@@ -1,0 +1,42 @@
+{
+  "name": "aishield-mcp",
+  "version": "2.1.0",
+  "description": "AIShield MCP Server - Scan AI tools (MCP/Skill/GPT) for security risks via Model Context Protocol. Agent-native security scanner.",
+  "main": "index.js",
+  "bin": {
+    "aishield-mcp": "index.js"
+  },
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": [
+    "mcp",
+    "mcp-server",
+    "security",
+    "ai-safety",
+    "ai-security",
+    "tool-scanner",
+    "prompt-injection",
+    "agent-security",
+    "model-context-protocol",
+    "claude",
+    "cursor"
+  ],
+  "author": "AIShield",
+  "license": "MIT",
+  "homepage": "https://aishield.ai",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aishield-ai/aishield"
+  },
+  "bugs": {
+    "url": "https://github.com/aishield-ai/aishield/issues"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "files": [
+    "index.js",
+    "README.md"
+  ]
+}
