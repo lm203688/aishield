@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aishield"
+version = "2.1.0"
+description = "AIShield SDK - Agent-native AI tool security scanner. Scan MCP/Skill/GPT/Prompt for security risks."
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [{name = "AIShield", email = "contact@aishield.ai"}]
+keywords = [
+    "mcp",
+    "ai-security",
+    "ai-safety",
+    "tool-scanner",
+    "prompt-injection",
+    "agent-security",
+    "model-context-protocol",
+    "security-audit",
+    "ai-tools",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Security",
+    "Topic :: Software Development :: Libraries",
+]
+dependencies = []
+
+[project.urls]
+Homepage = "https://aishield.ai"
+Repository = "https://github.com/aishield-ai/aishield"
+Documentation = "https://aishield.ai/docs"
+Issues = "https://github.com/aishield-ai/aishield/issues"
+
+[tool.setuptools]
+packages = ["aishield"]
