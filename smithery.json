@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "aishield": {
+      "command": "npx",
+      "args": [
+        "aishield-mcp"
+      ],
+      "env": {}
+    }
+  }
+}
