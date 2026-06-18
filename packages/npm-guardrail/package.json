@@ -1,0 +1,39 @@
+{
+  "name": "aishield-guardrail",
+  "version": "1.0.0",
+  "description": "AIShield Guardrail MCP - Security gate for AI agent tool installation. Blocks unsafe MCP/skill installs automatically.",
+  "main": "index.js",
+  "bin": {
+    "aishield-guardrail": "index.js"
+  },
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": [
+    "mcp",
+    "mcp-server",
+    "security",
+    "guardrail",
+    "ai-safety",
+    "tool-poisoning",
+    "prompt-injection",
+    "agent-security",
+    "model-context-protocol",
+    "claude",
+    "cursor"
+  ],
+  "author": "AIShield",
+  "license": "MIT",
+  "homepage": "https://aishield.ai",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aishield-ai/aishield"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "files": [
+    "index.js",
+    "README.md"
+  ]
+}
