@@ -1,0 +1,33 @@
+{
+  "name": "aishield",
+  "version": "2.1.0",
+  "description": "AIShield - Agent-native AI tool security scanner. Scan MCP/Skill/GPT/Prompt for security risks.",
+  "private": true,
+  "workspaces": [
+    "packages/npm-mcp",
+    "packages/npm-guardrail"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "mcp",
+    "security",
+    "ai-safety",
+    "ai-security",
+    "tool-scanner",
+    "prompt-injection",
+    "agent-security",
+    "guardrail"
+  ],
+  "author": "AIShield",
+  "license": "MIT",
+  "homepage": "https://aishield.ai",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aishield-ai/aishield"
+  },
+  "bugs": {
+    "url": "https://github.com/aishield-ai/aishield/issues"
+  }
+}
