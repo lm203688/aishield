@@ -1,0 +1,57 @@
+{
+  "name": "aishield-security-scan",
+  "version": "1.0.0",
+  "description": "AIShield security scanner - Scan MCP/Skill/GPT tools for security risks before installing or using them. Agent-native guardrail for AI tool safety.",
+  "author": {
+    "name": "AIShield",
+    "url": "https://aishield.ai"
+  },
+  "license": "MIT",
+  "homepage": "https://aishield.ai",
+  "repository": "https://github.com/aishield-ai/aishield",
+  "keywords": [
+    "security",
+    "mcp",
+    "ai-safety",
+    "audit",
+    "scanner",
+    "guardrail",
+    "prompt-injection"
+  ],
+  "tools": [
+    {
+      "name": "scan_ai_tool",
+      "description": "Scan any AI tool (MCP server, GPT, Skill, Prompt) for security risks. Returns 4-dimensional scoring and certified badge.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "source_url": {"type": "string", "description": "GitHub repo URL or tool source URL"},
+          "tool_type": {"type": "string", "enum": ["mcp", "skill", "gpt", "prompt"]},
+          "name": {"type": "string"}
+        },
+        "required": ["source_url", "tool_type"]
+      }
+    },
+    {
+      "name": "check_tool_safety",
+      "description": "Quick pass/fail safety check before installing an MCP tool. Call this BEFORE adding any MCP server to your config.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "source_url": {"type": "string", "description": "GitHub repo URL"},
+          "name": {"type": "string"}
+        },
+        "required": ["source_url"]
+      }
+    }
+  ],
+  "mcpServers": {
+    "aishield": {
+      "command": "npx",
+      "args": ["aishield-mcp"],
+      "env": {
+        "AISHIELD_API_KEY": "${AISHIELD_API_KEY}"
+      }
+    }
+  }
+}
