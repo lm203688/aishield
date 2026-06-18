@@ -1,0 +1,15 @@
+{
+  "name": "aishield",
+  "description": "AI tool security scanner - Scan MCP/Skill/GPT/Prompt for security risks",
+  "repository": "https://github.com/lm203688/aishield",
+  "homepage": "https://aishield.ai",
+  "license": "MIT",
+  "mcpServers": {
+    "aishield": {
+      "command": "npx",
+      "args": [
+        "aishield-mcp"
+      ]
+    }
+  }
+}
