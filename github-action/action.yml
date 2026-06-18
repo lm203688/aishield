@@ -1,0 +1,100 @@
+name: 'AIShield Security Audit'
+description: '🛡️ AI工具安全审计 - 自动扫描MCP/Skill/GPT工具的安全风险，生成评分和认证徽章。Agent-native security scanner.'
+author: 'AIShield'
+branding:
+  icon: 'shield'
+  color: 'purple'
+inputs:
+  tool_type:
+    description: 'Tool type: mcp, skill, gpt, prompt'
+    required: false
+    default: 'mcp'
+  source_url:
+    description: 'Tool source URL (default: use current repo)'
+    required: false
+    default: ''
+  name:
+    description: 'Tool name (default: use repo name)'
+    required: false
+    default: ''
+  api_key:
+    description: 'AIShield API Key (free: 5 scans/day, Pro: 200/day)'
+    required: false
+    default: ''
+  api_url:
+    description: 'AIShield API URL'
+    required: false
+    default: 'https://aishield.ai'
+  fail_on_risk:
+    description: 'Fail CI if risk is high or critical (true/false)'
+    required: false
+    default: 'false'
+  fail_on_score:
+    description: 'Fail CI if score below this number (0-100, 0=disabled)'
+    required: false
+    default: '0'
+  generate_badge:
+    description: 'Generate badge markdown for README (true/false)'
+    required: false
+    default: 'true'
+outputs:
+  audit_id:
+    description: 'Audit ID'
+  overall_score:
+    description: 'Overall security score (0-100)'
+  risk_level:
+    description: 'Risk level (safe/medium/high/critical)'
+  badge_level:
+    description: 'Badge level (gold/silver/bronze/none)'
+  report_url:
+    description: 'Full report URL'
+runs:
+  using: 'composite'
+  steps:
+    - name: Run AIShield Audit
+      shell: bash
+      run: |
+        set -e
+        SOURCE_URL="${{ inputs.source_url }}"
+        if [ -z "$SOURCE_URL" ]; then
+          SOURCE_URL="${{ github.server_url }}/${{ github.repository }}"
+        fi
+        TOOL_NAME="${{ inputs.name }}"
+        if [ -z "$TOOL_NAME" ]; then
+          TOOL_NAME=$(basename "${{ github.repository }}")
+        fi
+        API_URL="${{ inputs.api_url }}"
+        API_KEY="${{ inputs.api_key }}"
+        echo "🛡️ AIShield Security Audit"
+        echo "   Tool: $TOOL_NAME | URL: $SOURCE_URL | Type: ${{ inputs.tool_type }}"
+        RESPONSE=$(curl -sf -X POST "$API_URL/api/v1/audit" \
+          -H "Content-Type: application/json" \
+          ${API_KEY:+-H "X-API-Key: $API_KEY"} \
+          -d "{\"tool_type\":\"${{ inputs.tool_type }}\",\"source_url\":\"$SOURCE_URL\",\"name\":\"$TOOL_NAME\"}" 2>&1) || { echo "❌ Failed to submit audit"; echo "$RESPONSE"; exit 1; }
+        AUDIT_ID=$(echo "$RESPONSE" | python3 -c "import sys,json; print(json.load(sys.stdin).get('audit_id',''))" 2>/dev/null)
+        if [ -z "$AUDIT_ID" ]; then echo "❌ No audit ID returned"; echo "$RESPONSE"; exit 1; fi
+        echo "   Audit ID: $AUDIT_ID | Scanning..."
+        for i in $(seq 1 40); do
+          sleep 5
+          RESULT=$(curl -sf "$API_URL/api/v1/audit/$AUDIT_ID" 2>/dev/null) || continue
+          STATUS=$(echo "$RESULT" | python3 -c "import sys,json; print(json.load(sys.stdin).get('status',''))" 2>/dev/null)
+          if [ "$STATUS" = "completed" ]; then
+            REPORT=$(echo "$RESULT" | python3 -c "import sys,json; print(json.dumps(json.load(sys.stdin).get('report',{})))" 2>/dev/null)
+            SCORE=$(echo "$REPORT" | python3 -c "import sys,json; print(json.load(sys.stdin).get('overall_score',0))" 2>/dev/null)
+            RISK=$(echo "$REPORT" | python3 -c "import sys,json; print(json.load(sys.stdin).get('risk_level','unknown'))" 2>/dev/null)
+            BADGE=$(echo "$REPORT" | python3 -c "import sys,json; print(json.load(sys.stdin).get('badge_level','none'))" 2>/dev/null)
+            echo "✅ Score: $SCORE/100 | Risk: $RISK | Badge: $BADGE"
+            echo "📄 Report: $API_URL/report/$AUDIT_ID"
+            echo "audit_id=$AUDIT_ID" >> $GITHUB_OUTPUT
+            echo "overall_score=$SCORE" >> $GITHUB_OUTPUT
+            echo "risk_level=$RISK" >> $GITHUB_OUTPUT
+            echo "badge_level=$BADGE" >> $GITHUB_OUTPUT
+            echo "report_url=$API_URL/report/$AUDIT_ID" >> $GITHUB_OUTPUT
+            if [ "${{ inputs.fail_on_risk }}" = "true" ] && { [ "$RISK" = "high" ] || [ "$RISK" = "critical" ]; }; then echo "❌ CI Failed: Risk=$RISK"; exit 1; fi
+            if [ "${{ inputs.fail_on_score }}" -gt 0 ] 2>/dev/null && [ "$SCORE" -lt "${{ inputs.fail_on_score }}" ] 2>/dev/null; then echo "❌ CI Failed: Score $SCORE < ${{ inputs.fail_on_score }}"; exit 1; fi
+            exit 0
+          fi
+          if [ "$STATUS" = "failed" ]; then echo "❌ Audit failed"; exit 1; fi
+          echo "   ... scanning ($((i*5))s)"
+        done
+        echo "❌ Timeout"; exit 1
