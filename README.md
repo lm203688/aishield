@@ -1,209 +1,99 @@
-<div align="center">
+# AIShield — AI安全盾
 
-# 🛡️ AIShield
+> Agent可信生态的安全基础设施
 
-### Agent-Native AI Tool Security Scanner
+## 项目纲领
 
-Scan MCP servers, AI skills, GPTs, and prompts for security risks. 4-dimensional scoring. Certified badges. Guardrail MCP for auto-protection.
+**必须先读 [CHARTER.md](./CHARTER.md)** — 这是项目发展方向的根本指导。
 
-[![npm: aishield-mcp](https://img.shields.io/npm/v/aishield-mcp.svg)](https://www.npmjs.com/package/aishield-mcp)
-[![npm: aishield-guardrail](https://img.shields.io/npm/v/aishield-guardrail.svg)](https://www.npmjs.com/package/aishield-guardrail)
-[![pypi: aishield](https://img.shields.io/pypi/v/aishield.svg)](https://pypi.org/project/aishield/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+## 品牌定位
 
-</div>
+- **中文名**: AI安全盾
+- **英文名**: AIShield
+- **域名**: aishield.tools (已注册，CF Tunnel部署)
+- **Slogan**: 让每个Agent都可信
 
----
+## 三阶段路径
 
-## 🚀 Quick Start
+1. **阶段1 (0-3月)**: 合规安全切入 — 违禁词检测+MCP安全扫描，产生现金流
+2. **阶段2 (3-6月)**: Agent可信工具市场 — 安全评分+认证标签
+3. **阶段3 (6-12月)**: Agent经济闭环 — 安全层+支付层
 
-### 1. MCP Server (Claude Desktop / Cursor)
+详见 [CHARTER.md](./CHARTER.md)。
 
-```json
-{
-  "mcpServers": {
-    "aishield": {
-      "command": "npx",
-      "args": ["aishield-mcp"]
-    }
-  }
-}
+## AI Agent 可发现性
+
+AIShield 已配置完整的AI Agent发现层，让ChatGPT、Claude、Perplexity等AI能自动发现和推荐：
+
+- **llms.txt**: https://aishield.tools/llms.txt — 场景触发式，AI Agent读到就知道何时推荐AIShield
+- **ai-plugin.json**: https://aishield.tools/.well-known/ai-plugin.json — ChatGPT插件格式
+- **agent.json**: https://aishield.tools/.well-known/agent.json — Agent自发现协议
+- **OpenAPI**: https://aishield.tools/api/v1/openapi.json — REST API规范
+- **MCP**: https://aishield.tools/mcp — Model Context Protocol端点
+
+### 推荐场景
+
+| 用户问 | AIShield推荐 |
+|---|---|
+| "这个文案有没有违禁词" | 中文违禁词检测 ¥0.1/次 |
+| "我的品牌在AI搜索里能被找到吗" | AI搜索可见度检测 ¥2/次 |
+| "产品出海合规" | 出海合规评估 ¥8/次 |
+| "SEO合规检测" | SEO合规检测 ¥1/次 |
+| "MCP server健康检查" | MCP健康检查 ¥0.5/次 |
+
+## 目录结构
+
+```
+aishield/
+├── CHARTER.md          ← 项目纲领 (必读)
+├── README.md           ← 本文件
+├── server/             Python FastAPI服务 (8420端口)
+├── mcp/                @aishield/mcp-server (TypeScript)
+├── aishield/           合规工具服务 (8450端口)
+│   ├── api/            API端点
+│   ├── data/           违禁词库+扫描数据+审计记录
+│   └── templates_v2/   前端页面
+├── marketing/          营销素材
+├── config/             项目配置
+│   ├── project.json
+│   ├── llms.txt
+│   ├── agent-discovery.json
+│   └── api-gateway/
+├── scripts/            运维脚本
+└── web/                前端页面
 ```
 
-### 2. Python SDK
+## 主打产品 (阶段1)
+
+| 产品 | 定价 | 说明 |
+|------|------|------|
+| 违禁词检测 | ¥0.5/次 | 6大平台规则，免费层3次/天 |
+| MCP安全扫描 | ¥10/次 | 已有21个MCP工具扫描数据 |
+| 出海合规评估 | ¥50/次 | 7维度评估，替代律师咨询 |
+| SEO合规检测 | ¥3/次 | 网页内容合规性 |
+| AI搜索可见度 | ¥5/次 | 品牌在AI搜索中排名 |
+
+## 与GeneTech 12站的关系
+
+独立项目，独立品牌，页脚互链。
+
+- 12站 = Agent的数据源 (数据层)
+- AIShield = Agent的安全+工具层 (安全层+经济层)
+
+## 部署
 
 ```bash
-pip install aishield
+# API服务
+cd aishield/server && python3 -m uvicorn api.server:app --host 0.0.0.0 --port 8420
+
+# AIShield合规服务
+cd aishield/aishield && bash aishield.sh start
+
+# MCP Server
+cd aishield/mcp && npm install && npm run build
 ```
 
-```python
-from aishield import AIShield
+## 支付
 
-shield = AIShield()
-result = shield.scan("https://github.com/modelcontextprotocol/servers")
-print(result.overall_score)  # 85
-print(result.badge_level)    # "gold"
-```
-
-### 3. Guardrail MCP (Auto-protection)
-
-```json
-{
-  "mcpServers": {
-    "aishield-guardrail": {
-      "command": "npx",
-      "args": ["aishield-guardrail"],
-      "env": {
-        "AISHIELD_API_KEY": "your-key"
-      }
-    }
-  }
-}
-```
-
-**Put `aishield-guardrail` FIRST in your config.** It intercepts all tool installs and blocks unsafe ones.
-
-### 4. GitHub Action
-
-```yaml
-- uses: aishield/audit@v1
-  with:
-    api_key: ${{ secrets.AISHIELD_KEY }}
-    fail_on_risk: true
-```
-
----
-
-## 🛡️ What AIShield Scans
-
-| Category | Detection |
-|----------|-----------|
-| **Tool Poisoning** | Hidden adversarial instructions in tool descriptions |
-| **Prompt Injection** | Malicious prompts that hijack agent behavior |
-| **Command Execution** | `child_process`, `subprocess`, `os.system` |
-| **Data Exfiltration** | Unauthorized network calls, telemetry |
-| **Credential Leaks** | Hardcoded API keys, tokens, passwords |
-| **Dangerous APIs** | File system, network, shell, database access |
-| **Supply Chain** | Malicious dependencies, typosquatting |
-| **Code Quality** | Error handling, input validation, docs |
-
-## 📊 Scoring
-
-4-dimensional scoring (0-100):
-
-| Dimension | Weight | What it measures |
-|-----------|--------|-----------------|
-| Security | 40% | Code vulnerabilities, dangerous APIs |
-| Privacy | 25% | Data exfiltration, telemetry |
-| Quality | 20% | Code quality, documentation |
-| Performance | 15% | Resource usage, efficiency |
-
-**Badges**: 🥇 Gold (≥85) | 🥈 Silver (≥70) | 🥉 Bronze (≥55)
-
----
-
-## 📦 Packages
-
-| Package | Install | Description |
-|---------|---------|-------------|
-| [`aishield-mcp`](packages/npm-mcp) | `npx aishield-mcp` | MCP Server for Claude/Cursor |
-| [`aishield-guardrail`](packages/npm-guardrail) | `npx aishield-guardrail` | Guardrail MCP (auto-block unsafe tools) |
-| [`aishield`](packages/pypi-sdk) | `pip install aishield` | Python SDK |
-| [GitHub Action](packages/github-action) | `uses: aishield/audit@v1` | CI/CD integration |
-| [Claude Skill](packages/claude-skill) | Plugin install | Claude Code skill |
-
----
-
-## 🔌 API
-
-### Submit Audit
-```bash
-curl -X POST https://aishield.ai/api/v1/audit \
-  -H "Content-Type: application/json" \
-  -H "X-API-Key: your-key" \
-  -d '{
-    "tool_type": "mcp",
-    "source_url": "https://github.com/user/repo",
-    "name": "my-mcp-server"
-  }'
-```
-
-### Get Result
-```bash
-curl https://aishield.ai/api/v1/audit/{audit_id}
-```
-
-### Get Badge
-```markdown
-![AIShield](https://aishield.ai/api/v1/badge-name/your-tool-name)
-```
-
-### Endpoints
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/v1/audit` | Submit audit |
-| GET | `/api/v1/audit/{id}` | Get audit result |
-| GET | `/api/v1/tools` | List scanned tools |
-| GET | `/api/v1/stats` | Global statistics |
-| GET | `/api/v1/badge-name/{name}` | SVG badge |
-| GET | `/api/v1/pricing` | Pricing info |
-| POST | `/api/v1/keys` | Create API key |
-| GET | `/api/v1/health` | Health check |
-
----
-
-## 💰 Pricing
-
-| Tier | Price | Scans/Day | Features |
-|------|-------|-----------|----------|
-| Free | ¥0 | 5 | Basic scanning, badge |
-| Pro | ¥29/month | 200 | Priority queue, batch scan |
-| Enterprise | ¥199/month | Unlimited | Custom rules, SSO, SLA |
-| Pay-per-scan | ¥1/scan | - | One-time |
-
-Get API key: https://aishield.ai/pricing
-
----
-
-## 🏗️ Architecture
-
-```
-Agent (Claude/Cursor/Cline)
-    ↓ installs MCP tool
-Guardrail MCP intercepts
-    ↓ calls AIShield API
-AIShield Scanner
-    ├── Static Analysis (30+ regex rules)
-    ├── Dependency Analysis (npm/PyPI)
-    ├── Secrets Detection
-    └── Semantic Analysis (AI-powered)
-    ↓ returns 4D score + badge
-Agent shows result to user
-    ✅ Approved → install
-    🚫 Blocked → warn user
-```
-
----
-
-## 📈 Roadmap
-
-- [x] MCP Server (stdio)
-- [x] Python SDK
-- [x] GitHub Action
-- [x] Guardrail MCP
-- [x] 4-dimensional scoring
-- [x] Certified badges
-- [ ] OWASP MCP Top 10 alignment
-- [ ] Tool Poisoning deep detection
-- [ ] Rug Pull detection (git diff monitoring)
-- [ ] MCP Trust Framework (MTF) scoring
-- [ ] Real-time handshake verification
-- [ ] Batch scan 1000+ tools
-- [ ] Industry security report
-
----
-
-## 📄 License
-
-MIT © AIShield
+- Creem Store ID: sto_7gBcCekvUKTpsaAFyf (与12站共用)
+- 虎皮椒(支付宝): 已配置
