@@ -1718,46 +1718,50 @@ if(d.hint)document.getElementById('hint').innerHTML=d.hint;if(d.remaining_free_u
                     if not user: return self._json({"jsonrpc": "2.0", "id": req_id, "error": {"code": -32001, "message": "Free limit reached (3/day). Register at https://aishield.tools/v1/register for more. Set Authorization: Bearer YOUR_API_KEY"}}, 401)
                     if user["balance_cny"] < 0.5:
                         return self._json({"jsonrpc": "2.0", "id": req_id, "error": {"code": -32002, "message": "Insufficient balance. Top up at https://aishield.tools/v1/topup"}}, 402)
-                _KB_MAP = {
-                    "genetech": "/home/ubuntu/atex/kb-eco/genetech-tools/knowledge-base/entities",
-                    "tcm": "/home/ubuntu/atex/kb-eco/tcm-tools/knowledge-base/entities",
-                    "agent": "/home/ubuntu/atex/kb-eco/agent-ecosystem/knowledge-base/entities",
-                    "quantum": "/home/ubuntu/atex/kb-eco/quantum-computing/knowledge-base/entities",
-                    "brain": "/home/ubuntu/atex/kb-eco/brain-science/knowledge-base/entities",
-                    "nuclear": "/home/ubuntu/atex/kb-eco/nuclear-energy/knowledge-base/entities",
-                    "exo": "/home/ubuntu/atex/kb-eco/exo-science/knowledge-base/entities",
-                    "mineral": "/home/ubuntu/atex/kb-eco/alien-minerals/knowledge-base/entities",
-                    "deepsea": "/home/ubuntu/atex/kb-eco/deep-sea-tech/knowledge-base/entities",
-                    "energy": "/home/ubuntu/atex/kb-eco/new-energy/knowledge-base/entities",
-                    "life": "/home/ubuntu/atex/kb-eco/life-science/knowledge-base/entities",
-                    "robot": "/home/ubuntu/atex/kb-eco/robot-parts/knowledge-base/entities",
-                    "biocompute": "/home/ubuntu/atex/kb-eco/biocomputing/knowledge-base/entities",
-                    "bionic": "/home/ubuntu/atex/kb-eco/bionic-ai/knowledge-base/entities",
+                _KB_API = {
+                    "genetech": "https://genetech-tools.pages.dev/api/entities.json",
+                    "tcm": "https://tcm-tools.pages.dev/api/entities.json",
+                    "agent": "https://agentecosystem.pages.dev/api/entities.json",
+                    "quantum": "https://quantumcomputing.pages.dev/api/entities.json",
+                    "brain": "https://brainscience.pages.dev/api/entities.json",
+                    "nuclear": "https://nuclearenergy.pages.dev/api/entities.json",
+                    "exo": "https://exoscience.pages.dev/api/entities.json",
+                    "mineral": "https://alienminerals.pages.dev/api/entities.json",
+                    "deepsea": "https://deepseatech.pages.dev/api/entities.json",
+                    "energy": "https://newenergy-nya.pages.dev/api/entities.json",
+                    "life": "https://lifescience-epe.pages.dev/api/entities.json",
+                    "robot": "https://robotparts.pages.dev/api/entities.json",
+                    "biocompute": "https://biocomputedb.pages.dev/api/entities.json",
+                    "bionic": "https://bionicai.pages.dev/api/entities.json",
                 }
                 results = []
                 if tool_name == "knowledge_search":
                     query = args.get("query", "").lower()
                     engine_filter = args.get("engine", "all")
                     cat_filter = args.get("category", "")
-                    engines_to_search = [engine_filter] if engine_filter != "all" else list(_KB_MAP.keys())
+                    engines_to_search = [engine_filter] if engine_filter != "all" else list(_KB_API.keys())
+                    import urllib.request
                     for eng in engines_to_search:
-                        kb_dir = _KB_MAP.get(eng)
-                        if not kb_dir or not os.path.isdir(kb_dir): continue
-                        for fname in os.listdir(kb_dir):
-                            if not fname.endswith(".json") or fname == "main.json": continue
-                            if cat_filter and fname.replace(".json", "") != cat_filter: continue
-                            try:
-                                with open(os.path.join(kb_dir, fname), "r") as f:
-                                    data = json.load(f)
-                                items = data if isinstance(data, list) else data.get("entities", data.get("data", []))
-                                for item in items:
-                                    text = json.dumps(item, ensure_ascii=False).lower()
-                                    if query in text:
-                                        results.append({"engine": eng, "category": fname.replace(".json", ""), "id": item.get("id", ""), "name": item.get("name", ""), "match": "keyword"})
-                                        if len(results) >= 20: break
-                                if len(results) >= 20: break
-                            except (json.JSONDecodeError, KeyError, TypeError, OSError): pass
-                        if len(results) >= 20: break
+                        api_url = _KB_API.get(eng)
+                        if not api_url: continue
+                        try:
+                            req = urllib.request.Request(api_url, headers={"User-Agent": "AIShield/1.0"})
+                            with urllib.request.urlopen(req, timeout=5) as resp:
+                                data = json.loads(resp.read().decode())
+                            items = data.get("entities", []) if isinstance(data, dict) else data
+                            for item in items:
+                                if cat_filter and item.get("category", "").replace("_","") != cat_filter.replace("_",""): 
+                                    item_cat = json.dumps(item, ensure_ascii=False).lower()
+                                    if cat_filter.lower() not in item_cat: pass
+                                text = json.dumps(item, ensure_ascii=False).lower()
+                                if query in text:
+                                    cat = ""
+                                    for k in ["category","type","subcategory"]:
+                                        if k in item: cat = str(item[k]); break
+                                    results.append({"engine": eng, "category": cat, "id": item.get("id", ""), "name": item.get("name", item.get("symbol", "")), "match": "keyword"})
+                                    if len(results) >= 20: break
+                            if len(results) >= 20: break
+                        except Exception: pass
                     if is_free:
                         exchange._free_usage[_free_key] = free_count + 1
                         remaining = 3 - free_count - 1
@@ -1767,23 +1771,21 @@ if(d.hint)document.getElementById('hint').innerHTML=d.hint;if(d.remaining_free_u
                 else:  # knowledge_entity_detail - always free
                     engine = args.get("engine", "")
                     entity_id = args.get("entity_id", "")
-                    kb_dir = _KB_MAP.get(engine)
-                    if not kb_dir or not os.path.isdir(kb_dir):
+                    api_url = _KB_API.get(engine)
+                    if not api_url:
                         return self._json({"jsonrpc": "2.0", "id": req_id, "error": {"code": -32602, "message": f"Unknown engine: {engine}"}})
                     found = None
-                    for fname in os.listdir(kb_dir):
-                        if not fname.endswith(".json") or fname == "main.json": continue
-                        try:
-                            with open(os.path.join(kb_dir, fname), "r") as f:
-                                data = json.load(f)
-                            items = data if isinstance(data, list) else data.get("entities", data.get("data", []))
-                            for item in items:
-                                if item.get("id") == entity_id:
-                                    found = item
-                                    break
-                        except (json.JSONDecodeError, KeyError, TypeError, OSError): pass
-                        if found: break
-                    _deduct(user["user_id"], 0.5, "knowledge_entity_detail", 0, 0)
+                    try:
+                        import urllib.request
+                        req2 = urllib.request.Request(api_url, headers={"User-Agent": "AIShield/1.0"})
+                        with urllib.request.urlopen(req2, timeout=5) as resp:
+                            data = json.loads(resp.read().decode())
+                        items = data.get("entities", []) if isinstance(data, dict) else data
+                        for item in items:
+                            if item.get("id") == entity_id:
+                                found = item
+                                break
+                    except Exception: pass
                     if found:
                         return self._json({"jsonrpc": "2.0", "id": req_id, "result": {"content": [{"type": "text", "text": json.dumps(found, ensure_ascii=False)}]}})
                     else:
