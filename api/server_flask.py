@@ -11,12 +11,12 @@ from flask_cors import CORS
 import json, os, time, hashlib, sys, subprocess, threading, tempfile, urllib.parse, secrets
 from pathlib import Path
 
-app = Flask(__name__, static_folder="/home/ubuntu/aishield/static", static_url_path="/static")
+app = Flask(__name__, static_folder="/home/ubuntu/aishield/aishield/static", static_url_path="/static")
 CORS(app, resources={r"/api/*": {"origins": "*"}})  # API端点允许跨域
 
 # ============ 付费API层级 ============
-API_KEYS_FILE = Path("/home/ubuntu/aishield/data/api_keys.json")
-ORDERS_FILE = Path("/home/ubuntu/aishield/data/orders.json")
+API_KEYS_FILE = Path("/home/ubuntu/aishield/aishield/data/api_keys.json")
+ORDERS_FILE = Path("/home/ubuntu/aishield/aishield/data/orders.json")
 FREE_DAILY_LIMIT = 50  # 免费用户每天50次扫描（v3: 扩10倍对抗竞品）
 PRO_DAILY_LIMIT = 500  # Pro用户每天500次
 ENTERPRISE_DAILY_LIMIT = -1  # Enterprise无限
@@ -166,11 +166,11 @@ def check_rate_limit(ip):
     _rate_limit[ip].append(now)
     return True
 
-DATA_DIR = Path("/home/ubuntu/aishield/data")
+DATA_DIR = Path("/home/ubuntu/aishield/aishield/data")
 AUDITS_FILE = DATA_DIR / "audits.json"
 TOOLS_FILE = DATA_DIR / "tools.json"
-TEMPLATES_DIR = Path("/home/ubuntu/aishield/templates")
-SCAN_CLI = "/home/ubuntu/aishield/scanner/scan_cli.py"
+TEMPLATES_DIR = Path("/home/ubuntu/aishield/aishield/templates")
+SCAN_CLI = "/home/ubuntu/aishield/aishield/scanner/scan_cli.py"
 SCAN_CWD = "/home/ubuntu/aishield"
 
 def load_json(path):
@@ -1081,7 +1081,7 @@ def deploy_github():
     GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", "")
     if not GITHUB_TOKEN:
         return jsonify({"error": "GITHUB_TOKEN not set"}), 400
-    DISTRIB_DIR = "/home/ubuntu/aishield/distrib"
+    DISTRIB_DIR = "/home/ubuntu/aishield/aishield/distrib"
     ctx = ssl.create_default_context()
     
     def gh_api(method, endpoint, body=None):
