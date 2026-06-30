@@ -1471,31 +1471,27 @@ if(d.hint)document.getElementById('hint').innerHTML=d.hint;if(d.remaining_free_u
     def _mcp_server_card(self):
         """GET /.well-known/mcp/server-card.json — Smithery扫描用"""
         self._json({
-            "name": "ATEX AI Gateway",
-            "description": "23 AI services + 12 knowledge engines. Compliance tools (banned words, AI visibility, SEO), AI capabilities (TTS, ASR, VLM, image/video gen), knowledge engines (gene tech, TCM, quantum, robotics, deep sea, exo-science, etc.), LLM chat (DeepSeek/GPT-4o/Claude). Pay-per-use via ATEX credits.",
-            "version": "6.0",
-            "url": "http://150.158.119.19:8420/mcp",
+            "name": "AIShield",
+            "description": "AI Agent security and compliance platform. MCP security scanning (119 rules, OWASP MCP Top 10), Chinese banned word detection (6 platforms), prompt injection defense, AI search visibility, export compliance. Pay-per-use via Alipay.",
+            "version": "2.0",
+            "url": "https://aishield.tools/mcp",
             "protocolVersion": "2025-03-26",
             "capabilities": {"tools": {"listChanged": False}},
-            "serverInfo": {"name": "ATEX AI Gateway", "version": "6.0"},
-            "repository": {"url": "https://github.com/lm203688/atex/tree/main/mcp-server"},
+            "serverInfo": {"name": "AIShield", "version": "2.0"},
+            "repository": {"url": "https://github.com/lm203688/aishield"},
             "tools": [
-                {"name": "chat", "description": "Chat with AI models (DeepSeek, GPT-4o, Claude). Pay-per-use via ATEX API key."},
-                {"name": "web_search", "description": "Search the web for real-time information. 5 ATEX per call."},
-                {"name": "tts", "description": "Text-to-speech synthesis. 2 ATEX per call."},
-                {"name": "asr", "description": "Speech-to-text transcription. 2 ATEX per call."},
-                {"name": "vlm", "description": "Vision-language model for image understanding. 3 ATEX per call."},
-                {"name": "image_generate", "description": "AI image generation from text. 5 ATEX per call."},
-                {"name": "image_edit", "description": "AI image editing. 5 ATEX per call."},
-                {"name": "video_generate", "description": "AI video generation. 10 ATEX per call."},
-                {"name": "banned_words_check", "description": "Chinese banned/prohibited words detection. 0.1 ATEX per call."},
-                {"name": "ai_visibility_check", "description": "AI search visibility analysis. 2 ATEX per call."},
-                {"name": "global_compliance", "description": "Cross-border compliance assessment. 8 ATEX per call."},
-                {"name": "seo_compliance", "description": "SEO compliance check. 5 ATEX per call."},
-                {"name": "knowledge_engines_list", "description": "List all 12 knowledge engines (gene tech, TCM, quantum, robotics, deep sea, exo-science, etc.)"},
-                {"name": "knowledge_search", "description": "Search across 12 knowledge engine databases."},
-                {"name": "check_balance", "description": "Check your ATEX account balance and usage."},
-                {"name": "list_services", "description": "List all 23 available services in the ATEX marketplace."}
+                {"name": "aishield_scan", "description": "Scan MCP servers for security vulnerabilities. 119 rules aligned with OWASP MCP Top 10. Detects tool poisoning, rug pulls, taint analysis, trust boundary violations."},
+                {"name": "aishield_guardrail", "description": "Prompt injection detection and defense. Detects jailbreak attempts, malicious instructions, and policy violations in user inputs."},
+                {"name": "aishield_prompt_check", "description": "Prompt safety check with 30+ rules. Covers policy compliance, abuse detection, and content safety in Chinese and English."},
+                {"name": "banned_words_check", "description": "Chinese banned/prohibited words detection for 6 platforms (Douyin, Xiaohongshu, WeChat, Weibo, Bilibili, Kuaishou). Returns applicable laws, fines, and replacement suggestions."},
+                {"name": "ai_visibility_check", "description": "AI search visibility analysis. Check brand visibility in DeepSeek, Kimi, Doubao, and other AI search engines."},
+                {"name": "global_compliance", "description": "Cross-border compliance assessment. 7-dimension evaluation for product export compliance."},
+                {"name": "seo_compliance", "description": "SEO compliance check. Detects keyword stuffing, hidden text, and false descriptions."},
+                {"name": "knowledge_search", "description": "Search across 14 frontier tech knowledge engines (gene tech, TCM, quantum, robotics, deep sea, exo-science, etc.)."},
+                {"name": "chat", "description": "Chat with AI models (DeepSeek, GPT-4o, Claude). Pay-per-use."},
+                {"name": "web_search", "description": "Real-time web search with structured results."},
+                {"name": "tts", "description": "Text-to-speech synthesis."},
+                {"name": "check_balance", "description": "Check your AIShield account balance and usage."}
             ]
         })
 
