@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>蜂群科研 — 体验版 + 真实案例</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,sans-serif;background:#0a0a0f;color:#e0e0e0;padding:40px 20px}
+.container{max-width:900px;margin:0 auto}
+h1{text-align:center;font-size:28px;margin-bottom:8px;background:linear-gradient(135deg,#6c5ce7,#a29bfe);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.subtitle{text-align:center;color:#64748b;margin-bottom:32px}
+.trial-banner{background:linear-gradient(135deg,#6c5ce7,#a29bfe);border-radius:16px;padding:32px;margin-bottom:32px;text-align:center}
+.trial-banner h2{font-size:24px;margin-bottom:8px;color:#fff}
+.trial-banner .price{font-size:48px;font-weight:700;color:#fdcb6e;margin:8px 0}
+.trial-banner p{color:#fff;opacity:0.9}
+.trial-banner .btn{display:inline-block;margin-top:16px;padding:12px 32px;background:#fff;color:#6c5ce7;border-radius:8px;text-decoration:none;font-weight:600}
+.cases{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:32px}
+.case{background:#12121a;border:1px solid #1e1e2e;border-radius:12px;padding:20px}
+.case h3{color:#6c5ce7;margin-bottom:8px}
+.case .molecule{font-family:monospace;background:#0a0a0f;padding:4px 8px;border-radius:4px;font-size:12px;color:#fdcb6e;margin-bottom:8px;display:inline-block}
+.case p{color:#64748b;font-size:13px;line-height:1.6}
+.case .result{margin-top:8px;padding:8px;background:rgba(0,184,148,.1);border-radius:6px;color:#00b894;font-size:13px}
+@media(max-width:768px){.cases{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>🐝 蜂群科研</h1>
+<p class="subtitle">AI科研验证平台 · 8种蜂协作 · RDKit真实计算</p>
+
+<div class="trial-banner">
+<h2>🎉 限时体验版</h2>
+<div class="price">¥9.9</div>
+<p>30,000积分 · 体验完整化学蜂ADMET预测+文献蜂 · 7天有效</p>
+<a href="https://swarm.aishield.tools" class="btn">立即体验</a>
+</div>
+
+<h2>📊 真实案例展示</h2>
+<p style="color:#64748b;margin-bottom:20px">RDKit真实计算结果，非AI编造</p>
+
+<div class="cases">
+<div class="case">
+<h3>💊 阿司匹林</h3>
+<div class="molecule">CC(=O)Oc1ccccc1C(=O)O</div>
+<p>ADMET药物发现预测：分子量180.16，LogP 1.31，口服生物利用度优秀</p>
+<div class="result">药物评分: 90/100 ✅</div>
+</div>
+<div class="case">
+<h3>☕ 咖啡因</h3>
+<div class="molecule">CN1C=NC2=C1C(=O)N(C(=O)N2C)C</div>
+<p>分子性质分析：LogP -1.03，TPSA 61.82，hERG毒性低</p>
+<div class="result">药物评分: 70/100 ✅</div>
+</div>
+<div class="case">
+<h3>🩹 布洛芬</h3>
+<div class="molecule">CC(C)Cc1ccc(cc1)C(C)C(=O)O</div>
+<p>ADMET预测：LogP 3.07，Lipinski+Veber规则通过</p>
+<div class="result">药物评分: 100/100 ✅</div>
+</div>
+</div>
+
+<h2>💰 完整定价</h2>
+<table style="width:100%;border-collapse:collapse;margin-top:16px">
+<tr style="color:#6c5ce7"><th style="padding:12px;text-align:left;border-bottom:1px solid #1e1e2e">套餐</th><th style="padding:12px;text-align:left;border-bottom:1px solid #1e1e2e">价格</th><th style="padding:12px;text-align:left;border-bottom:1px solid #1e1e2e">积分</th><th style="padding:12px;text-align:left;border-bottom:1px solid #1e1e2e">BYOK</th></tr>
+<tr><td style="padding:12px;border-bottom:1px solid #1e1e2e">🆓 免费额度</td><td style="padding:12px;border-bottom:1px solid #1e1e2e">¥0</td><td style="padding:12px;border-bottom:1px solid #1e1e2e">2,000/天</td><td style="padding:12px;border-bottom:1px solid #1e1e2e">❌</td></tr>
+<tr style="background:rgba(108,92,231,.1)"><td style="padding:12px;border-bottom:1px solid #1e1e2e">🎉 体验版</td><td style="padding:12px;border-bottom:1px solid #1e1e2e;color:#fdcb6e;font-weight:600">¥9.9</td><td style="padding:12px;border-bottom:1px solid #1e1e2e">30,000</td><td style="padding:12px;border-bottom:1px solid #1e1e2e">❌</td></tr>
+<tr><td style="padding:12px;border-bottom:1px solid #1e1e2e">基础包</td><td style="padding:12px;border-bottom:1px solid #1e1e2e">¥39</td><td style="padding:12px;border-bottom:1px solid #1e1e2e">110,000</td><td style="padding:12px;border-bottom:1px solid #1e1e2e">❌</td></tr>
+<tr><td style="padding:12px;border-bottom:1px solid #1e1e2e">研究包</td><td style="padding:12px;border-bottom:1px solid #1e1e2e">¥69</td><td style="padding:12px;border-bottom:1px solid #1e1e2e">230,000</td><td style="padding:12px;border-bottom:1px solid #1e1e2e">✅</td></tr>
+<tr><td style="padding:12px">企业包</td><td style="padding:12px">¥499</td><td style="padding:12px">1,350,000</td><td style="padding:12px">✅</td></tr>
+</table>
+
+<div style="text-align:center;margin-top:32px">
+<a href="https://swarm.aishield.tools" style="color:#6c5ce7">→ 前往蜂群科研平台</a>
+</div>
+</div>
+</body>
+</html>
