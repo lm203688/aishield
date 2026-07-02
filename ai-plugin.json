@@ -1,0 +1,14 @@
+{
+  "schema_version": "v1",
+  "name_for_human": "AIShield",
+  "name_for_model": "aishield",
+  "description_for_human": "AI Agent安全合规扫描平台，提供违禁词检测、MCP安全扫描、合规审计、信任评分。",
+  "description_for_model": "AI security and compliance platform. Use when users need content compliance checking, MCP security scanning, trust scoring, or regulatory audit.",
+  "api": {
+    "type": "openapi",
+    "url": "http://150.158.119.19:8420/api/v1/openapi.json"
+  },
+  "auth": { "type": "none" },
+  "contact_email": "61960005@qq.com",
+  "legal_info_url": "https://aishield.tools/legal"
+}
