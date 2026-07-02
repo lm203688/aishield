@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AIShield — 信任评分仪表盘</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,sans-serif;background:#0a0e17;color:#e2e8f0;padding:40px 20px}
+.container{max-width:900px;margin:0 auto}
+h1{text-align:center;font-size:28px;margin-bottom:8px;background:linear-gradient(135deg,#6c5ce7,#a29bfe);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.subtitle{text-align:center;color:#64748b;margin-bottom:32px}
+.score-card{background:#12121a;border:1px solid #1e2d4a;border-radius:16px;padding:32px;margin-bottom:24px;text-align:center}
+.score-num{font-size:72px;font-weight:700;background:linear-gradient(135deg,#00b894,#6c5ce7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.score-grade{font-size:24px;color:#00b894;font-weight:600;margin-top:8px}
+.score-confidence{color:#64748b;margin-top:8px}
+.dimensions{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:24px}
+.dim{background:#12121a;border:1px solid #1e2d4a;border-radius:12px;padding:16px}
+.dim-label{color:#64748b;font-size:13px}
+.dim-value{font-size:28px;font-weight:600;margin-top:4px}
+.dim-bar{height:6px;background:#1e2d4a;border-radius:3px;margin-top:8px;overflow:hidden}
+.dim-fill{height:100%;border-radius:3px;transition:width .5s}
+.compliance-packs{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:24px}
+.pack{background:#12121a;border:1px solid #1e2d4a;border-radius:12px;padding:20px;text-align:center}
+.pack h3{color:#6c5ce7;margin-bottom:8px}
+.pack p{color:#64748b;font-size:13px;margin-bottom:12px}
+.pack .price{color:#00b894;font-size:20px;font-weight:600}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>🛡️ AIShield 信任评分仪表盘</h1>
+<p class="subtitle">Agent Trust Protocol · 4维评分 · W3C可验证凭证</p>
+
+<div class="score-card">
+<div class="score-num">82.8</div>
+<div class="score-grade">B+ 等级</div>
+<div class="score-confidence">置信度: insufficient（4条交易记录）</div>
+<div class="dimensions">
+<div class="dim">
+<div class="dim-label">完成率 (35%)</div>
+<div class="dim-value">75.0</div>
+<div class="dim-bar"><div class="dim-fill" style="width:75%;background:#00b894"></div></div>
+</div>
+<div class="dim">
+<div class="dim-label">可靠性 (30%)</div>
+<div class="dim-value">90</div>
+<div class="dim-bar"><div class="dim-fill" style="width:90%;background:#6c5ce7"></div></div>
+</div>
+<div class="dim">
+<div class="dim-label">一致性 (20%)</div>
+<div class="dim-value">76</div>
+<div class="dim-bar"><div class="dim-fill" style="width:76%;background:#fdcb6e"></div></div>
+</div>
+<div class="dim">
+<div class="dim-label">响应速度 (15%)</div>
+<div class="dim-value">96</div>
+<div class="dim-bar"><div class="dim-fill" style="width:96%;background:#0984e3"></div></div>
+</div>
+</div>
+</div>
+
+<h2 style="margin:32px 0 16px">行业合规包</h2>
+<div class="compliance-packs">
+<div class="pack">
+<h3>🏥 医疗合规</h3>
+<p>HIPAA + 医疗器械法规 + 数据隐私</p>
+<div class="price">¥500/次</div>
+</div>
+<div class="pack">
+<h3>💰 金融合规</h3>
+<p>反洗钱 + 数据安全法 + 金融广告合规</p>
+<div class="price">¥500/次</div>
+</div>
+<div class="pack">
+<h3>🤖 AI合规</h3>
+<p>AI法案 + 算法备案 + 内容安全</p>
+<div class="price">¥300/次</div>
+</div>
+</div>
+
+<div style="text-align:center;margin-top:32px">
+<a href="https://aishield.tools" style="color:#6c5ce7">← 返回AIShield</a>
+</div>
+</div>
+</body>
+</html>
