@@ -1,0 +1,50 @@
+/* OracleMind — AI八字预测设计令牌 */
+:root {
+  /* 主色调 — 深色+金色+紫色，体现命理+AI */
+  --primary: #f59e0b;
+  --primary-light: #fbbf24;
+  --primary-dark: #d97706;
+  --accent: #7c3aed;
+  --accent-light: #8b5cf6;
+  
+  /* 中性色 — 深色神秘感 */
+  --bg: #0f0c1e;
+  --bg-card: #1a1530;
+  --bg-hover: #251e40;
+  --border: #2d2650;
+  --text: #e2e8f0;
+  --text-secondary: #a78bfa;
+  --text-muted: #6d5cae;
+  
+  /* 五行色 */
+  --metal: #e2e8f0;
+  --wood: #10b981;
+  --water: #3b82f6;
+  --fire: #ef4444;
+  --earth: #f59e0b;
+  
+  /* 字体 */
+  --font-sans: -apple-system, 'Noto Sans SC', sans-serif;
+  --font-serif: 'Noto Serif SC', serif;
+  
+  /* 间距 */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 40px;
+  
+  /* 圆角 */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  
+  /* 阴影 */
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.5);
+  --shadow-md: 0 4px 12px rgba(245,158,11,0.15);
+  --shadow-lg: 0 8px 30px rgba(245,158,11,0.2);
+  
+  /* 标识元素 — 八卦渐变 */
+  --bagua-gradient: linear-gradient(135deg, #f59e0b, #7c3aed);
+  --mystic-glow: 0 0 20px rgba(245,158,11,0.3);
+}
