@@ -1,0 +1,48 @@
+/* AIShield — AI安全合规平台设计令牌 */
+:root {
+  /* 主色调 — 深蓝+红警示，体现安全+专业 */
+  --primary: #3b82f6;
+  --primary-light: #60a5fa;
+  --primary-dark: #2563eb;
+  --danger: #ef4444;
+  --danger-light: #f87171;
+  
+  /* 中性色 — 深色主题 */
+  --bg: #0a0e17;
+  --bg-card: #111827;
+  --bg-hover: #1a2236;
+  --border: #1e2d4a;
+  --text: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  
+  /* 安全等级色 */
+  --safe: #10b981;
+  --warning: #f59e0b;
+  --critical: #ef4444;
+  --info: #06b6d4;
+  
+  /* 字体 */
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  
+  /* 间距 */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 40px;
+  
+  /* 圆角 */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  
+  /* 阴影 */
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.5);
+  --shadow-md: 0 4px 12px rgba(59,130,246,0.15);
+  --shadow-lg: 0 8px 30px rgba(59,130,246,0.2);
+  
+  /* 标识元素 — 盾牌 */
+  --shield-gradient: linear-gradient(135deg, #3b82f6, #1e293b);
+}
