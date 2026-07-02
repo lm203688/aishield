@@ -1,0 +1,46 @@
+/* RoboParts — 机器人零件平台设计令牌 */
+:root {
+  /* 主色调 — 橙色+石板灰，体现工业+机械 */
+  --primary: #f97316;
+  --primary-light: #fb923c;
+  --primary-dark: #ea580c;
+  --accent: #64748b;
+  
+  /* 中性色 */
+  --bg: #f8fafc;
+  --bg-card: #ffffff;
+  --bg-hover: #f1f5f9;
+  --border: #e2e8f0;
+  --text: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  
+  /* 功能色 */
+  --compatible: #10b981;
+  --incompatible: #ef4444;
+  --adapter: #f59e0b;
+  
+  /* 字体 — 含等宽字体体现技术感 */
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+  --font-mono: 'Roboto Mono', 'SF Mono', monospace;
+  
+  /* 间距 */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 40px;
+  
+  /* 圆角 */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  
+  /* 阴影 */
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+  --shadow-md: 0 4px 12px rgba(249,115,22,0.15);
+  --shadow-lg: 0 8px 30px rgba(249,115,22,0.2);
+  
+  /* 标识元素 — 齿轮渐变 */
+  --gear-gradient: linear-gradient(135deg, #f97316, #64748b);
+}
