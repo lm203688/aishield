@@ -1,0 +1,50 @@
+/* Swarm Research — AI科研实验室设计令牌 */
+:root {
+  /* 主色调 — 紫色+蓝色，体现蜂群+科研 */
+  --primary: #6c5ce7;
+  --primary-light: #a29bfe;
+  --primary-dark: #5b4cdb;
+  --accent: #0984e3;
+  
+  /* 中性色 — 深色主题 */
+  --bg: #0a0a0f;
+  --bg-card: #12121a;
+  --bg-hover: #1a1a2e;
+  --border: #1e1e2e;
+  --text: #e0e0e0;
+  --text-secondary: #888;
+  --text-muted: #555;
+  
+  /* 功能色 */
+  --success: #00b894;
+  --warning: #fdcb6e;
+  --danger: #e17055;
+  --info: #74b9ff;
+  
+  /* 字体 */
+  --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+  --font-mono: 'SF Mono', monospace;
+  
+  /* 间距 */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 40px;
+  
+  /* 圆角 */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  
+  /* 阴影 */
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.5);
+  --shadow-md: 0 4px 12px rgba(108,92,231,0.15);
+  --shadow-lg: 0 8px 30px rgba(108,92,231,0.2);
+  
+  /* 标识元素 — 蜂群渐变 */
+  --swarm-gradient: linear-gradient(135deg, #6c5ce7, #a29bfe, #74b9ff);
+  
+  /* 动画 */
+  --bee-float: float 3s ease-in-out infinite;
+}
