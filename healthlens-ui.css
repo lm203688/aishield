@@ -1,0 +1,26 @@
+/* HealthLens UI — 医疗青色主题 */
+:root {
+  --primary: #0891b2;
+  --primary-light: #06b6d4;
+  --primary-dark: #0e7490;
+  --accent: #0d9488;
+  --bg: #f0fdfa;
+  --bg-card: #ffffff;
+  --border: #cffafe;
+  --text: #0f172a;
+  --text-secondary: #475569;
+  --normal: #10b981;
+  --borderline: #f59e0b;
+  --abnormal: #ef4444;
+  --health-gradient: linear-gradient(135deg, #0891b2, #0d9488);
+}
+
+body { background: var(--bg); color: var(--text); font-family: -apple-system, 'SF Pro Text', sans-serif; }
+h1, h2 { color: var(--primary-dark); }
+.btn-primary { background: var(--primary); color: #fff; border: none; padding: 10px 24px; border-radius: 8px; cursor: pointer; }
+.btn-primary:hover { background: var(--primary-dark); }
+.card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(8,145,178,0.1); }
+.metric-normal { color: var(--normal); }
+.metric-borderline { color: var(--borderline); }
+.metric-abnormal { color: var(--abnormal); }
+.navbar { background: var(--health-gradient); color: #fff; padding: 12px 24px; }
