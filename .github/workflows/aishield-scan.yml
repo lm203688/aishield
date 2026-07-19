@@ -1,0 +1,157 @@
+name: AIShield MCP Security Scan
+
+on:
+  workflow_dispatch:
+    inputs:
+      repo_url:
+        description: 'GitHub repo URL to scan'
+        required: true
+        type: string
+      tool_type:
+        description: 'Tool type'
+        required: false
+        default: 'mcp'
+        type: choice
+        options:
+          - mcp
+          - skill
+          - gpt
+  schedule:
+    - cron: '0 0 * * 1'  # 每周一自动扫描
+  pull_request:
+    paths:
+      - 'scanner/**'
+      - 'eco/**'
+
+permissions:
+  contents: read
+  issues: write
+  security-events: write
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    name: AIShield Security Scan
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install AIShield
+        run: pip install -e .
+
+      - name: Run Security Scan
+        env:
+          AISHIELD_API_URL: https://api.aishield.dev
+        run: |
+          REPO_URL="${{ github.event.inputs.repo_url || github.event.repository.html_url }}"
+          TOOL_TYPE="${{ github.event.inputs.tool_type || 'mcp' }}"
+          REPO_NAME="${{ github.repository }}"
+          
+          echo "Scanning: $REPO_URL"
+          python -c "
+          import sys, json
+          sys.path.insert(0, '.')
+          from scanner.engine import scan
+          result = scan('$REPO_URL', '$TOOL_TYPE', '$REPO_NAME')
+          print(json.dumps(result, ensure_ascii=False, indent=2))
+          " > scan_report.json 2>scan_error.log
+          
+          # Extract key metrics
+          python -c "
+          import json
+          with open('scan_report.json') as f:
+              r = json.load(f)
+          print('## AIShield Security Scan Report')
+          print()
+          print(f'| Metric | Value |')
+          print(f'|--------|-------|')
+          print(f'| Overall Score | {r.get(\"overall_score\",\"N/A\")}/100 |')
+          print(f'| Risk Level | {r.get(\"risk_level\",\"N/A\")} |')
+          print(f'| Badge | {r.get(\"badge_level\",\"N/A\")} |')
+          print(f'| Findings | {r.get(\"total_findings\",0)} |')
+          print(f'| OWASP Coverage | {r.get(\"owasp_coverage\",{}).get(\"covered_count\",0)}/10 |')
+          print()
+          scores = r.get('owasp_coverage',{}).get('categories',{})
+          if scores:
+              print('### OWASP MCP Top 10')
+              for cat in sorted(scores.keys()):
+                  c = scores[cat]
+                  print(f'- **{cat}** {c.get(\"name_cn\",cat)}: {c.get(\"rules_triggered\",0)} issues')
+          "
+
+      - name: Check scan errors
+        if: always()
+        run: |
+          if [ -s scan_error.log ]; then
+            echo "::warning::Scan produced stderr output:"
+            cat scan_error.log
+          fi
+
+      - name: Check if critical issues found
+        id: check
+        run: |
+          CRITICAL=$(python -c "
+          import json
+          with open('scan_report.json') as f:
+              r = json.load(f)
+          crit = len([f for f in r.get('findings',[]) if f.get('severity')=='critical'])
+          print(crit)
+          ")
+          echo "critical_count=$CRITICAL" >> $GITHUB_OUTPUT
+          
+          if [ "$CRITICAL" -gt 0 ]; then
+            echo "::warning::$CRITICAL critical security issues detected by AIShield"
+          fi
+
+      - name: Upload Scan Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aishield-scan-report
+          path: scan_report.json
+          retention-days: 30
+
+      - name: Upload Scan Error Log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aishield-scan-error
+          path: scan_error.log
+          retention-days: 7
+
+      - name: Comment on PR (if triggered by pull_request)
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = JSON.parse(fs.readFileSync('scan_report.json', 'utf8'));
+            const score = report.overall_score || 0;
+            const badge = report.badge_level || 'none';
+            const findings = report.total_findings || 0;
+            const critical = (report.findings || []).filter(f => f.severity === 'critical').length;
+            
+            const body = `## 🛡️ AIShield Security Scan
+            **Score: ${score}/100** | Badge: ${badge} | Issues: ${findings} | Critical: ${critical}
+            
+            ${critical > 0 ? '⚠️ **Critical security issues detected!** Review the [full report](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).' : '✅ No critical issues found.'}
+            
+            <details><summary>OWASP MCP Top 10 Coverage</summary>
+            
+            ${Object.entries(report.owasp_coverage?.categories || {}).map(([k,v]) => 
+              `- ${k} ${v.name_cn}: ${v.rules_triggered} issues`
+            ).join('\n')}
+            </details>
+            
+            _Scanned by [AIShield](https://github.com/lm203688/aishield) — OWASP MCP Top 10 aligned scanner_`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });

@@ -1,0 +1,12 @@
+{
+  "tools": {
+    "https://github.com/modelcontextprotocol/servers": {
+      "name": "mcp-official",
+      "last_version": "2026.7.10",
+      "last_commit": "2026-07-06T17:15:49Z",
+      "added_at": "2026-07-19T21:00:42.330110+08:00",
+      "last_checked": "2026-07-19T21:00:43.506343+08:00"
+    }
+  },
+  "version": "1.0"
+}

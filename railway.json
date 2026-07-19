@@ -1,0 +1,5 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "build": "pip install -e .",
+  "deploy": ["python -m api.server"]
+}

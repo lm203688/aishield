@@ -1,0 +1,12 @@
+# PulseMCP submission
+# https://pulsemcp.com
+{
+  "name": "AIShield Security Scanner",
+  "short_description": "OWASP MCP Top 10 aligned security scanner",
+  "description": "Scan MCP servers for security risks. 82+ rules covering tool poisoning, prompt injection, supply chain attacks, command injection, and more. 5-dimension scoring with OWASP compliance matrix.",
+  "url": "https://github.com/lm203688/aishield",
+  "install": "npx @aishield/mcp-server",
+  "category": "security",
+  "license": "MIT",
+  "tags": ["security", "owasp", "mcp-scanner", "tool-poisoning", "agent-safety"]
+}

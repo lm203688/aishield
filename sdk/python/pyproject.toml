@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[project]
+name = "aishield"
+version = "4.0.0"
+description = "OWASP MCP Top 10 aligned security scanner for AI Agent tools"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.9"
+keywords = ["mcp", "security", "owasp", "ai-safety", "tool-poisoning", "prompt-injection", "agent-security"]
+authors = [{name = "AIShield Team"}]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Topic :: Security",
+    "Programming Language :: Python :: 3",
+]
+
+[project.urls]
+Homepage = "https://aishield.dev"
+Repository = "https://github.com/lm203688/aishield"

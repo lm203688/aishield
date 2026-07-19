@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Agent Security Report - AIShield</title>
+<meta name="description" content="OWASP MCP Top 10 aligned security scan report by AIShield. Verify AI Agent tool safety.">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: #0f172a;
+    color: #e2e8f0;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 24px 60px;
+  }
+
+  /* ── 顶部 Header ── */
+  .header {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+  .logo {
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, #60a5fa, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .header .subtitle {
+    font-size: 15px;
+    color: #94a3b8;
+    margin-top: 6px;
+  }
+
+  /* ── 工具信息栏 ── */
+  .tool-info {
+    text-align: center;
+    margin-bottom: 36px;
+    padding: 16px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+  }
+  .tool-info .tool-name {
+    font-size: 20px;
+    font-weight: 700;
+    color: #f1f5f9;
+  }
+  .tool-info .scan-date {
+    font-size: 13px;
+    color: #64748b;
+    margin-top: 4px;
+  }
+
+  /* ── 评分圆环 ── */
+  .score-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 48px;
+  }
+  .score-ring-wrapper {
+    position: relative;
+    width: 200px;
+    height: 200px;
+  }
+  .score-ring-wrapper svg {
+    transform: rotate(-90deg);
+    width: 200px;
+    height: 200px;
+  }
+  .score-ring-bg {
+    fill: none;
+    stroke: #1e293b;
+    stroke-width: 12;
+  }
+  .score-ring-fg {
+    fill: none;
+    stroke-width: 12;
+    stroke-linecap: round;
+    stroke-dasharray: 502;
+    stroke-dashoffset: 502;
+    transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .score-ring-fg.animate {
+    /* JS动态设置 */
+  }
+  .score-ring-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 160px;
+    height: 160px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    filter: blur(30px);
+    opacity: 0.15;
+    pointer-events: none;
+  }
+  .score-value {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+  }
+  .score-value .number {
+    font-size: 48px;
+    font-weight: 800;
+    line-height: 1;
+  }
+  .score-value .label {
+    font-size: 14px;
+    color: #94a3b8;
+    margin-top: 4px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: 600;
+  }
+  .score-badge {
+    display: inline-block;
+    margin-top: 16px;
+    padding: 6px 20px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  /* ── OWASP 合规矩阵 ── */
+  .section-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    color: #f1f5f9;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title::before {
+    content: '';
+    width: 4px;
+    height: 20px;
+    border-radius: 2px;
+    background: linear-gradient(180deg, #60a5fa, #a78bfa);
+  }
+
+  .matrix-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 32px;
+  }
+  .matrix-grid {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px 16px;
+    align-items: center;
+  }
+  .matrix-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.02);
+  }
+  .matrix-item .cat-id {
+    font-size: 11px;
+    font-weight: 700;
+    color: #475569;
+    min-width: 32px;
+  }
+  .matrix-item .cat-name {
+    font-size: 14px;
+    color: #cbd5e1;
+  }
+  .matrix-status {
+    font-size: 22px;
+    text-align: center;
+    min-width: 32px;
+  }
+  .status-pass { color: #22c55e; }
+  .status-warn { color: #f59e0b; }
+  .status-fail { color: #ef4444; }
+
+  /* ── 风险发现列表 ── */
+  .findings-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 32px;
+  }
+  .findings-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .finding-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.02);
+    border-left: 3px solid transparent;
+  }
+  .finding-item.severity-critical { border-left-color: #ef4444; }
+  .finding-item.severity-high { border-left-color: #f97316; }
+  .finding-item.severity-medium { border-left-color: #f59e0b; }
+  .finding-item.severity-low { border-left-color: #60a5fa; }
+  .finding-severity {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+  .severity-critical { background: rgba(239,68,68,0.15); color: #fca5a5; }
+  .severity-high { background: rgba(249,115,22,0.15); color: #fdba74; }
+  .severity-medium { background: rgba(245,158,11,0.15); color: #fcd34d; }
+  .severity-low { background: rgba(96,165,250,0.15); color: #93c5fd; }
+  .finding-content {
+    flex: 1;
+    min-width: 0;
+  }
+  .finding-rule {
+    font-size: 13px;
+    color: #94a3b8;
+    margin-bottom: 2px;
+  }
+  .finding-desc {
+    font-size: 14px;
+    color: #e2e8f0;
+  }
+  .no-findings {
+    text-align: center;
+    padding: 32px;
+    color: #22c55e;
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  /* ── CTA 区域 ── */
+  .cta-section {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 48px;
+  }
+  .cta-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 28px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+    border: none;
+  }
+  .cta-btn:hover {
+    transform: translateY(-2px);
+  }
+  .cta-btn:active {
+    transform: translateY(0);
+  }
+  .cta-primary {
+    background: linear-gradient(135deg, #60a5fa, #a78bfa);
+    color: #0f172a;
+    box-shadow: 0 4px 20px rgba(96,165,250,0.3);
+  }
+  .cta-primary:hover {
+    box-shadow: 0 8px 30px rgba(96,165,250,0.4);
+  }
+  .cta-secondary {
+    background: rgba(255,255,255,0.06);
+    color: #e2e8f0;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .cta-secondary:hover {
+    background: rgba(255,255,255,0.1);
+  }
+  .cta-icon {
+    font-size: 18px;
+  }
+
+  /* ── Footer ── */
+  .footer {
+    text-align: center;
+    padding-top: 32px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    color: #475569;
+    font-size: 13px;
+  }
+  .footer a {
+    color: #60a5fa;
+    text-decoration: none;
+  }
+  .footer a:hover {
+    text-decoration: underline;
+  }
+
+  /* ── 动画 ── */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-in {
+    animation: fadeInUp 0.6s ease-out forwards;
+    opacity: 0;
+  }
+  .delay-1 { animation-delay: 0.1s; }
+  .delay-2 { animation-delay: 0.3s; }
+  .delay-3 { animation-delay: 0.5s; }
+  .delay-4 { animation-delay: 0.7s; }
+  .delay-5 { animation-delay: 0.9s; }
+
+  @keyframes pulse-glow {
+    0%, 100% { opacity: 0.15; }
+    50% { opacity: 0.25; }
+  }
+  .score-ring-glow {
+    animation: pulse-glow 3s ease-in-out infinite;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- 顶部 -->
+  <div class="header animate-in">
+    <div class="logo">AIShield</div>
+    <div class="subtitle">AI Agent Security Report</div>
+  </div>
+
+  <!-- 工具信息 -->
+  <div class="tool-info animate-in delay-1">
+    <div class="tool-name" id="toolName">--</div>
+    <div class="scan-date" id="scanDate">--</div>
+  </div>
+
+  <!-- 安全评分 -->
+  <div class="score-section animate-in delay-2">
+    <div class="score-ring-wrapper">
+      <div class="score-ring-glow" id="ringGlow"></div>
+      <svg viewBox="0 0 200 200">
+        <circle class="score-ring-bg" cx="100" cy="100" r="80"/>
+        <circle class="score-ring-fg" id="scoreRing" cx="100" cy="100" r="80"/>
+      </svg>
+      <div class="score-value">
+        <div class="number" id="scoreNumber">--</div>
+        <div class="label" id="scoreLabel">SCORE</div>
+      </div>
+    </div>
+    <div class="score-badge" id="scoreBadge">--</div>
+  </div>
+
+  <!-- OWASP MCP Top 10 合规矩阵 -->
+  <div class="animate-in delay-3">
+    <div class="section-title">OWASP MCP Top 10 Compliance</div>
+    <div class="matrix-card">
+      <div class="matrix-grid" id="matrixGrid">
+        <!-- JS填充 -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 风险发现 -->
+  <div class="animate-in delay-4">
+    <div class="section-title">Risk Findings</div>
+    <div class="findings-card">
+      <div class="findings-list" id="findingsList">
+        <div class="no-findings" id="noFindings">No risks detected</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-section animate-in delay-5">
+    <a class="cta-btn cta-primary" href="https://aishield.dev/badge" target="_blank" rel="noopener">
+      <span class="cta-icon">&#128737;</span> Get Your Badge
+    </a>
+    <a class="cta-btn cta-secondary" href="https://aishield.dev/docs" target="_blank" rel="noopener">
+      <span class="cta-icon">&#9889;</span> Install MCP Server
+    </a>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    Powered by <a href="https://aishield.dev" target="_blank" rel="noopener">AIShield</a>
+    &middot;
+    <a href="https://github.com/aishield-dev" target="_blank" rel="noopener">GitHub</a>
+    &middot;
+    OWASP MCP Top 10 (2025 v0.1) Aligned
+  </div>
+
+</div>
+
+<script>
+(function() {
+  /* ── URL参数解析 ── */
+  var params = new URLSearchParams(window.location.search);
+  var toolName = params.get('tool') || 'Unknown Tool';
+  var score = parseInt(params.get('score') || '0', 10);
+  var level = (params.get('level') || '').toLowerCase();
+
+  /* ── 颜色配置 ── */
+  var COLORS = {
+    gold:   { ring: '#F5A623', glow: '#F5A623', badge_bg: 'rgba(245,166,35,0.15)', badge_color: '#F5A623' },
+    silver: { ring: '#4A90D9', glow: '#4A90D9', badge_bg: 'rgba(74,144,217,0.15)', badge_color: '#4A90D9' },
+    bronze: { ring: '#CD7F32', glow: '#CD7F32', badge_bg: 'rgba(205,127,50,0.15)', badge_color: '#CD7F32' },
+    none:   { ring: '#ef4444', glow: '#ef4444', badge_bg: 'rgba(239,68,68,0.15)', badge_color: '#ef4444' }
+  };
+
+  /* 根据分数推断等级 */
+  if (!level || !COLORS[level]) {
+    if (score >= 90) level = 'gold';
+    else if (score >= 70) level = 'silver';
+    else if (score >= 50) level = 'bronze';
+    else level = 'none';
+  }
+
+  var colors = COLORS[level] || COLORS.none;
+
+  /* ── 填充工具信息 ── */
+  document.getElementById('toolName').textContent = toolName;
+  document.getElementById('scanDate').textContent = 'Scanned: ' + new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+
+  /* ── 评分圆环动画 ── */
+  score = Math.max(0, Math.min(100, score));
+  var circumference = 2 * Math.PI * 80; // ~502
+  var offset = circumference - (circumference * score / 100);
+  var ring = document.getElementById('scoreRing');
+  ring.style.stroke = colors.ring;
+  ring.style.strokeDasharray = circumference;
+  ring.style.strokeDashoffset = circumference;
+
+  document.getElementById('ringGlow').style.background = colors.glow;
+
+  /* 数字递增动画 */
+  var numberEl = document.getElementById('scoreNumber');
+  numberEl.style.color = colors.ring;
+  var current = 0;
+  var step = Math.max(1, Math.ceil(score / 40));
+  var counter = setInterval(function() {
+    current += step;
+    if (current >= score) {
+      current = score;
+      clearInterval(counter);
+    }
+    numberEl.textContent = current;
+  }, 30);
+
+  /* 延迟触发圆环填充 */
+  setTimeout(function() {
+    ring.style.strokeDashoffset = offset;
+  }, 300);
+
+  /* Badge标签 */
+  var badge = document.getElementById('scoreBadge');
+  badge.textContent = level.charAt(0).toUpperCase() + level.slice(1) + ' Level';
+  badge.style.background = colors.badge_bg;
+  badge.style.color = colors.badge_color;
+
+  /* ── OWASP MCP Top 10 合规矩阵（模拟数据） ── */
+  var categories = [
+    { id: 'MCP-01', name: 'Prompt Injection Prevention' },
+    { id: 'MCP-02', name: 'Tool Permission Boundaries' },
+    { id: 'MCP-03', name: 'Data Exfiltration Protection' },
+    { id: 'MCP-04', name: 'Input Validation & Sanitization' },
+    { id: 'MCP-05', name: 'Authentication & Authorization' },
+    { id: 'MCP-06', name: 'Secure Communication' },
+    { id: 'MCP-07', name: 'Resource & Rate Limiting' },
+    { id: 'MCP-08', name: 'Logging & Monitoring' },
+    { id: 'MCP-09', name: 'Supply Chain Security' },
+    { id: 'MCP-10', name: 'Configuration & Deployment' }
+  ];
+
+  /* 根据分数生成模拟状态 */
+  var grid = document.getElementById('matrixGrid');
+  categories.forEach(function(cat) {
+    var threshold = 90 - categories.indexOf(cat) * 3;
+    var status, statusClass;
+    if (score >= threshold) {
+      status = '\u2705'; statusClass = 'status-pass';
+    } else if (score >= threshold - 15) {
+      status = '\u26A0\uFE0F'; statusClass = 'status-warn';
+    } else {
+      status = '\u274C'; statusClass = 'status-fail';
+    }
+
+    var item = document.createElement('div');
+    item.className = 'matrix-item';
+    item.innerHTML = '<span class="cat-id">' + cat.id + '</span><span class="cat-name">' + cat.name + '</span>';
+
+    var statusEl = document.createElement('div');
+    statusEl.className = 'matrix-status ' + statusClass;
+    statusEl.textContent = status;
+
+    grid.appendChild(item);
+    grid.appendChild(statusEl);
+  });
+
+  /* ── 风险发现（模拟，根据分数生成） ── */
+  var findingsList = document.getElementById('findingsList');
+  var noFindings = document.getElementById('noFindings');
+
+  if (score >= 90) {
+    noFindings.style.display = 'block';
+    return;
+  }
+
+  noFindings.style.display = 'none';
+  var sampleFindings = [
+    { severity: 'critical', rule: 'MCP-01', desc: 'Potential prompt injection via unsanitized user input' },
+    { severity: 'high', rule: 'MCP-03', desc: 'Missing data exfiltration safeguards on tool outputs' },
+    { severity: 'high', rule: 'MCP-05', desc: 'No authentication mechanism for tool invocation' },
+    { severity: 'medium', rule: 'MCP-07', desc: 'No rate limiting configured for API endpoints' },
+    { severity: 'medium', rule: 'MCP-08', desc: 'Insufficient logging of tool execution traces' },
+    { severity: 'low', rule: 'MCP-09', desc: 'Dependency version pinning not enforced' },
+    { severity: 'low', rule: 'MCP-10', desc: 'Default configuration exposes debug endpoints' }
+  ];
+
+  /* 根据分数筛选：分数越低，暴露越多发现 */
+  var count = score >= 80 ? 1 : score >= 60 ? 3 : score >= 40 ? 5 : 7;
+  var shown = sampleFindings.slice(0, count);
+
+  shown.forEach(function(f) {
+    var item = document.createElement('div');
+    item.className = 'finding-item severity-' + f.severity;
+    item.innerHTML =
+      '<span class="finding-severity severity-' + f.severity + '">' + f.severity + '</span>' +
+      '<div class="finding-content">' +
+        '<div class="finding-rule">' + f.rule + '</div>' +
+        '<div class="finding-desc">' + f.desc + '</div>' +
+      '</div>';
+    findingsList.appendChild(item);
+  });
+})();
+</script>
+</body>
+</html>

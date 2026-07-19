@@ -1,0 +1,15 @@
+{
+  "services": [
+    {
+      "type": "web",
+      "name": "aishield-api",
+      "env": "python",
+      "buildCommand": "pip install -e . 2>/dev/null; true",
+      "startCommand": "python -m api.server",
+      "envVars": {
+        "PYTHONUNBUFFERED": "1",
+        "AISHIELD_PORT": "$PORT"
+      }
+    }
+  ]
+}

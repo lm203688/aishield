@@ -1,0 +1,10 @@
+# Smithery configuration for AIShield
+# https://smithery.ai
+startCommand:
+  type: stdio
+  command: npx
+  args:
+    - "-y"
+    - "@aishield/mcp-server"
+  env:
+    AISHIELD_API_URL: https://api.aishield.dev

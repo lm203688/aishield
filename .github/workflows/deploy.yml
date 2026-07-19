@@ -1,0 +1,13 @@
+name: Deploy to Railway
+on:
+  push:
+    branches: [main]
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: railwayapp/railway-github-action@v1
+        with:
+          railway-token: ${{ secrets.RAILWAY_TOKEN }}
+          service-id: ${{ secrets.RAILWAY_SERVICE_ID }}

@@ -1,0 +1,45 @@
+{
+  "name": "AIShield安全扫描",
+  "name_en": "AIShield Security Scanner",
+  "description": "OWASP MCP Top 10对齐的AI Agent安全扫描工具。扫描MCP Server/AI工具的安全风险，返回5维评分(安全/权限/数据处理/供应链/可靠性)+OWASP合规矩阵+修复建议。110+条检测规则覆盖: 工具投毒、命令注入、提示注入、供应链攻击、SSRF、密钥泄露等。",
+  "icon": "🛡️",
+  "version": "4.0.0",
+  "author": "AIShield Team",
+  "api": {
+    "base_url": "https://api.aishield.dev",
+    "auth_type": "none",
+    "auth_doc": "无需API Key即可使用免费额度（每天50次）。设置AISHIELD_API_KEY环境变量可提升限额。"
+  },
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "source_url": {
+        "type": "string",
+        "description": "要扫描的GitHub仓库URL"
+      },
+      "tool_type": {
+        "type": "string",
+        "enum": ["mcp", "skill", "gpt", "prompt"],
+        "default": "mcp",
+        "description": "工具类型"
+      }
+    },
+    "required": ["source_url"]
+  },
+  "examples": [
+    {
+      "title": "扫描一个MCP Server",
+      "parameters": {
+        "source_url": "https://github.com/snyk/agent-scan",
+        "tool_type": "mcp"
+      }
+    }
+  ],
+  "pricing": {
+    "model": "per_call",
+    "free_quota": 50,
+    "price_cny": 0.5
+  },
+  "tags": ["安全", "MCP", "OWASP", "扫描", "AI安全", "工具投毒", "提示注入"],
+  "category": "开发工具"
+}

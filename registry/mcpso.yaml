@@ -1,0 +1,7 @@
+# mcp.so submission
+# https://mcp.so
+name: AIShield Security Scanner
+description: OWASP MCP Top 10 aligned security scanner for AI Agent tools
+repo: lm203688/aishield
+install: npx @aishield/mcp-server
+tags: security,owasp,mcp,scanner

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI违禁词检测 - AIShield</title>
+<meta name="description" content="免费在线检测文本中的违禁词/敏感词，覆盖微信/抖音/小红书/B站/知乎/微博6大平台，返回法律条文+替换建议">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+  body { font-family: 'Inter', -apple-system, sans-serif; }
+  .gradient-bg { background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%); }
+  .shield-glow { box-shadow: 0 0 60px rgba(56, 189, 248, 0.15); }
+  .result-card { transition: all 0.3s ease; }
+  .result-card:hover { transform: translateY(-2px); }
+</style>
+</head>
+<body class="gradient-bg min-h-screen text-gray-100">
+
+<!-- Header -->
+<header class="pt-12 pb-8 text-center">
+  <div class="flex items-center justify-center gap-3 mb-4">
+    <svg class="w-12 h-12 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0-5.592 4.406-10.138 9.904-10.138 5.498 0 9.904 4.546 9.904 10.138 0 2.037-.545 3.946-1.5 5.578M19.5 9.75a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+    <h1 class="text-4xl font-bold text-white">AIShield</h1>
+  </div>
+  <p class="text-sky-300 text-lg font-medium mb-2">中文违禁词检测</p>
+  <p class="text-gray-400 max-w-xl mx-auto">覆盖微信、抖音、小红书、B站、知乎、微博 6 大平台规则。输入文本，即时返回违禁词、法律依据和替换建议。</p>
+</header>
+
+<!-- Main Card -->
+<main class="max-w-3xl mx-auto px-4 pb-16">
+  <div class="bg-slate-800/60 backdrop-blur rounded-2xl p-8 shield-glow border border-slate-700/50">
+    
+    <!-- Platform Select -->
+    <div class="mb-6">
+      <label class="block text-sm font-medium text-gray-300 mb-2">目标平台</label>
+      <div class="flex flex-wrap gap-2">
+        <button onclick="setPlatform('all')" class="platform-btn active px-4 py-2 rounded-lg text-sm font-medium bg-sky-600 text-white" data-platform="all">全部平台</button>
+        <button onclick="setPlatform('wechat')" class="platform-btn px-4 py-2 rounded-lg text-sm font-medium bg-slate-700 text-gray-300 hover:bg-slate-600" data-platform="wechat">微信</button>
+        <button onclick="setPlatform('douyin')" class="platform-btn px-4 py-2 rounded-lg text-sm font-medium bg-slate-700 text-gray-300 hover:bg-slate-600" data-platform="douyin">抖音</button>
+        <button onclick="setPlatform('xiaohongshu')" class="platform-btn px-4 py-2 rounded-lg text-sm font-medium bg-slate-700 text-gray-300 hover:bg-slate-600" data-platform="xiaohongshu">小红书</button>
+        <button onclick="setPlatform('bilibili')" class="platform-btn px-4 py-2 rounded-lg text-sm font-medium bg-slate-700 text-gray-300 hover:bg-slate-600" data-platform="bilibili">B站</button>
+        <button onclick="setPlatform('weibo')" class="platform-btn px-4 py-2 rounded-lg text-sm font-medium bg-slate-700 text-gray-300 hover:bg-slate-600" data-platform="weibo">微博</button>
+      </div>
+    </div>
+
+    <!-- Text Input -->
+    <div class="mb-6">
+      <label class="block text-sm font-medium text-gray-300 mb-2">待检测文本</label>
+      <textarea id="inputText" rows="6" class="w-full bg-slate-900/50 border border-slate-600 rounded-xl p-4 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent resize-none" placeholder="在此输入要检测的中文文本内容..."></textarea>
+    </div>
+
+    <!-- Submit -->
+    <button onclick="checkText()" id="checkBtn" class="w-full py-3 px-6 bg-sky-600 hover:bg-sky-500 text-white font-semibold rounded-xl transition-colors flex items-center justify-center gap-2">
+      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
+      开始检测
+    </button>
+
+    <!-- Results -->
+    <div id="results" class="hidden mt-8 space-y-4"></div>
+  </div>
+
+  <!-- Stats -->
+  <div class="mt-8 grid grid-cols-3 gap-4 text-center">
+    <div class="bg-slate-800/40 rounded-xl p-4">
+      <div class="text-2xl font-bold text-sky-400">6</div>
+      <div class="text-sm text-gray-400">平台覆盖</div>
+    </div>
+    <div class="bg-slate-800/40 rounded-xl p-4">
+      <div class="text-2xl font-bold text-sky-400">110+</div>
+      <div class="text-sm text-gray-400">安全规则</div>
+    </div>
+    <div class="bg-slate-800/40 rounded-xl p-4">
+      <div class="text-2xl font-bold text-sky-400">OWASP</div>
+      <div class="text-sm text-gray-400">对齐标准</div>
+    </div>
+  </div>
+
+  <!-- MCP Scan CTA -->
+  <div class="mt-8 bg-slate-800/40 rounded-xl p-6 border border-slate-700/30">
+    <h3 class="text-lg font-semibold text-white mb-2">也是MCP安全扫描工具</h3>
+    <p class="text-gray-400 text-sm mb-4">OWASP MCP Top 10对齐，110+规则，5维评分。在Claude/Cursor中安装: <code class="bg-slate-700 px-2 py-1 rounded text-sky-300 text-xs">npx @aishield/mcp-server</code></p>
+    <a href="https://github.com/lm203688/aishield" target="_blank" class="text-sky-400 hover:text-sky-300 text-sm font-medium">GitHub →</a>
+  </div>
+</main>
+
+<script>
+let selectedPlatform = 'all';
+
+function setPlatform(p) {
+  selectedPlatform = p;
+  document.querySelectorAll('.platform-btn').forEach(btn => {
+    if (btn.dataset.platform === p) {
+      btn.className = 'platform-btn active px-4 py-2 rounded-lg text-sm font-medium bg-sky-600 text-white';
+    } else {
+      btn.className = 'platform-btn px-4 py-2 rounded-lg text-sm font-medium bg-slate-700 text-gray-300 hover:bg-slate-600';
+    }
+  });
+}
+
+async function checkText() {
+  const text = document.getElementById('inputText').value.trim();
+  if (!text) { alert('请输入待检测文本'); return; }
+  
+  const btn = document.getElementById('checkBtn');
+  const results = document.getElementById('results');
+  btn.disabled = true;
+  btn.textContent = '检测中...';
+  results.classList.add('hidden');
+  
+  try {
+    const resp = await fetch('/api/v1/banned-words', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, platform: selectedPlatform })
+    });
+    const data = await resp.json();
+    renderResults(data);
+  } catch (e) {
+    // 如果API不可用，做客户端检测
+    renderClientResults(text);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<svg class="w-5 h-5 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg> 开始检测';
+  }
+}
+
+function renderResults(data) {
+  const results = document.getElementById('results');
+  results.classList.remove('hidden');
+  
+  if (data.safe) {
+    results.innerHTML = `
+      <div class="bg-emerald-900/30 border border-emerald-700/50 rounded-xl p-6 text-center">
+        <div class="text-3xl mb-2">✅</div>
+        <div class="text-emerald-400 font-semibold text-lg">未检测到违禁词</div>
+        <div class="text-gray-400 text-sm mt-1">在${data.platform === 'all' ? '所有平台' : data.platform}规则下，该文本合规</div>
+      </div>`;
+  } else {
+    let wordsHtml = data.words.map(w => `
+      <div class="result-card bg-slate-900/50 border border-slate-700 rounded-lg p-4">
+        <div class="flex items-center justify-between">
+          <span class="text-red-400 font-mono font-bold text-lg">${w.word}</span>
+          <span class="px-2 py-1 rounded text-xs font-medium ${w.severity === 'high' ? 'bg-red-900/50 text-red-300' : 'bg-yellow-900/50 text-yellow-300'}">${w.severity}</span>
+        </div>
+        <div class="text-gray-400 text-sm mt-2">上下文: <span class="text-gray-300">...${w.context}...</span></div>
+      </div>`).join('');
+    
+    results.innerHTML = `
+      <div class="bg-red-900/20 border border-red-700/50 rounded-xl p-4 mb-4">
+        <div class="text-red-400 font-semibold">⚠️ 检测到 ${data.found_count} 个违禁词/敏感词</div>
+      </div>
+      ${wordsHtml}`;
+  }
+}
+
+// 客户端备用检测（API不可用时）
+function renderClientResults(text) {
+  const words = ['赌博','色情','暴力','恐怖','毒品','枪支','洗钱','诈骗','传销','非法集资','反动','颠覆','邪教'];
+  const found = words.filter(w => text.includes(w));
+  const results = document.getElementById('results');
+  results.classList.remove('hidden');
+  
+  if (found.length === 0) {
+    renderResults({safe: true, platform: selectedPlatform});
+  } else {
+    renderResults({
+      safe: false, found_count: found.length, platform: selectedPlatform,
+      words: found.map(w => ({
+        word: w, severity: 'high',
+        context: text.substring(Math.max(0, text.indexOf(w)-10), text.indexOf(w)+w.length+10)
+      }))
+    });
+  }
+}
+</script>
+
+</body>
+</html>

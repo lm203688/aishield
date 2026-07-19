@@ -1,0 +1,288 @@
+# AIShield Security Scanner — Dify 工具市场插件配置
+# 导入方式：Dify 工作台 → 工具 → 从 YAML 文件导入
+# 文档：https://docs.dify.ai/guides/tools/create-tool
+
+identity:
+  # 插件唯一标识
+  name: aishield_security_scan
+  # 人类可读标签
+  label:
+    en_US: AIShield Security Scan
+    zh_Hans: AIShield 安全扫描
+  # 插件描述
+  description:
+    en_US: >
+      AI Agent Security Scanner aligned with OWASP MCP Top 10 (2025 v0.1).
+      133 detection rules, 5-dimension scoring (Security, Permissions,
+      Data Handling, Supply Chain, Reliability). Detects tool poisoning,
+      command injection, prompt injection, supply chain attacks, SSRF,
+      secret exposure, and privilege escalation.
+    zh_Hans: >
+      AI Agent 安全扫描工具，对齐 OWASP MCP Top 10 (2025 v0.1) 标准。
+      133条检测规则，5维评分体系（安全性/权限/数据处理/供应链/可靠性）。
+      检测工具投毒、命令注入、Prompt注入、供应链攻击、SSRF、密钥泄露、
+      权限提升等安全风险。
+  # 插件图标
+  icon: shield
+  icon_background: "#0f172a"
+  # 作者信息
+  author: AIShield Team
+  author_url: https://aishield.dev
+  # 标签
+  tags:
+    en_US:
+      - security
+      - mcp
+      - owasp
+      - scanner
+      - ai-agent
+      - prompt-injection
+      - banned-words
+    zh_Hans:
+      - 安全
+      - MCP
+      - OWASP
+      - 扫描器
+      - AI Agent
+      - Prompt注入
+      - 违禁词
+  # 分类
+  category: security
+
+# 工具列表
+tools:
+  # ─── 工具1：MCP安全扫描 ───
+  - name: scan_mcp_security
+    label:
+      en_US: Scan MCP Security
+      zh_Hans: MCP安全扫描
+    description:
+      en_US: >
+        Scan a GitHub MCP server or AI tool for security risks.
+        Returns 5-dimension score, OWASP MCP Top 10 compliance matrix,
+        severity findings, and fix recommendations.
+      zh_Hans: >
+        扫描 GitHub MCP Server 或 AI 工具的安全风险。
+        返回5维评分、OWASP MCP Top 10合规矩阵、严重程度发现和修复建议。
+    # 输入参数（JSON Schema格式）
+    input_schema:
+      type: object
+      required:
+        - github_url
+      properties:
+        github_url:
+          type: string
+          title:
+            en_US: GitHub Repository URL
+            zh_Hans: GitHub仓库地址
+          description:
+            en_US: The GitHub repository URL of the MCP server to scan (e.g. https://github.com/user/mcp-server)
+            zh_Hans: 待扫描的MCP Server GitHub仓库地址
+          placeholder:
+            en_US: https://github.com/user/mcp-server
+            zh_Hans: https://github.com/user/mcp-server
+        tool_type:
+          type: string
+          title:
+            en_US: Tool Type
+            zh_Hans: 工具类型
+          description:
+            en_US: The type of AI tool to scan
+            zh_Hans: 要扫描的AI工具类型
+          enum:
+            - mcp
+            - skill
+            - gpt
+            - prompt
+          default: mcp
+        tool_name:
+          type: string
+          title:
+            en_US: Tool Name
+            zh_Hans: 工具名称
+          description:
+            en_US: Optional custom name for the tool
+            zh_Hans: 工具自定义名称（可选）
+    # 输出参数
+    output_schema:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Whether the scan completed successfully
+        overall_score:
+          type: number
+          description: Overall security score (0-100)
+        badge_level:
+          type: string
+          enum: [gold, silver, bronze, none]
+          description: Security badge level
+        risk_level:
+          type: string
+          description: Overall risk assessment
+        dimensions:
+          type: object
+          description: 5-dimension scores
+        owasp_matrix:
+          type: array
+          description: OWASP MCP Top 10 compliance matrix
+        total_findings:
+          type: integer
+          description: Total number of security findings
+        critical_findings:
+          type: array
+          description: Critical severity findings
+    # API 端点配置
+    endpoint:
+      method: POST
+      url: https://api.aishield.dev/api/v1/audit
+      headers:
+        Content-Type: application/json
+      # 请求体映射：Dify参数 → API请求体
+      body_mapping:
+        source_url: "{{github_url}}"
+        tool_type: "{{tool_type}}"
+        name: "{{tool_name}}"
+    # 是否在Dify工作流中显示为关键节点
+    is_critical: true
+
+  # ─── 工具2：Prompt注入检测 ───
+  - name: check_prompt_injection
+    label:
+      en_US: Check Prompt Injection
+      zh_Hans: Prompt注入检测
+    description:
+      en_US: >
+        Detect prompt injection, jailbreak attempts, identity switching,
+        system prompt theft, data exfiltration instructions, zero-width
+        characters, and Unicode tricks. Supports both Chinese and English.
+      zh_Hans: >
+        检测Prompt注入、越狱尝试、身份切换、系统提示词窃取、
+        数据外泄指令、零宽字符和Unicode欺骗。支持中英文双语检测。
+    input_schema:
+      type: object
+      required:
+        - prompt
+      properties:
+        prompt:
+          type: string
+          title:
+            en_US: Prompt Text
+            zh_Hans: Prompt文本
+          description:
+            en_US: The prompt text to check for injection risks (minimum 10 characters)
+            zh_Hans: 待检测的Prompt文本（至少10个字符）
+          placeholder:
+            en_US: Enter the prompt text you want to check...
+            zh_Hans: 输入需要检测的Prompt文本...
+    output_schema:
+      type: object
+      properties:
+        safe:
+          type: boolean
+          description: Whether the prompt is safe
+        score:
+          type: number
+          description: Safety score (0-100)
+        risk:
+          type: string
+          enum: [safe, low, medium, high, critical]
+          description: Risk level
+        findings:
+          type: array
+          description: List of detected injection risks
+        summary:
+          type: string
+          description: Human-readable summary in Chinese
+    endpoint:
+      method: POST
+      url: https://api.aishield.dev/api/v1/prompt-check
+      headers:
+        Content-Type: application/json
+      body_mapping:
+        prompt: "{{prompt}}"
+
+  # ─── 工具3：违禁词检测 ───
+  - name: detect_banned_words
+    label:
+      en_US: Detect Banned Words
+      zh_Hans: 违禁词检测
+    description:
+      en_US: >
+        Check Chinese text for banned/sensitive words across 6 major platforms:
+        WeChat, Douyin, Xiaohongshu, Bilibili, Weibo, and Kuaishou.
+        Returns found words with legal references, severity, and replacement suggestions.
+      zh_Hans: >
+        检测中文文本中的违禁/敏感词，覆盖6大主流平台：
+        微信、抖音、小红书、B站、微博、快手。
+        返回命中词、法律依据、严重程度和替换建议。
+    input_schema:
+      type: object
+      required:
+        - text
+      properties:
+        text:
+          type: string
+          title:
+            en_US: Text Content
+            zh_Hans: 文本内容
+          description:
+            en_US: The Chinese text to check for banned words
+            zh_Hans: 待检测的中文文本内容
+          placeholder:
+            en_US: Enter the text content to check...
+            zh_Hans: 输入需要检测的文本内容...
+        platform:
+          type: string
+          title:
+            en_US: Target Platform
+            zh_Hans: 目标平台
+          description:
+            en_US: The target platform for compliance checking
+            zh_Hans: 合规检测的目标平台
+          enum:
+            - douyin
+            - xiaohongshu
+            - wechat
+            - weibo
+            - bilibili
+            - kuaishou
+            - all
+          default: all
+    output_schema:
+      type: object
+      properties:
+        safe:
+          type: boolean
+          description: Whether the text is safe for the target platform
+        total_words:
+          type: integer
+          description: Total number of words in the rule set
+        found_count:
+          type: integer
+          description: Number of banned words found
+        words:
+          type: array
+          description: List of found banned words with context and severity
+        platform:
+          type: string
+          description: The checked platform
+    endpoint:
+      method: POST
+      url: https://api.aishield.dev/api/v1/banned-words
+      headers:
+        Content-Type: application/json
+      body_mapping:
+        text: "{{text}}"
+        platform: "{{platform}}"
+
+# Logo URL
+logo_url: https://aishield.dev/logo.svg
+# 版本
+version: "4.1.0"
+# 许可证
+license: MIT
+# 首页
+homepage: https://aishield.dev
+# 仓库
+repository: https://github.com/aishield-dev/aishield

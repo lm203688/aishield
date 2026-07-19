@@ -1,0 +1,21 @@
+version: "3.8"
+services:
+  aishield-api:
+    build: .
+    ports:
+      - "8450:8450"
+    environment:
+      - AISHIELD_PORT=8450
+      - AISHIELD_LLM_URL=${AISHIELD_LLM_URL:-}
+      - AISHIELD_LLM_KEY=${AISHIELD_LLM_KEY:-}
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./data:/app/data
+      - ./api/data:/app/api/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8450/api/v1/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
