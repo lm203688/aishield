@@ -40,6 +40,7 @@ from scanner.rug_pull import detect_rug_pull
 from scanner.handshake import verify_handshake
 from scanner.rules import OWASP_MCP_TOP10, get_rule_count
 from scanner.monitor import get_monitored_tools, add_monitor as add_tool_monitor, remove_monitor, check_version_change, check_all_monitored
+from scanner.api_scanner import APIScanOrchestrator
 from proxy import gateway as proxy_gateway
 
 # ── Eco Dispatcher ──
@@ -797,14 +798,19 @@ def main():
     if _eco_available:
         try:
             from eco import identity, payment, badge, marketplace, a2a_gateway
+            from eco import collab, sandbox, skill_market, auth_provider
             _eco_init({
                 "identity": identity,
                 "payment": payment,
                 "badge": badge,
                 "marketplace": marketplace,
                 "a2a_gateway": a2a_gateway,
+                "collab": collab,
+                "sandbox": sandbox,
+                "skill_market": skill_market,
+                "auth_provider": auth_provider,
             })
-            print("  Eco modules: identity, payment, badge, marketplace, a2a")
+            print("  Eco modules: identity, payment, badge, marketplace, a2a, collab, sandbox, skill_market, auth_provider")
         except Exception as e:
             print(f"  Eco modules: init failed ({e})")
     else:

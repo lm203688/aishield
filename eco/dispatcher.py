@@ -110,6 +110,132 @@ def dispatch_get(handler):
             handler._send_json({"success": True, "agents": agents})
             return True
 
+    # Collab: 列出频道
+    if path == "/api/v1/collab/channels":
+        mod = _modules.get("collab")
+        if mod:
+            bus = mod.MessageBus()
+            bus._load()
+            channels = bus._data.get("channels", {}) if hasattr(bus, '_data') else {}
+            handler._send_json({"success": True, "channels": channels, "total": len(channels)})
+            return True
+
+    # Collab: 消费消息
+    if path == "/api/v1/collab/messages":
+        mod = _modules.get("collab")
+        if mod:
+            bus = mod.MessageBus()
+            agent_id = qs.get("agent_id", [None])[0]
+            channel = qs.get("channel", [None])[0]
+            result = bus.consume(agent_id=agent_id, channel=channel)
+            handler._send_json({"success": True, "messages": result if isinstance(result, list) else []})
+            return True
+
+    # Collab: 会话消息
+    if path.startswith("/api/v1/collab/sessions/") and path.endswith("/messages"):
+        mod = _modules.get("collab")
+        if mod:
+            sid = path[len("/api/v1/collab/sessions/"):-len("/messages")]
+            sess = mod.CollaborationSession()
+            result = sess.get_session_messages(sid)
+            handler._send_json({"success": True, "messages": result if isinstance(result, list) else []})
+            return True
+
+    # Collab: 列出委托
+    if path == "/api/v1/collab/delegations":
+        mod = _modules.get("collab")
+        if mod:
+            agent_id = qs.get("agent_id", [None])[0]
+            status = qs.get("status", [None])[0]
+            delg = mod.TaskDelegation()
+            result = delg.list_delegations(agent_id=agent_id, status=status)
+            handler._send_json({"success": True, "delegations": result if isinstance(result, list) else []})
+            return True
+
+    # Skills: 搜索技能（/api/v1/skills/agent/ 前缀必须先于 /api/v1/skills/{skill_id}）
+    if path.startswith("/api/v1/skills/agent/"):
+        mod = _modules.get("skill_market")
+        if mod:
+            agent_id = path[len("/api/v1/skills/agent/"):]
+            reg = mod.SkillRegistry()
+            result = reg.list_by_agent(agent_id)
+            handler._send_json({"success": True, **result})
+            return True
+
+    # Skills: 技能列表
+    if path == "/api/v1/skills":
+        mod = _modules.get("skill_market")
+        if mod:
+            reg = mod.SkillRegistry()
+            query = qs.get("q", [None])[0]
+            category = qs.get("category", [None])[0]
+            result = reg.search(query=query, category=category)
+            handler._send_json({"success": True, **result})
+            return True
+
+    # Skills: 技能评分
+    if path.startswith("/api/v1/skills/") and path.endswith("/ratings"):
+        mod = _modules.get("skill_market")
+        if mod:
+            skill_id = path[len("/api/v1/skills/"):-len("/ratings")]
+            rating = mod.SkillRating()
+            result = rating.get_ratings(skill_id)
+            handler._send_json({"success": True, **result})
+            return True
+
+    # Skills: 技能详情
+    if path.startswith("/api/v1/skills/"):
+        mod = _modules.get("skill_market")
+        if mod:
+            skill_id = path[len("/api/v1/skills/"):]
+            reg = mod.SkillRegistry()
+            result = reg.get_skill(skill_id)
+            handler._send_json({"success": True, **result})
+            return True
+
+    # Sandbox: 列出任务
+    if path == "/api/v1/sandbox/tasks":
+        mod = _modules.get("sandbox")
+        if mod:
+            agent_id = qs.get("agent_id", [None])[0]
+            status = qs.get("status", [None])[0]
+            task = mod.SandboxTask()
+            result = task.list_tasks(agent_id=agent_id, status=status)
+            handler._send_json({"success": True, **result})
+            return True
+
+    # Auth: 列出API Key
+    if path == "/api/v1/auth/keys":
+        mod = _modules.get("auth_provider")
+        if mod:
+            auth_header = handler.headers.get("Authorization", "")
+            if not auth_header.startswith("Bearer "):
+                handler._send_json({"error": "Authorization header required"}, 401)
+                return True
+            agent_id = qs.get("agent_id", [None])[0]
+            mgr = mod.APIKeyManager()
+            result = mgr.list_keys(agent_id=agent_id)
+            handler._send_json({"success": True, **result})
+            return True
+
+    # Auth: 作用域列表
+    if path == "/api/v1/auth/scopes":
+        mod = _modules.get("auth_provider")
+        if mod:
+            mgr = mod.ScopeManager()
+            handler._send_json({"success": True, "scopes": mod.SCOPES})
+            return True
+
+    # Auth: 审计日志
+    if path == "/api/v1/auth/audit":
+        mod = _modules.get("auth_provider")
+        if mod:
+            agent_id = qs.get("agent_id", [None])[0]
+            logger = mod.AuditLogger()
+            result = logger.query_events(agent_id=agent_id)
+            handler._send_json({"success": True, "events": result if isinstance(result, list) else []})
+            return True
+
     return False
 
 
@@ -205,5 +331,155 @@ def dispatch_post(handler, data):
             )
             handler._send_json({"success": True, **result})
             return True
+
+    # Collab: 发布消息
+    if path == "/api/v1/collab/publish":
+        mod = _modules.get("collab")
+        if mod:
+            bus = mod.MessageBus()
+            result = bus.publish(
+                channel=data.get("channel", ""),
+                sender_agent_id=data.get("sender_agent_id", ""),
+                message_type=data.get("message_type", "status"),
+                payload=data.get("payload", {}),
+            )
+            handler._send_json({"success": True, **result})
+            return True
+
+    # Collab: 订阅频道
+    if path == "/api/v1/collab/subscribe":
+        mod = _modules.get("collab")
+        if mod:
+            bus = mod.MessageBus()
+            result = bus.subscribe(
+                channel=data.get("channel", ""),
+                subscriber_agent_id=data.get("subscriber_agent_id", ""),
+            )
+            handler._send_json({"success": True, **result})
+            return True
+
+    # Collab: 创建协作会话
+    if path == "/api/v1/collab/sessions":
+        mod = _modules.get("collab")
+        if mod:
+            sess = mod.CollaborationSession()
+            result = sess.create_session(
+                initiator_agent_id=data.get("initiator_agent_id", ""),
+                task_description=data.get("task_description", ""),
+                participant_agent_ids=data.get("participant_agent_ids", []),
+            )
+            handler._send_json({"success": True, **result})
+            return True
+
+    # Collab: 委托任务
+    if path == "/api/v1/collab/delegate":
+        mod = _modules.get("collab")
+        if mod:
+            delg = mod.TaskDelegation()
+            result = delg.delegate(
+                task_description=data.get("task_description", ""),
+                from_agent_id=data.get("from_agent_id", ""),
+                to_agent_id=data.get("to_agent_id", ""),
+            )
+            handler._send_json({"success": True, **result})
+            return True
+
+    # Collab: 接受委托
+    if path.startswith("/api/v1/collab/delegations/") and path.endswith("/accept"):
+        mod = _modules.get("collab")
+        if mod:
+            did = path[len("/api/v1/collab/delegations/"):-len("/accept")]
+            delg = mod.TaskDelegation()
+            result = delg.accept_delegation(did, agent_id=data.get("agent_id", ""))
+            handler._send_json({"success": True, **result})
+            return True
+
+    # Collab: 提交委托结果
+    if path.startswith("/api/v1/collab/delegations/") and path.endswith("/result"):
+        mod = _modules.get("collab")
+        if mod:
+            did = path[len("/api/v1/collab/delegations/"):-len("/result")]
+            delg = mod.TaskDelegation()
+            result = delg.submit_result(did, result_data=data.get("result", {}))
+            handler._send_json({"success": True, **result})
+            return True
+
+    # Skills: 发布技能
+    if path == "/api/v1/skills/publish":
+        mod = _modules.get("skill_market")
+        if mod:
+            reg = mod.SkillRegistry()
+            result = reg.publish(
+                agent_id=data.get("agent_id", ""),
+                name=data.get("name", ""),
+                description=data.get("description", ""),
+                category=data.get("category", "security"),
+            )
+            handler._send_json({"success": True, **result})
+            return True
+
+    # Skills: 调用技能
+    if path.startswith("/api/v1/skills/") and path.endswith("/invoke"):
+        mod = _modules.get("skill_market")
+        if mod:
+            skill_id = path[len("/api/v1/skills/"):-len("/invoke")]
+            invoker = mod.SkillInvoker()
+            result = invoker.invoke(skill_id, caller_agent_id=data.get("caller_agent_id", ""), input_data=data.get("input_data", {}))
+            handler._send_json({"success": True, **result})
+            return True
+
+    # Sandbox: 提交并执行任务
+    if path == "/api/v1/sandbox/execute":
+        mod = _modules.get("sandbox")
+        if mod:
+            task = mod.SandboxTask()
+            task_dict = task.submit(
+                agent_id=data.get("agent_id", ""),
+                code=data.get("code", ""),
+                language=data.get("language", "python"),
+            )
+            if task_dict.get("status") == "rejected":
+                handler._send_json({"success": False, **task_dict})
+            else:
+                result = task.execute_pending(task_dict["task_id"])
+                handler._send_json({"success": True, **result})
+            return True
+
+    # Auth: 生成API Key
+    if path == "/api/v1/auth/keys":
+        mod = _modules.get("auth_provider")
+        if mod:
+            mgr = mod.APIKeyManager()
+            result = mgr.generate_key(
+                agent_id=data.get("agent_id", ""),
+                key_name=data.get("key_name", ""),
+            )
+            handler._send_json({"success": True, **result})
+            return True
+
+    # Auth: 撤销API Key
+    if path.startswith("/api/v1/auth/keys/") and path.endswith("/revoke"):
+        mod = _modules.get("auth_provider")
+        if mod:
+            key_id = path[len("/api/v1/auth/keys/"):-len("/revoke")]
+            mgr = mod.APIKeyManager()
+            result = mgr.revoke_key(key_id, revoked_by=data.get("revoked_by", ""))
+            handler._send_json({"success": True, **result})
+            return True
+
+    # Scan: API扫描
+    if path == "/api/v1/scan/api":
+        from scanner.api_scanner import APIScanOrchestrator
+        url = data.get("url", "")
+        if not url:
+            handler._send_json({"error": "url is required"}, 400)
+            return True
+        try:
+            orchestrator = APIScanOrchestrator()
+            result = orchestrator.scan(spec_source=url)
+            handler._send_json({"success": True, **result})
+        except Exception as e:
+            handler._send_json({"error": str(e)}, 500)
+        return True
 
     return False
