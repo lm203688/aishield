@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AIShield — AI Agent安全生态平台</title>
+<meta name="description" content="OWASP MCP Top 10对齐的AI Agent安全扫描与信任生态平台。133条规则、5维评分、Agent协作通信、安全沙箱、技能交易市场、身份认证与持续监控。">
+<meta property="og:title" content="AIShield — AI Agent安全生态平台">
+<meta property="og:description" content="AI Agent安全扫描 · 信任生态 · 技能市场 · 安全沙箱">
+<meta property="og:type" content="website">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+  body { font-family: 'Inter', -apple-system, sans-serif; }
+  .gradient-bg { background: linear-gradient(135deg, #0a0f1a 0%, #0f172a 40%, #1a1030 100%); }
+  .hero-glow {
+    background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(56,189,248,0.15) 0%, transparent 70%),
+                radial-gradient(ellipse 60% 40% at 80% 50%, rgba(139,92,246,0.08) 0%, transparent 70%);
+  }
+  .card-glow { box-shadow: 0 0 0 1px rgba(255,255,255,0.05), 0 8px 32px rgba(0,0,0,0.3); }
+  .card-glow:hover { box-shadow: 0 0 0 1px rgba(56,189,248,0.2), 0 12px 48px rgba(56,189,248,0.1); }
+  .animate-float { animation: float 6s ease-in-out infinite; }
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+  .animate-pulse-slow { animation: pulse-slow 3s ease-in-out infinite; }
+  @keyframes pulse-slow { 0%,100%{opacity:1} 50%{opacity:0.7} }
+  .feature-icon { transition: all 0.3s ease; }
+  .feature-card:hover .feature-icon { transform: scale(1.1); filter: brightness(1.2); }
+  .tab-active { background: linear-gradient(135deg, #0ea5e9, #8b5cf6); }
+  .scan-ring { stroke-dasharray: 283; stroke-dashoffset: 283; animation: scan-draw 2s ease forwards; }
+  @keyframes scan-draw { to { stroke-dashoffset: 0; } }
+  .counter { font-variant-numeric: tabular-nums; }
+  .fade-in-up { opacity: 0; transform: translateY(20px); animation: fadeInUp 0.6s ease forwards; }
+  @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+  .delay-1 { animation-delay: 0.1s; }
+  .delay-2 { animation-delay: 0.2s; }
+  .delay-3 { animation-delay: 0.3s; }
+  .delay-4 { animation-delay: 0.4s; }
+  .delay-5 { animation-delay: 0.5s; }
+</style>
+</head>
+<body class="gradient-bg min-h-screen text-gray-100">
+
+<!-- Navigation -->
+<nav class="fixed top-0 left-0 right-0 z-50 bg-slate-900/80 backdrop-blur-md border-b border-slate-800/50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16">
+      <div class="flex items-center gap-2">
+        <svg class="w-8 h-8 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0-5.592 4.406-10.138 9.904-10.138 5.498 0 9.904 4.546 9.904 10.138 0 2.037-.545 3.946-1.5 5.578M19.5 9.75a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span class="text-xl font-bold text-white">AIShield</span>
+        <span class="hidden sm:inline text-xs px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30">v4.2</span>
+      </div>
+      <div class="hidden md:flex items-center gap-6 text-sm">
+        <a href="#features" class="text-gray-400 hover:text-white transition">功能</a>
+        <a href="#demo" class="text-gray-400 hover:text-white transition">体验</a>
+        <a href="#ecosystem" class="text-gray-400 hover:text-white transition">生态</a>
+        <a href="/api/v1" class="text-gray-400 hover:text-white transition">API</a>
+        <a href="https://github.com/lm203688/aishield" target="_blank" class="text-gray-400 hover:text-white transition">GitHub</a>
+      </div>
+      <div class="flex items-center gap-3">
+        <a href="/banned-words" class="hidden sm:inline text-sm px-4 py-2 rounded-lg bg-slate-800 text-gray-300 hover:bg-slate-700 transition">违禁词检测</a>
+        <a href="#demo" class="text-sm px-4 py-2 rounded-lg bg-gradient-to-r from-sky-500 to-violet-500 text-white font-medium hover:from-sky-400 hover:to-violet-400 transition">开始扫描</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero Section -->
+<section class="relative pt-32 pb-20 hero-glow overflow-hidden">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="grid lg:grid-cols-2 gap-12 items-center">
+      <div class="fade-in-up">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-500/20 text-sky-300 text-sm mb-6">
+          <span class="w-2 h-2 rounded-full bg-sky-400 animate-pulse"></span>
+          OWASP MCP Top 10 对齐 · 133 条安全规则
+        </div>
+        <h1 class="text-5xl sm:text-6xl font-extrabold text-white leading-tight mb-6">
+          AI Agent<br>
+          <span class="bg-gradient-to-r from-sky-400 via-violet-400 to-pink-400 bg-clip-text text-transparent">安全生态平台</span>
+        </h1>
+        <p class="text-lg text-gray-400 mb-8 max-w-lg">
+          为AI Agent生态提供完整的安全基础设施。安全扫描、身份认证、协作通信、沙箱执行、技能交易、持续监控——全链路守护Agent世界。
+        </p>
+        <div class="flex flex-wrap gap-4">
+          <a href="#demo" class="px-6 py-3 rounded-xl bg-gradient-to-r from-sky-500 to-violet-500 text-white font-semibold hover:from-sky-400 hover:to-violet-400 transition shadow-lg shadow-sky-500/20">
+            立即体验
+          </a>
+          <a href="https://github.com/lm203688/aishield" target="_blank" class="px-6 py-3 rounded-xl bg-slate-800 text-gray-300 font-semibold hover:bg-slate-700 transition border border-slate-700">
+            <span class="flex items-center gap-2">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.28-1.56 3.285-1.23 3.285-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+              GitHub Star
+            </span>
+          </a>
+        </div>
+        <div class="mt-8 flex items-center gap-4 text-sm text-gray-500">
+          <span class="flex items-center gap-1"><svg class="w-4 h-4 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Python标准库零依赖</span>
+          <span class="flex items-center gap-1"><svg class="w-4 h-4 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> 40+ API端点</span>
+          <span class="flex items-center gap-1"><svg class="w-4 h-4 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> 开源免费</span>
+        </div>
+      </div>
+      <div class="relative animate-float">
+        <!-- Security Score Card -->
+        <div class="bg-slate-800/60 backdrop-blur-xl rounded-2xl p-8 card-glow border border-slate-700/50">
+          <div class="flex items-center justify-between mb-6">
+            <div>
+              <p class="text-sm text-gray-400">安全评分</p>
+              <p class="text-3xl font-bold text-white">A+</p>
+            </div>
+            <div class="w-16 h-16 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center">
+              <svg class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0-5.592 4.406-10.138 9.904-10.138 5.498 0 9.904 4.546 9.904 10.138 0 2.037-.545 3.946-1.5 5.578M19.5 9.75a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+          </div>
+          <div class="space-y-3">
+            <div class="flex items-center justify-between text-sm"><span class="text-gray-400">认证安全</span><span class="text-green-400">98/100</span></div>
+            <div class="w-full bg-slate-700 rounded-full h-1.5"><div class="bg-green-400 h-1.5 rounded-full" style="width:98%"></div></div>
+            <div class="flex items-center justify-between text-sm"><span class="text-gray-400">输入验证</span><span class="text-green-400">95/100</span></div>
+            <div class="w-full bg-slate-700 rounded-full h-1.5"><div class="bg-green-400 h-1.5 rounded-full" style="width:95%"></div></div>
+            <div class="flex items-center justify-between text-sm"><span class="text-gray-400">业务逻辑</span><span class="text-yellow-400">87/100</span></div>
+            <div class="w-full bg-slate-700 rounded-full h-1.5"><div class="bg-yellow-400 h-1.5 rounded-full" style="width:87%"></div></div>
+            <div class="flex items-center justify-between text-sm"><span class="text-gray-400">数据暴露</span><span class="text-green-400">92/100</span></div>
+            <div class="w-full bg-slate-700 rounded-full h-1.5"><div class="bg-green-400 h-1.5 rounded-full" style="width:92%"></div></div>
+            <div class="flex items-center justify-between text-sm"><span class="text-gray-400">配置安全</span><span class="text-green-400">94/100</span></div>
+            <div class="w-full bg-slate-700 rounded-full h-1.5"><div class="bg-green-400 h-1.5 rounded-full" style="width:94%"></div></div>
+          </div>
+          <div class="mt-6 pt-4 border-t border-slate-700/50 flex items-center justify-between text-xs text-gray-500">
+            <span>OWASP MCP Top 10</span>
+            <span>9/10 合规</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Stats Section -->
+<section class="py-16 border-y border-slate-800/50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+      <div class="text-center fade-in-up delay-1">
+        <p class="text-4xl font-bold bg-gradient-to-r from-sky-400 to-violet-400 bg-clip-text text-transparent counter">133</p>
+        <p class="text-sm text-gray-400 mt-1">安全规则</p>
+      </div>
+      <div class="text-center fade-in-up delay-2">
+        <p class="text-4xl font-bold bg-gradient-to-r from-violet-400 to-pink-400 bg-clip-text text-transparent counter">40+</p>
+        <p class="text-sm text-gray-400 mt-1">API端点</p>
+      </div>
+      <div class="text-center fade-in-up delay-3">
+        <p class="text-4xl font-bold bg-gradient-to-r from-pink-400 to-orange-400 bg-clip-text text-transparent counter">6</p>
+        <p class="text-sm text-gray-400 mt-1">生态模块</p>
+      </div>
+      <div class="text-center fade-in-up delay-4">
+        <p class="text-4xl font-bold bg-gradient-to-r from-orange-400 to-yellow-400 bg-clip-text text-transparent counter">10</p>
+        <p class="text-sm text-gray-400 mt-1">OWASP类别</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Features Section -->
+<section id="features" class="py-24">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-16 fade-in-up">
+      <h2 class="text-3xl sm:text-4xl font-bold text-white mb-4">完整的Agent安全基础设施</h2>
+      <p class="text-gray-400 max-w-2xl mx-auto">从安全扫描到身份认证，从协作通信到技能交易——覆盖Agent全生命周期</p>
+    </div>
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- Feature 1: Security Scan -->
+      <div class="feature-card bg-slate-800/40 backdrop-blur rounded-xl p-6 card-glow border border-slate-700/30 fade-in-up delay-1">
+        <div class="feature-icon w-12 h-12 rounded-lg bg-gradient-to-br from-red-500/20 to-orange-500/20 flex items-center justify-center mb-4">
+          <svg class="w-6 h-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0-5.592 4.406-10.138 9.904-10.138 5.498 0 9.904 4.546 9.904 10.138 0 2.037-.545 3.946-1.5 5.578M19.5 9.75a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+        <h3 class="text-lg font-semibold text-white mb-2">安全扫描引擎</h3>
+        <p class="text-sm text-gray-400 mb-3">133条规则对齐OWASP MCP Top 10，覆盖MCP工具静态分析、Prompt注入检测、API接口安全扫描。</p>
+        <div class="flex flex-wrap gap-2">
+          <span class="text-xs px-2 py-1 rounded bg-red-500/10 text-red-300 border border-red-500/20">MCP扫描</span>
+          <span class="text-xs px-2 py-1 rounded bg-red-500/10 text-red-300 border border-red-500/20">Prompt检测</span>
+          <span class="text-xs px-2 py-1 rounded bg-red-500/10 text-red-300 border border-red-500/20">API扫描</span>
+        </div>
+      </div>
+      <!-- Feature 2: Agent Collab -->
+      <div class="feature-card bg-slate-800/40 backdrop-blur rounded-xl p-6 card-glow border border-slate-700/30 fade-in-up delay-2">
+        <div class="feature-icon w-12 h-12 rounded-lg bg-gradient-to-br from-sky-500/20 to-blue-500/20 flex items-center justify-center mb-4">
+          <svg class="w-6 h-6 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z"/></svg>
+        </div>
+        <h3 class="text-lg font-semibold text-white mb-2">Agent协作通信</h3>
+        <p class="text-sm text-gray-400 mb-3">消息发布/订阅总线、多Agent协作会话、任务委派与结果回传。Agent间安全协作的基础设施。</p>
+        <div class="flex flex-wrap gap-2">
+          <span class="text-xs px-2 py-1 rounded bg-sky-500/10 text-sky-300 border border-sky-500/20">消息总线</span>
+          <span class="text-xs px-2 py-1 rounded bg-sky-500/10 text-sky-300 border border-sky-500/20">协作会话</span>
+          <span class="text-xs px-2 py-1 rounded bg-sky-500/10 text-sky-300 border border-sky-500/20">任务委派</span>
+        </div>
+      </div>
+      <!-- Feature 3: Identity -->
+      <div class="feature-card bg-slate-800/40 backdrop-blur rounded-xl p-6 card-glow border border-slate-700/30 fade-in-up delay-3">
+        <div class="feature-icon w-12 h-12 rounded-lg bg-gradient-to-br from-violet-500/20 to-purple-500/20 flex items-center justify-center mb-4">
+          <svg class="w-6 h-6 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5zm6-10.125a1.875 1.875 0 11-3.75 0 1.875 1.875 0 013.75 0zM12 15.75a4.125 4.125 0 100-8.25 4.125 4.125 0 000 8.25z"/></svg>
+        </div>
+        <h3 class="text-lg font-semibold text-white mb-2">身份认证体系</h3>
+        <p class="text-sm text-gray-400 mb-3">DID去中心化身份、API Key管理(SHA256存储)、16个权限Scope、OAuth2.0简化版、完整审计日志。</p>
+        <div class="flex flex-wrap gap-2">
+          <span class="text-xs px-2 py-1 rounded bg-violet-500/10 text-violet-300 border border-violet-500/20">DID</span>
+          <span class="text-xs px-2 py-1 rounded bg-violet-500/10 text-violet-300 border border-violet-500/20">API Key</span>
+          <span class="text-xs px-2 py-1 rounded bg-violet-500/10 text-violet-300 border border-violet-500/20">OAuth2</span>
+        </div>
+      </div>
+      <!-- Feature 4: Sandbox -->
+      <div class="feature-card bg-slate-800/40 backdrop-blur rounded-xl p-6 card-glow border border-slate-700/30 fade-in-up delay-1">
+        <div class="feature-icon w-12 h-12 rounded-lg bg-gradient-to-br from-emerald-500/20 to-teal-500/20 flex items-center justify-center mb-4">
+          <svg class="w-6 h-6 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125"/></svg>
+        </div>
+        <h3 class="text-lg font-semibold text-white mb-2">安全沙箱执行</h3>
+        <p class="text-sm text-gray-400 mb-3">代码预检(15+危险模式)、Python/JS/Shell隔离执行、资源限制、输出安全审计。Agent代码执行的保险箱。</p>
+        <div class="flex flex-wrap gap-2">
+          <span class="text-xs px-2 py-1 rounded bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">代码预检</span>
+          <span class="text-xs px-2 py-1 rounded bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">隔离执行</span>
+          <span class="text-xs px-2 py-1 rounded bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">安全审计</span>
+        </div>
+      </div>
+      <!-- Feature 5: Skill Market -->
+      <div class="feature-card bg-slate-800/40 backdrop-blur rounded-xl p-6 card-glow border border-slate-700/30 fade-in-up delay-2">
+        <div class="feature-icon w-12 h-12 rounded-lg bg-gradient-to-br from-amber-500/20 to-yellow-500/20 flex items-center justify-center mb-4">
+          <svg class="w-6 h-6 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg>
+        </div>
+        <h3 class="text-lg font-semibold text-white mb-2">技能交易市场</h3>
+        <p class="text-sm text-gray-400 mb-3">Agent技能发布、搜索发现、按次调用计费、用户评价评分。免费层+付费层，构建Agent能力经济。</p>
+        <div class="flex flex-wrap gap-2">
+          <span class="text-xs px-2 py-1 rounded bg-amber-500/10 text-amber-300 border border-amber-500/20">技能发布</span>
+          <span class="text-xs px-2 py-1 rounded bg-amber-500/10 text-amber-300 border border-amber-500/20">按次计费</span>
+          <span class="text-xs px-2 py-1 rounded bg-amber-500/10 text-amber-300 border border-amber-500/20">用户评价</span>
+        </div>
+      </div>
+      <!-- Feature 6: Monitor -->
+      <div class="feature-card bg-slate-800/40 backdrop-blur rounded-xl p-6 card-glow border border-slate-700/30 fade-in-up delay-3">
+        <div class="feature-icon w-12 h-12 rounded-lg bg-gradient-to-br from-pink-500/20 to-rose-500/20 flex items-center justify-center mb-4">
+          <svg class="w-6 h-6 text-pink-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/></svg>
+        </div>
+        <h3 class="text-lg font-semibold text-white mb-2">持续监控告警</h3>
+        <p class="text-sm text-gray-400 mb-3">GitHub版本变更检测、批量并发扫描(3线程)、增量扫描(7天去重)、进度回调。Agent生态的动态安全雷达。</p>
+        <div class="flex flex-wrap gap-2">
+          <span class="text-xs px-2 py-1 rounded bg-pink-500/10 text-pink-300 border border-pink-500/20">版本检测</span>
+          <span class="text-xs px-2 py-1 rounded bg-pink-500/10 text-pink-300 border border-pink-500/20">批量扫描</span>
+          <span class="text-xs px-2 py-1 rounded bg-pink-500/10 text-pink-300 border border-pink-500/20">增量更新</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Quick Demo Section -->
+<section id="demo" class="py-24 border-y border-slate-800/50">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-12 fade-in-up">
+      <h2 class="text-3xl font-bold text-white mb-4">一键体验</h2>
+      <p class="text-gray-400">选择工具，即刻试用核心安全能力</p>
+    </div>
+
+    <!-- Tabs -->
+    <div class="flex justify-center gap-2 mb-8 fade-in-up">
+      <button onclick="switchTab('scan')" id="tab-scan" class="tab-btn tab-active px-5 py-2 rounded-lg text-sm font-medium text-white transition">安全扫描</button>
+      <button onclick="switchTab('prompt')" id="tab-prompt" class="tab-btn px-5 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white bg-slate-800 transition">Prompt检测</button>
+      <button onclick="switchTab('banned')" id="tab-banned" class="tab-btn px-5 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white bg-slate-800 transition">违禁词检测</button>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="bg-slate-800/60 backdrop-blur rounded-2xl p-8 card-glow border border-slate-700/50 fade-in-up">
+      <!-- Scan Tab -->
+      <div id="content-scan" class="tab-content">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-10 h-10 rounded-lg bg-red-500/20 flex items-center justify-center"><svg class="w-5 h-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0-5.592 4.406-10.138 9.904-10.138 5.498 0 9.904 4.546 9.904 10.138 0 2.037-.545 3.946-1.5 5.578M19.5 9.75a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
+          <div><p class="font-semibold text-white">MCP工具安全扫描</p><p class="text-xs text-gray-500">输入GitHub仓库URL，获取完整安全报告</p></div>
+        </div>
+        <div class="flex gap-3">
+          <input type="text" id="scan-url" placeholder="https://github.com/owner/repo" class="flex-1 px-4 py-3 rounded-lg bg-slate-900/80 border border-slate-700 text-white placeholder-gray-500 focus:border-sky-500 focus:outline-none text-sm">
+          <button onclick="doScan()" id="scan-btn" class="px-6 py-3 rounded-lg bg-gradient-to-r from-sky-500 to-violet-500 text-white font-medium hover:from-sky-400 hover:to-violet-400 transition whitespace-nowrap">开始扫描</button>
+        </div>
+        <div id="scan-result" class="mt-4 hidden"></div>
+      </div>
+
+      <!-- Prompt Tab -->
+      <div id="content-prompt" class="tab-content hidden">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-10 h-10 rounded-lg bg-orange-500/20 flex items-center justify-center"><svg class="w-5 h-5 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg></div>
+          <div><p class="font-semibold text-white">Prompt注入检测</p><p class="text-xs text-gray-500">检测LLM输入中的恶意指令和越狱攻击</p></div>
+        </div>
+        <textarea id="prompt-input" rows="4" placeholder="输入需要检测的Prompt文本..." class="w-full px-4 py-3 rounded-lg bg-slate-900/80 border border-slate-700 text-white placeholder-gray-500 focus:border-sky-500 focus:outline-none text-sm resize-none"></textarea>
+        <div class="mt-3 flex justify-end">
+          <button onclick="doPromptCheck()" id="prompt-btn" class="px-6 py-2 rounded-lg bg-gradient-to-r from-orange-500 to-red-500 text-white font-medium hover:from-orange-400 hover:to-red-400 transition">检测</button>
+        </div>
+        <div id="prompt-result" class="mt-4 hidden"></div>
+      </div>
+
+      <!-- Banned Tab -->
+      <div id="content-banned" class="tab-content hidden">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-10 h-10 rounded-lg bg-rose-500/20 flex items-center justify-center"><svg class="w-5 h-5 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg></div>
+          <div><p class="font-semibold text-white">中文违禁词检测</p><p class="text-xs text-gray-500">覆盖微信、抖音、小红书、B站、知乎、微博6大平台</p></div>
+        </div>
+        <div class="flex flex-wrap gap-2 mb-3">
+          <button onclick="setBannedPlatform('all')" class="banned-platform px-3 py-1 rounded-lg text-xs font-medium bg-sky-600 text-white" data-pf="all">全部</button>
+          <button onclick="setBannedPlatform('wechat')" class="banned-platform px-3 py-1 rounded-lg text-xs font-medium bg-slate-700 text-gray-300 hover:bg-slate-600" data-pf="wechat">微信</button>
+          <button onclick="setBannedPlatform('douyin')" class="banned-platform px-3 py-1 rounded-lg text-xs font-medium bg-slate-700 text-gray-300 hover:bg-slate-600" data-pf="douyin">抖音</button>
+          <button onclick="setBannedPlatform('xiaohongshu')" class="banned-platform px-3 py-1 rounded-lg text-xs font-medium bg-slate-700 text-gray-300 hover:bg-slate-600" data-pf="xiaohongshu">小红书</button>
+          <button onclick="setBannedPlatform('bilibili')" class="banned-platform px-3 py-1 rounded-lg text-xs font-medium bg-slate-700 text-gray-300 hover:bg-slate-600" data-pf="bilibili">B站</button>
+        </div>
+        <textarea id="banned-input" rows="4" placeholder="输入中文文本..." class="w-full px-4 py-3 rounded-lg bg-slate-900/80 border border-slate-700 text-white placeholder-gray-500 focus:border-sky-500 focus:outline-none text-sm resize-none"></textarea>
+        <div class="mt-3 flex justify-end">
+          <button onclick="doBannedCheck()" id="banned-btn" class="px-6 py-2 rounded-lg bg-gradient-to-r from-rose-500 to-pink-500 text-white font-medium hover:from-rose-400 hover:to-pink-400 transition">检测</button>
+        </div>
+        <div id="banned-result" class="mt-4 hidden"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Ecosystem Section -->
+<section id="ecosystem" class="py-24">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-16 fade-in-up">
+      <h2 class="text-3xl font-bold text-white mb-4">生态集成</h2>
+      <p class="text-gray-400">无缝对接主流AI Agent平台与开发工具</p>
+    </div>
+    <div class="flex flex-wrap justify-center gap-8 items-center opacity-60 fade-in-up">
+      <div class="text-center">
+        <div class="w-16 h-16 rounded-xl bg-slate-800 flex items-center justify-center mb-2 border border-slate-700">
+          <span class="text-xl font-bold text-sky-400">MCP</span>
+        </div>
+        <p class="text-xs text-gray-500">Model Context<br>Protocol</p>
+      </div>
+      <div class="text-center">
+        <div class="w-16 h-16 rounded-xl bg-slate-800 flex items-center justify-center mb-2 border border-slate-700">
+          <span class="text-xl font-bold text-orange-400">Claude</span>
+        </div>
+        <p class="text-xs text-gray-500">Claude Code<br>Skills</p>
+      </div>
+      <div class="text-center">
+        <div class="w-16 h-16 rounded-xl bg-slate-800 flex items-center justify-center mb-2 border border-slate-700">
+          <span class="text-xl font-bold text-blue-400">Cursor</span>
+        </div>
+        <p class="text-xs text-gray-500">IDE<br>Extension</p>
+      </div>
+      <div class="text-center">
+        <div class="w-16 h-16 rounded-xl bg-slate-800 flex items-center justify-center mb-2 border border-slate-700">
+          <span class="text-xl font-bold text-violet-400">Dify</span>
+        </div>
+        <p class="text-xs text-gray-500">Dify<br>Plugin</p>
+      </div>
+      <div class="text-center">
+        <div class="w-16 h-16 rounded-xl bg-slate-800 flex items-center justify-center mb-2 border border-slate-700">
+          <span class="text-xl font-bold text-green-400">GitHub</span>
+        </div>
+        <p class="text-xs text-gray-500">Action /<br>Registry</p>
+      </div>
+      <div class="text-center">
+        <div class="w-16 h-16 rounded-xl bg-slate-800 flex items-center justify-center mb-2 border border-slate-700">
+          <span class="text-xl font-bold text-yellow-400">A2A</span>
+        </div>
+        <p class="text-xs text-gray-500">Agent-to-Agent<br>Protocol</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA Footer -->
+<section class="py-20 border-t border-slate-800/50">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+    <h2 class="text-3xl font-bold text-white mb-4">构建安全的AI Agent生态</h2>
+    <p class="text-gray-400 mb-8 max-w-xl mx-auto">从安全扫描到身份认证，从协作通信到技能交易——AIShield为你的Agent生态提供全链路安全保障。</p>
+    <div class="flex flex-wrap justify-center gap-4">
+      <a href="https://github.com/lm203688/aishield" target="_blank" class="px-8 py-3 rounded-xl bg-gradient-to-r from-sky-500 to-violet-500 text-white font-semibold hover:from-sky-400 hover:to-violet-400 transition shadow-lg shadow-sky-500/20">
+        GitHub 查看源码
+      </a>
+      <a href="/api/v1" class="px-8 py-3 rounded-xl bg-slate-800 text-gray-300 font-semibold hover:bg-slate-700 transition border border-slate-700">
+        API 文档
+      </a>
+      <a href="/banned-words" class="px-8 py-3 rounded-xl bg-slate-800 text-gray-300 font-semibold hover:bg-slate-700 transition border border-slate-700">
+        违禁词检测
+      </a>
+    </div>
+    <div class="mt-12 pt-8 border-t border-slate-800/50 flex flex-wrap justify-center gap-6 text-sm text-gray-500">
+      <span>AIShield v4.2</span>
+      <span>OWASP MCP Top 10 Aligned</span>
+      <span>133 Security Rules</span>
+      <span>40+ API Endpoints</span>
+      <a href="https://github.com/lm203688/aishield" class="hover:text-gray-300 transition">GitHub</a>
+    </div>
+  </div>
+</section>
+
+<script>
+// Tab switching
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    b.classList.remove('tab-active');
+    b.classList.add('bg-slate-800', 'text-gray-400');
+  });
+  document.getElementById('tab-' + tab).classList.add('tab-active');
+  document.getElementById('tab-' + tab).classList.remove('bg-slate-800', 'text-gray-400');
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+  document.getElementById('content-' + tab).classList.remove('hidden');
+}
+
+// Banned platform select
+let bannedPf = 'all';
+function setBannedPlatform(pf) {
+  bannedPf = pf;
+  document.querySelectorAll('.banned-platform').forEach(b => {
+    b.classList.remove('bg-sky-600', 'text-white');
+    b.classList.add('bg-slate-700', 'text-gray-300');
+  });
+  document.querySelector('[data-pf="' + pf + '"]').classList.remove('bg-slate-700', 'text-gray-300');
+  document.querySelector('[data-pf="' + pf + '"]').classList.add('bg-sky-600', 'text-white');
+}
+
+// API calls
+async function apiPost(path, body) {
+  const r = await fetch('/api/v1' + path, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(body)
+  });
+  return r.json();
+}
+
+function showResult(id, html) {
+  const el = document.getElementById(id);
+  el.innerHTML = html;
+  el.classList.remove('hidden');
+}
+
+async function doScan() {
+  const url = document.getElementById('scan-url').value.trim();
+  if (!url) { alert('请输入GitHub仓库URL'); return; }
+  const btn = document.getElementById('scan-btn');
+  btn.textContent = '扫描中...'; btn.disabled = true;
+  try {
+    const data = await apiPost('/audit', {source_url: url});
+    const score = data.overall_score || 0;
+    const level = data.badge_level || 'none';
+    const color = score >= 70 ? 'text-green-400' : score >= 55 ? 'text-yellow-400' : 'text-red-400';
+    const bg = score >= 70 ? 'bg-green-500/10 border-green-500/20' : score >= 55 ? 'bg-yellow-500/10 border-yellow-500/20' : 'bg-red-500/10 border-red-500/20';
+    showResult('scan-result', `
+      <div class="rounded-lg ${bg} border p-4">
+        <div class="flex items-center gap-4">
+          <div class="text-4xl font-bold ${color}">${score}</div>
+          <div>
+            <p class="font-semibold text-white">安全评分: ${level.toUpperCase()}</p>
+            <p class="text-sm text-gray-400">${data.overall_assessment || '扫描完成'}</p>
+          </div>
+        </div>
+        <div class="mt-3 flex flex-wrap gap-2">
+          ${(data.findings || []).slice(0, 3).map(f => `<span class="text-xs px-2 py-1 rounded bg-slate-900/60 text-gray-300">${f.owasp_category}: ${f.title}</span>`).join('')}
+        </div>
+      </div>
+    `);
+  } catch(e) {
+    showResult('scan-result', '<div class="rounded-lg bg-red-500/10 border border-red-500/20 p-4 text-red-300 text-sm">扫描失败: ' + e.message + '</div>');
+  }
+  btn.textContent = '开始扫描'; btn.disabled = false;
+}
+
+async function doPromptCheck() {
+  const text = document.getElementById('prompt-input').value.trim();
+  if (!text || text.length < 5) { alert('请输入至少5个字符'); return; }
+  const btn = document.getElementById('prompt-btn');
+  btn.textContent = '检测中...'; btn.disabled = true;
+  try {
+    const data = await apiPost('/prompt-check', {prompt: text});
+    const isSafe = data.risk_level === 'safe';
+    const color = isSafe ? 'text-green-400' : 'text-red-400';
+    const bg = isSafe ? 'bg-green-500/10 border-green-500/20' : 'bg-red-500/10 border-red-500/20';
+    showResult('prompt-result', `
+      <div class="rounded-lg ${bg} border p-4">
+        <p class="font-semibold ${color}">${isSafe ? '安全' : '检测到风险'} — ${data.risk_level}</p>
+        <p class="text-sm text-gray-400 mt-1">${data.message || ''}</p>
+        ${(data.findings || []).length > 0 ? '<div class="mt-2 space-y-1">' + data.findings.map(f => `<p class="text-xs text-gray-300">- ${f.title}</p>`).join('') + '</div>' : ''}
+      </div>
+    `);
+  } catch(e) {
+    showResult('prompt-result', '<div class="rounded-lg bg-red-500/10 border border-red-500/20 p-4 text-red-300 text-sm">检测失败</div>');
+  }
+  btn.textContent = '检测'; btn.disabled = false;
+}
+
+async function doBannedCheck() {
+  const text = document.getElementById('banned-input').value.trim();
+  if (!text) { alert('请输入文本'); return; }
+  const btn = document.getElementById('banned-btn');
+  btn.textContent = '检测中...'; btn.disabled = true;
+  try {
+    const data = await apiPost('/banned-words', {text: text, platform: bannedPf});
+    const hasWords = data.found_words && data.found_words.length > 0;
+    const bg = hasWords ? 'bg-red-500/10 border-red-500/20' : 'bg-green-500/10 border-green-500/20';
+    const color = hasWords ? 'text-red-400' : 'text-green-400';
+    showResult('banned-result', `
+      <div class="rounded-lg ${bg} border p-4">
+        <p class="font-semibold ${color}">${hasWords ? '发现 ' + data.found_words.length + ' 个违禁词' : '未发现违禁词'}</p>
+        ${hasWords ? '<div class="mt-2 flex flex-wrap gap-2">' + data.found_words.map(w => `<span class="text-xs px-2 py-1 rounded bg-slate-900/60 text-red-300">${w.word}</span>`).join('') + '</div>' : ''}
+        ${data.legal_reference ? '<p class="text-xs text-gray-500 mt-2">法律依据: ' + data.legal_reference + '</p>' : ''}
+      </div>
+    `);
+  } catch(e) {
+    showResult('banned-result', '<div class="rounded-lg bg-red-500/10 border border-red-500/20 p-4 text-red-300 text-sm">检测失败</div>');
+  }
+  btn.textContent = '检测'; btn.disabled = false;
+}
+</script>
+</body>
+</html>

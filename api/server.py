@@ -395,7 +395,23 @@ class AIShieldHandler(BaseHTTPRequestHandler):
             _record_usage("monitor-list", self.client_address[0])
             return
 
-        if path == "/" or path == "/api/v1":
+        # 产品首页 — HTML Landing Page
+        if path == "/":
+            html_path = os.path.join(BASE, "static", "index.html")
+            if os.path.exists(html_path):
+                with open(html_path, "r", encoding="utf-8") as f:
+                    html = f.read()
+                body = html.encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "text/html; charset=utf-8")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+                _record_usage("landing-page", self.client_address[0])
+                return
+
+        # API根节点 — JSON端点列表
+        if path == "/api/v1":
             self._send_json({
                 "name": "AIShield API",
                 "version": "4.1",
