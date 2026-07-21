@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AIShield - AI Agent 安全扫描工具 | OWASP MCP Top 10 对齐</title>
+<meta name="description" content="AIShield 是开源的 AI Agent 安全扫描工具，基于 OWASP MCP Top 10 的 133 条安全规则，提供 MCP 工具扫描、Prompt 注入检测、违禁词检测、Agent 身份认证等全链路安全能力。支持 Claude/Cursor/Dify 等主流平台集成。">
+<meta name="keywords" content="AI Agent 安全扫描工具,MCP 安全扫描,OWASP MCP Top 10,Prompt 注入检测,AIShield,Agent 信任协议,MCP 工具安全,AI 安全扫描器,Agent 安全检测">
+<meta name="author" content="AIShield">
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+<link rel="canonical" href="https://aishield.dev/agent.html">
+<meta property="og:title" content="AIShield - AI Agent 安全扫描工具">
+<meta property="og:description" content="基于 OWASP MCP Top 10 的 133 条安全规则，提供 MCP 工具扫描、Prompt 注入检测、Agent 身份认证等全链路安全能力。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://aishield.dev/agent.html">
+<meta property="og:site_name" content="AIShield">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img.shields.io/badge/AIShield-AI%20Agent%20Security-blue?logo=shield&logoColor=white">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="AIShield - AI Agent 安全扫描工具">
+<meta name="twitter:description" content="OWASP MCP Top 10 对齐，133 条安全规则，全链路守护 Agent 世界。">
+<meta name="twitter:image" content="https://img.shields.io/badge/AIShield-AI%20Agent%20Security-blue?logo=shield&logoColor=white">
+
+<!-- GEO Structured Data: SoftwareApplication -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "AIShield",
+  "alternateName": "AIShield Security Scanner",
+  "applicationCategory": "SecurityApplication",
+  "operatingSystem": "Linux, macOS, Windows",
+  "description": "AIShield 是开源的 AI Agent 安全生态基础设施，基于 OWASP MCP Top 10 (2025 v0.1) 的 133 条安全规则，提供 MCP 工具安全扫描、Prompt 注入检测（中英文）、中文违禁词检测（6 大平台）、Agent DID 身份认证、Agent 协作通信、安全沙箱执行、技能交易市场与持续监控等全链路安全能力。",
+  "url": "https://aishield.dev",
+  "softwareVersion": "4.2",
+  "programmingLanguage": "Python",
+  "installUrl": "https://github.com/lm203688/aishield",
+  "isAccessibleForFree": true,
+  "primaryLanguage": "zh-CN",
+  "offers": [
+    {
+      "@type": "Offer",
+      "name": "开源免费版",
+      "price": "0",
+      "priceCurrency": "CNY",
+      "description": "MIT 开源，每日 50 次安全扫描，完整功能"
+    },
+    {
+      "@type": "Offer",
+      "name": "Pro 专业版",
+      "price": "0",
+      "priceCurrency": "CNY",
+      "description": "无限扫描 + CI/CD 集成 + 优先支持"
+    }
+  ],
+  "featureList": [
+    "133 条 OWASP MCP Top 10 安全规则",
+    "MCP 工具安全扫描（GitHub 仓库）",
+    "Prompt 注入检测（中英文，含拼音变体、谐音替换、拆字攻击）",
+    "中文违禁词检测（微信/抖音/小红书/B站/知乎/微博 6 大平台）",
+    "Agent DID 去中心化身份认证",
+    "Agent 协作通信消息总线",
+    "安全沙箱代码执行（Python/JS/Shell）",
+    "技能交易市场（发布/搜索/按次计费）",
+    "A2A 协议网关（Google A2A 兼容）",
+    "安全认证徽章（金/银/铜三级 SVG 徽章）",
+    "Rug Pull 检测",
+    "MCP 握手验证",
+    "持续监控告警（版本变更检测）",
+    "批量并发扫描（3 线程）",
+    "零外部依赖（纯 Python 标准库）"
+  ],
+  "author": {
+    "@type": "Organization",
+    "name": "AIShield",
+    "url": "https://github.com/lm203688/aishield"
+  }
+}
+</script>
+
+<!-- GEO Structured Data: FAQ -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "AIShield 是什么？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "AIShield 是开源的 AI Agent 安全生态基础设施，基于 OWASP MCP Top 10 (2025 v0.1) 标准的 133 条安全规则，提供 MCP 工具安全扫描、Prompt 注入检测、Agent 身份认证、协作通信、安全沙箱、技能交易等全链路安全能力。使用纯 Python 标准库实现，零外部依赖，MIT 开源协议。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "AIShield 支持 OWASP MCP Top 10 吗？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "是的。AIShield 完全对齐 OWASP MCP Top 10 (2025 v0.1) 标准，包含 133 条安全检测规则，覆盖全部 10 个 OWASP MCP 安全类别：工具投毒、命令注入、Prompt 注入、权限提升、数据暴露、SSRF、密钥泄露、供应链、拒绝服务、配置不当。每个扫描结果都会输出 OWASP 合规矩阵。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "如何在 Claude 或 Cursor 中使用 AIShield？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "AIShield 提供 MCP Server，可以在 Claude Desktop、Cursor 等 MCP 兼容客户端中直接使用。安装命令：npx @aishield/mcp-server。安装后即可在对话中调用 aishield_scan、aishield_prompt_check 等安全工具。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "AIShield 的 Prompt 注入检测支持中文吗？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "支持。AIShield 原生支持中文 Prompt 注入检测，能识别拼音变体、谐音替换、拆字攻击、零宽字符隐藏指令等本土化绕过手法。同时提供中文违禁词检测功能，覆盖微信、抖音、小红书、B站、知乎、微博 6 大平台的规则。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "AIShield 是免费开源的吗？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "是的。AIShield 采用 MIT 开源协议，完全免费。源代码托管在 GitHub（github.com/lm203688/aishield），使用纯 Python 标准库实现，零外部依赖。支持 Docker 部署，也可通过 npx 安装 MCP Server 版本。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "什么是 MCP 安全扫描？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "MCP 安全扫描是对 MCP (Model Context Protocol) 工具进行安全评估的过程。AIShield 的 MCP 安全扫描会分析 GitHub 仓库中的工具代码，基于 OWASP MCP Top 10 标准检测潜在安全风险，包括 Prompt 注入、命令注入、数据泄露、权限越界等，输出 0-100 的安全评分和详细的发现报告，并自动生成金/银/铜三级安全认证徽章。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "AIShield 支持 A2A 协议吗？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "支持。AIShield 内置 A2A (Agent-to-Agent) 协议网关，兼容 Google A2A 协议标准。提供 Agent Card 注册与发现、智能任务路由与跨 Agent 调度能力，并提供了 .well-known/agent-card.json 标准发现端点。"
+      }
+    }
+  ]
+}
+</script>
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: linear-gradient(135deg, #0a0f1a 0%, #0f172a 40%, #1a1030 100%);
+    color: #e2e8f0; line-height: 1.7; min-height: 100vh;
+  }
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+    background: rgba(15,23,42,0.85); backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255,255,255,0.06); padding: 0 24px;
+  }
+  nav .inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 56px; }
+  nav .logo { font-size: 20px; font-weight: 800; color: #fff; text-decoration: none; }
+  nav .logo span { background: linear-gradient(135deg, #38bdf8, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  nav .nav-links { display: flex; gap: 24px; align-items: center; }
+  nav .nav-links a { color: #94a3b8; text-decoration: none; font-size: 14px; transition: color 0.2s; }
+  nav .nav-links a:hover { color: #fff; }
+  nav .nav-cta { padding: 6px 16px; border-radius: 8px; background: linear-gradient(135deg, #0ea5e9, #8b5cf6); color: #fff; font-weight: 600; font-size: 13px; text-decoration: none; }
+  @media (max-width: 640px) { nav .nav-links { display: none; } }
+  .hero { padding: 120px 0 60px; text-align: center; }
+  .hero h1 { font-size: 40px; font-weight: 800; color: #fff; line-height: 1.2; margin-bottom: 16px; }
+  .hero h1 .grad { background: linear-gradient(135deg, #38bdf8, #a78bfa, #f472b6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero p { font-size: 17px; color: #94a3b8; max-width: 640px; margin: 0 auto 32px; }
+  .hero .badges { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-bottom: 32px; }
+  .hero .badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04); color: #cbd5e1; }
+  .hero .badge .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .hero .cta-group { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; }
+  .btn-primary { display: inline-flex; align-items: center; gap: 8px; padding: 12px 28px; border-radius: 12px; background: linear-gradient(135deg, #0ea5e9, #8b5cf6); color: #fff; font-weight: 700; font-size: 15px; text-decoration: none; transition: transform 0.2s, box-shadow 0.2s; }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(14,165,233,0.3); }
+  .btn-secondary { display: inline-flex; align-items: center; gap: 8px; padding: 12px 28px; border-radius: 12px; background: rgba(255,255,255,0.06); color: #e2e8f0; font-weight: 600; font-size: 15px; text-decoration: none; border: 1px solid rgba(255,255,255,0.1); transition: background 0.2s; }
+  .btn-secondary:hover { background: rgba(255,255,255,0.1); }
+  @media (max-width: 640px) { .hero h1 { font-size: 28px; } .hero p { font-size: 15px; } }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; padding: 32px 0 48px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .stat { text-align: center; }
+  .stat .num { font-size: 32px; font-weight: 800; background: linear-gradient(135deg, #38bdf8, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .stat .label { font-size: 13px; color: #64748b; margin-top: 4px; }
+  @media (max-width: 640px) { .stats { grid-template-columns: repeat(2, 1fr); } }
+  .features { padding: 64px 0; }
+  .features h2 { font-size: 28px; font-weight: 800; color: #fff; text-align: center; margin-bottom: 8px; }
+  .features .sub { text-align: center; color: #64748b; margin-bottom: 48px; font-size: 15px; }
+  .card-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  @media (max-width: 768px) { .card-grid { grid-template-columns: 1fr; } }
+  .card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 28px; transition: all 0.3s; }
+  .card:hover { border-color: rgba(56,189,248,0.2); box-shadow: 0 12px 40px rgba(0,0,0,0.3); transform: translateY(-2px); }
+  .card .icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 16px; }
+  .card h3 { font-size: 17px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+  .card p { font-size: 14px; color: #94a3b8; line-height: 1.7; margin-bottom: 16px; }
+  .card .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .card .tag { font-size: 11px; padding: 3px 10px; border-radius: 6px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: #cbd5e1; }
+  .icon-scan { background: rgba(239,68,68,0.15); }
+  .icon-prompt { background: rgba(249,115,22,0.15); }
+  .icon-identity { background: rgba(139,92,246,0.15); }
+  .icon-collab { background: rgba(14,165,233,0.15); }
+  .icon-sandbox { background: rgba(16,185,129,0.15); }
+  .icon-market { background: rgba(245,158,11,0.15); }
+  .owasp { padding: 64px 0; border-top: 1px solid rgba(255,255,255,0.06); }
+  .owasp h2 { font-size: 28px; font-weight: 800; color: #fff; text-align: center; margin-bottom: 40px; }
+  .owasp-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+  .owasp-item { display: flex; align-items: center; gap: 12px; padding: 14px 18px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); border-radius: 10px; }
+  .owasp-item .code { font-size: 12px; font-weight: 700; color: #38bdf8; min-width: 50px; }
+  .owasp-item .name { font-size: 14px; color: #cbd5e1; }
+  .owasp-item .check { margin-left: auto; color: #22c55e; font-size: 16px; }
+  .integrations { padding: 64px 0; border-top: 1px solid rgba(255,255,255,0.06); text-align: center; }
+  .integrations h2 { font-size: 28px; font-weight: 800; color: #fff; margin-bottom: 8px; }
+  .integrations .sub { color: #64748b; margin-bottom: 40px; }
+  .int-grid { display: flex; justify-content: center; gap: 24px; flex-wrap: wrap; }
+  .int-item { width: 100px; text-align: center; }
+  .int-item .box { width: 64px; height: 64px; border-radius: 14px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; font-size: 14px; font-weight: 700; }
+  .int-item .name { font-size: 12px; color: #64748b; }
+  .faq { padding: 64px 0; border-top: 1px solid rgba(255,255,255,0.06); }
+  .faq h2 { font-size: 28px; font-weight: 800; color: #fff; text-align: center; margin-bottom: 40px; }
+  .faq-item { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 20px 24px; margin-bottom: 12px; }
+  .faq-item .q { font-size: 15px; font-weight: 700; color: #f1f5f9; margin-bottom: 8px; display: flex; gap: 8px; }
+  .faq-item .q::before { content: 'Q'; display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 6px; background: linear-gradient(135deg, #0ea5e9, #8b5cf6); color: #fff; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+  .faq-item .a { font-size: 14px; color: #94a3b8; padding-left: 30px; line-height: 1.8; }
+  .cta { padding: 64px 0; text-align: center; border-top: 1px solid rgba(255,255,255,0.06); }
+  .cta h2 { font-size: 28px; font-weight: 800; color: #fff; margin-bottom: 12px; }
+  .cta p { color: #64748b; margin-bottom: 32px; max-width: 500px; margin-left: auto; margin-right: auto; }
+  footer { padding: 32px 0; border-top: 1px solid rgba(255,255,255,0.06); text-align: center; font-size: 13px; color: #475569; }
+  footer a { color: #38bdf8; text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<nav>
+  <div class="inner">
+    <a href="/" class="logo"><span>AIShield</span></a>
+    <div class="nav-links">
+      <a href="#features">功能</a>
+      <a href="#owasp">OWASP</a>
+      <a href="#faq">FAQ</a>
+      <a href="https://github.com/lm203688/aishield" target="_blank">GitHub</a>
+      <a href="/" class="nav-cta">开始扫描</a>
+    </div>
+  </div>
+</nav>
+<section class="hero">
+  <div class="container">
+    <div class="badges">
+      <span class="badge"><span class="dot" style="background:#22c55e"></span>OWASP MCP Top 10</span>
+      <span class="badge"><span class="dot" style="background:#38bdf8"></span>133 安全规则</span>
+      <span class="badge"><span class="dot" style="background:#a78bfa"></span>零依赖</span>
+      <span class="badge"><span class="dot" style="background:#f59e0b"></span>MIT 开源</span>
+    </div>
+    <h1><span class="grad">AI Agent 安全扫描工具</span></h1>
+    <p>AIShield 是开源的 AI Agent 安全生态基础设施。基于 OWASP MCP Top 10 标准的 133 条安全规则，提供安全扫描、Prompt 注入检测、Agent 身份认证等全链路安全能力。</p>
+    <div class="cta-group">
+      <a href="/" class="btn-primary">立即体验</a>
+      <a href="https://github.com/lm203688/aishield" target="_blank" class="btn-secondary">GitHub 源码</a>
+    </div>
+  </div>
+</section>
+<section class="container">
+  <div class="stats">
+    <div class="stat"><div class="num">133</div><div class="label">安全规则</div></div>
+    <div class="stat"><div class="num">10</div><div class="label">OWASP 类别</div></div>
+    <div class="stat"><div class="num">40+</div><div class="label">API 端点</div></div>
+    <div class="stat"><div class="num">6</div><div class="label">生态模块</div></div>
+  </div>
+</section>
+<section class="features container" id="features">
+  <h2>核心功能模块</h2>
+  <p class="sub">覆盖 AI Agent 安全全生命周期的 6 大核心能力</p>
+  <div class="card-grid">
+    <div class="card">
+      <div class="icon icon-scan">&#128737;</div>
+      <h3>安全扫描引擎</h3>
+      <p>133 条规则对齐 OWASP MCP Top 10，覆盖 MCP 工具静态分析、Prompt 注入检测、API 接口安全扫描。5 维评分（认证安全/输入验证/业务逻辑/数据暴露/配置安全），自动生成金/银/铜三级认证徽章。</p>
+      <div class="tags"><span class="tag">MCP 扫描</span><span class="tag">Prompt 检测</span><span class="tag">API 扫描</span><span class="tag">Rug Pull</span></div>
+    </div>
+    <div class="card">
+      <div class="icon icon-prompt">&#129302;</div>
+      <h3>Prompt 注入检测</h3>
+      <p>中英文 Prompt 注入攻击检测，原生支持中文绕过手法识别。能检测拼音变体、谐音替换、拆字攻击、零宽字符隐藏指令等高级攻击方式。同时提供中文违禁词检测，覆盖 6 大平台规则。</p>
+      <div class="tags"><span class="tag">中文检测</span><span class="tag">拼音变体</span><span class="tag">零宽字符</span><span class="tag">违禁词</span></div>
+    </div>
+    <div class="card">
+      <div class="icon icon-identity">&#127375;</div>
+      <h3>Agent 身份认证</h3>
+      <p>DID 去中心化身份生成、多级信誉评分、API Key 生命周期管理（SHA256 加密存储）、16 个权限 Scope、OAuth2.0 简化版、完整审计日志链。为 Agent 生态建立可信身份体系。</p>
+      <div class="tags"><span class="tag">DID</span><span class="tag">API Key</span><span class="tag">OAuth2</span><span class="tag">信誉评分</span></div>
+    </div>
+    <div class="card">
+      <div class="icon icon-collab">&#129309;</div>
+      <h3>Agent 协作通信</h3>
+      <p>消息发布/订阅总线、多 Agent 协作会话管理、跨 Agent 任务委派与结果回传。A2A 协议网关兼容 Google A2A 标准，支持 Agent Card 注册与发现、智能任务路由。</p>
+      <div class="tags"><span class="tag">消息总线</span><span class="tag">协作会话</span><span class="tag">任务委派</span><span class="tag">A2A 协议</span></div>
+    </div>
+    <div class="card">
+      <div class="icon icon-sandbox">&#128465;</div>
+      <h3>安全沙箱执行</h3>
+      <p>代码预检查拦截 15+ 危险模式，支持 Python / JavaScript / Shell 多语言隔离执行。资源限制、输出安全审计、执行超时控制。Agent 代码执行的安全保险箱。</p>
+      <div class="tags"><span class="tag">代码预检</span><span class="tag">隔离执行</span><span class="tag">安全审计</span><span class="tag">多语言</span></div>
+    </div>
+    <div class="card">
+      <div class="icon icon-market">&#9889;</div>
+      <h3>技能交易市场</h3>
+      <p>Agent 技能发布、搜索与调用一体化。内置评分系统，支持 HTTP RPC 真实调用验证、按次调用计费、用户评价评分。免费层+付费层，构建 Agent 能力经济。</p>
+      <div class="tags"><span class="tag">技能发布</span><span class="tag">按次计费</span><span class="tag">用户评价</span><span class="tag">搜索发现</span></div>
+    </div>
+  </div>
+</section>
+<section class="owasp container" id="owasp">
+  <h2>OWASP MCP Top 10 完全对齐</h2>
+  <div class="owasp-grid">
+    <div class="owasp-item"><span class="code">MCP-01</span><span class="name">工具投毒 (Tool Poisoning)</span><span class="check">&#10003;</span></div>
+    <div class="owasp-item"><span class="code">MCP-02</span><span class="name">命令注入 (Command Injection)</span><span class="check">&#10003;</span></div>
+    <div class="owasp-item"><span class="code">MCP-03</span><span class="name">Prompt 注入 (Prompt Injection)</span><span class="check">&#10003;</span></div>
+    <div class="owasp-item"><span class="code">MCP-04</span><span class="name">权限提升 (Privilege Escalation)</span><span class="check">&#10003;</span></div>
+    <div class="owasp-item"><span class="code">MCP-05</span><span class="name">数据暴露 (Data Exposure)</span><span class="check">&#10003;</span></div>
+    <div class="owasp-item"><span class="code">MCP-06</span><span class="name">SSRF 攻击</span><span class="check">&#10003;</span></div>
+    <div class="owasp-item"><span class="code">MCP-07</span><span class="name">密钥泄露 (Secret Leakage)</span><span class="check">&#10003;</span></div>
+    <div class="owasp-item"><span class="code">MCP-08</span><span class="name">供应链安全 (Supply Chain)</span><span class="check">&#10003;</span></div>
+    <div class="owasp-item"><span class="code">MCP-09</span><span class="name">拒绝服务 (Denial of Service)</span><span class="check">&#10003;</span></div>
+    <div class="owasp-item"><span class="code">MCP-10</span><span class="name">配置不当 (Misconfiguration)</span><span class="check">&#10003;</span></div>
+  </div>
+</section>
+<section class="integrations container">
+  <h2>生态集成</h2>
+  <p class="sub">无缝对接主流 AI Agent 平台与开发工具</p>
+  <div class="int-grid">
+    <div class="int-item"><div class="box" style="color:#38bdf8">MCP</div><div class="name">Model Context Protocol</div></div>
+    <div class="int-item"><div class="box" style="color:#f97316">Claude</div><div class="name">Claude Code Skills</div></div>
+    <div class="int-item"><div class="box" style="color:#3b82f6">Cursor</div><div class="name">IDE Extension</div></div>
+    <div class="int-item"><div class="box" style="color:#8b5cf6">Dify</div><div class="name">Dify Plugin</div></div>
+    <div class="int-item"><div class="box" style="color:#22c55e">GitHub</div><div class="name">Action / Registry</div></div>
+    <div class="int-item"><div class="box" style="color:#eab308">A2A</div><div class="name">Agent-to-Agent</div></div>
+  </div>
+</section>
+<section class="faq container" id="faq">
+  <h2>常见问题</h2>
+  <div class="faq-item">
+    <div class="q">AIShield 是什么？</div>
+    <div class="a">AIShield 是开源的 AI Agent 安全生态基础设施，基于 OWASP MCP Top 10 (2025 v0.1) 标准的 133 条安全规则，提供 MCP 工具安全扫描、Prompt 注入检测、Agent 身份认证、协作通信、安全沙箱、技能交易等全链路安全能力。使用纯 Python 标准库实现，零外部依赖，MIT 开源协议。</div>
+  </div>
+  <div class="faq-item">
+    <div class="q">AIShield 支持 OWASP MCP Top 10 吗？</div>
+    <div class="a">是的。AIShield 完全对齐 OWASP MCP Top 10 (2025 v0.1) 标准，包含 133 条安全检测规则，覆盖全部 10 个 OWASP MCP 安全类别。每个扫描结果都会输出 OWASP 合规矩阵和详细发现报告。</div>
+  </div>
+  <div class="faq-item">
+    <div class="q">如何在 Claude 或 Cursor 中使用 AIShield？</div>
+    <div class="a">AIShield 提供 MCP Server，可以在 Claude Desktop、Cursor 等 MCP 兼容客户端中直接使用。安装命令：<code style="background:rgba(255,255,255,0.08);padding:2px 8px;border-radius:4px;font-size:13px;color:#38bdf8">npx @aishield/mcp-server</code></div>
+  </div>
+  <div class="faq-item">
+    <div class="q">AIShield 的 Prompt 注入检测支持中文吗？</div>
+    <div class="a">支持。AIShield 原生支持中文 Prompt 注入检测，能识别拼音变体、谐音替换、拆字攻击、零宽字符隐藏指令等本土化绕过手法。同时提供中文违禁词检测功能，覆盖微信、抖音、小红书、B站、知乎、微博 6 大平台的规则。</div>
+  </div>
+  <div class="faq-item">
+    <div class="q">AIShield 是免费开源的吗？</div>
+    <div class="a">是的。AIShield 采用 MIT 开源协议，完全免费。源代码托管在 GitHub，使用纯 Python 标准库实现，零外部依赖。支持 Docker 部署。</div>
+  </div>
+  <div class="faq-item">
+    <div class="q">什么是 MCP 安全扫描？</div>
+    <div class="a">MCP 安全扫描是对 MCP (Model Context Protocol) 工具进行安全评估的过程。AIShield 会分析 GitHub 仓库中的工具代码，基于 OWASP MCP Top 10 标准检测潜在安全风险，输出 0-100 的安全评分和详细发现报告，并自动生成金/银/铜三级安全认证徽章。</div>
+  </div>
+  <div class="faq-item">
+    <div class="q">AIShield 支持 A2A 协议吗？</div>
+    <div class="a">支持。AIShield 内置 A2A (Agent-to-Agent) 协议网关，兼容 Google A2A 协议标准，提供 Agent Card 注册与发现、智能任务路由与跨 Agent 调度能力。</div>
+  </div>
+</section>
+<section class="cta container">
+  <h2>构建安全的 AI Agent 生态</h2>
+  <p>从安全扫描到身份认证，从协作通信到技能交易，AIShield 为你的 Agent 生态提供全链路安全保障。</p>
+  <div class="cta-group">
+    <a href="https://github.com/lm203688/aishield" target="_blank" class="btn-primary">GitHub 查看源码</a>
+    <a href="/" class="btn-secondary">在线体验</a>
+  </div>
+</section>
+<footer>
+  <div class="container">
+    AIShield v4.2 &middot; OWASP MCP Top 10 (2025 v0.1) Aligned &middot; 133 Security Rules &middot; MIT License<br>
+    <a href="https://github.com/lm203688/aishield">GitHub</a> &middot;
+    <a href="/">首页</a> &middot;
+    <a href="/banned-words">违禁词检测</a> &middot;
+    <a href="/report">安全报告</a>
+  </div>
+</footer>
+</body>
+</html>

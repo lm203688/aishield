@@ -1,0 +1,38 @@
+# AIShield Robots.txt
+# https://aishield.dev
+
+User-agent: *
+Allow: /
+Allow: /agent.html
+Allow: /banned-words
+Allow: /report
+Allow: /tool/profile
+Allow: /.well-known/agent-card.json
+Allow: /sitemap.xml
+Allow: /robots.txt
+
+# 禁止抓取动态数据目录
+Disallow: /api/data/
+Disallow: /admin/
+Disallow: /api/v1/billing/
+Disallow: /api/v1/auth/
+
+# Crawl-delay（秒）
+Crawl-delay: 1
+
+# Sitemap 位置
+Sitemap: https://aishield.dev/sitemap.xml
+
+# AI 搜索引擎专属声明
+# AIShield 是一个 AI Agent 安全生态基础设施项目
+# 欢迎所有搜索引擎和 AI 爬虫抓取公开页面
+User-agent: GPTBot
+Allow: /
+User-agent: ClaudeBot
+Allow: /
+User-agent: PerplexityBot
+Allow: /
+User-agent: Applebot-Extended
+Allow: /
+User-agent: Google-Extended
+Allow: /

@@ -10,6 +10,81 @@ def init(modules_dict):
     _modules = modules_dict
 
 
+# ══════════════════════════════════════════════
+#  P0-4: Auth 认证中间件
+# ══════════════════════════════════════════════
+
+# 认证豁免路径（生成key的端点和健康检查不需要认证）
+_AUTH_EXEMPT_PATHS = {
+    "/api/v1/auth/keys",   # 生成 API Key 的端点
+    "/api/v1/health",      # 健康检查
+}
+
+
+def _require_auth(handler):
+    """
+    认证中间件：验证请求的 Authorization header 中的 API Key。
+
+    - 读取 Authorization: Bearer <api_key> header
+    - 调用 auth_provider.APIKeyManager().verify_key() 验证
+    - 验证失败返回 401（已通过 handler._send_json 发送响应）
+    - 验证成功把 agent_id 挂到 handler._auth_agent_id
+    - 对 /api/v1/auth/keys（生成 key 的端点）和 /api/v1/health 豁免认证
+    - 对其他 /api/v1/* 端点默认启用认证
+
+    Args:
+        handler: AIShieldHandler 实例
+
+    Returns:
+        bool: True 表示认证通过（或豁免），False 表示认证失败（已发送401响应）
+    """
+    parsed = urlparse(handler.path)
+    path = parsed.path
+
+    # 非 /api/v1/ 路径不启用认证
+    if not path.startswith("/api/v1/"):
+        return True
+
+    # 豁免路径
+    if path in _AUTH_EXEMPT_PATHS:
+        return True
+
+    # 获取 auth_provider 模块
+    # 如果 auth_provider 未加载，则无法验证 Key，放行避免阻断所有请求
+    mod = _modules.get("auth_provider")
+    if not mod:
+        return True
+
+    # 读取 Authorization header
+    auth_header = handler.headers.get("Authorization", "")
+    if not auth_header.startswith("Bearer "):
+        handler._send_json(
+            {"error": "Authorization header required (Bearer <api_key>)"}, 401
+        )
+        return False
+
+    api_key = auth_header[len("Bearer "):].strip()
+    if not api_key:
+        handler._send_json({"error": "Invalid API key"}, 401)
+        return False
+
+    # 验证 API Key
+    try:
+        mgr = mod.APIKeyManager()
+        key_info = mgr.verify_key(api_key)
+    except Exception as e:
+        handler._send_json({"error": f"Auth service error: {str(e)}"}, 500)
+        return False
+
+    if not key_info:
+        handler._send_json({"error": "Invalid or expired API key"}, 401)
+        return False
+
+    # 验证成功，挂载 agent_id 到 handler
+    handler._auth_agent_id = key_info.get("agent_id", "")
+    return True
+
+
 def dispatch_get(handler):
     """分发GET请求。返回True如果处理了。"""
     parsed = urlparse(handler.path)
@@ -127,7 +202,8 @@ def dispatch_get(handler):
             bus = mod.MessageBus()
             agent_id = qs.get("agent_id", [None])[0]
             channel = qs.get("channel", [None])[0]
-            result = bus.consume(agent_id=agent_id, channel=channel)
+            # P0-1 修复: consume() 签名为 subscriber_agent_id，而非 agent_id
+            result = bus.consume(subscriber_agent_id=agent_id, channel=channel)
             handler._send_json({"success": True, "messages": result if isinstance(result, list) else []})
             return True
 
@@ -243,6 +319,10 @@ def dispatch_post(handler, data):
     """分发POST请求。返回True如果处理了。"""
     parsed = urlparse(handler.path)
     path = parsed.path
+
+    # P0-4: 认证中间件 — 对 /api/v1/* POST 端点默认启用认证
+    if not _require_auth(handler):
+        return True
 
     # Identity: 注册agent
     if path == "/api/v1/identity/register":
@@ -463,8 +543,9 @@ def dispatch_post(handler, data):
         if mod:
             key_id = path[len("/api/v1/auth/keys/"):-len("/revoke")]
             mgr = mod.APIKeyManager()
-            result = mgr.revoke_key(key_id, revoked_by=data.get("revoked_by", ""))
-            handler._send_json({"success": True, **result})
+            # P0-1 修复: revoke_key() 签名为 agent_id，而非 revoked_by
+            result = mgr.revoke_key(key_id, agent_id=data.get("revoked_by", ""))
+            handler._send_json({"success": True, **result} if isinstance(result, dict) else {"success": bool(result)})
             return True
 
     # Scan: API扫描

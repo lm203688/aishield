@@ -1,0 +1,172 @@
+{
+  "name": "AIShield",
+  "version": "4.2.0",
+  "description": "AI Agent 安全生态基础设施 — OWASP MCP Top 10 对齐，133条安全规则，全链路守护Agent世界",
+  "url": "https://aishield.dev",
+  "provider": {
+    "name": "AIShield",
+    "url": "https://github.com/lm203688/aishield"
+  },
+  "capabilities": [
+    "security_scan",
+    "prompt_injection_detection",
+    "banned_words_detection",
+    "agent_identity",
+    "agent_collaboration",
+    "sandbox_execution",
+    "skill_marketplace",
+    "a2a_gateway",
+    "trust_badge",
+    "continuous_monitoring"
+  ],
+  "skills": [
+    {
+      "id": "security_scan",
+      "name": "MCP 工具安全扫描",
+      "description": "基于 OWASP MCP Top 10 的 133 条规则，对 GitHub 上的 MCP 工具/Agent 技能进行静态安全分析，输出 5 维评分和详细发现",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "source_url": {"type": "string", "description": "GitHub 仓库 URL"},
+          "tool_type": {"type": "string", "enum": ["mcp", "skill", "gpt", "prompt"], "default": "mcp"},
+          "name": {"type": "string", "description": "工具名称（可选）"}
+        },
+        "required": ["source_url"]
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "overall_score": {"type": "number", "description": "总分 0-100"},
+          "badge_level": {"type": "string", "enum": ["gold", "silver", "bronze", "none"]},
+          "findings": {"type": "array", "items": {"type": "object"}},
+          "owasp_compliance": {"type": "object"}
+        }
+      },
+      "security_certification": {
+        "level": "Level 3",
+        "score": 95,
+        "issuer": "AIShield",
+        "certificate_url": "https://github.com/lm203688/aishield"
+      }
+    },
+    {
+      "id": "prompt_injection_detection",
+      "name": "Prompt 注入检测",
+      "description": "中英文 Prompt 注入攻击检测，支持拼音变体、谐音替换、拆字攻击、零宽字符等绕过手法识别",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "prompt": {"type": "string", "description": "待检测的 Prompt 文本"}
+        },
+        "required": ["prompt"]
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "safe": {"type": "boolean"},
+          "score": {"type": "number"},
+          "risk_level": {"type": "string"},
+          "findings": {"type": "array"}
+        }
+      }
+    },
+    {
+      "id": "banned_words_detection",
+      "name": "中文违禁词检测",
+      "description": "覆盖微信、抖音、小红书、B站、知乎、微博 6 大平台规则的中文违禁词/敏感词检测",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "text": {"type": "string", "description": "待检测文本"},
+          "platform": {"type": "string", "enum": ["all", "wechat", "douyin", "xiaohongshu", "bilibili", "weibo"], "default": "all"}
+        },
+        "required": ["text"]
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "safe": {"type": "boolean"},
+          "found_count": {"type": "number"},
+          "words": {"type": "array"}
+        }
+      }
+    },
+    {
+      "id": "rug_pull_detection",
+      "name": "Rug Pull 检测",
+      "description": "检测 MCP 工具是否在近期提交中移除安全代码或添加可疑变更",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "source_url": {"type": "string", "description": "GitHub 仓库 URL"}
+        },
+        "required": ["source_url"]
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "risk_level": {"type": "string"},
+          "suspicious_changes": {"type": "array"}
+        }
+      }
+    },
+    {
+      "id": "mcp_handshake",
+      "name": "MCP 握手验证",
+      "description": "分析 MCP 配置文件，检测 npx 自动安装、敏感环境变量、超长工具描述等风险，并尝试 HTTP 握手验证",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "source_url": {"type": "string", "description": "GitHub 仓库 URL"}
+        },
+        "required": ["source_url"]
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "handshake_ok": {"type": "boolean"},
+          "warnings": {"type": "array"}
+        }
+      }
+    }
+  ],
+  "trust_score": {
+    "overall": 85,
+    "security": 90,
+    "reliability": 88,
+    "reputation": 80,
+    "activity": 85,
+    "identity": 85,
+    "methodology": "基于 OWASP MCP Top 10 (2025 v0.1) 对齐度、扫描规则覆盖率、API 可用性、开源社区活跃度综合计算"
+  },
+  "endpoints": {
+    "scan_api": "POST /api/v1/audit",
+    "prompt_check": "POST /api/v1/prompt-check",
+    "banned_words": "POST /api/v1/banned-words",
+    "rug_pull": "POST /api/v1/rug-pull",
+    "handshake": "POST /api/v1/handshake",
+    "audit": "POST /api/v1/audit",
+    "trust_query": "GET /api/v1/identity/agents",
+    "mcp_endpoint": "POST /api/v1/mcp",
+    "health": "GET /api/v1/health",
+    "stats": "GET /api/v1/stats"
+  },
+  "compliance": {
+    "owasp_mcp_top10": true,
+    "owasp_version": "2025 v0.1",
+    "a2a_protocol": true,
+    "mcp_protocol": true,
+    "mcp_protocol_version": "2025-03-26",
+    "chinese_regulations": true,
+    "rules_count": 133,
+    "owasp_categories": 10
+  },
+  "contact": {
+    "github": "https://github.com/lm203688/aishield",
+    "license": "MIT",
+    "license_url": "https://github.com/lm203688/aishield/blob/main/LICENSE",
+    "api_docs": "https://aishield.dev/api/v1"
+  },
+  "mcp_install": "npx @aishield/mcp-server",
+  "protocol_version": "a2a-2025-06"
+}

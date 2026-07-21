@@ -8,7 +8,136 @@
 <meta property="og:title" content="AIShield — AI Agent安全生态平台">
 <meta property="og:description" content="AI Agent安全扫描 · 信任生态 · 技能市场 · 安全沙箱">
 <meta property="og:type" content="website">
+<meta property="og:url" content="https://aishield.dev/">
+<meta property="og:site_name" content="AIShield">
+<meta property="og:image" content="https://img.shields.io/badge/AIShield-AI%20Agent%20Security-blue?logo=shield&logoColor=white">
+<meta property="og:locale" content="zh_CN">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="AIShield — AI Agent安全生态平台">
+<meta name="twitter:description" content="OWASP MCP Top 10对齐的AI Agent安全扫描与信任生态平台。133条规则、5维评分、Agent协作通信、安全沙箱、技能交易市场。">
+<meta name="twitter:image" content="https://img.shields.io/badge/AIShield-AI%20Agent%20Security-blue?logo=shield&logoColor=white">
+<meta name="keywords" content="AI Agent安全,MCP安全扫描,Agent信任协议,OWASP MCP Top 10,Prompt注入检测,Agent身份认证,AI安全工具,MCP工具安全,Agent协作通信,安全沙箱,技能市场,AIShield">
+<meta name="author" content="AIShield">
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+<link rel="canonical" href="https://aishield.dev/">
 <script src="https://cdn.tailwindcss.com"></script>
+
+<!-- GEO Structured Data: Organization -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "AIShield",
+  "url": "https://aishield.dev",
+  "logo": "https://img.shields.io/badge/AIShield-AI%20Agent%20Security-blue?logo=shield&logoColor=white",
+  "description": "AI Agent 安全生态基础设施。基于 OWASP MCP Top 10 的安全扫描、身份认证、协作通信、安全沙箱、技能交易与持续监控平台。",
+  "sameAs": [
+    "https://github.com/lm203688/aishield"
+  ],
+  "knowsAbout": [
+    "Python",
+    "OWASP MCP Top 10",
+    "A2A Protocol",
+    "MCP (Model Context Protocol)",
+    "AI Agent Security",
+    "Prompt Injection Detection",
+    "DID (Decentralized Identifier)",
+    "Agent Trust Protocol"
+  ],
+  "license": "https://github.com/lm203688/aishield/blob/main/LICENSE"
+}
+</script>
+
+<!-- GEO Structured Data: SoftwareApplication -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "AIShield",
+  "applicationCategory": "SecurityApplication",
+  "operatingSystem": "Linux, macOS, Windows",
+  "description": "AI Agent 安全生态基础设施。133条安全规则对齐 OWASP MCP Top 10，提供安全扫描、Prompt注入检测、违禁词检测、Agent身份认证、协作通信、安全沙箱、技能交易市场与持续监控等全链路能力。",
+  "url": "https://aishield.dev",
+  "softwareVersion": "4.2",
+  "programmingLanguage": "Python",
+  "offers": [
+    {
+      "@type": "Offer",
+      "name": "Free",
+      "price": "0",
+      "priceCurrency": "CNY",
+      "description": "开源免费版，每日50次安全扫描"
+    },
+    {
+      "@type": "Offer",
+      "name": "Pro",
+      "price": "0",
+      "priceCurrency": "CNY",
+      "description": "专业版，无限扫描 + CI/CD集成"
+    }
+  ],
+  "featureList": [
+    "133条OWASP MCP Top 10安全规则",
+    "MCP工具安全扫描",
+    "Prompt注入检测（中英文）",
+    "中文违禁词检测（6大平台）",
+    "Agent DID去中心化身份认证",
+    "Agent协作通信消息总线",
+    "安全沙箱代码执行",
+    "技能交易市场",
+    "A2A协议网关",
+    "安全认证徽章系统",
+    "Rug Pull检测",
+    "MCP握手验证",
+    "持续监控告警",
+    "API按量计费",
+    "批量并发扫描"
+  ],
+  "installUrl": "https://github.com/lm203688/aishield",
+  "isAccessibleForFree": true,
+  "primaryLanguage": "zh-CN",
+  "author": {
+    "@type": "Organization",
+    "name": "AIShield",
+    "url": "https://github.com/lm203688/aishield"
+  }
+}
+</script>
+
+<!-- GEO Structured Data: WebSite with SearchAction -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "AIShield",
+  "url": "https://aishield.dev",
+  "description": "AI Agent 安全生态基础设施 — OWASP MCP Top 10 对齐，133条安全规则，全链路守护Agent世界",
+  "inLanguage": "zh-CN",
+  "potentialAction": [
+    {
+      "@type": "SearchAction",
+      "target": "https://aishield.dev/api/v1/audit?source_url={search_term_string}",
+      "query-input": "required name=search_term_string",
+      "name": "安全扫描Agent工具"
+    },
+    {
+      "@type": "ViewAction",
+      "target": "https://aishield.dev/banned-words",
+      "name": "违禁词检测"
+    },
+    {
+      "@type": "ViewAction",
+      "target": "https://aishield.dev/report",
+      "name": "查看安全报告"
+    },
+    {
+      "@type": "ViewAction",
+      "target": "https://aishield.dev/agent.html",
+      "name": "Agent安全能力展示"
+    }
+  ]
+}
+</script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
   body { font-family: 'Inter', -apple-system, sans-serif; }

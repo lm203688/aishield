@@ -1,0 +1,1556 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AIShield - Agent 信任操作系统 | 融资商业计划书</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+/* ===== RESET & BASE ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg-primary: #0b1120;
+  --bg-card: #111827;
+  --bg-card-hover: #1e293b;
+  --border-color: #1e293b;
+  --border-accent: #334155;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --accent-blue: #38bdf8;
+  --accent-purple: #818cf8;
+  --accent-cyan: #22d3ee;
+  --accent-green: #34d399;
+  --accent-amber: #fbbf24;
+  --accent-rose: #fb7185;
+  --gradient-blue-purple: linear-gradient(135deg, #38bdf8, #818cf8);
+  --gradient-hero: linear-gradient(180deg, #0b1120 0%, #0f172a 50%, #1e1b4b 100%);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ===== SLIDE SYSTEM ===== */
+.slide {
+  width: 210mm;
+  min-height: 297mm;
+  margin: 0 auto;
+  padding: 40px 56px;
+  position: relative;
+  background: var(--bg-primary);
+  overflow: hidden;
+  page-break-after: always;
+}
+
+/* ===== TYPOGRAPHY ===== */
+.slide-tag {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--accent-blue);
+  margin-bottom: 8px;
+}
+
+.slide-title {
+  font-size: 36px;
+  font-weight: 900;
+  line-height: 1.2;
+  margin-bottom: 8px;
+  background: var(--gradient-blue-purple);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.slide-subtitle {
+  font-size: 16px;
+  color: var(--text-secondary);
+  margin-bottom: 32px;
+  font-weight: 300;
+}
+
+h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+
+/* ===== CARDS ===== */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 24px;
+  transition: border-color 0.3s;
+}
+
+.card:hover { border-color: var(--accent-blue); }
+
+.card-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.card-grid-2 { grid-template-columns: 1fr 1fr; }
+.card-grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+.card-grid-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+
+/* ===== STAT BOX ===== */
+.stat-value {
+  font-size: 32px;
+  font-weight: 900;
+  background: var(--gradient-blue-purple);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.stat-label {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.stat-prefix {
+  font-size: 18px;
+  font-weight: 700;
+  -webkit-text-fill-color: var(--accent-blue);
+}
+
+/* ===== ICON CIRCLES ===== */
+.icon-circle {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 20px;
+}
+
+.icon-circle.blue { background: rgba(56, 189, 248, 0.15); color: var(--accent-blue); }
+.icon-circle.purple { background: rgba(129, 140, 248, 0.15); color: var(--accent-purple); }
+.icon-circle.green { background: rgba(52, 211, 153, 0.15); color: var(--accent-green); }
+.icon-circle.amber { background: rgba(251, 191, 36, 0.15); color: var(--accent-amber); }
+.icon-circle.rose { background: rgba(251, 113, 133, 0.15); color: var(--accent-rose); }
+.icon-circle.cyan { background: rgba(34, 211, 238, 0.15); color: var(--accent-cyan); }
+
+/* ===== BADGE ===== */
+.badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.badge-blue { background: rgba(56, 189, 248, 0.15); color: var(--accent-blue); border: 1px solid rgba(56, 189, 248, 0.3); }
+.badge-purple { background: rgba(129, 140, 248, 0.15); color: var(--accent-purple); border: 1px solid rgba(129, 140, 248, 0.3); }
+.badge-green { background: rgba(52, 211, 153, 0.15); color: var(--accent-green); border: 1px solid rgba(52, 211, 153, 0.3); }
+.badge-amber { background: rgba(251, 191, 36, 0.15); color: var(--accent-amber); border: 1px solid rgba(251, 191, 36, 0.3); }
+
+/* ===== TABLE ===== */
+.compare-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+
+.compare-table th {
+  text-align: left;
+  padding: 10px 12px;
+  color: var(--text-muted);
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border-accent);
+}
+
+.compare-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-secondary);
+}
+
+.compare-table tr:last-child td { border-bottom: none; }
+
+.compare-table .highlight-row td {
+  background: rgba(56, 189, 248, 0.05);
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.check { color: var(--accent-green); font-weight: 700; }
+.cross { color: var(--accent-rose); opacity: 0.5; }
+.partial { color: var(--accent-amber); }
+
+/* ===== PROGRESS BAR ===== */
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: var(--bg-card);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 4px;
+  background: var(--gradient-blue-purple);
+}
+
+/* ===== TIMELINE ===== */
+.timeline { position: relative; padding-left: 28px; }
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 8px;
+  top: 6px;
+  bottom: 6px;
+  width: 2px;
+  background: var(--border-accent);
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 24px;
+}
+
+.timeline-item:last-child { margin-bottom: 0; }
+
+.timeline-dot {
+  position: absolute;
+  left: -24px;
+  top: 4px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--accent-blue);
+  background: var(--bg-primary);
+}
+
+.timeline-item.active .timeline-dot {
+  background: var(--accent-blue);
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.5);
+}
+
+/* ===== SEPARATOR ===== */
+.page-divider {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border-accent), transparent);
+  margin: 0 auto;
+}
+
+/* ===== PAGE FOOTER ===== */
+.page-footer {
+  position: absolute;
+  bottom: 20px;
+  left: 56px;
+  right: 56px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+}
+
+/* ===== UTILITY ===== */
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.gap-8 { gap: 8px; }
+.gap-12 { gap: 12px; }
+.gap-16 { gap: 16px; }
+.gap-24 { gap: 24px; }
+.gap-32 { gap: 32px; }
+.mb-8 { margin-bottom: 8px; }
+.mb-12 { margin-bottom: 12px; }
+.mb-16 { margin-bottom: 16px; }
+.mb-24 { margin-bottom: 24px; }
+.mb-32 { margin-bottom: 32px; }
+.mt-auto { margin-top: auto; }
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+.w-full { width: 100%; }
+.flex-1 { flex: 1; }
+
+/* ===== P1 COVER SPECIAL ===== */
+.cover-slide {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  background: var(--gradient-hero);
+  position: relative;
+}
+
+.cover-slide::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(ellipse at 30% 20%, rgba(56, 189, 248, 0.08) 0%, transparent 50%),
+              radial-gradient(ellipse at 70% 80%, rgba(129, 140, 248, 0.06) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.cover-logo {
+  font-size: 56px;
+  font-weight: 900;
+  letter-spacing: -1px;
+  background: var(--gradient-blue-purple);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 16px;
+  position: relative;
+}
+
+.cover-tagline {
+  font-size: 22px;
+  font-weight: 300;
+  color: var(--text-secondary);
+  max-width: 600px;
+  margin-bottom: 48px;
+  position: relative;
+}
+
+.cover-badge-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 64px;
+  position: relative;
+}
+
+.cover-confidential {
+  position: absolute;
+  bottom: 40px;
+  right: 56px;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--accent-rose);
+  border: 1px solid rgba(251, 113, 133, 0.3);
+  padding: 4px 12px;
+  border-radius: 4px;
+}
+
+.cover-date {
+  position: absolute;
+  bottom: 40px;
+  left: 56px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* ===== DONUT CHART (CSS) ===== */
+.donut-chart {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.donut-chart .inner {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+  z-index: 1;
+}
+
+/* ===== BAR CHART ===== */
+.bar-chart { display: flex; align-items: flex-end; gap: 16px; height: 160px; }
+
+.bar-col { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; }
+
+.bar-fill {
+  width: 100%;
+  max-width: 48px;
+  border-radius: 6px 6px 0 0;
+  background: var(--gradient-blue-purple);
+  transition: height 0.5s;
+  min-height: 4px;
+}
+
+.bar-fill.dim { background: var(--border-accent); }
+
+.bar-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.bar-value {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* ===== LIST ===== */
+.check-list { list-style: none; }
+
+.check-list li {
+  padding: 6px 0;
+  padding-left: 24px;
+  position: relative;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.check-list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 13px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-blue);
+}
+
+/* ===== ARCHITECTURE DIAGRAM ===== */
+.arch-layer {
+  border-radius: 12px;
+  padding: 20px 24px;
+  text-align: center;
+  position: relative;
+}
+
+.arch-layer-top {
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.12), rgba(56, 189, 248, 0.04));
+  border: 1px solid rgba(56, 189, 248, 0.25);
+}
+
+.arch-layer-mid {
+  background: linear-gradient(135deg, rgba(129, 140, 248, 0.12), rgba(129, 140, 248, 0.04));
+  border: 1px solid rgba(129, 140, 248, 0.25);
+}
+
+.arch-layer-bottom {
+  background: linear-gradient(135deg, rgba(52, 211, 153, 0.12), rgba(52, 211, 153, 0.04));
+  border: 1px solid rgba(52, 211, 153, 0.25);
+}
+
+.arch-connector {
+  width: 2px;
+  height: 16px;
+  margin: 0 auto;
+  background: var(--border-accent);
+  position: relative;
+}
+
+.arch-connector::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: -3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-blue);
+}
+
+.arch-modules {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.arch-module {
+  padding: 4px 14px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.arch-module.blue { background: rgba(56, 189, 248, 0.1); color: var(--accent-blue); border: 1px solid rgba(56, 189, 248, 0.2); }
+.arch-module.purple { background: rgba(129, 140, 248, 0.1); color: var(--accent-purple); border: 1px solid rgba(129, 140, 248, 0.2); }
+.arch-module.green { background: rgba(52, 211, 153, 0.1); color: var(--accent-green); border: 1px solid rgba(52, 211, 153, 0.2); }
+
+/* ===== MOAT DIAGRAM ===== */
+.moat-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+}
+
+.moat-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--gradient-blue-purple);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* ===== ALLOCATION PIE (CSS conic) ===== */
+.allocation-chart {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.allocation-chart .inner-hole {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background: var(--bg-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  z-index: 1;
+}
+
+/* ===== PRINT STYLES ===== */
+@media print {
+  body { background: white; color: #111; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .slide {
+    background: white;
+    page-break-after: always;
+    box-shadow: none;
+    border: none;
+    padding: 30px 40px;
+  }
+  .cover-slide { background: #0b1120 !important; color: white !important; }
+  .cover-slide * { color: inherit !important; }
+  .page-divider { display: none; }
+  .slide-title {
+    -webkit-text-fill-color: #2563eb !important;
+    color: #2563eb !important;
+  }
+  .stat-value {
+    -webkit-text-fill-color: #2563eb !important;
+    color: #2563eb !important;
+  }
+  .card { background: #f8fafc !important; border-color: #e2e8f0 !important; }
+  .badge-blue { background: #eff6ff !important; color: #2563eb !important; }
+  .badge-purple { background: #f5f3ff !important; color: #7c3aed !important; }
+  .badge-green { background: #ecfdf5 !important; color: #059669 !important; }
+  .badge-amber { background: #fffbeb !important; color: #d97706 !important; }
+  .compare-table .highlight-row td { background: #f0f9ff !important; }
+  .text-muted, .text-secondary { color: #64748b !important; }
+  .progress-fill { background: #3b82f6 !important; }
+  .moat-item { background: #f8fafc !important; border-color: #e2e8f0 !important; }
+  .allocation-chart .inner-hole { background: white !important; }
+  .donut-chart .inner { background: #f8fafc !important; }
+  .cover-confidential { color: #dc2626 !important; border-color: #dc2626 !important; }
+  .page-footer { color: #94a3b8 !important; }
+  .arch-layer { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .allocation-chart { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+
+@media screen {
+  .slide {
+    box-shadow: 0 0 80px rgba(56, 189, 248, 0.03);
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================ -->
+<!-- P1 - COVER -->
+<!-- ============================================================ -->
+<div class="slide cover-slide">
+  <div class="cover-logo">AIShield</div>
+  <div class="cover-tagline">Agent 信任操作系统 &mdash; AI Agent 安全生态基础设施平台</div>
+  <div class="cover-badge-row">
+    <span class="badge badge-blue">OWASP MCP Top 10</span>
+    <span class="badge badge-purple">133 条安全规则</span>
+    <span class="badge badge-green">零依赖架构</span>
+    <span class="badge badge-amber">43 API 端点</span>
+  </div>
+  <div style="margin-top: 12px; position: relative;">
+    <div style="font-size: 14px; color: var(--text-muted); font-weight: 300;">种子轮融资 &middot; 商业计划书</div>
+  </div>
+  <div class="cover-date">2026 年 7 月</div>
+  <div class="cover-confidential">CONFIDENTIAL</div>
+</div>
+
+<div class="page-divider"></div>
+
+<!-- ============================================================ -->
+<!-- P2 - 痛点与机会 -->
+<!-- ============================================================ -->
+<div class="slide">
+  <div class="slide-tag">PROBLEM &amp; OPPORTUNITY</div>
+  <div class="slide-title">Agent 经济的三个核心问题</div>
+  <div class="slide-subtitle">AI Agent 生态爆发前夜，安全、连接、交易三大基础设施缺失</div>
+
+  <div class="card-grid card-grid-3 mb-24">
+    <!-- Problem 1 -->
+    <div class="card" style="border-top: 2px solid var(--accent-rose);">
+      <div class="flex items-center gap-12 mb-16">
+        <div class="icon-circle rose">&#x1F6E1;</div>
+        <h3>安全真空</h3>
+      </div>
+      <ul class="check-list">
+        <li>Agent 可执行任意系统命令，无沙箱隔离</li>
+        <li>MCP 协议缺乏安全扫描标准</li>
+        <li>Prompt 注入、数据泄露、越权调用频发</li>
+        <li>企业不敢让 Agent 触及核心业务</li>
+      </ul>
+    </div>
+    <!-- Problem 2 -->
+    <div class="card" style="border-top: 2px solid var(--accent-amber);">
+      <div class="flex items-center gap-12 mb-16">
+        <div class="icon-circle amber">&#x1F517;</div>
+        <h3>连接碎片</h3>
+      </div>
+      <ul class="check-list">
+        <li>Agent 间通信无统一身份与信任机制</li>
+        <li>多平台协议割裂（MCP/A2P/OpenAPI）</li>
+        <li>缺乏 Agent 能力发现与互操作标准</li>
+        <li>开发者重复造轮子</li>
+      </ul>
+    </div>
+    <!-- Problem 3 -->
+    <div class="card" style="border-top: 2px solid var(--accent-blue);">
+      <div class="flex items-center gap-12 mb-16">
+        <div class="icon-circle blue">&#x1F4B0;</div>
+        <h3>交易缺位</h3>
+      </div>
+      <ul class="check-list">
+        <li>Agent 技能/服务无安全认证市场</li>
+        <li>技能质量参差不齐，买家无法评估</li>
+        <li>缺乏支付与计费基础设施</li>
+        <li>中文合规市场完全空白</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card" style="background: linear-gradient(135deg, rgba(56, 189, 248, 0.06), rgba(129, 140, 248, 0.06)); border-color: rgba(56, 189, 248, 0.2);">
+    <div class="flex items-center justify-between">
+      <div>
+        <div style="font-size: 14px; font-weight: 700; color: var(--accent-blue); margin-bottom: 4px;">市场窗口</div>
+        <div style="font-size: 13px; color: var(--text-secondary);">全球 AI Agent 市场预计 2026 年达 <span style="font-weight: 700; color: var(--text-primary);">$650B+</span>，安全基础设施缺口巨大</div>
+      </div>
+      <div style="text-align: right;">
+        <div style="font-size: 28px; font-weight: 900; color: var(--accent-blue);">12-18</div>
+        <div style="font-size: 11px; color: var(--text-muted);">个月黄金窗口期</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <span>AIShield &middot; 融资商业计划书</span>
+    <span>02 / 10</span>
+  </div>
+</div>
+
+<div class="page-divider"></div>
+
+<!-- ============================================================ -->
+<!-- P3 - 解决方案 -->
+<!-- ============================================================ -->
+<div class="slide">
+  <div class="slide-tag">SOLUTION</div>
+  <div class="slide-title">AIShield 产品架构</div>
+  <div class="slide-subtitle">三层架构：安全引擎 + 信任协议 + 交易市场，构建 Agent 信任操作系统</div>
+
+  <!-- Architecture Diagram -->
+  <div style="max-width: 680px; margin: 0 auto 24px;">
+    <div class="arch-layer arch-layer-top">
+      <div style="font-size: 16px; font-weight: 700; color: var(--accent-blue); margin-bottom: 2px;">Layer 1 &mdash; 安全引擎 Security Engine</div>
+      <div class="arch-modules">
+        <span class="arch-module blue">MCP 安全扫描</span>
+        <span class="arch-module blue">API 安全审计</span>
+        <span class="arch-module blue">Prompt 注入检测</span>
+        <span class="arch-module blue">沙箱隔离</span>
+        <span class="arch-module blue">RASP 监控</span>
+      </div>
+    </div>
+    <div class="arch-connector"></div>
+    <div class="arch-layer arch-layer-mid">
+      <div style="font-size: 16px; font-weight: 700; color: var(--accent-purple); margin-bottom: 2px;">Layer 2 &mdash; 信任协议 Trust Protocol</div>
+      <div class="arch-modules">
+        <span class="arch-module purple">DID 身份</span>
+        <span class="arch-module purple">信誉评分</span>
+        <span class="arch-module purple">合规审查</span>
+        <span class="arch-module purple">技能认证</span>
+        <span class="arch-module purple">Trust Standard</span>
+      </div>
+    </div>
+    <div class="arch-connector" style="background: var(--border-accent);"></div>
+    <div class="arch-layer arch-layer-bottom">
+      <div style="font-size: 16px; font-weight: 700; color: var(--accent-green); margin-bottom: 2px;">Layer 3 &mdash; 交易市场 Marketplace</div>
+      <div class="arch-modules">
+        <span class="arch-module green">技能市场</span>
+        <span class="arch-module green">托管支付</span>
+        <span class="arch-module green">需求匹配</span>
+        <span class="arch-module green">认证徽章</span>
+        <span class="arch-module green">API 计费</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Key Stats Row -->
+  <div class="card-grid card-grid-4">
+    <div class="card text-center">
+      <div class="stat-value">133</div>
+      <div class="stat-label">安全扫描规则</div>
+    </div>
+    <div class="card text-center">
+      <div class="stat-value">43</div>
+      <div class="stat-label">API 端点</div>
+    </div>
+    <div class="card text-center">
+      <div class="stat-value">0</div>
+      <div class="stat-label">外部依赖</div>
+    </div>
+    <div class="card text-center">
+      <div class="stat-value">100%</div>
+      <div class="stat-label">纯 Python 实现</div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <span>AIShield &middot; 融资商业计划书</span>
+    <span>03 / 10</span>
+  </div>
+</div>
+
+<div class="page-divider"></div>
+
+<!-- ============================================================ -->
+<!-- P4 - 市场规模 -->
+<!-- ============================================================ -->
+<div class="slide">
+  <div class="slide-tag">MARKET SIZE</div>
+  <div class="slide-title">市场规模与增长趋势</div>
+  <div class="slide-subtitle">全球 AI 安全市场高速增长，Agent 安全细分赛道即将爆发</div>
+
+  <!-- TAM / SAM / SOM -->
+  <div class="card-grid card-grid-3 mb-24">
+    <div class="card text-center" style="border-color: rgba(56, 189, 248, 0.3);">
+      <div style="font-size: 11px; letter-spacing: 2px; color: var(--accent-blue); margin-bottom: 8px;">TAM</div>
+      <div class="stat-value" style="font-size: 40px;">$180B</div>
+      <div class="stat-label">全球 AI 安全市场 (2026)</div>
+      <div style="margin-top: 12px;">
+        <svg width="120" height="120" viewBox="0 0 120 120">
+          <circle cx="60" cy="60" r="50" fill="none" stroke="#1e293b" stroke-width="8"/>
+          <circle cx="60" cy="60" r="50" fill="none" stroke="#38bdf8" stroke-width="8"
+                  stroke-dasharray="314" stroke-dashoffset="0"
+                  transform="rotate(-90 60 60)" opacity="0.3"/>
+          <circle cx="60" cy="60" r="50" fill="none" stroke="#38bdf8" stroke-width="8"
+                  stroke-dasharray="314" stroke-dashoffset="0"
+                  transform="rotate(-90 60 60)"/>
+          <text x="60" y="56" text-anchor="middle" fill="#38bdf8" font-size="16" font-weight="700">100%</text>
+          <text x="60" y="72" text-anchor="middle" fill="#94a3b8" font-size="10">Total</text>
+        </svg>
+      </div>
+    </div>
+    <div class="card text-center" style="border-color: rgba(129, 140, 248, 0.3);">
+      <div style="font-size: 11px; letter-spacing: 2px; color: var(--accent-purple); margin-bottom: 8px;">SAM</div>
+      <div class="stat-value" style="font-size: 40px;">$8-12B</div>
+      <div class="stat-label">Agent 安全细分市场</div>
+      <div style="margin-top: 12px;">
+        <svg width="120" height="120" viewBox="0 0 120 120">
+          <circle cx="60" cy="60" r="50" fill="none" stroke="#1e293b" stroke-width="8"/>
+          <circle cx="60" cy="60" r="50" fill="none" stroke="#818cf8" stroke-width="8"
+                  stroke-dasharray="314" stroke-dashoffset="0"
+                  transform="rotate(-90 60 60)" opacity="0.3"/>
+          <circle cx="60" cy="60" r="50" fill="none" stroke="#818cf8" stroke-width="8"
+                  stroke-dasharray="314" stroke-dashoffset="251"
+                  transform="rotate(-90 60 60)"/>
+          <text x="60" y="56" text-anchor="middle" fill="#818cf8" font-size="16" font-weight="700">5.6%</text>
+          <text x="60" y="72" text-anchor="middle" fill="#94a3b8" font-size="10">Agent</text>
+        </svg>
+      </div>
+    </div>
+    <div class="card text-center" style="border-color: rgba(52, 211, 153, 0.3);">
+      <div style="font-size: 11px; letter-spacing: 2px; color: var(--accent-green); margin-bottom: 8px;">SOM</div>
+      <div class="stat-value" style="font-size: 40px;">$50-100M</div>
+      <div class="stat-label">12 个月可触达市场</div>
+      <div style="margin-top: 12px;">
+        <svg width="120" height="120" viewBox="0 0 120 120">
+          <circle cx="60" cy="60" r="50" fill="none" stroke="#1e293b" stroke-width="8"/>
+          <circle cx="60" cy="60" r="50" fill="none" stroke="#34d399" stroke-width="8"
+                  stroke-dasharray="314" stroke-dashoffset="0"
+                  transform="rotate(-90 60 60)" opacity="0.3"/>
+          <circle cx="60" cy="60" r="50" fill="none" stroke="#34d399" stroke-width="8"
+                  stroke-dasharray="314" stroke-dashoffset="309"
+                  transform="rotate(-90 60 60)"/>
+          <text x="60" y="56" text-anchor="middle" fill="#34d399" font-size="16" font-weight="700">0.6%</text>
+          <text x="60" y="72" text-anchor="middle" fill="#94a3b8" font-size="10">Reach</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- Growth Bar Chart -->
+  <div class="card">
+    <div style="font-size: 13px; font-weight: 700; margin-bottom: 16px;">AI 安全市场增长趋势 (单位: $B)</div>
+    <div class="bar-chart">
+      <div class="bar-col">
+        <div class="bar-value">$24</div>
+        <div class="bar-fill dim" style="height: 32px;"></div>
+        <div class="bar-label">2023</div>
+      </div>
+      <div class="bar-col">
+        <div class="bar-value">$42</div>
+        <div class="bar-fill dim" style="height: 56px;"></div>
+        <div class="bar-label">2024</div>
+      </div>
+      <div class="bar-col">
+        <div class="bar-value">$78</div>
+        <div class="bar-fill dim" style="height: 104px;"></div>
+        <div class="bar-label">2025</div>
+      </div>
+      <div class="bar-col">
+        <div class="bar-value">$180</div>
+        <div class="bar-fill" style="height: 160px;"></div>
+        <div class="bar-label" style="color: var(--accent-blue); font-weight: 700;">2026</div>
+      </div>
+      <div class="bar-col">
+        <div class="bar-value">$350</div>
+        <div class="bar-fill" style="height: 140px; background: linear-gradient(135deg, rgba(56,189,248,0.3), rgba(129,140,248,0.3)); border: 1px dashed var(--accent-blue);"></div>
+        <div class="bar-label" style="color: var(--text-muted);">2027E</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <span>AIShield &middot; 融资商业计划书</span>
+    <span>04 / 10</span>
+  </div>
+</div>
+
+<div class="page-divider"></div>
+
+<!-- ============================================================ -->
+<!-- P5 - 竞品分析 -->
+<!-- ============================================================ -->
+<div class="slide">
+  <div class="slide-tag">COMPETITIVE LANDSCAPE</div>
+  <div class="slide-title">竞品分析与差异化定位</div>
+  <div class="slide-subtitle">AIShield 是唯一覆盖安全 + 连接 + 交易三层的平台</div>
+
+  <!-- Comparison Table -->
+  <div class="card mb-24" style="padding: 0; overflow: hidden;">
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th style="width: 18%;">维度</th>
+          <th style="width: 16%;">MS Agent Gov</th>
+          <th style="width: 14%;">Google A2A</th>
+          <th style="width: 12%;">e2b</th>
+          <th style="width: 14%;">腾讯 CubeSandbox</th>
+          <th style="width: 12%;">skills.sh</th>
+          <th style="width: 14%; color: var(--accent-blue);">AIShield</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="font-weight: 600; color: var(--text-primary);">安全扫描</td>
+          <td><span class="partial">&#9679; 仅治理</span></td>
+          <td><span class="cross">&times;</span></td>
+          <td><span class="cross">&times;</span></td>
+          <td><span class="cross">&times;</span></td>
+          <td><span class="cross">&times;</span></td>
+          <td><span class="check">&#10003; 133 规则</span></td>
+        </tr>
+        <tr>
+          <td style="font-weight: 600; color: var(--text-primary);">身份/DID</td>
+          <td><span class="cross">&times;</span></td>
+          <td><span class="cross">&times;</span></td>
+          <td><span class="cross">&times;</span></td>
+          <td><span class="cross">&times;</span></td>
+          <td><span class="cross">&times;</span></td>
+          <td><span class="check">&#10003; 链上 DID</span></td>
+        </tr>
+        <tr>
+          <td style="font-weight: 600; color: var(--text-primary);">技能市场</td>
+          <td><span class="cross">&times;</span></td>
+          <td><span class="cross">&times;</span></td>
+          <td><span class="cross">&times;</span></td>
+          <td><span class="cross">&times;</span></td>
+          <td><span class="partial">&#9679; 无认证</span></td>
+          <td><span class="check">&#10003; 安全认证</span></td>
+        </tr>
+        <tr>
+          <td style="font-weight: 600; color: var(--text-primary);">沙箱执行</td>
+          <td><span class="cross">&times;</span></td>
+          <td><span class="cross">&times;</span></td>
+          <td><span class="check">&#10003;</span></td>
+          <td><span class="check">&#10003;</span></td>
+          <td><span class="cross">&times;</span></td>
+          <td><span class="check">&#10003; 容器沙箱</span></td>
+        </tr>
+        <tr>
+          <td style="font-weight: 600; color: var(--text-primary);">支付交易</td>
+          <td><span class="cross">&times;</span></td>
+          <td><span class="cross">&times;</span></td>
+          <td><span class="cross">&times;</span></td>
+          <td><span class="cross">&times;</span></td>
+          <td><span class="cross">&times;</span></td>
+          <td><span class="check">&#10003; 托管支付</span></td>
+        </tr>
+        <tr>
+          <td style="font-weight: 600; color: var(--text-primary);">中文合规</td>
+          <td><span class="cross">&times;</span></td>
+          <td><span class="cross">&times;</span></td>
+          <td><span class="cross">&times;</span></td>
+          <td><span class="partial">&#9679; 部分</span></td>
+          <td><span class="cross">&times;</span></td>
+          <td><span class="check">&#10003; 深度合规</span></td>
+        </tr>
+        <tr>
+          <td style="font-weight: 600; color: var(--text-primary);">开源</td>
+          <td><span class="cross">&times;</span></td>
+          <td><span class="check">&#10003; 协议</span></td>
+          <td><span class="check">&#10003;</span></td>
+          <td><span class="cross">&times;</span></td>
+          <td><span class="check">&#10003;</span></td>
+          <td><span class="check">&#10003; Open Core</span></td>
+        </tr>
+        <tr>
+          <td style="font-weight: 600; color: var(--text-primary);">中立性</td>
+          <td><span class="cross">&times; 厂商锁定</span></td>
+          <td><span class="cross">&times; 厂商锁定</span></td>
+          <td><span class="partial">&#9679; 云依赖</span></td>
+          <td><span class="cross">&times; 厂商锁定</span></td>
+          <td><span class="partial">&#9679; 平台</span></td>
+          <td><span class="check">&#10003; 云/模型无关</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Differentiator Cards -->
+  <div class="card-grid card-grid-4">
+    <div class="card text-center">
+      <div style="font-size: 22px; margin-bottom: 6px;">&#x1F6E1; + &#x1F517; + &#x1F4B3;</div>
+      <div style="font-size: 12px; font-weight: 700; margin-bottom: 4px;">三位一体</div>
+      <div style="font-size: 11px; color: var(--text-muted);">安全+连接+交易</div>
+    </div>
+    <div class="card text-center">
+      <div style="font-size: 22px; margin-bottom: 6px;">&#x2601; &#x1F916;</div>
+      <div style="font-size: 12px; font-weight: 700; margin-bottom: 4px;">中立定位</div>
+      <div style="font-size: 11px; color: var(--text-muted);">云无关 / 模型无关</div>
+    </div>
+    <div class="card text-center">
+      <div style="font-size: 22px; margin-bottom: 6px;">&#x1F1E8;&#x1F1F3;</div>
+      <div style="font-size: 12px; font-weight: 700; margin-bottom: 4px;">合规壁垒</div>
+      <div style="font-size: 11px; color: var(--text-muted);">违禁词 / 备案 / 数安法</div>
+    </div>
+    <div class="card text-center">
+      <div style="font-size: 22px; margin-bottom: 6px;">&#x1F4E6;</div>
+      <div style="font-size: 12px; font-weight: 700; margin-bottom: 4px;">零依赖</div>
+      <div style="font-size: 11px; color: var(--text-muted);">纯 Python 轻量嵌入</div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <span>AIShield &middot; 融资商业计划书</span>
+    <span>05 / 10</span>
+  </div>
+</div>
+
+<div class="page-divider"></div>
+
+<!-- ============================================================ -->
+<!-- P6 - 产品演示 -->
+<!-- ============================================================ -->
+<div class="slide">
+  <div class="slide-tag">PRODUCT DEMO</div>
+  <div class="slide-title">核心功能与工作流</div>
+  <div class="slide-subtitle">基于 43 个 API 端点的完整 Agent 信任生命周期</div>
+
+  <!-- Workflow -->
+  <div class="card mb-24" style="padding: 28px;">
+    <div style="font-size: 13px; font-weight: 700; margin-bottom: 20px; color: var(--accent-blue);">Agent 信任生命周期</div>
+    <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+      <div class="text-center" style="flex: 1;">
+        <div style="width: 48px; height: 48px; margin: 0 auto 8px; border-radius: 12px; background: rgba(56, 189, 248, 0.15); display: flex; align-items: center; justify-content: center; font-size: 20px;">&#x1F4CB;</div>
+        <div style="font-size: 11px; font-weight: 600;">注册认证</div>
+        <div style="font-size: 9px; color: var(--text-muted); margin-top: 2px;">DID 身份 + 基础信息</div>
+      </div>
+      <div style="color: var(--accent-blue); font-size: 16px;">&#x2192;</div>
+      <div class="text-center" style="flex: 1;">
+        <div style="width: 48px; height: 48px; margin: 0 auto 8px; border-radius: 12px; background: rgba(129, 140, 248, 0.15); display: flex; align-items: center; justify-content: center; font-size: 20px;">&#x1F50E;</div>
+        <div style="font-size: 11px; font-weight: 600;">安全扫描</div>
+        <div style="font-size: 9px; color: var(--text-muted); margin-top: 2px;">133 规则自动检测</div>
+      </div>
+      <div style="color: var(--accent-blue); font-size: 16px;">&#x2192;</div>
+      <div class="text-center" style="flex: 1;">
+        <div style="width: 48px; height: 48px; margin: 0 auto 8px; border-radius: 12px; background: rgba(52, 211, 153, 0.15); display: flex; align-items: center; justify-content: center; font-size: 20px;">&#x1F3C5;</div>
+        <div style="font-size: 11px; font-weight: 600;">信任评分</div>
+        <div style="font-size: 9px; color: var(--text-muted); margin-top: 2px;">信誉图谱 + 徽章</div>
+      </div>
+      <div style="color: var(--accent-blue); font-size: 16px;">&#x2192;</div>
+      <div class="text-center" style="flex: 1;">
+        <div style="width: 48px; height: 48px; margin: 0 auto 8px; border-radius: 12px; background: rgba(251, 191, 36, 0.15); display: flex; align-items: center; justify-content: center; font-size: 20px;">&#x1F6D2;</div>
+        <div style="font-size: 11px; font-weight: 600;">上架交易</div>
+        <div style="font-size: 9px; color: var(--text-muted); margin-top: 2px;">技能市场 + 托管支付</div>
+      </div>
+      <div style="color: var(--accent-blue); font-size: 16px;">&#x2192;</div>
+      <div class="text-center" style="flex: 1;">
+        <div style="width: 48px; height: 48px; margin: 0 auto 8px; border-radius: 12px; background: rgba(251, 113, 133, 0.15); display: flex; align-items: center; justify-content: center; font-size: 20px;">&#x1F4CA;</div>
+        <div style="font-size: 11px; font-weight: 600;">持续监控</div>
+        <div style="font-size: 9px; color: var(--text-muted); margin-top: 2px;">RASP + AI 自动修复</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- API Endpoint Categories -->
+  <div class="card-grid card-grid-3">
+    <div class="card">
+      <div class="flex items-center gap-12 mb-12">
+        <div class="icon-circle blue">&#x1F510;</div>
+        <div>
+          <div style="font-size: 13px; font-weight: 700;">安全扫描</div>
+          <div style="font-size: 10px; color: var(--text-muted);">Security Scanning</div>
+        </div>
+      </div>
+      <ul class="check-list" style="font-size: 11px;">
+        <li>MCP 协议安全扫描</li>
+        <li>API 端点安全审计</li>
+        <li>Prompt 注入检测</li>
+        <li>OWASP Top 10 覆盖</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="flex items-center gap-12 mb-12">
+        <div class="icon-circle purple">&#x1F4F1;</div>
+        <div>
+          <div style="font-size: 13px; font-weight: 700;">身份认证</div>
+          <div style="font-size: 10px; color: var(--text-muted);">Identity &amp; Auth</div>
+        </div>
+      </div>
+      <ul class="check-list" style="font-size: 11px;">
+        <li>Agent DID 注册</li>
+        <li>链上身份验证</li>
+        <li>信誉评分系统</li>
+        <li>认证徽章管理</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="flex items-center gap-12 mb-12">
+        <div class="icon-circle green">&#x1F3F7;</div>
+        <div>
+          <div style="font-size: 13px; font-weight: 700;">技能市场</div>
+          <div style="font-size: 10px; color: var(--text-muted);">Skill Marketplace</div>
+        </div>
+      </div>
+      <ul class="check-list" style="font-size: 11px;">
+        <li>技能发布与搜索</li>
+        <li>安全认证审核</li>
+        <li>需求匹配引擎</li>
+        <li>托管支付集成</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Tech Highlight -->
+  <div class="card mt-24" style="background: linear-gradient(135deg, rgba(52, 211, 153, 0.06), rgba(56, 189, 248, 0.06)); border-color: rgba(52, 211, 153, 0.2);">
+    <div class="flex items-center justify-between">
+      <div>
+        <div style="font-size: 13px; font-weight: 700; color: var(--accent-green); margin-bottom: 4px;">技术亮点</div>
+        <div style="font-size: 12px; color: var(--text-secondary);">纯 Python 零依赖架构，支持私有部署 &middot; 边缘设备 &middot; 容器化 &middot; Serverless</div>
+      </div>
+      <div class="flex gap-8">
+        <span class="badge badge-green">GitHub 开源</span>
+        <span class="badge badge-blue">lm203688/aishield</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <span>AIShield &middot; 融资商业计划书</span>
+    <span>06 / 10</span>
+  </div>
+</div>
+
+<div class="page-divider"></div>
+
+<!-- ============================================================ -->
+<!-- P7 - 商业模式 -->
+<!-- ============================================================ -->
+<div class="slide">
+  <div class="slide-tag">BUSINESS MODEL</div>
+  <div class="slide-title">Open Core 商业模式</div>
+  <div class="slide-subtitle">开源免费拉动增长，企业付费实现变现，多层次收入结构</div>
+
+  <!-- Revenue Layers -->
+  <div class="card-grid card-grid-2 mb-24" style="grid-template-columns: 1fr 2fr;">
+    <!-- Open Source -->
+    <div class="card" style="border-color: rgba(52, 211, 153, 0.3); background: linear-gradient(180deg, rgba(52, 211, 153, 0.04), transparent);">
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
+        <span class="badge badge-green">OPEN SOURCE</span>
+        <span style="font-size: 11px; color: var(--text-muted);">免费</span>
+      </div>
+      <h3 style="font-size: 16px;">开源社区版</h3>
+      <div style="margin-top: 12px;">
+        <ul class="check-list" style="font-size: 12px;">
+          <li>安全扫描引擎 (133 规则)</li>
+          <li>基础身份注册</li>
+          <li>基础技能市场</li>
+          <li>社区支持</li>
+        </ul>
+      </div>
+      <div style="margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border-color);">
+        <div style="font-size: 11px; color: var(--text-muted);">目标：建立开发者生态 &amp; 数据飞轮</div>
+      </div>
+    </div>
+
+    <!-- Enterprise -->
+    <div>
+      <div class="card-grid card-grid-2" style="gap: 12px;">
+        <div class="card" style="border-left: 3px solid var(--accent-blue);">
+          <div style="font-size: 11px; color: var(--accent-blue); font-weight: 600; margin-bottom: 8px;">ENTERPRISE SUB</div>
+          <div style="font-size: 22px; font-weight: 900; margin-bottom: 4px;">
+            <span style="font-size: 14px; font-weight: 400; color: var(--text-muted);">$</span>499-1,999<span style="font-size: 13px; font-weight: 400; color: var(--text-muted);">/月</span>
+          </div>
+          <div style="font-size: 11px; color: var(--text-secondary); line-height: 1.5;">
+            自定义规则 &middot; 链上身份 &middot; 容器沙箱 &middot; 托管支付 &middot; Dashboard
+          </div>
+        </div>
+        <div class="card" style="border-left: 3px solid var(--accent-purple);">
+          <div style="font-size: 11px; color: var(--accent-purple); font-weight: 600; margin-bottom: 8px;">API PER-CALL</div>
+          <div style="font-size: 22px; font-weight: 900; margin-bottom: 4px;">
+            <span style="font-size: 14px; font-weight: 400; color: var(--text-muted);">$</span>0.01-0.05<span style="font-size: 13px; font-weight: 400; color: var(--text-muted);">/次</span>
+          </div>
+          <div style="font-size: 11px; color: var(--text-secondary); line-height: 1.5;">
+            安全扫描 API 按量计费，适合中小团队灵活接入
+          </div>
+        </div>
+        <div class="card" style="border-left: 3px solid var(--accent-amber);">
+          <div style="font-size: 11px; color: var(--accent-amber); font-weight: 600; margin-bottom: 8px;">SECURITY AUDIT</div>
+          <div style="font-size: 22px; font-weight: 900; margin-bottom: 4px;">
+            <span style="font-size: 14px; font-weight: 400; color: var(--text-muted);">$</span>5k-20k<span style="font-size: 13px; font-weight: 400; color: var(--text-muted);">/次</span>
+          </div>
+          <div style="font-size: 11px; color: var(--text-secondary); line-height: 1.5;">
+            企业安全审计服务，深度 Agent 安全评估与合规报告
+          </div>
+        </div>
+        <div class="card" style="border-left: 3px solid var(--accent-green);">
+          <div style="font-size: 11px; color: var(--accent-green); font-weight: 600; margin-bottom: 8px;">CERTIFICATION</div>
+          <div style="font-size: 22px; font-weight: 900; margin-bottom: 4px;">
+            <span style="font-size: 14px; font-weight: 400; color: var(--text-muted);">$</span>99<span style="font-size: 13px; font-weight: 400; color: var(--text-muted);">/月/Agent</span>
+          </div>
+          <div style="font-size: 11px; color: var(--text-secondary); line-height: 1.5;">
+            认证徽章订阅，提升 Agent 可信度与市场竞争力
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Revenue Projection -->
+  <div class="card">
+    <div class="flex items-center justify-between mb-16">
+      <div>
+        <div style="font-size: 13px; font-weight: 700;">收入预测 (Year 1)</div>
+        <div style="font-size: 11px; color: var(--text-muted);">保守估计</div>
+      </div>
+      <div class="flex gap-8">
+        <span class="badge badge-blue">技能佣金 5-10%</span>
+      </div>
+    </div>
+    <div style="display: flex; gap: 24px; align-items: flex-end;">
+      <div style="flex: 1;">
+        <div class="flex justify-between mb-8" style="font-size: 11px;">
+          <span style="color: var(--text-secondary);">企业订阅</span>
+          <span style="font-weight: 700; color: var(--accent-blue);">50%</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width: 50%;"></div></div>
+      </div>
+      <div style="flex: 1;">
+        <div class="flex justify-between mb-8" style="font-size: 11px;">
+          <span style="color: var(--text-secondary);">API 按量计费</span>
+          <span style="font-weight: 700; color: var(--accent-purple);">25%</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width: 25%; background: linear-gradient(135deg, #818cf8, #a78bfa);"></div></div>
+      </div>
+      <div style="flex: 1;">
+        <div class="flex justify-between mb-8" style="font-size: 11px;">
+          <span style="color: var(--text-secondary);">安全审计</span>
+          <span style="font-weight: 700; color: var(--accent-amber);">15%</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width: 15%; background: linear-gradient(135deg, #fbbf24, #f59e0b);"></div></div>
+      </div>
+      <div style="flex: 1;">
+        <div class="flex justify-between mb-8" style="font-size: 11px;">
+          <span style="color: var(--text-secondary);">其他</span>
+          <span style="font-weight: 700; color: var(--accent-green);">10%</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width: 10%; background: linear-gradient(135deg, #34d399, #10b981);"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <span>AIShield &middot; 融资商业计划书</span>
+    <span>07 / 10</span>
+  </div>
+</div>
+
+<div class="page-divider"></div>
+
+<!-- ============================================================ -->
+<!-- P8 - 护城河 -->
+<!-- ============================================================ -->
+<div class="slide">
+  <div class="slide-tag">COMPETITIVE MOAT</div>
+  <div class="slide-title">六大结构性壁垒</div>
+  <div class="slide-subtitle">不是单一优势，而是层层叠加的结构性护城河</div>
+
+  <div style="display: flex; flex-direction: column; gap: 12px;">
+    <!-- Moat 1 -->
+    <div class="moat-item">
+      <div class="moat-num">1</div>
+      <div>
+        <div style="font-size: 14px; font-weight: 700; margin-bottom: 4px;">数据飞轮</div>
+        <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.5;">扫描数据积累 &#x2192; 威胁情报丰富 &#x2192; 检测精度提升 &#x2192; 吸引更多用户 &#x2192; 更多数据。信誉图谱与中文合规库形成独特数据资产。</div>
+      </div>
+    </div>
+    <!-- Moat 2 -->
+    <div class="moat-item">
+      <div class="moat-num">2</div>
+      <div>
+        <div style="font-size: 14px; font-weight: 700; margin-bottom: 4px;">网络效应</div>
+        <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.5;">双边市场：Agent 开发者发布技能，需求方搜索采购。更多供给吸引更多需求，更多需求激励更多供给。跨平台互操作放大网络效应。</div>
+      </div>
+    </div>
+    <!-- Moat 3 -->
+    <div class="moat-item">
+      <div class="moat-num">3</div>
+      <div>
+        <div style="font-size: 14px; font-weight: 700; margin-bottom: 4px;">中立性优势</div>
+        <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.5;">云厂商和模型厂商天然存在利益冲突，无法扮演公正的信任中介角色。AIShield 作为独立第三方，获得全行业信任。</div>
+      </div>
+    </div>
+    <!-- Moat 4 -->
+    <div class="moat-item">
+      <div class="moat-num">4</div>
+      <div>
+        <div style="font-size: 14px; font-weight: 700; margin-bottom: 4px;">标准制定者</div>
+        <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.5;">发起 AIShield Trust Standard，定义 Agent 安全认证行业标准。先发者优势使标准成为事实规范，后来者只能适配。</div>
+      </div>
+    </div>
+    <!-- Moat 5 -->
+    <div class="moat-item">
+      <div class="moat-num">5</div>
+      <div>
+        <div style="font-size: 14px; font-weight: 700; margin-bottom: 4px;">合规深度</div>
+        <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.5;">深度覆盖中国 AI 合规体系：违禁词检测、算法备案、数据安全法、生成式 AI 管理办法。海外竞品无法快速复制此壁垒。</div>
+      </div>
+    </div>
+    <!-- Moat 6 -->
+    <div class="moat-item">
+      <div class="moat-num">6</div>
+      <div>
+        <div style="font-size: 14px; font-weight: 700; margin-bottom: 4px;">轻量嵌入能力</div>
+        <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.5;">零依赖纯 Python 架构，可嵌入私有部署、边缘设备、IoT 场景。重度平台无法触及的长尾场景，成为天然分发渠道。</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <span>AIShield &middot; 融资商业计划书</span>
+    <span>08 / 10</span>
+  </div>
+</div>
+
+<div class="page-divider"></div>
+
+<!-- ============================================================ -->
+<!-- P9 - 路线图 -->
+<!-- ============================================================ -->
+<div class="slide">
+  <div class="slide-tag">ROADMAP</div>
+  <div class="slide-title">12 个月产品路线图</div>
+  <div class="slide-subtitle">三阶段递进：技术验证 &#x2192; 产品完善 &#x2192; 商业化落地</div>
+
+  <div class="flex gap-24" style="height: calc(100% - 160px);">
+    <!-- Phase 1 -->
+    <div class="flex-1">
+      <div class="card" style="height: 100%; border-top: 3px solid var(--accent-blue); display: flex; flex-direction: column;">
+        <div class="flex items-center justify-between mb-12">
+          <span class="badge badge-blue">PHASE 1</span>
+          <span style="font-size: 11px; color: var(--text-muted);">1-3 月</span>
+        </div>
+        <h3 style="font-size: 16px; margin-bottom: 16px;">链路贯通</h3>
+        <div class="timeline" style="flex: 1;">
+          <div class="timeline-item active">
+            <div class="timeline-dot"></div>
+            <div style="font-size: 13px; font-weight: 600;">端到端链路贯通</div>
+            <div style="font-size: 11px; color: var(--text-muted);">扫描-认证-上架-支付全流程</div>
+          </div>
+          <div class="timeline-item active">
+            <div class="timeline-dot"></div>
+            <div style="font-size: 13px; font-weight: 600;">技能真实调用</div>
+            <div style="font-size: 11px; color: var(--text-muted);">技能市场中技能可真实执行</div>
+          </div>
+          <div class="timeline-item active">
+            <div class="timeline-dot"></div>
+            <div style="font-size: 13px; font-weight: 600;">支付 MVP</div>
+            <div style="font-size: 11px; color: var(--text-muted);">托管支付基础功能上线</div>
+          </div>
+          <div class="timeline-item active">
+            <div class="timeline-dot"></div>
+            <div style="font-size: 13px; font-weight: 600;">CI/CD 自动化</div>
+            <div style="font-size: 11px; color: var(--text-muted);">开发流程标准化</div>
+          </div>
+        </div>
+        <div style="margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border-color);">
+          <div style="font-size: 10px; color: var(--text-muted);">里程碑：第一个付费客户</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phase 2 -->
+    <div class="flex-1">
+      <div class="card" style="height: 100%; border-top: 3px solid var(--accent-purple); display: flex; flex-direction: column;">
+        <div class="flex items-center justify-between mb-12">
+          <span class="badge badge-purple">PHASE 2</span>
+          <span style="font-size: 11px; color: var(--text-muted);">4-6 月</span>
+        </div>
+        <h3 style="font-size: 16px; margin-bottom: 16px;">产品完善</h3>
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div style="font-size: 13px; font-weight: 600;">链上 DID</div>
+            <div style="font-size: 11px; color: var(--text-muted);">区块链身份验证</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div style="font-size: 13px; font-weight: 600;">容器沙箱</div>
+            <div style="font-size: 11px; color: var(--text-muted);">安全执行环境</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div style="font-size: 13px; font-weight: 600;">Dashboard</div>
+            <div style="font-size: 11px; color: var(--text-muted);">管理控制台上线</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div style="font-size: 13px; font-weight: 600;">Trust Standard v1</div>
+            <div style="font-size: 11px; color: var(--text-muted);">行业标准白皮书</div>
+          </div>
+        </div>
+        <div style="margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border-color);">
+          <div style="font-size: 10px; color: var(--text-muted);">里程碑：10+ 企业客户</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phase 3 -->
+    <div class="flex-1">
+      <div class="card" style="height: 100%; border-top: 3px solid var(--accent-green); display: flex; flex-direction: column;">
+        <div class="flex items-center justify-between mb-12">
+          <span class="badge badge-green">PHASE 3</span>
+          <span style="font-size: 11px; color: var(--text-muted);">7-12 月</span>
+        </div>
+        <h3 style="font-size: 16px; margin-bottom: 16px;">商业化验证</h3>
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div style="font-size: 13px; font-weight: 600;">RASP 监控</div>
+            <div style="font-size: 11px; color: var(--text-muted);">运行时安全防护</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div style="font-size: 13px; font-weight: 600;">AI 自动修复</div>
+            <div style="font-size: 11px; color: var(--text-muted);">智能漏洞修复建议</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div style="font-size: 13px; font-weight: 600;">社区运营</div>
+            <div style="font-size: 11px; color: var(--text-muted);">开发者生态建设</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div style="font-size: 13px; font-weight: 600;">商业化验证</div>
+            <div style="font-size: 11px; color: var(--text-muted);">MRR 跑通</div>
+          </div>
+        </div>
+        <div style="margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border-color);">
+          <div style="font-size: 10px; color: var(--text-muted);">里程碑：$10k+ MRR</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <span>AIShield &middot; 融资商业计划书</span>
+    <span>09 / 10</span>
+  </div>
+</div>
+
+<div class="page-divider"></div>
+
+<!-- ============================================================ -->
+<!-- P10 - 融资需求 -->
+<!-- ============================================================ -->
+<div class="slide">
+  <div class="slide-tag">FUNDING REQUEST</div>
+  <div class="slide-title">种子轮融资</div>
+  <div class="slide-subtitle">$300-500K USD &middot; 极致精益 &middot; 高密度执行</div>
+
+  <!-- Funding Amount -->
+  <div class="card mb-24 text-center" style="padding: 32px; background: linear-gradient(135deg, rgba(56, 189, 248, 0.08), rgba(129, 140, 248, 0.08)); border-color: rgba(56, 189, 248, 0.3);">
+    <div style="font-size: 11px; letter-spacing: 2px; color: var(--accent-blue); margin-bottom: 8px;">SEED ROUND</div>
+    <div style="font-size: 48px; font-weight: 900; background: var(--gradient-blue-purple); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 8px;">$300-500K</div>
+    <div style="font-size: 13px; color: var(--text-secondary);">12 个月 Runway &middot; 从 MVP 到商业化验证</div>
+  </div>
+
+  <!-- Fund Allocation -->
+  <div class="flex gap-24 mb-24">
+    <div class="flex-1">
+      <div class="card" style="height: 100%;">
+        <div style="font-size: 13px; font-weight: 700; margin-bottom: 20px;">资金用途</div>
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+          <div>
+            <div class="flex justify-between mb-8" style="font-size: 12px;">
+              <span style="color: var(--text-secondary);">研发与工程</span>
+              <span style="font-weight: 700; color: var(--accent-blue);">50% &middot; $150-250K</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" style="width: 50%;"></div></div>
+          </div>
+          <div>
+            <div class="flex justify-between mb-8" style="font-size: 12px;">
+              <span style="color: var(--text-secondary);">基础设施与云服务</span>
+              <span style="font-weight: 700; color: var(--accent-purple);">20% &middot; $60-100K</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" style="width: 20%; background: linear-gradient(135deg, #818cf8, #a78bfa);"></div></div>
+          </div>
+          <div>
+            <div class="flex justify-between mb-8" style="font-size: 12px;">
+              <span style="color: var(--text-secondary);">市场与社区</span>
+              <span style="font-weight: 700; color: var(--accent-green);">15% &middot; $45-75K</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" style="width: 15%; background: linear-gradient(135deg, #34d399, #10b981);"></div></div>
+          </div>
+          <div>
+            <div class="flex justify-between mb-8" style="font-size: 12px;">
+              <span style="color: var(--text-secondary);">运营与法务</span>
+              <span style="font-weight: 700; color: var(--accent-amber);">10% &middot; $30-50K</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" style="width: 10%; background: linear-gradient(135deg, #fbbf24, #f59e0b);"></div></div>
+          </div>
+          <div>
+            <div class="flex justify-between mb-8" style="font-size: 12px;">
+              <span style="color: var(--text-secondary);">储备金</span>
+              <span style="font-weight: 700; color: var(--accent-rose);">5% &middot; $15-25K</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" style="width: 5%; background: linear-gradient(135deg, #fb7185, #f43f5e);"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Expected Returns -->
+    <div class="flex-1">
+      <div class="card" style="height: 100%;">
+        <div style="font-size: 13px; font-weight: 700; margin-bottom: 20px;">预期里程碑与回报</div>
+
+        <div class="card-grid" style="gap: 10px;">
+          <div style="display: flex; align-items: center; gap: 12px; padding: 12px; background: rgba(56, 189, 248, 0.05); border-radius: 8px; border: 1px solid rgba(56, 189, 248, 0.1);">
+            <div style="font-size: 20px;">&#x1F4C8;</div>
+            <div>
+              <div style="font-size: 12px; font-weight: 700;">M6: 10+ 企业客户</div>
+              <div style="font-size: 10px; color: var(--text-muted);">产品-市场匹配验证</div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 12px; padding: 12px; background: rgba(129, 140, 248, 0.05); border-radius: 8px; border: 1px solid rgba(129, 140, 248, 0.1);">
+            <div style="font-size: 20px;">&#x1F4B0;</div>
+            <div>
+              <div style="font-size: 12px; font-weight: 700;">M12: $10K+ MRR</div>
+              <div style="font-size: 10px; color: var(--text-muted);">商业化模型验证</div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 12px; padding: 12px; background: rgba(52, 211, 153, 0.05); border-radius: 8px; border: 1px solid rgba(52, 211, 153, 0.1);">
+            <div style="font-size: 20px;">&#x1F31F;</div>
+            <div>
+              <div style="font-size: 12px; font-weight: 700;">Y2: Series A 准备</div>
+              <div style="font-size: 10px; color: var(--text-muted);">$100K+ MRR / 数据飞轮</div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 12px; padding: 12px; background: rgba(251, 191, 36, 0.05); border-radius: 8px; border: 1px solid rgba(251, 191, 36, 0.1);">
+            <div style="font-size: 20px;">&#x1F680;</div>
+            <div>
+              <div style="font-size: 12px; font-weight: 700;">Y3: 标准制定者地位</div>
+              <div style="font-size: 10px; color: var(--text-muted);">AIShield Trust Standard 行业采用</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border-color);">
+          <div style="font-size: 11px; color: var(--text-muted); line-height: 1.6;">
+            <span style="font-weight: 600; color: var(--text-secondary);">投资亮点：</span>
+            12-18 个月窗口期 &middot; 首个 Agent 信任 OS &middot; 中国合规壁垒不可复制 &middot; 极致精益团队 &middot; 开源生态自增长
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Team -->
+  <div class="card" style="background: linear-gradient(135deg, rgba(56, 189, 248, 0.04), rgba(129, 140, 248, 0.04));">
+    <div class="flex items-center justify-between">
+      <div>
+        <div style="font-size: 13px; font-weight: 700; margin-bottom: 4px;">团队现状</div>
+        <div style="font-size: 12px; color: var(--text-secondary);">1 人全职（创始人 / 技术负责人）&middot; 本轮融资后扩充 2-3 人核心团队</div>
+      </div>
+      <div class="flex gap-8">
+        <span class="badge badge-blue">GitHub: lm203688/aishield</span>
+        <span class="badge badge-purple">种子轮</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <span>AIShield &middot; 融资商业计划书</span>
+    <span>10 / 10</span>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,136 @@
+name: AIShield CI/CD
+
+on:
+  push:
+    branches: [ main, dev ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # 每天凌晨 3 点运行快速测试
+    - cron: '0 3 * * *'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        # 无外部依赖，仅标准库
+
+    - name: Run syntax check
+      run: |
+        python -m py_compile api/server.py eco/*.py scanner/*.py
+
+    - name: Run quick tests
+      run: |
+        python tests/quick_test.py
+
+    - name: Run integration tests
+      run: |
+        python tests/e2e_test.py
+
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Run self-scan
+      run: |
+        python -c "
+        import sys
+        sys.path.insert(0, '.')
+        from scanner.engine import scan
+        import json
+        result = scan({
+            'type': 'mcp_server',
+            'source_url': 'https://github.com/lm203688/aishield',
+            'mcp_server_url': 'http://localhost:8450'
+        })
+        print(json.dumps(result, indent=2, ensure_ascii=False))
+        "
+
+  dependency-check:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Check for external dependencies
+      run: |
+        # 检查是否有 requirements.txt
+        if [ -f requirements.txt ]; then
+          echo "⚠️ Warning: requirements.txt detected. This project should be zero-dependency."
+          exit 1
+        fi
+        # 检查代码中是否有 import 非 stdlib
+        if grep -r "^import requests\|^import numpy\|^import pandas" --include="*.py" .; then
+          echo "❌ External dependencies detected in code."
+          exit 1
+        fi
+        echo "✅ Zero-dependency check passed."
+
+  performance-test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Benchmark scan performance
+      run: |
+        python -c "
+        import time
+        from scanner.engine import scan
+        start = time.time()
+        result = scan({
+            'type': 'mcp_server',
+            'source_url': 'https://github.com/lm203688/aishield',
+            'mcp_server_url': 'http://localhost:8450'
+        })
+        duration = time.time() - start
+        print(f'Scan completed in {duration:.2f}s')
+        print(f'Overall score: {result[\"score\"]}')
+        if duration > 10:
+          print('⚠️ Warning: Scan took longer than 10s')
+          exit 1
+        print('✅ Performance check passed')
+        "
+
+  docker-test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Build Docker image
+      run: |
+        docker build -t aishield:test .
+
+    - name: Run Docker container
+      run: |
+        docker run -d -p 8450:8450 --name aishield-test aishield:test
+        sleep 5
+
+    - name: Health check
+      run: |
+        curl -f http://localhost:8450/api/v1/health || exit 1
+        echo '✅ Docker health check passed'
+
+    - name: Cleanup
+      run: |
+        docker stop aishield-test
+        docker rm aishield-test

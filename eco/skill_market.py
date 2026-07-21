@@ -28,6 +28,9 @@ import json
 import os
 import uuid
 import threading
+import time
+import urllib.request
+import urllib.error
 from datetime import datetime, timezone, timedelta
 
 # ── 路径配置 ──
@@ -350,8 +353,14 @@ class SkillInvoker:
     负责技能的调用管理和费用计算
     """
 
+    # HTTP RPC 调用超时时间（秒）
+    HTTP_TIMEOUT = 30
+
     def __init__(self):
         self._invocations = {}
+        # P0-2: 调用统计（调用次数 + 平均响应时间）
+        self._call_count = 0
+        self._total_response_time_ms = 0.0
 
     def _load(self):
         """从磁盘加载调用数据"""
@@ -369,13 +378,18 @@ class SkillInvoker:
         """
         调用技能
 
+        P0-2 修复: 不再返回 Mock 数据，改为真实调用：
+          - 如果技能标记 sandbox_required: true，通过 sandbox 模块执行（P0-3.3）
+          - 否则如果技能定义中包含 endpoint（HTTP URL），通过 urllib 发起真实 HTTP POST 调用
+          - 如果都没有，返回明确的"未配置调用端点"错误
+
         Args:
             skill_id (str):         技能ID
             caller_agent_id (str):  调用者Agent ID
             input_data (dict):      输入数据
 
         Returns:
-            dict: {"invocation_id", "result", "cost", "remaining_quota"}
+            dict: {"invocation_id", "result", "cost", "remaining_quota"} 或 {"error": ...}
         """
         self._load()
 
@@ -407,26 +421,186 @@ class SkillInvoker:
         # 保存技能更新
         registry._save()
 
-        # 记录调用
+        # 记录调用（初始状态为 pending，执行后更新）
         invocation = {
             "invocation_id": invocation_id,
             "skill_id": skill_id,
             "caller_agent_id": caller_agent_id,
             "input_data": input_data,
-            "output": None,  # 实际调用结果由外部填充
+            "output": None,
             "cost": cost,
-            "status": "completed",
+            "status": "pending",
             "invoked_at": _now_iso(),
+            "completed_at": None,
         }
+        self._invocations[invocation_id] = invocation
+        self._save()
 
+        # ── P0-2/P0-3.3: 真实调用技能 ──
+        start_time = time.time()
+        invoke_result = None
+        invoke_error = None
+
+        if skill.get("sandbox_required"):
+            # P0-3.3: 通过沙箱模块执行
+            invoke_result = self._sandbox_invoke(skill, input_data, caller_agent_id)
+        elif skill.get("endpoint"):
+            # P0-2: 通过 HTTP POST 调用技能端点
+            invoke_result = self._http_invoke(skill["endpoint"], input_data)
+        else:
+            # P0-2: 未配置调用端点，返回明确错误（而非假装成功）
+            invoke_error = "未配置调用端点：技能既未标记 sandbox_required 也未提供 endpoint"
+
+        elapsed_ms = int((time.time() - start_time) * 1000)
+
+        # P0-2: 记录调用次数和平均响应时间
+        self._call_count += 1
+        self._total_response_time_ms += elapsed_ms
+
+        # 更新调用记录
+        if invoke_error:
+            invocation["status"] = "failed"
+            invocation["output"] = {"error": invoke_error}
+            result_output = {"error": invoke_error}
+        elif invoke_result and invoke_result.get("success"):
+            invocation["status"] = "completed"
+            invocation["output"] = invoke_result.get("data")
+            result_output = invoke_result.get("data")
+        else:
+            invocation["status"] = "failed"
+            error_msg = invoke_result.get("error", "未知调用错误") if invoke_result else "未知调用错误"
+            invocation["output"] = {"error": error_msg}
+            result_output = {"error": error_msg}
+
+        invocation["completed_at"] = _now_iso()
+        invocation["duration_ms"] = elapsed_ms
         self._invocations[invocation_id] = invocation
         self._save()
 
         return {
             "invocation_id": invocation_id,
-            "result": None,  # 预留: 实际结果由技能执行引擎填充
+            "result": result_output,
             "cost": cost,
             "remaining_quota": remaining_quota,
+            "status": invocation["status"],
+            "duration_ms": elapsed_ms,
+        }
+
+    def _http_invoke(self, endpoint, input_data):
+        """
+        P0-2: 通过 HTTP POST 调用技能端点
+
+        Args:
+            endpoint (str):    技能的 HTTP URL 端点
+            input_data (dict): 输入数据
+
+        Returns:
+            dict: {"success": bool, "data": ..., "error": ...}
+        """
+        try:
+            payload = json.dumps(input_data).encode("utf-8")
+            req = urllib.request.Request(
+                endpoint,
+                data=payload,
+                headers={"Content-Type": "application/json"},
+                method="POST",
+            )
+            with urllib.request.urlopen(req, timeout=self.HTTP_TIMEOUT) as resp:
+                body = resp.read().decode("utf-8")
+                try:
+                    parsed = json.loads(body)
+                except json.JSONDecodeError:
+                    parsed = {"raw": body}
+                return {"success": True, "data": parsed, "status_code": resp.status}
+        except urllib.error.HTTPError as e:
+            return {"success": False, "error": f"HTTP {e.code}: {e.reason}", "status_code": e.code}
+        except urllib.error.URLError as e:
+            return {"success": False, "error": f"URL error: {str(e.reason)}"}
+        except Exception as e:
+            return {"success": False, "error": f"Invoke error: {str(e)}"}
+
+    def _sandbox_invoke(self, skill, input_data, caller_agent_id):
+        """
+        P0-3.3: 通过沙箱模块执行技能
+
+        Args:
+            skill (dict):          技能定义
+            input_data (dict):     输入数据
+            caller_agent_id (str): 调用者Agent ID
+
+        Returns:
+            dict: {"success": bool, "data": ..., "error": ...}
+        """
+        try:
+            from eco import sandbox as _sandbox_mod
+        except ImportError:
+            return {"success": False, "error": "沙箱模块未加载"}
+
+        try:
+            task_mgr = _sandbox_mod.SandboxTask()
+            # 从输入数据或技能定义中提取代码和语言
+            code = input_data.get("code", skill.get("code", ""))
+            language = input_data.get("language", skill.get("language", "python"))
+
+            if not code:
+                return {"success": False, "error": "沙箱执行需要 code 参数"}
+
+            submit_result = task_mgr.submit(
+                agent_id=caller_agent_id,
+                code=code,
+                language=language,
+            )
+
+            if submit_result.get("status") == "rejected":
+                return {
+                    "success": False,
+                    "error": "代码被沙箱安全检查拒绝",
+                    "details": submit_result,
+                }
+
+            task_id = submit_result.get("task_id")
+            if not task_id:
+                return {"success": False, "error": "沙箱任务提交失败"}
+
+            exec_result = task_mgr.execute_pending(task_id)
+            if "error" in exec_result:
+                return {"success": False, "error": exec_result["error"]}
+
+            # 获取完整结果
+            full_result = task_mgr.get_task_result(task_id)
+            return {
+                "success": True,
+                "data": {
+                    "task_id": task_id,
+                    "status": exec_result.get("status"),
+                    "exit_code": exec_result.get("exit_code"),
+                    "stdout": full_result.get("stdout", "") if full_result else "",
+                    "stderr": full_result.get("stderr", "") if full_result else "",
+                    "duration_ms": exec_result.get("duration_ms", 0),
+                    "security": exec_result.get("security_inspection", {}),
+                },
+                "status_code": 200,
+            }
+        except ValueError as e:
+            return {"success": False, "error": f"沙箱执行错误: {str(e)}"}
+        except Exception as e:
+            return {"success": False, "error": f"沙箱执行异常: {str(e)}"}
+
+    def get_stats(self):
+        """
+        P0-2: 获取调用统计信息
+
+        Returns:
+            dict: {"call_count", "avg_response_time_ms"}
+        """
+        avg = (
+            self._total_response_time_ms / self._call_count
+            if self._call_count > 0
+            else 0.0
+        )
+        return {
+            "call_count": self._call_count,
+            "avg_response_time_ms": round(avg, 2),
         }
 
     def get_invocation(self, invocation_id):

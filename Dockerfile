@@ -1,38 +1,20 @@
-FROM python:3.10-slim
+FROM python:3.11-slim
 
 LABEL maintainer="AIShield Team"
-LABEL description="AIShield - OWASP MCP Top 10 aligned AI Agent security scanner"
+LABEL description="AI Agent Security Ecosystem Infrastructure"
+LABEL version="4.1.0"
 
 WORKDIR /app
 
-# 系统依赖
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    git curl \
-    && rm -rf /var/lib/apt/lists/*
+# 复制源码
+COPY . .
 
-# Python依赖（仅标准库，无外部依赖）
-COPY scanner/ /app/scanner/
-COPY api/ /app/api/
-COPY eco/ /app/eco/
-COPY sdk/python/aishield/ /app/sdk/aishield/
-COPY data/ /app/data/
-COPY sdk/python/ /app/sdk/python/
-
-# 创建数据目录和 SDK init
-RUN mkdir -p /app/api/data /app/data
-RUN touch /app/sdk/__init__.py
-
-# 可选安装（不阻塞构建）
-RUN pip install -e . 2>/dev/null || true
-
-# 环境变量
-ENV AISHIELD_PORT=8450
-ENV PYTHONPATH=/app
-ENV PYTHONUNBUFFERED=1
-
+# 暴露端口
 EXPOSE 8450
 
+# 健康检查
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
-    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8450/api/v1/health')" || exit 1
+  CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8450/api/v1/health')" || exit 1
 
-CMD ["python", "-m", "api.server"]
+# 启动服务
+CMD ["python", "api/server.py"]

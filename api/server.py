@@ -277,6 +277,65 @@ class AIShieldHandler(BaseHTTPRequestHandler):
         parsed = urlparse(self.path)
         path = parsed.path
         
+        # Landing Page — Agent SEO
+        if path == "/agent.html":
+            html_path = os.path.join(BASE, "static", "agent.html")
+            if os.path.exists(html_path):
+                with open(html_path, "r", encoding="utf-8") as f:
+                    html = f.read()
+                body = html.encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "text/html; charset=utf-8")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+                _record_usage("agent-page", self.client_address[0])
+                return
+
+        # Sitemap XML
+        if path == "/sitemap.xml":
+            sitemap_path = os.path.join(BASE, "static", "sitemap.xml")
+            if os.path.exists(sitemap_path):
+                with open(sitemap_path, "r", encoding="utf-8") as f:
+                    xml = f.read()
+                body = xml.encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "application/xml; charset=utf-8")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+                return
+
+        # Robots.txt
+        if path == "/robots.txt":
+            robots_path = os.path.join(BASE, "static", "robots.txt")
+            if os.path.exists(robots_path):
+                with open(robots_path, "r", encoding="utf-8") as f:
+                    txt = f.read()
+                body = txt.encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "text/plain; charset=utf-8")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+                return
+
+        # Agent Card (A2A discovery)
+        if path == "/.well-known/agent-card.json":
+            agent_card_path = os.path.join(BASE, "static", ".well-known", "agent-card.json")
+            if os.path.exists(agent_card_path):
+                with open(agent_card_path, "r", encoding="utf-8") as f:
+                    json_data = f.read()
+                body = json_data.encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self.send_header("Content-Length", str(len(body)))
+                self.send_header("Access-Control-Allow-Origin", "*")
+                self.end_headers()
+                self.wfile.write(body)
+                _record_usage("agent-card", self.client_address[0])
+                return
+
         # Landing Page — 违禁词检测
         if path == "/banned-words":
             html_path = os.path.join(BASE, "static", "banned_words.html")
@@ -556,6 +615,22 @@ class AIShieldHandler(BaseHTTPRequestHandler):
                 audits = audits[-500:]
             _save_json(AUDIT_FILE, audits)
             
+            # P0-3.1: Badge <-> Scan 联动
+            # 扫描评分 >= 80 时，自动调用 CertificationService.certify_tool() 生成认证
+            certification = None
+            try:
+                overall_score = result.get("overall_score", 0)
+                if overall_score >= 80:
+                    from eco import badge as _badge_mod
+                    cert_svc = _badge_mod.CertificationService()
+                    certification = cert_svc.certify_tool(
+                        source_url=source_url,
+                        scan_report=result,
+                    )
+            except Exception:
+                # 认证失败不影响扫描结果返回
+                pass
+            
             # 品牌水印 + 转化提示
             response = {
                 "success": True,
@@ -566,6 +641,10 @@ class AIShieldHandler(BaseHTTPRequestHandler):
                     "version": "4.1",
                 },
             }
+            
+            # 附加自动认证结果（Badge <-> Scan 联动）
+            if certification:
+                response["certification"] = certification
             
             # 超限时添加升级提示（完整结果仍返回，但附带转化引导）
             if is_limited:

@@ -770,6 +770,19 @@ class TaskDelegation:
 
         self._save()
 
+        # P0-3.2: Payment <-> TaskDelegation 联动
+        # 提交结果成功后，调用 payment 模块记录一笔交易
+        # 用 try/except 包裹，避免 payment 失败影响委托流程
+        try:
+            from eco import payment as _payment_mod
+            _bs = _payment_mod.BillingService()
+            _bs.record_usage(
+                account_id=agent_id,
+                endpoint="task_delegation:submit_result",
+            )
+        except Exception:
+            pass
+
         return {
             "delegation_id": delegation_id,
             "status": "completed",
