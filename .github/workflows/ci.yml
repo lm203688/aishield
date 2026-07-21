@@ -6,7 +6,6 @@ on:
   pull_request:
     branches: [ main ]
   schedule:
-    # 每天凌晨 3 点运行快速测试
     - cron: '0 3 * * *'
 
 jobs:
@@ -19,12 +18,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.11'
-
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        # 无外部依赖，仅标准库
+        python-version: '3.13'
 
     - name: Run syntax check
       run: |
@@ -34,9 +28,9 @@ jobs:
       run: |
         python tests/quick_test.py
 
-    - name: Run integration tests
+    - name: Run all tests
       run: |
-        python tests/e2e_test.py
+        python tests/run_all.py
 
   security-scan:
     runs-on: ubuntu-latest
@@ -44,7 +38,12 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Run self-scan
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.13'
+
+    - name: Run self-scan (local mode, no network)
       run: |
         python -c "
         import sys
@@ -53,10 +52,20 @@ jobs:
         import json
         result = scan({
             'type': 'mcp_server',
-            'source_url': 'https://github.com/lm203688/aishield',
-            'mcp_server_url': 'http://localhost:8450'
+            'name': 'aishield-self-test',
+            'description': 'AIShield self scan test',
+            'tools': [
+                {'name': 'audit', 'description': 'Security audit tool'},
+                {'name': 'prompt_check', 'description': 'Prompt injection detection'}
+            ]
         })
         print(json.dumps(result, indent=2, ensure_ascii=False))
+        score = result.get('score', 0)
+        print(f'Self-scan score: {score}')
+        if score < 0:
+          print('Scan returned negative score')
+          exit(1)
+        print('Self-scan passed')
         "
 
   dependency-check:
@@ -67,17 +76,15 @@ jobs:
 
     - name: Check for external dependencies
       run: |
-        # 检查是否有 requirements.txt
         if [ -f requirements.txt ]; then
-          echo "⚠️ Warning: requirements.txt detected. This project should be zero-dependency."
+          echo "Warning: requirements.txt detected."
           exit 1
         fi
-        # 检查代码中是否有 import 非 stdlib
-        if grep -r "^import requests\|^import numpy\|^import pandas" --include="*.py" .; then
-          echo "❌ External dependencies detected in code."
+        if grep -rq "^import requests\|^import numpy\|^import pandas\|^import flask\|^import fastapi" --include="*.py" . 2>/dev/null; then
+          echo "External dependencies detected in code."
           exit 1
         fi
-        echo "✅ Zero-dependency check passed."
+        echo "Zero-dependency check passed."
 
   performance-test:
     runs-on: ubuntu-latest
@@ -88,26 +95,32 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.11'
+        python-version: '3.13'
 
-    - name: Benchmark scan performance
+    - name: Benchmark scan performance (local mode)
       run: |
         python -c "
-        import time
+        import time, sys
+        sys.path.insert(0, '.')
         from scanner.engine import scan
         start = time.time()
         result = scan({
             'type': 'mcp_server',
-            'source_url': 'https://github.com/lm203688/aishield',
-            'mcp_server_url': 'http://localhost:8450'
+            'name': 'perf-test',
+            'description': 'Performance benchmark',
+            'tools': [
+                {'name': 'tool_a', 'description': 'Test tool A'},
+                {'name': 'tool_b', 'description': 'Test tool B'}
+            ]
         })
         duration = time.time() - start
         print(f'Scan completed in {duration:.2f}s')
-        print(f'Overall score: {result[\"score\"]}')
-        if duration > 10:
-          print('⚠️ Warning: Scan took longer than 10s')
-          exit 1
-        print('✅ Performance check passed')
+        print(f'Overall score: {result.get(\"score\", \"N/A\")}')
+        if duration > 5:
+          print(f'Warning: Scan took {duration:.2f}s (limit: 5s)')
+          exit(1
+        )
+        print('Performance check passed')
         "
 
   docker-test:
@@ -117,20 +130,19 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Build Docker image
-      run: |
-        docker build -t aishield:test .
+      run: docker build -t aishield:test .
 
     - name: Run Docker container
       run: |
         docker run -d -p 8450:8450 --name aishield-test aishield:test
-        sleep 5
+        sleep 3
 
     - name: Health check
       run: |
-        curl -f http://localhost:8450/api/v1/health || exit 1
-        echo '✅ Docker health check passed'
+        curl -sf http://localhost:8450/api/v1/health | python -m json.tool
 
     - name: Cleanup
+      if: always()
       run: |
-        docker stop aishield-test
-        docker rm aishield-test
+        docker stop aishield-test 2>/dev/null || true
+        docker rm aishield-test 2>/dev/null || true
