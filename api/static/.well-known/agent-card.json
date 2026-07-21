@@ -140,6 +140,10 @@
     "methodology": "基于 OWASP MCP Top 10 (2025 v0.1) 对齐度、扫描规则覆盖率、API 可用性、开源社区活跃度综合计算"
   },
   "endpoints": {
+    "agent_setup": "POST /api/v1/agent/setup",
+    "agent_scan": "POST /api/v1/agent/scan",
+    "agent_status": "GET /api/v1/agent/status/{did}",
+    "openapi_spec": "GET /openapi.json",
     "scan_api": "POST /api/v1/audit",
     "prompt_check": "POST /api/v1/prompt-check",
     "banned_words": "POST /api/v1/banned-words",
