@@ -623,6 +623,119 @@ class BillingService:
 
         return bill
 
+    def _record_transaction(self, account_id, amount, tx_type, service_id="", description=""):
+        """
+        记录交易到 billing.json 的 transactions 字段
+
+        Args:
+            account_id (str): 账户ID
+            amount (float):   金额（正为充值，负为消费）
+            tx_type (str):    交易类型 (recharge/consume/refund)
+            service_id (str): 关联服务ID
+            description (str): 描述
+
+        Returns:
+            dict: 交易记录
+        """
+        self._load()
+        txn = {
+            "transaction_id": f"txn_{uuid.uuid4().hex[:12]}",
+            "account_id": account_id,
+            "amount": amount,
+            "type": tx_type,
+            "service_id": service_id,
+            "description": description,
+            "timestamp": _now_iso(),
+        }
+        transactions = self._billing_data.setdefault("transactions", [])
+        transactions.append(txn)
+        # 只保留最近50000条
+        if len(transactions) > 50000:
+            self._billing_data["transactions"] = transactions[-25000:]
+        else:
+            self._billing_data["transactions"] = transactions
+        self._save()
+        return txn
+
+    def recharge(self, account_id, amount, gateway="alipay"):
+        """
+        用户充值（增加余额）
+
+        Args:
+            account_id (str): 账户ID
+            amount (float):   充值金额（CNY）
+            gateway (str):    支付网关
+
+        Returns:
+            dict: 充值结果
+        """
+        from eco.account import UserAccount
+        ua = UserAccount()
+        result = ua.recharge(account_id, amount, gateway)
+        self._record_transaction(
+            account_id=account_id,
+            amount=amount,
+            tx_type="recharge",
+            service_id=gateway,
+            description=f"通过 {gateway} 充值",
+        )
+        return result
+
+    def consume(self, account_id, amount, service_id="", description=""):
+        """
+        消费扣款
+
+        Args:
+            account_id (str): 账户ID
+            amount (float):   消费金额（CNY）
+            service_id (str): 服务ID
+            description (str): 描述
+
+        Returns:
+            dict: 消费结果
+        """
+        from eco.account import UserAccount
+        ua = UserAccount()
+        result = ua.consume(account_id, amount)
+        self._record_transaction(
+            account_id=account_id,
+            amount=-amount,
+            tx_type="consume",
+            service_id=service_id,
+            description=description or f"消费 {amount} CNY",
+        )
+        return result
+
+    def get_balance(self, account_id):
+        """
+        查询余额
+
+        Args:
+            account_id (str): 账户ID
+
+        Returns:
+            float: 余额
+        """
+        from eco.account import UserAccount
+        ua = UserAccount()
+        return ua.get_balance(account_id)
+
+    def get_transaction_history(self, account_id, limit=50):
+        """
+        查询交易记录
+
+        Args:
+            account_id (str): 账户ID
+            limit (int):      返回条数
+
+        Returns:
+            list: 交易记录列表
+        """
+        self._load()
+        transactions = self._billing_data.get("transactions", [])
+        user_txns = [t for t in transactions if t.get("account_id") == account_id]
+        return user_txns[-limit:]
+
 
 # ══════════════════════════════════════════════
 #  API路由处理函数

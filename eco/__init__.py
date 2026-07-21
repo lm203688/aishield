@@ -9,9 +9,10 @@ AIShield 生态核心模块包
   - a2a_gateway:     A2A协议Gateway（兼容Google A2A v1.0）
   - collab:          Agent协作通信总线（消息总线/会话/委派）
   - auth_provider:   增强身份认证（API Key/作用域/审计）
+  - account:         用户账户系统（注册/登录/余额/API Key）
 
 使用方式:
-    from eco import identity, payment, badge, marketplace, a2a_gateway, collab, auth_provider
+    from eco import identity, payment, badge, marketplace, a2a_gateway, collab, auth_provider, account
 """
 
 from eco import identity
@@ -21,6 +22,7 @@ from eco import marketplace
 from eco import a2a_gateway
 from eco import collab
 from eco import auth_provider
+from eco import account
 
 # NOTE: 公共JSON持久化工具已提取至 api.utils（load_json / save_json）
 #       各子模块当前仍使用各自的私有实现（_load_json / _save_json），
@@ -34,4 +36,5 @@ __all__ = [
     "a2a_gateway",
     "collab",
     "auth_provider",
+    "account",
 ]

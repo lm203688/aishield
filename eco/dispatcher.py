@@ -312,6 +312,33 @@ def dispatch_get(handler):
             handler._send_json({"success": True, "events": result if isinstance(result, list) else []})
             return True
 
+    # Account: 查询当前用户信息
+    if path == "/api/v1/account/me":
+        mod = _modules.get("account")
+        if mod:
+            account = mod._get_auth_account(handler)
+            if not account:
+                handler._send_json({"error": "Unauthorized"}, 401)
+                return True
+            info = mod.UserAccount().get_user_info(account["account_id"])
+            handler._send_json({"success": True, "account": info})
+            return True
+
+    # Account: 查询余额
+    if path == "/api/v1/account/balance":
+        mod = _modules.get("account")
+        if mod:
+            account = mod._get_auth_account(handler)
+            if not account:
+                handler._send_json({"error": "Unauthorized"}, 401)
+                return True
+            try:
+                balance = mod.UserAccount().get_balance(account["account_id"])
+                handler._send_json({"success": True, "account_id": account["account_id"], "balance": balance})
+            except ValueError as e:
+                handler._send_json({"error": str(e)}, 400)
+            return True
+
     return False
 
 
@@ -319,6 +346,59 @@ def dispatch_post(handler, data):
     """分发POST请求。返回True如果处理了。"""
     parsed = urlparse(handler.path)
     path = parsed.path
+
+    # Account: 注册（无需认证）
+    if path == "/api/v1/account/register":
+        mod = _modules.get("account")
+        if mod:
+            name = data.get("name", "").strip()
+            email = data.get("email", "").strip()
+            password = data.get("password", "")
+            if not name or not email or not password:
+                handler._send_json({"error": "name, email, password 均为必填"}, 400)
+                return True
+            try:
+                mgr = mod.UserAccount()
+                result = mgr.register(name, email, password)
+                handler._send_json({"success": True, **result}, 201)
+            except ValueError as e:
+                handler._send_json({"error": str(e)}, 409)
+            return True
+
+    # Account: 登录（无需认证）
+    if path == "/api/v1/account/login":
+        mod = _modules.get("account")
+        if mod:
+            email = data.get("email", "").strip()
+            password = data.get("password", "")
+            if not email or not password:
+                handler._send_json({"error": "email, password 均为必填"}, 400)
+                return True
+            try:
+                mgr = mod.UserAccount()
+                result = mgr.login(email, password)
+                handler._send_json({"success": True, **result})
+            except ValueError as e:
+                handler._send_json({"error": str(e)}, 401)
+            return True
+
+    # Account: 充值（无需认证，按接口设计直接调用）
+    if path == "/api/v1/account/recharge":
+        mod = _modules.get("account")
+        if mod:
+            account_id = data.get("account_id", "").strip()
+            amount = float(data.get("amount", 0))
+            gateway = data.get("gateway", "alipay")
+            if not account_id or amount <= 0:
+                handler._send_json({"error": "account_id 和 amount 为必填，且 amount > 0"}, 400)
+                return True
+            try:
+                mgr = mod.UserAccount()
+                result = mgr.recharge(account_id, amount, gateway)
+                handler._send_json({"success": True, **result})
+            except ValueError as e:
+                handler._send_json({"error": str(e)}, 400)
+            return True
 
     # P0-4: 认证中间件 — 对 /api/v1/* POST 端点默认启用认证
     if not _require_auth(handler):
@@ -504,7 +584,12 @@ def dispatch_post(handler, data):
         if mod:
             skill_id = path[len("/api/v1/skills/"):-len("/invoke")]
             invoker = mod.SkillInvoker()
-            result = invoker.invoke(skill_id, caller_agent_id=data.get("caller_agent_id", ""), input_data=data.get("input_data", {}))
+            result = invoker.invoke(
+                skill_id,
+                caller_agent_id=data.get("caller_agent_id", ""),
+                input_data=data.get("input_data", {}),
+                account_id=data.get("account_id"),
+            )
             handler._send_json({"success": True, **result})
             return True
 

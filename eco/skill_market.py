@@ -138,7 +138,7 @@ class SkillRegistry:
         _save_json(SKILL_MARKET_FILE, existing)
 
     def publish(self, agent_id, name, description, category,
-                pricing_model="free", price=0, capabilities=None,
+                pricing_model="free", price=0, pricing=None, capabilities=None,
                 tags=None, version="1.0.0", free_quota=10):
         """
         发布新技能
@@ -149,7 +149,8 @@ class SkillRegistry:
             description (str):       技能描述
             category (str):          分类
             pricing_model (str):     定价模型 (free/per_call/subscription)
-            price (float):           价格
+            price (float):           价格（兼容旧字段）
+            pricing (dict):          定价详情 {type, amount, currency}
             capabilities (list):     能力列表
             tags (list):             标签
             version (str):           版本号
@@ -170,6 +171,20 @@ class SkillRegistry:
 
         skill_id = _generate_skill_id()
 
+        # 构建定价字段（优先使用传入的 pricing，否则从 pricing_model + price 推导）
+        if pricing and isinstance(pricing, dict):
+            skill_pricing = {
+                "type": pricing.get("type", pricing_model),
+                "amount": float(pricing.get("amount", price)),
+                "currency": pricing.get("currency", "CNY"),
+            }
+        else:
+            skill_pricing = {
+                "type": pricing_model if pricing_model in ("free", "per_call") else "per_call",
+                "amount": float(price),
+                "currency": "CNY",
+            }
+
         skill = {
             "skill_id": skill_id,
             "agent_id": agent_id,
@@ -178,6 +193,7 @@ class SkillRegistry:
             "category": category,
             "pricing_model": pricing_model,
             "price": float(price),
+            "pricing": skill_pricing,
             "capabilities": capabilities or [],
             "tags": tags or [],
             "version": version,
@@ -374,7 +390,7 @@ class SkillInvoker:
         existing["invocations"] = self._invocations
         _save_json(SKILL_MARKET_FILE, existing)
 
-    def invoke(self, skill_id, caller_agent_id, input_data):
+    def invoke(self, skill_id, caller_agent_id, input_data, account_id=None):
         """
         调用技能
 
@@ -383,10 +399,13 @@ class SkillInvoker:
           - 否则如果技能定义中包含 endpoint（HTTP URL），通过 urllib 发起真实 HTTP POST 调用
           - 如果都没有，返回明确的"未配置调用端点"错误
 
+        新增: 如果传入 account_id，调用前检查用户余额，扣费后再执行。
+
         Args:
             skill_id (str):         技能ID
             caller_agent_id (str):  调用者Agent ID
             input_data (dict):      输入数据
+            account_id (str, opt):  用户账户ID（用于余额扣费）
 
         Returns:
             dict: {"invocation_id", "result", "cost", "remaining_quota"} 或 {"error": ...}
@@ -405,14 +424,22 @@ class SkillInvoker:
 
         invocation_id = _generate_invocation_id()
 
-        # 计算费用
+        # 计算费用（优先使用 pricing 字段）
+        pricing = skill.get("pricing", {})
         cost = 0.0
-        if skill["pricing_model"] == "free":
-            cost = 0.0
+        if pricing.get("type") == "per_call":
+            cost = pricing.get("amount", 0.0)
         elif skill["pricing_model"] == "per_call":
             cost = skill.get("price", 0.0)
-        elif skill["pricing_model"] == "subscription":
-            cost = 0.0  # 订阅制不额外收费
+
+        # 如果有 account_id，检查余额并扣费
+        if account_id and cost > 0:
+            try:
+                from eco.account import UserAccount
+                ua = UserAccount()
+                ua.consume(account_id, cost)
+            except ValueError as e:
+                return {"error": str(e)}
 
         # 更新技能调用统计
         skill["total_calls"] = skill.get("total_calls", 0) + 1

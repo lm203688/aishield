@@ -570,12 +570,46 @@ class AIShieldHandler(BaseHTTPRequestHandler):
                     "GET  /api/v1/proxy/tools — List proxyable certified tools",
                     "GET  /api/v1/proxy/stats — Proxy call statistics",
                     "GET  /banned-words — Banned words landing page",
+                    "POST /api/v1/account/register — User registration",
+                    "POST /api/v1/account/login — User login",
+                    "GET  /api/v1/account/me — Get user info",
+                    "POST /api/v1/account/recharge — Recharge balance",
+                    "GET  /api/v1/account/balance — Query balance",
                 ],
                 "docs": "https://aishield.tools/docs",
                 "mcp_install": "npx @aishield/mcp-server",
             })
             return
-        
+
+        # ── 账户路由（在 eco dispatcher 之前处理）──
+        if path == "/api/v1/account/me":
+            try:
+                from eco import account as _account_mod
+                acct = _account_mod._get_auth_account(self)
+                if not acct:
+                    self._send_json({"error": "Unauthorized"}, 401)
+                    return
+                info = _account_mod.UserAccount().get_user_info(acct["account_id"])
+                self._send_json({"success": True, "account": info})
+            except Exception as e:
+                self._send_json({"error": str(e)}, 500)
+            return
+
+        if path == "/api/v1/account/balance":
+            try:
+                from eco import account as _account_mod
+                acct = _account_mod._get_auth_account(self)
+                if not acct:
+                    self._send_json({"error": "Unauthorized"}, 401)
+                    return
+                balance = _account_mod.UserAccount().get_balance(acct["account_id"])
+                self._send_json({"success": True, "account_id": acct["account_id"], "balance": balance})
+            except ValueError as e:
+                self._send_json({"error": str(e)}, 400)
+            except Exception as e:
+                self._send_json({"error": str(e)}, 500)
+            return
+
         # Eco模块路由
         if _eco_dispatch_get(self):
             return
@@ -596,6 +630,49 @@ class AIShieldHandler(BaseHTTPRequestHandler):
             self._send_json({"error": "Invalid JSON"}, 400)
             return
         
+        # ── 账户路由（在 eco dispatcher 之前处理）──
+        if path.startswith("/api/v1/account/"):
+            try:
+                from eco import account as _account_mod
+                if path == "/api/v1/account/register":
+                    name = data.get("name", "").strip()
+                    email = data.get("email", "").strip()
+                    password = data.get("password", "")
+                    if not name or not email or not password:
+                        self._send_json({"error": "name, email, password 均为必填"}, 400)
+                        return
+                    mgr = _account_mod.UserAccount()
+                    result = mgr.register(name, email, password)
+                    self._send_json({"success": True, **result}, 201)
+                    return
+                elif path == "/api/v1/account/login":
+                    email = data.get("email", "").strip()
+                    password = data.get("password", "")
+                    if not email or not password:
+                        self._send_json({"error": "email, password 均为必填"}, 400)
+                        return
+                    mgr = _account_mod.UserAccount()
+                    result = mgr.login(email, password)
+                    self._send_json({"success": True, **result})
+                    return
+                elif path == "/api/v1/account/recharge":
+                    account_id = data.get("account_id", "").strip()
+                    amount = float(data.get("amount", 0))
+                    gateway = data.get("gateway", "alipay")
+                    if not account_id or amount <= 0:
+                        self._send_json({"error": "account_id 和 amount 为必填，且 amount > 0"}, 400)
+                        return
+                    mgr = _account_mod.UserAccount()
+                    result = mgr.recharge(account_id, amount, gateway)
+                    self._send_json({"success": True, **result})
+                    return
+            except ValueError as e:
+                self._send_json({"error": str(e)}, 400)
+                return
+            except Exception as e:
+                self._send_json({"error": str(e)}, 500)
+                return
+
         if path == "/api/v1/audit":
             self._handle_audit(data)
         elif path == "/api/v1/prompt-check":
@@ -966,7 +1043,7 @@ def main():
     if _eco_available:
         try:
             from eco import identity, payment, badge, marketplace, a2a_gateway
-            from eco import collab, sandbox, skill_market, auth_provider
+            from eco import collab, sandbox, skill_market, auth_provider, account
             _eco_init({
                 "identity": identity,
                 "payment": payment,
@@ -977,8 +1054,9 @@ def main():
                 "sandbox": sandbox,
                 "skill_market": skill_market,
                 "auth_provider": auth_provider,
+                "account": account,
             })
-            print("  Eco modules: identity, payment, badge, marketplace, a2a, collab, sandbox, skill_market, auth_provider")
+            print("  Eco modules: identity, payment, badge, marketplace, a2a, collab, sandbox, skill_market, auth_provider, account")
         except Exception as e:
             print(f"  Eco modules: init failed ({e})")
     else:
