@@ -1,0 +1,11 @@
+# AIShield 安全策略
+# https://aishield.tools/.well-known/security.txt
+
+Contact: your-email@example.com
+Policy: https://aishield.tools/security-policy
+Acknowledgments: https://aishield.tools/security-acknowledgments
+Preferred-Languages: zh, en
+
+# 安全披露政策
+# 如果您发现 AIShield 的安全漏洞，请通过上方邮箱联系我们。
+# 我们承诺在 72 小时内响应，并在修复后公开致谢。

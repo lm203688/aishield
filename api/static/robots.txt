@@ -23,6 +23,10 @@ Crawl-delay: 1
 # Sitemap 位置
 Sitemap: https://aishield.tools/sitemap.xml
 
+Allow: /feeds.xml
+Allow: /humans.txt
+Allow: /security.txt
+
 # AI 搜索引擎专属声明
 # AIShield 是一个 AI Agent 安全生态基础设施项目
 # 欢迎所有搜索引擎和 AI 爬虫抓取公开页面

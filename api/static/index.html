@@ -20,6 +20,9 @@
 <meta name="author" content="AIShield">
 <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
 <link rel="canonical" href="https://aishield.tools/">
+<link rel="manifest" href="/manifest.json">
+<link rel="alternate" type="application/atom+xml" title="AIShield Updates" href="/feeds.xml">
+<meta name="theme-color" content="#38bdf8">
 <script src="https://cdn.tailwindcss.com"></script>
 
 <!-- GEO Structured Data: Organization -->
@@ -632,6 +635,11 @@ async function doBannedCheck() {
     showResult('banned-result', '<div class="rounded-lg bg-red-500/10 border border-red-500/20 p-4 text-red-300 text-sm">检测失败</div>');
   }
   btn.textContent = '检测'; btn.disabled = false;
+}
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/service-worker.js');
 }
 </script>
 </body>

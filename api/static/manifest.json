@@ -1,0 +1,28 @@
+{
+  "name": "AIShield",
+  "short_name": "AIShield",
+  "description": "AI Agent 安全生态基础设施",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#38bdf8",
+  "background_color": "#0f172a",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/badge/aishield",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["security", "developer tools", "utilities"],
+  "lang": "zh-CN",
+  "dir": "ltr",
+  "scope": "/",
+  "related_applications": [
+    {
+      "platform": "web",
+      "url": "https://aishield.tools"
+    }
+  ]
+}

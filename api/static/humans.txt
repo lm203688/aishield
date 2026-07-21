@@ -1,0 +1,20 @@
+/* TEAM */
+Team: AIShield Team
+Site: https://aishield.tools
+Location: Open Source
+Last update: 2026-07-21
+
+/* STANDARDS */
+Standards: OWASP MCP Top 10
+Standards: A2A Protocol
+
+/* PROJECT */
+Open source: Yes (MIT License)
+Repository: https://github.com/lm203688/aishield
+Version: 4.2
+
+/* TECHNOLOGY */
+Language: Python
+Framework: Python Standard Library (zero dependencies)
+Security: OWASP MCP Top 10 aligned
+Rules: 133 security rules

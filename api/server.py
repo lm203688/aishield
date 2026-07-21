@@ -336,6 +336,79 @@ class AIShieldHandler(BaseHTTPRequestHandler):
                 _record_usage("agent-card", self.client_address[0])
                 return
 
+        # GEO: Atom Feed
+        if path == "/feeds.xml":
+            feeds_path = os.path.join(BASE, "static", "feeds.xml")
+            if os.path.exists(feeds_path):
+                with open(feeds_path, "r", encoding="utf-8") as f:
+                    xml = f.read()
+                body = xml.encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "application/atom+xml; charset=utf-8")
+                self.send_header("Content-Length", str(len(body)))
+                self.send_header("Cache-Control", "public, max-age=3600")
+                self.end_headers()
+                self.wfile.write(body)
+                return
+
+        # GEO: Web App Manifest
+        if path == "/manifest.json":
+            manifest_path = os.path.join(BASE, "static", "manifest.json")
+            if os.path.exists(manifest_path):
+                with open(manifest_path, "r", encoding="utf-8") as f:
+                    json_data = f.read()
+                body = json_data.encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "application/manifest+json; charset=utf-8")
+                self.send_header("Content-Length", str(len(body)))
+                self.send_header("Cache-Control", "public, max-age=3600")
+                self.end_headers()
+                self.wfile.write(body)
+                return
+
+        # GEO: Security Contact
+        if path == "/security.txt":
+            security_path = os.path.join(BASE, "static", ".well-known", "security.txt")
+            if os.path.exists(security_path):
+                with open(security_path, "r", encoding="utf-8") as f:
+                    txt = f.read()
+                body = txt.encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "text/plain; charset=utf-8")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+                return
+
+        # GEO: Humans.txt
+        if path == "/humans.txt":
+            humans_path = os.path.join(BASE, "static", "humans.txt")
+            if os.path.exists(humans_path):
+                with open(humans_path, "r", encoding="utf-8") as f:
+                    txt = f.read()
+                body = txt.encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "text/plain; charset=utf-8")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+                return
+
+        # GEO: Service Worker
+        if path == "/service-worker.js":
+            sw_path = os.path.join(BASE, "static", "service-worker.js")
+            if os.path.exists(sw_path):
+                with open(sw_path, "r", encoding="utf-8") as f:
+                    js = f.read()
+                body = js.encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "application/javascript; charset=utf-8")
+                self.send_header("Content-Length", str(len(body)))
+                self.send_header("Cache-Control", "no-cache")
+                self.end_headers()
+                self.wfile.write(body)
+                return
+
         # Landing Page — 违禁词检测
         if path == "/banned-words":
             html_path = os.path.join(BASE, "static", "banned_words.html")
