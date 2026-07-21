@@ -1,5 +1,5 @@
-# AIShield Robots.txt
-# https://aishield.dev
+﻿# AIShield Robots.txt
+# https://aishield.tools
 
 User-agent: *
 Allow: /
@@ -21,7 +21,7 @@ Disallow: /api/v1/auth/
 Crawl-delay: 1
 
 # Sitemap 位置
-Sitemap: https://aishield.dev/sitemap.xml
+Sitemap: https://aishield.tools/sitemap.xml
 
 # AI 搜索引擎专属声明
 # AIShield 是一个 AI Agent 安全生态基础设施项目

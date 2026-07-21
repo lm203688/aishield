@@ -1,4 +1,4 @@
-# AIShield Security Scanner — Dify 工具市场插件配置
+﻿# AIShield Security Scanner — Dify 工具市场插件配置
 # 导入方式：Dify 工作台 → 工具 → 从 YAML 文件导入
 # 文档：https://docs.dify.ai/guides/tools/create-tool
 
@@ -27,7 +27,7 @@ identity:
   icon_background: "#0f172a"
   # 作者信息
   author: AIShield Team
-  author_url: https://aishield.dev
+  author_url: https://aishield.tools
   # 标签
   tags:
     en_US:
@@ -135,7 +135,7 @@ tools:
     # API 端点配置
     endpoint:
       method: POST
-      url: https://api.aishield.dev/api/v1/audit
+      url: https://api.aishield.tools/api/v1/audit
       headers:
         Content-Type: application/json
       # 请求体映射：Dify参数 → API请求体
@@ -196,7 +196,7 @@ tools:
           description: Human-readable summary in Chinese
     endpoint:
       method: POST
-      url: https://api.aishield.dev/api/v1/prompt-check
+      url: https://api.aishield.tools/api/v1/prompt-check
       headers:
         Content-Type: application/json
       body_mapping:
@@ -269,7 +269,7 @@ tools:
           description: The checked platform
     endpoint:
       method: POST
-      url: https://api.aishield.dev/api/v1/banned-words
+      url: https://api.aishield.tools/api/v1/banned-words
       headers:
         Content-Type: application/json
       body_mapping:
@@ -277,12 +277,12 @@ tools:
         platform: "{{platform}}"
 
 # Logo URL
-logo_url: https://aishield.dev/logo.svg
+logo_url: https://aishield.tools/logo.svg
 # 版本
 version: "4.1.0"
 # 许可证
 license: MIT
 # 首页
-homepage: https://aishield.dev
+homepage: https://aishield.tools
 # 仓库
 repository: https://github.com/aishield-dev/aishield

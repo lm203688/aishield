@@ -1,4 +1,4 @@
-# AIShield MCP Server
+﻿# AIShield MCP Server
 
 OWASP MCP Top 10 aligned security scanner for AI Agent tools.
 
@@ -28,7 +28,7 @@ npx @aishield/mcp-server
 {
   "mcpServers": {
     "aishield": {
-      "url": "https://api.aishield.dev/mcp"
+      "url": "https://api.aishield.tools/mcp"
     }
   }
 }

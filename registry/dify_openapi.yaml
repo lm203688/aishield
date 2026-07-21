@@ -1,4 +1,4 @@
-# AIShield Security Scanner — Dify OpenAPI 格式工具定义
+﻿# AIShield Security Scanner — Dify OpenAPI 格式工具定义
 # Dify 支持通过 OpenAPI/Swagger 规范导入工具集
 # 导入方式：Dify 工作台 → 工具 → 从 OpenAPI 文件导入
 # 文档：https://docs.dify.ai/guides/tools/import-from-openapi-swagger
@@ -22,22 +22,22 @@ info:
   version: "4.1.0"
   contact:
     name: AIShield Team
-    url: https://aishield.dev
-    email: team@aishield.dev
+    url: https://aishield.tools
+    email: team@aishield.tools
   license:
     name: MIT
     url: https://opensource.org/licenses/MIT
 
 servers:
-  - url: https://api.aishield.dev
+  - url: https://api.aishield.tools
     description: AIShield 生产环境
-  - url: http://localhost:8450
-    description: AIShield 本地开发环境
+  - url: https://aishield.tools
+    description: AIShield 生产环境
 
 # 外部文档链接
 externalDocs:
   description: AIShield 完整文档
-  url: https://docs.aishield.dev
+  url: https://docs.aishield.tools
 
 tags:
   - name: Security Scan
@@ -353,7 +353,7 @@ components:
           type: object
           properties:
             name: { type: string, example: "AIShield" }
-            url: { type: string, example: "https://aishield.dev" }
+            url: { type: string, example: "https://aishield.tools" }
             version: { type: string, example: "4.1" }
 
     PromptCheckResponse:

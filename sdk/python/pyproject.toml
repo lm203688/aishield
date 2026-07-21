@@ -1,4 +1,4 @@
-[build-system]
+﻿[build-system]
 requires = ["setuptools>=68.0", "wheel"]
 build-backend = "setuptools.backends._legacy:_Backend"
 
@@ -19,5 +19,5 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://aishield.dev"
+Homepage = "https://aishield.tools"
 Repository = "https://github.com/lm203688/aishield"

@@ -1,4 +1,4 @@
-"""
+﻿"""
 eco/a2a_gateway.py — A2A协议Gateway
 
 功能:
@@ -693,7 +693,7 @@ if __name__ == "__main__":
 
     agent1 = card_mgr.register({
         "name": "SecurityScanner",
-        "url": "https://agent.aishield.dev/scanner",
+        "url": "https://agent.aishield.tools/scanner",
         "description": "OWASP MCP Top 10安全扫描Agent",
         "skills": [
             {"id": "scan", "name": "security_scan", "description": "安全扫描", "tags": ["scan", "security", "audit"]},
@@ -708,7 +708,7 @@ if __name__ == "__main__":
 
     agent2 = card_mgr.register({
         "name": "CodeReviewer",
-        "url": "https://agent.aishield.dev/reviewer",
+        "url": "https://agent.aishield.tools/reviewer",
         "description": "AI代码审查Agent",
         "skills": [
             {"id": "review", "name": "code_review", "description": "代码审查", "tags": ["review", "code", "quality"]},

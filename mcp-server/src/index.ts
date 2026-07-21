@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+﻿#!/usr/bin/env node
 
 /**
  * AIShield MCP Server v3.0
@@ -10,7 +10,7 @@
  *   npx @aishield/mcp-server
  * 
  * Env:
- *   AISHIELD_API_URL  — backend API URL (default: https://api.aishield.dev)
+ *   AISHIELD_API_URL  — backend API URL (default: https://api.aishield.tools)
  *   AISHIELD_API_KEY  — optional API key for higher rate limits
  */
 
@@ -18,7 +18,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
 
-const API_BASE = process.env.AISHIELD_API_URL || 'https://api.aishield.dev';
+const API_BASE = process.env.AISHIELD_API_URL || 'https://api.aishield.tools';
 const API_KEY = process.env.AISHIELD_API_KEY || '';
 
 // ── API Helper ──
@@ -328,7 +328,7 @@ function formatScanResult(data: any) {
   }
 
   lines.push('');
-  lines.push(`Badge: [![AIShield](https://img.shields.io/badge/AIShield-${badge}-${badge === 'gold' ? 'FFD700' : badge === 'silver' ? 'C0C0C0' : badge === 'bronze' ? 'CD7F32' : '999'})}](https://aishield.dev)`);
+  lines.push(`Badge: [![AIShield](https://img.shields.io/badge/AIShield-${badge}-${badge === 'gold' ? 'FFD700' : badge === 'silver' ? 'C0C0C0' : badge === 'bronze' ? 'CD7F32' : '999'})}](https://aishield.tools)`);
 
   return { content: [{ type: 'text' as const, text: lines.join('\n') }] };
 }

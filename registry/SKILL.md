@@ -1,4 +1,4 @@
----
+﻿---
 name: aishield
 description: >
   AIShield Security Scanner — 对齐 OWASP MCP Top 10 (2025 v0.1) 的 AI Agent 安全扫描工具。
@@ -160,7 +160,7 @@ tags: [security, mcp, owasp, scanner, agent-safety, prompt-injection, compliance
 ## API 配置
 
 ### 端点
-默认 API 地址：`https://api.aishield.dev`
+默认 API 地址：`https://api.aishield.tools`
 
 | 功能 | 方法 | 路径 |
 |------|------|------|

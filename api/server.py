@@ -1,4 +1,4 @@
-"""
+﻿"""
 AIShield API Server — Phase 1 精简版
 仅保留安全/合规相关路由，去除所有非核心功能
 
@@ -498,7 +498,7 @@ class AIShieldHandler(BaseHTTPRequestHandler):
                     "GET  /api/v1/proxy/stats — Proxy call statistics",
                     "GET  /banned-words — Banned words landing page",
                 ],
-                "docs": "https://aishield.dev/docs",
+                "docs": "https://aishield.tools/docs",
                 "mcp_install": "npx @aishield/mcp-server",
             })
             return
@@ -637,7 +637,7 @@ class AIShieldHandler(BaseHTTPRequestHandler):
                 "report": result,
                 "powered_by": {
                     "name": "AIShield",
-                    "url": "https://aishield.dev",
+                    "url": "https://aishield.tools",
                     "version": "4.1",
                 },
             }
@@ -667,7 +667,7 @@ class AIShieldHandler(BaseHTTPRequestHandler):
         # 品牌水印
         result["powered_by"] = {
             "name": "AIShield",
-            "url": "https://aishield.dev",
+            "url": "https://aishield.tools",
             "version": "4.1",
         }
         self._send_json(result)
@@ -684,7 +684,7 @@ class AIShieldHandler(BaseHTTPRequestHandler):
         # 品牌水印
         result["powered_by"] = {
             "name": "AIShield",
-            "url": "https://aishield.dev",
+            "url": "https://aishield.tools",
             "version": "4.1",
         }
         self._send_json(result)

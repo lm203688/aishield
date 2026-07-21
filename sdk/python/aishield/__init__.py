@@ -1,4 +1,4 @@
-"""AIShield Python SDK"""
+﻿"""AIShield Python SDK"""
 __version__ = "4.1.0"
 
 import json
@@ -9,7 +9,7 @@ import urllib.error
 class AIShieldClient:
     """AIShield API Client — OWASP MCP Top 10 aligned security scanner"""
 
-    def __init__(self, api_url="https://api.aishield.dev", api_key=None):
+    def __init__(self, api_url="https://api.aishield.tools", api_key=None):
         self.api_url = api_url.rstrip("/")
         self.api_key = api_key
 

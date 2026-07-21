@@ -1,4 +1,4 @@
-"""
+﻿"""
 GEO 优化测试 -- 验证结构化数据和发现端点
 
 测试策略:
@@ -63,7 +63,7 @@ class TestRobotsTxt(unittest.TestCase):
     def test_robots_txt_contains_sitemap_location(self):
         """robots.txt 包含 Sitemap 声明"""
         self.assertIn('Sitemap:', self.content)
-        self.assertIn('https://aishield.dev/sitemap.xml', self.content)
+        self.assertIn('https://aishield.tools/sitemap.xml', self.content)
 
     def test_robots_txt_has_ai_crawler_rules(self):
         """robots.txt 包含 AI 搜索引擎专属规则"""
@@ -88,12 +88,12 @@ class TestSitemapXml(unittest.TestCase):
     def test_sitemap_contains_major_pages(self):
         """sitemap 包含所有主要页面"""
         text = self.content
-        self.assertIn('https://aishield.dev/', text)
-        self.assertIn('https://aishield.dev/agent.html', text)
-        self.assertIn('https://aishield.dev/banned-words', text)
-        self.assertIn('https://aishield.dev/report', text)
-        self.assertIn('https://aishield.dev/tool/profile', text)
-        self.assertIn('https://aishield.dev/.well-known/agent-card.json', text)
+        self.assertIn('https://aishield.tools/', text)
+        self.assertIn('https://aishield.tools/agent.html', text)
+        self.assertIn('https://aishield.tools/banned-words', text)
+        self.assertIn('https://aishield.tools/report', text)
+        self.assertIn('https://aishield.tools/tool/profile', text)
+        self.assertIn('https://aishield.tools/.well-known/agent-card.json', text)
 
     def test_sitemap_urls_have_loc_elements(self):
         """每个 URL 条目包含 loc 元素"""
@@ -225,7 +225,7 @@ class TestIndexPage(unittest.TestCase):
     def test_index_has_canonical_url(self):
         """首页包含 canonical URL"""
         self.assertIn('rel="canonical"', self.html)
-        self.assertIn('https://aishield.dev/', self.html)
+        self.assertIn('https://aishield.tools/', self.html)
 
 
 class TestBannedWordsPage(unittest.TestCase):
@@ -253,7 +253,7 @@ class TestBannedWordsPage(unittest.TestCase):
     def test_banned_words_page_has_canonical(self):
         """违禁词页面包含 canonical URL"""
         self.assertIn('rel="canonical"', self.html)
-        self.assertIn('https://aishield.dev/banned-words', self.html)
+        self.assertIn('https://aishield.tools/banned-words', self.html)
 
 
 # ============================================================

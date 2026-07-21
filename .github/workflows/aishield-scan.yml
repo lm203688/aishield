@@ -1,4 +1,4 @@
-name: AIShield MCP Security Scan
+﻿name: AIShield MCP Security Scan
 
 on:
   workflow_dispatch:
@@ -45,7 +45,7 @@ jobs:
 
       - name: Run Security Scan
         env:
-          AISHIELD_API_URL: https://api.aishield.dev
+          AISHIELD_API_URL: https://api.aishield.tools
         run: |
           REPO_URL="${{ github.event.inputs.repo_url || github.event.repository.html_url }}"
           TOOL_TYPE="${{ github.event.inputs.tool_type || 'mcp' }}"

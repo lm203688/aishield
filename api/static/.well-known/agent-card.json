@@ -1,8 +1,8 @@
-{
+﻿{
   "name": "AIShield",
   "version": "4.2.0",
   "description": "AI Agent 安全生态基础设施 — OWASP MCP Top 10 对齐，133条安全规则，全链路守护Agent世界",
-  "url": "https://aishield.dev",
+  "url": "https://aishield.tools",
   "provider": {
     "name": "AIShield",
     "url": "https://github.com/lm203688/aishield"
@@ -165,7 +165,7 @@
     "github": "https://github.com/lm203688/aishield",
     "license": "MIT",
     "license_url": "https://github.com/lm203688/aishield/blob/main/LICENSE",
-    "api_docs": "https://aishield.dev/api/v1"
+    "api_docs": "https://aishield.tools/api/v1"
   },
   "mcp_install": "npx @aishield/mcp-server",
   "protocol_version": "a2a-2025-06"

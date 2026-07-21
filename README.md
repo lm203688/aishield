@@ -80,7 +80,7 @@ python api/server.py
 ### 2. 首次安全扫描
 
 ```bash
-curl -X POST http://localhost:8450/api/v1/audit \
+curl -X POST https://aishield.tools/api/v1/audit \
   -H "Content-Type: application/json" \
   -d '{
     "tool_name": "my-agent-tool",
@@ -95,7 +95,7 @@ curl -X POST http://localhost:8450/api/v1/audit \
 扫描通过后，在项目 README 中嵌入你的安全徽章：
 
 ```markdown
-![AIShield Security](http://localhost:8450/badge/my-agent-tool)
+![AIShield Security](https://aishield.tools/badge/my-agent-tool)
 ```
 
 部署后替换 `localhost:8450` 为你的公网地址即可在 GitHub 中展示。
