@@ -24,7 +24,7 @@ jobs:
           python3 -m py_compile api/server.py eco/*.py scanner/*.py
           pkill -f "api/server.py" || true
           sleep 2
-          export PORT=8420
+          export PORT=8450
           nohup python3 api/server.py > server.log 2>&1 &
           sleep 3
-          curl -sf http://localhost:8420/api/v1/health && echo "Deploy successful"
+          curl -sf http://localhost:8450/api/v1/health && echo "Deploy successful"
