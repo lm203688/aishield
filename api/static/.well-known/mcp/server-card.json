@@ -1,0 +1,87 @@
+{
+  "serverInfo": {
+    "name": "AIShield",
+    "version": "4.2.0",
+    "description": "AI Agent Security Shield — OWASP MCP Top 10 aligned security scanning. 133 rules covering prompt injection, zero-width characters, Rug Pull, permission audit, and dependency monitoring. Features agent one-click onboarding, OpenAPI auto-discovery, and embeddable security badges."
+  },
+  "url": "https://aishield.tools/mcp",
+  "provider": {
+    "name": "AIShield",
+    "url": "https://github.com/lm203688/aishield"
+  },
+  "license": "MIT",
+  "tools": [
+    {
+      "name": "security_scan",
+      "description": "Full security audit for MCP tools/agents with OWASP MCP Top 10 alignment. Returns 5-dimension scores, badge level, and detailed findings.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "tool_name": {"type": "string", "description": "Tool name"},
+          "description": {"type": "string", "description": "Tool description"},
+          "input_schema": {"type": "object", "description": "Tool input schema"},
+          "endpoint": {"type": "string", "description": "Tool endpoint URL"}
+        },
+        "required": ["tool_name"]
+      }
+    },
+    {
+      "name": "prompt_injection_check",
+      "description": "Detect prompt injection attacks in Chinese and English. Supports pinyin variants, homophone substitution, zero-width characters, and 200+ pattern matching.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "prompt": {"type": "string", "description": "Text to check for prompt injection"}
+        },
+        "required": ["prompt"]
+      }
+    },
+    {
+      "name": "banned_words_check",
+      "description": "Detect banned/sensitive words for 6 Chinese platforms: WeChat, Douyin, Xiaohongshu, Bilibili, Weibo, and general content.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "text": {"type": "string", "description": "Text to check"},
+          "platform": {"type": "string", "enum": ["all", "wechat", "douyin", "xiaohongshu", "bilibili", "weibo"], "default": "all"}
+        },
+        "required": ["text"]
+      }
+    },
+    {
+      "name": "rug_pull_detect",
+      "description": "Detect if an MCP tool has suspicious recent changes like removed security code or added risky modifications (Rug Pull risk).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "source_url": {"type": "string", "description": "GitHub repository URL"}
+        },
+        "required": ["source_url"]
+      }
+    },
+    {
+      "name": "agent_register",
+      "description": "One-click agent onboarding. Register your agent and get API key, DID identity, and quick start guide.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "agent_name": {"type": "string", "description": "Agent name"},
+          "description": {"type": "string", "description": "Agent description"},
+          "capabilities": {"type": "array", "items": {"type": "string"}, "description": "Agent capabilities list"}
+        },
+        "required": ["agent_name"]
+      }
+    },
+    {
+      "name": "dependency_monitor",
+      "description": "Monitor MCP tool dependencies for version changes and security risks.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "source_url": {"type": "string", "description": "GitHub repository URL"}
+        },
+        "required": ["source_url"]
+      }
+    }
+  ]
+}
