@@ -345,18 +345,42 @@ class AIShieldHandler(BaseHTTPRequestHandler):
         # Smithery MCP Server Card
         if path == "/.well-known/mcp/server-card.json":
             sc_path = os.path.join(BASE, "static", ".well-known", "mcp", "server-card.json")
+            json_data = None
             if os.path.exists(sc_path):
                 with open(sc_path, "r", encoding="utf-8") as f:
                     json_data = f.read()
-                body = json_data.encode("utf-8")
-                self.send_response(200)
-                self.send_header("Content-Type", "application/json; charset=utf-8")
-                self.send_header("Content-Length", str(len(body)))
-                self.send_header("Access-Control-Allow-Origin", "*")
-                self.end_headers()
-                self.wfile.write(body)
-                _record_usage("smithery-server-card", self.client_address[0])
-                return
+            else:
+                # Fallback: inline server card for deployments without the static file
+                json_data = json.dumps({
+                    "serverInfo": {"name": "AIShield", "version": "4.2.0",
+                        "description": "AI Agent Security Shield — OWASP MCP Top 10 aligned security scanning. 133 rules covering prompt injection, zero-width characters, Rug Pull, permission audit, and dependency monitoring."},
+                    "url": "https://aishield.tools/mcp",
+                    "provider": {"name": "AIShield", "url": "https://github.com/lm203688/aishield"},
+                    "license": "MIT",
+                    "tools": [
+                        {"name": "security_scan", "description": "Full security audit for MCP tools/agents with OWASP MCP Top 10 alignment.",
+                            "inputSchema": {"type": "object", "properties": {"tool_name": {"type": "string"}}, "required": ["tool_name"]}},
+                        {"name": "prompt_injection_check", "description": "Detect prompt injection attacks in Chinese and English. 200+ pattern matching.",
+                            "inputSchema": {"type": "object", "properties": {"prompt": {"type": "string"}}, "required": ["prompt"]}},
+                        {"name": "banned_words_check", "description": "Detect banned/sensitive words for 6 Chinese platforms.",
+                            "inputSchema": {"type": "object", "properties": {"text": {"type": "string"}}, "required": ["text"]}},
+                        {"name": "rug_pull_detect", "description": "Detect Rug Pull risk in MCP tool repositories.",
+                            "inputSchema": {"type": "object", "properties": {"source_url": {"type": "string"}}, "required": ["source_url"]}},
+                        {"name": "agent_register", "description": "One-click agent onboarding with API key and DID identity.",
+                            "inputSchema": {"type": "object", "properties": {"agent_name": {"type": "string"}}, "required": ["agent_name"]}},
+                        {"name": "dependency_monitor", "description": "Monitor MCP tool dependencies for version changes.",
+                            "inputSchema": {"type": "object", "properties": {"source_url": {"type": "string"}}, "required": ["source_url"]}}
+                    ]
+                }, ensure_ascii=False, indent=2)
+            body = json_data.encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+            self.wfile.write(body)
+            _record_usage("smithery-server-card", self.client_address[0])
+            return
 
         # Agent Card (A2A discovery)
         if path == "/.well-known/agent-card.json":
