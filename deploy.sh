@@ -38,7 +38,7 @@ sleep 2
 
 # 启动新服务
 echo "🚀 启动服务..."
-export PORT=8420
+export PORT=8450
 nohup python3 api/server.py > server.log 2>&1 &
 
 # 等待服务启动
@@ -46,7 +46,7 @@ sleep 3
 
 # 健康检查
 echo "🏥 健康检查..."
-if curl -sf http://localhost:8420/api/v1/health > /dev/null; then
+if curl -sf http://localhost:8450/api/v1/health > /dev/null; then
     echo "✅ 服务启动成功!"
     echo ""
     echo "📍 访问地址:"
