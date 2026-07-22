@@ -1,28 +1,22 @@
-﻿"""
-AIShield API Server — Phase 1 精简版
-仅保留安全/合规相关路由，去除所有非核心功能
+"""
+AIShield API Server — v4.2 Agent-First
+
+Agent-First 改造:
+  - POST /api/v1/agent/setup         — Agent 一键入驻（注册+API Key+快速指引）
+  - GET  /api/v1/agent/status/{did}  — Agent 状态查询
+  - POST /api/v1/agent/scan          — Agent 快速扫描
+  - GET  /openapi.json                — OpenAPI 3.0.3 规范（Agent 自动发现）
+  - 所有错误响应增加 error_code + error_id
+  - MCP 新增 agent_register / agent_quick_scan 工具
 
 端口: 8450
-路由:
-  GET  /                         — 首页API信息
-  GET  /banned-words             — 违禁词检测Landing Page
-  GET  /report                   — 扫描报告公开Landing Page（SEO+引流）
-  GET  /badge/{tool_name}        — 公开徽章SVG
-  POST /api/v1/audit             — 完整安全扫描
-  POST /api/v1/prompt-check      — Prompt注入检测
-  POST /api/v1/banned-words      — 违禁词检测API
-  GET  /api/v1/health             — 健康检查
-  GET  /api/v1/stats              — 扫描统计
-  POST /api/v1/mcp                — MCP StreamableHTTP endpoint
-  POST /api/v1/proxy/call        — 代理调用认证工具
-  GET  /api/v1/proxy/tools       — 列出可代理工具
-  GET  /api/v1/proxy/stats       — 代理调用统计
 """
 
 import json
 import os
 import sys
 import time
+import uuid
 import threading
 import re
 from http.server import HTTPServer, BaseHTTPRequestHandler
@@ -32,6 +26,7 @@ from datetime import datetime, timezone, timedelta
 
 # ── 路径 ──
 BASE = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.dirname(BASE)
 sys.path.insert(0, BASE)
 sys.path.insert(0, os.path.join(BASE, ".."))
 
@@ -220,19 +215,32 @@ class AIShieldHandler(BaseHTTPRequestHandler):
         """简化日志"""
         pass  # 静默日志，减少噪音
     
-    def _send_json(self, data, status=200):
+    def _send_json(self, data, status=200, rate_limit_remaining=None):
+        """发送 JSON 响应，自动为错误响应添加 error_code 和 error_id"""
         try:
+            # Agent-First: 自动为错误响应补充结构化错误码
+            if status >= 400 and "error" in data and "error_code" not in data:
+                error_code_map = {
+                    400: "BAD_REQUEST", 401: "AUTH_REQUIRED", 403: "PERMISSION_DENIED",
+                    404: "NOT_FOUND", 413: "BODY_TOO_LARGE", 429: "RATE_LIMITED", 500: "INTERNAL_ERROR",
+                }
+                data["error_code"] = error_code_map.get(status, "UNKNOWN_ERROR")
+                data["error_id"] = f"err_{uuid.uuid4().hex[:12]}"
             body = json.dumps(data, ensure_ascii=False).encode("utf-8")
             self.send_response(status)
             self.send_header("Content-Type", "application/json; charset=utf-8")
             self.send_header("Content-Length", str(len(body)))
             self.send_header("Access-Control-Allow-Origin", "*")
             self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-            self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+            self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Request-ID")
+            self.send_header("X-Request-ID", f"req_{uuid.uuid4().hex[:12]}")
+            # Agent-First: 速率限制标准头
+            if rate_limit_remaining is not None:
+                self.send_header("X-RateLimit-Remaining", str(rate_limit_remaining))
             self.end_headers()
             self.wfile.write(body)
         except (ConnectionAbortedError, BrokenPipeError, OSError):
-            pass  # 客户端已断开
+            pass
     
     def _read_body(self):
         length = int(self.headers.get("Content-Length", 0))
@@ -270,9 +278,8 @@ class AIShieldHandler(BaseHTTPRequestHandler):
         self.send_response(204)
         self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Request-ID")
         self.end_headers()
-    
     def do_GET(self):
         parsed = urlparse(self.path)
         path = parsed.path
@@ -290,6 +297,21 @@ class AIShieldHandler(BaseHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(body)
                 _record_usage("agent-page", self.client_address[0])
+                return
+
+        # OWASP MCP Top 10 中文解读博客
+        if path == "/owasp-mcp-top10-guide/owasp-mcp-top10-guide.html" or path == "/owasp-mcp-top10-guide":
+            html_path = os.path.join(PROJECT_ROOT, "owasp-mcp-top10-guide", "owasp-mcp-top10-guide.html")
+            if os.path.exists(html_path):
+                with open(html_path, "r", encoding="utf-8") as f:
+                    html = f.read()
+                body = html.encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "text/html; charset=utf-8")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+                _record_usage("owasp-guide-page", self.client_address[0])
                 return
 
         # Sitemap XML
@@ -318,6 +340,22 @@ class AIShieldHandler(BaseHTTPRequestHandler):
                 self.send_header("Content-Length", str(len(body)))
                 self.end_headers()
                 self.wfile.write(body)
+                return
+
+        # Smithery MCP Server Card
+        if path == "/.well-known/mcp/server-card.json":
+            sc_path = os.path.join(BASE, "static", ".well-known", "mcp", "server-card.json")
+            if os.path.exists(sc_path):
+                with open(sc_path, "r", encoding="utf-8") as f:
+                    json_data = f.read()
+                body = json_data.encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self.send_header("Content-Length", str(len(body)))
+                self.send_header("Access-Control-Allow-Origin", "*")
+                self.end_headers()
+                self.wfile.write(body)
+                _record_usage("smithery-server-card", self.client_address[0])
                 return
 
         # Agent Card (A2A discovery)
@@ -481,10 +519,13 @@ class AIShieldHandler(BaseHTTPRequestHandler):
         if path == "/api/v1/health":
             self._send_json({
                 "status": "ok",
-                "version": "4.1",
+                "version": "4.2",
                 "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)",
                 "rules_count": get_rule_count("mcp"),
                 "uptime": time.time(),
+                "agent_first": True,
+                "openapi": "/openapi.json",
+                "agent_setup": "/api/v1/agent/setup",
             })
             _record_usage("health", self.client_address[0])
             return
@@ -542,18 +583,50 @@ class AIShieldHandler(BaseHTTPRequestHandler):
                 _record_usage("landing-page", self.client_address[0])
                 return
 
+        # ── Agent-First: OpenAPI 规范（Agent 自动发现）──
+        if path == "/openapi.json":
+            try:
+                from api.openapi_spec import get_openapi_spec
+                spec = get_openapi_spec()
+                self._send_json(spec)
+                _record_usage("openapi", self.client_address[0])
+            except Exception as e:
+                self._send_json({"error": str(e)}, 500)
+            return
+
+        # ── Agent-First: Agent 状态查询 ──
+        agent_status_match = re.match(r"^/api/v1/agent/status/([^/]+)$", path)
+        if agent_status_match:
+            did = agent_status_match.group(1)
+            try:
+                from eco.agent_gateway import agent_status
+                result = agent_status(did)
+                http_status = 200 if result.get("success") else (result.get("http_status", 404) if "http_status" in result else 404)
+                self._send_json(result, http_status)
+            except Exception as e:
+                self._send_json({"error": str(e)}, 500)
+            _record_usage("agent-status", self.client_address[0])
+            return
+
         # API根节点 — JSON端点列表
         if path == "/api/v1":
             self._send_json({
                 "name": "AIShield API",
-                "version": "4.1",
-                "description": "OWASP MCP Top 10 aligned security scanner + trust ecosystem for AI Agent tools",
+                "version": "4.2",
+                "description": "AI Agent Security & Trust Platform — Agent-First API",
+                "openapi": "/openapi.json",
+                "agent_setup": "/api/v1/agent/setup",
                 "endpoints": [
+                    "POST /api/v1/agent/setup — Agent one-click onboarding (register + API key + guide)",
+                    "POST /api/v1/agent/scan — Agent quick scan (by name + description)",
+                    "GET  /api/v1/agent/status/{did} — Agent status query",
                     "POST /api/v1/audit — Full security scan",
                     "POST /api/v1/prompt-check — Prompt injection detection",
                     "POST /api/v1/banned-words — Chinese banned words check",
                     "POST /api/v1/rug-pull — Rug pull detection",
                     "POST /api/v1/handshake — MCP handshake verification",
+                    "POST /api/v1/mcp — MCP StreamableHTTP (JSON-RPC 2.0, 8 tools)",
+                    "GET  /openapi.json — OpenAPI 3.0.3 spec (Agent auto-discovery)",
                     "GET  /api/v1/health — Health check",
                     "GET  /api/v1/stats — Usage statistics",
                     "GET  /api/v1/monitor/list — List monitored tools",
@@ -569,7 +642,6 @@ class AIShieldHandler(BaseHTTPRequestHandler):
                     "POST /api/v1/proxy/call — Proxy tool call (certified only)",
                     "GET  /api/v1/proxy/tools — List proxyable certified tools",
                     "GET  /api/v1/proxy/stats — Proxy call statistics",
-                    "GET  /banned-words — Banned words landing page",
                     "POST /api/v1/account/register — User registration",
                     "POST /api/v1/account/login — User login",
                     "GET  /api/v1/account/me — Get user info",
@@ -630,6 +702,30 @@ class AIShieldHandler(BaseHTTPRequestHandler):
             self._send_json({"error": "Invalid JSON"}, 400)
             return
         
+        # ── Agent-First: Agent 一键入驻（最高优先级，无认证）──
+        if path == "/api/v1/agent/setup":
+            try:
+                from eco.agent_gateway import agent_setup
+                result = agent_setup(data)
+                status = 201 if result.get("success") else 400
+                self._send_json(result, status)
+            except Exception as e:
+                self._send_json({"error": str(e)}, 500)
+            _record_usage("agent-setup", self.client_address[0])
+            return
+
+        # ── Agent-First: Agent 快速扫描（无认证）──
+        if path == "/api/v1/agent/scan":
+            try:
+                from eco.agent_gateway import agent_quick_scan
+                result = agent_quick_scan(data)
+                status = 200 if result.get("success") else 400
+                self._send_json(result, status)
+            except Exception as e:
+                self._send_json({"error": str(e)}, 500)
+            _record_usage("agent-scan", self.client_address[0])
+            return
+
         # ── 账户路由（在 eco dispatcher 之前处理）──
         if path.startswith("/api/v1/account/"):
             try:
@@ -891,7 +987,7 @@ class AIShieldHandler(BaseHTTPRequestHandler):
                     "capabilities": {"tools": {}},
                     "serverInfo": {
                         "name": "AIShield Security Scanner",
-                        "version": "4.1.0",
+                        "version": "4.2.0",
                     },
                 },
             })
@@ -974,6 +1070,32 @@ class AIShieldHandler(BaseHTTPRequestHandler):
                                 "required": ["source_url"],
                             },
                         },
+                        {
+                            "name": "agent_register",
+                            "description": "Agent-First one-click onboarding — register as an Agent, get DID + API Key + quick start guide in a single call",
+                            "inputSchema": {
+                                "type": "object",
+                                "properties": {
+                                    "agent_name": {"type": "string", "description": "Agent name (required)"},
+                                    "capabilities": {"type": "array", "items": {"type": "string"}, "description": "Capability list, e.g. [\"scan\", \"monitor\"]"},
+                                    "owner": {"type": "string", "description": "Owner identifier"},
+                                },
+                                "required": ["agent_name"],
+                            },
+                        },
+                        {
+                            "name": "agent_quick_scan",
+                            "description": "Agent-First quick scan — scan a tool by name and description, no source URL required",
+                            "inputSchema": {
+                                "type": "object",
+                                "properties": {
+                                    "tool_name": {"type": "string", "description": "Tool name (required)"},
+                                    "tool_description": {"type": "string", "description": "Tool description (required)"},
+                                    "source_url": {"type": "string", "description": "Optional GitHub repo URL for deep scan"},
+                                },
+                                "required": ["tool_name", "tool_description"],
+                            },
+                        },
                     ],
                 },
             })
@@ -1011,6 +1133,14 @@ class AIShieldHandler(BaseHTTPRequestHandler):
                 elif tool_name == "aishield_handshake":
                     result_data = verify_handshake(args["source_url"])
                     text = json.dumps(result_data, ensure_ascii=False, indent=2)
+                elif tool_name == "agent_register":
+                    from eco.agent_gateway import agent_setup
+                    result_data = agent_setup(args)
+                    text = json.dumps(result_data, ensure_ascii=False, indent=2)
+                elif tool_name == "agent_quick_scan":
+                    from eco.agent_gateway import agent_quick_scan
+                    result_data = agent_quick_scan(args)
+                    text = json.dumps(result_data, ensure_ascii=False, indent=2)
                 else:
                     self._send_json({
                         "jsonrpc": "2.0", "id": req_id,
@@ -1044,6 +1174,7 @@ def main():
         try:
             from eco import identity, payment, badge, marketplace, a2a_gateway
             from eco import collab, sandbox, skill_market, auth_provider, account
+            from eco import agent_gateway
             _eco_init({
                 "identity": identity,
                 "payment": payment,
@@ -1055,8 +1186,9 @@ def main():
                 "skill_market": skill_market,
                 "auth_provider": auth_provider,
                 "account": account,
+                "agent_gateway": agent_gateway,
             })
-            print("  Eco modules: identity, payment, badge, marketplace, a2a, collab, sandbox, skill_market, auth_provider, account")
+            print("  Eco modules: identity, payment, badge, marketplace, a2a, collab, sandbox, skill_market, auth_provider, account, agent_gateway")
         except Exception as e:
             print(f"  Eco modules: init failed ({e})")
     else:
@@ -1066,11 +1198,13 @@ def main():
         daemon_threads = True
 
     server = ThreadedServer(("0.0.0.0", port), AIShieldHandler)
-    print(f"AIShield API v4.1 — OWASP MCP Top 10 aligned + Trust Ecosystem")
+    print(f"AIShield API v4.2 — Agent-First + OWASP MCP Top 10")
     print(f"  Port: {port}")
     print(f"  Rules: {get_rule_count('mcp')}")
     print(f"  Standard: OWASP MCP Top 10 (2025 v0.1)")
     print(f"  MCP endpoint: /api/v1/mcp")
+    print(f"  Agent setup: /api/v1/agent/setup")
+    print(f"  OpenAPI spec: /openapi.json")
     try:
         server.serve_forever()
     except KeyboardInterrupt:
