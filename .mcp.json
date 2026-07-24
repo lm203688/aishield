@@ -1,0 +1,11 @@
+{
+  "servers": {
+    "aishield": {
+      "command": "python",
+      "args": ["-m", "api.mcp_server"],
+      "description": "AI Agent Security Shield — OWASP MCP Top 10 aligned, 133 security rules, prompt injection detection, Rug Pull detection, banned words scanning, dependency monitoring, and security badge generation.",
+      "homepage": "https://github.com/lm203688/aishield",
+      "license": "MIT"
+    }
+  }
+}

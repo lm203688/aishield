@@ -314,7 +314,7 @@ class AIShieldHandler(BaseHTTPRequestHandler):
                 _record_usage("owasp-guide-page", self.client_address[0])
                 return
 
-        # Demo: 委托链可视化
+# Demo: 委托链可视化
         if path == "/demo/delegation-chain":
             html_path = os.path.join(BASE, "static", "demo", "delegation-chain.html")
             if os.path.exists(html_path):
@@ -328,7 +328,6 @@ class AIShieldHandler(BaseHTTPRequestHandler):
                 self.wfile.write(body)
                 _record_usage("demo-delegation-chain", self.client_address[0])
                 return
-
         # Sitemap XML
         if path == "/sitemap.xml":
             sitemap_path = os.path.join(BASE, "static", "sitemap.xml")
