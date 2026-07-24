@@ -26,6 +26,7 @@ from datetime import datetime, timezone, timedelta
 
 # ── 路径 ──
 BASE = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.dirname(BASE)
 sys.path.insert(0, BASE)
 sys.path.insert(0, os.path.join(BASE, ".."))
 
@@ -298,6 +299,36 @@ class AIShieldHandler(BaseHTTPRequestHandler):
                 _record_usage("agent-page", self.client_address[0])
                 return
 
+        # OWASP MCP Top 10 中文解读博客
+        if path == "/owasp-mcp-top10-guide/owasp-mcp-top10-guide.html" or path == "/owasp-mcp-top10-guide":
+            html_path = os.path.join(PROJECT_ROOT, "owasp-mcp-top10-guide", "owasp-mcp-top10-guide.html")
+            if os.path.exists(html_path):
+                with open(html_path, "r", encoding="utf-8") as f:
+                    html = f.read()
+                body = html.encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "text/html; charset=utf-8")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+                _record_usage("owasp-guide-page", self.client_address[0])
+                return
+
+        # Demo: 委托链可视化
+        if path == "/demo/delegation-chain":
+            html_path = os.path.join(BASE, "static", "demo", "delegation-chain.html")
+            if os.path.exists(html_path):
+                with open(html_path, "r", encoding="utf-8") as f:
+                    html = f.read()
+                body = html.encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "text/html; charset=utf-8")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+                _record_usage("demo-delegation-chain", self.client_address[0])
+                return
+
         # Sitemap XML
         if path == "/sitemap.xml":
             sitemap_path = os.path.join(BASE, "static", "sitemap.xml")
@@ -325,6 +356,46 @@ class AIShieldHandler(BaseHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(body)
                 return
+
+        # Smithery MCP Server Card
+        if path == "/.well-known/mcp/server-card.json":
+            sc_path = os.path.join(BASE, "static", ".well-known", "mcp", "server-card.json")
+            json_data = None
+            if os.path.exists(sc_path):
+                with open(sc_path, "r", encoding="utf-8") as f:
+                    json_data = f.read()
+            else:
+                # Fallback: inline server card for deployments without the static file
+                json_data = json.dumps({
+                    "serverInfo": {"name": "AIShield", "version": "4.2.0",
+                        "description": "AI Agent Security Shield — OWASP MCP Top 10 aligned security scanning. 133 rules covering prompt injection, zero-width characters, Rug Pull, permission audit, and dependency monitoring."},
+                    "url": "https://aishield.tools/mcp",
+                    "provider": {"name": "AIShield", "url": "https://github.com/lm203688/aishield"},
+                    "license": "MIT",
+                    "tools": [
+                        {"name": "security_scan", "description": "Full security audit for MCP tools/agents with OWASP MCP Top 10 alignment.",
+                            "inputSchema": {"type": "object", "properties": {"tool_name": {"type": "string"}}, "required": ["tool_name"]}},
+                        {"name": "prompt_injection_check", "description": "Detect prompt injection attacks in Chinese and English. 200+ pattern matching.",
+                            "inputSchema": {"type": "object", "properties": {"prompt": {"type": "string"}}, "required": ["prompt"]}},
+                        {"name": "banned_words_check", "description": "Detect banned/sensitive words for 6 Chinese platforms.",
+                            "inputSchema": {"type": "object", "properties": {"text": {"type": "string"}}, "required": ["text"]}},
+                        {"name": "rug_pull_detect", "description": "Detect Rug Pull risk in MCP tool repositories.",
+                            "inputSchema": {"type": "object", "properties": {"source_url": {"type": "string"}}, "required": ["source_url"]}},
+                        {"name": "agent_register", "description": "One-click agent onboarding with API key and DID identity.",
+                            "inputSchema": {"type": "object", "properties": {"agent_name": {"type": "string"}}, "required": ["agent_name"]}},
+                        {"name": "dependency_monitor", "description": "Monitor MCP tool dependencies for version changes.",
+                            "inputSchema": {"type": "object", "properties": {"source_url": {"type": "string"}}, "required": ["source_url"]}}
+                    ]
+                }, ensure_ascii=False, indent=2)
+            body = json_data.encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+            self.wfile.write(body)
+            _record_usage("smithery-server-card", self.client_address[0])
+            return
 
         # Agent Card (A2A discovery)
         if path == "/.well-known/agent-card.json":
