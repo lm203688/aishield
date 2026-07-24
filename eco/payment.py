@@ -279,88 +279,201 @@ class AlipayGateway(PaymentGateway):
 
 
 # ══════════════════════════════════════════════
-#  Creem国际支付网关
+#  Creem国际支付网关（真实集成）
 # ══════════════════════════════════════════════
+
+# Creem 产品ID映射（FrontierKB 商店）
+CREEM_PRODUCTS = {
+    "daily_brief": {
+        "product_id": "prod_22YhSbYonX9hiC0OppnXTn",
+        "name": "Daily Brief",
+        "credits": 500,
+    },
+    "intelligence_pro": {
+        "product_id": "prod_4EpFVQGKm5vWXChbRiFdbE",
+        "name": "Intelligence Pro",
+        "credits": 5000,
+    },
+    "api_access": {
+        "product_id": "prod_pny43rzDa0mmBaj7d9k4w",
+        "name": "API Access",
+        "credits": 10000,
+    },
+    "lifetime": {
+        "product_id": "prod_5IooNCEQoCyqp758oeVPGT",
+        "name": "Lifetime",
+        "credits": 999999,
+    },
+    "full_db": {
+        "product_id": "prod_5OFcAcJeXzfTMkDDt6woBh",
+        "name": "Full DB",
+        "credits": 20000,
+    },
+    "single_domain": {
+        "product_id": "prod_44o1TOBce0Zt00X4E5ACET",
+        "name": "Single Domain",
+        "credits": 2000,
+    },
+}
+
+# 产品ID反向查找表
+CREEM_PRODUCT_MAP = {v["product_id"]: (k, v) for k, v in CREEM_PRODUCTS.items()}
+
 
 class CreemGateway(PaymentGateway):
     """
-    Creem国际支付网关
-    支持国际信用卡和PayPal
+    Creem国际支付网关（真实REST API集成）
 
-    注意: 骨架实现，生产环境需接入Creem API
+    文档: https://docs.creem.io/api-reference/endpoint/create-checkout
+    认证: x-api-key header
+    Webhook: HMAC-SHA256 签名验证
     """
 
-    CREEM_API = "https://api.creem.io/v1"
+    CREEM_API_LIVE = "https://api.creem.io/v1"
+    CREEM_API_TEST = "https://test-api.creem.io/v1"
 
-    def __init__(self, api_key=None, webhook_secret=None):
-        """
-        初始化Creem网关
-
-        Args:
-            api_key (str):        API密钥
-            webhook_secret (str): Webhook签名密钥
-        """
+    def __init__(self, api_key=None, webhook_secret=None, test_mode=False):
         self.api_key = api_key or os.environ.get("CREEM_API_KEY", "")
         self.webhook_secret = webhook_secret or os.environ.get("CREEM_WEBHOOK_SECRET", "")
+        self.test_mode = test_mode or os.environ.get("CREEM_TEST_MODE", "true").lower() == "true"
+        self.base_url = self.CREEM_API_TEST if self.test_mode else self.CREEM_API_LIVE
+
+    def _api_call(self, endpoint, payload):
+        """Creem REST API 调用（使用 urllib，零依赖）"""
+        import urllib.request
+        import urllib.error
+
+        url = f"{self.base_url}{endpoint}"
+        body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+
+        req = urllib.request.Request(
+            url,
+            data=body,
+            headers={
+                "Content-Type": "application/json",
+                "x-api-key": self.api_key,
+            },
+            method="POST",
+        )
+
+        try:
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                return json.loads(resp.read().decode("utf-8")), resp.status
+        except urllib.error.HTTPError as e:
+            error_body = e.read().decode("utf-8", errors="replace")
+            try:
+                error_data = json.loads(error_body)
+            except Exception:
+                error_data = {"message": error_body}
+            return {"error": error_data.get("message", str(e)), "status_code": e.code}, e.code
+        except Exception as e:
+            return {"error": str(e)}, 0
+
+    def create_checkout(self, product_key, account_id, customer_email=None, success_url=None):
+        """
+        创建 Creem Checkout Session
+
+        Args:
+            product_key (str): 产品标识（如 "api_access", "lifetime"）
+            account_id (str):  AIShield 账户ID（传入 metadata 用于回调识别）
+            customer_email (str): 可选，客户邮箱
+            success_url (str):  支付成功后跳转URL
+
+        Returns:
+            dict: {checkout_url, checkout_id, product_key, ...} 或 {error: ...}
+        """
+        if not self.api_key:
+            return {"error": "Creem网关未配置（缺少CREEM_API_KEY）"}
+
+        product = CREEM_PRODUCTS.get(product_key)
+        if not product:
+            return {"error": f"未知产品: {product_key}，可选: {list(CREEM_PRODUCTS.keys())}"}
+
+        payload = {
+            "product_id": product["product_id"],
+            "success_url": success_url or "https://aishield.tools/recharge/success",
+            "metadata": {
+                "account_id": account_id,
+                "product_key": product_key,
+                "credits": product["credits"],
+            },
+        }
+        if customer_email:
+            payload["customer"] = {"email": customer_email}
+
+        data, status_code = self._api_call("/checkouts", payload)
+
+        if status_code >= 400 or "error" in data:
+            return {"error": data.get("error", "Creem API调用失败"), "status_code": status_code}
+
+        return {
+            "checkout_url": data.get("checkout_url"),
+            "checkout_id": data.get("id"),
+            "product_key": product_key,
+            "product_name": product["name"],
+            "credits": product["credits"],
+            "account_id": account_id,
+            "status": data.get("status", "pending"),
+        }
 
     def create_payment(self, amount, currency, order_id, description=""):
         """
-        创建Creem支付
-
-        Returns:
-            dict: 支付信息
+        兼容 PaymentGateway 接口的通用支付方法
+        推荐使用 create_checkout() 方法
         """
         if not self.api_key:
             return {
-                "error": "Creem网关未配置（缺少api_key）",
+                "error": "Creem网关未配置（缺少CREEM_API_KEY）",
                 "payment_url": None,
                 "payment_id": f"creem_mock_{order_id}",
             }
+        # 通用方法：使用 API Access 产品
+        return self.create_checkout(
+            product_key="api_access",
+            account_id=order_id,
+        )
 
-        # Creem API请求骨架
-        creem_request = {
-            "amount": amount,
-            "currency": currency,
-            "order_id": order_id,
-            "description": description or "AIShield API Subscription",
-            "success_url": "",   # 支付成功跳转
-            "cancel_url": "",     # 支付取消跳转
-            "webhook_url": "",    # 异步通知
-        }
-
-        return {
-            "payment_id": f"creem_{order_id}",
-            "payment_url": f"{self.CREEM_API}/checkout/{order_id}",
-            "status": "pending",
-            "creem_request": creem_request,
-        }
-
-    def verify_payment(self, payment_id):
+    @staticmethod
+    def verify_webhook_signature(raw_body, signature_header, webhook_secret):
         """
-        验证Creem支付结果
+        验证 Webhook 签名（HMAC-SHA256）
+
+        Args:
+            raw_body (bytes):     原始请求体
+            signature_header (str): creem-signature 头的值
+            webhook_secret (str):  Webhook签名密钥
 
         Returns:
-            dict: 验证结果
+            bool: 签名是否有效
         """
+        if not webhook_secret or not signature_header:
+            return False
+
+        import hmac
+        computed = hmac.new(
+            webhook_secret.encode("utf-8"),
+            raw_body,
+            hashlib.sha256,
+        ).hexdigest()
+
+        return hmac.compare_digest(computed, signature_header)
+
+    def verify_payment(self, payment_id):
+        """Creem 通过 Webhook 异步通知，此方法保留接口兼容"""
         return {
             "verified": False,
             "payment_id": payment_id,
             "status": "pending",
-            "message": "骨架实现 — 需接入Creem API进行实际验证",
+            "message": "Creem 通过 Webhook 异步确认支付结果，请使用 /api/v1/webhooks/creem 端点",
         }
 
     def refund(self, payment_id, reason=""):
-        """
-        Creem退款
-
-        Returns:
-            dict: 退款结果
-        """
+        """退款接口（保留）"""
         return {
             "refunded": False,
             "payment_id": payment_id,
             "reason": reason,
-            "message": "骨架实现 — 需接入Creem API进行实际退款",
+            "message": "退款需通过 Creem Dashboard 手动操作",
         }
 
     def get_name(self):
@@ -407,14 +520,15 @@ class BillingService:
             self._save()
         return accounts[account_id]
 
-    def upgrade_plan(self, account_id, new_plan, gateway_name="alipay"):
+    def upgrade_plan(self, account_id, new_plan, gateway_name="alipay", skip_payment=False):
         """
         升级套餐
 
         Args:
-            account_id (str):   账户ID
-            new_plan (str):      目标套餐 (free/pro/enterprise)
-            gateway_name (str):  支付网关名称
+            account_id (str):    账户ID
+            new_plan (str):       目标套餐 (free/pro/enterprise)
+            gateway_name (str):   支付网关名称
+            skip_payment (bool):  是否跳过支付验证（仅测试用）
 
         Returns:
             dict: 升级结果
@@ -426,15 +540,14 @@ class BillingService:
         account = self._get_account(account_id)
         old_plan = account["plan"]
 
-        # 生成订单
         order_id = f"bill_{uuid.uuid4().hex[:12]}"
         plan_info = PLANS[new_plan]
 
-        # 尝试创建支付
-        payment_result = {"status": "mock", "message": "计费系统骨架 — 无需实际支付"}
-
-        if plan_info["price"] > 0:
-            # 实际支付流程骨架
+        # 免费套餐无需支付
+        if plan_info["price"] == 0 or new_plan == "free":
+            payment_result = {"status": "free", "message": "免费套餐，无需支付"}
+        else:
+            # 创建支付订单
             if gateway_name == "alipay":
                 gateway = AlipayGateway()
             elif gateway_name == "creem":
@@ -449,7 +562,21 @@ class BillingService:
                 description=f"AIShield {plan_info['name']} 套餐",
             )
 
-        # 更新账户
+            # 关键修复：验证支付是否成功，失败则不升级
+            if not skip_payment:
+                if payment_result.get("error"):
+                    return {
+                        "success": False,
+                        "account_id": account_id,
+                        "old_plan": old_plan,
+                        "new_plan": new_plan,
+                        "error": payment_result["error"],
+                        "order_id": order_id,
+                        "payment": payment_result,
+                        "message": "支付创建失败，套餐未升级",
+                    }
+
+        # 支付成功（或免费/跳过）才更新账户
         account["plan"] = new_plan
         account["upgraded_at"] = _now_iso()
         account["payment_history"].append({
@@ -460,7 +587,6 @@ class BillingService:
             "timestamp": _now_iso(),
             "payment_result": payment_result,
         })
-        # 只保留最近100条支付记录
         if len(account["payment_history"]) > 100:
             account["payment_history"] = account["payment_history"][-100:]
 

@@ -11,7 +11,28 @@
     <name>AIShield Team</name>
     <uri>https://aishield.tools</uri>
   </author>
-  <updated>2026-07-21T00:00:00+08:00</updated>
+  <updated>2026-07-24T00:00:00+08:00</updated>
+
+  <entry>
+    <title>v4.2 — 积分制计费体系上线</title>
+    <link href="https://aishield.tools/pricing" rel="alternate" type="text/html"/>
+    <id>urn:uuid:aishield-v4.2</id>
+    <updated>2026-07-24T00:00:00+08:00</updated>
+    <content type="html">
+      <![CDATA[
+        <p>v4.2 版本发布：</p>
+        <ul>
+          <li>全新积分制定价体系：1元=100积分，按量计费无浪费</li>
+          <li>注册送100积分体验金，每日50次匿名免费扫描</li>
+          <li>Agent 调用专属半价优惠（0.5倍积分消耗），鼓励生态增长</li>
+          <li>安全扫描1积分/次、Prompt检测1积分/次、违禁词检测0.5积分/次</li>
+          <li>新增定价页 /pricing，完整展示积分规则和FAQ</li>
+          <li>新增 MCP 安全扫描指南页 /mcp-security-guide，面向开发者的技术深度内容</li>
+          <li>首页增加积分制CTA，优化转化路径</li>
+        </ul>
+      ]]>
+    </content>
+  </entry>
 
   <entry>
     <title>v4.1 — Rug Pull 检测与 MCP 握手验证</title>

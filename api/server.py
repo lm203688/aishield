@@ -485,6 +485,58 @@ class AIShieldHandler(BaseHTTPRequestHandler):
                 self.wfile.write(body)
                 return
 
+        # Landing Page — 定价页（积分制）
+        if path == "/pricing":
+            html_path = os.path.join(BASE, "static", "pricing.html")
+            if os.path.exists(html_path):
+                with open(html_path, "r", encoding="utf-8") as f:
+                    html = f.read()
+                body = html.encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "text/html; charset=utf-8")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+                _record_usage("pricing-page", self.client_address[0])
+                return
+
+        # Creem 支付成功跳转页
+        if path == "/recharge/success" or path == "/recharge/success/":
+            html = f'''<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>充值成功 - AIShield</title><style>body{{font-family:system-ui,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;background:#0f172a;color:#e2e8f0}}.box{{text-align:center;padding:48px;border-radius:16px;background:#1e293b;max-width:480px}}h1{{color:#22c55e;font-size:28px;margin-bottom:12px}}p{{color:#94a3b8;margin-bottom:24px}}a{{display:inline-block;padding:12px 32px;background:#3b82f6;color:#fff;border-radius:8px;text-decoration:none;font-weight:600}}</style></head><body><div class="box"><h1>支付成功</h1><p>积分将在几分钟内到账，请刷新账户页面查看。<br>如未到账，请携带支付凭证联系客服。</p><a href="/pricing">返回定价页</a></div></body></html>'''
+            body = html.encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
+
+        # Creem 支付取消跳转页
+        if path == "/recharge/cancel" or path == "/recharge/cancel/":
+            html = f'''<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>支付取消 - AIShield</title><style>body{{font-family:system-ui,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;background:#0f172a;color:#e2e8f0}}.box{{text-align:center;padding:48px;border-radius:16px;background:#1e293b;max-width:480px}}h1{{color:#f59e0b;font-size:28px;margin-bottom:12px}}p{{color:#94a3b8;margin-bottom:24px}}a{{display:inline-block;padding:12px 32px;background:#3b82f6;color:#fff;border-radius:8px;text-decoration:none;font-weight:600}}</style></head><body><div class="box"><h1>支付已取消</h1><p>您取消了本次支付。如需帮助，请联系客服。</p><a href="/pricing">返回定价页</a></div></body></html>'''
+            body = html.encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
+
+        # Landing Page — MCP 安全扫描指南（GEO）
+        if path == "/mcp-security-guide":
+            html_path = os.path.join(BASE, "static", "mcp-security-guide.html")
+            if os.path.exists(html_path):
+                with open(html_path, "r", encoding="utf-8") as f:
+                    html = f.read()
+                body = html.encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "text/html; charset=utf-8")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+                _record_usage("mcp-security-guide-page", self.client_address[0])
+                return
+
         # Landing Page — 违禁词检测
         if path == "/banned-words":
             html_path = os.path.join(BASE, "static", "banned_words.html")
@@ -685,6 +737,8 @@ class AIShieldHandler(BaseHTTPRequestHandler):
                     "GET  /api/v1/account/me — Get user info",
                     "POST /api/v1/account/recharge — Recharge balance",
                     "GET  /api/v1/account/balance — Query balance",
+                    "POST /api/v1/checkout/create — Create Creem checkout session",
+                    "POST /api/v1/webhooks/creem — Creem payment webhook",
                 ],
                 "docs": "https://aishield.tools/docs",
                 "mcp_install": "npx @aishield/mcp-server",
@@ -726,10 +780,27 @@ class AIShieldHandler(BaseHTTPRequestHandler):
 
         self._send_json({"error": "Not found"}, 404)
     
+    def _read_raw_body(self):
+        """读取原始请求体（用于 webhook 签名验证）"""
+        length = int(self.headers.get("Content-Length", 0))
+        if length > 200000:  # 200KB
+            return None
+        if length == 0:
+            return b""
+        try:
+            return self.rfile.read(length)
+        except Exception:
+            return None
+
     def do_POST(self):
         parsed = urlparse(self.path)
         path = parsed.path
-        
+
+        # ── Creem Webhook（最高优先级，需要 raw body 验证签名）──
+        if path == "/api/v1/webhooks/creem":
+            self._handle_creem_webhook()
+            return
+
         try:
             body = self._read_body()
             if body is None:
@@ -739,7 +810,12 @@ class AIShieldHandler(BaseHTTPRequestHandler):
         except json.JSONDecodeError:
             self._send_json({"error": "Invalid JSON"}, 400)
             return
-        
+
+        # ── Creem Checkout 创建 ──
+        if path == "/api/v1/checkout/create":
+            self._handle_creem_checkout(data)
+            return
+
         # ── Agent-First: Agent 一键入驻（最高优先级，无认证）──
         if path == "/api/v1/agent/setup":
             try:
@@ -791,13 +867,18 @@ class AIShieldHandler(BaseHTTPRequestHandler):
                     return
                 elif path == "/api/v1/account/recharge":
                     account_id = data.get("account_id", "").strip()
-                    amount = float(data.get("amount", 0))
+                    yuan_amount = float(data.get("amount", 0))
                     gateway = data.get("gateway", "alipay")
-                    if not account_id or amount <= 0:
-                        self._send_json({"error": "account_id 和 amount 为必填，且 amount > 0"}, 400)
+                    # amount 现在代表人民币金额，转换为积分（1元=100积分）
+                    credit_amount = yuan_amount * 100
+                    if not account_id or yuan_amount <= 0:
+                        self._send_json({"error": "account_id 和 amount(元) 为必填，且 amount > 0。1元=100积分"}, 400)
                         return
                     mgr = _account_mod.UserAccount()
-                    result = mgr.recharge(account_id, amount, gateway)
+                    result = mgr.recharge(account_id, credit_amount, gateway)
+                    result["yuan_amount"] = yuan_amount
+                    result["credit_amount"] = credit_amount
+                    result["rate"] = "1 CNY = 100 credits"
                     self._send_json({"success": True, **result})
                     return
             except ValueError as e:
@@ -860,6 +941,61 @@ class AIShieldHandler(BaseHTTPRequestHandler):
                 return
             self._send_json({"error": "Not found"}, 404)
     
+    # ── 积分配置 ──
+    CREDIT_COST = {"audit": 1, "prompt_check": 1, "batch_audit": 5, "banned_words": 0.5, "rug_pull": 1, "handshake": 0.5}
+    FREE_DAILY_LIMIT = 50
+    SIGNUP_BONUS = 100
+    CREDIT_PER_YUAN = 100
+    AGENT_DISCOUNT = 0.5  # Agent 调用半价
+    
+    def _identify_and_deduct(self, endpoint):
+        """
+        从 Authorization 头识别用户并扣除积分。
+        返回 (account_dict, credits_deducted, is_agent, error_response_or_None)
+        """
+        auth_header = self.headers.get("Authorization", "")
+        has_key = auth_header.startswith("Bearer ")
+        api_key = auth_header[7:].strip() if has_key else ""
+        
+        credit_cost = self.CREDIT_COST.get(endpoint, 1)
+        
+        if has_key and api_key:
+            # 有 API Key → 积分扣减
+            try:
+                from eco import account as _acct
+                mgr = _acct.UserAccount()
+                account = mgr.get_by_api_key(api_key)
+                if not account:
+                    return None, 0, False, ("API Key 无效", 401)
+                if account.get("status") != "active":
+                    return None, 0, False, ("账户已禁用", 403)
+                
+                balance = account.get("balance", 0)
+                # Agent 身份判断：account_id 以 "agent-" 开头
+                is_agent = account["account_id"].startswith("agent-")
+                actual_cost = credit_cost * (self.AGENT_DISCOUNT if is_agent else 1)
+                
+                if balance < actual_cost:
+                    return account, 0, is_agent, (f"积分不足: 当前 {balance:.0f} 积分，需要 {actual_cost:.0f} 积分。请充值或注册获取 {self.SIGNUP_BONUS} 积分体验金。", 402)
+                
+                # 扣减积分
+                mgr.consume(account["account_id"], actual_cost)
+                return account, actual_cost, is_agent, None
+            except ValueError as e:
+                return None, 0, False, (str(e), 400)
+            except Exception:
+                return None, 0, False, ("认证服务异常", 500)
+        else:
+            # 无 API Key → 匿名免费层
+            today = datetime.now(TZ).strftime("%Y-%m-%d")
+            usage = _load_json(USAGE_FILE, {"daily": {}, "total": 0})
+            today_audit_count = usage.get("daily", {}).get(today, {}).get("by_endpoint", {}).get(endpoint, 0)
+            
+            if today_audit_count >= self.FREE_DAILY_LIMIT:
+                return None, 0, False, (f"匿名免费额度已用完（{self.FREE_DAILY_LIMIT}次/天）。请注册获取 {self.SIGNUP_BONUS} 积分体验金，或通过 API Key 调用。", 429)
+            
+            return None, 0, False, None  # 匿名免费放行
+    
     def _handle_audit(self, data):
         source_url = data.get("source_url", "")
         tool_type = data.get("tool_type", "mcp")
@@ -869,15 +1005,12 @@ class AIShieldHandler(BaseHTTPRequestHandler):
             self._send_json({"error": "source_url is required"}, 400)
             return
         
-        # ── Free→Pro 转化层：检查今日调用次数 ──
-        today = datetime.now(TZ).strftime("%Y-%m-%d")
-        usage = _load_json(USAGE_FILE, {"daily": {}, "total": 0})
-        today_usage = usage.get("daily", {}).get(today, {})
-        today_audit_count = today_usage.get("by_endpoint", {}).get("audit", 0)
-        
-        # Free层每日50次限制（对应billing模块PLANS定义）
-        FREE_DAILY_LIMIT = 50
-        is_limited = today_audit_count >= FREE_DAILY_LIMIT
+        # ── 积分扣减 / 免费额度检查 ──
+        account, credits_used, is_agent, auth_error = self._identify_and_deduct("audit")
+        if auth_error:
+            self._send_json({"error": auth_error[0], "error_code": "INSUFFICIENT_CREDITS" if auth_error[1] == 402 else "AUTH_REQUIRED"}, auth_error[1])
+            _record_usage("audit", self.client_address[0], success=False)
+            return
         
         try:
             result = scan(source_url, tool_type, name)
@@ -894,13 +1027,11 @@ class AIShieldHandler(BaseHTTPRequestHandler):
                 "total_findings": result.get("total_findings", 0),
                 "scanned_at": result.get("scanned_at", ""),
             })
-            # 只保留最近1000条
             if len(audits) > 1000:
                 audits = audits[-500:]
             _save_json(AUDIT_FILE, audits)
             
             # P0-3.1: Badge <-> Scan 联动
-            # 扫描评分 >= 80 时，自动调用 CertificationService.certify_tool() 生成认证
             certification = None
             try:
                 overall_score = result.get("overall_score", 0)
@@ -912,10 +1043,9 @@ class AIShieldHandler(BaseHTTPRequestHandler):
                         scan_report=result,
                     )
             except Exception:
-                # 认证失败不影响扫描结果返回
                 pass
             
-            # 品牌水印 + 转化提示
+            # 品牌水印
             response = {
                 "success": True,
                 "report": result,
@@ -926,13 +1056,21 @@ class AIShieldHandler(BaseHTTPRequestHandler):
                 },
             }
             
-            # 附加自动认证结果（Badge <-> Scan 联动）
             if certification:
                 response["certification"] = certification
             
-            # 超限时添加升级提示（完整结果仍返回，但附带转化引导）
-            if is_limited:
-                response["upgrade_hint"] = "升级Pro获取无限扫描+CI/CD集成 | npx @aishield/mcp-server"
+            # 附加积分信息（有身份时）
+            if account:
+                from eco import account as _acct
+                current_balance = _acct.UserAccount().get_balance(account["account_id"])
+                response["credits"] = {
+                    "deducted": credits_used,
+                    "balance": current_balance,
+                    "is_agent": is_agent,
+                    "agent_discount": self.AGENT_DISCOUNT if is_agent else None,
+                }
+            else:
+                response["credits"] = {"deducted": 0, "tier": "anonymous_free"}
             
             self._send_json(response)
             _record_usage("audit", self.client_address[0])
@@ -1002,6 +1140,104 @@ class AIShieldHandler(BaseHTTPRequestHandler):
             self._send_json({"error": str(e)}, 500)
             _record_usage("handshake", self.client_address[0], success=False)
     
+    # ── Creem Checkout 创建 ──
+    def _handle_creem_checkout(self, data):
+        """创建 Creem Checkout Session"""
+        product_key = data.get("product_key", "").strip()
+        account_id = data.get("account_id", "").strip()
+        customer_email = data.get("customer_email", "").strip()
+        success_url = data.get("success_url", "").strip()
+
+        if not product_key:
+            self._send_json({"error": "product_key 为必填（可选: daily_brief, intelligence_pro, api_access, lifetime, full_db, single_domain）"}, 400)
+            return
+
+        if not account_id:
+            self._send_json({"error": "account_id 为必填（传入您的 AIShield 账户 ID）"}, 400)
+            return
+
+        try:
+            from eco.payment import CreemGateway
+            gateway = CreemGateway()
+            result = gateway.create_checkout(
+                product_key=product_key,
+                account_id=account_id,
+                customer_email=customer_email or None,
+                success_url=success_url or None,
+            )
+
+            if "error" in result:
+                self._send_json(result, 400)
+            else:
+                self._send_json({"success": True, **result})
+                _record_usage("checkout-create", self.client_address[0])
+        except Exception as e:
+            self._send_json({"error": str(e)}, 500)
+            _record_usage("checkout-create", self.client_address[0], success=False)
+
+    # ── Creem Webhook 处理 ──
+    def _handle_creem_webhook(self):
+        """处理 Creem Webhook 事件（checkout.completed 等）"""
+        raw_body = self._read_raw_body()
+        if raw_body is None:
+            self._send_json({"error": "Request body too large (max 200KB)"}, 413)
+            return
+
+        signature_header = self.headers.get("creem-signature", "")
+        webhook_secret = os.environ.get("CREEM_WEBHOOK_SECRET", "")
+        if not webhook_secret:
+            print("❌ Creem webhook 未配置: 缺少 CREEM_WEBHOOK_SECRET")
+            self._send_json({"error": "Webhook secret not configured"}, 500)
+            return
+
+        from eco.payment import CreemGateway
+        if not CreemGateway.verify_webhook_signature(raw_body, signature_header, webhook_secret):
+            print(f"⚠️  Creem webhook 签名验证失败: signature={signature_header[:16]}...")
+            self._send_json({"error": "Invalid signature"}, 401)
+            return
+
+        try:
+            event = json.loads(raw_body.decode("utf-8", errors="replace"))
+        except Exception as e:
+            self._send_json({"error": f"Invalid JSON: {e}"}, 400)
+            return
+
+        event_type = event.get("eventType", "")
+        print(f"🔔 Creem webhook 事件: {event_type}")
+
+        if event_type == "checkout.completed":
+            self._handle_checkout_completed(event)
+        else:
+            print(f"ℹ️  事件类型 {event_type} 暂不处理，直接确认")
+
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.end_headers()
+        self.wfile.write(json.dumps({"received": True}).encode("utf-8"))
+        _record_usage("webhook-creem", self.client_address[0])
+
+    def _handle_checkout_completed(self, event):
+        """处理 checkout.completed 事件，增加积分"""
+        try:
+            checkout_data = event.get("object", {})
+            metadata = checkout_data.get("metadata", {})
+            account_id = metadata.get("account_id")
+            product_key = metadata.get("product_key")
+            credits = metadata.get("credits")
+
+            if not account_id or not credits:
+                print(f"⚠️  webhook metadata 缺少必要字段: account_id={account_id}, credits={credits}")
+                return
+
+            from eco.account import UserAccount
+            mgr = UserAccount()
+            mgr.recharge(account_id, credits, "creem")
+
+            print(f"✅ Creem 支付成功: account_id={account_id}, product_key={product_key}, credits={credits}")
+        except Exception as e:
+            print(f"❌ 处理 checkout.completed 失败: {e}")
+
     def _handle_mcp(self, data):
         """MCP StreamableHTTP endpoint — JSON-RPC 2.0"""
         method = data.get("method", "")

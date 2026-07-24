@@ -7,7 +7,12 @@ Allow: /agent.html
 Allow: /banned-words
 Allow: /report
 Allow: /tool/profile
+Allow: /pricing
+Allow: /mcp-security-guide
+Allow: /owasp-mcp-top10-guide
+Allow: /demo/delegation-chain
 Allow: /.well-known/agent-card.json
+Allow: /.well-known/mcp/server-card.json
 Allow: /sitemap.xml
 Allow: /robots.txt
 

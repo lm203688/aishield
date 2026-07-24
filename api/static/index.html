@@ -69,14 +69,14 @@
       "name": "Free",
       "price": "0",
       "priceCurrency": "CNY",
-      "description": "开源免费版，每日50次安全扫描"
+      "description": "注册送100积分，每日50次匿名免费扫描"
     },
     {
       "@type": "Offer",
-      "name": "Pro",
-      "price": "0",
+      "name": "Credits",
+      "price": "0.01",
       "priceCurrency": "CNY",
-      "description": "专业版，无限扫描 + CI/CD集成"
+      "description": "1元=100积分，按量计费，Agent调用半价"
     }
   ],
   "featureList": [
@@ -137,6 +137,16 @@
       "@type": "ViewAction",
       "target": "https://aishield.tools/agent.html",
       "name": "Agent安全能力展示"
+    },
+    {
+      "@type": "ViewAction",
+      "target": "https://aishield.tools/pricing",
+      "name": "查看积分制定价"
+    },
+    {
+      "@type": "ViewAction",
+      "target": "https://aishield.tools/mcp-security-guide",
+      "name": "MCP安全扫描指南"
     }
   ]
 }
@@ -187,11 +197,13 @@
         <a href="#features" class="text-gray-400 hover:text-white transition">功能</a>
         <a href="#demo" class="text-gray-400 hover:text-white transition">体验</a>
         <a href="#ecosystem" class="text-gray-400 hover:text-white transition">生态</a>
+        <a href="/pricing" class="text-gray-400 hover:text-white transition">定价</a>
         <a href="/api/v1" class="text-gray-400 hover:text-white transition">API</a>
         <a href="https://github.com/lm203688/aishield" target="_blank" class="text-gray-400 hover:text-white transition">GitHub</a>
       </div>
       <div class="flex items-center gap-3">
         <a href="/banned-words" class="hidden sm:inline text-sm px-4 py-2 rounded-lg bg-slate-800 text-gray-300 hover:bg-slate-700 transition">违禁词检测</a>
+        <a href="/pricing" class="hidden sm:inline text-sm px-4 py-2 rounded-lg bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 hover:bg-emerald-500/20 transition">注册送100积分</a>
         <a href="#demo" class="text-sm px-4 py-2 rounded-lg bg-gradient-to-r from-sky-500 to-violet-500 text-white font-medium hover:from-sky-400 hover:to-violet-400 transition">开始扫描</a>
         <!-- Account UI -->
         <div id="account-ui" class="relative">
@@ -261,7 +273,7 @@
         </p>
         <div class="flex flex-wrap gap-4">
           <a href="#demo" class="px-6 py-3 rounded-xl bg-gradient-to-r from-sky-500 to-violet-500 text-white font-semibold hover:from-sky-400 hover:to-violet-400 transition shadow-lg shadow-sky-500/20">
-            立即体验
+            注册送100积分，立即体验
           </a>
           <a href="https://github.com/lm203688/aishield" target="_blank" class="px-6 py-3 rounded-xl bg-slate-800 text-gray-300 font-semibold hover:bg-slate-700 transition border border-slate-700">
             <span class="flex items-center gap-2">
@@ -547,11 +559,11 @@
       <a href="https://github.com/lm203688/aishield" target="_blank" class="px-8 py-3 rounded-xl bg-gradient-to-r from-sky-500 to-violet-500 text-white font-semibold hover:from-sky-400 hover:to-violet-400 transition shadow-lg shadow-sky-500/20">
         GitHub 查看源码
       </a>
+      <a href="/pricing" class="px-8 py-3 rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-500 transition shadow-lg shadow-emerald-500/20">
+        注册送100积分
+      </a>
       <a href="/api/v1" class="px-8 py-3 rounded-xl bg-slate-800 text-gray-300 font-semibold hover:bg-slate-700 transition border border-slate-700">
         API 文档
-      </a>
-      <a href="/banned-words" class="px-8 py-3 rounded-xl bg-slate-800 text-gray-300 font-semibold hover:bg-slate-700 transition border border-slate-700">
-        违禁词检测
       </a>
     </div>
     <div class="mt-12 pt-8 border-t border-slate-800/50 flex flex-wrap justify-center gap-6 text-sm text-gray-500">
@@ -559,6 +571,9 @@
       <span>OWASP MCP Top 10 Aligned</span>
       <span>133 Security Rules</span>
       <span>40+ API Endpoints</span>
+      <a href="/pricing" class="hover:text-gray-300 transition">积分制定价</a>
+      <a href="/mcp-security-guide" class="hover:text-gray-300 transition">MCP安全指南</a>
+      <a href="/owasp-mcp-top10-guide" class="hover:text-gray-300 transition">OWASP指南</a>
       <a href="https://github.com/lm203688/aishield" class="hover:text-gray-300 transition">GitHub</a>
     </div>
   </div>
