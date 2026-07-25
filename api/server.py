@@ -487,6 +487,32 @@ class AIShieldHandler(BaseHTTPRequestHandler):
                 self.wfile.write(body)
                 return
 
+        # 博客列表页 /blog
+        if path == "/blog" or path == "/blog/":
+            html = self._render_blog_index()
+            body = html.encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            _record_usage("blog-index", self.client_address[0])
+            return
+        
+        # 博客详情页 /blog/<slug>
+        if path.startswith("/blog/") and len(path) > 6:
+            slug = path[6:]
+            html = self._render_blog_post(slug)
+            if html:
+                body = html.encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "text/html; charset=utf-8")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+                _record_usage("blog-post", self.client_address[0])
+                return
+        
         # Landing Page — 定价页（积分制）
         if path == "/pricing":
             html_path = os.path.join(BASE, "static", "pricing.html")
@@ -949,6 +975,130 @@ class AIShieldHandler(BaseHTTPRequestHandler):
     SIGNUP_BONUS = 100
     CREDIT_PER_YUAN = 100
     AGENT_DISCOUNT = 0.5  # Agent 调用半价
+    
+    # ── 博客渲染 ──
+    def _render_blog_index(self):
+        """渲染博客列表页"""
+        blog_dir = os.path.join(BASE, "content", "blog")
+        posts = []
+        if os.path.exists(blog_dir):
+            for fname in sorted(os.listdir(blog_dir), reverse=True):
+                if fname.endswith(".md"):
+                    fpath = os.path.join(blog_dir, fname)
+                    with open(fpath, "r", encoding="utf-8") as f:
+                        content = f.read()
+                    # 解析 frontmatter
+                    title = fname.replace(".md", "").replace("-", " ").title()
+                    date_str = ""
+                    summary = ""
+                    if content.startswith("---"):
+                        parts = content.split("---", 2)
+                        if len(parts) >= 3:
+                            fm = parts[1]
+                            body = parts[2]
+                            for line in fm.split("\n"):
+                                if line.startswith("title:"):
+                                    title = line.split(":", 1)[1].strip().strip('"')
+                                elif line.startswith("date:"):
+                                    date_str = line.split(":", 1)[1].strip()
+                            summary = body.strip()[:200].replace("\n", " ") + "..."
+                    slug = fname.replace(".md", "")
+                    posts.append({"slug": slug, "title": title, "date": date_str, "summary": summary})
+        
+        posts_html = ""
+        for p in posts:
+            posts_html += f'''<article style="margin-bottom:32px;padding-bottom:24px;border-bottom:1px solid #334155">
+                <h2 style="margin-bottom:8px"><a href="/blog/{p['slug']}" style="color:#60a5fa;text-decoration:none">{p['title']}</a></h2>
+                <p style="color:#94a3b8;font-size:14px;margin-bottom:8px">{p['date']}</p>
+                <p style="color:#cbd5e1">{p['summary']}</p>
+            </article>'''
+        
+        if not posts_html:
+            posts_html = '<p style="color:#94a3b8">暂无博客文章，内容流水线将自动生成。</p>'
+        
+        return f'''<!DOCTYPE html><html lang="zh-CN"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>博客 - AIShield</title>
+<style>body{{font-family:system-ui,sans-serif;margin:0;background:#0f172a;color:#e2e8f0;line-height:1.6}}
+.container{{max-width:800px;margin:0 auto;padding:40px 20px}}
+h1{{font-size:32px;margin-bottom:8px}}.subtitle{{color:#94a3b8;margin-bottom:40px}}
+a{{color:#60a5fa}}</style></head><body>
+<div class="container">
+<h1>AIShield 博客</h1>
+<p class="subtitle">AI Agent 安全洞察与 MCP 生态观察</p>
+{posts_html}
+<p style="margin-top:40px"><a href="/">← 返回首页</a></p>
+</div></body></html>'''
+    
+    def _render_blog_post(self, slug):
+        """渲染单篇博客"""
+        safe_slug = "".join(c for c in slug if c.isalnum() or c in "-_")
+        if safe_slug != slug:
+            return None
+        fpath = os.path.join(BASE, "content", "blog", safe_slug + ".md")
+        if not os.path.exists(fpath):
+            return None
+        
+        with open(fpath, "r", encoding="utf-8") as f:
+            content = f.read()
+        
+        # 简单 Markdown → HTML 转换
+        title = safe_slug.replace("-", " ").title()
+        date_str = ""
+        body = content
+        
+        if content.startswith("---"):
+            parts = content.split("---", 2)
+            if len(parts) >= 3:
+                fm = parts[1]
+                body = parts[2].strip()
+                for line in fm.split("\n"):
+                    if line.startswith("title:"):
+                        title = line.split(":", 1)[1].strip().strip('"')
+                    elif line.startswith("date:"):
+                        date_str = line.split(":", 1)[1].strip()
+        
+        # 简单转换
+        html_body = body
+        html_body = html_body.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+        # 标题
+        for i in range(6, 0, -1):
+            html_body = html_body.replace(f"{'#' * i} ", f"<h{i} style=\"margin-top:24px;margin-bottom:12px;color:#f1f5f9\">")
+            html_body = html_body.replace(f"\n{'#' * i} ", f"\n<h{i} style=\"margin-top:24px;margin-bottom:12px;color:#f1f5f9\">")
+        # 粗体
+        html_body = html_body.replace("**", "<strong>", 1).replace("**", "</strong>", 1)
+        # 代码块
+        import re
+        html_body = re.sub(r'```(\w+)?\n(.*?)```', r'<pre style="background:#1e293b;padding:16px;border-radius:8px;overflow-x:auto"><code>\2</code></pre>', html_body, flags=re.DOTALL)
+        # 行内代码
+        html_body = re.sub(r'`([^`]+)`', r'<code style="background:#1e293b;padding:2px 6px;border-radius:4px">\1</code>', html_body)
+        # 段落
+        paragraphs = html_body.split("\n\n")
+        new_paras = []
+        for p in paragraphs:
+            p = p.strip()
+            if p and not p.startswith("<"):
+                p = f'<p style="margin-bottom:16px;color:#cbd5e1">{p}</p>'
+            new_paras.append(p)
+        html_body = "\n".join(new_paras)
+        # 链接
+        html_body = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', r'<a href="\2" style="color:#60a5fa">\1</a>', html_body)
+        
+        return f'''<!DOCTYPE html><html lang="zh-CN"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{title} - AIShield Blog</title>
+<style>body{{font-family:system-ui,sans-serif;margin:0;background:#0f172a;color:#e2e8f0;line-height:1.6}}
+.container{{max-width:800px;margin:0 auto;padding:40px 20px}}
+h1{{font-size:28px;margin-bottom:8px;color:#f1f5f9}}.meta{{color:#94a3b8;font-size:14px;margin-bottom:32px}}
+a{{color:#60a5fa}}pre{{background:#1e293b;padding:16px;border-radius:8px;overflow-x:auto}}
+code{{font-family:monospace}}ul,ol{{color:#cbd5e1}}li{{margin-bottom:8px}}
+blockquote{{border-left:4px solid #3b82f6;padding-left:16px;margin-left:0;color:#94a3b8}}</style></head><body>
+<div class="container">
+<h1>{title}</h1>
+<p class="meta">{date_str} | <a href="/blog">← 返回博客列表</a></p>
+<div class="content">{html_body}</div>
+<p style="margin-top:40px"><a href="/blog">← 返回博客列表</a> | <a href="/">首页</a></p>
+</div></body></html>'''
     
     def _build_recharge_cta(self, balance, is_agent=False, is_anonymous=False):
         """

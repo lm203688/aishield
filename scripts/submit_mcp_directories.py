@@ -201,36 +201,142 @@ def check_smithery_status():
     return {"status": "missing", "file": yaml_path}
 
 
+def _github_api_request(url, token, method="GET", data=None):
+    """GitHub API 通用请求"""
+    headers = {
+        "Authorization": f"token {token}",
+        "Accept": "application/vnd.github.v3+json",
+        "User-Agent": "AIShield-Submission-Bot/1.0",
+    }
+    req = urllib.request.Request(url, headers=headers, method=method)
+    if data is not None:
+        req.add_header("Content-Type", "application/json")
+        req.data = json.dumps(data).encode("utf-8")
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            return json.loads(resp.read().decode("utf-8")), resp.status
+    except urllib.error.HTTPError as e:
+        return {"error": e.read().decode("utf-8")}, e.code
+    except Exception as e:
+        return {"error": str(e)}, 0
+
+
 def submit_github_awesome(manifest, dry_run=True):
     """
     自动提交到 awesome-mcp-servers（需要 GITHUB_TOKEN）
-    由于需要 fork + PR，这里生成 PR 模板并输出操作指南
+    流程: Fork → 获取 README → 修改 → 提交 → 创建 PR
     """
-    repo = "punkpeye/awesome-mcp-servers"
-    pr_body = generate_awesome_pr_body(manifest)
+    target_repo = "punkpeye/awesome-mcp-servers"
+    target_owner = "punkpeye"
+    target_name = "awesome-mcp-servers"
     
     if dry_run:
         print(f"\n📋 [GitHub Awesome MCP] 预览 PR 内容:")
-        print(f"   目标仓库: {repo}")
+        print(f"   目标仓库: {target_repo}")
         print(f"   修改: 在 README.md 的 Security 分类下添加一行")
         print(f"   PR 标题: Add AIShield — AI Agent security scanner")
-        print(f"   PR 内容预览 (前300字):")
-        print(f"   {pr_body[:300]}...")
-        return {"status": "dry_run", "repo": repo}
+        return {"status": "dry_run", "repo": target_repo}
     
     token = os.environ.get("GITHUB_TOKEN", "")
     if not token:
         print(f"   ⚠️  缺少 GITHUB_TOKEN 环境变量，无法自动提交")
+        print(f"   获取方式: https://github.com/settings/tokens (勾选 'repo' 权限)")
         return {"status": "failed", "reason": "missing GITHUB_TOKEN"}
     
-    # 这里可以实现完整的 fork + branch + commit + PR 流程
-    # 但由于需要用户授权，目前仅输出指南
-    print(f"   ⚠️  自动 PR 功能需要手动授权，请按以下步骤操作:")
-    print(f"   1. Fork {repo}")
-    print(f"   2. 在 README.md 的 Security 分类下添加:")
-    print(f"      - [{manifest.get('displayName', 'AIShield')}]({manifest.get('homepage', '')}) — {manifest.get('description', '')[:60]}")
-    print(f"   3. 提交 PR")
-    return {"status": "manual_required", "repo": repo}
+    # 1. 获取当前用户
+    user_data, status = _github_api_request("https://api.github.com/user", token)
+    if status != 200:
+        print(f"   ❌ GitHub API 认证失败: {user_data.get('error', 'unknown')}")
+        return {"status": "failed", "reason": "auth_failed"}
+    
+    username = user_data.get("login", "")
+    print(f"   ✅ GitHub 认证成功: @{username}")
+    
+    # 2. Fork 目标仓库
+    print(f"   🍴 Forking {target_repo}...")
+    fork_data, fork_status = _github_api_request(
+        f"https://api.github.com/repos/{target_repo}/forks",
+        token, method="POST"
+    )
+    if fork_status not in (200, 202):
+        print(f"   ❌ Fork 失败: {fork_data.get('error', 'unknown')}")
+        return {"status": "failed", "reason": "fork_failed"}
+    
+    fork_repo = fork_data.get("full_name", f"{username}/{target_name}")
+    print(f"   ✅ Fork 成功: {fork_repo}")
+    
+    # 3. 获取 README 内容
+    print(f"   📄 获取 README.md...")
+    readme_data, readme_status = _github_api_request(
+        f"https://api.github.com/repos/{fork_repo}/contents/README.md",
+        token
+    )
+    if readme_status != 200:
+        print(f"   ❌ 获取 README 失败: {readme_data.get('error', 'unknown')}")
+        return {"status": "failed", "reason": "readme_fetch_failed"}
+    
+    import base64
+    readme_content = base64.b64decode(readme_data.get("content", "")).decode("utf-8")
+    readme_sha = readme_data.get("sha", "")
+    
+    # 4. 在 Security 分类下添加 AIShield
+    display_name = manifest.get("displayName", manifest.get("name", "AIShield"))
+    homepage = manifest.get("homepage", "https://aishield.tools")
+    description = manifest.get("description", "AI Agent security scanner")
+    new_line = f"- [{display_name}]({homepage}) — {description}\n"
+    
+    # 查找 Security 分类并插入
+    security_marker = "### Security"
+    if security_marker in readme_content:
+        idx = readme_content.find(security_marker)
+        # 找到该分类的下一个 ### 或在列表末尾插入
+        next_section = readme_content.find("### ", idx + len(security_marker))
+        if next_section == -1:
+            readme_content += f"\n{new_line}"
+        else:
+            readme_content = readme_content[:next_section] + new_line + readme_content[next_section:]
+    else:
+        # 如果没有 Security 分类，在末尾添加
+        readme_content += f"\n### Security\n\n{new_line}"
+    
+    # 5. 提交修改
+    print(f"   ✏️  修改 README.md...")
+    commit_data, commit_status = _github_api_request(
+        f"https://api.github.com/repos/{fork_repo}/contents/README.md",
+        token,
+        method="PUT",
+        data={
+            "message": f"feat: add {display_name} to MCP servers list",
+            "content": base64.b64encode(readme_content.encode("utf-8")).decode("utf-8"),
+            "sha": readme_sha,
+        }
+    )
+    if commit_status not in (200, 201):
+        print(f"   ❌ 提交修改失败: {commit_data.get('error', 'unknown')}")
+        return {"status": "failed", "reason": "commit_failed"}
+    
+    print(f"   ✅ README 修改已提交")
+    
+    # 6. 创建 PR
+    print(f"   📬 创建 Pull Request...")
+    pr_data, pr_status = _github_api_request(
+        f"https://api.github.com/repos/{target_repo}/pulls",
+        token,
+        method="POST",
+        data={
+            "title": f"Add {display_name} — AI Agent security scanner",
+            "body": generate_awesome_pr_body(manifest),
+            "head": f"{username}:main",
+            "base": "main",
+        }
+    )
+    if pr_status not in (200, 201):
+        print(f"   ❌ 创建 PR 失败: {pr_data.get('error', 'unknown')}")
+        return {"status": "failed", "reason": "pr_failed"}
+    
+    pr_url = pr_data.get("html_url", "")
+    print(f"   ✅ PR 创建成功: {pr_url}")
+    return {"status": "submitted", "repo": target_repo, "pr_url": pr_url}
 
 
 def run_submission(dry_run=True):
