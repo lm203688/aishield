@@ -54,6 +54,8 @@ os.makedirs(DATA_DIR, exist_ok=True)
 
 AUDIT_FILE = os.path.join(DATA_DIR, "audits.json")
 USAGE_FILE = os.path.join(DATA_DIR, "usage.json")
+WEBHOOK_PROCESSED_FILE = os.path.join(DATA_DIR, "webhook_processed.json")  # 幂等性：已处理的webhook checkout_id
+CREDIT_TXN_FILE = os.path.join(DATA_DIR, "credit_transactions.json")  # 积分变动流水
 
 TZ = timezone(timedelta(hours=8))
 
@@ -1218,23 +1220,58 @@ class AIShieldHandler(BaseHTTPRequestHandler):
         _record_usage("webhook-creem", self.client_address[0])
 
     def _handle_checkout_completed(self, event):
-        """处理 checkout.completed 事件，增加积分"""
+        """处理 checkout.completed 事件，增加积分（含幂等性检查）"""
         try:
             checkout_data = event.get("object", {})
             metadata = checkout_data.get("metadata", {})
             account_id = metadata.get("account_id")
             product_key = metadata.get("product_key")
             credits = metadata.get("credits")
+            checkout_id = checkout_data.get("id", "")
 
             if not account_id or not credits:
                 print(f"⚠️  webhook metadata 缺少必要字段: account_id={account_id}, credits={credits}")
                 return
 
+            # ── 幂等性检查：防止重复处理同一个 checkout ──
+            processed = _load_json(WEBHOOK_PROCESSED_FILE, {"checkouts": []})
+            processed_checkouts = processed.get("checkouts", [])
+            if checkout_id and checkout_id in processed_checkouts:
+                print(f"⚠️  重复 webhook 已忽略: checkout_id={checkout_id}（已处理过）")
+                return
+
+            # ── 充值积分 ──
             from eco.account import UserAccount
             mgr = UserAccount()
             mgr.recharge(account_id, credits, "creem")
 
-            print(f"✅ Creem 支付成功: account_id={account_id}, product_key={product_key}, credits={credits}")
+            # ── 记录已处理 checkout_id（幂等性）──
+            processed_checkouts.append(checkout_id)
+            # 只保留最近 1000 条
+            if len(processed_checkouts) > 1000:
+                processed_checkouts = processed_checkouts[-500:]
+            processed["checkouts"] = processed_checkouts
+            _save_json(WEBHOOK_PROCESSED_FILE, processed)
+
+            # ── 记录积分变动流水 ──
+            txns = _load_json(CREDIT_TXN_FILE, {"transactions": []})
+            txn_list = txns.get("transactions", [])
+            txn_list.append({
+                "txn_id": f"txn_{uuid.uuid4().hex[:12]}",
+                "type": "recharge",
+                "account_id": account_id,
+                "credits": credits,
+                "gateway": "creem",
+                "checkout_id": checkout_id,
+                "product_key": product_key,
+                "timestamp": datetime.now(TZ).isoformat(),
+            })
+            if len(txn_list) > 10000:
+                txn_list = txn_list[-5000:]
+            txns["transactions"] = txn_list
+            _save_json(CREDIT_TXN_FILE, txns)
+
+            print(f"✅ Creem 支付成功: account_id={account_id}, product_key={product_key}, credits={credits}, checkout_id={checkout_id}")
         except Exception as e:
             print(f"❌ 处理 checkout.completed 失败: {e}")
 

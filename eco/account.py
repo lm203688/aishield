@@ -248,11 +248,11 @@ class UserAccount:
 
     def recharge(self, account_id, amount, gateway="alipay"):
         """
-        充值（增加余额）
+        充值（增加积分）
 
         Args:
             account_id (str): 账户ID
-            amount (float):   充值金额（CNY）
+            amount (float):   积分数量
             gateway (str):    支付网关
 
         Returns:
@@ -261,7 +261,7 @@ class UserAccount:
         self._load()
 
         if amount <= 0:
-            raise ValueError("充值金额必须大于0")
+            raise ValueError("充值积分必须大于0")
 
         account = self._accounts.get(account_id)
         if not account:
@@ -269,6 +269,18 @@ class UserAccount:
 
         account["balance"] = round(account.get("balance", 0.0) + amount, 2)
         account["updated_at"] = _now_iso()
+
+        # 记录充值流水
+        history = account.get("recharge_history", [])
+        history.append({
+            "amount": amount,
+            "gateway": gateway,
+            "balance_after": account["balance"],
+            "timestamp": _now_iso(),
+        })
+        if len(history) > 500:
+            history = history[-200:]
+        account["recharge_history"] = history
 
         self._accounts[account_id] = account
         self._save()
@@ -284,11 +296,11 @@ class UserAccount:
 
     def consume(self, account_id, amount):
         """
-        消费（扣除余额）
+        消费（扣除积分）
 
         Args:
             account_id (str): 账户ID
-            amount (float):   消费金额（CNY）
+            amount (float):   积分数量
 
         Returns:
             dict: 消费结果
@@ -296,7 +308,7 @@ class UserAccount:
         self._load()
 
         if amount <= 0:
-            raise ValueError("消费金额必须大于0")
+            raise ValueError("消费积分必须大于0")
 
         account = self._accounts.get(account_id)
         if not account:
@@ -304,10 +316,21 @@ class UserAccount:
 
         balance = account.get("balance", 0.0)
         if balance < amount:
-            raise ValueError(f"余额不足: 当前余额 {balance} CNY，需要 {amount} CNY")
+            raise ValueError(f"积分不足: 当前 {balance:.0f} 积分，需要 {amount:.0f} 积分")
 
         account["balance"] = round(balance - amount, 2)
         account["updated_at"] = _now_iso()
+
+        # 记录消费流水
+        history = account.get("consume_history", [])
+        history.append({
+            "amount": amount,
+            "balance_after": account["balance"],
+            "timestamp": _now_iso(),
+        })
+        if len(history) > 500:
+            history = history[-200:]
+        account["consume_history"] = history
 
         self._accounts[account_id] = account
         self._save()
