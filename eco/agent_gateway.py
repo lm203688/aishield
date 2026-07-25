@@ -268,6 +268,19 @@ def agent_setup(data):
                 f"with MCP JSON-RPC 2.0 protocol"
             ),
         },
+        "ecosystem": {
+            "openapi": f"{_BASE_URL}/openapi.json",
+            "agent_card": f"{_BASE_URL}/.well-known/agent-card.json",
+            "crewai_integration": "https://github.com/lm203688/aishield/blob/main/docs/partnership-strategy.md#21-crewai-tools-registry",
+            "langchain_integration": "https://github.com/lm203688/aishield/blob/main/docs/partnership-strategy.md#23-langchain-callback-handler",
+            "mcp_config": {
+                "mcpServers": {
+                    "aishield": {
+                        "url": f"{_BASE_URL}/api/v1/mcp"
+                    }
+                }
+            },
+        },
     }
 
 

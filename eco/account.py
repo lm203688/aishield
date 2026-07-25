@@ -141,7 +141,7 @@ class UserAccount:
             "email": email,
             "password_hash": _hash_sha256(password),
             "api_key_hash": api_key_hash,
-            "balance": 5.0,  # 送5元体验金
+            "balance": 100.0,  # 注册送100积分体验金（1元=100积分）
             "status": "active",
             "created_at": _now_iso(),
             "updated_at": _now_iso(),

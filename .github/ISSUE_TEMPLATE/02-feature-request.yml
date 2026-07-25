@@ -1,0 +1,50 @@
+name: 功能建议
+description: 为 AIShield 提出新功能或改进建议
+title: "[Feature] "
+labels: ["feature", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢你的建议！请描述你的使用场景，帮助我们理解需求的价值。
+
+  - type: checkboxes
+    attributes:
+      label: 自查清单
+      options:
+        - label: 我已经搜索过现有 Issues，确认没有重复建议
+          required: true
+
+  - type: textarea
+    attributes:
+      label: 使用场景
+      description: 描述你遇到什么问题，或者希望解决什么痛点
+      placeholder: 作为一个 AI Agent 开发者，我希望能够在部署前自动扫描我的 MCP Server...
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: 建议方案
+      description: 你希望如何实现？如果有具体的 API 设计或交互方案，请详细说明
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: 替代方案
+      description: 你考虑过哪些替代方案？为什么它们不够好？
+
+  - type: dropdown
+    attributes:
+      label: 优先级（对你而言）
+      options:
+        - 阻塞性（没有此功能无法使用）
+        - 高（严重影响体验）
+        - 中（有改善空间）
+        - 低（锦上添花）
+
+  - type: textarea
+    attributes:
+      label: 额外信息
+      description: 截图、参考链接、竞品实现等

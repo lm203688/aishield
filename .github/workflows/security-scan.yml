@@ -1,0 +1,57 @@
+name: Security Scan
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 0 * * 1'  # 每周一凌晨运行
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  aishield-self-scan:
+    name: Self-Scan with AIShield
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Start AIShield Server
+        run: |
+          python api/server.py &
+          sleep 3
+          curl -s http://localhost:8450/api/v1/health
+
+      - name: Scan Repository
+        run: |
+          curl -s -X POST http://localhost:8450/api/v1/audit \
+            -H "Content-Type: application/json" \
+            -d '{
+              "tool_name": "aishield-repo",
+              "tool_description": "AIShield self-scan of repository",
+              "tool_schema": {},
+              "capabilities": ["scan"]
+            }' | tee scan-report.json
+
+      - name: Upload Scan Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-scan-report
+          path: scan-report.json
+
+      - name: Check Risk Level
+        run: |
+          SCORE=$(cat scan-report.json | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('score',0))")
+          echo "Security Score: $SCORE"
+          if [ "$SCORE" -lt 60 ]; then
+            echo "::error::Security score $SCORE is below threshold (60)"
+            exit 1
+          fi

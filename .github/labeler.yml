@@ -1,0 +1,21 @@
+# 自动标签配置 — 根据 Issue 标题/内容匹配关键词
+bug:
+  - '(?i)\\b(bug|错误|崩溃|crash|exception|报错|失效|broken|not working)\\b'
+feature:
+  - '(?i)\\b(feature|功能|建议|新增|添加|支持|enhancement|improvement|优化)\\b'
+documentation:
+  - '(?i)\\b(doc|文档|readme|注释|说明|tutorial|指南|guide)\\b'
+scanner:
+  - '(?i)\\b(scan|扫描|规则|rule|检测|audit|漏洞|vulnerability|security check)\\b'
+mcp:
+  - '(?i)\\b(mcp|model.context|protocol|stdio|sse|tool|server)\\b'
+identity:
+  - '(?i)\\b(did|identity|身份|注册|agent|reputation|信誉)\\b'
+billing:
+  - '(?i)\\b(billing|计费|支付|充值|套餐|plan|payment|price)\\b'
+frontend:
+  - '(?i)\\b(ui|前端|页面|html|css|界面|display|render|可视化)\\b'
+performance:
+  - '(?i)\\b(perf|性能|慢|timeout|内存|优化|speed|cache|加载)\\b'
+good first issue:
+  - '(?i)\\b(good first|新手|入门|简单|easy| beginner|first time)\\b'

@@ -1,0 +1,40 @@
+name: Stale Issues Manager
+on:
+  schedule:
+    - cron: '0 2 * * *'  # 每天凌晨 2 点运行
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@v9
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          # Issue 配置
+          stale-issue-message: |
+            这个 Issue 已经 30 天没有活动了。如果问题仍然存在，请评论回复，否则将在 7 天后自动关闭。
+            
+            感谢你的贡献！
+          close-issue-message: |
+            这个 Issue 因长期无活动已被自动关闭。如果问题仍然存在，请重新打开或创建新 Issue。
+          days-before-issue-stale: 30
+          days-before-issue-close: 7
+          stale-issue-label: 'stale'
+          # PR 配置
+          stale-pr-message: |
+            这个 PR 已经 45 天没有活动了。请更新状态或评论说明进展，否则将在 10 天后自动关闭。
+          close-pr-message: |
+            这个 PR 因长期无活动已被自动关闭。如需继续，请重新提交。
+          days-before-pr-stale: 45
+          days-before-pr-close: 10
+          stale-pr-label: 'stale'
+          # 排除标签
+          exempt-issue-labels: 'pinned,security,roadmap'
+          exempt-pr-labels: 'pinned,work-in-progress'
+          # 不处理已分配的 Issue
+          exempt-all-assignees: true

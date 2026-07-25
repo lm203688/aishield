@@ -1,0 +1,49 @@
+{
+  "name": "aishield-security",
+  "displayName": "AIShield Security Scanner",
+  "description": "AI Agent security scanner for MCP tools — scan for prompt injection, secret leakage, tool abuse, and OWASP MCP Top 10 risks",
+  "version": "4.2.0",
+  "protocol_version": "2025-03-26",
+  "license": "MIT",
+  "keywords": ["security", "mcp", "ai-agent", "scanner", "prompt-injection", "owasp"],
+  "categories": ["security", "developer-tools"],
+  "author": {
+    "name": "AIShield",
+    "url": "https://aishield.tools",
+    "email": "security@aishield.tools"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lm203688/aishield"
+  },
+  "homepage": "https://aishield.tools",
+  "documentation": "https://aishield.tools/docs",
+  "installation": {
+    "type": "npx",
+    "command": "npx @aishield/mcp-server"
+  },
+  "endpoints": {
+    "http": {
+      "url": "https://aishield.tools/api/v1/mcp",
+      "type": "streamable-http"
+    },
+    "setup": "https://aishield.tools/api/v1/agent/setup"
+  },
+  "capabilities": {
+    "tools": [
+      "aishield_scan",
+      "aishield_guardrail",
+      "aishield_prompt_check",
+      "aishield_banned_words",
+      "aishield_rug_pull",
+      "aishield_handshake",
+      "agent_register",
+      "agent_quick_scan"
+    ]
+  },
+  "trust": {
+    "score": 85,
+    "standard": "OWASP MCP Top 10 (2025 v0.1)",
+    "compliance": ["SOC2-Type-II", "ISO27001"]
+  }
+}

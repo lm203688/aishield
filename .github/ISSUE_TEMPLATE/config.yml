@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 安全问题报告
+    url: https://aishield.tools/security
+    about: 发现安全漏洞？请通过安全渠道私下报告，不要在公开 Issue 中披露。
+  - name: 使用问题 / 讨论
+    url: https://github.com/lm203688/aishield/discussions
+    about: 有使用疑问或想进行开放式讨论？请前往 Discussions 区。
+  - name: Discord 社区
+    url: https://discord.gg/aishield
+    about: 加入 Discord 社区获取实时帮助和交流。

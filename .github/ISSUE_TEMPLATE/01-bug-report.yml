@@ -1,0 +1,77 @@
+name: Bug 报告
+description: 报告 AIShield 的 Bug
+title: "[Bug] "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢提交 Bug 报告！请尽可能提供详细信息，帮助我们快速定位和修复。
+
+  - type: checkboxes
+    attributes:
+      label: 自查清单
+      options:
+        - label: 我已经搜索过现有 Issues，确认没有重复报告
+          required: true
+        - label: 我已经升级到最新版本，问题仍然存在
+          required: true
+
+  - type: dropdown
+    attributes:
+      label: 受影响模块
+      options:
+        - 安全扫描 (scanner)
+        - MCP 协议 (mcp)
+        - Agent 身份 (identity)
+        - 技能市场 (skill_market)
+        - 计费系统 (billing)
+        - 前端页面 (frontend)
+        - 文档 (docs)
+        - 其他
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: 问题描述
+      description: 清晰描述发生了什么 Bug
+      placeholder: 当我调用 /api/v1/audit 扫描某个工具时，返回了 500 错误...
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: 复现步骤
+      description: 提供最小可复现的步骤
+      placeholder: |
+        1. POST /api/v1/audit
+        2. 请求体: {...}
+        3. 观察到错误
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: 预期行为
+      description: 你期望发生什么？
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: 实际行为
+      description: 实际发生了什么？（包含错误信息、堆栈跟踪等）
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: 环境信息
+      description: 运行环境
+      placeholder: |
+        - AIShield 版本: v4.2
+        - Python 版本: 3.11
+        - 部署方式: 本地 / Docker / 服务器
+        - 操作系统: Windows / macOS / Linux
