@@ -352,6 +352,8 @@ class CreemGateway(PaymentGateway):
             headers={
                 "Content-Type": "application/json",
                 "x-api-key": self.api_key,
+                "User-Agent": "AIShield/4.2 (https://aishield.tools)",
+                "Accept": "application/json",
             },
             method="POST",
         )
