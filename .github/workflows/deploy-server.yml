@@ -22,6 +22,8 @@ jobs:
           cd /opt/aishield || cd ~/aishield
           git pull origin main
           python3 -m py_compile api/server.py eco/*.py scanner/*.py
+
+          # ── 重启 API 服务 ──
           pkill -f "api/server.py" || true
           sleep 2
           export PORT=8450
@@ -30,4 +32,27 @@ jobs:
           export CREEM_TEST_MODE=${{ secrets.CREEM_TEST_MODE || 'true' }}
           nohup python3 api/server.py > server.log 2>&1 &
           sleep 3
-          curl -sf http://localhost:8450/api/v1/health && echo "Deploy successful"
+
+          # ── 确保 Cloudflare Tunnel 运行 ──
+          if ! pgrep -x cloudflared > /dev/null 2>&1; then
+            echo "cloudflared not running, attempting to start..."
+            # 尝试 systemd 服务
+            if systemctl is-enabled cloudflared 2>/dev/null; then
+              sudo systemctl start cloudflared
+            else
+              # 检查是否存在 tunnel 配置
+              if [ -f /etc/cloudflared/config.yml ] || [ -f ~/.cloudflared/config.yml ]; then
+                nohup cloudflared tunnel run > /tmp/cloudflared.log 2>&1 &
+                echo "cloudflared started via nohup"
+              else
+                echo "WARNING: cloudflared config not found, tunnel not started"
+              fi
+            fi
+          else
+            echo "cloudflared already running (pid: $(pgrep -x cloudflared))"
+          fi
+          sleep 2
+
+          # ── 验证 ──
+          curl -sf http://localhost:8450/api/v1/health && echo "API OK"
+          pgrep -x cloudflared && echo "Tunnel OK" || echo "WARNING: Tunnel not running"
