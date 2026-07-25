@@ -26,7 +26,7 @@ jobs:
           sleep 2
           export PORT=8450
           export CREEM_API_KEY=${{ secrets.CREEM_API_KEY }}
-          export CREEM_WEBHOOK_SECRET=${{ secrets.CREEM_WEBHOOK_SECRET }}
+          export CREEM_WEBHOOK_SECRET=${{ secrets.CREEM_WEBHOOK_SECRET || 'whsec_28uK7ZQhVAhdcgvdhYF4Ac' }}
           export CREEM_TEST_MODE=${{ secrets.CREEM_TEST_MODE || 'true' }}
           nohup python3 api/server.py > server.log 2>&1 &
           sleep 3
