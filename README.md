@@ -11,7 +11,11 @@
   <a href="https://owasp.org/www-project-mcp-security-top-10/"><img src="https://img.shields.io/badge/OWASP-MCP%20Top%2010-orange.svg" alt="OWASP MCP Top 10"></a>
   <img src="https://img.shields.io/badge/Rules-133-red.svg" alt="133 Security Rules">
   <img src="https://img.shields.io/badge/Dependencies-0-9cf.svg" alt="Zero Dependencies">
-  <img src="https://img.shields.io/badge/Version-v4.1.0-brightgreen.svg" alt="v4.1.0">
+  <img src="https://img.shields.io/badge/Version-v4.2.0-brightgreen.svg" alt="v4.2.0">
+</p>
+
+<p align="center">
+  <a href="https://aishield.tools/pricing"><strong>🚀 免费注册 — 送 100 积分体验金</strong></a>
 </p>
 
 ```
@@ -77,10 +81,25 @@ python api/server.py
 
 服务启动后访问 **http://localhost:8450**，即可看到 API 信息面板。
 
-### 2. 首次安全扫描
+### 2. 注册获取 API Key（送 100 积分）
+
+```bash
+curl -X POST https://aishield.tools/api/v1/account/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Your Name",
+    "email": "your@email.com",
+    "password": "YourSecurePassword123"
+  }'
+```
+
+注册成功返回 `api_key`，后续调用需要携带 `Authorization: Bearer YOUR_API_KEY`。
+
+### 3. 首次安全扫描
 
 ```bash
 curl -X POST https://aishield.tools/api/v1/audit \
+  -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "tool_name": "my-agent-tool",
@@ -90,7 +109,9 @@ curl -X POST https://aishield.tools/api/v1/audit \
   }'
 ```
 
-### 3. 获取安全徽章
+> 💡 未注册用户也可匿名免费扫描 **50 次/天**，注册后获 **100 积分**（可扫描 100 次），[查看定价](https://aishield.tools/pricing)。
+
+### 4. 获取安全徽章
 
 扫描通过后，在项目 README 中嵌入你的安全徽章：
 
@@ -327,6 +348,23 @@ docker run -p 8450:8450 aishield
 项目内置 `railway.json`、`render.yaml` 和 `Procfile`，可直接一键部署。
 
 详见 [DEPLOY.md](./DEPLOY.md)。
+
+---
+
+## 🚀 立即开始
+
+选择最适合你的方式开始使用 AIShield：
+
+| 方式 | 操作 | 适合场景 |
+|:---|:---|:---|
+| **在线体验** | 访问 [aishield.tools](https://aishield.tools) 直接扫描 | 快速体验，无需部署 |
+| **本地运行** | `git clone` + `python api/server.py` | 开发调试，自定义规则 |
+| **MCP 集成** | 配置 Claude Desktop / Cursor | 在对话中直接扫描 |
+| **API 调用** | 注册获取 API Key，集成到 CI/CD | 自动化安全审计 |
+
+<p align="center">
+  <a href="https://aishield.tools/pricing"><strong>免费注册 — 获取 100 积分体验金 →</strong></a>
+</p>
 
 ---
 

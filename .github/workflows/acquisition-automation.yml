@@ -1,0 +1,66 @@
+name: Acquisition Automation
+
+on:
+  schedule:
+    # 每周一 08:00 生成内容营销素材
+    - cron: '0 0 * * 1'
+    # 每天 09:00 检查获客指标
+    - cron: '0 1 * * *'
+  workflow_dispatch:
+
+jobs:
+  content-pipeline:
+    if: github.event.schedule == '0 0 * * 1' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Run Content Pipeline
+        run: |
+          python scripts/content_pipeline.py --all
+      
+      - name: Commit Generated Content
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add content/blog/ api/static/feeds.xml
+          git diff --quiet && git diff --staged --quiet || git commit -m "auto: weekly content pipeline [$(date +%Y-%m-%d)]"
+          git push
+
+  acquisition-monitor:
+    if: github.event.schedule == '0 1 * * *' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Run Acquisition Monitor
+        run: |
+          python scripts/acquisition_monitor.py
+      
+      - name: Check Alerts
+        id: alerts
+        run: |
+          python scripts/acquisition_monitor.py --alert || echo "ALERTS_FOUND=true" >> $GITHUB_OUTPUT
+        continue-on-error: true
+      
+      - name: Upload Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: acquisition-report
+          path: api/data/acquisition_report.json
+      
+      - name: Notify on Alerts
+        if: steps.alerts.outputs.ALERTS_FOUND == 'true'
+        run: |
+          echo "⚠️ 获客指标告警，请查看 acquisition_report.json"
+          # 这里可以集成邮件/钉钉/企业微信通知

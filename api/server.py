@@ -950,6 +950,37 @@ class AIShieldHandler(BaseHTTPRequestHandler):
     CREDIT_PER_YUAN = 100
     AGENT_DISCOUNT = 0.5  # Agent 调用半价
     
+    def _build_recharge_cta(self, balance, is_agent=False, is_anonymous=False):
+        """
+        构建充值/注册引导CTA信息（获客转化核心）
+        返回 dict 包含结构化引导信息
+        """
+        base_url = "https://aishield.tools"
+        if is_anonymous:
+            return {
+                "cta_type": "signup",
+                "message": f"注册即送 {self.SIGNUP_BONUS} 积分体验金，解锁更多扫描次数",
+                "action_url": f"{base_url}/pricing",
+                "action_text": "免费注册",
+                "remaining_tier": "anonymous_free",
+            }
+        # 积分不足或余额低时的引导
+        agent_note = "Agent 用户享 5 折优惠" if is_agent else ""
+        recommended = "daily_brief" if balance < 50 else "intelligence_pro"
+        pkg_name = "Daily Brief (500积分)" if recommended == "daily_brief" else "Intelligence Pro (5000积分)"
+        return {
+            "cta_type": "recharge",
+            "message": f"积分余额较低 ({balance:.0f} 积分)。{agent_note}",
+            "action_url": f"{base_url}/pricing",
+            "action_text": "立即充值",
+            "recommended_package": {
+                "key": recommended,
+                "name": pkg_name,
+                "checkout_url": f"{base_url}/api/v1/checkout/create?product_key={recommended}",
+            },
+            "remaining_tier": "registered",
+        }
+    
     def _identify_and_deduct(self, endpoint):
         """
         从 Authorization 头识别用户并扣除积分。
@@ -978,10 +1009,23 @@ class AIShieldHandler(BaseHTTPRequestHandler):
                 actual_cost = credit_cost * (self.AGENT_DISCOUNT if is_agent else 1)
                 
                 if balance < actual_cost:
-                    return account, 0, is_agent, (f"积分不足: 当前 {balance:.0f} 积分，需要 {actual_cost:.0f} 积分。请充值或注册获取 {self.SIGNUP_BONUS} 积分体验金。", 402)
+                    # P0: 积分不足 — 强CTA引导充值
+                    cta = self._build_recharge_cta(balance, is_agent)
+                    error_payload = {
+                        "error": f"积分不足: 当前 {balance:.0f} 积分，需要 {actual_cost:.0f} 积分。",
+                        "cta": cta,
+                        "hint": "注册即送 100 积分体验金，充值 1 元 = 100 积分",
+                    }
+                    return account, 0, is_agent, (error_payload, 402)
                 
                 # 扣减积分
                 mgr.consume(account["account_id"], actual_cost)
+                
+                # P1: 余额预警 — 低于20积分时提前引导（不阻断，只提示）
+                if balance - actual_cost < 20:
+                    cta = self._build_recharge_cta(balance - actual_cost, is_agent)
+                    return account, actual_cost, is_agent, ("LOW_BALANCE_WARNING", cta)
+                
                 return account, actual_cost, is_agent, None
             except ValueError as e:
                 return None, 0, False, (str(e), 400)
@@ -991,10 +1035,23 @@ class AIShieldHandler(BaseHTTPRequestHandler):
             # 无 API Key → 匿名免费层
             today = datetime.now(TZ).strftime("%Y-%m-%d")
             usage = _load_json(USAGE_FILE, {"daily": {}, "total": 0})
-            today_audit_count = usage.get("daily", {}).get(today, {}).get("by_endpoint", {}).get(endpoint, 0)
+            today_endpoint_count = usage.get("daily", {}).get(today, {}).get("by_endpoint", {}).get(endpoint, 0)
+            remaining = max(0, self.FREE_DAILY_LIMIT - today_endpoint_count)
             
-            if today_audit_count >= self.FREE_DAILY_LIMIT:
-                return None, 0, False, (f"匿名免费额度已用完（{self.FREE_DAILY_LIMIT}次/天）。请注册获取 {self.SIGNUP_BONUS} 积分体验金，或通过 API Key 调用。", 429)
+            if today_endpoint_count >= self.FREE_DAILY_LIMIT:
+                # 免费额度用完 — 强CTA引导注册
+                cta = self._build_recharge_cta(0, is_anonymous=True)
+                error_payload = {
+                    "error": f"匿名免费额度已用完（{self.FREE_DAILY_LIMIT}次/天）。",
+                    "cta": cta,
+                    "hint": "注册即送 100 积分体验金，可扫描 100 次",
+                }
+                return None, 0, False, (error_payload, 429)
+            
+            # P1: 免费额度快用完预警（剩余<=5次时）
+            if remaining <= 5:
+                cta = self._build_recharge_cta(0, is_anonymous=True)
+                return None, 0, False, ("FREE_LIMIT_WARNING", {"remaining": remaining, "cta": cta})
             
             return None, 0, False, None  # 匿名免费放行
     
@@ -1009,8 +1066,26 @@ class AIShieldHandler(BaseHTTPRequestHandler):
         
         # ── 积分扣减 / 免费额度检查 ──
         account, credits_used, is_agent, auth_error = self._identify_and_deduct("audit")
+        
+        # 处理预警类型（不阻断请求）
+        balance_warning = None
+        free_limit_warning = None
+        if auth_error and auth_error[0] == "LOW_BALANCE_WARNING":
+            balance_warning = auth_error[1]  # cta dict
+            auth_error = None
+        elif auth_error and auth_error[0] == "FREE_LIMIT_WARNING":
+            free_limit_warning = auth_error[1]  # {"remaining": N, "cta": {...}}
+            auth_error = None
+        
         if auth_error:
-            self._send_json({"error": auth_error[0], "error_code": "INSUFFICIENT_CREDITS" if auth_error[1] == 402 else "AUTH_REQUIRED"}, auth_error[1])
+            # 结构化错误响应（402/429 含 CTA）
+            status_code = auth_error[1]
+            if isinstance(auth_error[0], dict):
+                payload = auth_error[0]
+                payload["error_code"] = "INSUFFICIENT_CREDITS" if status_code == 402 else "RATE_LIMIT"
+            else:
+                payload = {"error": auth_error[0], "error_code": "AUTH_REQUIRED"}
+            self._send_json(payload, status_code)
             _record_usage("audit", self.client_address[0], success=False)
             return
         
@@ -1071,8 +1146,16 @@ class AIShieldHandler(BaseHTTPRequestHandler):
                     "is_agent": is_agent,
                     "agent_discount": self.AGENT_DISCOUNT if is_agent else None,
                 }
+                # 余额预警嵌入
+                if balance_warning:
+                    response["credits"]["warning"] = balance_warning
+                    response["upgrade_prompt"] = balance_warning
             else:
                 response["credits"] = {"deducted": 0, "tier": "anonymous_free"}
+                # 免费额度预警嵌入
+                if free_limit_warning:
+                    response["credits"]["warning"] = free_limit_warning
+                    response["upgrade_prompt"] = free_limit_warning["cta"]
             
             self._send_json(response)
             _record_usage("audit", self.client_address[0])

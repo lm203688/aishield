@@ -33,6 +33,17 @@
       ]]>
     </content>
   </entry>
+  <entry>
+    <title>MCP 安全周报 2026-07-25</title>
+    <link href="https://aishield.tools/blog/weekly-2026-07-25"/>
+    <id>https://aishield.tools/blog/weekly-2026-07-25</id>
+    <published>2026-07-25T08:00:00+08:00</published>
+    <updated>2026-07-25T08:00:00+08:00</updated>
+    <summary>本周 AI Agent 安全扫描趋势分析，基于真实扫描数据。</summary>
+    <category term="security"/>
+    <category term="weekly-report"/>
+  </entry>
+
 
   <entry>
     <title>v4.1 — Rug Pull 检测与 MCP 握手验证</title>
