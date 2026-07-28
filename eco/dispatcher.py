@@ -339,6 +339,106 @@ def dispatch_get(handler):
                 handler._send_json({"error": str(e)}, 400)
             return True
 
+    # Observability: 成本预估
+    if path == "/api/v1/observability/cost-estimate":
+        mod = _modules.get("observability")
+        if mod:
+            endpoints_param = qs.get("endpoints", [""])[0]
+            if not endpoints_param.strip():
+                handler._send_json({"error": "endpoints 参数必填（逗号分隔）"}, 400)
+                return True
+            endpoints = [e.strip() for e in endpoints_param.split(",") if e.strip()]
+            try:
+                svc = mod.ObservabilityService()
+                result = svc.cost_estimate(endpoints)
+                handler._send_json({"success": True, **result})
+            except Exception as e:
+                handler._send_json({"error": str(e)}, 500)
+            return True
+
+    # Observability: Agent效率
+    _EFF_PREFIX = "/api/v1/observability/agent/"
+    _EFF_SUFFIX = "/efficiency"
+    if path.startswith(_EFF_PREFIX) and path.endswith(_EFF_SUFFIX):
+        mod = _modules.get("observability")
+        if mod:
+            agent_id = path[len(_EFF_PREFIX):-len(_EFF_SUFFIX)]
+            if not agent_id:
+                handler._send_json({"error": "agent_id 必填"}, 400)
+                return True
+            try:
+                days = int(qs.get("days", [7])[0])
+            except (ValueError, IndexError):
+                days = 7
+            try:
+                svc = mod.ObservabilityService()
+                result = svc.get_agent_efficiency(agent_id, days=days)
+                handler._send_json({"success": True, **result})
+            except Exception as e:
+                handler._send_json({"error": str(e)}, 500)
+            return True
+
+    # Observability: 系统指标
+    if path == "/api/v1/observability/system":
+        mod = _modules.get("observability")
+        if mod:
+            try:
+                hours = int(qs.get("hours", [24])[0])
+            except (ValueError, IndexError):
+                hours = 24
+            try:
+                svc = mod.ObservabilityService()
+                result = svc.get_system_metrics(hours=hours)
+                handler._send_json({"success": True, **result})
+            except Exception as e:
+                handler._send_json({"error": str(e)}, 500)
+            return True
+
+    # Observability: 用户消耗
+    _CONS_PREFIX = "/api/v1/observability/user/"
+    _CONS_SUFFIX = "/consumption"
+    if path.startswith(_CONS_PREFIX) and path.endswith(_CONS_SUFFIX):
+        mod = _modules.get("observability")
+        if mod:
+            account_id = path[len(_CONS_PREFIX):-len(_CONS_SUFFIX)]
+            if not account_id:
+                handler._send_json({"error": "account_id 必填"}, 400)
+                return True
+            try:
+                days = int(qs.get("days", [30])[0])
+            except (ValueError, IndexError):
+                days = 30
+            try:
+                svc = mod.ObservabilityService()
+                result = svc.get_user_consumption(account_id, days=days)
+                handler._send_json({"success": True, **result})
+            except Exception as e:
+                handler._send_json({"error": str(e)}, 500)
+            return True
+
+    # Observability: 成本告警
+    if path == "/api/v1/observability/alerts":
+        mod = _modules.get("observability")
+        if mod:
+            level = qs.get("level", [None])[0]
+            try:
+                limit = int(qs.get("limit", [100])[0])
+            except (ValueError, IndexError):
+                limit = 100
+            try:
+                svc = mod.ObservabilityService()
+                # 同时触发新告警生成，再返回持久化的告警列表
+                svc.get_cost_alerts()
+                alerts = svc.list_alerts(level=level, limit=limit)
+                handler._send_json({
+                    "success": True,
+                    "total": len(alerts),
+                    "alerts": alerts,
+                })
+            except Exception as e:
+                handler._send_json({"error": str(e)}, 500)
+            return True
+
     return False
 
 
@@ -647,5 +747,33 @@ def dispatch_post(handler, data):
         except Exception as e:
             handler._send_json({"error": str(e)}, 500)
         return True
+
+    # Observability: 手动记录调用
+    if path == "/api/v1/observability/track":
+        mod = _modules.get("observability")
+        if mod:
+            endpoint = data.get("endpoint", "").strip()
+            account_id = data.get("account_id", "").strip()
+            if not endpoint or not account_id:
+                handler._send_json(
+                    {"error": "endpoint 和 account_id 均为必填"}, 400
+                )
+                return True
+            try:
+                record_mgr = mod.CallRecord()
+                record = record_mgr.track_call(
+                    endpoint=endpoint,
+                    account_id=account_id,
+                    agent_id=data.get("agent_id"),
+                    input_tokens=data.get("input_tokens"),
+                    output_tokens=data.get("output_tokens"),
+                    credits_charged=data.get("credits_charged"),
+                    latency_ms=data.get("latency_ms"),
+                    metadata=data.get("metadata"),
+                )
+                handler._send_json({"success": True, "record": record}, 201)
+            except Exception as e:
+                handler._send_json({"error": str(e)}, 500)
+            return True
 
     return False

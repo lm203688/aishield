@@ -1719,6 +1719,7 @@ def main():
             from eco import identity, payment, badge, marketplace, a2a_gateway
             from eco import collab, sandbox, skill_market, auth_provider, account
             from eco import agent_gateway
+            from eco import observability
             _eco_init({
                 "identity": identity,
                 "payment": payment,
@@ -1731,8 +1732,9 @@ def main():
                 "auth_provider": auth_provider,
                 "account": account,
                 "agent_gateway": agent_gateway,
+                "observability": observability,
             })
-            print("  Eco modules: identity, payment, badge, marketplace, a2a, collab, sandbox, skill_market, auth_provider, account, agent_gateway")
+            print("  Eco modules: identity, payment, badge, marketplace, a2a, collab, sandbox, skill_market, auth_provider, account, agent_gateway, observability")
         except Exception as e:
             print(f"  Eco modules: init failed ({e})")
     else:

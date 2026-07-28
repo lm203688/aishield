@@ -10,11 +10,15 @@ eco/badge.py — 安全徽章 + 认证API
       certify_tool(source_url, scan_report): 认证工具
       生成认证ID: cert-aishield-xxxxx
       持久化到 data/certifications.json
+      持续认证机制: 有效期管理、过期检查、续期、即将过期提醒
 
 API路由:
   GET  /api/v1/badge/{tool_name}?score=X&level=gold  — 返回SVG
   POST /api/v1/certify                                — 提交认证
   GET  /api/v1/certify/{cert_id}                      — 查询认证
+  POST /api/v1/certify/renew      — 续期认证
+  GET  /api/v1/certify/expiring?days=7 — 即将过期的认证
+  POST /api/v1/certify/check-expiry — 检查并更新过期状态
 """
 
 import json
@@ -61,6 +65,16 @@ def _save_json(path, data):
 def _now_iso():
     """返回当前时间ISO格式"""
     return datetime.now(TZ).isoformat()
+
+
+def _parse_iso(iso_str):
+    """解析ISO时间字符串为datetime对象，失败返回None"""
+    if not iso_str:
+        return None
+    try:
+        return datetime.fromisoformat(iso_str)
+    except (ValueError, TypeError):
+        return None
 
 
 # ══════════════════════════════════════════════
@@ -217,6 +231,7 @@ class CertificationService:
     """
     工具认证服务
     对已扫描的工具进行安全认证
+    支持持续认证机制: 有效期管理、过期检查、续期、即将过期提醒
     """
 
     def __init__(self):
@@ -273,6 +288,13 @@ class CertificationService:
         certified = score >= 70
         status = "certified" if certified else "rejected"
 
+        # 认证有效期：Gold 90天，Silver 60天，Bronze 30天，其余30天
+        _expiry_days_map = {"gold": 90, "silver": 60, "bronze": 30}
+        expiry_days = _expiry_days_map.get(badge_level, 30)
+        expires_at = ""
+        if certified:
+            expires_at = (datetime.now(TZ) + timedelta(days=expiry_days)).isoformat()
+
         cert_info = {
             "cert_id": cert_id,
             "source_url": source_url,
@@ -282,7 +304,7 @@ class CertificationService:
             "findings_count": findings_count,
             "status": status,
             "certified_at": _now_iso(),
-            "expires_at": "",  # 可扩展：认证有效期
+            "expires_at": expires_at,
         }
 
         self._certs[cert_id] = cert_info
@@ -328,17 +350,150 @@ class CertificationService:
             reason (str):  撤销原因
 
         Returns:
-            bool: 是否成功
+            bool: 是否成功。认证已过期时返回 False 并提示"认证已过期，无需撤销"。
         """
         self._load()
         if cert_id not in self._certs:
             return False
+
+        # 如果认证已过期，无需撤销
+        cert = self._certs[cert_id]
+        if cert.get("status") == "expired":
+            return False
+
+        # 检查是否已自然过期但状态未更新
+        expires_at_str = cert.get("expires_at", "")
+        if expires_at_str:
+            expires_at = _parse_iso(expires_at_str)
+            if expires_at and datetime.now(TZ) > expires_at:
+                # 自动更新状态为过期
+                cert["status"] = "expired"
+                self._save()
+                return False
 
         self._certs[cert_id]["status"] = "revoked"
         self._certs[cert_id]["revoked_at"] = _now_iso()
         self._certs[cert_id]["revoke_reason"] = reason
         self._save()
         return True
+
+    def check_certification_expiry(self):
+        """
+        检查所有认证是否过期，将过期的认证状态改为"expired"。
+
+        Returns:
+            dict: {"checked": int, "expired": int, "expired_ids": list}
+        """
+        self._load()
+        now = datetime.now(TZ)
+        checked = 0
+        expired_count = 0
+        expired_ids = []
+
+        for cert_id, cert in self._certs.items():
+            # 只检查有效认证（certified 状态且有 expires_at）
+            if cert.get("status") != "certified":
+                continue
+            expires_at_str = cert.get("expires_at", "")
+            if not expires_at_str:
+                continue
+            checked += 1
+            expires_at = _parse_iso(expires_at_str)
+            if expires_at and now > expires_at:
+                cert["status"] = "expired"
+                cert["expired_at"] = _now_iso()
+                expired_count += 1
+                expired_ids.append(cert_id)
+
+        if expired_count > 0:
+            self._save()
+
+        return {
+            "checked": checked,
+            "expired": expired_count,
+            "expired_ids": expired_ids,
+        }
+
+    def renew_certification(self, cert_id, new_scan_report):
+        """
+        续期认证，需要提供新的扫描报告。
+
+        Args:
+            cert_id (str):        认证ID
+            new_scan_report (dict): 新的安全扫描报告
+
+        Returns:
+            dict | None: 更新后的认证信息，失败返回None
+        """
+        self._load()
+        if cert_id not in self._certs:
+            return None
+
+        cert = self._certs[cert_id]
+
+        # 已撤销的认证不允许续期
+        if cert.get("status") == "revoked":
+            return None
+
+        # 从新扫描报告中提取关键指标
+        score = new_scan_report.get("overall_score", 0)
+        badge_level = new_scan_report.get("badge_level", "none")
+        risk_level = new_scan_report.get("risk_level", "unknown")
+        findings_count = new_scan_report.get("total_findings", 0)
+
+        # 续期要求分数 >= 70
+        if score < 70:
+            return None
+
+        # 计算新的有效期
+        _expiry_days_map = {"gold": 90, "silver": 60, "bronze": 30}
+        expiry_days = _expiry_days_map.get(badge_level, 30)
+        expires_at = (datetime.now(TZ) + timedelta(days=expiry_days)).isoformat()
+
+        # 更新认证信息
+        cert["score"] = score
+        cert["badge_level"] = badge_level
+        cert["risk_level"] = risk_level
+        cert["findings_count"] = findings_count
+        cert["status"] = "certified"
+        cert["renewed_at"] = _now_iso()
+        cert["expires_at"] = expires_at
+
+        self._save()
+        return cert
+
+    def get_expiring_certifications(self, days=7):
+        """
+        获取N天内即将过期的认证列表（用于提醒）。
+
+        Args:
+            days (int): 天数阈值，默认7天
+
+        Returns:
+            list: 即将过期的认证信息列表（含 remaining_days 字段）
+        """
+        self._load()
+        now = datetime.now(TZ)
+        deadline = now + timedelta(days=days)
+        result = []
+
+        for cert_id, cert in self._certs.items():
+            # 只关注有效认证
+            if cert.get("status") != "certified":
+                continue
+            expires_at_str = cert.get("expires_at", "")
+            if not expires_at_str:
+                continue
+            expires_at = _parse_iso(expires_at_str)
+            if expires_at and now <= expires_at <= deadline:
+                remaining = (expires_at - now).days
+                cert_copy = dict(cert)
+                cert_copy["remaining_days"] = remaining
+                result.append(cert_copy)
+
+        # 按过期时间升序（最快过期的排前面）
+        result.sort(key=lambda c: c.get("expires_at", ""))
+        return result
 
 
 # ══════════════════════════════════════════════
@@ -391,6 +546,26 @@ def register_routes(handler):
             self.wfile.write(body)
             return
 
+        # ── GET /api/v1/certify/expiring?days=7 — 即将过期的认证 ──
+        if path == "/api/v1/certify/expiring":
+            query = parse_qs(parsed.query)
+            try:
+                days = int(query.get("days", ["7"])[0])
+            except (ValueError, IndexError):
+                days = 7
+            try:
+                cert_service = CertificationService()
+                expiring = cert_service.get_expiring_certifications(days=days)
+                self._send_json({
+                    "success": True,
+                    "total": len(expiring),
+                    "days": days,
+                    "certifications": expiring,
+                })
+            except Exception as e:
+                self._send_json({"error": str(e)}, 500)
+            return
+
         # ── GET /api/v1/certify/{cert_id} — 查询认证 ──
         if path.startswith("/api/v1/certify/"):
             cert_id = path[len("/api/v1/certify/"):]
@@ -437,6 +612,37 @@ def register_routes(handler):
                 self._send_json({"error": str(e)}, 500)
             return
 
+        # ── POST /api/v1/certify/renew — 续期认证 ──
+        if path == "/api/v1/certify/renew":
+            cert_id = data.get("cert_id", "")
+            new_scan_report = data.get("new_scan_report")
+            if not cert_id:
+                self._send_json({"error": "cert_id is required"}, 400)
+                return
+            if not new_scan_report or not isinstance(new_scan_report, dict):
+                self._send_json({"error": "new_scan_report is required"}, 400)
+                return
+            try:
+                cert_service = CertificationService()
+                result = cert_service.renew_certification(cert_id, new_scan_report)
+                if result:
+                    self._send_json({"success": True, "certification": result})
+                else:
+                    self._send_json({"error": "续期失败，认证不存在、已撤销或新扫描分数不足"}, 400)
+            except Exception as e:
+                self._send_json({"error": str(e)}, 500)
+            return
+
+        # ── POST /api/v1/certify/check-expiry — 检查并更新过期状态 ──
+        if path == "/api/v1/certify/check-expiry":
+            try:
+                cert_service = CertificationService()
+                result = cert_service.check_certification_expiry()
+                self._send_json({"success": True, **result})
+            except Exception as e:
+                self._send_json({"error": str(e)}, 500)
+            return
+
         # 非本模块路由
         original_do_post(self)
 
@@ -479,6 +685,7 @@ if __name__ == "__main__":
     print(f"  认证ID: {cert['cert_id']}")
     print(f"  状态: {cert['status']}")
     print(f"  分数: {cert['score']} ({cert['badge_level']})")
+    print(f"  有效期至: {cert['expires_at']}")
 
     # 查询认证
     found = cert_service.get_certification(cert["cert_id"])
@@ -492,5 +699,56 @@ if __name__ == "__main__":
     cert_service.revoke_certification(cert["cert_id"], "安全漏洞修复")
     found = cert_service.get_certification(cert["cert_id"])
     print(f"  撤销后: {found['status']}")
+
+    print("\n=== 持续认证机制测试 ===")
+
+    # 认证一个Gold工具
+    cert_gold = cert_service.certify_tool(
+        "https://github.com/example/gold-tool",
+        scan_report={
+            "overall_score": 92,
+            "badge_level": "gold",
+            "risk_level": "safe",
+            "total_findings": 0,
+        },
+    )
+    print(f"  Gold认证有效期: {cert_gold['expires_at']}")
+
+    # 认证一个Bronze工具
+    cert_bronze = cert_service.certify_tool(
+        "https://github.com/example/bronze-tool",
+        scan_report={
+            "overall_score": 55,
+            "badge_level": "bronze",
+            "risk_level": "medium",
+            "total_findings": 5,
+        },
+    )
+    print(f"  Bronze认证有效期: {cert_bronze['expires_at']}")
+
+    # 获取即将过期的认证
+    expiring = cert_service.get_expiring_certifications(days=90)
+    print(f"  90天内即将过期: {len(expiring)}个")
+    for c in expiring:
+        print(f"    {c['cert_id']} ({c['badge_level']}) 剩余{c.get('remaining_days', '?')}天")
+
+    # 续期认证
+    renewed = cert_service.renew_certification(
+        cert_gold["cert_id"],
+        new_scan_report={
+            "overall_score": 95,
+            "badge_level": "gold",
+            "risk_level": "safe",
+            "total_findings": 0,
+        },
+    )
+    if renewed:
+        print(f"  续期成功: {renewed['cert_id']}, 新有效期: {renewed['expires_at']}")
+    else:
+        print("  续期失败")
+
+    # 检查过期
+    expiry_result = cert_service.check_certification_expiry()
+    print(f"  过期检查: 检查{expiry_result['checked']}个, 过期{expiry_result['expired']}个")
 
     print("\n=== 全部测试通过 ===")

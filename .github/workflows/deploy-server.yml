@@ -33,26 +33,24 @@ jobs:
           nohup python3 api/server.py > server.log 2>&1 &
           sleep 3
 
-          # ── 确保 Cloudflare Tunnel 运行 ──
-          if ! pgrep -x cloudflared > /dev/null 2>&1; then
-            echo "cloudflared not running, attempting to start..."
-            # 尝试 systemd 服务
-            if systemctl is-enabled cloudflared 2>/dev/null; then
-              sudo systemctl start cloudflared
-            else
-              # 检查是否存在 tunnel 配置
-              if [ -f /etc/cloudflared/config.yml ] || [ -f ~/.cloudflared/config.yml ]; then
-                nohup cloudflared tunnel run > /tmp/cloudflared.log 2>&1 &
-                echo "cloudflared started via nohup"
-              else
-                echo "WARNING: cloudflared config not found, tunnel not started"
-              fi
-            fi
+          # ── 配置 Nginx 反向代理 (80 → 8450) ──
+          # Cloudflare SSL: Flexible 模式 → Cloudflare HTTP 80 → Nginx → API 8450
+          if command -v nginx &> /dev/null; then
+            echo "Nginx installed, configuring..."
+            bash setup-nginx.sh || echo "WARNING: Nginx setup had issues"
           else
-            echo "cloudflared already running (pid: $(pgrep -x cloudflared))"
+            echo "Installing Nginx..."
+            sudo apt-get update -qq && sudo apt-get install -y -qq nginx
+            bash setup-nginx.sh || echo "WARNING: Nginx setup had issues"
           fi
           sleep 2
 
           # ── 验证 ──
-          curl -sf http://localhost:8450/api/v1/health && echo "API OK"
-          pgrep -x cloudflared && echo "Tunnel OK" || echo "WARNING: Tunnel not running"
+          echo "── API 健康检查 ──"
+          curl -sf http://localhost:8450/api/v1/health && echo " → API OK" || echo "API FAIL"
+
+          echo "── Nginx 代理检查 ──"
+          curl -sf http://localhost/api/v1/health && echo " → Nginx OK" || echo "Nginx FAIL"
+
+          echo "── Cloudflare 全链路检查 ──"
+          curl -sf https://aishield.tools/api/v1/health && echo " → Full Chain OK" || echo "Cloudflare FAIL (check SSL mode = Flexible)"
