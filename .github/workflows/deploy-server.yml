@@ -21,28 +21,47 @@ jobs:
         script: |
           cd /opt/aishield || cd ~/aishield
           git pull origin main
-          python3 -m py_compile api/server.py eco/*.py scanner/*.py
 
-          # ── 确保 Nginx 已安装 ──
-          if ! command -v nginx &> /dev/null; then
-            echo "Installing Nginx..."
-            apt-get update -qq && apt-get install -y -qq nginx
-          fi
+          # ── 创建 .env 文件 ──
+          cat > .env << 'ENV_FILE'
+          AISHIELD_LLM_URL=${{ secrets.AISHIELD_LLM_URL }}
+          AISHIELD_LLM_KEY=${{ secrets.AISHIELD_LLM_KEY }}
+          CREEM_API_KEY=${{ secrets.CREEM_API_KEY }}
+          CREEM_WEBHOOK_SECRET=${{ secrets.CREEM_WEBHOOK_SECRET }}
+          CREEM_TEST_MODE=${{ secrets.CREEM_TEST_MODE }}
+          ENV_FILE
 
-          # ── 全面修复 Nginx 配置 ──
-          # fix-nginx.sh 会清理旧配置、设置 80→8450 代理、检查 API
-          export CREEM_API_KEY=${{ secrets.CREEM_API_KEY }}
-          export CREEM_WEBHOOK_SECRET=${{ secrets.CREEM_WEBHOOK_SECRET || 'whsec_28uK7ZQhVAhdcgvdhYF4Ac' }}
-          export CREEM_TEST_MODE=${{ secrets.CREEM_TEST_MODE || 'true' }}
-          bash fix-nginx.sh || echo "WARNING: Nginx fix had issues"
+          # ── 创建 html 目录 (ACME challenge) ──
+          mkdir -p html
+
+          # ── 停止旧的 Nginx 和 API 进程 ──
+          systemctl stop nginx 2>/dev/null || true
+          pkill -f "nginx: master" 2>/dev/null || true
+          pkill -f "api/server.py" 2>/dev/null || true
           sleep 2
 
-          # ── 验证 ──
-          echo "── API 健康检查 (8450) ──"
-          curl -sf http://localhost:8450/api/v1/health && echo " → API OK" || echo "API FAIL"
+          # ── Docker Compose 部署 ──
+          # Nginx (80) + API (8450) 在同一 Docker 网络
+          # Nginx → aishield-api:8450 (Docker 内部网络)
+          docker compose down 2>/dev/null || docker-compose down 2>/dev/null || true
+          sleep 2
+          docker compose up -d --build 2>/dev/null || docker-compose up -d --build
+          sleep 5
 
-          echo "── Nginx 代理检查 (80) ──"
+          # ── 验证 ──
+          echo "── Docker 容器状态 ──"
+          docker compose ps 2>/dev/null || docker-compose ps 2>/dev/null
+
+          echo ""
+          echo "── API 健康检查 (Docker 内部) ──"
+          docker compose exec aishield-api curl -sf http://localhost:8450/api/v1/health 2>/dev/null || \
+          docker-compose exec aishield-api curl -sf http://localhost:8450/api/v1/health 2>/dev/null || \
+          echo "API check failed"
+
+          echo ""
+          echo "── Nginx 代理检查 (localhost:80) ──"
           curl -sf http://localhost/api/v1/health && echo " → Nginx OK" || echo "Nginx FAIL"
 
+          echo ""
           echo "── Cloudflare 全链路检查 ──"
-          curl -sf https://aishield.tools/api/v1/health && echo " → Full Chain OK" || echo "Cloudflare FAIL (check SSL mode = Flexible)"
+          curl -sf https://aishield.tools/api/v1/health && echo " → Full Chain OK" || echo "Cloudflare FAIL (check SSL = Flexible)"
