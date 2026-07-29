@@ -23,33 +23,25 @@ jobs:
           git pull origin main
           python3 -m py_compile api/server.py eco/*.py scanner/*.py
 
-          # ── 重启 API 服务 ──
-          pkill -f "api/server.py" || true
-          sleep 2
-          export PORT=8450
+          # ── 确保 Nginx 已安装 ──
+          if ! command -v nginx &> /dev/null; then
+            echo "Installing Nginx..."
+            apt-get update -qq && apt-get install -y -qq nginx
+          fi
+
+          # ── 全面修复 Nginx 配置 ──
+          # fix-nginx.sh 会清理旧配置、设置 80→8450 代理、检查 API
           export CREEM_API_KEY=${{ secrets.CREEM_API_KEY }}
           export CREEM_WEBHOOK_SECRET=${{ secrets.CREEM_WEBHOOK_SECRET || 'whsec_28uK7ZQhVAhdcgvdhYF4Ac' }}
           export CREEM_TEST_MODE=${{ secrets.CREEM_TEST_MODE || 'true' }}
-          nohup python3 api/server.py > server.log 2>&1 &
-          sleep 3
-
-          # ── 配置 Nginx 反向代理 (80 → 8450) ──
-          # Cloudflare SSL: Flexible 模式 → Cloudflare HTTP 80 → Nginx → API 8450
-          if command -v nginx &> /dev/null; then
-            echo "Nginx installed, configuring..."
-            bash setup-nginx.sh || echo "WARNING: Nginx setup had issues"
-          else
-            echo "Installing Nginx..."
-            sudo apt-get update -qq && sudo apt-get install -y -qq nginx
-            bash setup-nginx.sh || echo "WARNING: Nginx setup had issues"
-          fi
+          bash fix-nginx.sh || echo "WARNING: Nginx fix had issues"
           sleep 2
 
           # ── 验证 ──
-          echo "── API 健康检查 ──"
+          echo "── API 健康检查 (8450) ──"
           curl -sf http://localhost:8450/api/v1/health && echo " → API OK" || echo "API FAIL"
 
-          echo "── Nginx 代理检查 ──"
+          echo "── Nginx 代理检查 (80) ──"
           curl -sf http://localhost/api/v1/health && echo " → Nginx OK" || echo "Nginx FAIL"
 
           echo "── Cloudflare 全链路检查 ──"
