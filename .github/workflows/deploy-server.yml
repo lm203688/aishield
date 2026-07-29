@@ -19,49 +19,70 @@ jobs:
         key: ${{ secrets.SERVER_SSH_KEY }}
         port: ${{ secrets.SERVER_PORT || 22 }}
         script: |
+          set +e
           cd /opt/aishield || cd ~/aishield
           git pull origin main
 
-          # ── 创建 .env 文件 ──
-          cat > .env << 'ENV_FILE'
-          AISHIELD_LLM_URL=${{ secrets.AISHIELD_LLM_URL }}
-          AISHIELD_LLM_KEY=${{ secrets.AISHIELD_LLM_KEY }}
-          CREEM_API_KEY=${{ secrets.CREEM_API_KEY }}
-          CREEM_WEBHOOK_SECRET=${{ secrets.CREEM_WEBHOOK_SECRET }}
-          CREEM_TEST_MODE=${{ secrets.CREEM_TEST_MODE }}
-          ENV_FILE
+          echo "=== 1. 检查 API (8450) ==="
+          curl -sf http://127.0.0.1:8450/api/v1/health && echo " → API OK" || {
+            echo "API 未运行，启动..."
+            pkill -f "api/server.py" 2>/dev/null
+            sleep 1
+            export PORT=8450
+            export CREEM_API_KEY=${{ secrets.CREEM_API_KEY }}
+            export CREEM_WEBHOOK_SECRET=${{ secrets.CREEM_WEBHOOK_SECRET }}
+            export CREEM_TEST_MODE=${{ secrets.CREEM_TEST_MODE }}
+            nohup python3 api/server.py > server.log 2>&1 &
+            sleep 3
+            curl -sf http://127.0.0.1:8450/api/v1/health && echo " → API OK" || echo " → API FAIL"
+          }
 
-          # ── 创建 html 目录 (ACME challenge) ──
+          echo ""
+          echo "=== 2. 停止占用端口 80 的进程 ==="
+          # 停止 host nginx
+          systemctl stop nginx 2>/dev/null
+          pkill -f "nginx: master" 2>/dev/null
+          # 停止旧的 Docker nginx 容器
+          docker stop aishield-nginx 2>/dev/null
+          docker rm aishield-nginx 2>/dev/null
+          # 停止所有占用端口 80 的 Docker 容器
+          for c in $(docker ps -q 2>/dev/null); do
+            if docker port "$c" 2>/dev/null | grep -q '80/tcp'; then
+              echo "停止容器: $(docker inspect --format '{{.Name}}' $c)"
+              docker stop "$c" 2>/dev/null
+            fi
+          done
+          sleep 2
+
+          echo ""
+          echo "=== 3. 启动 Nginx 容器 (host 网络) ==="
           mkdir -p html
-
-          # ── 停止旧的 Nginx 和 API 进程 ──
-          systemctl stop nginx 2>/dev/null || true
-          pkill -f "nginx: master" 2>/dev/null || true
-          pkill -f "api/server.py" 2>/dev/null || true
-          sleep 2
-
-          # ── Docker Compose 部署 ──
-          # Nginx (80) + API (8450) 在同一 Docker 网络
-          # Nginx → aishield-api:8450 (Docker 内部网络)
-          docker compose down 2>/dev/null || docker-compose down 2>/dev/null || true
-          sleep 2
-          docker compose up -d --build 2>/dev/null || docker-compose up -d --build
-          sleep 5
-
-          # ── 验证 ──
-          echo "── Docker 容器状态 ──"
-          docker compose ps 2>/dev/null || docker-compose ps 2>/dev/null
+          docker run -d \
+            --name aishield-nginx \
+            --network host \
+            --restart unless-stopped \
+            -v $(pwd)/nginx/nginx.conf:/etc/nginx/nginx.conf:ro \
+            -v $(pwd)/html:/var/www/html:ro \
+            nginx:alpine
+          sleep 3
 
           echo ""
-          echo "── API 健康检查 (Docker 内部) ──"
-          docker compose exec aishield-api curl -sf http://localhost:8450/api/v1/health 2>/dev/null || \
-          docker-compose exec aishield-api curl -sf http://localhost:8450/api/v1/health 2>/dev/null || \
-          echo "API check failed"
+          echo "=== 4. 验证 ==="
+          echo "── Docker 容器 ──"
+          docker ps --format "table {{.Names}}\t{{.Image}}\t{{.Ports}}\t{{.Status}}" 2>/dev/null
 
           echo ""
-          echo "── Nginx 代理检查 (localhost:80) ──"
-          curl -sf http://localhost/api/v1/health && echo " → Nginx OK" || echo "Nginx FAIL"
+          echo "── 端口监听 ──"
+          ss -tlnp | grep -E ':(80|8450) '
 
           echo ""
-          echo "── Cloudflare 全链路检查 ──"
-          curl -sf https://aishield.tools/api/v1/health && echo " → Full Chain OK" || echo "Cloudflare FAIL (check SSL = Flexible)"
+          echo "── API (8450) ──"
+          curl -sf http://127.0.0.1:8450/api/v1/health && echo " ✅" || echo " ❌"
+
+          echo ""
+          echo "── Nginx (80) ──"
+          curl -sf http://127.0.0.1/api/v1/health && echo " ✅" || echo " ❌"
+
+          echo ""
+          echo "── Cloudflare ──"
+          curl -sf https://aishield.tools/api/v1/health && echo " ✅" || echo " ❌ (check SSL=Flexible)"
