@@ -139,21 +139,54 @@ EOF
           sleep 3
 
           echo ""
+          echo "=== STEP 5.5: 检查并开放防火墙端口 ==="
+          echo "--- iptables 规则 ---"
+          iptables -L INPUT -n --line-numbers 2>/dev/null | head -20
+          echo ""
+          echo "--- 添加防火墙规则 ---"
+          iptables -I INPUT -p tcp --dport 443 -j ACCEPT 2>/dev/null && echo "443端口已开放(iptables)" || echo "iptables 443 失败"
+          iptables -I INPUT -p tcp --dport 80 -j ACCEPT 2>/dev/null && echo "80端口已开放(iptables)" || echo "iptables 80 失败"
+          iptables -I INPUT -p tcp --dport 8450 -j ACCEPT 2>/dev/null && echo "8450端口已开放(iptables)" || echo "iptables 8450 失败"
+          # 保存 iptables 规则
+          iptables-save > /etc/iptables.rules 2>/dev/null || true
+          netfilter-persistent save 2>/dev/null || true
+          # ufw 检查
+          if command -v ufw &> /dev/null; then
+            ufw allow 443/tcp 2>/dev/null && echo "443端口已开放(ufw)" || true
+            ufw allow 80/tcp 2>/dev/null && echo "80端口已开放(ufw)" || true
+          fi
+
+          echo ""
           echo "=== STEP 6: 验证 ==="
           echo "--- 端口监听 ---"
           ss -tlnp | grep -E ':(80|443|8450) '
           echo ""
           echo "--- API (8450) ---"
           curl -sf http://127.0.0.1:8450/api/v1/health 2>/dev/null && echo " OK" || echo " FAIL"
-          echo "--- Nginx HTTPS (443) ---"
+          echo "--- Nginx HTTPS 本地 (443) ---"
           curl -sk https://127.0.0.1/api/v1/health 2>/dev/null && echo " OK" || echo " FAIL"
-          echo "--- Nginx HTTP (80) ---"
-          curl -sf http://127.0.0.1/api/v1/health 2>/dev/null && echo " OK" || echo " FAIL (预期)"
+          echo "--- Nginx HTTPS 外部IP (443) ---"
+          curl -sk https://150.158.119.19/api/v1/health 2>/dev/null && echo " OK" || echo " FAIL (可能安全组阻止)"
           echo ""
           echo "--- Nginx 进程 ---"
           ps aux | grep nginx | grep -v grep
           echo ""
           echo "--- Nginx 错误日志 ---"
           tail -5 /var/log/nginx/error.log 2>/dev/null || echo "无错误日志"
+          echo ""
+          echo "--- iptables 443规则 ---"
+          iptables -L INPUT -n 2>/dev/null | grep 443 || echo "无443规则"
+          echo ""
+          echo "=== 诊断结论 ==="
+          if curl -sk https://127.0.0.1/api/v1/health 2>/dev/null; then
+            echo "本地443端口: OK"
+            if curl -sk https://150.158.119.19/api/v1/health 2>/dev/null; then
+              echo "外部443端口: OK - 服务应已恢复"
+            else
+              echo "外部443端口: FAIL - 需在腾讯云安全组添加443端口入站规则"
+            fi
+          else
+            echo "本地443端口: FAIL - Nginx未正确监听443"
+          fi
 
           exit 0
