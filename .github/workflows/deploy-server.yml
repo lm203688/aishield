@@ -20,69 +20,68 @@ jobs:
         port: ${{ secrets.SERVER_PORT || 22 }}
         script: |
           set +e
-          cd /opt/aishield || cd ~/aishield
-          git pull origin main
+          export HOME=/root
 
-          echo "=== 1. 检查 API (8450) ==="
-          curl -sf http://127.0.0.1:8450/api/v1/health && echo " → API OK" || {
-            echo "API 未运行，启动..."
-            pkill -f "api/server.py" 2>/dev/null
-            sleep 1
-            export PORT=8450
-            export CREEM_API_KEY=${{ secrets.CREEM_API_KEY }}
-            export CREEM_WEBHOOK_SECRET=${{ secrets.CREEM_WEBHOOK_SECRET }}
-            export CREEM_TEST_MODE=${{ secrets.CREEM_TEST_MODE }}
-            nohup python3 api/server.py > server.log 2>&1 &
+          # 找到项目目录
+          PROJ_DIR=""
+          for d in /opt/aishield /root/aishield /home/*/aishield; do
+            if [ -d "$d" ]; then PROJ_DIR="$d"; break; fi
+          done
+          if [ -z "$PROJ_DIR" ]; then
+            echo "ERROR: project directory not found"
+            exit 1
+          fi
+          echo "Project dir: $PROJ_DIR"
+          cd "$PROJ_DIR"
+          git pull origin main 2>/dev/null
+
+          echo "=== 1. API 状态 ==="
+          curl -sf http://127.0.0.1:8450/api/v1/health 2>/dev/null && echo " → OK" || {
+            echo "API not running, starting..."
+            pkill -f "api/server.py" 2>/dev/null; sleep 1
+            cd "$PROJ_DIR"
+            PORT=8450 nohup python3 api/server.py > /tmp/api.log 2>&1 &
             sleep 3
-            curl -sf http://127.0.0.1:8450/api/v1/health && echo " → API OK" || echo " → API FAIL"
+            curl -sf http://127.0.0.1:8450/api/v1/health 2>/dev/null && echo " → OK" || echo " → FAIL"
           }
 
           echo ""
-          echo "=== 2. 停止占用端口 80 的进程 ==="
-          # 停止 host nginx
+          echo "=== 2. 停止端口 80 占用 ==="
           systemctl stop nginx 2>/dev/null
           pkill -f "nginx: master" 2>/dev/null
-          # 停止旧的 Docker nginx 容器
           docker stop aishield-nginx 2>/dev/null
           docker rm aishield-nginx 2>/dev/null
-          # 停止所有占用端口 80 的 Docker 容器
-          for c in $(docker ps -q 2>/dev/null); do
-            if docker port "$c" 2>/dev/null | grep -q '80/tcp'; then
-              echo "停止容器: $(docker inspect --format '{{.Name}}' $c)"
-              docker stop "$c" 2>/dev/null
-            fi
+          # 停止所有映射 80 端口的容器
+          docker ps -q 2>/dev/null | while read cid; do
+            docker port "$cid" 2>/dev/null | grep -q '80/tcp' && docker stop "$cid" 2>/dev/null
           done
           sleep 2
 
           echo ""
-          echo "=== 3. 启动 Nginx 容器 (host 网络) ==="
-          mkdir -p html
+          echo "=== 3. 启动 Nginx ==="
+          mkdir -p "$PROJ_DIR/html"
           docker run -d \
             --name aishield-nginx \
             --network host \
             --restart unless-stopped \
-            -v $(pwd)/nginx/nginx.conf:/etc/nginx/nginx.conf:ro \
-            -v $(pwd)/html:/var/www/html:ro \
-            nginx:alpine
+            -v "$PROJ_DIR/nginx/nginx.conf:/etc/nginx/nginx.conf:ro" \
+            -v "$PROJ_DIR/html:/var/www/html:ro" \
+            nginx:alpine 2>&1
           sleep 3
 
           echo ""
-          echo "=== 4. 验证 ==="
-          echo "── Docker 容器 ──"
-          docker ps --format "table {{.Names}}\t{{.Image}}\t{{.Ports}}\t{{.Status}}" 2>/dev/null
+          echo "=== 4. 诊断 ==="
+          echo "--- Docker containers ---"
+          docker ps -a --format "table {{.Names}}\t{{.Image}}\t{{.Status}}" 2>/dev/null
+          echo "--- Port 80 ---"
+          ss -tlnp 2>/dev/null | grep ':80 '
+          echo "--- Port 8450 ---"
+          ss -tlnp 2>/dev/null | grep ':8450 '
+          echo "--- Nginx logs ---"
+          docker logs aishield-nginx 2>&1 | tail -10
+          echo "--- curl localhost:80 ---"
+          curl -sf http://127.0.0.1/api/v1/health 2>/dev/null && echo " → OK" || echo " → FAIL"
+          echo "--- curl localhost:8450 ---"
+          curl -sf http://127.0.0.1:8450/api/v1/health 2>/dev/null && echo " → OK" || echo " → FAIL"
 
-          echo ""
-          echo "── 端口监听 ──"
-          ss -tlnp | grep -E ':(80|8450) '
-
-          echo ""
-          echo "── API (8450) ──"
-          curl -sf http://127.0.0.1:8450/api/v1/health && echo " ✅" || echo " ❌"
-
-          echo ""
-          echo "── Nginx (80) ──"
-          curl -sf http://127.0.0.1/api/v1/health && echo " ✅" || echo " ❌"
-
-          echo ""
-          echo "── Cloudflare ──"
-          curl -sf https://aishield.tools/api/v1/health && echo " ✅" || echo " ❌ (check SSL=Flexible)"
+          exit 0
