@@ -23,40 +23,53 @@ jobs:
           set +e
           cd /opt/aishield 2>/dev/null || cd ~/aishield 2>/dev/null
           git pull origin main 2>/dev/null
-          PROJ=$(pwd)
-          echo "DIR=$PROJ"
 
-          # 1. 检查 API
-          echo "=== API ==="
-          curl -sf http://127.0.0.1:8450/api/v1/health && echo "OK" || echo "FAIL"
+          echo "=== STEP 1: 恢复所有停止的 Docker 容器 ==="
+          docker ps -a --format "{{.ID}} {{.Names}} {{.Image}} {{.Status}}" 2>/dev/null
+          echo "---"
+          # 启动所有停止的容器
+          docker start $(docker ps -aq --filter "status=exited") 2>/dev/null
+          sleep 5
 
-          # 2. 安装 Nginx (如果没有)
-          echo "=== Nginx install ==="
-          which nginx || apt-get update -qq && apt-get install -y -qq nginx
-          nginx -v 2>&1
+          echo ""
+          echo "=== STEP 2: 检查端口 ==="
+          ss -tlnp | grep -E ':(80|443|8450) ' 2>/dev/null
+          echo "---"
+          echo "API 8450:"
+          curl -sf http://127.0.0.1:8450/api/v1/health 2>/dev/null && echo " OK" || echo " FAIL"
+          echo "Port 80:"
+          curl -sf http://127.0.0.1/api/v1/health 2>/dev/null && echo " OK" || echo " FAIL"
 
-          # 3. 防火墙
-          echo "=== Firewall ==="
-          ufw allow 80/tcp 2>/dev/null || true
-          ufw allow 443/tcp 2>/dev/null || true
-          iptables -I INPUT -p tcp --dport 80 -j ACCEPT 2>/dev/null || true
+          echo ""
+          echo "=== STEP 3: 如果端口 80 仍不通，尝试启动 Nginx ==="
+          if ! curl -sf http://127.0.0.1/api/v1/health 2>/dev/null; then
+            echo "端口 80 不通，尝试修复..."
 
-          # 4. 停止 Docker 占用 80
-          echo "=== Stop Docker on 80 ==="
-          docker stop aishield-nginx 2>/dev/null
-          docker rm aishield-nginx 2>/dev/null
-          docker ps -q 2>/dev/null | while read c; do docker port "$c" 2>/dev/null | grep -q '80/tcp' && docker stop "$c" 2>/dev/null; done
-          systemctl stop nginx 2>/dev/null
-          pkill nginx 2>/dev/null
-          sleep 2
+            # 方法1: 启动 Nginx Docker 容器 (host 网络)
+            echo "尝试 Docker Nginx..."
+            docker stop aishield-nginx 2>/dev/null
+            docker rm aishield-nginx 2>/dev/null
+            docker run -d --name aishield-nginx --network host --restart unless-stopped \
+              -v $(pwd)/nginx/nginx.conf:/etc/nginx/nginx.conf:ro \
+              nginx:alpine 2>&1
+            sleep 3
+            echo "Docker Nginx status:"
+            docker ps --filter name=aishield-nginx --format "{{.Status}}" 2>/dev/null
+            echo "Docker Nginx logs:"
+            docker logs aishield-nginx 2>&1 | tail -5
 
-          # 5. 写 Nginx 配置 (直接写到 nginx.conf)
-          echo "=== Write config ==="
-          cat > /etc/nginx/nginx.conf << 'EOF'
+            # 检查是否成功
+            if curl -sf http://127.0.0.1/api/v1/health 2>/dev/null; then
+              echo "Docker Nginx 成功!"
+            else
+              echo "Docker Nginx 失败，尝试 host nginx..."
+
+              # 方法2: 安装并启动 host Nginx
+              which nginx 2>/dev/null || { apt-get update -qq; apt-get install -y -qq nginx; }
+              cat > /etc/nginx/nginx.conf << 'NGINXEOF'
 worker_processes auto;
 events { worker_connections 1024; }
 http {
-    include mime.types;
     default_type application/octet-stream;
     server {
         listen 80;
@@ -71,28 +84,28 @@ http {
         }
     }
 }
-EOF
+NGINXEOF
+              nginx -t 2>&1
+              pkill nginx 2>/dev/null; sleep 1
+              nginx 2>&1 || systemctl start nginx 2>&1
+              sleep 2
+              echo "Host Nginx status:"
+              ps aux | grep nginx | grep -v grep
+              curl -sf http://127.0.0.1/api/v1/health 2>/dev/null && echo "Host Nginx OK!" || echo "Host Nginx FAIL"
+            fi
+          fi
 
-          # 6. 测试并启动
-          echo "=== Test config ==="
-          nginx -t 2>&1
-          echo "=== Start nginx ==="
-          nginx 2>&1 || systemctl start nginx 2>&1 || service nginx start 2>&1
-          sleep 2
-
-          # 7. 诊断
-          echo "=== Diagnostics ==="
-          echo "--- ss port 80 ---"
-          ss -tlnp | grep ':80 '
-          echo "--- ss port 8450 ---"
-          ss -tlnp | grep ':8450 '
-          echo "--- nginx process ---"
-          ps aux | grep nginx | grep -v grep
-          echo "--- nginx error log ---"
-          tail -5 /var/log/nginx/error.log 2>/dev/null
-          echo "--- curl localhost:80 ---"
-          curl -sf http://127.0.0.1/api/v1/health 2>/dev/null && echo " OK" || echo " FAIL"
-          echo "--- curl localhost:8450 ---"
+          echo ""
+          echo "=== 最终状态 ==="
+          echo "Docker containers:"
+          docker ps --format "table {{.Names}}\t{{.Image}}\t{{.Ports}}\t{{.Status}}" 2>/dev/null
+          echo ""
+          echo "Ports:"
+          ss -tlnp | grep -E ':(80|8450) ' 2>/dev/null
+          echo ""
+          echo "API (8450):"
           curl -sf http://127.0.0.1:8450/api/v1/health 2>/dev/null && echo " OK" || echo " FAIL"
+          echo "Nginx (80):"
+          curl -sf http://127.0.0.1/api/v1/health 2>/dev/null && echo " OK" || echo " FAIL"
 
           exit 0
