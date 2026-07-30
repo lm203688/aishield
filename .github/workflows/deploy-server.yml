@@ -71,7 +71,12 @@ jobs:
           # 检查是否已有 Origin CA 证书（避免重复生成）
           if [ -f /etc/nginx/ssl/origin-ca-cert.pem ] && [ -s /etc/nginx/ssl/origin-ca-cert.pem ]; then
             echo "Origin CA 证书已存在，复用"
-            cp /etc/nginx/ssl/origin-ca-cert.pem /etc/nginx/ssl/cert.pem
+            # 确保根证书存在
+            if [ ! -f /etc/nginx/ssl/origin-ca-root.pem ]; then
+              curl -s -o /etc/nginx/ssl/origin-ca-root.pem 'https://developers.cloudflare.com/ssl/static/origin_ca_rsa_root.pem' 2>/dev/null
+            fi
+            # 重建证书链
+            cat /etc/nginx/ssl/origin-ca-cert.pem /etc/nginx/ssl/origin-ca-root.pem > /etc/nginx/ssl/cert.pem
             cp /etc/nginx/ssl/origin-ca-key.pem /etc/nginx/ssl/key.pem
           else
             echo "生成 CSR..."
@@ -98,8 +103,15 @@ jobs:
             if [ -n "$CERT" ]; then
               echo "Cloudflare Origin CA 证书获取成功!"
               echo "$CERT" > /etc/nginx/ssl/origin-ca-cert.pem
-              cp /etc/nginx/ssl/origin-ca-cert.pem /etc/nginx/ssl/cert.pem
+
+              # 下载 Cloudflare Origin CA 根证书并拼接到证书链
+              echo "下载 Cloudflare Origin CA RSA 根证书..."
+              curl -s -o /etc/nginx/ssl/origin-ca-root.pem 'https://developers.cloudflare.com/ssl/static/origin_ca_rsa_root.pem' 2>/dev/null
+
+              # 拼接完整证书链: 服务器证书 + 根证书
+              cat /etc/nginx/ssl/origin-ca-cert.pem /etc/nginx/ssl/origin-ca-root.pem > /etc/nginx/ssl/cert.pem
               cp /etc/nginx/ssl/origin-ca-key.pem /etc/nginx/ssl/key.pem
+              echo "证书链已构建 (服务器证书 + 根证书)"
               echo "证书有效期: 15年"
             else
               echo "Origin CA 获取失败，回退到自签证书"
@@ -187,7 +199,25 @@ jobs:
             # 修复3: pid 目录不存在
             mkdir -p /run /var/log/nginx
 
-            # 修复4: 如果仍然失败，移除 user 指令
+            # 修复4: 循环移除不支持的指令（如 ssl_ciphersuites）
+            FIX_RETRY=0
+            while [ $FIX_RETRY -lt 5 ]; do
+              NGINX_TEST_OUTPUT=$(nginx -t 2>&1)
+              echo "$NGINX_TEST_OUTPUT" | head -3
+              if echo "$NGINX_TEST_OUTPUT" | grep -qi "unknown directive"; then
+                UNKNOWN_DIR=$(echo "$NGINX_TEST_OUTPUT" | grep -oP 'unknown directive "[^"]*"' | head -1 | grep -oP '"[^"]*"' | tr -d '"')
+                if [ -n "$UNKNOWN_DIR" ]; then
+                  echo "移除不支持的指令: $UNKNOWN_DIR"
+                  sed -i "/$UNKNOWN_DIR/d" /etc/nginx/nginx.conf
+                  FIX_RETRY=$((FIX_RETRY + 1))
+                  sleep 1
+                  continue
+                fi
+              fi
+              break
+            done
+
+            # 修复5: 如果仍然失败，移除 user 指令
             if ! nginx -t 2>&1; then
               echo "仍然失败，尝试移除 user 指令..."
               sed -i '/^user /d' /etc/nginx/nginx.conf
