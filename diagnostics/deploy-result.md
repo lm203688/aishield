@@ -1,86 +1,59 @@
 === AIShield DIAGNOSTIC ===
-Time: Thu Jul 30 00:54:31 UTC 2026
+Time: Thu Jul 30 21:25:57 UTC 2026
 === nginx -t ===
 nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
 nginx: configuration file /etc/nginx/nginx.conf test is successful
 === PORTS ===
-LISTEN 0      511          0.0.0.0:80         0.0.0.0:*    users:(("nginx",pid=3648843,fd=8),("nginx",pid=3648842,fd=8),("nginx",pid=3648841,fd=8))
-LISTEN 0      5            0.0.0.0:8450       0.0.0.0:*    users:(("python3",pid=2590363,fd=3))                                                    
-LISTEN 0      511          0.0.0.0:443        0.0.0.0:*    users:(("nginx",pid=3648843,fd=6),("nginx",pid=3648842,fd=6),("nginx",pid=3648841,fd=6))
-LISTEN 0      511             [::]:80            [::]:*    users:(("nginx",pid=3648843,fd=9),("nginx",pid=3648842,fd=9),("nginx",pid=3648841,fd=9))
-LISTEN 0      511             [::]:443           [::]:*    users:(("nginx",pid=3648843,fd=7),("nginx",pid=3648842,fd=7),("nginx",pid=3648841,fd=7))
+LISTEN 0      511          0.0.0.0:80         0.0.0.0:*    users:(("nginx",pid=326084,fd=8),("nginx",pid=326083,fd=8),("nginx",pid=326082,fd=8))
+LISTEN 0      5            0.0.0.0:8450       0.0.0.0:*    users:(("python3",pid=2590363,fd=3))                                                 
+LISTEN 0      511          0.0.0.0:443        0.0.0.0:*    users:(("nginx",pid=326084,fd=6),("nginx",pid=326083,fd=6),("nginx",pid=326082,fd=6))
+LISTEN 0      511             [::]:80            [::]:*    users:(("nginx",pid=326084,fd=9),("nginx",pid=326083,fd=9),("nginx",pid=326082,fd=9))
+LISTEN 0      511             [::]:443           [::]:*    users:(("nginx",pid=326084,fd=7),("nginx",pid=326083,fd=7),("nginx",pid=326082,fd=7))
 === NGINX PROCESS ===
-root     3648841  0.0  0.0  10936  1696 ?        Ss   08:54   0:00 nginx: master process /usr/sbin/nginx -g daemon on; master_process on;
-www-data 3648842  0.0  0.3  11736  7388 ?        S    08:54   0:00 nginx: worker process
-www-data 3648843  0.0  0.2  11604  4284 ?        S    08:54   0:00 nginx: worker process
+root      326082  0.0  0.0  10936  1692 ?        Ss   05:25   0:00 nginx: master process /usr/sbin/nginx -g daemon on; master_process on;
+www-data  326083  0.0  0.2  11604  4268 ?        S    05:25   0:00 nginx: worker process
+www-data  326084  0.1  0.3  11740  7828 ?        S    05:25   0:00 nginx: worker process
 === NGINX ERROR LOG ===
-2026/07/30 05:26:20 [emerg] 3509840#3509840: bind() to 0.0.0.0:80 failed (98: Unknown error)
-2026/07/30 05:26:20 [emerg] 3509840#3509840: still could not bind()
-2026/07/30 05:26:23 [emerg] 3509892#3509892: bind() to 0.0.0.0:80 failed (98: Unknown error)
-2026/07/30 05:26:23 [emerg] 3509892#3509892: bind() to 0.0.0.0:80 failed (98: Unknown error)
-2026/07/30 05:26:23 [emerg] 3509892#3509892: bind() to 0.0.0.0:80 failed (98: Unknown error)
-2026/07/30 05:26:23 [emerg] 3509892#3509892: bind() to 0.0.0.0:80 failed (98: Unknown error)
-2026/07/30 05:26:23 [emerg] 3509892#3509892: bind() to 0.0.0.0:80 failed (98: Unknown error)
-2026/07/30 05:26:23 [emerg] 3509892#3509892: still could not bind()
-2026/07/30 05:26:25 [emerg] 3509898#3509898: bind() to 0.0.0.0:80 failed (98: Unknown error)
-2026/07/30 05:26:25 [emerg] 3509898#3509898: bind() to 0.0.0.0:80 failed (98: Unknown error)
-2026/07/30 05:26:25 [emerg] 3509898#3509898: bind() to 0.0.0.0:80 failed (98: Unknown error)
-2026/07/30 05:26:25 [emerg] 3509898#3509898: bind() to 0.0.0.0:80 failed (98: Unknown error)
-2026/07/30 05:26:25 [emerg] 3509898#3509898: bind() to 0.0.0.0:80 failed (98: Unknown error)
-2026/07/30 05:26:25 [emerg] 3509898#3509898: still could not bind()
-2026/07/30 08:16:19 [notice] 3617749#3617749: signal process started
-2026/07/30 08:16:19 [error] 3617749#3617749: open() "/run/nginx.pid" failed (2: No such file or directory)
-2026/07/30 08:23:43 [notice] 3623854#3623854: signal process started
-2026/07/30 08:23:43 [error] 3623854#3623854: open() "/run/nginx.pid" failed (2: No such file or directory)
-2026/07/30 08:28:43 [notice] 3628478#3628478: signal process started
-2026/07/30 08:28:43 [error] 3628478#3628478: open() "/run/nginx.pid" failed (2: No such file or directory)
-2026/07/30 08:32:42 [notice] 3631977#3631977: signal process started
-2026/07/30 08:32:42 [error] 3631977#3631977: open() "/run/nginx.pid" failed (2: No such file or directory)
-2026/07/30 08:39:00 [notice] 3636782#3636782: signal process started
-2026/07/30 08:39:00 [error] 3636782#3636782: open() "/run/nginx.pid" failed (2: No such file or directory)
-2026/07/30 08:43:32 [notice] 3640310#3640310: signal process started
-2026/07/30 08:43:32 [error] 3640310#3640310: open() "/run/nginx.pid" failed (2: No such file or directory)
-2026/07/30 08:48:43 [notice] 3644305#3644305: signal process started
-2026/07/30 08:48:43 [error] 3644305#3644305: open() "/run/nginx.pid" failed (2: No such file or directory)
-2026/07/30 08:54:20 [notice] 3648803#3648803: signal process started
-2026/07/30 08:54:20 [error] 3648803#3648803: open() "/run/nginx.pid" failed (2: No such file or directory)
+2026/07/31 00:08:48 [crit] 3648842#3648842: *877 SSL_do_handshake() failed (SSL: error:0A00006C:SSL routines::bad key share) while SSL handshaking, client: 165.154.62.35, server: 0.0.0.0:443
+2026/07/31 05:25:45 [notice] 325998#325998: signal process started
+2026/07/31 05:25:45 [error] 325998#325998: open() "/run/nginx.pid" failed (2: No such file or directory)
 === SSL TEST ===
-depth=0 CN = aishield.tools
-verify error:num=18:self-signed certificate
+depth=0 O = "CloudFlare, Inc.", OU = CloudFlare Origin CA, CN = CloudFlare Origin Certificate
+verify error:num=20:unable to get local issuer certificate
 verify return:1
-depth=0 CN = aishield.tools
+depth=0 O = "CloudFlare, Inc.", OU = CloudFlare Origin CA, CN = CloudFlare Origin Certificate
+verify error:num=21:unable to verify the first certificate
+verify return:1
+depth=0 O = "CloudFlare, Inc.", OU = CloudFlare Origin CA, CN = CloudFlare Origin Certificate
 verify return:1
 CONNECTED(00000003)
 ---
 Certificate chain
- 0 s:CN = aishield.tools
-   i:CN = aishield.tools
+ 0 s:O = "CloudFlare, Inc.", OU = CloudFlare Origin CA, CN = CloudFlare Origin Certificate
+   i:C = US, O = "CloudFlare, Inc.", OU = CloudFlare Origin SSL Certificate Authority, L = San Francisco, ST = California
    a:PKEY: rsaEncryption, 2048 (bit); sigalg: RSA-SHA256
-   v:NotBefore: Jul 30 00:54:22 2026 GMT; NotAfter: Jul 27 00:54:22 2036 GMT
+   v:NotBefore: Jul 30 21:21:00 2026 GMT; NotAfter: Jul 26 21:21:00 2041 GMT
 ---
 Server certificate
 -----BEGIN CERTIFICATE-----
-MIIDEzCCAfugAwIBAgIUE4zUaaAtMUTUk0cwZ0lpX9hA2E4wDQYJKoZIhvcNAQEL
-BQAwGTEXMBUGA1UEAwwOYWlzaGllbGQudG9vbHMwHhcNMjYwNzMwMDA1NDIyWhcN
-MzYwNzI3MDA1NDIyWjAZMRcwFQYDVQQDDA5haXNoaWVsZC50b29sczCCASIwDQYJ
-KoZIhvcNAQEBBQADggEPADCCAQoCggEBAJZudIpqbAw24Nb2Ui7BaHn/kVp9GCWR
-mHl07/2Sqr9/HN/3Rd5ZK6aY6MYpKFTJ9IIDM+3l4vPhliQKkEvqjyBVbrh44y7A
-RYDV9StVkotWJB0G9XnhZkzrsvpDhDTVKMaPPGDpgusNH+E0UZJTCGFKwvNigM57
-OoNDwJyBVEAyAnXSt6oef3+dydUq0KxhyYVHoEYWwwifc8csrf0TqtNUOGEXfywv
-CHJgnfAgACuqt6irxoWvyDiSM+wGA+L8pPqn+GmTf7kgMUicufugkgHuzC3MewRw
-3f731J2vLVFNEMUNYT/ryjKgvSt1CoxbQraVH4gDt9A6CSpIe3ascZsCAwEAAaNT
-MFEwHQYDVR0OBBYEFP/tHDiZe4o8AziA7EtKCFS1ivkgMB8GA1UdIwQYMBaAFP/t
-HDiZe4o8AziA7EtKCFS1ivkgMA8GA1UdEwEB/wQFMAMBAf8wDQYJKoZIhvcNAQEL
-BQADggEBACwYflF5TkhmaL+oV4gZ4D7wh+ho3rJ7jWInWTB1/AwNnVYp4vflAbFF
-Bvmgyte56UiGpX95vgHeehMO0dBlMMfdt0YDDQsthgzT8OrcsyqL9/cb6RrVP7OH
-JUhd5yXgPegmmYcaZAUlVcbRPYpxAn91so6erBth9FWh3SqMClZWa/PmVshDqodh
-C6ZVYj9Bp+3IrIk4kFGtjTkf3zPMyA1yp0YvM4NVuEOK921GEIkGYISuttIGIgvn
+MIIEqDCCA5CgAwIBAgIUaBz+MWoAtsMskUpJGWueRKnBRdQwDQYJKoZIhvcNAQEL
+BQAwgYsxCzAJBgNVBAYTAlVTMRkwFwYDVQQKExBDbG91ZEZsYXJlLCBJbmMuMTQw
+MgYDVQQLEytDbG91ZEZsYXJlIE9yaWdpbiBTU0wgQ2VydGlmaWNhdGUgQXV0aG9y
+aXR5MRYwFAYDVQQHEw1TYW4gRnJhbmNpc2NvMRMwEQYDVQQIEwpDYWxpZm9ybmlh
+MB4XDTI2MDczMDIxMjEwMFoXDTQxMDcyNjIxMjEwMFowYjEZMBcGA1UEChMQQ2xv
+dWRGbGFyZSwgSW5jLjEdMBsGA1UECxMUQ2xvdWRGbGFyZSBPcmlnaW4gQ0ExJjAk
+BgNVBAMTHUNsb3VkRmxhcmUgT3JpZ2luIENlcnRpZmljYXRlMIIBIjANBgkqhkiG
+9w0BAQEFAAOCAQ8AMIIBCgKCAQEAk8Jli3uc15mUjhQ90BVYW4kFY7E5YfE3bQbe
+bAVk+a6YYpNECkD5OFOBSuUd2plT7lG/SjbFJ+2FcwnqLjjHtPYMJoTRO1bktLFL
+rZr98bV/N4q+Ole9z0DZ1uA7+i0rrvSFfe9CoYhbwxrrF0ggYy1+BqdVPU8xzj1K
+p0bQD+aPdvjYT4DiA+V8Su4KdLaLrCrN9n0dh3/E136ZuDkhB2IDec8WuhN/cnOl
+iPyLJ7mgW/3BJjAoaAeii48USYKKJ+sRb04wnGzJGXFH5ZhqKP7JfISQ0/eJtw2X
 === CERT CHECK ===
-subject=CN = aishield.tools
-notBefore=Jul 30 00:54:22 2026 GMT
-notAfter=Jul 27 00:54:22 2036 GMT
+subject=O = "CloudFlare, Inc.", OU = CloudFlare Origin CA, CN = CloudFlare Origin Certificate
+notBefore=Jul 30 21:21:00 2026 GMT
+notAfter=Jul 26 21:21:00 2041 GMT
 === API STATUS ===
-{"status": "ok", "version": "4.2", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 133, "uptime": 1785372874.0674229, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup"}OK
+{"status": "ok", "version": "4.2", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 133, "uptime": 1785446759.5780718, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup"}OK
 === NGINX CONF ===
 user www-data;
 worker_processes auto;
@@ -153,7 +126,7 @@ http {
 }
 
 === HTTPS Test from GitHub Actions Runner ===
-Time: Thu Jul 30 00:54:34 UTC 2026
+Time: Thu Jul 30 21:25:59 UTC 2026
 
 === curl test (aishield.tools) ===
 error code: 525
