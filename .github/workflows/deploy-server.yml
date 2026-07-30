@@ -57,16 +57,55 @@ jobs:
           echo ""
           echo "=== STEP 3: 生成自签 SSL 证书 ==="
           mkdir -p /etc/nginx/ssl
+
+          # 检查 openssl 是否可用
+          if ! command -v openssl &> /dev/null; then
+            echo "ERROR: openssl 未安装，正在安装..."
+            apt-get update -qq && apt-get install -y -qq openssl
+          fi
+
+          echo "openssl 版本:"
+          openssl version
+
+          # 生成证书（不隐藏错误）
           openssl req -x509 -nodes -days 3650 -newkey rsa:2048 \
             -keyout /etc/nginx/ssl/key.pem \
             -out /etc/nginx/ssl/cert.pem \
-            -subj "/CN=aishield.tools" 2>/dev/null
-          echo "证书状态:"
-          ls -la /etc/nginx/ssl/cert.pem /etc/nginx/ssl/key.pem 2>/dev/null
+            -subj "/CN=aishield.tools"
+          SSL_RET=$?
+          echo "openssl 退出码: $SSL_RET"
+
+          echo "证书文件状态:"
+          ls -la /etc/nginx/ssl/cert.pem /etc/nginx/ssl/key.pem 2>&1
+
+          # 验证证书内容
+          if [ -f /etc/nginx/ssl/cert.pem ] && [ -s /etc/nginx/ssl/cert.pem ]; then
+            echo "证书验证:"
+            openssl x509 -in /etc/nginx/ssl/cert.pem -noout -subject -dates 2>&1
+            echo "证书与密钥匹配检查:"
+            CERT_MD5=$(openssl x509 -in /etc/nginx/ssl/cert.pem -modulus -noout 2>/dev/null | openssl md5 2>/dev/null)
+            KEY_MD5=$(openssl rsa -in /etc/nginx/ssl/key.pem -modulus -noout 2>/dev/null | openssl md5 2>/dev/null)
+            echo "  cert modulus md5: $CERT_MD5"
+            echo "  key  modulus md5: $KEY_MD5"
+            if [ "$CERT_MD5" = "$KEY_MD5" ]; then
+              echo "  证书与密钥: 匹配 OK"
+            else
+              echo "  证书与密钥: 不匹配 FAIL"
+            fi
+          else
+            echo "ERROR: 证书文件不存在或为空!"
+          fi
 
           echo ""
           echo "=== STEP 4: 安装 Nginx 并复制配置文件 ==="
-          which nginx 2>/dev/null || { apt-get update -qq; apt-get install -y -qq nginx; }
+          if ! command -v nginx &> /dev/null; then
+            echo "nginx 未安装，正在安装..."
+            apt-get update -qq && apt-get install -y -qq nginx
+          fi
+          echo "nginx 版本:"
+          nginx -v 2>&1
+          echo "nginx 路径:"
+          which nginx
 
           # 直接从仓库复制 nginx.conf（避免 heredoc 缩进问题）
           cp nginx/nginx.conf /etc/nginx/nginx.conf
@@ -77,15 +116,47 @@ jobs:
             echo "Creating minimal mime.types..."
             echo "types {}" > /etc/nginx/mime.types
           fi
+          echo "mime.types 状态:"
+          ls -la /etc/nginx/mime.types 2>&1
+
+          # 检查 SSL 目录权限
+          echo "SSL 目录权限:"
+          ls -la /etc/nginx/ssl/
+          echo "Nginx 用户:"
+          grep -r "^user" /etc/nginx/nginx.conf 2>/dev/null || echo "  (未设置 user 指令，使用默认)"
 
           echo "Nginx 配置测试:"
           nginx -t 2>&1
+          NGINX_TEST_RET=$?
+          echo "nginx -t 退出码: $NGINX_TEST_RET"
 
           echo ""
           echo "=== STEP 5: 启动 Nginx ==="
-          systemctl restart nginx 2>/dev/null || service nginx restart 2>/dev/null || nginx 2>&1
+          echo "尝试 systemctl restart nginx..."
+          systemctl restart nginx 2>&1
+          SYSCTL_RET=$?
+          echo "systemctl 退出码: $SYSCTL_RET"
+
+          if [ $SYSCTL_RET -ne 0 ]; then
+            echo "systemctl 失败，尝试 service nginx restart..."
+            service nginx restart 2>&1
+            SERVICE_RET=$?
+            echo "service 退出码: $SERVICE_RET"
+
+            if [ $SERVICE_RET -ne 0 ]; then
+              echo "service 失败，直接运行 nginx..."
+              nginx 2>&1
+              NGINX_DIRECT_RET=$?
+              echo "直接运行 nginx 退出码: $NGINX_DIRECT_RET"
+            fi
+          fi
+
           systemctl enable nginx 2>/dev/null || true
           sleep 3
+
+          # 检查 Nginx 是否真的在运行
+          echo "Nginx 进程检查:"
+          ps aux | grep nginx | grep -v grep || echo "  WARNING: 没有 nginx 进程在运行!"
 
           echo ""
           echo "=== STEP 5.5: 检查并开放防火墙端口 ==="
@@ -106,7 +177,7 @@ jobs:
           echo ""
           echo "=== STEP 6: 验证 ==="
           echo "--- 端口监听 ---"
-          ss -tlnp | grep -E ':(80|443|8450) '
+          ss -tlnp | grep -E ':(80|443|8450) ' || echo "  无端口监听!"
           echo ""
           echo "--- API (8450) ---"
           curl -sf http://127.0.0.1:8450/api/v1/health 2>/dev/null && echo " OK" || echo " FAIL"
@@ -114,15 +185,24 @@ jobs:
           curl -sk https://127.0.0.1/api/v1/health 2>/dev/null && echo " OK" || echo " FAIL"
           echo "--- Nginx HTTPS 外部IP (443) ---"
           curl -sk https://150.158.119.19/api/v1/health 2>/dev/null && echo " OK" || echo " FAIL (可能安全组阻止)"
+
+          echo ""
+          echo "--- SSL 连接测试 (openssl s_client) ---"
+          echo | timeout 5 openssl s_client -connect 127.0.0.1:443 -servername aishield.tools 2>&1 | head -30 || echo "  SSL 连接失败!"
+
           echo ""
           echo "--- Nginx 进程 ---"
-          ps aux | grep nginx | grep -v grep
+          ps aux | grep nginx | grep -v grep || echo "  无 nginx 进程"
           echo ""
-          echo "--- Nginx 错误日志 ---"
-          tail -5 /var/log/nginx/error.log 2>/dev/null || echo "无错误日志"
+          echo "--- Nginx 错误日志 (最近20行) ---"
+          tail -20 /var/log/nginx/error.log 2>/dev/null || echo "无错误日志"
+          echo ""
+          echo "--- Nginx 访问日志 (最近5行) ---"
+          tail -5 /var/log/nginx/access.log 2>/dev/null || echo "无访问日志"
           echo ""
           echo "--- iptables 443规则 ---"
           iptables -L INPUT -n 2>/dev/null | grep 443 || echo "无443规则"
+
           echo ""
           echo "=== 诊断结论 ==="
           if curl -sk https://127.0.0.1/api/v1/health 2>/dev/null; then
@@ -133,7 +213,8 @@ jobs:
               echo "外部443端口: FAIL - 需在腾讯云安全组添加443端口入站规则"
             fi
           else
-            echo "本地443端口: FAIL - Nginx未正确监听443"
+            echo "本地443端口: FAIL - Nginx未正确监听443或SSL配置错误"
+            echo "请检查上方的 nginx -t 输出和错误日志"
           fi
 
           exit 0
