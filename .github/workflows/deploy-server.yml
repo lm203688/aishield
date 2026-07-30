@@ -84,16 +84,7 @@ jobs:
             CF_TOKEN=$(echo 'Y2Z1dF9Nb2hJTlhSTFBpaWQ2cHpDZUJuOVZCVUxxZWdvR29sSmVESEFwZDR1YWE1NDM5ZGI=' | base64 -d)
             CSR_CONTENT=$(cat /tmp/origin.csr)
 
-            JSON_BODY=$(python3 -c "
-import json, sys
-csr = sys.stdin.read()
-print(json.dumps({
-    'hostnames': ['aishield.tools', '*.aishield.tools'],
-    'requested_validity': 5475,
-    'request_type': 'origin-rsa',
-    'csr': csr
-}))
-" <<< "$CSR_CONTENT" 2>/dev/null)
+            JSON_BODY=$(echo "$CSR_CONTENT" | python3 -c "import json,sys; print(json.dumps({'hostnames':['aishield.tools','*.aishield.tools'],'requested_validity':5475,'request_type':'origin-rsa','csr':sys.stdin.read()}))" 2>/dev/null)
 
             echo "调用 Cloudflare API 创建 Origin CA 证书..."
             RESPONSE=$(curl -s -X POST 'https://api.cloudflare.com/client/v4/certificates' \
@@ -101,16 +92,8 @@ print(json.dumps({
               -H "Content-Type: application/json" \
               -d "$JSON_BODY" 2>/dev/null)
 
-            # 提取证书
-            CERT=$(echo "$RESPONSE" | python3 -c "
-import sys, json
-try:
-    data = json.load(sys.stdin)
-    if data.get('success'):
-        print(data['result']['certificate'])
-except:
-    pass
-" 2>/dev/null)
+            # 提取证书（单行 Python 避免缩进问题）
+            CERT=$(echo "$RESPONSE" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['result']['certificate']) if d.get('success') else sys.exit(1)" 2>/dev/null)
 
             if [ -n "$CERT" ]; then
               echo "Cloudflare Origin CA 证书获取成功!"
