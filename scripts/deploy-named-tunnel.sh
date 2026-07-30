@@ -229,30 +229,41 @@ CONFIGEOF
     fi
 fi
 
-# ========== STEP 5: 更新 DNS (token 模式) ==========
-if [ "$TUNNEL_MODE" = "token" ] && [ -n "$TUNNEL_ID" ]; then
+# ========== STEP 5: 更新 DNS (API - 所有模式) ==========
+if [ -n "$TUNNEL_ID" ]; then
     log "=== STEP 5: 更新 DNS (API) ==="
 
     TUNNEL_CNAME="${TUNNEL_ID}.cfargotunnel.com"
     log "CNAME: aishield.tools -> $TUNNEL_CNAME"
 
+    # 使用 API 更新 DNS（cert.pem 的 zone 可能不匹配，API 更可靠）
     DNS_RESULT=$(curl -s "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records?name=aishield.tools" \
         -H "Authorization: Bearer $CF_API_TOKEN")
     DNS_RECORD_ID=$(echo "$DNS_RESULT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['result'][0]['id'] if d.get('result') else '')" 2>/dev/null)
 
     if [ -n "$DNS_RECORD_ID" ]; then
+        log "更新现有 DNS 记录 (ID: $DNS_RECORD_ID)"
         curl -s -X PUT "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records/$DNS_RECORD_ID" \
             -H "Authorization: Bearer $CF_API_TOKEN" \
             -H "Content-Type: application/json" \
             -d "{\"type\":\"CNAME\",\"name\":\"aishield.tools\",\"content\":\"$TUNNEL_CNAME\",\"proxied\":true}" \
             | python3 -c "import sys,json; d=json.load(sys.stdin); print('DNS 更新: OK' if d.get('success') else 'DNS 更新失败: '+json.dumps(d.get('errors','')))" 2>/dev/null | tee -a "$LOG_FILE"
     else
+        log "创建新 DNS CNAME 记录..."
         curl -s -X POST "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records" \
             -H "Authorization: Bearer $CF_API_TOKEN" \
             -H "Content-Type: application/json" \
             -d "{\"type\":\"CNAME\",\"name\":\"aishield.tools\",\"content\":\"$TUNNEL_CNAME\",\"proxied\":true}" \
             | python3 -c "import sys,json; d=json.load(sys.stdin); print('DNS 创建: OK' if d.get('success') else 'DNS 创建失败: '+json.dumps(d.get('errors','')))" 2>/dev/null | tee -a "$LOG_FILE"
     fi
+
+    # 设置 SSL 模式为 Full
+    log "设置 SSL 模式为 Full..."
+    curl -s -X PATCH "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/settings/ssl" \
+        -H "Authorization: Bearer $CF_API_TOKEN" \
+        -H "Content-Type: application/json" \
+        -d '{"value":"full"}' \
+        | python3 -c "import sys,json; d=json.load(sys.stdin); print('SSL: OK' if d.get('success') else 'SSL: 跳过')" 2>/dev/null | tee -a "$LOG_FILE"
 fi
 
 # ========== STEP 6: 启动 Tunnel ==========
