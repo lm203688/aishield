@@ -16,8 +16,6 @@ jobs:
     - name: Deploy via SSH
       id: deploy
       uses: appleboy/ssh-action@v1.0.3
-      env:
-        CF_TUNNEL_TOKEN: ${{ secrets.CLOUDFLARE_TUNNEL_TOKEN }}
       with:
         host: ${{ secrets.SERVER_HOST }}
         username: ${{ secrets.SERVER_USER }}
@@ -25,431 +23,142 @@ jobs:
         port: ${{ secrets.SERVER_PORT || 22 }}
         command_timeout: 15m
         capture_stdout: true
-        envs: CF_TUNNEL_TOKEN
         script: |
           set +e
-          cd /opt/aishield 2>/dev/null || cd ~/aishield 2>/dev/null
-          git pull origin main 2>/dev/null
+          echo "=== AIShield Quick Tunnel Deployment ==="
+          echo "Time: $(date)"
+          echo "User: $(whoami) (UID: $(id -u))"
 
+          cd /opt/aishield 2>/dev/null || cd ~/aishield 2>/dev/null || true
+          git pull origin main 2>/dev/null || true
+
+          echo ""
           echo "=== STEP 1: 启动 API (端口 8450) ==="
-          docker start $(docker ps -aq --filter "status=exited") 2>/dev/null
-          sleep 3
           if ! curl -sf http://127.0.0.1:8450/api/v1/health 2>/dev/null; then
             echo "API 未运行，尝试启动..."
-            if [ -f docker-compose.yml ]; then
-              docker compose up -d 2>/dev/null || docker-compose up -d 2>/dev/null || true
-              sleep 5
-            fi
+            docker start $(docker ps -aq --filter "status=exited") 2>/dev/null || true
+            sleep 3
             if ! curl -sf http://127.0.0.1:8450/api/v1/health 2>/dev/null; then
-              pkill -f "api/server.py" 2>/dev/null || true
-              sleep 1
-              export PORT=8450
-              nohup python3 api/server.py > /tmp/aishield-api.log 2>&1 &
-              sleep 5
+              if [ -f docker-compose.yml ]; then
+                docker compose up -d 2>/dev/null || docker-compose up -d 2>/dev/null || true
+                sleep 5
+              fi
+              if ! curl -sf http://127.0.0.1:8450/api/v1/health 2>/dev/null; then
+                pkill -f "api/server.py" 2>/dev/null || true
+                sleep 1
+                export PORT=8450
+                nohup python3 api/server.py > /tmp/aishield-api.log 2>&1 &
+                sleep 5
+              fi
             fi
           fi
           echo "API 状态:"
-          curl -sf http://127.0.0.1:8450/api/v1/health && echo " OK" || echo " FAIL"
-
-          echo ""
-          echo "=== STEP 2: 停止 Nginx ==="
-          docker stop aishield-nginx 2>/dev/null
-          docker rm aishield-nginx 2>/dev/null
-          systemctl stop nginx 2>/dev/null || true
-          nginx -s stop 2>/dev/null || true
-          sleep 2
-          echo "443端口占用检查:"
-          ss -tlnp | grep ':443 ' || echo "  443端口已释放"
-
-          echo ""
-          echo "=== STEP 3: 生成 Cloudflare Origin CA 证书 ==="
-          mkdir -p /etc/nginx/ssl
-
-          if ! command -v openssl &> /dev/null; then
-            echo "openssl 未安装，正在安装..."
-            apt-get update -qq && apt-get install -y -qq openssl
-          fi
-          echo "openssl 版本: $(openssl version)"
-
-          # 检查是否已有 Origin CA 证书（避免重复生成）
-          if [ -f /etc/nginx/ssl/origin-ca-cert.pem ] && [ -s /etc/nginx/ssl/origin-ca-cert.pem ]; then
-            echo "Origin CA 证书已存在，复用"
-            # 确保根证书存在
-            if [ ! -f /etc/nginx/ssl/origin-ca-root.pem ]; then
-              curl -s -o /etc/nginx/ssl/origin-ca-root.pem 'https://developers.cloudflare.com/ssl/static/origin_ca_rsa_root.pem' 2>/dev/null
-            fi
-            # 重建证书链
-            cat /etc/nginx/ssl/origin-ca-cert.pem /etc/nginx/ssl/origin-ca-root.pem > /etc/nginx/ssl/cert.pem
-            cp /etc/nginx/ssl/origin-ca-key.pem /etc/nginx/ssl/key.pem
-          else
-            echo "生成 CSR..."
-            openssl req -newkey rsa:2048 -nodes \
-              -keyout /etc/nginx/ssl/origin-ca-key.pem \
-              -out /tmp/origin.csr \
-              -subj "/CN=aishield.tools/O=AIShield/C=US" 2>/dev/null
-
-            # 用 Python 构造 JSON 请求体（安全转义 CSR）
-            CF_TOKEN=$(echo 'Y2Z1dF9Nb2hJTlhSTFBpaWQ2cHpDZUJuOVZCVUxxZWdvR29sSmVESEFwZDR1YWE1NDM5ZGI=' | base64 -d)
-            CSR_CONTENT=$(cat /tmp/origin.csr)
-
-            JSON_BODY=$(echo "$CSR_CONTENT" | python3 -c "import json,sys; print(json.dumps({'hostnames':['aishield.tools','*.aishield.tools'],'requested_validity':5475,'request_type':'origin-rsa','csr':sys.stdin.read()}))" 2>/dev/null)
-
-            echo "调用 Cloudflare API 创建 Origin CA 证书..."
-            RESPONSE=$(curl -s -X POST 'https://api.cloudflare.com/client/v4/certificates' \
-              -H "Authorization: Bearer $CF_TOKEN" \
-              -H "Content-Type: application/json" \
-              -d "$JSON_BODY" 2>/dev/null)
-
-            # 提取证书（单行 Python 避免缩进问题）
-            CERT=$(echo "$RESPONSE" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['result']['certificate']) if d.get('success') else sys.exit(1)" 2>/dev/null)
-
-            if [ -n "$CERT" ]; then
-              echo "Cloudflare Origin CA 证书获取成功!"
-              echo "$CERT" > /etc/nginx/ssl/origin-ca-cert.pem
-
-              # 下载 Cloudflare Origin CA 根证书并拼接到证书链
-              echo "下载 Cloudflare Origin CA RSA 根证书..."
-              curl -s -o /etc/nginx/ssl/origin-ca-root.pem 'https://developers.cloudflare.com/ssl/static/origin_ca_rsa_root.pem' 2>/dev/null
-
-              # 拼接完整证书链: 服务器证书 + 根证书
-              cat /etc/nginx/ssl/origin-ca-cert.pem /etc/nginx/ssl/origin-ca-root.pem > /etc/nginx/ssl/cert.pem
-              cp /etc/nginx/ssl/origin-ca-key.pem /etc/nginx/ssl/key.pem
-              echo "证书链已构建 (服务器证书 + 根证书)"
-              echo "证书有效期: 15年"
-            else
-              echo "Origin CA 获取失败，回退到自签证书"
-              echo "API Response: $RESPONSE" | head -5
-              openssl req -x509 -nodes -days 3650 -newkey rsa:2048 \
-                -keyout /etc/nginx/ssl/key.pem \
-                -out /etc/nginx/ssl/cert.pem \
-                -subj "/CN=aishield.tools" 2>/dev/null
-            fi
-
-            # 清理临时文件和 token
-            rm -f /tmp/origin.csr
-            unset CF_TOKEN
-          fi
-
-          echo "证书文件状态:"
-          ls -la /etc/nginx/ssl/cert.pem /etc/nginx/ssl/key.pem 2>&1
-
-          # 验证证书
-          if [ -f /etc/nginx/ssl/cert.pem ] && [ -s /etc/nginx/ssl/cert.pem ]; then
-            echo "证书信息:"
-            openssl x509 -in /etc/nginx/ssl/cert.pem -noout -subject -issuer -dates 2>&1
-            CERT_MD5=$(openssl x509 -in /etc/nginx/ssl/cert.pem -modulus -noout 2>/dev/null | openssl md5 2>/dev/null)
-            KEY_MD5=$(openssl rsa -in /etc/nginx/ssl/key.pem -modulus -noout 2>/dev/null | openssl md5 2>/dev/null)
-            if [ "$CERT_MD5" = "$KEY_MD5" ]; then
-              echo "证书与密钥: 匹配 OK"
-            else
-              echo "证书与密钥: 不匹配 FAIL"
-            fi
-          else
-            echo "ERROR: 证书文件不存在或为空!"
-          fi
-
-          echo ""
-          echo "=== STEP 4: 安装 Nginx 并复制配置文件 ==="
-          if ! command -v nginx &> /dev/null; then
-            echo "nginx 未安装，正在安装..."
-            apt-get update -qq && apt-get install -y -qq nginx
-          fi
-          echo "nginx 版本:"
-          nginx -v 2>&1
-          echo "nginx 路径:"
-          which nginx
-
-          # 直接从仓库复制 nginx.conf（避免 heredoc 缩进问题）
-          cp nginx/nginx.conf /etc/nginx/nginx.conf
-          echo "Nginx 配置已复制"
-
-          # 创建 mime.types（如果不存在）
-          if [ ! -f /etc/nginx/mime.types ]; then
-            echo "Creating minimal mime.types..."
-            echo "types {}" > /etc/nginx/mime.types
-          fi
-          echo "mime.types 状态:"
-          ls -la /etc/nginx/mime.types 2>&1
-
-          # 检查 SSL 目录权限
-          echo "SSL 目录权限:"
-          ls -la /etc/nginx/ssl/
-          echo "Nginx 用户:"
-          grep -r "^user" /etc/nginx/nginx.conf 2>/dev/null || echo "  (未设置 user 指令，使用默认)"
-
-          echo "Nginx 配置测试:"
-          nginx -t 2>&1
-          NGINX_TEST_RET=$?
-          echo "nginx -t 退出码: $NGINX_TEST_RET"
-
-          # 如果配置测试失败，尝试自动修复
-          if [ $NGINX_TEST_RET -ne 0 ]; then
-            echo ""
-            echo "=== 配置测试失败，尝试自动修复 ==="
-
-            # 修复1: www-data 用户不存在
-            if ! id www-data &>/dev/null; then
-              echo "www-data 用户不存在，创建..."
-              useradd -r -s /usr/sbin/nologin www-data 2>/dev/null || true
-            fi
-
-            # 修复2: IPv6 不支持 - 移除 listen [::]: 行
-            if nginx -t 2>&1 | grep -qi "ipv6\|Address family"; then
-              echo "IPv6 不可用，移除 IPv6 监听..."
-              sed -i '/listen \[::\]/d' /etc/nginx/nginx.conf
-            fi
-
-            # 修复3: pid 目录不存在
-            mkdir -p /run /var/log/nginx
-
-            # 修复4: 循环移除不支持的指令（如 ssl_ciphersuites）
-            FIX_RETRY=0
-            while [ $FIX_RETRY -lt 5 ]; do
-              NGINX_TEST_OUTPUT=$(nginx -t 2>&1)
-              echo "$NGINX_TEST_OUTPUT" | head -3
-              if echo "$NGINX_TEST_OUTPUT" | grep -qi "unknown directive"; then
-                UNKNOWN_DIR=$(echo "$NGINX_TEST_OUTPUT" | grep -oP 'unknown directive "[^"]*"' | head -1 | grep -oP '"[^"]*"' | tr -d '"')
-                if [ -n "$UNKNOWN_DIR" ]; then
-                  echo "移除不支持的指令: $UNKNOWN_DIR"
-                  sed -i "/$UNKNOWN_DIR/d" /etc/nginx/nginx.conf
-                  FIX_RETRY=$((FIX_RETRY + 1))
-                  sleep 1
-                  continue
-                fi
-              fi
-              break
-            done
-
-            # 修复5: 如果仍然失败，移除 user 指令
-            if ! nginx -t 2>&1; then
-              echo "仍然失败，尝试移除 user 指令..."
-              sed -i '/^user /d' /etc/nginx/nginx.conf
-            fi
-
-            echo "修复后配置测试:"
-            nginx -t 2>&1
-            NGINX_TEST_RET=$?
-            echo "修复后 nginx -t 退出码: $NGINX_TEST_RET"
-          fi
-
-          # 确保 SSL 证书文件权限正确
-          chmod 644 /etc/nginx/ssl/cert.pem 2>/dev/null
-          chmod 600 /etc/nginx/ssl/key.pem 2>/dev/null
-          chown -R www-data:www-data /etc/nginx/ssl/ 2>/dev/null || true
-
-          echo ""
-          echo "=== STEP 5: 启动 Nginx ==="
-          echo "尝试 systemctl restart nginx..."
-          systemctl restart nginx 2>&1
-          SYSCTL_RET=$?
-          echo "systemctl 退出码: $SYSCTL_RET"
-
-          if [ $SYSCTL_RET -ne 0 ]; then
-            echo "systemctl 失败，尝试 service nginx restart..."
-            service nginx restart 2>&1
-            SERVICE_RET=$?
-            echo "service 退出码: $SERVICE_RET"
-
-            if [ $SERVICE_RET -ne 0 ]; then
-              echo "service 失败，直接运行 nginx..."
-              nginx 2>&1
-              NGINX_DIRECT_RET=$?
-              echo "直接运行 nginx 退出码: $NGINX_DIRECT_RET"
-            fi
-          fi
-
-          systemctl enable nginx 2>/dev/null || true
-          sleep 3
-
-          # 检查 Nginx 是否真的在运行
-          echo "Nginx 进程检查:"
-          ps aux | grep nginx | grep -v grep || echo "  WARNING: 没有 nginx 进程在运行!"
-
-          echo ""
-          echo "=== STEP 5.5: 检查并开放防火墙端口 ==="
-          echo "--- iptables 规则 ---"
-          iptables -L INPUT -n --line-numbers 2>/dev/null | head -20
-          echo ""
-          echo "--- 添加防火墙规则 ---"
-          iptables -I INPUT -p tcp --dport 443 -j ACCEPT 2>/dev/null && echo "443端口已开放(iptables)" || echo "iptables 443 失败"
-          iptables -I INPUT -p tcp --dport 80 -j ACCEPT 2>/dev/null && echo "80端口已开放(iptables)" || echo "iptables 80 失败"
-          iptables -I INPUT -p tcp --dport 8450 -j ACCEPT 2>/dev/null && echo "8450端口已开放(iptables)" || echo "iptables 8450 失败"
-          iptables-save > /etc/iptables.rules 2>/dev/null || true
-          netfilter-persistent save 2>/dev/null || true
-          if command -v ufw &> /dev/null; then
-            ufw allow 443/tcp 2>/dev/null && echo "443端口已开放(ufw)" || true
-            ufw allow 80/tcp 2>/dev/null && echo "80端口已开放(ufw)" || true
-          fi
-
-          echo ""
-          echo "=== STEP 6: 验证 ==="
-          echo "--- 端口监听 ---"
-          ss -tlnp | grep -E ':(80|443|8450) ' || echo "  无端口监听!"
-          echo ""
-          echo "--- API (8450) ---"
           curl -sf http://127.0.0.1:8450/api/v1/health 2>/dev/null && echo " OK" || echo " FAIL"
-          echo "--- Nginx HTTPS 本地 (443) ---"
-          curl -sk https://127.0.0.1/api/v1/health 2>/dev/null && echo " OK" || echo " FAIL"
-          echo "--- Nginx HTTPS 外部IP (443) ---"
-          curl -sk https://150.158.119.19/api/v1/health 2>/dev/null && echo " OK" || echo " FAIL (可能安全组阻止)"
 
           echo ""
-          echo "--- SSL 连接测试 (openssl s_client) ---"
-          echo | timeout 5 openssl s_client -connect 127.0.0.1:443 -servername aishield.tools 2>&1 | head -30 || echo "  SSL 连接失败!"
-
-          echo ""
-          echo "--- Nginx 进程 ---"
-          ps aux | grep nginx | grep -v grep || echo "  无 nginx 进程"
-          echo ""
-          echo "--- Nginx 错误日志 (最近20行) ---"
-          tail -20 /var/log/nginx/error.log 2>/dev/null || echo "无错误日志"
-          echo ""
-          echo "--- Nginx 访问日志 (最近5行) ---"
-          tail -5 /var/log/nginx/access.log 2>/dev/null || echo "无访问日志"
-          echo ""
-          echo "--- iptables 443规则 ---"
-          iptables -L INPUT -n 2>/dev/null | grep 443 || echo "无443规则"
-
-          echo ""
-          echo "=== 诊断结论 ==="
-          if curl -sk https://127.0.0.1/api/v1/health 2>/dev/null; then
-            echo "本地443端口: OK"
-            if curl -sk https://150.158.119.19/api/v1/health 2>/dev/null; then
-              echo "外部443端口: OK - 服务应已恢复"
-            else
-              echo "外部443端口: FAIL - 需在腾讯云安全组添加443端口入站规则"
-            fi
+          echo "=== STEP 2: 安装 cloudflared ==="
+          if [ -w /usr/local/bin ]; then
+            CF_BIN=/usr/local/bin/cloudflared
           else
-            echo "本地443端口: FAIL - Nginx未正确监听443或SSL配置错误"
-            echo "请检查上方的 nginx -t 输出和错误日志"
+            mkdir -p ~/bin
+            CF_BIN=~/bin/cloudflared
           fi
+          if [ ! -f "$CF_BIN" ] || ! "$CF_BIN" --version 2>/dev/null; then
+            echo "下载 cloudflared 到 $CF_BIN..."
+            curl -sL https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -o "$CF_BIN" 2>/dev/null
+            chmod +x "$CF_BIN"
+          fi
+          echo "cloudflared: $($CF_BIN --version 2>&1)"
+          echo "cloudflared 路径: $CF_BIN"
 
           echo ""
-          echo "=== STEP 7: Cloudflare Tunnel (绕过备案SNI拦截) ==="
-          if [ -n "$CF_TUNNEL_TOKEN" ]; then
-            echo "Tunnel Token 已配置，安装 cloudflared..."
+          echo "=== STEP 3: 启动 Quick Tunnel ==="
+          pkill -f "cloudflared" 2>/dev/null || true
+          sleep 2
 
-            # 安装 cloudflared
-            if ! command -v cloudflared &> /dev/null; then
-              echo "下载 cloudflared..."
-              curl -sL https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 \
-                -o /usr/local/bin/cloudflared 2>/dev/null
-              chmod +x /usr/local/bin/cloudflared
-            fi
-            echo "cloudflared 版本: $(cloudflared --version 2>&1)"
+          nohup "$CF_BIN" tunnel --url http://localhost:8450 > /tmp/cloudflared.log 2>&1 &
+          CF_PID=$!
+          echo "cloudflared PID: $CF_PID"
 
-            # 停止现有 cloudflared 进程
-            pkill -f "cloudflared tunnel" 2>/dev/null || true
+          TUNNEL_URL=""
+          for i in $(seq 1 30); do
             sleep 2
-
-            # 创建 systemd 服务（使用printf避免heredoc在YAML中的缩进问题）
-            printf '[Unit]\nDescription=Cloudflare Tunnel\nAfter=network.target\n\n[Service]\nExecStart=/usr/local/bin/cloudflared tunnel --no-autoupdate run --token %s\nRestart=always\nRestartSec=5\nEnvironment=CF_TUNNEL_TOKEN=%s\n\n[Install]\nWantedBy=multi-user.target\n' "$CF_TUNNEL_TOKEN" "$CF_TUNNEL_TOKEN" > /etc/systemd/system/cloudflared.service
-
-            # 启动服务
-            systemctl daemon-reload 2>/dev/null
-            systemctl enable cloudflared 2>/dev/null
-            systemctl restart cloudflared 2>/dev/null || service cloudflared restart 2>/dev/null
-            sleep 5
-
-            echo "cloudflared 服务状态:"
-            systemctl status cloudflared 2>&1 | head -10 || ps aux | grep cloudflared | grep -v grep
-
-            echo ""
-            echo "--- cloudflared 日志 ---"
-            journalctl -u cloudflared --no-pager -n 20 2>/dev/null || tail -20 /tmp/cloudflared.log 2>/dev/null || echo "无日志"
-
-            # 清理 token 变量
-            unset CF_TUNNEL_TOKEN
-          else
-            echo "使用 Quick Tunnel 模式（无需认证，自动绕过备案SNI拦截）..."
-
-            # 安装 cloudflared
-            if ! command -v cloudflared &> /dev/null; then
-              echo "下载 cloudflared..."
-              curl -sL https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 \
-                -o /usr/local/bin/cloudflared 2>/dev/null
-              chmod +x /usr/local/bin/cloudflared
+            TUNNEL_URL=$(grep -o 'https://[a-z0-9-]*\.trycloudflare\.com' /tmp/cloudflared.log | head -1)
+            if [ -n "$TUNNEL_URL" ]; then
+              echo "Tunnel URL: $TUNNEL_URL"
+              break
             fi
-            echo "cloudflared 版本: $(cloudflared --version 2>&1)"
+            echo "  等待 tunnel URL... ($i/30)"
+          done
 
-            # 停止现有 cloudflared
-            systemctl stop cloudflared-quick 2>/dev/null || true
-            pkill -f "cloudflared" 2>/dev/null || true
-            sleep 2
+          echo ""
+          echo "--- cloudflared 日志 (最后20行) ---"
+          tail -20 /tmp/cloudflared.log 2>/dev/null
 
-            # 使用base64解码创建启动脚本（避免heredoc在YAML中的缩进问题）
-            echo 'IyEvYmluL2Jhc2gKIyBBSVNoaWVsZCBRdWljayBUdW5uZWwgLSDoh6rliqjlkK/liqjlubbmm7TmlrBETlMKQ0ZfQVBJX1RPS0VOPSQoZWNobyAnWTJaMWRGOU5iMmhKVGxoU1RGQnBhV1EyY0hwRFpVSnVPVlpDVlV4eFpXZHZSMjlzU21WRVNFRndaRFIxWVdFMU5ETTVaR0k9JyB8IGJhc2U2NCAtZCkKQ0ZfWk9ORV9JRD0nNzYyNWZjOGFiNzE5YjM5NzRlMTJhYTJiNmJmMjU0ODknCgpjbGVhbnVwKCkgeyBraWxsICRDRl9QSUQgMj4vZGV2L251bGw7IGV4aXQgMDsgfQp0cmFwIGNsZWFudXAgU0lHVEVSTSBTSUdJTlQKCi91c3IvbG9jYWwvYmluL2Nsb3VkZmxhcmVkIHR1bm5lbCAtLXVybCBodHRwOi8vbG9jYWxob3N0Ojg0NTAgPiAvdG1wL2Nsb3VkZmxhcmVkLmxvZyAyPiYxICYKQ0ZfUElEPSQhCgpmb3IgaSBpbiAkKHNlcSAxIDMwKTsgZG8KICAgIHNsZWVwIDIKICAgIFRVTk5FTF9VUkw9JChncmVwIC1vICdodHRwczovL1thLXowLTktXSpcLnRyeWNsb3VkZmxhcmVcLmNvbScgL3RtcC9jbG91ZGZsYXJlZC5sb2cgfCBoZWFkIC0xKQogICAgaWYgWyAtbiAiJFRVTk5FTF9VUkwiIF07IHRoZW4KICAgICAgICBlY2hvICJbJChkYXRlKV0gVHVubmVsIFVSTDogJFRVTk5FTF9VUkwiCiAgICAgICAgYnJlYWsKICAgIGZpCmRvbmUKCmlmIFsgLW4gIiRUVU5ORUxfVVJMIiBdOyB0aGVuCiAgICBUVU5ORUxfSE9TVD0kKGVjaG8gIiRUVU5ORUxfVVJMIiB8IHNlZCAnc3xodHRwczovL3x8JykKICAgIGVjaG8gIlskKGRhdGUpXSBVcGRhdGluZyBETlM6IGFpc2hpZWxkLnRvb2xzIC0+ICRUVU5ORUxfSE9TVCIKCiAgICBETlNfUkVTVUxUPSQoY3VybCAtcyAiaHR0cHM6Ly9hcGkuY2xvdWRmbGFyZS5jb20vY2xpZW50L3Y0L3pvbmVzLyRDRl9aT05FX0lEL2Ruc19yZWNvcmRzP25hbWU9YWlzaGllbGQudG9vbHMiIFwKICAgICAgICAtSCAiQXV0aG9yaXphdGlvbjogQmVhcmVyICRDRl9BUElfVE9LRU4iKQogICAgRE5TX1JFQ09SRF9JRD0kKGVjaG8gIiRETlNfUkVTVUxUIiB8IHB5dGhvbjMgLWMgImltcG9ydCBzeXMsanNvbjsgZD1qc29uLmxvYWQoc3lzLnN0ZGluKTsgcHJpbnQoZFsncmVzdWx0J11bMF1bJ2lkJ10gaWYgZC5nZXQoJ3Jlc3VsdCcpIGVsc2UgJycpIiAyPi9kZXYvbnVsbCkKCiAgICBpZiBbIC1uICIkRE5TX1JFQ09SRF9JRCIgXTsgdGhlbgogICAgICAgIGN1cmwgLXMgLVggUFVUICJodHRwczovL2FwaS5jbG91ZGZsYXJlLmNvbS9jbGllbnQvdjQvem9uZXMvJENGX1pPTkVfSUQvZG5zX3JlY29yZHMvJEROU19SRUNPUkRfSUQiIFwKICAgICAgICAgICAgLUggIkF1dGhvcml6YXRpb246IEJlYXJlciAkQ0ZfQVBJX1RPS0VOIiBcCiAgICAgICAgICAgIC1IICJDb250ZW50LVR5cGU6IGFwcGxpY2F0aW9uL2pzb24iIFwKICAgICAgICAgICAgLWQgIntcInR5cGVcIjpcIkNOQU1FXCIsXCJuYW1lXCI6XCJhaXNoaWVsZC50b29sc1wiLFwiY29udGVudFwiOlwiJFRVTk5FTF9IT1NUXCIsXCJwcm94aWVkXCI6dHJ1ZX0iIFwKICAgICAgICAgICAgfCBweXRob24zIC1jICJpbXBvcnQgc3lzLGpzb247IGQ9anNvbi5sb2FkKHN5cy5zdGRpbik7IHByaW50KCdETlMgT0snIGlmIGQuZ2V0KCdzdWNjZXNzJykgZWxzZSAnRE5TIEZBSUw6ICcrc3RyKGQuZ2V0KCdlcnJvcnMnKSkpIiAyPi9kZXYvbnVsbAogICAgZmkKZmkKCnVuc2V0IENGX0FQSV9UT0tFTgp3YWl0ICRDRl9QSUQ=' | base64 -d > /opt/start-tunnel.sh
-            chmod +x /opt/start-tunnel.sh
-            echo "启动脚本已创建: $(wc -l < /opt/start-tunnel.sh) 行"
+          echo ""
+          echo "=== STEP 4: 更新 DNS ==="
+          if [ -n "$TUNNEL_URL" ]; then
+            TUNNEL_HOST=$(echo "$TUNNEL_URL" | sed 's|https://||')
+            echo "更新 DNS: aishield.tools -> $TUNNEL_HOST"
 
-            # 使用base64解码创建systemd服务文件
-            echo 'W1VuaXRdCkRlc2NyaXB0aW9uPUNsb3VkZmxhcmUgUXVpY2sgVHVubmVsIGZvciBBSVNoaWVsZApBZnRlcj1uZXR3b3JrLnRhcmdldAoKW1NlcnZpY2VdCkV4ZWNTdGFydD0vb3B0L3N0YXJ0LXR1bm5lbC5zaApSZXN0YXJ0PWFsd2F5cwpSZXN0YXJ0U2VjPTEwClRpbWVvdXRTdGFydFNlYz0xMjAKCltJbnN0YWxsXQpXYW50ZWRCeT1tdWx0aS11c2VyLnRhcmdldA==' | base64 -d > /etc/systemd/system/cloudflared-quick.service
-            echo "systemd服务文件已创建"
-
-            systemctl daemon-reload 2>/dev/null
-            systemctl enable cloudflared-quick 2>/dev/null
-            systemctl restart cloudflared-quick 2>/dev/null
-            sleep 20
-
-            echo "cloudflared 服务状态:"
-            systemctl status cloudflared-quick 2>&1 | head -15
-
-            echo ""
-            echo "--- cloudflared 日志 ---"
-            cat /tmp/cloudflared.log 2>/dev/null | tail -20
-
-            echo ""
-            echo "--- 服务日志 ---"
-            journalctl -u cloudflared-quick --no-pager -n 15 2>/dev/null
-
-            # 验证DNS
-            echo ""
-            echo "--- DNS 验证 ---"
             CF_API_TOKEN=$(echo 'Y2Z1dF9Nb2hJTlhSTFBpaWQ2cHpDZUJuOVZCVUxxZWdvR29sSmVESEFwZDR1YWE1NDM5ZGI=' | base64 -d)
-            curl -s "https://api.cloudflare.com/client/v4/zones/7625fc8ab719b3974e12aa2b6bf25489/dns_records?name=aishield.tools" \
+            CF_ZONE_ID='7625fc8ab719b3974e12aa2b6bf25489'
+
+            DNS_RESULT=$(curl -s "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records?name=aishield.tools" \
+              -H "Authorization: Bearer $CF_API_TOKEN")
+            DNS_RECORD_ID=$(echo "$DNS_RESULT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['result'][0]['id'] if d.get('result') else '')" 2>/dev/null)
+
+            if [ -n "$DNS_RECORD_ID" ]; then
+              echo "现有DNS记录ID: $DNS_RECORD_ID"
+              UPDATE_RESULT=$(curl -s -X PUT "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records/$DNS_RECORD_ID" \
                 -H "Authorization: Bearer $CF_API_TOKEN" \
-                | python3 -c "import sys,json; d=json.load(sys.stdin); r=d['result'][0] if d.get('result') else {}; print(f\"DNS: {r.get('name','?')} -> {r.get('content','?')} (proxied={r.get('proxied','?')})\")" 2>/dev/null || echo "DNS查询失败"
+                -H "Content-Type: application/json" \
+                -d "{\"type\":\"CNAME\",\"name\":\"aishield.tools\",\"content\":\"$TUNNEL_HOST\",\"proxied\":true}")
+              echo "$UPDATE_RESULT" | python3 -c "import sys,json; d=json.load(sys.stdin); print('DNS更新: OK' if d.get('success') else 'DNS更新失败: '+str(d.get('errors')))" 2>/dev/null
+            else
+              echo "DNS记录不存在，创建新CNAME记录..."
+              CREATE_RESULT=$(curl -s -X POST "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records" \
+                -H "Authorization: Bearer $CF_API_TOKEN" \
+                -H "Content-Type: application/json" \
+                -d "{\"type\":\"CNAME\",\"name\":\"aishield.tools\",\"content\":\"$TUNNEL_HOST\",\"proxied\":true}")
+              echo "$CREATE_RESULT" | python3 -c "import sys,json; d=json.load(sys.stdin); print('DNS创建: OK' if d.get('success') else 'DNS创建失败: '+str(d.get('errors')))" 2>/dev/null
+            fi
+
             unset CF_API_TOKEN
+          else
+            echo "ERROR: 未获取到 Tunnel URL!"
+            echo "请检查 cloudflared 日志:"
+            cat /tmp/cloudflared.log 2>/dev/null
           fi
 
           echo ""
-          echo "=== STEP 8: 上传诊断到 paste.rs ==="
-          {
-            echo "=== AIShield 服务器诊断报告 ==="
-            echo "时间: $(date)"
-            echo "服务器: 150.158.119.19"
-            echo ""
-            echo "=== nginx -t 输出 ==="
-            nginx -t 2>&1
-            echo ""
-            echo "=== 端口监听 ==="
-            ss -tlnp | grep -E ':(80|443|8450) ' || echo "无端口监听"
-            echo ""
-            echo "=== Nginx 进程 ==="
-            ps aux | grep nginx | grep -v grep || echo "无 nginx 进程"
-            echo ""
-            echo "=== Nginx 错误日志 ==="
-            tail -30 /var/log/nginx/error.log 2>/dev/null || echo "无错误日志"
-            echo ""
-            echo "=== SSL 连接测试 ==="
-            echo | timeout 5 openssl s_client -connect 127.0.0.1:443 -servername aishield.tools 2>&1 | head -30 || echo "SSL 连接失败"
-            echo ""
-            echo "=== 证书检查 ==="
-            openssl x509 -in /etc/nginx/ssl/cert.pem -noout -subject -dates 2>&1 || echo "证书文件不存在"
-            echo ""
-            echo "=== nginx.conf 内容 ==="
-            cat /etc/nginx/nginx.conf 2>/dev/null || echo "配置文件不存在"
-            echo ""
-            echo "=== 证书文件 ==="
-            ls -la /etc/nginx/ssl/ 2>/dev/null || echo "SSL 目录不存在"
-            echo ""
-            echo "=== API 状态 ==="
-            curl -sf http://127.0.0.1:8450/api/v1/health 2>/dev/null && echo " OK" || echo " FAIL"
-          } | curl -s --data-binary @- https://paste.rs/ 2>/dev/null || echo "上传失败"
+          echo "=== STEP 5: 验证 ==="
+          echo "--- API (localhost:8450) ---"
+          curl -sf http://127.0.0.1:8450/api/v1/health 2>/dev/null && echo " OK" || echo " FAIL"
+          echo "--- Tunnel URL ---"
+          if [ -n "$TUNNEL_URL" ]; then
+            curl -sf --max-time 10 "$TUNNEL_URL/api/v1/health" 2>/dev/null && echo " OK" || echo " FAIL"
+          fi
+          echo "--- aishield.tools ---"
+          curl -sf --max-time 10 https://aishield.tools/api/v1/health 2>/dev/null && echo " OK" || echo " FAIL (DNS传播中...)"
+
+          echo ""
+          echo "=== STEP 6: 持久化 (crontab) ==="
+          CRON_LINE="* * * * * pgrep -f 'cloudflared tunnel' > /dev/null 2>&1 || nohup $CF_BIN tunnel --url http://localhost:8450 >> /tmp/cloudflared.log 2>&1 &"
+          ( crontab -l 2>/dev/null | grep -v 'cloudflared' ; echo "$CRON_LINE" ) | crontab - 2>/dev/null && echo "Cron job 已设置" || echo "Cron 设置失败 (非关键)"
+
+          echo ""
+          echo "=== 部署完成 ==="
+          echo "Tunnel URL: ${TUNNEL_URL:-未获取}"
+          echo "API: http://localhost:8450"
+          echo "域名: https://aishield.tools"
+          echo "PID: $CF_PID"
 
           exit 0
 
     - name: Run server diagnostics via SSH
+      if: always()
+      continue-on-error: true
       env:
         SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
         SERVER_HOST: ${{ secrets.SERVER_HOST }}
@@ -461,13 +170,15 @@ jobs:
         chmod 600 ~/.ssh/id_rsa
         ssh-keyscan -H "$SERVER_HOST" >> ~/.ssh/known_hosts 2>/dev/null
 
-        ssh -o StrictHostKeyChecking=no -p "${SERVER_PORT:-22}" "$SERVER_USER@$SERVER_HOST" "echo '=== AIShield DIAGNOSTIC ==='; echo 'Time:' $(date); echo '=== nginx -t ==='; nginx -t 2>&1; echo '=== PORTS ==='; ss -tlnp | grep -E ':(80|443|8450) ' || echo 'NO PORTS'; echo '=== NGINX PROCESS ==='; ps aux | grep nginx | grep -v grep || echo 'NO NGINX'; echo '=== NGINX ERROR LOG ==='; tail -30 /var/log/nginx/error.log 2>/dev/null || echo 'NO LOG'; echo '=== SSL TEST ==='; echo | timeout 5 openssl s_client -connect 127.0.0.1:443 -servername aishield.tools 2>&1 | head -30 || echo 'SSL FAIL'; echo '=== CERT CHECK ==='; openssl x509 -in /etc/nginx/ssl/cert.pem -noout -subject -dates 2>&1 || echo 'NO CERT'; echo '=== API STATUS ==='; curl -sf http://127.0.0.1:8450/api/v1/health 2>/dev/null && echo 'OK' || echo 'FAIL'; echo '=== NGINX CONF ==='; cat /etc/nginx/nginx.conf 2>/dev/null || echo 'NO CONF'" > diagnostics/deploy-result.md 2>&1
+        ssh -o StrictHostKeyChecking=no -p "${SERVER_PORT:-22}" "$SERVER_USER@$SERVER_HOST" "echo '=== DIAGNOSTIC ==='; echo 'Time:' $(date); echo '=== USER ==='; whoami; echo '=== API STATUS ==='; curl -sf http://127.0.0.1:8450/api/v1/health 2>/dev/null && echo 'OK' || echo 'FAIL'; echo '=== CLOUDFLARED PROCESS ==='; ps aux | grep cloudflared | grep -v grep || echo 'NOT RUNNING'; echo '=== CLOUDFLARED LOG ==='; tail -30 /tmp/cloudflared.log 2>/dev/null || echo 'NO LOG'; echo '=== TUNNEL URL ==='; grep -o 'https://[a-z0-9-]*\.trycloudflare\.com' /tmp/cloudflared.log 2>/dev/null | head -1 || echo 'NO URL'; echo '=== PORTS ==='; ss -tlnp 2>/dev/null | grep -E ':(8450) ' || echo 'NO PORTS'; echo '=== CRONTAB ==='; crontab -l 2>/dev/null | grep cloudflared || echo 'NO CRON'" > diagnostics/deploy-result.md 2>&1
 
         echo "=== Diagnostics file size: $(wc -c < diagnostics/deploy-result.md) bytes ==="
-        echo "=== First 20 lines ==="
-        head -20 diagnostics/deploy-result.md
+        echo "=== First 30 lines ==="
+        head -30 diagnostics/deploy-result.md
 
     - name: Test HTTPS from runner
+      if: always()
+      continue-on-error: true
       run: |
         echo "" >> diagnostics/deploy-result.md
         echo "=== HTTPS Test from GitHub Actions Runner ===" >> diagnostics/deploy-result.md
@@ -476,10 +187,12 @@ jobs:
         echo "=== curl test (aishield.tools) ===" >> diagnostics/deploy-result.md
         curl -sk --max-time 10 https://aishield.tools/api/v1/health >> diagnostics/deploy-result.md 2>&1 || echo "FAILED" >> diagnostics/deploy-result.md
         echo "" >> diagnostics/deploy-result.md
-        echo "=== openssl s_client test ===" >> diagnostics/deploy-result.md
-        echo | timeout 5 openssl s_client -connect aishield.tools:443 -servername aishield.tools 2>&1 | head -30 >> diagnostics/deploy-result.md || echo "SSL FAILED" >> diagnostics/deploy-result.md
+        echo "=== DNS lookup ===" >> diagnostics/deploy-result.md
+        dig +short aishield.tools >> diagnostics/deploy-result.md 2>&1 || echo "dig failed" >> diagnostics/deploy-result.md
 
     - name: Commit diagnostics to repo
+      if: always()
+      continue-on-error: true
       run: |
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
