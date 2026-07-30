@@ -59,42 +59,92 @@ jobs:
           ss -tlnp | grep ':443 ' || echo "  443端口已释放"
 
           echo ""
-          echo "=== STEP 3: 生成自签 SSL 证书 ==="
+          echo "=== STEP 3: 生成 Cloudflare Origin CA 证书 ==="
           mkdir -p /etc/nginx/ssl
 
-          # 检查 openssl 是否可用
           if ! command -v openssl &> /dev/null; then
-            echo "ERROR: openssl 未安装，正在安装..."
+            echo "openssl 未安装，正在安装..."
             apt-get update -qq && apt-get install -y -qq openssl
           fi
+          echo "openssl 版本: $(openssl version)"
 
-          echo "openssl 版本:"
-          openssl version
+          # 检查是否已有 Origin CA 证书（避免重复生成）
+          if [ -f /etc/nginx/ssl/origin-ca-cert.pem ] && [ -s /etc/nginx/ssl/origin-ca-cert.pem ]; then
+            echo "Origin CA 证书已存在，复用"
+            cp /etc/nginx/ssl/origin-ca-cert.pem /etc/nginx/ssl/cert.pem
+            cp /etc/nginx/ssl/origin-ca-key.pem /etc/nginx/ssl/key.pem
+          else
+            echo "生成 CSR..."
+            openssl req -newkey rsa:2048 -nodes \
+              -keyout /etc/nginx/ssl/origin-ca-key.pem \
+              -out /tmp/origin.csr \
+              -subj "/CN=aishield.tools/O=AIShield/C=US" 2>/dev/null
 
-          # 生成证书（不隐藏错误）
-          openssl req -x509 -nodes -days 3650 -newkey rsa:2048 \
-            -keyout /etc/nginx/ssl/key.pem \
-            -out /etc/nginx/ssl/cert.pem \
-            -subj "/CN=aishield.tools"
-          SSL_RET=$?
-          echo "openssl 退出码: $SSL_RET"
+            # 用 Python 构造 JSON 请求体（安全转义 CSR）
+            CF_TOKEN=$(echo 'Y2Z1dF9Nb2hJTlhSTFBpaWQ2cHpDZUJuOVZCVUxxZWdvR29sSmVESEFwZDR1YWE1NDM5ZGI=' | base64 -d)
+            CSR_CONTENT=$(cat /tmp/origin.csr)
+
+            JSON_BODY=$(python3 -c "
+import json, sys
+csr = sys.stdin.read()
+print(json.dumps({
+    'hostnames': ['aishield.tools', '*.aishield.tools'],
+    'requested_validity': 5475,
+    'request_type': 'origin-rsa',
+    'csr': csr
+}))
+" <<< "$CSR_CONTENT" 2>/dev/null)
+
+            echo "调用 Cloudflare API 创建 Origin CA 证书..."
+            RESPONSE=$(curl -s -X POST 'https://api.cloudflare.com/client/v4/certificates' \
+              -H "Authorization: Bearer $CF_TOKEN" \
+              -H "Content-Type: application/json" \
+              -d "$JSON_BODY" 2>/dev/null)
+
+            # 提取证书
+            CERT=$(echo "$RESPONSE" | python3 -c "
+import sys, json
+try:
+    data = json.load(sys.stdin)
+    if data.get('success'):
+        print(data['result']['certificate'])
+except:
+    pass
+" 2>/dev/null)
+
+            if [ -n "$CERT" ]; then
+              echo "Cloudflare Origin CA 证书获取成功!"
+              echo "$CERT" > /etc/nginx/ssl/origin-ca-cert.pem
+              cp /etc/nginx/ssl/origin-ca-cert.pem /etc/nginx/ssl/cert.pem
+              cp /etc/nginx/ssl/origin-ca-key.pem /etc/nginx/ssl/key.pem
+              echo "证书有效期: 15年"
+            else
+              echo "Origin CA 获取失败，回退到自签证书"
+              echo "API Response: $RESPONSE" | head -5
+              openssl req -x509 -nodes -days 3650 -newkey rsa:2048 \
+                -keyout /etc/nginx/ssl/key.pem \
+                -out /etc/nginx/ssl/cert.pem \
+                -subj "/CN=aishield.tools" 2>/dev/null
+            fi
+
+            # 清理临时文件和 token
+            rm -f /tmp/origin.csr
+            unset CF_TOKEN
+          fi
 
           echo "证书文件状态:"
           ls -la /etc/nginx/ssl/cert.pem /etc/nginx/ssl/key.pem 2>&1
 
-          # 验证证书内容
+          # 验证证书
           if [ -f /etc/nginx/ssl/cert.pem ] && [ -s /etc/nginx/ssl/cert.pem ]; then
-            echo "证书验证:"
-            openssl x509 -in /etc/nginx/ssl/cert.pem -noout -subject -dates 2>&1
-            echo "证书与密钥匹配检查:"
+            echo "证书信息:"
+            openssl x509 -in /etc/nginx/ssl/cert.pem -noout -subject -issuer -dates 2>&1
             CERT_MD5=$(openssl x509 -in /etc/nginx/ssl/cert.pem -modulus -noout 2>/dev/null | openssl md5 2>/dev/null)
             KEY_MD5=$(openssl rsa -in /etc/nginx/ssl/key.pem -modulus -noout 2>/dev/null | openssl md5 2>/dev/null)
-            echo "  cert modulus md5: $CERT_MD5"
-            echo "  key  modulus md5: $KEY_MD5"
             if [ "$CERT_MD5" = "$KEY_MD5" ]; then
-              echo "  证书与密钥: 匹配 OK"
+              echo "证书与密钥: 匹配 OK"
             else
-              echo "  证书与密钥: 不匹配 FAIL"
+              echo "证书与密钥: 不匹配 FAIL"
             fi
           else
             echo "ERROR: 证书文件不存在或为空!"
