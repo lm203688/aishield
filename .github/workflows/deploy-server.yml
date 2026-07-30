@@ -293,19 +293,27 @@ jobs:
 
           exit 0
 
-    - name: Save diagnostic output
+    - name: Run server diagnostics via SSH
       env:
-        DEPLOY_STDOUT: ${{ steps.deploy.outputs.stdout }}
+        SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
+        SERVER_HOST: ${{ secrets.SERVER_HOST }}
+        SERVER_USER: ${{ secrets.SERVER_USER }}
+        SERVER_PORT: ${{ secrets.SERVER_PORT || 22 }}
       run: |
-        mkdir -p diagnostics
-        printf '%s' "$DEPLOY_STDOUT" > diagnostics/deploy-result.md
-        echo "=== Diagnostic output saved ==="
-        echo "File size: $(wc -c < diagnostics/deploy-result.md) bytes"
-        echo "First 30 lines:"
-        head -30 diagnostics/deploy-result.md || echo "No output captured"
+        mkdir -p ~/.ssh diagnostics
+        echo "$SSH_KEY" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -H "$SERVER_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+
+        ssh -o StrictHostKeyChecking=no -p "${SERVER_PORT:-22}" "$SERVER_USER@$SERVER_HOST" "echo '=== AIShield DIAGNOSTIC ==='; echo 'Time:' $(date); echo '=== nginx -t ==='; nginx -t 2>&1; echo '=== PORTS ==='; ss -tlnp | grep -E ':(80|443|8450) ' || echo 'NO PORTS'; echo '=== NGINX PROCESS ==='; ps aux | grep nginx | grep -v grep || echo 'NO NGINX'; echo '=== NGINX ERROR LOG ==='; tail -30 /var/log/nginx/error.log 2>/dev/null || echo 'NO LOG'; echo '=== SSL TEST ==='; echo | timeout 5 openssl s_client -connect 127.0.0.1:443 -servername aishield.tools 2>&1 | head -30 || echo 'SSL FAIL'; echo '=== CERT CHECK ==='; openssl x509 -in /etc/nginx/ssl/cert.pem -noout -subject -dates 2>&1 || echo 'NO CERT'; echo '=== API STATUS ==='; curl -sf http://127.0.0.1:8450/api/v1/health 2>/dev/null && echo 'OK' || echo 'FAIL'; echo '=== NGINX CONF ==='; cat /etc/nginx/nginx.conf 2>/dev/null || echo 'NO CONF'" > diagnostics/deploy-result.md 2>&1
+
+        echo "=== Diagnostics file size: $(wc -c < diagnostics/deploy-result.md) bytes ==="
+        echo "=== First 20 lines ==="
+        head -20 diagnostics/deploy-result.md
 
     - name: Test HTTPS from runner
       run: |
+        echo "" >> diagnostics/deploy-result.md
         echo "=== HTTPS Test from GitHub Actions Runner ===" >> diagnostics/deploy-result.md
         echo "Time: $(date)" >> diagnostics/deploy-result.md
         echo "" >> diagnostics/deploy-result.md
