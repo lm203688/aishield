@@ -25,7 +25,8 @@ jobs:
         capture_stdout: true
         script: |
           cd /opt/aishield 2>/dev/null || cd ~/aishield 2>/dev/null || true
-          git pull origin main 2>/dev/null || true
+          git fetch origin main 2>/dev/null || true
+          git reset --hard origin/main 2>/dev/null || true
           bash scripts/deploy-named-tunnel.sh 2>&1
           echo "DEPLOY_EXIT_CODE=$?"
 
