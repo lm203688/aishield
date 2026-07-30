@@ -25,8 +25,21 @@ jobs:
         capture_stdout: true
         script: |
           cd /opt/aishield 2>/dev/null || cd ~/aishield 2>/dev/null || true
-          git fetch origin main 2>/dev/null || true
-          git reset --hard origin/main 2>/dev/null || true
+
+          # Try git update first
+          git fetch origin main 2>&1 || echo "GIT FETCH FAILED"
+          git reset --hard origin/main 2>&1 || echo "GIT RESET FAILED"
+
+          # Verify script has cert.pem support
+          if ! grep -q "cert.pem" scripts/deploy-named-tunnel.sh 2>/dev/null; then
+            echo "Script outdated, downloading fresh from GitHub..."
+            curl -sL "https://raw.githubusercontent.com/lm203688/aishield/main/scripts/deploy-named-tunnel.sh" -o scripts/deploy-named-tunnel.sh
+            chmod +x scripts/deploy-named-tunnel.sh
+          fi
+
+          echo "=== Script first 5 lines ==="
+          head -5 scripts/deploy-named-tunnel.sh
+          echo "=== Running deploy ==="
           bash scripts/deploy-named-tunnel.sh 2>&1
           echo "DEPLOY_EXIT_CODE=$?"
 
@@ -49,6 +62,10 @@ jobs:
           echo 'Time:' \$(date)
           echo '=== USER ==='
           whoami
+          echo '=== GIT LOG ==='
+          cd /opt/aishield 2>/dev/null && git log --oneline -3 2>&1 || echo 'NO GIT REPO'
+          echo '=== SCRIPT CHECK ==='
+          head -5 /opt/aishield/scripts/deploy-named-tunnel.sh 2>/dev/null || echo 'SCRIPT NOT FOUND'
           echo '=== API STATUS ==='
           curl -sf http://127.0.0.1:8450/api/v1/health 2>/dev/null && echo 'OK' || echo 'FAIL'
           echo '=== CLOUDFLARED PROCESS ==='
