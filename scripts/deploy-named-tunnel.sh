@@ -1,6 +1,6 @@
 #!/bin/bash
 # AIShield Named Tunnel 部署脚本
-# 通过 Cloudflare API 创建持久化 Named Tunnel
+# 使用 cert.pem (cloudflared tunnel login) 创建持久化 Named Tunnel
 # 解决 Quick Tunnel 的 error 1014 (CNAME Cross-User Banned) 问题
 #
 # Named Tunnel 的 CNAME 目标是 {tunnel_id}.cfargotunnel.com（同账户内），不会被 Cloudflare 拦截
@@ -20,8 +20,9 @@ log "User: $(whoami) (UID: $(id -u))"
 CF_API_TOKEN=$(echo 'Y2Z1dF9Nb2hJTlhSTFBpaWQ2cHpDZUJuOVZCVUxxZWdvR29sSmVESEFwZDR1YWE1NDM5ZGI=' | base64 -d)
 CF_ZONE_ID='7625fc8ab719b3974e12aa2b6bf25489'
 TUNNEL_NAME='aishield-tunnel'
-TOKEN_FILE='/root/.cloudflared/tunnel-token'
-TUNNEL_ID_FILE='/root/.cloudflared/tunnel-id'
+CERT_FILE='/root/.cloudflared/cert.pem'
+CONFIG_FILE='/root/.cloudflared/config.yml'
+CRED_DIR='/root/.cloudflared'
 
 # ========== STEP 1: 启动 API (端口 8450) ==========
 log "=== STEP 1: 启动 API (端口 8450) ==="
@@ -34,7 +35,6 @@ if curl -sf http://127.0.0.1:8450/api/v1/health 2>/dev/null; then
 else
     log "API 未运行，尝试启动..."
 
-    # 尝试 Docker
     if command -v docker &>/dev/null; then
         docker start $(docker ps -aq --filter "status=exited") 2>/dev/null
         sleep 3
@@ -84,7 +84,6 @@ else
     DOWNLOAD_URLS=(
         "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64"
         "https://github.com/cloudflare/cloudflared/releases/download/2025.7.0/cloudflared-linux-amd64"
-        "https://pkg.cloudflare.com/cloudflared"
     )
     for URL in "${DOWNLOAD_URLS[@]}"; do
         log "尝试下载: $URL"
@@ -94,298 +93,229 @@ else
             chmod +x "$CF_BIN"
             break
         fi
-        log "下载失败或文件无效"
     done
-
-    if ! "$CF_BIN" --version 2>/dev/null; then
-        log "直接下载失败，尝试 apt 安装..."
-        if command -v apt-get &>/dev/null; then
-            curl -fsSL https://pkg.cloudflare.com/cloudflare-main.gpg | tee /usr/share/keyrings/cloudflare-main.gpg >/dev/null 2>&1
-            echo "deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudflare.com/cloudflared $(lsb_release -cs 2>/dev/null || echo jammy) main" | tee /etc/apt/sources.list.d/cloudflared.list >/dev/null 2>&1
-            apt-get update -qq 2>/dev/null && apt-get install -y -qq cloudflared 2>/dev/null
-        fi
-    fi
 fi
 
 if "$CF_BIN" --version 2>/dev/null; then
     log "cloudflared 版本: $($CF_BIN --version 2>&1)"
 else
-    log "ERROR: cloudflared 安装失败!"
+    log "ERROR: cloudflared 不可用!"
     which cloudflared 2>/dev/null && CF_BIN=$(which cloudflared) || log "系统中未找到 cloudflared"
 fi
 
-# ========== STEP 3: 获取 Account ID ==========
-log "=== STEP 3: 获取 Account ID ==="
+# ========== STEP 3: 检查 cert.pem ==========
+log "=== STEP 3: 检查认证方式 ==="
 
-ZONE_INFO=$(curl -s "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID" \
-    -H "Authorization: Bearer $CF_API_TOKEN")
-
-ACCOUNT_ID=$(echo "$ZONE_INFO" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['result']['account']['id'] if d.get('result') else '')" 2>/dev/null)
-
-if [ -n "$ACCOUNT_ID" ]; then
-    log "Account ID: $ACCOUNT_ID"
-else
-    log "ERROR: 无法获取 Account ID"
-    log "API 响应: $(echo "$ZONE_INFO" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('errors','unknown'))" 2>/dev/null)"
-fi
-
-# ========== STEP 4: 创建/获取 Named Tunnel ==========
-log "=== STEP 4: 创建/获取 Named Tunnel ==="
-
+TUNNEL_MODE=""  # "cert" or "token" or "quick"
 TUNNEL_ID=""
 TUNNEL_TOKEN=""
 
-if [ -n "$ACCOUNT_ID" ]; then
-    # 检查是否已有同名 tunnel
-    log "检查现有 tunnel: $TUNNEL_NAME"
-    LIST_RESULT=$(curl -s "https://api.cloudflare.com/client/v4/accounts/$ACCOUNT_ID/cfd_tunnel?name=$TUNNEL_NAME" \
+if [ -f "$CERT_FILE" ]; then
+    log "cert.pem 存在: $(ls -la $CERT_FILE)"
+    TUNNEL_MODE="cert"
+else
+    log "cert.pem 不存在，尝试 API 方式..."
+
+    # 获取 Account ID
+    ZONE_INFO=$(curl -s "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID" \
         -H "Authorization: Bearer $CF_API_TOKEN")
+    ACCOUNT_ID=$(echo "$ZONE_INFO" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['result']['account']['id'] if d.get('result') else '')" 2>/dev/null)
 
-    TUNNEL_ID=$(echo "$LIST_RESULT" | python3 -c "
-import sys,json
-d=json.load(sys.stdin)
-if d.get('result') and len(d['result']) > 0:
-    print(d['result'][0]['id'])
-" 2>/dev/null)
+    if [ -n "$ACCOUNT_ID" ]; then
+        log "Account ID: $ACCOUNT_ID"
 
-    if [ -n "$TUNNEL_ID" ]; then
-        log "Tunnel 已存在: $TUNNEL_ID"
-
-        # 检查 tunnel 状态
-        TUNNEL_STATUS=$(echo "$LIST_RESULT" | python3 -c "
-import sys,json
-d=json.load(sys.stdin)
-if d.get('result') and len(d['result']) > 0:
-    print(d['result'][0].get('status','unknown'))
-" 2>/dev/null)
-        log "Tunnel 状态: $TUNNEL_STATUS"
-
-        # 如果 tunnel 已被删除，需要重新创建
-        if [ "$TUNNEL_STATUS" = "deleted" ]; then
-            log "Tunnel 已被删除，需要重新创建"
-            TUNNEL_ID=""
-        fi
-    else
-        log "API 响应: $(echo "$LIST_RESULT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('errors','no tunnel found'))" 2>/dev/null)"
-    fi
-
-    # 如果没有现有 tunnel，创建新的
-    if [ -z "$TUNNEL_ID" ]; then
-        log "创建新 Named Tunnel: $TUNNEL_NAME"
-
-        # 生成 tunnel secret (32 bytes base64)
+        # 尝试创建 Named Tunnel via API
         TUNNEL_SECRET=$(head -c 32 /dev/urandom | base64)
-
         CREATE_RESULT=$(curl -s -X POST "https://api.cloudflare.com/client/v4/accounts/$ACCOUNT_ID/cfd_tunnel" \
             -H "Authorization: Bearer $CF_API_TOKEN" \
             -H "Content-Type: application/json" \
             -d "{\"name\":\"$TUNNEL_NAME\",\"tunnel_secret\":\"$TUNNEL_SECRET\"}")
 
-        TUNNEL_ID=$(echo "$CREATE_RESULT" | python3 -c "
-import sys,json
-d=json.load(sys.stdin)
-if d.get('result'):
-    print(d['result'].get('id',''))
-" 2>/dev/null)
+        TUNNEL_ID=$(echo "$CREATE_RESULT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['result'].get('id','') if d.get('result') else '')" 2>/dev/null)
+
+        if [ -n "$TUNNEL_ID" ]; then
+            log "Tunnel 创建成功 (API): $TUNNEL_ID"
+            TUNNEL_TOKEN=$(echo "$CREATE_RESULT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['result'].get('token',''))" 2>/dev/null)
+            TUNNEL_MODE="token"
+
+            # 配置 ingress via API
+            curl -s -X PUT "https://api.cloudflare.com/client/v4/accounts/$ACCOUNT_ID/cfd_tunnel/$TUNNEL_ID/configurations" \
+                -H "Authorization: Bearer $CF_API_TOKEN" \
+                -H "Content-Type: application/json" \
+                -d '{"config":{"ingress":[{"hostname":"aishield.tools","service":"http://localhost:8450"},{"service":"http_status:404"}]}}' \
+                | python3 -c "import sys,json; d=json.load(sys.stdin); print('Ingress: OK' if d.get('success') else 'Ingress: FAIL')" 2>/dev/null | tee -a "$LOG_FILE"
+        else
+            log "API Tunnel 创建失败: $(echo "$CREATE_RESULT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('errors','unknown'))" 2>/dev/null)"
+        fi
+    fi
+fi
+
+# ========== STEP 4: 使用 cert.pem 创建/获取 Named Tunnel ==========
+if [ "$TUNNEL_MODE" = "cert" ]; then
+    log "=== STEP 4: 使用 cert.pem 创建 Named Tunnel ==="
+
+    # 检查是否已有同名 tunnel
+    log "检查现有 tunnel..."
+    TUNNEL_LIST=$("$CF_BIN" tunnel list 2>&1)
+    log "现有 tunnel 列表:"
+    echo "$TUNNEL_LIST" | tee -a "$LOG_FILE"
+
+    # 尝试从列表中提取 tunnel ID
+    # 格式: ID                                   NAME              ...
+    TUNNEL_ID=$(echo "$TUNNEL_LIST" | grep "$TUNNEL_NAME" | awk '{print $1}' | head -1)
+
+    if [ -n "$TUNNEL_ID" ]; then
+        log "Tunnel 已存在: $TUNNEL_ID"
+    else
+        log "创建新 tunnel: $TUNNEL_NAME"
+        CREATE_OUTPUT=$("$CF_BIN" tunnel create "$TUNNEL_NAME" 2>&1)
+        log "创建输出: $CREATE_OUTPUT"
+
+        # 从创建输出中提取 tunnel ID
+        TUNNEL_ID=$(echo "$CREATE_OUTPUT" | grep -oP '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' | head -1)
 
         if [ -n "$TUNNEL_ID" ]; then
             log "Tunnel 创建成功! ID: $TUNNEL_ID"
-            # 创建时返回 token
-            TUNNEL_TOKEN=$(echo "$CREATE_RESULT" | python3 -c "
-import sys,json
-d=json.load(sys.stdin)
-if d.get('result'):
-    print(d['result'].get('token',''))
-" 2>/dev/null)
         else
-            log "Tunnel 创建失败!"
-            log "错误: $(echo "$CREATE_RESULT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(json.dumps(d.get('errors','unknown')))" 2>/dev/null)"
-            log "完整响应: $CREATE_RESULT"
+            log "Tunnel 创建失败，尝试其他方法..."
+            # 可能 tunnel 已存在但名称不匹配，列出所有
+            TUNNEL_ID=$("$CF_BIN" tunnel list 2>&1 | grep -v "ID" | grep -v "^$" | awk '{print $1}' | head -1)
+            if [ -n "$TUNNEL_ID" ]; then
+                log "使用第一个可用 tunnel: $TUNNEL_ID"
+            fi
         fi
     fi
 
-    # 如果有 tunnel 但没有 token，尝试获取
-    if [ -n "$TUNNEL_ID" ] && [ -z "$TUNNEL_TOKEN" ]; then
-        log "获取 Tunnel token..."
-        TOKEN_RESULT=$(curl -s "https://api.cloudflare.com/client/v4/accounts/$ACCOUNT_ID/cfd_tunnel/$TUNNEL_ID/token" \
-            -H "Authorization: Bearer $CF_API_TOKEN")
+    # 配置 tunnel
+    if [ -n "$TUNNEL_ID" ]; then
+        CRED_FILE="$CRED_DIR/${TUNNEL_ID}.json"
 
-        TUNNEL_TOKEN=$(echo "$TOKEN_RESULT" | python3 -c "
-import sys,json
-d=json.load(sys.stdin)
-if d.get('result'):
-    print(d['result'])
-" 2>/dev/null)
-
-        if [ -n "$TUNNEL_TOKEN" ]; then
-            log "Token 获取成功"
+        log "凭证文件: $CRED_FILE"
+        if [ -f "$CRED_FILE" ]; then
+            log "凭证文件存在"
         else
-            log "Token 获取失败: $(echo "$TOKEN_RESULT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(json.dumps(d.get('errors','unknown')))" 2>/dev/null)"
+            log "凭证文件不存在，列出 .cloudflared 目录内容:"
+            ls -la "$CRED_DIR/" 2>/dev/null | tee -a "$LOG_FILE"
         fi
-    fi
-fi
 
-# ========== STEP 5: 配置 Ingress ==========
-if [ -n "$TUNNEL_ID" ] && [ -n "$ACCOUNT_ID" ]; then
-    log "=== STEP 5: 配置 Ingress ==="
+        # 创建 config.yml
+        log "创建 config.yml..."
+        cat > "$CONFIG_FILE" << CONFIGEOF
+tunnel: ${TUNNEL_ID}
+credentials-file: ${CRED_FILE}
 
-    CONFIG_RESULT=$(curl -s -X PUT "https://api.cloudflare.com/client/v4/accounts/$ACCOUNT_ID/cfd_tunnel/$TUNNEL_ID/configurations" \
-        -H "Authorization: Bearer $CF_API_TOKEN" \
-        -H "Content-Type: application/json" \
-        -d '{
-            "config": {
-                "ingress": [
-                    {
-                        "hostname": "aishield.tools",
-                        "service": "http://localhost:8450"
-                    },
-                    {
-                        "service": "http_status:404"
-                    }
-                ]
-            }
-        }')
+ingress:
+  - hostname: aishield.tools
+    service: http://localhost:8450
+  - service: http_status:404
+CONFIGEOF
+        log "config.yml 已创建:"
+        cat "$CONFIG_FILE" | tee -a "$LOG_FILE"
 
-    CONFIG_OK=$(echo "$CONFIG_RESULT" | python3 -c "import sys,json; d=json.load(sys.stdin); print('OK' if d.get('success') else 'FAIL')" 2>/dev/null)
+        # 路由 DNS
+        log "路由 DNS: aishield.tools -> ${TUNNEL_ID}.cfargotunnel.com"
+        DNS_ROUTE_OUTPUT=$("$CF_BIN" tunnel route dns "$TUNNEL_NAME" aishield.tools 2>&1)
+        log "DNS 路由结果: $DNS_ROUTE_OUTPUT"
 
-    if [ "$CONFIG_OK" = "OK" ]; then
-        log "Ingress 配置成功: aishield.tools -> http://localhost:8450"
+        # 如果按名称路由失败，尝试按 ID
+        if echo "$DNS_ROUTE_OUTPUT" | grep -qi "error\|fail"; then
+            log "按名称路由失败，尝试按 ID..."
+            DNS_ROUTE_OUTPUT=$("$CF_BIN" tunnel route dns "$TUNNEL_ID" aishield.tools 2>&1)
+            log "DNS 路由结果 (by ID): $DNS_ROUTE_OUTPUT"
+        fi
     else
-        log "Ingress 配置失败: $(echo "$CONFIG_RESULT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(json.dumps(d.get('errors','unknown')))" 2>/dev/null)"
+        log "ERROR: 无法获取 Tunnel ID，cert.pem 模式失败"
+        TUNNEL_MODE="quick"
     fi
 fi
 
-# ========== STEP 6: 更新 DNS ==========
-if [ -n "$TUNNEL_ID" ]; then
-    log "=== STEP 6: 更新 DNS ==="
+# ========== STEP 5: 更新 DNS (token 模式) ==========
+if [ "$TUNNEL_MODE" = "token" ] && [ -n "$TUNNEL_ID" ]; then
+    log "=== STEP 5: 更新 DNS (API) ==="
 
     TUNNEL_CNAME="${TUNNEL_ID}.cfargotunnel.com"
-    log "CNAME 目标: aishield.tools -> $TUNNEL_CNAME"
+    log "CNAME: aishield.tools -> $TUNNEL_CNAME"
 
-    # 查询现有 DNS 记录
     DNS_RESULT=$(curl -s "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records?name=aishield.tools" \
         -H "Authorization: Bearer $CF_API_TOKEN")
-
     DNS_RECORD_ID=$(echo "$DNS_RESULT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['result'][0]['id'] if d.get('result') else '')" 2>/dev/null)
 
     if [ -n "$DNS_RECORD_ID" ]; then
-        log "更新现有 DNS 记录 (ID: $DNS_RECORD_ID)"
-        UPDATE_RESULT=$(curl -s -X PUT "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records/$DNS_RECORD_ID" \
+        curl -s -X PUT "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records/$DNS_RECORD_ID" \
             -H "Authorization: Bearer $CF_API_TOKEN" \
             -H "Content-Type: application/json" \
-            -d "{\"type\":\"CNAME\",\"name\":\"aishield.tools\",\"content\":\"$TUNNEL_CNAME\",\"proxied\":true}")
-
-        echo "$UPDATE_RESULT" | python3 -c "import sys,json; d=json.load(sys.stdin); print('DNS 更新: OK' if d.get('success') else 'DNS 更新失败: '+json.dumps(d.get('errors','')))" 2>/dev/null | tee -a "$LOG_FILE"
+            -d "{\"type\":\"CNAME\",\"name\":\"aishield.tools\",\"content\":\"$TUNNEL_CNAME\",\"proxied\":true}" \
+            | python3 -c "import sys,json; d=json.load(sys.stdin); print('DNS 更新: OK' if d.get('success') else 'DNS 更新失败: '+json.dumps(d.get('errors','')))" 2>/dev/null | tee -a "$LOG_FILE"
     else
-        log "创建新 DNS CNAME 记录..."
-        CREATE_RESULT=$(curl -s -X POST "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records" \
+        curl -s -X POST "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records" \
             -H "Authorization: Bearer $CF_API_TOKEN" \
             -H "Content-Type: application/json" \
-            -d "{\"type\":\"CNAME\",\"name\":\"aishield.tools\",\"content\":\"$TUNNEL_CNAME\",\"proxied\":true}")
-
-        echo "$CREATE_RESULT" | python3 -c "import sys,json; d=json.load(sys.stdin); print('DNS 创建: OK' if d.get('success') else 'DNS 创建失败: '+json.dumps(d.get('errors','')))" 2>/dev/null | tee -a "$LOG_FILE"
+            -d "{\"type\":\"CNAME\",\"name\":\"aishield.tools\",\"content\":\"$TUNNEL_CNAME\",\"proxied\":true}" \
+            | python3 -c "import sys,json; d=json.load(sys.stdin); print('DNS 创建: OK' if d.get('success') else 'DNS 创建失败: '+json.dumps(d.get('errors','')))" 2>/dev/null | tee -a "$LOG_FILE"
     fi
-
-    # 尝试设置 SSL 模式为 Full（非严格）
-    log "设置 SSL 模式为 Full..."
-    SSL_RESULT=$(curl -s -X PATCH "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/settings/ssl" \
-        -H "Authorization: Bearer $CF_API_TOKEN" \
-        -H "Content-Type: application/json" \
-        -d '{"value":"full"}')
-    echo "$SSL_RESULT" | python3 -c "import sys,json; d=json.load(sys.stdin); print('SSL 设置: OK' if d.get('success') else 'SSL 设置: 跳过 (权限不足)')" 2>/dev/null | tee -a "$LOG_FILE"
 fi
 
-# ========== STEP 7: 启动 cloudflared ==========
-log "=== STEP 7: 启动 Named Tunnel ==="
-
-# 保存 token 到文件（供 cron 使用）
-if [ -n "$TUNNEL_TOKEN" ]; then
-    mkdir -p /root/.cloudflared
-    echo -n "$TUNNEL_TOKEN" > "$TOKEN_FILE"
-    chmod 600 "$TOKEN_FILE"
-    echo -n "$TUNNEL_ID" > "$TUNNEL_ID_FILE"
-    log "Token 已保存到 $TOKEN_FILE"
-fi
-
-# 如果没有 token 但文件中有，从文件读取
-if [ -z "$TUNNEL_TOKEN" ] && [ -f "$TOKEN_FILE" ]; then
-    TUNNEL_TOKEN=$(cat "$TOKEN_FILE")
-    log "从文件读取 Token"
-fi
-
-if [ -z "$TUNNEL_ID" ] && [ -f "$TUNNEL_ID_FILE" ]; then
-    TUNNEL_ID=$(cat "$TUNNEL_ID_FILE")
-    log "从文件读取 Tunnel ID: $TUNNEL_ID"
-fi
+# ========== STEP 6: 启动 Tunnel ==========
+log "=== STEP 6: 启动 Tunnel ==="
 
 # 停止现有 cloudflared
 pkill -f "cloudflared" 2>/dev/null || true
-sleep 2
+sleep 3
 
-if [ -n "$TUNNEL_TOKEN" ] && "$CF_BIN" --version 2>/dev/null; then
+if [ "$TUNNEL_MODE" = "cert" ] && [ -n "$TUNNEL_ID" ]; then
+    log "启动 Named Tunnel (cert 模式)..."
+    log "使用 config: $CONFIG_FILE"
+    nohup "$CF_BIN" tunnel --config "$CONFIG_FILE" run > /tmp/cloudflared.log 2>&1 &
+    CF_PID=$!
+    log "cloudflared PID: $CF_PID"
+
+elif [ "$TUNNEL_MODE" = "token" ] && [ -n "$TUNNEL_TOKEN" ]; then
     log "启动 Named Tunnel (token 模式)..."
     nohup "$CF_BIN" tunnel run --token "$TUNNEL_TOKEN" > /tmp/cloudflared.log 2>&1 &
     CF_PID=$!
     log "cloudflared PID: $CF_PID"
 
-    # 等待连接建立
-    for i in $(seq 1 15); do
-        sleep 2
-        if grep -q "Registered tunnel connection" /tmp/cloudflared.log 2>/dev/null; then
-            log "Tunnel 连接已建立!"
-            break
-        fi
-        if [ $((i % 5)) -eq 0 ]; then
-            log "等待 tunnel 连接... ($((i*2))s)"
-        fi
-    done
-
-    log "--- cloudflared 日志 (最后 10 行) ---"
-    tail -10 /tmp/cloudflared.log 2>/dev/null | tee -a "$LOG_FILE"
-elif [ -n "$TUNNEL_ID" ] && [ -f /root/.cloudflared/cert.pem ]; then
-    # 如果有 cert.pem，使用 cert 模式
-    log "启动 Named Tunnel (cert 模式)..."
-    nohup "$CF_BIN" tunnel run "$TUNNEL_NAME" > /tmp/cloudflared.log 2>&1 &
-    CF_PID=$!
-    log "cloudflared PID: $CF_PID"
-    sleep 10
-    tail -10 /tmp/cloudflared.log 2>/dev/null | tee -a "$LOG_FILE"
 else
-    log "ERROR: 无法启动 Named Tunnel (缺少 token 或 cert)"
-    log "TUNNEL_ID: ${TUNNEL_ID:-空}"
-    log "TUNNEL_TOKEN: ${TUNNEL_TOKEN:+已设置}${TUNNEL_TOKEN:-空}"
-    log "cert.pem: $([ -f /root/.cloudflared/cert.pem ] && echo '存在' || echo '不存在')"
-
-    # Fallback: 启动 Quick Tunnel（仅用于临时访问）
-    log "=== FALLBACK: 启动 Quick Tunnel（临时方案）==="
+    log "ERROR: 无法启动 Named Tunnel，使用 Quick Tunnel 临时方案"
+    TUNNEL_MODE="quick"
     nohup "$CF_BIN" tunnel --url http://localhost:8450 > /tmp/cloudflared.log 2>&1 &
     CF_PID=$!
     log "Quick Tunnel PID: $CF_PID"
-    sleep 15
-
-    # 获取 Quick Tunnel URL
-    QUICK_URL=$(grep -o 'https://[a-z0-9-]*\.trycloudflare\.com' /tmp/cloudflared.log 2>/dev/null | head -1)
-    if [ -n "$QUICK_URL" ]; then
-        log "Quick Tunnel URL: $QUICK_URL"
-        log "注意: Quick Tunnel URL 无法绑定到 aishield.tools (error 1014)"
-        log "请使用此 URL 临时访问: $QUICK_URL"
-    fi
 fi
 
-# ========== STEP 8: 持久化 ==========
-log "=== STEP 8: 持久化 ==="
+# 等待连接建立
+for i in $(seq 1 20); do
+    sleep 2
+    if grep -q "Registered tunnel connection" /tmp/cloudflared.log 2>/dev/null; then
+        log "Tunnel 连接已建立!"
+        break
+    fi
+    if [ $((i % 5)) -eq 0 ]; then
+        log "等待 tunnel 连接... ($((i*2))s)"
+    fi
+done
+
+log "--- cloudflared 日志 (最后 15 行) ---"
+tail -15 /tmp/cloudflared.log 2>/dev/null | tee -a "$LOG_FILE"
+
+# ========== STEP 7: 持久化 ==========
+log "=== STEP 7: 持久化 ==="
 
 # 创建启动脚本
 cat > /opt/start-tunnel.sh << 'STARTEOF'
 #!/bin/bash
 # AIShield Tunnel 启动脚本
-TOKEN_FILE='/root/.cloudflared/tunnel-token'
 CF_BIN='/usr/local/bin/cloudflared'
+CONFIG_FILE='/root/.cloudflared/config.yml'
+TOKEN_FILE='/root/.cloudflared/tunnel-token'
 
 cleanup() { kill $CF_PID 2>/dev/null; exit 0; }
 trap cleanup SIGTERM SIGINT
 
-if [ -f "$TOKEN_FILE" ]; then
+if [ -f "$CONFIG_FILE" ]; then
+    $CF_BIN tunnel --config "$CONFIG_FILE" run &
+    CF_PID=$!
+elif [ -f "$TOKEN_FILE" ]; then
     TOKEN=$(cat "$TOKEN_FILE")
     $CF_BIN tunnel run --token "$TOKEN" &
     CF_PID=$!
@@ -399,7 +329,7 @@ STARTEOF
 chmod +x /opt/start-tunnel.sh 2>/dev/null
 
 # systemd 服务
-cat > /etc/systemd/system/cloudflared-tunnel.service << SVCEOF
+cat > /etc/systemd/system/cloudflared-tunnel.service << 'SVCEOF'
 [Unit]
 Description=Cloudflare Named Tunnel for AIShield
 After=network.target
@@ -424,8 +354,8 @@ CRON_LINE="* * * * * pgrep -f 'cloudflared tunnel' > /dev/null 2>&1 || /opt/star
 ( crontab -l 2>/dev/null | grep -v 'cloudflared' ; echo "$CRON_LINE" ) | crontab - 2>/dev/null
 log "Cron 保活已设置"
 
-# ========== STEP 9: 验证 ==========
-log "=== STEP 9: 验证 ==="
+# ========== STEP 8: 验证 ==========
+log "=== STEP 8: 验证 ==="
 
 log "--- API (localhost:8450) ---"
 curl -sf http://127.0.0.1:8450/api/v1/health 2>/dev/null && echo " OK" | tee -a "$LOG_FILE" || echo " FAIL" | tee -a "$LOG_FILE"
@@ -436,25 +366,32 @@ ps aux | grep cloudflared | grep -v grep | head -3 | tee -a "$LOG_FILE"
 log "--- aishield.tools ---"
 curl -sf --max-time 15 https://aishield.tools/api/v1/health 2>/dev/null && echo " OK" | tee -a "$LOG_FILE" || echo " FAIL (DNS 传播中或配置错误)" | tee -a "$LOG_FILE"
 
-log "--- DNS 解析 ---"
+log "--- DNS CNAME ---"
+dig aishield.tools CNAME +short 2>/dev/null | head -3 | tee -a "$LOG_FILE"
+
+log "--- DNS A ---"
 dig +short aishield.tools 2>/dev/null | head -3 | tee -a "$LOG_FILE"
 
 # ========== 汇总 ==========
 log "=== 部署汇总 ==="
+log "Tunnel Mode: $TUNNEL_MODE"
 log "Tunnel ID: ${TUNNEL_ID:-未获取}"
-log "Tunnel Type: Named Tunnel"
-log "CNAME: ${TUNNEL_ID:+${TUNNEL_ID}.cfargotunnel.com}未配置"
 log "API: http://localhost:8450"
 log "域名: https://aishield.tools"
 log "cloudflared: $CF_BIN"
 log "PID: ${CF_PID:-N/A}"
+log "Config: ${CONFIG_FILE:-N/A}"
 
-if [ -n "$TUNNEL_ID" ] && [ -n "$TUNNEL_TOKEN" ]; then
-    log "状态: Named Tunnel 已配置"
-    log "Tunnel CNAME: ${TUNNEL_ID}.cfargotunnel.com"
+if [ "$TUNNEL_MODE" = "cert" ]; then
+    log "CNAME: ${TUNNEL_ID}.cfargotunnel.com"
+    log "状态: Named Tunnel (cert 模式) 已配置"
+elif [ "$TUNNEL_MODE" = "token" ]; then
+    log "CNAME: ${TUNNEL_ID}.cfargotunnel.com"
+    log "状态: Named Tunnel (token 模式) 已配置"
 else
-    log "状态: Named Tunnel 配置失败，使用 Quick Tunnel 临时方案"
-    log "需要手动操作: 创建 API Token with Account:Cloudflare Tunnel:Edit 权限"
+    log "状态: Quick Tunnel 临时方案 (error 1014 未解决)"
+    QUICK_URL=$(grep -o 'https://[a-z0-9-]*\.trycloudflare\.com' /tmp/cloudflared.log 2>/dev/null | head -1)
+    log "临时 URL: ${QUICK_URL:-未获取}"
 fi
 
 unset CF_API_TOKEN TUNNEL_TOKEN TUNNEL_SECRET
