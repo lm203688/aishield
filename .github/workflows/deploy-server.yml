@@ -130,6 +130,43 @@ jobs:
           NGINX_TEST_RET=$?
           echo "nginx -t 退出码: $NGINX_TEST_RET"
 
+          # 如果配置测试失败，尝试自动修复
+          if [ $NGINX_TEST_RET -ne 0 ]; then
+            echo ""
+            echo "=== 配置测试失败，尝试自动修复 ==="
+
+            # 修复1: www-data 用户不存在
+            if ! id www-data &>/dev/null; then
+              echo "www-data 用户不存在，创建..."
+              useradd -r -s /usr/sbin/nologin www-data 2>/dev/null || true
+            fi
+
+            # 修复2: IPv6 不支持 - 移除 listen [::]: 行
+            if nginx -t 2>&1 | grep -qi "ipv6\|Address family"; then
+              echo "IPv6 不可用，移除 IPv6 监听..."
+              sed -i '/listen \[::\]/d' /etc/nginx/nginx.conf
+            fi
+
+            # 修复3: pid 目录不存在
+            mkdir -p /run /var/log/nginx
+
+            # 修复4: 如果仍然失败，移除 user 指令
+            if ! nginx -t 2>&1; then
+              echo "仍然失败，尝试移除 user 指令..."
+              sed -i '/^user /d' /etc/nginx/nginx.conf
+            fi
+
+            echo "修复后配置测试:"
+            nginx -t 2>&1
+            NGINX_TEST_RET=$?
+            echo "修复后 nginx -t 退出码: $NGINX_TEST_RET"
+          fi
+
+          # 确保 SSL 证书文件权限正确
+          chmod 644 /etc/nginx/ssl/cert.pem 2>/dev/null
+          chmod 600 /etc/nginx/ssl/key.pem 2>/dev/null
+          chown -R www-data:www-data /etc/nginx/ssl/ 2>/dev/null || true
+
           echo ""
           echo "=== STEP 5: 启动 Nginx ==="
           echo "尝试 systemctl restart nginx..."
