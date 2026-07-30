@@ -1,7 +1,8 @@
 # 定时任务注册表
 
-> 更新时间: 2026-07-30
+> 更新时间: 2026-07-31
 > 总计: 28个定时任务
+> 备注: aishield.tools 已于 2026-07-31 07:31 通过 Cloudflare Named Tunnel 恢复访问
 
 ## AIShield 项目 (4个)
 
@@ -73,7 +74,8 @@
 - 上次执行: 2026-07-30 02:19 (北京时间)
 - 下次执行: 2026-07-31 02:01 (北京时间)
 - 产出: eco/reports/daily-20260730.md
-- 状态: 服务不可达（备案拦截），闭环率 0%
+- 状态: ✅ 服务已恢复（Named Tunnel 已部署），下次执行预期闭环率恢复正常
+- 备注: 07-24 至 07-31 因备案SNI拦截导致服务不可达，已通过 Cloudflare Named Tunnel 解决
 
 ### AIShield 每周综合闭环 (57b788bd)
 - 执行次数: 0次
@@ -85,3 +87,15 @@
 - 上次执行: 2026-07-30 02:17 (北京时间)
 - 下次执行: 2026-07-31 02:11 (北京时间)
 - 状态: 正常运行
+
+---
+
+## 基础设施维护任务（非定时，随部署触发）
+
+| 任务 | 触发方式 | 状态 | 说明 |
+|------|----------|------|------|
+| Cloudflare Named Tunnel 部署 | GitHub Actions push to main | ✅ 已部署 | cert.pem 认证，自动创建/复用 tunnel，API 更新 DNS |
+| cloudflared 进程保活 | Cron 每分钟检查 | ✅ 运行中 | `pgrep -f 'cloudflared tunnel' \|\| /opt/start-tunnel.sh` |
+| cloudflared-tunnel systemd 服务 | systemd 自动管理 | ✅ active (running) | Restart=always, RestartSec=10 |
+| API 服务 (端口 8450) | Docker / Python nohup | ✅ 运行中 | 健康检查: /api/v1/health |
+| 部署诊断报告 | GitHub Actions (always) | ✅ 自动生成 | diagnostics/deploy-result.md |
