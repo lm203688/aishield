@@ -45,11 +45,11 @@ jobs:
           curl -sf http://127.0.0.1:8450/api/v1/health && echo " OK" || echo " FAIL"
 
           echo ""
-          echo "=== STEP 2: 停止所有 Nginx 进程 ==="
+          echo "=== STEP 2: 停止 Nginx ==="
           docker stop aishield-nginx 2>/dev/null
           docker rm aishield-nginx 2>/dev/null
-          pkill -f "nginx: master" 2>/dev/null || true
-          pkill -f "nginx: worker" 2>/dev/null || true
+          systemctl stop nginx 2>/dev/null || true
+          nginx -s stop 2>/dev/null || true
           sleep 2
           echo "443端口占用检查:"
           ss -tlnp | grep ':443 ' || echo "  443端口已释放"
