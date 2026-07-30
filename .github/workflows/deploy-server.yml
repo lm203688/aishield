@@ -24,137 +24,10 @@ jobs:
         command_timeout: 15m
         capture_stdout: true
         script: |
-          set +e
-          echo "=== AIShield Quick Tunnel Deployment ==="
-          echo "Time: $(date)"
-          echo "User: $(whoami) (UID: $(id -u))"
-
           cd /opt/aishield 2>/dev/null || cd ~/aishield 2>/dev/null || true
           git pull origin main 2>/dev/null || true
-
-          echo ""
-          echo "=== STEP 1: 启动 API (端口 8450) ==="
-          if ! curl -sf http://127.0.0.1:8450/api/v1/health 2>/dev/null; then
-            echo "API 未运行，尝试启动..."
-            docker start $(docker ps -aq --filter "status=exited") 2>/dev/null || true
-            sleep 3
-            if ! curl -sf http://127.0.0.1:8450/api/v1/health 2>/dev/null; then
-              if [ -f docker-compose.yml ]; then
-                docker compose up -d 2>/dev/null || docker-compose up -d 2>/dev/null || true
-                sleep 5
-              fi
-              if ! curl -sf http://127.0.0.1:8450/api/v1/health 2>/dev/null; then
-                pkill -f "api/server.py" 2>/dev/null || true
-                sleep 1
-                export PORT=8450
-                nohup python3 api/server.py > /tmp/aishield-api.log 2>&1 &
-                sleep 5
-              fi
-            fi
-          fi
-          echo "API 状态:"
-          curl -sf http://127.0.0.1:8450/api/v1/health 2>/dev/null && echo " OK" || echo " FAIL"
-
-          echo ""
-          echo "=== STEP 2: 安装 cloudflared ==="
-          if [ -w /usr/local/bin ]; then
-            CF_BIN=/usr/local/bin/cloudflared
-          else
-            mkdir -p ~/bin
-            CF_BIN=~/bin/cloudflared
-          fi
-          if [ ! -f "$CF_BIN" ] || ! "$CF_BIN" --version 2>/dev/null; then
-            echo "下载 cloudflared 到 $CF_BIN..."
-            curl -sL https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -o "$CF_BIN" 2>/dev/null
-            chmod +x "$CF_BIN"
-          fi
-          echo "cloudflared: $($CF_BIN --version 2>&1)"
-          echo "cloudflared 路径: $CF_BIN"
-
-          echo ""
-          echo "=== STEP 3: 启动 Quick Tunnel ==="
-          pkill -f "cloudflared" 2>/dev/null || true
-          sleep 2
-
-          nohup "$CF_BIN" tunnel --url http://localhost:8450 > /tmp/cloudflared.log 2>&1 &
-          CF_PID=$!
-          echo "cloudflared PID: $CF_PID"
-
-          TUNNEL_URL=""
-          for i in $(seq 1 30); do
-            sleep 2
-            TUNNEL_URL=$(grep -o 'https://[a-z0-9-]*\.trycloudflare\.com' /tmp/cloudflared.log | head -1)
-            if [ -n "$TUNNEL_URL" ]; then
-              echo "Tunnel URL: $TUNNEL_URL"
-              break
-            fi
-            echo "  等待 tunnel URL... ($i/30)"
-          done
-
-          echo ""
-          echo "--- cloudflared 日志 (最后20行) ---"
-          tail -20 /tmp/cloudflared.log 2>/dev/null
-
-          echo ""
-          echo "=== STEP 4: 更新 DNS ==="
-          if [ -n "$TUNNEL_URL" ]; then
-            TUNNEL_HOST=$(echo "$TUNNEL_URL" | sed 's|https://||')
-            echo "更新 DNS: aishield.tools -> $TUNNEL_HOST"
-
-            CF_API_TOKEN=$(echo 'Y2Z1dF9Nb2hJTlhSTFBpaWQ2cHpDZUJuOVZCVUxxZWdvR29sSmVESEFwZDR1YWE1NDM5ZGI=' | base64 -d)
-            CF_ZONE_ID='7625fc8ab719b3974e12aa2b6bf25489'
-
-            DNS_RESULT=$(curl -s "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records?name=aishield.tools" \
-              -H "Authorization: Bearer $CF_API_TOKEN")
-            DNS_RECORD_ID=$(echo "$DNS_RESULT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['result'][0]['id'] if d.get('result') else '')" 2>/dev/null)
-
-            if [ -n "$DNS_RECORD_ID" ]; then
-              echo "现有DNS记录ID: $DNS_RECORD_ID"
-              UPDATE_RESULT=$(curl -s -X PUT "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records/$DNS_RECORD_ID" \
-                -H "Authorization: Bearer $CF_API_TOKEN" \
-                -H "Content-Type: application/json" \
-                -d "{\"type\":\"CNAME\",\"name\":\"aishield.tools\",\"content\":\"$TUNNEL_HOST\",\"proxied\":true}")
-              echo "$UPDATE_RESULT" | python3 -c "import sys,json; d=json.load(sys.stdin); print('DNS更新: OK' if d.get('success') else 'DNS更新失败: '+str(d.get('errors')))" 2>/dev/null
-            else
-              echo "DNS记录不存在，创建新CNAME记录..."
-              CREATE_RESULT=$(curl -s -X POST "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records" \
-                -H "Authorization: Bearer $CF_API_TOKEN" \
-                -H "Content-Type: application/json" \
-                -d "{\"type\":\"CNAME\",\"name\":\"aishield.tools\",\"content\":\"$TUNNEL_HOST\",\"proxied\":true}")
-              echo "$CREATE_RESULT" | python3 -c "import sys,json; d=json.load(sys.stdin); print('DNS创建: OK' if d.get('success') else 'DNS创建失败: '+str(d.get('errors')))" 2>/dev/null
-            fi
-
-            unset CF_API_TOKEN
-          else
-            echo "ERROR: 未获取到 Tunnel URL!"
-            echo "请检查 cloudflared 日志:"
-            cat /tmp/cloudflared.log 2>/dev/null
-          fi
-
-          echo ""
-          echo "=== STEP 5: 验证 ==="
-          echo "--- API (localhost:8450) ---"
-          curl -sf http://127.0.0.1:8450/api/v1/health 2>/dev/null && echo " OK" || echo " FAIL"
-          echo "--- Tunnel URL ---"
-          if [ -n "$TUNNEL_URL" ]; then
-            curl -sf --max-time 10 "$TUNNEL_URL/api/v1/health" 2>/dev/null && echo " OK" || echo " FAIL"
-          fi
-          echo "--- aishield.tools ---"
-          curl -sf --max-time 10 https://aishield.tools/api/v1/health 2>/dev/null && echo " OK" || echo " FAIL (DNS传播中...)"
-
-          echo ""
-          echo "=== STEP 6: 持久化 (crontab) ==="
-          CRON_LINE="* * * * * pgrep -f 'cloudflared tunnel' > /dev/null 2>&1 || nohup $CF_BIN tunnel --url http://localhost:8450 >> /tmp/cloudflared.log 2>&1 &"
-          ( crontab -l 2>/dev/null | grep -v 'cloudflared' ; echo "$CRON_LINE" ) | crontab - 2>/dev/null && echo "Cron job 已设置" || echo "Cron 设置失败 (非关键)"
-
-          echo ""
-          echo "=== 部署完成 ==="
-          echo "Tunnel URL: ${TUNNEL_URL:-未获取}"
-          echo "API: http://localhost:8450"
-          echo "域名: https://aishield.tools"
-          echo "PID: $CF_PID"
-
-          exit 0
+          bash scripts/deploy-quick-tunnel.sh 2>&1
+          echo "DEPLOY_EXIT_CODE=$?"
 
     - name: Run server diagnostics via SSH
       if: always()
@@ -170,18 +43,17 @@ jobs:
         chmod 600 ~/.ssh/id_rsa
         ssh-keyscan -H "$SERVER_HOST" >> ~/.ssh/known_hosts 2>/dev/null
 
-        ssh -o StrictHostKeyChecking=no -p "${SERVER_PORT:-22}" "$SERVER_USER@$SERVER_HOST" "echo '=== DIAGNOSTIC ==='; echo 'Time:' $(date); echo '=== USER ==='; whoami; echo '=== API STATUS ==='; curl -sf http://127.0.0.1:8450/api/v1/health 2>/dev/null && echo 'OK' || echo 'FAIL'; echo '=== CLOUDFLARED PROCESS ==='; ps aux | grep cloudflared | grep -v grep || echo 'NOT RUNNING'; echo '=== CLOUDFLARED LOG ==='; tail -30 /tmp/cloudflared.log 2>/dev/null || echo 'NO LOG'; echo '=== TUNNEL URL ==='; grep -o 'https://[a-z0-9-]*\.trycloudflare\.com' /tmp/cloudflared.log 2>/dev/null | head -1 || echo 'NO URL'; echo '=== PORTS ==='; ss -tlnp 2>/dev/null | grep -E ':(8450) ' || echo 'NO PORTS'; echo '=== CRONTAB ==='; crontab -l 2>/dev/null | grep cloudflared || echo 'NO CRON'" > diagnostics/deploy-result.md 2>&1
+        ssh -o StrictHostKeyChecking=no -p "${SERVER_PORT:-22}" "$SERVER_USER@$SERVER_HOST" "echo '=== DIAGNOSTIC ==='; echo 'Time:' $(date); echo '=== USER ==='; whoami; echo '=== API STATUS ==='; curl -sf http://127.0.0.1:8450/api/v1/health 2>/dev/null && echo 'OK' || echo 'FAIL'; echo '=== CLOUDFLARED PROCESS ==='; ps aux | grep cloudflared | grep -v grep || echo 'NOT RUNNING'; echo '=== CLOUDFLARED BINARY ==='; ls -la /usr/local/bin/cloudflared ~/bin/cloudflared 2>/dev/null || echo 'NOT FOUND'; echo '=== CLOUDFLARED LOG ==='; tail -30 /tmp/cloudflared.log 2>/dev/null || echo 'NO LOG'; echo '=== DEPLOY LOG ==='; cat /tmp/aishield-deploy.log 2>/dev/null || echo 'NO DEPLOY LOG'; echo '=== TUNNEL URL ==='; grep -o 'https://[a-z0-9-]*\.trycloudflare\.com' /tmp/cloudflared.log 2>/dev/null | head -1 || echo 'NO URL'; echo '=== PORTS ==='; ss -tlnp 2>/dev/null | grep -E ':(8450) ' || echo 'NO PORTS'; echo '=== CRONTAB ==='; crontab -l 2>/dev/null | grep cloudflared || echo 'NO CRON'" > diagnostics/deploy-result.md 2>&1
 
         echo "=== Diagnostics file size: $(wc -c < diagnostics/deploy-result.md) bytes ==="
-        echo "=== First 30 lines ==="
-        head -30 diagnostics/deploy-result.md
+        head -50 diagnostics/deploy-result.md
 
     - name: Test HTTPS from runner
       if: always()
       continue-on-error: true
       run: |
         echo "" >> diagnostics/deploy-result.md
-        echo "=== HTTPS Test from GitHub Actions Runner ===" >> diagnostics/deploy-result.md
+        echo "=== HTTPS Test from Runner ===" >> diagnostics/deploy-result.md
         echo "Time: $(date)" >> diagnostics/deploy-result.md
         echo "" >> diagnostics/deploy-result.md
         echo "=== curl test (aishield.tools) ===" >> diagnostics/deploy-result.md
