@@ -26,19 +26,15 @@ jobs:
         script: |
           cd /opt/aishield 2>/dev/null || cd ~/aishield 2>/dev/null || true
 
-          # Try git update first
-          git fetch origin main 2>&1 || echo "GIT FETCH FAILED"
-          git reset --hard origin/main 2>&1 || echo "GIT RESET FAILED"
-
-          # Verify script has cert.pem support
-          if ! grep -q "cert.pem" scripts/deploy-named-tunnel.sh 2>/dev/null; then
-            echo "Script outdated, downloading fresh from GitHub..."
-            curl -sL "https://raw.githubusercontent.com/lm203688/aishield/main/scripts/deploy-named-tunnel.sh" -o scripts/deploy-named-tunnel.sh
-            chmod +x scripts/deploy-named-tunnel.sh
-          fi
+          # Always download latest script from GitHub (git reset unreliable on this server)
+          echo "Downloading latest deploy script..."
+          curl -sL "https://raw.githubusercontent.com/lm203688/aishield/main/scripts/deploy-named-tunnel.sh" -o scripts/deploy-named-tunnel.sh
+          chmod +x scripts/deploy-named-tunnel.sh
 
           echo "=== Script first 5 lines ==="
           head -5 scripts/deploy-named-tunnel.sh
+          echo "=== Checking for DNS API fix ==="
+          grep -c "所有模式" scripts/deploy-named-tunnel.sh || echo "DNS API fix NOT found!"
           echo "=== Running deploy ==="
           bash scripts/deploy-named-tunnel.sh 2>&1
           echo "DEPLOY_EXIT_CODE=$?"
