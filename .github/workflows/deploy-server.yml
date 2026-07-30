@@ -294,12 +294,26 @@ jobs:
           exit 0
 
     - name: Save diagnostic output
+      env:
+        DEPLOY_STDOUT: ${{ steps.deploy.outputs.stdout }}
       run: |
         mkdir -p diagnostics
-        echo "${{ steps.deploy.outputs.stdout }}" > diagnostics/deploy-result.md
+        printf '%s' "$DEPLOY_STDOUT" > diagnostics/deploy-result.md
         echo "=== Diagnostic output saved ==="
+        echo "File size: $(wc -c < diagnostics/deploy-result.md) bytes"
         echo "First 30 lines:"
         head -30 diagnostics/deploy-result.md || echo "No output captured"
+
+    - name: Test HTTPS from runner
+      run: |
+        echo "=== HTTPS Test from GitHub Actions Runner ===" >> diagnostics/deploy-result.md
+        echo "Time: $(date)" >> diagnostics/deploy-result.md
+        echo "" >> diagnostics/deploy-result.md
+        echo "=== curl test (aishield.tools) ===" >> diagnostics/deploy-result.md
+        curl -sk --max-time 10 https://aishield.tools/api/v1/health >> diagnostics/deploy-result.md 2>&1 || echo "FAILED" >> diagnostics/deploy-result.md
+        echo "" >> diagnostics/deploy-result.md
+        echo "=== openssl s_client test ===" >> diagnostics/deploy-result.md
+        echo | timeout 5 openssl s_client -connect aishield.tools:443 -servername aishield.tools 2>&1 | head -30 >> diagnostics/deploy-result.md || echo "SSL FAILED" >> diagnostics/deploy-result.md
 
     - name: Commit diagnostics to repo
       run: |
@@ -307,6 +321,7 @@ jobs:
         git config user.email "github-actions[bot]@users.noreply.github.com"
         git add diagnostics/deploy-result.md
         git commit -m "chore: update deploy diagnostics [skip ci]" || echo "No changes to commit"
+        git pull --rebase origin main || true
         git push || echo "Push failed"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
