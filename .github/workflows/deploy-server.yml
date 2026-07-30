@@ -342,24 +342,8 @@ jobs:
             pkill -f "cloudflared tunnel" 2>/dev/null || true
             sleep 2
 
-            # 创建 systemd 服务
-            cat > /etc/systemd/system/cloudflared.service << 'EOF'
-[Unit]
-Description=Cloudflare Tunnel
-After=network.target
-
-[Service]
-ExecStart=/usr/local/bin/cloudflared tunnel --no-autoupdate run --token ${CF_TUNNEL_TOKEN}
-Restart=always
-RestartSec=5
-Environment=CF_TUNNEL_TOKEN=${CF_TUNNEL_TOKEN}
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-            # 替换 token 占位符
-            sed -i "s|\${CF_TUNNEL_TOKEN}|$CF_TUNNEL_TOKEN|g" /etc/systemd/system/cloudflared.service
+            # 创建 systemd 服务（使用printf避免heredoc在YAML中的缩进问题）
+            printf '[Unit]\nDescription=Cloudflare Tunnel\nAfter=network.target\n\n[Service]\nExecStart=/usr/local/bin/cloudflared tunnel --no-autoupdate run --token %s\nRestart=always\nRestartSec=5\nEnvironment=CF_TUNNEL_TOKEN=%s\n\n[Install]\nWantedBy=multi-user.target\n' "$CF_TUNNEL_TOKEN" "$CF_TUNNEL_TOKEN" > /etc/systemd/system/cloudflared.service
 
             # 启动服务
             systemctl daemon-reload 2>/dev/null
