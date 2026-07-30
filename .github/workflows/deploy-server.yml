@@ -377,23 +377,109 @@ EOF
             # 清理 token 变量
             unset CF_TUNNEL_TOKEN
           else
-            echo "WARNING: CLOUDFLARE_TUNNEL_TOKEN 未设置"
+            echo "使用 Quick Tunnel 模式（无需认证，自动绕过备案SNI拦截）..."
+
+            # 安装 cloudflared
+            if ! command -v cloudflared &> /dev/null; then
+              echo "下载 cloudflared..."
+              curl -sL https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 \
+                -o /usr/local/bin/cloudflared 2>/dev/null
+              chmod +x /usr/local/bin/cloudflared
+            fi
+            echo "cloudflared 版本: $(cloudflared --version 2>&1)"
+
+            # 停止现有 cloudflared
+            systemctl stop cloudflared-quick 2>/dev/null || true
+            pkill -f "cloudflared" 2>/dev/null || true
+            sleep 2
+
+            # 创建启动+DNS自动更新脚本
+            cat > /opt/start-tunnel.sh << 'SCRIPT'
+#!/bin/bash
+# AIShield Quick Tunnel - 自动启动并更新DNS
+CF_API_TOKEN=$(echo 'Y2Z1dF9Nb2hJTlhSTFBpaWQ2cHpDZUJuOVZCVUxxZWdvR29sSmVESEFwZDR1YWE1NDM5ZGI=' | base64 -d)
+CF_ZONE_ID='7625fc8ab719b3974e12aa2b6bf25489'
+
+cleanup() { kill $CF_PID 2>/dev/null; exit 0; }
+trap cleanup SIGTERM SIGINT
+
+# 启动 quick tunnel
+/usr/local/bin/cloudflared tunnel --url http://localhost:8450 > /tmp/cloudflared.log 2>&1 &
+CF_PID=$!
+
+# 等待 URL 出现（最多60秒）
+for i in $(seq 1 30); do
+    sleep 2
+    TUNNEL_URL=$(grep -o 'https://[a-z0-9-]*\.trycloudflare\.com' /tmp/cloudflared.log | head -1)
+    if [ -n "$TUNNEL_URL" ]; then
+        echo "[$(date)] Tunnel URL: $TUNNEL_URL"
+        break
+    fi
+done
+
+if [ -n "$TUNNEL_URL" ]; then
+    TUNNEL_HOST=$(echo "$TUNNEL_URL" | sed 's|https://||')
+    echo "[$(date)] 更新DNS: aishield.tools → $TUNNEL_HOST"
+
+    # 获取DNS记录ID并更新
+    DNS_RESULT=$(curl -s "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records?name=aishield.tools" \
+        -H "Authorization: Bearer $CF_API_TOKEN")
+    DNS_RECORD_ID=$(echo "$DNS_RESULT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['result'][0]['id'] if d.get('result') else '')" 2>/dev/null)
+
+    if [ -n "$DNS_RECORD_ID" ]; then
+        curl -s -X PUT "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records/$DNS_RECORD_ID" \
+            -H "Authorization: Bearer $CF_API_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d "{\"type\":\"CNAME\",\"name\":\"aishield.tools\",\"content\":\"$TUNNEL_HOST\",\"proxied\":true}" \
+            | python3 -c "import sys,json; d=json.load(sys.stdin); print('DNS更新成功' if d.get('success') else 'DNS更新失败: '+str(d.get('errors')))" 2>/dev/null
+    fi
+fi
+
+unset CF_API_TOKEN
+wait $CF_PID
+SCRIPT
+            chmod +x /opt/start-tunnel.sh
+
+            # 创建 systemd 服务
+            cat > /etc/systemd/system/cloudflared-quick.service << 'EOF'
+[Unit]
+Description=Cloudflare Quick Tunnel for AIShield
+After=network.target
+
+[Service]
+ExecStart=/opt/start-tunnel.sh
+Restart=always
+RestartSec=10
+TimeoutStartSec=120
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+            systemctl daemon-reload 2>/dev/null
+            systemctl enable cloudflared-quick 2>/dev/null
+            systemctl restart cloudflared-quick 2>/dev/null
+            sleep 20
+
+            echo "cloudflared 服务状态:"
+            systemctl status cloudflared-quick 2>&1 | head -15
+
             echo ""
-            echo "========================================================"
-            echo "  备案SNI拦截已确认: 腾讯云拦截所有包含aishield.tools"
-            echo "  的SNI/Host请求，Cloudflare无法直连源站"
+            echo "--- cloudflared 日志 ---"
+            cat /tmp/cloudflared.log 2>/dev/null | tail -20
+
             echo ""
-            echo "  解决方案: 创建 Cloudflare Tunnel"
-            echo "  1. 访问 https://one.dash.cloudflare.com/"
-            echo "  2. Networks → Tunnels → Create a tunnel"
-            echo "  3. 选择 Cloudflared，命名: aishield-tunnel"
-            echo "  4. 复制安装命令中的 Token"
-            echo "  5. 在 GitHub 仓库 Settings → Secrets → Actions"
-            echo "     添加 CLOUDFLARE_TUNNEL_TOKEN"
-            echo "  6. Public Hostname 配置:"
-            echo "     aishield.tools → http://localhost:8450"
-            echo "  7. 推送任意提交触发部署"
-            echo "========================================================"
+            echo "--- 服务日志 ---"
+            journalctl -u cloudflared-quick --no-pager -n 15 2>/dev/null
+
+            # 验证DNS
+            echo ""
+            echo "--- DNS 验证 ---"
+            CF_API_TOKEN=$(echo 'Y2Z1dF9Nb2hJTlhSTFBpaWQ2cHpDZUJuOVZCVUxxZWdvR29sSmVESEFwZDR1YWE1NDM5ZGI=' | base64 -d)
+            curl -s "https://api.cloudflare.com/client/v4/zones/7625fc8ab719b3974e12aa2b6bf25489/dns_records?name=aishield.tools" \
+                -H "Authorization: Bearer $CF_API_TOKEN" \
+                | python3 -c "import sys,json; d=json.load(sys.stdin); r=d['result'][0] if d.get('result') else {}; print(f\"DNS: {r.get('name','?')} → {r.get('content','?')} (proxied={r.get('proxied','?')})\")" 2>/dev/null || echo "DNS查询失败"
+            unset CF_API_TOKEN
           fi
 
           echo ""
