@@ -16,6 +16,8 @@ jobs:
     - name: Deploy via SSH
       id: deploy
       uses: appleboy/ssh-action@v1.0.3
+      env:
+        CF_TUNNEL_TOKEN: ${{ secrets.CLOUDFLARE_TUNNEL_TOKEN }}
       with:
         host: ${{ secrets.SERVER_HOST }}
         username: ${{ secrets.SERVER_USER }}
@@ -23,6 +25,7 @@ jobs:
         port: ${{ secrets.SERVER_PORT || 22 }}
         command_timeout: 15m
         capture_stdout: true
+        envs: CF_TUNNEL_TOKEN
         script: |
           set +e
           cd /opt/aishield 2>/dev/null || cd ~/aishield 2>/dev/null
@@ -322,7 +325,79 @@ jobs:
           fi
 
           echo ""
-          echo "=== 上传完整诊断到 paste.rs ==="
+          echo "=== STEP 7: Cloudflare Tunnel (绕过备案SNI拦截) ==="
+          if [ -n "$CF_TUNNEL_TOKEN" ]; then
+            echo "Tunnel Token 已配置，安装 cloudflared..."
+
+            # 安装 cloudflared
+            if ! command -v cloudflared &> /dev/null; then
+              echo "下载 cloudflared..."
+              curl -sL https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 \
+                -o /usr/local/bin/cloudflared 2>/dev/null
+              chmod +x /usr/local/bin/cloudflared
+            fi
+            echo "cloudflared 版本: $(cloudflared --version 2>&1)"
+
+            # 停止现有 cloudflared 进程
+            pkill -f "cloudflared tunnel" 2>/dev/null || true
+            sleep 2
+
+            # 创建 systemd 服务
+            cat > /etc/systemd/system/cloudflared.service << 'EOF'
+[Unit]
+Description=Cloudflare Tunnel
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/cloudflared tunnel --no-autoupdate run --token ${CF_TUNNEL_TOKEN}
+Restart=always
+RestartSec=5
+Environment=CF_TUNNEL_TOKEN=${CF_TUNNEL_TOKEN}
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+            # 替换 token 占位符
+            sed -i "s|\${CF_TUNNEL_TOKEN}|$CF_TUNNEL_TOKEN|g" /etc/systemd/system/cloudflared.service
+
+            # 启动服务
+            systemctl daemon-reload 2>/dev/null
+            systemctl enable cloudflared 2>/dev/null
+            systemctl restart cloudflared 2>/dev/null || service cloudflared restart 2>/dev/null
+            sleep 5
+
+            echo "cloudflared 服务状态:"
+            systemctl status cloudflared 2>&1 | head -10 || ps aux | grep cloudflared | grep -v grep
+
+            echo ""
+            echo "--- cloudflared 日志 ---"
+            journalctl -u cloudflared --no-pager -n 20 2>/dev/null || tail -20 /tmp/cloudflared.log 2>/dev/null || echo "无日志"
+
+            # 清理 token 变量
+            unset CF_TUNNEL_TOKEN
+          else
+            echo "WARNING: CLOUDFLARE_TUNNEL_TOKEN 未设置"
+            echo ""
+            echo "========================================================"
+            echo "  备案SNI拦截已确认: 腾讯云拦截所有包含aishield.tools"
+            echo "  的SNI/Host请求，Cloudflare无法直连源站"
+            echo ""
+            echo "  解决方案: 创建 Cloudflare Tunnel"
+            echo "  1. 访问 https://one.dash.cloudflare.com/"
+            echo "  2. Networks → Tunnels → Create a tunnel"
+            echo "  3. 选择 Cloudflared，命名: aishield-tunnel"
+            echo "  4. 复制安装命令中的 Token"
+            echo "  5. 在 GitHub 仓库 Settings → Secrets → Actions"
+            echo "     添加 CLOUDFLARE_TUNNEL_TOKEN"
+            echo "  6. Public Hostname 配置:"
+            echo "     aishield.tools → http://localhost:8450"
+            echo "  7. 推送任意提交触发部署"
+            echo "========================================================"
+          fi
+
+          echo ""
+          echo "=== STEP 8: 上传诊断到 paste.rs ==="
           {
             echo "=== AIShield 服务器诊断报告 ==="
             echo "时间: $(date)"
