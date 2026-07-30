@@ -12,6 +12,7 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Deploy via SSH
+      id: deploy
       uses: appleboy/ssh-action@v1.0.3
       with:
         host: ${{ secrets.SERVER_HOST }}
@@ -19,6 +20,7 @@ jobs:
         key: ${{ secrets.SERVER_SSH_KEY }}
         port: ${{ secrets.SERVER_PORT || 22 }}
         command_timeout: 15m
+        capture_stdout: true
         script: |
           set +e
           cd /opt/aishield 2>/dev/null || cd ~/aishield 2>/dev/null
@@ -254,4 +256,57 @@ jobs:
             echo "请检查上方的 nginx -t 输出和错误日志"
           fi
 
+          echo ""
+          echo "=== 上传完整诊断到 paste.rs ==="
+          {
+            echo "=== AIShield 服务器诊断报告 ==="
+            echo "时间: $(date)"
+            echo "服务器: 150.158.119.19"
+            echo ""
+            echo "=== nginx -t 输出 ==="
+            nginx -t 2>&1
+            echo ""
+            echo "=== 端口监听 ==="
+            ss -tlnp | grep -E ':(80|443|8450) ' || echo "无端口监听"
+            echo ""
+            echo "=== Nginx 进程 ==="
+            ps aux | grep nginx | grep -v grep || echo "无 nginx 进程"
+            echo ""
+            echo "=== Nginx 错误日志 ==="
+            tail -30 /var/log/nginx/error.log 2>/dev/null || echo "无错误日志"
+            echo ""
+            echo "=== SSL 连接测试 ==="
+            echo | timeout 5 openssl s_client -connect 127.0.0.1:443 -servername aishield.tools 2>&1 | head -30 || echo "SSL 连接失败"
+            echo ""
+            echo "=== 证书检查 ==="
+            openssl x509 -in /etc/nginx/ssl/cert.pem -noout -subject -dates 2>&1 || echo "证书文件不存在"
+            echo ""
+            echo "=== nginx.conf 内容 ==="
+            cat /etc/nginx/nginx.conf 2>/dev/null || echo "配置文件不存在"
+            echo ""
+            echo "=== 证书文件 ==="
+            ls -la /etc/nginx/ssl/ 2>/dev/null || echo "SSL 目录不存在"
+            echo ""
+            echo "=== API 状态 ==="
+            curl -sf http://127.0.0.1:8450/api/v1/health 2>/dev/null && echo " OK" || echo " FAIL"
+          } | curl -s --data-binary @- https://paste.rs/ 2>/dev/null || echo "上传失败"
+
           exit 0
+
+    - name: Save diagnostic output
+      run: |
+        mkdir -p diagnostics
+        echo "${{ steps.deploy.outputs.stdout }}" > diagnostics/deploy-result.md
+        echo "=== Diagnostic output saved ==="
+        echo "First 30 lines:"
+        head -30 diagnostics/deploy-result.md || echo "No output captured"
+
+    - name: Commit diagnostics to repo
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git add diagnostics/deploy-result.md
+        git commit -m "chore: update deploy diagnostics [skip ci]" || echo "No changes to commit"
+        git push || echo "Push failed"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
