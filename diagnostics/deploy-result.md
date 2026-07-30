@@ -1,12 +1,18 @@
 === AIShield DIAGNOSTIC ===
-Time: Thu Jul 30 21:34:35 UTC 2026
+Time: Thu Jul 30 21:49:46 UTC 2026
 === nginx -t ===
-nginx: [emerg] unknown directive "ssl_ciphersuites" in /etc/nginx/nginx.conf:33
-nginx: configuration file /etc/nginx/nginx.conf test failed
+nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
 === PORTS ===
-LISTEN 0      5            0.0.0.0:8450       0.0.0.0:*    users:(("python3",pid=2590363,fd=3))     
+LISTEN 0      511          0.0.0.0:80         0.0.0.0:*    users:(("nginx",pid=343883,fd=8),("nginx",pid=343882,fd=8),("nginx",pid=343881,fd=8))
+LISTEN 0      5            0.0.0.0:8450       0.0.0.0:*    users:(("python3",pid=2590363,fd=3))                                                 
+LISTEN 0      511          0.0.0.0:443        0.0.0.0:*    users:(("nginx",pid=343883,fd=6),("nginx",pid=343882,fd=6),("nginx",pid=343881,fd=6))
+LISTEN 0      511             [::]:80            [::]:*    users:(("nginx",pid=343883,fd=9),("nginx",pid=343882,fd=9),("nginx",pid=343881,fd=9))
+LISTEN 0      511             [::]:443           [::]:*    users:(("nginx",pid=343883,fd=7),("nginx",pid=343882,fd=7),("nginx",pid=343881,fd=7))
 === NGINX PROCESS ===
-NO NGINX
+root      343881  0.0  0.0  21176  1704 ?        Ss   05:49   0:00 nginx: master process /usr/sbin/nginx -g daemon on; master_process on;
+www-data  343882  0.0  0.2  21852  4452 ?        S    05:49   0:00 nginx: worker process
+www-data  343883  0.0  0.4  21984  8244 ?        S    05:49   0:00 nginx: worker process
 === NGINX ERROR LOG ===
 2026/07/31 00:08:48 [crit] 3648842#3648842: *877 SSL_do_handshake() failed (SSL: error:0A00006C:SSL routines::bad key share) while SSL handshaking, client: 165.154.62.35, server: 0.0.0.0:443
 2026/07/31 05:25:45 [notice] 325998#325998: signal process started
@@ -22,17 +28,49 @@ NO NGINX
 2026/07/31 05:34:27 [emerg] 332791#332791: unknown directive "ssl_ciphersuites" in /etc/nginx/nginx.conf:33
 2026/07/31 05:34:31 [emerg] 332996#332996: unknown directive "ssl_ciphersuites" in /etc/nginx/nginx.conf:33
 2026/07/31 05:34:38 [emerg] 333127#333127: unknown directive "ssl_ciphersuites" in /etc/nginx/nginx.conf:33
+2026/07/31 05:49:35 [emerg] 343775#343775: unknown directive "ssl_ciphersuites" in /etc/nginx/nginx.conf:33
+2026/07/31 05:49:37 [emerg] 343806#343806: unknown directive "ssl_ciphersuites" in /etc/nginx/nginx.conf:34
+2026/07/31 05:49:37 [emerg] 343808#343808: unknown directive "ssl_ciphersuites" in /etc/nginx/nginx.conf:34
+2026/07/31 05:49:37 [emerg] 343812#343812: unknown directive "ssl_ciphersuites" in /etc/nginx/nginx.conf:34
 === SSL TEST ===
-40677AC3077F0000:error:8000006F:system library:BIO_connect:Connection refused:../crypto/bio/bio_sock2.c:125:calling connect()
-40677AC3077F0000:error:10000067:BIO routines:BIO_connect:connect error:../crypto/bio/bio_sock2.c:127:
-connect:errno=111
+depth=1 C = US, O = "CloudFlare, Inc.", OU = CloudFlare Origin SSL Certificate Authority, L = San Francisco, ST = California
+verify error:num=19:self-signed certificate in certificate chain
+verify return:1
+depth=1 C = US, O = "CloudFlare, Inc.", OU = CloudFlare Origin SSL Certificate Authority, L = San Francisco, ST = California
+verify return:1
+depth=0 O = "CloudFlare, Inc.", OU = CloudFlare Origin CA, CN = CloudFlare Origin Certificate
+verify return:1
+CONNECTED(00000003)
+---
+Certificate chain
+ 0 s:O = "CloudFlare, Inc.", OU = CloudFlare Origin CA, CN = CloudFlare Origin Certificate
+   i:C = US, O = "CloudFlare, Inc.", OU = CloudFlare Origin SSL Certificate Authority, L = San Francisco, ST = California
+   a:PKEY: rsaEncryption, 2048 (bit); sigalg: RSA-SHA256
+   v:NotBefore: Jul 30 21:21:00 2026 GMT; NotAfter: Jul 26 21:21:00 2041 GMT
+ 1 s:C = US, O = "CloudFlare, Inc.", OU = CloudFlare Origin SSL Certificate Authority, L = San Francisco, ST = California
+   i:C = US, O = "CloudFlare, Inc.", OU = CloudFlare Origin SSL Certificate Authority, L = San Francisco, ST = California
+   a:PKEY: rsaEncryption, 2048 (bit); sigalg: RSA-SHA256
+   v:NotBefore: Aug 23 21:08:00 2019 GMT; NotAfter: Aug 15 17:00:00 2029 GMT
+---
+Server certificate
+-----BEGIN CERTIFICATE-----
+MIIEqDCCA5CgAwIBAgIUaBz+MWoAtsMskUpJGWueRKnBRdQwDQYJKoZIhvcNAQEL
+BQAwgYsxCzAJBgNVBAYTAlVTMRkwFwYDVQQKExBDbG91ZEZsYXJlLCBJbmMuMTQw
+MgYDVQQLEytDbG91ZEZsYXJlIE9yaWdpbiBTU0wgQ2VydGlmaWNhdGUgQXV0aG9y
+aXR5MRYwFAYDVQQHEw1TYW4gRnJhbmNpc2NvMRMwEQYDVQQIEwpDYWxpZm9ybmlh
+MB4XDTI2MDczMDIxMjEwMFoXDTQxMDcyNjIxMjEwMFowYjEZMBcGA1UEChMQQ2xv
+dWRGbGFyZSwgSW5jLjEdMBsGA1UECxMUQ2xvdWRGbGFyZSBPcmlnaW4gQ0ExJjAk
+BgNVBAMTHUNsb3VkRmxhcmUgT3JpZ2luIENlcnRpZmljYXRlMIIBIjANBgkqhkiG
+9w0BAQEFAAOCAQ8AMIIBCgKCAQEAk8Jli3uc15mUjhQ90BVYW4kFY7E5YfE3bQbe
+bAVk+a6YYpNECkD5OFOBSuUd2plT7lG/SjbFJ+2FcwnqLjjHtPYMJoTRO1bktLFL
 === CERT CHECK ===
 subject=O = "CloudFlare, Inc.", OU = CloudFlare Origin CA, CN = CloudFlare Origin Certificate
 notBefore=Jul 30 21:21:00 2026 GMT
 notAfter=Jul 26 21:21:00 2041 GMT
 === API STATUS ===
-{"status": "ok", "version": "4.2", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 133, "uptime": 1785447278.7950807, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup"}OK
+{"status": "ok", "version": "4.2", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 133, "uptime": 1785448189.5386589, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup"}OK
 === NGINX CONF ===
+user www-data;
 worker_processes auto;
 pid /run/nginx.pid;
 error_log /var/log/nginx/error.log;
@@ -65,7 +103,6 @@ http {
         ssl_certificate_key /etc/nginx/ssl/key.pem;
         ssl_protocols       TLSv1.2 TLSv1.3;
         ssl_ciphers         ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:HIGH:!aNULL:!MD5;
-        ssl_ciphersuites    TLS_AES_128_GCM_SHA256:TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256;
         ssl_ecdh_curve      X25519:secp384r1:prime256v1:secp521r1;
         ssl_prefer_server_ciphers off;
         ssl_session_cache   shared:SSL:10m;
@@ -108,10 +145,10 @@ http {
 }
 
 === HTTPS Test from GitHub Actions Runner ===
-Time: Thu Jul 30 21:34:39 UTC 2026
+Time: Thu Jul 30 21:49:49 UTC 2026
 
 === curl test (aishield.tools) ===
-error code: 521
+error code: 525
 
 === openssl s_client test ===
 depth=2 C = US, O = Google Trust Services LLC, CN = GTS Root R4
