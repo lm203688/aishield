@@ -21,12 +21,12 @@ jobs:
         username: ${{ secrets.SERVER_USER }}
         key: ${{ secrets.SERVER_SSH_KEY }}
         port: ${{ secrets.SERVER_PORT || 22 }}
-        command_timeout: 15m
+        command_timeout: 20m
         capture_stdout: true
         script: |
           cd /opt/aishield 2>/dev/null || cd ~/aishield 2>/dev/null || true
           git pull origin main 2>/dev/null || true
-          bash scripts/deploy-quick-tunnel.sh 2>&1
+          bash scripts/deploy-named-tunnel.sh 2>&1
           echo "DEPLOY_EXIT_CODE=$?"
 
     - name: Run server diagnostics via SSH
@@ -43,10 +43,35 @@ jobs:
         chmod 600 ~/.ssh/id_rsa
         ssh-keyscan -H "$SERVER_HOST" >> ~/.ssh/known_hosts 2>/dev/null
 
-        ssh -o StrictHostKeyChecking=no -p "${SERVER_PORT:-22}" "$SERVER_USER@$SERVER_HOST" "echo '=== DIAGNOSTIC ==='; echo 'Time:' $(date); echo '=== USER ==='; whoami; echo '=== API STATUS ==='; curl -sf http://127.0.0.1:8450/api/v1/health 2>/dev/null && echo 'OK' || echo 'FAIL'; echo '=== CLOUDFLARED PROCESS ==='; ps aux | grep cloudflared | grep -v grep || echo 'NOT RUNNING'; echo '=== CLOUDFLARED BINARY ==='; ls -la /usr/local/bin/cloudflared ~/bin/cloudflared 2>/dev/null || echo 'NOT FOUND'; echo '=== CLOUDFLARED LOG ==='; tail -30 /tmp/cloudflared.log 2>/dev/null || echo 'NO LOG'; echo '=== DEPLOY LOG ==='; cat /tmp/aishield-deploy.log 2>/dev/null || echo 'NO DEPLOY LOG'; echo '=== TUNNEL URL ==='; grep -o 'https://[a-z0-9-]*\.trycloudflare\.com' /tmp/cloudflared.log 2>/dev/null | head -1 || echo 'NO URL'; echo '=== PORTS ==='; ss -tlnp 2>/dev/null | grep -E ':(8450) ' || echo 'NO PORTS'; echo '=== CRONTAB ==='; crontab -l 2>/dev/null | grep cloudflared || echo 'NO CRON'" > diagnostics/deploy-result.md 2>&1
+        ssh -o StrictHostKeyChecking=no -p "${SERVER_PORT:-22}" "$SERVER_USER@$SERVER_HOST" "
+          echo '=== DIAGNOSTIC ==='
+          echo 'Time:' \$(date)
+          echo '=== USER ==='
+          whoami
+          echo '=== API STATUS ==='
+          curl -sf http://127.0.0.1:8450/api/v1/health 2>/dev/null && echo 'OK' || echo 'FAIL'
+          echo '=== CLOUDFLARED PROCESS ==='
+          ps aux | grep cloudflared | grep -v grep || echo 'NOT RUNNING'
+          echo '=== CLOUDFLARED LOG (last 30 lines) ==='
+          tail -30 /tmp/cloudflared.log 2>/dev/null || echo 'NO LOG'
+          echo '=== DEPLOY LOG ==='
+          cat /tmp/aishield-deploy.log 2>/dev/null || echo 'NO DEPLOY LOG'
+          echo '=== TUNNEL INFO ==='
+          echo 'Tunnel ID:' \$(cat /root/.cloudflared/tunnel-id 2>/dev/null || echo 'NOT SET')
+          echo 'Token File:' \$(ls -la /root/.cloudflared/tunnel-token 2>/dev/null || echo 'NOT SET')
+          echo 'cert.pem:' \$(ls -la /root/.cloudflared/cert.pem 2>/dev/null || echo 'NOT FOUND')
+          echo '=== SYSTEMD STATUS ==='
+          systemctl status cloudflared-tunnel 2>/dev/null | head -10 || echo 'NO SERVICE'
+          echo '=== PORTS ==='
+          ss -tlnp 2>/dev/null | grep -E ':(8450) ' || echo 'NO PORTS'
+          echo '=== CRONTAB ==='
+          crontab -l 2>/dev/null | grep -v '^#' || echo 'NO CRON'
+          echo '=== START SCRIPT ==='
+          cat /opt/start-tunnel.sh 2>/dev/null || echo 'NO START SCRIPT'
+        " > diagnostics/deploy-result.md 2>&1
 
         echo "=== Diagnostics file size: $(wc -c < diagnostics/deploy-result.md) bytes ==="
-        head -50 diagnostics/deploy-result.md
+        head -80 diagnostics/deploy-result.md
 
     - name: Test HTTPS from runner
       if: always()
@@ -57,10 +82,13 @@ jobs:
         echo "Time: $(date)" >> diagnostics/deploy-result.md
         echo "" >> diagnostics/deploy-result.md
         echo "=== curl test (aishield.tools) ===" >> diagnostics/deploy-result.md
-        curl -sk --max-time 10 https://aishield.tools/api/v1/health >> diagnostics/deploy-result.md 2>&1 || echo "FAILED" >> diagnostics/deploy-result.md
+        curl -sk --max-time 15 https://aishield.tools/api/v1/health >> diagnostics/deploy-result.md 2>&1 || echo "FAILED" >> diagnostics/deploy-result.md
         echo "" >> diagnostics/deploy-result.md
         echo "=== DNS lookup ===" >> diagnostics/deploy-result.md
         dig +short aishield.tools >> diagnostics/deploy-result.md 2>&1 || echo "dig failed" >> diagnostics/deploy-result.md
+        echo "" >> diagnostics/deploy-result.md
+        echo "=== DNS CNAME check ===" >> diagnostics/deploy-result.md
+        dig aishield.tools CNAME +short >> diagnostics/deploy-result.md 2>&1 || echo "no CNAME" >> diagnostics/deploy-result.md
 
     - name: Commit diagnostics to repo
       if: always()
