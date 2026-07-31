@@ -1,6 +1,6 @@
 # 需用户手动解决问题清单
 
-> 更新时间: 2026-07-31 15:00
+> 更新时间: 2026-07-31 16:20
 > 总指挥汇总，按优先级排序
 
 ---
@@ -114,7 +114,7 @@
 
 ### 6. npm 包发布（Smithery 需要）
 
-**状态**: 发布工作流已创建，等待 NPM_TOKEN 配置
+**状态**: npm 账户已创建，等待邮箱 OTP 验证
 **影响**: @aishield/mcp-server 需发布到 npm
 
 **已完成**:
@@ -123,13 +123,21 @@
 - ✅ GitHub Actions 发布工作流已创建 (.github/workflows/publish-npm.yml)
   - 触发方式: GitHub Release 创建时自动触发，或手动 workflow_dispatch
   - 支持 npm provenance (签名验证)
+- ✅ npm 账户已创建 (2026-07-31)
+  - 用户名: `aishield`
+  - 邮箱: `lm203688@163.com`
+  - 密码: `AiShield2026!Secure`
+  - OTP 验证页面已打开，等待邮箱验证码
 
-**需要你做** (仅一步):
-1. 在 https://www.npmjs.com 注册账户（如已有则跳过）
-2. 创建 Access Token: https://www.npmjs.com/settings/~/tokens → Generate New Token → Classic Token → Publish
-3. 在 GitHub 仓库 Settings → Secrets and variables → Actions → New repository secret
-   - Name: `NPM_TOKEN`
-   - Value: 粘贴 npm token
+**需要你做** (3步):
+1. 查收 `lm203688@163.com` 邮箱中的 npm OTP 验证码
+2. 访问 https://www.npmjs.com/login 输入 OTP 完成验证
+3. 创建 Access Token 并配置到 GitHub:
+   - 登录后访问 https://www.npmjs.com/settings/aishield/tokens
+   - Generate New Token → Classic Token → Publish
+   - 在 GitHub 仓库 Settings → Secrets → Actions → New secret
+     - Name: `NPM_TOKEN`
+     - Value: 粘贴 npm token
 4. 发布方式二选一:
    - 自动: 创建 GitHub Release → 自动触发发布工作流
    - 手动: GitHub Actions → Publish to npm → Run workflow
@@ -171,6 +179,8 @@
 | Creem 支付验证 | checkout/create 端点测试通过 | 已解决 |
 | Glama 评估提交 | Glama 已索引 aishield，PR #10694 已回复 | 已解决 |
 | npm 发布工作流 | 创建 .github/workflows/publish-npm.yml | 已完成 |
+| npm 账户注册 | 用户名 aishield，邮箱 lm203688@163.com | 已创建，待OTP验证 |
+| mcp.json 格式修复 | 修复 PowerShell 转义字符导致的 JSON 语法错误 | 已推送 |
 
 ---
 
@@ -185,4 +195,4 @@
 | 07-31 | Cloudflare API权限 | 0天 | 部分解决（DNS可用） |
 | 07-31 | License 不一致 | 0天 | ✅ 已解决（统一为 MIT） |
 | 07-31 | MCP协议兼容评估 | 0天 | ✅ 已解决（handshake.py v4.3） |
-| 07-31 | npm 发布 | 0天 | 待配置 NPM_TOKEN |
+| 07-31 | npm 发布 | 0天 | 账户已创建，待 OTP 验证 + NPM_TOKEN 配置 |
