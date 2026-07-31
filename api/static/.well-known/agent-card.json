@@ -1,4 +1,4 @@
-{
+﻿{
   "name": "AIShield",
   "version": "4.2.0",
   "description": "AI Agent 安全生态基础设施 — OWASP MCP Top 10 对齐，133条安全规则，全链路守护Agent世界",
@@ -160,7 +160,7 @@
     "owasp_version": "2025 v0.1",
     "a2a_protocol": true,
     "mcp_protocol": true,
-    "mcp_protocol_version": "2025-03-26",
+    "mcp_protocol_version": "2026-07-28",
     "chinese_regulations": true,
     "rules_count": 133,
     "owasp_categories": 10
