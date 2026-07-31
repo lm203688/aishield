@@ -1,0 +1,53 @@
+name: Publish to npm
+
+on:
+  release:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'NPM tag (latest or beta)'
+        required: false
+        default: 'latest'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        registry-url: 'https://registry.npmjs.org'
+
+    - name: Install dependencies
+      working-directory: mcp-server
+      run: npm ci
+
+    - name: Build
+      working-directory: mcp-server
+      run: npm run build
+
+    - name: Verify dist
+      working-directory: mcp-server
+      run: |
+        test -f dist/index.js || { echo "dist/index.js missing"; exit 1; }
+        test -f dist/index.d.ts || { echo "dist/index.d.ts missing"; exit 1; }
+        echo "Build output verified"
+
+    - name: Publish to npm
+      working-directory: mcp-server
+      run: npm publish --access public --provenance
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+    - name: Verify publication
+      run: |
+        sleep 10
+        npm view @aishield/mcp-server version || echo "Package may take a few minutes to appear"

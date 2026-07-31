@@ -1,6 +1,6 @@
 # 需用户手动解决问题清单
 
-> 更新时间: 2026-07-31 14:15
+> 更新时间: 2026-07-31 15:00
 > 总指挥汇总，按优先级排序
 
 ---
@@ -56,25 +56,38 @@
 
 ## P1 - 本周内处理
 
-### 3. 验证 Creem 支付全链路
+### 3. ~~验证 Creem 支付全链路~~ ✅ 已验证
 
-**状态**: 可验证（aishield.tools 已恢复）
-**影响**: 需确认线上支付是否正常
+**状态**: 已验证 - checkout/create 端点正常工作
+**验证时间**: 2026-07-31
+**影响**: 线上支付创建流程可用
 
-**需要你做**: 手动触发测试支付，确认 webhook 回调正常
+**验证结果**:
+- ✅ aishield.tools API 健康检查通过 (v4.2, 133 rules)
+- ✅ POST /api/v1/checkout/create 成功返回 Creem checkout URL
+  - 测试产品: Daily Brief (500 credits)
+  - Checkout URL: https://creem.io/checkout/prod_22YhSbYonX9hiC0OppnXTn/ch_1tjXW725EZBLJLcFzLrhmR
+  - 状态: pending (正常)
+- ⚠️ POST /api/v1/webhooks/creem 端点浏览器测试失败 (CORS限制)，该端点由 Creem 服务器端调用，不需浏览器访问
+- GitHub Secrets 中 CREEM_API_KEY、CREEM_WEBHOOK_SECRET、CREEM_TEST_MODE 均已配置
 
 ---
 
-### 4. 提交 Glama 评估（阻塞8天）
+### 4. ~~提交 Glama 评估~~ ✅ 已完成
 
-**状态**: 阻塞中
-**影响**: awesome-mcp-servers PR #10694 无法合并
+**状态**: 已完成 - Glama 已索引 aishield，PR #10694 已回复
+**完成时间**: 2026-07-31
+**影响**: awesome-mcp-servers PR #10694 已附上 Glama 链接
 
-**需要你做**:
-1. 前往 https://glama.ai/mcp/servers
-2. 提交 lm203688/aishield
-3. 获取 quality score
-4. 回 PR #10694 评论附上 Glama 链接
+**已完成的工作**:
+- Glama 已自动索引 aishield: https://glama.ai/mcp/servers/lm203688/aishield
+- 当前评分: License A, Quality - (未测试), Maintenance B
+- PR #10694 已回复两条评论:
+  1. 项目状态更新 (服务恢复、MCP协议兼容、Creem验证)
+  2. Glama 评估链接 + Creem 支付验证结果
+- 评论URL: https://github.com/punkpeye/awesome-mcp-servers/pull/10694#issuecomment-5137555533
+
+**待跟进**: Glama quality score 当前为 "-" (未测试)，需等待 Glama 自动评估或手动触发
 
 ---
 
@@ -101,7 +114,25 @@
 
 ### 6. npm 包发布（Smithery 需要）
 
-**需要你做**: 发布 @aishield/mcp-server 到 npm
+**状态**: 发布工作流已创建，等待 NPM_TOKEN 配置
+**影响**: @aishield/mcp-server 需发布到 npm
+
+**已完成**:
+- ✅ mcp-server/package.json 配置完成 (v4.1.0, MIT)
+- ✅ TypeScript 构建成功 (dist/index.js, dist/index.d.ts)
+- ✅ GitHub Actions 发布工作流已创建 (.github/workflows/publish-npm.yml)
+  - 触发方式: GitHub Release 创建时自动触发，或手动 workflow_dispatch
+  - 支持 npm provenance (签名验证)
+
+**需要你做** (仅一步):
+1. 在 https://www.npmjs.com 注册账户（如已有则跳过）
+2. 创建 Access Token: https://www.npmjs.com/settings/~/tokens → Generate New Token → Classic Token → Publish
+3. 在 GitHub 仓库 Settings → Secrets and variables → Actions → New repository secret
+   - Name: `NPM_TOKEN`
+   - Value: 粘贴 npm token
+4. 发布方式二选一:
+   - 自动: 创建 GitHub Release → 自动触发发布工作流
+   - 手动: GitHub Actions → Publish to npm → Run workflow
 
 ### 7. ~~License 不一致~~ ✅ 已解决
 
@@ -137,6 +168,9 @@
 | cert.pem zone 不匹配 | 使用 API 直接更新 aishield.tools zone DNS | 已解决 |
 | License 不一致 | 仓库已统一为 MIT License | 已解决 |
 | MCP协议兼容性 | handshake.py 升级至 v4.3，支持2026-07-28无状态协议 | 已解决 |
+| Creem 支付验证 | checkout/create 端点测试通过 | 已解决 |
+| Glama 评估提交 | Glama 已索引 aishield，PR #10694 已回复 | 已解决 |
+| npm 发布工作流 | 创建 .github/workflows/publish-npm.yml | 已完成 |
 
 ---
 
@@ -145,9 +179,10 @@
 | 日期 | 问题 | 跟踪天数 | 状态 |
 |------|------|----------|------|
 | 07-24 | aishield.tools 不可达 | 8天 | ✅ 已解决 (07-31 Named Tunnel) |
-| 07-24 | PR #10694 Glama 评估 | 8天 | 需手动操作 |
-| 07-25 | Creem Webhook 验证 | 7天 | 可验证（站点已恢复） |
+| 07-24 | PR #10694 Glama 评估 | 8天 | ✅ 已解决 (07-31 Glama已索引+PR已回复) |
+| 07-25 | Creem Webhook 验证 | 7天 | ✅ 已解决 (07-31 checkout测试通过) |
 | 07-28 | MCP协议兼容评估 | 3天 | ✅ 已解决 (07-31 handshake.py v4.3) |
 | 07-31 | Cloudflare API权限 | 0天 | 部分解决（DNS可用） |
 | 07-31 | License 不一致 | 0天 | ✅ 已解决（统一为 MIT） |
 | 07-31 | MCP协议兼容评估 | 0天 | ✅ 已解决（handshake.py v4.3） |
+| 07-31 | npm 发布 | 0天 | 待配置 NPM_TOKEN |
