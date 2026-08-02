@@ -3,6 +3,12 @@ name: Deploy to Production Server
 on:
   push:
     branches: [ main ]
+  schedule:
+    - cron: '17 */4 * * *'   # 每4小时自愈：定时自动检查+重部署，实现"监测->修复->测试->部署"闭环
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   deploy:
@@ -13,8 +19,26 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    - name: Self-heal health gate (skip deploy if already healthy)
+      if: github.event_name == 'schedule'
+      id: healthgate
+      run: |
+        # "监测"环节：定时任务先检查线上状态，健康则跳过重部署（避免无效重建）
+        code=$(curl -sk -o /tmp/health.json -w '%{http_code}' --max-time 20 https://aishield.tools/api/v1/health || true)
+        echo "health_http=$code"
+        if [ "$code" = "200" ]; then
+          if grep -q '"status": "ok"' /tmp/health.json; then
+            echo "Server healthy (HTTP $code). Skipping redeploy on this cycle."
+            echo "deploy_needed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+        fi
+        echo "Server degraded (HTTP ${code:-unreachable}). Triggering auto-repair deploy."
+        echo "deploy_needed=true" >> "$GITHUB_OUTPUT"
+
     - name: Deploy via SSH
       id: deploy
+      if: steps.healthgate.outputs.deploy_needed != 'false'
       uses: appleboy/ssh-action@v1.0.3
       with:
         host: ${{ secrets.SERVER_HOST }}
