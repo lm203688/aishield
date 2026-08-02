@@ -1,0 +1,78 @@
+name: AIShield Data Flywheel (Batch Scan to Self-Built Database)
+
+# 自动化/数据飞轮：批量采集MCP工具 -> 安全扫描 -> 入库 self-built DB -> 生成报告
+# 生态化/盈利化： 数据即信任，信任即用户，扫描库越大越有权威性与吸引力
+# 原则：Research-Informed（对齐 OWASP Top10 与最新工具）
+
+on:
+  schedule:
+    - cron: '30 5 * * 2,5'   # 每周二、周五 05:30 批量入库
+  workflow_dispatch:
+    inputs:
+      source:
+        description: '数据源 (smithery/glama/pulsemcp/github/all)'
+        default: 'all'
+      limit:
+        description: '每源扫描数量'
+        default: '30'
+      incremental:
+        description: '增量扫描(跳过近7天)'
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: data-scan
+  cancel-in-progress: false
+
+env:
+  BATCH_DB: data/batch_scans.json
+  MONITORED: data/monitored_tools.json
+
+jobs:
+  scan:
+    name: Crawl & Scan & Store
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Run batch scan (数据飞轮增量入库)
+        id: scan
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN || '' }}
+        run: |
+          python -c "from scanner.batch_scanner import *" 2>/dev/null || true
+          python -m py_compile scanner/batch_scanner.py scanner/engine.py scanner/rules.py
+          python -m scanner.batch_scanner --source "${{ inputs.source || 'all' }}" \
+            --limit ${{ inputs.limit || 30 }} --workers 3 --incremental --skip-days 7 \
+            2>&1 | tail -60
+          echo "SCAN_EXIT=$?"
+
+      - name: Regenerate scan report
+        run: |
+          python -m scanner.batch_scanner --report 2>&1 | tail -20
+
+      - name: Commit database update
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "github-actions[full]"
+          git config user.email "github-actions[full]@users.noreply.github.com"
+          git add data/batch_scans.json data/monitored_tools.json data/security_report.md 2>/dev/null
+          if ! git diff --cached --quiet; then
+            git commit -m "auto: 批量扫描入库 [skip ci]"
+            git push origin main
+            echo "DB updated & committed"
+          else
+            echo "No new scan data this cycle"
+          fi
