@@ -1,5 +1,5 @@
 === DIAGNOSTIC ===
-Time: Mon Aug 3 11:21:05 PM CST 2026
+Time: Tue Aug 4 02:11:17 AM CST 2026
 === USER ===
 root
 === GIT LOG ===
@@ -13,41 +13,41 @@ dbcf345 fix: download script from GitHub raw if git reset fails, add script vers
 # 解决 Quick Tunnel 的 error 1014 (CNAME Cross-User Banned) 问题
 #
 === API STATUS ===
-{"status": "ok", "version": "4.2", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 133, "uptime": 1785770466.015068, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup"}OK
+{"status": "ok", "version": "4.2", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 133, "uptime": 1785780677.2286205, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup"}OK
 === CLOUDFLARED PROCESS ===
-root     2779765  0.1  1.3 1294932 27200 ?       Sl   Aug02   3:01 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
-root     2779856  0.1  1.2 1360284 26088 ?       Sl   Aug02   3:00 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
+root     2779765  0.1  1.4 1294932 29160 ?       Sl   Aug02   3:17 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
+root     2779856  0.1  1.2 1360284 25864 ?       Sl   Aug02   3:16 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
 === CLOUDFLARED LOG (last 30 lines) ===
-2026-08-02T06:47:39Z INF |  UDP Connectivity  region1.v2.argotunnel.com  PASS    QUIC connection successful    |
-2026-08-02T06:47:39Z INF |  UDP Connectivity  region2.v2.argotunnel.com  PASS    QUIC connection successful    |
-2026-08-02T06:47:39Z INF |  TCP Connectivity  region1.v2.argotunnel.com  PASS    HTTP/2 connection successful  |
-2026-08-02T06:47:39Z INF |  TCP Connectivity  region2.v2.argotunnel.com  PASS    HTTP/2 connection successful  |
-2026-08-02T06:47:39Z INF |  Cloudflare API    api.cloudflare.com:443     PASS    API is reachable              |
-2026-08-02T06:47:39Z INF |                                                                                     |
-2026-08-02T06:47:39Z INF |  SUMMARY: Environment is healthy. cloudflared will use 'quic' as primary protocol.  |
-2026-08-02T06:47:39Z INF +-------------------------------------------------------------------------------------+
-2026-08-02T06:47:39Z INF precheck component="DNS Resolution" details="DNS Resolved successfully" run_id=990a5a2f-97af-4cbb-95fd-f32d6401f501 status=pass target=region1.v2.argotunnel.com
-2026-08-02T06:47:39Z INF precheck component="DNS Resolution" details="DNS Resolved successfully" run_id=990a5a2f-97af-4cbb-95fd-f32d6401f501 status=pass target=region2.v2.argotunnel.com
-2026-08-02T06:47:39Z INF precheck component="UDP Connectivity" details="QUIC connection successful" run_id=990a5a2f-97af-4cbb-95fd-f32d6401f501 status=pass target=region1.v2.argotunnel.com
-2026-08-02T06:47:39Z INF precheck component="UDP Connectivity" details="QUIC connection successful" run_id=990a5a2f-97af-4cbb-95fd-f32d6401f501 status=pass target=region2.v2.argotunnel.com
-2026-08-02T06:47:39Z INF precheck component="TCP Connectivity" details="HTTP/2 connection successful" run_id=990a5a2f-97af-4cbb-95fd-f32d6401f501 status=pass target=region1.v2.argotunnel.com
-2026-08-02T06:47:39Z INF precheck component="TCP Connectivity" details="HTTP/2 connection successful" run_id=990a5a2f-97af-4cbb-95fd-f32d6401f501 status=pass target=region2.v2.argotunnel.com
-2026-08-02T06:47:39Z INF precheck component="Cloudflare API" details="API is reachable" run_id=990a5a2f-97af-4cbb-95fd-f32d6401f501 status=pass target=api.cloudflare.com:443
-2026-08-02T06:47:39Z INF precheck complete hard_fail=false run_id=990a5a2f-97af-4cbb-95fd-f32d6401f501 suggested_protocol=quic
-2026-08-03T14:19:06Z ERR  error="stream 493 canceled by remote with error code 0" connIndex=1 event=1 ingressRule=0 originService=http://localhost:8450
-2026-08-03T14:19:06Z ERR Request failed error="stream 493 canceled by remote with error code 0" connIndex=1 dest=https://aishield.tools/owasp-mcp-top10-guide/owasp-mcp-top10-guide.html event=0 ip=198.41.192.77 type=http
-2026-08-03T14:19:06Z ERR  error="stream 481 canceled by remote with error code 0" connIndex=1 event=1 ingressRule=0 originService=http://localhost:8450
-2026-08-03T14:19:06Z ERR Request failed error="stream 481 canceled by remote with error code 0" connIndex=1 dest=https://aishield.tools/owasp-mcp-top10-guide/owasp-mcp-top10-guide.html event=0 ip=198.41.192.77 type=http
-2026-08-03T14:19:06Z ERR  error="stream 485 canceled by remote with error code 0" connIndex=1 event=1 ingressRule=0 originService=http://localhost:8450
-2026-08-03T14:19:06Z ERR Request failed error="stream 485 canceled by remote with error code 0" connIndex=1 dest=https://aishield.tools/owasp-mcp-top10-guide/owasp-mcp-top10-guide.html event=0 ip=198.41.192.77 type=http
-2026-08-03T14:19:06Z ERR  error="stream 505 canceled by remote with error code 0" connIndex=1 event=1 ingressRule=0 originService=http://localhost:8450
-2026-08-03T14:19:06Z ERR Request failed error="stream 505 canceled by remote with error code 0" connIndex=1 dest=https://aishield.tools/owasp-mcp-top10-guide/owasp-mcp-top10-guide.html event=0 ip=198.41.192.77 type=http
-2026-08-03T14:19:06Z ERR  error="stream 517 canceled by remote with error code 0" connIndex=1 event=1 ingressRule=0 originService=http://localhost:8450
-2026-08-03T14:19:06Z ERR Request failed error="stream 517 canceled by remote with error code 0" connIndex=1 dest=https://aishield.tools/owasp-mcp-top10-guide/owasp-mcp-top10-guide.html event=0 ip=198.41.192.77 type=http
-2026-08-03T14:19:06Z ERR  error="stream 513 canceled by remote with error code 0" connIndex=1 event=1 ingressRule=0 originService=http://localhost:8450
-2026-08-03T14:19:06Z ERR Request failed error="stream 513 canceled by remote with error code 0" connIndex=1 dest=https://aishield.tools/owasp-mcp-top10-guide/owasp-mcp-top10-guide.html event=0 ip=198.41.192.77 type=http
-2026-08-03T14:19:06Z ERR  error="stream 509 canceled by remote with error code 0" connIndex=1 event=1 ingressRule=0 originService=http://localhost:8450
-2026-08-03T14:19:06Z ERR Request failed error="stream 509 canceled by remote with error code 0" connIndex=1 dest=https://aishield.tools/owasp-mcp-top10-guide/owasp-mcp-top10-guide.html event=0 ip=198.41.192.77 type=http
+2026-08-03T16:49:06Z ERR failed to run the datagram handler error="Application error 0x0 (remote)" connIndex=1 event=0 ip=198.41.192.77
+2026-08-03T16:49:06Z ERR failed to accept incoming stream requests error="failed to accept QUIC stream: Application error 0x0 (remote)" connIndex=1 event=0 ip=198.41.192.77
+2026-08-03T16:49:06Z WRN failed to serve tunnel connection error="datagram manager encountered a failure while serving" connIndex=1 event=0 ip=198.41.192.77
+2026-08-03T16:49:06Z WRN Serve tunnel error error="datagram manager encountered a failure while serving" connIndex=1 event=0 ip=198.41.192.77
+2026-08-03T16:49:06Z INF Retrying connection in up to 1s connIndex=1 event=0 ip=198.41.192.77
+2026-08-03T16:49:07Z WRN Connection terminated error="datagram manager encountered a failure while serving" connIndex=1
+2026-08-03T16:49:26Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=1 event=0 ip=198.41.192.77
+2026-08-03T16:49:26Z INF Registered tunnel connection connIndex=1 connection=98936902-cdf5-4e07-990f-dfa3c4c26b14 event=0 ip=198.41.192.77 location=lax11 protocol=quic
+2026-08-03T17:17:26Z ERR failed to accept incoming stream requests error="failed to accept QUIC stream: timeout: no recent network activity" connIndex=0 event=0 ip=198.41.200.33
+2026-08-03T17:17:26Z ERR failed to run the datagram handler error="timeout: no recent network activity" connIndex=0 event=0 ip=198.41.200.33
+2026-08-03T17:17:26Z WRN failed to serve tunnel connection error="accept stream listener encountered a failure while serving" connIndex=0 event=0 ip=198.41.200.33
+2026-08-03T17:17:26Z WRN Serve tunnel error error="accept stream listener encountered a failure while serving" connIndex=0 event=0 ip=198.41.200.33
+2026-08-03T17:17:26Z INF Retrying connection in up to 1s connIndex=0 event=0 ip=198.41.200.33
+2026-08-03T17:17:28Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=0 event=0 ip=198.41.200.33
+2026-08-03T17:17:29Z INF Registered tunnel connection connIndex=0 connection=fba570ef-3536-42ad-89c2-2e8a702aba9b event=0 ip=198.41.200.33 location=lax01 protocol=quic
+2026-08-03T17:20:31Z ERR failed to run the datagram handler error="timeout: no recent network activity" connIndex=2 event=0 ip=198.41.192.227
+2026-08-03T17:20:31Z ERR failed to accept incoming stream requests error="failed to accept QUIC stream: timeout: no recent network activity" connIndex=2 event=0 ip=198.41.192.227
+2026-08-03T17:20:31Z WRN failed to serve tunnel connection error="datagram manager encountered a failure while serving" connIndex=2 event=0 ip=198.41.192.227
+2026-08-03T17:20:31Z WRN Serve tunnel error error="datagram manager encountered a failure while serving" connIndex=2 event=0 ip=198.41.192.227
+2026-08-03T17:20:31Z INF Retrying connection in up to 1s connIndex=2 event=0 ip=198.41.192.227
+2026-08-03T17:20:32Z WRN Connection terminated error="datagram manager encountered a failure while serving" connIndex=2
+2026-08-03T17:20:46Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=2 event=0 ip=198.41.192.227
+2026-08-03T17:20:53Z ERR failed to accept incoming stream requests error="failed to accept QUIC stream: timeout: no recent network activity" connIndex=2 event=0 ip=198.41.192.227
+2026-08-03T17:20:53Z ERR failed to run the datagram handler error="timeout: no recent network activity" connIndex=2 event=0 ip=198.41.192.227
+2026-08-03T17:20:53Z WRN failed to serve tunnel connection error="control stream encountered a failure while serving" connIndex=2 event=0 ip=198.41.192.227
+2026-08-03T17:20:53Z WRN Serve tunnel error error="control stream encountered a failure while serving" connIndex=2 event=0 ip=198.41.192.227
+2026-08-03T17:20:53Z INF Retrying connection in up to 4s connIndex=2 event=0 ip=198.41.192.227
+2026-08-03T17:20:56Z WRN Connection terminated error="control stream encountered a failure while serving" connIndex=2
+2026-08-03T17:21:14Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=2 event=0 ip=198.41.192.227
+2026-08-03T17:21:14Z INF Registered tunnel connection connIndex=2 connection=6a933062-92da-47c0-b20e-b56d0d6c85f5 event=0 ip=198.41.192.227 location=lax10 protocol=quic
 === DEPLOY LOG ===
 === AIShield Named Tunnel Deployment ===
 [14:46:51] Time: Sun Aug  2 02:46:51 PM CST 2026
@@ -142,11 +142,11 @@ cert.pem: -rw------- 1 root root 282 Jul 28 11:02 /root/.cloudflared/cert.pem
 === SYSTEMD STATUS ===
 ● cloudflared-tunnel.service - Cloudflare Named Tunnel for AIShield
      Loaded: loaded (/etc/systemd/system/cloudflared-tunnel.service; enabled; vendor preset: enabled)
-     Active: active (running) since Sun 2026-08-02 14:47:35 CST; 1 day 8h ago
+     Active: active (running) since Sun 2026-08-02 14:47:35 CST; 1 day 11h ago
    Main PID: 2779855 (start-tunnel.sh)
       Tasks: 10 (limit: 2216)
-     Memory: 20.1M
-        CPU: 3min 551ms
+     Memory: 20.0M
+        CPU: 3min 16.291s
      CGroup: /system.slice/cloudflared-tunnel.service
              ├─2779855 /bin/bash /opt/start-tunnel.sh
              └─2779856 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
@@ -180,12 +180,12 @@ fi
 wait $CF_PID
 
 === HTTPS Test from Runner ===
-Time: Mon Aug  3 15:21:06 UTC 2026
+Time: Mon Aug  3 18:11:17 UTC 2026
 
 === curl test (aishield.tools) ===
-{"status": "ok", "version": "4.2", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 133, "uptime": 1785770466.4482262, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup"}
+{"status": "ok", "version": "4.2", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 133, "uptime": 1785780677.6526408, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup"}
 === DNS lookup ===
-172.67.188.44
 104.21.81.46
+172.67.188.44
 
 === DNS CNAME check ===
