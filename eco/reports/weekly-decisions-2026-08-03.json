@@ -1,0 +1,118 @@
+{
+  "report_date": "2026-08-03",
+  "week": "W31",
+  "week_range": {
+    "start": "2026-07-27",
+    "end": "2026-08-02"
+  },
+  "decisions": {
+    "security_rules": [
+      {
+        "rule": "mcp_credential_flow_anomaly",
+        "description": "检测 MCP 无状态请求中的异常 OAuth 凭证流转",
+        "status": "立即采用",
+        "priority": "P0",
+        "action": "更新 security_middleware.py，新增凭证头异常检测正则"
+      },
+      {
+        "rule": "sandbox_integrity_check",
+        "description": "检测 Agent 尝试访问沙箱外文件或异常系统调用",
+        "status": "立即采用",
+        "priority": "P0",
+        "action": "新增规则类别 sandbox_escape，检测路径遍历 /proc /sys 等敏感目录访问"
+      },
+      {
+        "rule": "multi_turn_injection",
+        "description": "多轮对话上下文一致性检测",
+        "status": "排期",
+        "priority": "P1",
+        "action": "需引入 LLM-as-a-Judge，评估对话中目标偏移和权限渐进提升"
+      },
+      {
+        "rule": "iframe_sandbox_escape",
+        "description": "MCP Apps iframe 沙箱逃逸检测",
+        "status": "排期",
+        "priority": "P1",
+        "action": "研究 iframe 沙箱边界检测方法"
+      },
+      {
+        "rule": "progressive_escalation",
+        "description": "渐进式权限请求检测",
+        "status": "排期",
+        "priority": "P1",
+        "action": "行为模式检测，同一 session 内权限级别变化跟踪"
+      }
+    ],
+    "agent_registration": [],
+    "agent_certification": [],
+    "demand_backlog": [
+      {
+        "id": "DEMAND-001",
+        "title": "MCP 服务器实时扫描 CLI/CI 集成",
+        "source": "竞品差距分析",
+        "priority": "P0",
+        "status": "候选池",
+        "roadmap_match": "Phase 2: GitHub Action"
+      },
+      {
+        "id": "DEMAND-002",
+        "title": "运行时 MCP 流量代理/拦截模式",
+        "source": "竞品差距分析",
+        "priority": "P0",
+        "status": "候选池",
+        "roadmap_match": "proxy.py 已存在，需强化"
+      },
+      {
+        "id": "DEMAND-003",
+        "title": "Cursor/Claude Desktop 插件集成",
+        "source": "竞品差距分析",
+        "priority": "P1",
+        "status": "候选池",
+        "roadmap_match": "Phase 2"
+      },
+      {
+        "id": "DEMAND-004",
+        "title": "MCP 2026-07-28 无状态协议兼容",
+        "source": "协议更新",
+        "priority": "P0",
+        "status": "候选池",
+        "roadmap_match": "核心技术基线"
+      }
+    ],
+    "promotion": {
+      "this_week_topics": [
+        "MCP 无状态化后的安全新战场",
+        "HuggingFace 被入侵的 4 个必要条件"
+      ],
+      "channels": [
+        "Blog",
+        "Reddit r/LocalLLaMA",
+        "Hacker News",
+        "GitHub Discussions"
+      ],
+      "four_principles_compliance": "符合（技术深度、AIShield 能力展示、无硬广、社区价值）"
+    },
+    "ecosystem_maintenance": {
+      "agents_to_remove": [],
+      "agents_to_fix": [],
+      "mcp_connections_to_fix": [],
+      "notes": "所有已注册 Agent 均为测试Agent，无生产Agent需要维护"
+    }
+  },
+  "verification_checklist_for_next_week": [
+    "验证新增 sandbox_escape 检测规则是否正确导入",
+    "验证新增 mcp_credential_flow 检测规则测试用例",
+    "检查 MCP 2026-07-28 Beta SDK 兼容性测试结果",
+    "验证本周推广内容发布后的链接可访问性",
+    "检查 aishield.tools SSL/备案状态是否恢复",
+    "验证 PR #10694 / Glama 提交进展"
+  ],
+  "closed_loop_status": {
+    "breakpoints": [
+      "服务不可达（SSL/备案）导致所有线上数据收集中断，连续 8 天",
+      "无新 Agent 注册，生态停滞",
+      "无 GitHub Issues，用户需求渠道为空"
+    ],
+    "recommendation": "优先修复服务可用性（SSL/备案），否则所有闭环无法正常运转"
+  }
+}

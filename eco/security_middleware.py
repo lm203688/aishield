@@ -137,6 +137,21 @@ HALLUCINATION_PATTERNS = [
     re.compile(r"由于.*?限制.*?(但是|不过|以下是|下面是)"),
 ]
 
+# 沙箱逃逸模式：Agent 尝试访问沙箱外敏感路径
+SANDBOX_ESCAPE_PATTERNS = [
+    re.compile(r"(?i)(\.\./|\.\\|/%2e%2e/|\\x2e\\x2e)"),  # 路径遍历
+    re.compile(r"(?i)(/proc/|/sys/|/dev/|/etc/passwd|/etc/shadow|\\?C:\\Windows\\)"),  # 敏感系统目录
+    re.compile(r"(?i)(/\.env|/\.git/|/\.ssh/|\.bashrc|\.zshrc)"),  # 敏感配置文件
+    re.compile(r"(?i)(os\.system\(|subprocess\.call\(|eval\(|exec\(|__import__\()"),  # 危险系统调用
+]
+
+# MCP 凭证流转异常：无状态请求中的异常凭证头模式
+MCP_CREDENTIAL_PATTERNS = [
+    re.compile(r"(?i)(x-mcp-oauth-token|x-mcp-api-key|mcp-session-id|authorization)\s*:\s*[a-zA-Z0-9_-]{20,}"),
+    re.compile(r"(?i)(bearer\s+[a-zA-Z0-9_-]{20,}|basic\s+[a-zA-Z0-9+/=]{20,})"),
+    re.compile(r"(?i)(access_token|refresh_token|id_token)\s*[=:]\s*[\'\"]?[a-zA-Z0-9_-]{20,}"),
+]
+
 
 # ══════════════════════════════════════════════
 #  scanner 函数结果归一化
@@ -296,6 +311,40 @@ def detect_hallucination(text):
     for pattern in HALLUCINATION_PATTERNS:
         if pattern.search(text):
             findings.append({"type": "hallucination", "pattern": pattern.pattern})
+    return findings
+
+
+def detect_sandbox_escape(text):
+    """
+    检测 Agent 输出中是否包含沙箱逃逸尝试。
+    覆盖路径遍历、敏感系统目录访问、危险系统调用等模式。
+
+    Returns:
+        list: [{type, pattern}] 命中的逃逸模式列表
+    """
+    findings = []
+    if not isinstance(text, str) or not text:
+        return findings
+    for pattern in SANDBOX_ESCAPE_PATTERNS:
+        if pattern.search(text):
+            findings.append({"type": "sandbox_escape", "pattern": pattern.pattern})
+    return findings
+
+
+def detect_mcp_credential_anomaly(text):
+    """
+    检测 MCP 无状态请求中的异常凭证流转模式。
+    覆盖异常 OAuth 头、Token 泄露、跨用户凭证复用指示。
+
+    Returns:
+        list: [{type, pattern}] 命中的凭证异常列表
+    """
+    findings = []
+    if not isinstance(text, str) or not text:
+        return findings
+    for pattern in MCP_CREDENTIAL_PATTERNS:
+        if pattern.search(text):
+            findings.append({"type": "mcp_credential_flow", "pattern": pattern.pattern})
     return findings
 
 
@@ -517,6 +566,28 @@ class SecurityMiddleware:
                         })
                     score_total = min(score_total, inj["score"])
 
+                # 4b. payload 字符串值中的沙箱逃逸检测
+                sb = detect_sandbox_escape(value)
+                if sb:
+                    for s in sb:
+                        risks.append({
+                            "type": "sandbox_escape",
+                            "field": field_path,
+                            "detail": f"疑似沙箱逃逸模式: {s.get('pattern', '')}",
+                        })
+                    score_total = min(score_total, 60)
+
+                # 4c. payload 字符串值中的 MCP 凭证异常检测
+                cred = detect_mcp_credential_anomaly(value)
+                if cred:
+                    for c in cred:
+                        risks.append({
+                            "type": "mcp_credential_flow",
+                            "field": field_path,
+                            "detail": f"疑似 MCP 凭证异常: {c.get('pattern', '')}",
+                        })
+                    score_total = min(score_total, 60)
+
         result = {
             "safe": len(risks) == 0,
             "risks": risks,
@@ -622,6 +693,22 @@ class SecurityMiddleware:
             risks.append({
                 "type": "pii_leak",
                 "detail": f"输出含疑似 PII ({p['type']}): {p['value']}",
+            })
+
+        # 4. 沙箱逃逸检测
+        sandbox_findings = detect_sandbox_escape(text)
+        for s in sandbox_findings:
+            risks.append({
+                "type": "sandbox_escape",
+                "detail": f"疑似沙箱逃逸尝试: {s.get('pattern', '')}",
+            })
+
+        # 5. MCP 凭证流转异常检测
+        credential_findings = detect_mcp_credential_anomaly(text)
+        for c in credential_findings:
+            risks.append({
+                "type": "mcp_credential_flow",
+                "detail": f"疑似 MCP 凭证异常流转: {c.get('pattern', '')}",
             })
 
         # 4. PII 脱敏
@@ -966,5 +1053,25 @@ if __name__ == "__main__":
 
     report2 = mw.get_security_report("agent-test-003", time_range="24h")
     print(f"  agent-test-003 total: {report2['total']}, passed: {report2['passed']}")
+
+    # --- 9. 沙箱逃逸检测 ---
+    print("\n--- 9. 沙箱逃逸检测 ---")
+    r9 = mw.inspect_output("尝试访问 ../../etc/passwd 获取系统信息", agent_id="agent-test-004")
+    print(f"  safe: {r9['safe']}, risks: {len(r9['risks'])}")
+    for risk in r9["risks"]:
+        print(f"    [{risk['type']}] {risk.get('detail', '')[:60]}")
+
+    r9b = mw.inspect_task("执行任务", payload={"cmd": "os.system('rm -rf /')"}, agent_id="agent-test-004")
+    print(f"  payload沙箱逃逸 safe: {r9b['safe']}, risks: {len(r9b['risks'])}")
+
+    # --- 10. MCP 凭证异常检测 ---
+    print("\n--- 10. MCP 凭证异常检测 ---")
+    r10 = mw.inspect_output("x-mcp-oauth-token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9", agent_id="agent-test-005")
+    print(f"  safe: {r10['safe']}, risks: {len(r10['risks'])}")
+    for risk in r10["risks"]:
+        print(f"    [{risk['type']}] {risk.get('detail', '')[:60]}")
+
+    r10b = mw.inspect_task("调用工具", payload={"header": "Authorization: bearer abcdef1234567890abcdef1234567890"}, agent_id="agent-test-005")
+    print(f"  payload凭证异常 safe: {r10b['safe']}, risks: {len(r10b['risks'])}")
 
     print("\n=== 全部测试通过 ===")
