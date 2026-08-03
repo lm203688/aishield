@@ -1,5 +1,5 @@
 === DIAGNOSTIC ===
-Time: Tue Aug 4 05:32:44 AM CST 2026
+Time: Tue Aug 4 05:59:17 AM CST 2026
 === USER ===
 root
 === GIT LOG ===
@@ -13,67 +13,67 @@ dbcf345 fix: download script from GitHub raw if git reset fails, add script vers
 # 解决 Quick Tunnel 的 error 1014 (CNAME Cross-User Banned) 问题
 #
 === API STATUS ===
-{"status": "ok", "version": "4.2", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 133, "uptime": 1785792764.170476, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup"}OK
+{"status": "ok", "version": "4.2", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 133, "uptime": 1785794357.2955856, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup"}OK
 === CLOUDFLARED PROCESS ===
-root     2779765  0.1  1.4 1294932 28856 ?       Sl   Aug02   3:34 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
-root     2779856  0.1  1.2 1360284 25972 ?       Sl   Aug02   3:33 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
+root      261877  0.9  1.9 1294676 39792 ?       Sl   05:59   0:00 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
+root      261986  1.3  1.9 1294676 39648 ?       Sl   05:59   0:00 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
 === CLOUDFLARED LOG (last 30 lines) ===
-2026-08-03T16:49:06Z ERR failed to run the datagram handler error="Application error 0x0 (remote)" connIndex=1 event=0 ip=198.41.192.77
-2026-08-03T16:49:06Z ERR failed to accept incoming stream requests error="failed to accept QUIC stream: Application error 0x0 (remote)" connIndex=1 event=0 ip=198.41.192.77
-2026-08-03T16:49:06Z WRN failed to serve tunnel connection error="datagram manager encountered a failure while serving" connIndex=1 event=0 ip=198.41.192.77
-2026-08-03T16:49:06Z WRN Serve tunnel error error="datagram manager encountered a failure while serving" connIndex=1 event=0 ip=198.41.192.77
-2026-08-03T16:49:06Z INF Retrying connection in up to 1s connIndex=1 event=0 ip=198.41.192.77
-2026-08-03T16:49:07Z WRN Connection terminated error="datagram manager encountered a failure while serving" connIndex=1
-2026-08-03T16:49:26Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=1 event=0 ip=198.41.192.77
-2026-08-03T16:49:26Z INF Registered tunnel connection connIndex=1 connection=98936902-cdf5-4e07-990f-dfa3c4c26b14 event=0 ip=198.41.192.77 location=lax11 protocol=quic
-2026-08-03T17:17:26Z ERR failed to accept incoming stream requests error="failed to accept QUIC stream: timeout: no recent network activity" connIndex=0 event=0 ip=198.41.200.33
-2026-08-03T17:17:26Z ERR failed to run the datagram handler error="timeout: no recent network activity" connIndex=0 event=0 ip=198.41.200.33
-2026-08-03T17:17:26Z WRN failed to serve tunnel connection error="accept stream listener encountered a failure while serving" connIndex=0 event=0 ip=198.41.200.33
-2026-08-03T17:17:26Z WRN Serve tunnel error error="accept stream listener encountered a failure while serving" connIndex=0 event=0 ip=198.41.200.33
-2026-08-03T17:17:26Z INF Retrying connection in up to 1s connIndex=0 event=0 ip=198.41.200.33
-2026-08-03T17:17:28Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=0 event=0 ip=198.41.200.33
-2026-08-03T17:17:29Z INF Registered tunnel connection connIndex=0 connection=fba570ef-3536-42ad-89c2-2e8a702aba9b event=0 ip=198.41.200.33 location=lax01 protocol=quic
-2026-08-03T17:20:31Z ERR failed to run the datagram handler error="timeout: no recent network activity" connIndex=2 event=0 ip=198.41.192.227
-2026-08-03T17:20:31Z ERR failed to accept incoming stream requests error="failed to accept QUIC stream: timeout: no recent network activity" connIndex=2 event=0 ip=198.41.192.227
-2026-08-03T17:20:31Z WRN failed to serve tunnel connection error="datagram manager encountered a failure while serving" connIndex=2 event=0 ip=198.41.192.227
-2026-08-03T17:20:31Z WRN Serve tunnel error error="datagram manager encountered a failure while serving" connIndex=2 event=0 ip=198.41.192.227
-2026-08-03T17:20:31Z INF Retrying connection in up to 1s connIndex=2 event=0 ip=198.41.192.227
-2026-08-03T17:20:32Z WRN Connection terminated error="datagram manager encountered a failure while serving" connIndex=2
-2026-08-03T17:20:46Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=2 event=0 ip=198.41.192.227
-2026-08-03T17:20:53Z ERR failed to accept incoming stream requests error="failed to accept QUIC stream: timeout: no recent network activity" connIndex=2 event=0 ip=198.41.192.227
-2026-08-03T17:20:53Z ERR failed to run the datagram handler error="timeout: no recent network activity" connIndex=2 event=0 ip=198.41.192.227
-2026-08-03T17:20:53Z WRN failed to serve tunnel connection error="control stream encountered a failure while serving" connIndex=2 event=0 ip=198.41.192.227
-2026-08-03T17:20:53Z WRN Serve tunnel error error="control stream encountered a failure while serving" connIndex=2 event=0 ip=198.41.192.227
-2026-08-03T17:20:53Z INF Retrying connection in up to 4s connIndex=2 event=0 ip=198.41.192.227
-2026-08-03T17:20:56Z WRN Connection terminated error="control stream encountered a failure while serving" connIndex=2
-2026-08-03T17:21:14Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=2 event=0 ip=198.41.192.227
-2026-08-03T17:21:14Z INF Registered tunnel connection connIndex=2 connection=6a933062-92da-47c0-b20e-b56d0d6c85f5 event=0 ip=198.41.192.227 location=lax10 protocol=quic
+2026-08-03T21:59:06Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=1 event=0 ip=198.41.200.193
+2026-08-03T21:59:07Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=2 event=0 ip=198.41.200.113
+2026-08-03T21:59:07Z INF Registered tunnel connection connIndex=2 connection=bb7adf6b-c83e-47d5-8238-4dcd961ba20a event=0 ip=198.41.200.113 location=lax01 protocol=quic
+2026-08-03T21:59:08Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=3 event=0 ip=198.41.192.27
+2026-08-03T21:59:08Z INF Registered tunnel connection connIndex=3 connection=d45854dd-9d0b-4c3a-8ade-5f5a210b1fe4 event=0 ip=198.41.192.27 location=lax09 protocol=quic
+2026-08-03T21:59:11Z WRN Failed to dial a quic connection error="failed to dial to edge with quic: timeout: no recent network activity" connIndex=1 event=0 ip=198.41.200.193
+2026-08-03T21:59:11Z INF Retrying connection in up to 2s connIndex=1 event=0 ip=198.41.200.193
+2026-08-03T21:59:12Z WRN Connection terminated error="failed to dial to edge with quic: timeout: no recent network activity" connIndex=1
+2026-08-03T21:59:12Z INF +-------------------------------------------------------------------------------------+
+2026-08-03T21:59:12Z INF |                               CONNECTIVITY PRE-CHECKS                               |
+2026-08-03T21:59:12Z INF +-------------------------------------------------------------------------------------+
+2026-08-03T21:59:12Z INF |  COMPONENT         TARGET                     STATUS  DETAILS                       |
+2026-08-03T21:59:12Z INF |  DNS Resolution    region1.v2.argotunnel.com  PASS    DNS Resolved successfully     |
+2026-08-03T21:59:12Z INF |  DNS Resolution    region2.v2.argotunnel.com  PASS    DNS Resolved successfully     |
+2026-08-03T21:59:12Z INF |  UDP Connectivity  region1.v2.argotunnel.com  PASS    QUIC connection successful    |
+2026-08-03T21:59:12Z INF |  UDP Connectivity  region2.v2.argotunnel.com  PASS    QUIC connection successful    |
+2026-08-03T21:59:12Z INF |  TCP Connectivity  region1.v2.argotunnel.com  PASS    HTTP/2 connection successful  |
+2026-08-03T21:59:12Z INF |  TCP Connectivity  region2.v2.argotunnel.com  PASS    HTTP/2 connection successful  |
+2026-08-03T21:59:12Z INF |  Cloudflare API    api.cloudflare.com:443     PASS    API is reachable              |
+2026-08-03T21:59:12Z INF |                                                                                     |
+2026-08-03T21:59:12Z INF |  SUMMARY: Environment is healthy. cloudflared will use 'quic' as primary protocol.  |
+2026-08-03T21:59:12Z INF +-------------------------------------------------------------------------------------+
+2026-08-03T21:59:12Z INF precheck component="DNS Resolution" details="DNS Resolved successfully" run_id=c5534cc0-c6ca-4914-9e8c-76259858dec9 status=pass target=region1.v2.argotunnel.com
+2026-08-03T21:59:12Z INF precheck component="DNS Resolution" details="DNS Resolved successfully" run_id=c5534cc0-c6ca-4914-9e8c-76259858dec9 status=pass target=region2.v2.argotunnel.com
+2026-08-03T21:59:12Z INF precheck component="UDP Connectivity" details="QUIC connection successful" run_id=c5534cc0-c6ca-4914-9e8c-76259858dec9 status=pass target=region1.v2.argotunnel.com
+2026-08-03T21:59:12Z INF precheck component="UDP Connectivity" details="QUIC connection successful" run_id=c5534cc0-c6ca-4914-9e8c-76259858dec9 status=pass target=region2.v2.argotunnel.com
+2026-08-03T21:59:12Z INF precheck component="TCP Connectivity" details="HTTP/2 connection successful" run_id=c5534cc0-c6ca-4914-9e8c-76259858dec9 status=pass target=region1.v2.argotunnel.com
+2026-08-03T21:59:12Z INF precheck component="TCP Connectivity" details="HTTP/2 connection successful" run_id=c5534cc0-c6ca-4914-9e8c-76259858dec9 status=pass target=region2.v2.argotunnel.com
+2026-08-03T21:59:12Z INF precheck component="Cloudflare API" details="API is reachable" run_id=c5534cc0-c6ca-4914-9e8c-76259858dec9 status=pass target=api.cloudflare.com:443
+2026-08-03T21:59:12Z INF precheck complete hard_fail=false run_id=c5534cc0-c6ca-4914-9e8c-76259858dec9 suggested_protocol=quic
 === DEPLOY LOG ===
 === AIShield Named Tunnel Deployment ===
-[14:46:51] Time: Sun Aug  2 02:46:51 PM CST 2026
-[14:46:51] User: root (UID: 0)
-[14:46:51] === STEP 1: 启动 API (端口 8450) ===
-[14:47:24] API 已在运行
-[14:47:24] API 状态: OK
-[14:47:24] === STEP 2: 安装 cloudflared ===
-[14:47:24] cloudflared 安装路径: /usr/local/bin/cloudflared
-[14:47:24] cloudflared 已安装: cloudflared version 2026.7.3 (built 2026-07-23-09:58 UTC)
-[14:47:24] cloudflared 版本: cloudflared version 2026.7.3 (built 2026-07-23-09:58 UTC)
-[14:47:24] === STEP 3: 检查认证方式 ===
-[14:47:24] cert.pem 存在: -rw------- 1 root root 282 Jul 28 11:02 /root/.cloudflared/cert.pem
-[14:47:24] === STEP 4: 使用 cert.pem 创建 Named Tunnel ===
-[14:47:24] 检查现有 tunnel...
-[14:47:25] 现有 tunnel 列表:
+[05:58:56] Time: Tue Aug  4 05:58:56 AM CST 2026
+[05:58:56] User: root (UID: 0)
+[05:58:56] === STEP 1: 启动 API (端口 8450) ===
+[05:58:58] API 已在运行
+[05:58:58] API 状态: OK
+[05:58:58] === STEP 2: 安装 cloudflared ===
+[05:58:58] cloudflared 安装路径: /usr/local/bin/cloudflared
+[05:58:58] cloudflared 已安装: cloudflared version 2026.7.3 (built 2026-07-23-09:58 UTC)
+[05:58:58] cloudflared 版本: cloudflared version 2026.7.3 (built 2026-07-23-09:58 UTC)
+[05:58:58] === STEP 3: 检查认证方式 ===
+[05:58:58] cert.pem 存在: -rw------- 1 root root 282 Jul 28 11:02 /root/.cloudflared/cert.pem
+[05:58:58] === STEP 4: 使用 cert.pem 创建 Named Tunnel ===
+[05:58:58] 检查现有 tunnel...
+[05:58:59] 现有 tunnel 列表:
 You can obtain more detailed information for each tunnel with `cloudflared tunnel info <name/uuid>`
 ID                                   NAME            CREATED              CONNECTIONS                        
-0c39bcfb-0c96-4858-9025-d54131e062ec aishield-tunnel 2026-07-30T23:21:20Z 4xlax01, 1xlax05, 2xlax08, 1xlax11 
+0c39bcfb-0c96-4858-9025-d54131e062ec aishield-tunnel 2026-07-30T23:21:20Z 4xlax01, 1xlax09, 2xlax10, 1xlax11 
 a956a3fe-ad15-4f1e-8499-8dad27859d3d aishield.tools  2026-06-27T14:20:27Z                                    
 aa3f86b8-01f4-4ce0-83a8-5512219f9003 healthlens      2026-07-28T03:03:32Z                                    
-[14:47:25] Tunnel 已存在: 0c39bcfb-0c96-4858-9025-d54131e062ec
-[14:47:25] 凭证文件: /root/.cloudflared/0c39bcfb-0c96-4858-9025-d54131e062ec.json
-[14:47:25] 凭证文件存在
-[14:47:25] 创建 config.yml...
-[14:47:25] config.yml 已创建:
+[05:58:59] Tunnel 已存在: 0c39bcfb-0c96-4858-9025-d54131e062ec
+[05:58:59] 凭证文件: /root/.cloudflared/0c39bcfb-0c96-4858-9025-d54131e062ec.json
+[05:58:59] 凭证文件存在
+[05:58:59] 创建 config.yml...
+[05:58:59] config.yml 已创建:
 tunnel: 0c39bcfb-0c96-4858-9025-d54131e062ec
 credentials-file: /root/.cloudflared/0c39bcfb-0c96-4858-9025-d54131e062ec.json
 
@@ -81,60 +81,60 @@ ingress:
   - hostname: aishield.tools
     service: http://localhost:8450
   - service: http_status:404
-[14:47:25] 路由 DNS: aishield.tools -> 0c39bcfb-0c96-4858-9025-d54131e062ec.cfargotunnel.com
-[14:47:28] DNS 路由结果: 2026-08-02T06:47:28Z INF aishield.tools.healthlens.cc is already configured to route to your tunnel tunnelID=0c39bcfb-0c96-4858-9025-d54131e062ec
-[14:47:28] === STEP 5: 更新 DNS (API) ===
-[14:47:28] CNAME: aishield.tools -> 0c39bcfb-0c96-4858-9025-d54131e062ec.cfargotunnel.com
-[14:47:28] 更新现有 DNS 记录 (ID: fdc3eba7fdb90436809fe05358eb0f3a)
+[05:58:59] 路由 DNS: aishield.tools -> 0c39bcfb-0c96-4858-9025-d54131e062ec.cfargotunnel.com
+[05:59:00] DNS 路由结果: 2026-08-03T21:59:00Z INF aishield.tools.healthlens.cc is already configured to route to your tunnel tunnelID=0c39bcfb-0c96-4858-9025-d54131e062ec
+[05:59:00] === STEP 5: 更新 DNS (API) ===
+[05:59:00] CNAME: aishield.tools -> 0c39bcfb-0c96-4858-9025-d54131e062ec.cfargotunnel.com
+[05:59:01] 更新现有 DNS 记录 (ID: fdc3eba7fdb90436809fe05358eb0f3a)
 DNS 更新: OK
-[14:47:29] 设置 SSL 模式为 Full...
+[05:59:02] 设置 SSL 模式为 Full...
 SSL: 跳过
-[14:47:30] === STEP 6: 启动 Tunnel ===
-[14:47:33] 启动 Named Tunnel (cert 模式)...
-[14:47:33] 使用 config: /root/.cloudflared/config.yml
-[14:47:33] cloudflared PID: 2779765
-[14:47:35] Tunnel 连接已建立!
-[14:47:35] --- cloudflared 日志 (最后 15 行) ---
-2026-08-02T06:47:33Z INF GOOS: linux, GOVersion: go1.26.4, GoArch: amd64
-2026-08-02T06:47:33Z INF Settings: map[config:/root/.cloudflared/config.yml cred-file:/root/.cloudflared/0c39bcfb-0c96-4858-9025-d54131e062ec.json credentials-file:/root/.cloudflared/0c39bcfb-0c96-4858-9025-d54131e062ec.json]
-2026-08-02T06:47:33Z INF cloudflared will not automatically update if installed by a package manager.
-2026-08-02T06:47:33Z INF Generated Connector ID: 6ccbb49a-5a22-4af8-aec6-f7fa852b258f
-2026-08-02T06:47:33Z INF Initial protocol quic
-2026-08-02T06:47:33Z INF ICMP proxy will use 10.0.0.11 as source for IPv4
-2026-08-02T06:47:33Z INF ICMP proxy will use fe80::5054:ff:fe13:e120 in zone eth0 as source for IPv6
-2026-08-02T06:47:33Z INF ICMP proxy will use 10.0.0.11 as source for IPv4
-2026-08-02T06:47:33Z INF ICMP proxy will use fe80::5054:ff:fe13:e120 in zone eth0 as source for IPv6
-2026-08-02T06:47:33Z INF Starting metrics server on 127.0.0.1:20241/metrics
-2026-08-02T06:47:33Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=0 event=0 ip=198.41.200.33
-2026-08-02T06:47:33Z INF Registered tunnel connection connIndex=0 connection=dab2d2a7-fd38-4971-99bd-ef317d4460ce event=0 ip=198.41.200.33 location=lax01 protocol=quic
-2026-08-02T06:47:33Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=1 event=0 ip=198.41.192.77
-2026-08-02T06:47:34Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=2 event=0 ip=198.41.192.227
-2026-08-02T06:47:34Z INF Registered tunnel connection connIndex=1 connection=50cf186e-37dd-476d-bbb7-178cd61c0e15 event=0 ip=198.41.192.77 location=lax11 protocol=quic
-[14:47:35] === STEP 7: 持久化 ===
-[14:47:35] systemd 服务已配置
-[14:47:35] Cron 保活已设置
-[14:47:35] === STEP 8: 验证 ===
-[14:47:35] --- API (localhost:8450) ---
+[05:59:02] === STEP 6: 启动 Tunnel ===
+[05:59:05] 启动 Named Tunnel (cert 模式)...
+[05:59:05] 使用 config: /root/.cloudflared/config.yml
+[05:59:05] cloudflared PID: 261877
+[05:59:07] Tunnel 连接已建立!
+[05:59:07] --- cloudflared 日志 (最后 15 行) ---
+2026-08-03T21:59:05Z INF GOOS: linux, GOVersion: go1.26.4, GoArch: amd64
+2026-08-03T21:59:05Z INF Settings: map[config:/root/.cloudflared/config.yml cred-file:/root/.cloudflared/0c39bcfb-0c96-4858-9025-d54131e062ec.json credentials-file:/root/.cloudflared/0c39bcfb-0c96-4858-9025-d54131e062ec.json]
+2026-08-03T21:59:05Z INF cloudflared will not automatically update if installed by a package manager.
+2026-08-03T21:59:05Z INF Generated Connector ID: 91aae3f2-6b5a-4e2d-b525-2b544dd4bd12
+2026-08-03T21:59:05Z INF Initial protocol quic
+2026-08-03T21:59:06Z INF ICMP proxy will use 10.0.0.11 as source for IPv4
+2026-08-03T21:59:06Z INF ICMP proxy will use fe80::5054:ff:fe13:e120 in zone eth0 as source for IPv6
+2026-08-03T21:59:06Z INF ICMP proxy will use 10.0.0.11 as source for IPv4
+2026-08-03T21:59:06Z INF ICMP proxy will use fe80::5054:ff:fe13:e120 in zone eth0 as source for IPv6
+2026-08-03T21:59:06Z INF Starting metrics server on 127.0.0.1:20241/metrics
+2026-08-03T21:59:06Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=0 event=0 ip=198.41.192.57
+2026-08-03T21:59:06Z INF Registered tunnel connection connIndex=0 connection=3d3bb468-9335-4327-8bf7-e8872bfa0f79 event=0 ip=198.41.192.57 location=lax10 protocol=quic
+2026-08-03T21:59:06Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=1 event=0 ip=198.41.200.193
+2026-08-03T21:59:07Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=2 event=0 ip=198.41.200.113
+2026-08-03T21:59:07Z INF Registered tunnel connection connIndex=2 connection=bb7adf6b-c83e-47d5-8238-4dcd961ba20a event=0 ip=198.41.200.113 location=lax01 protocol=quic
+[05:59:07] === STEP 7: 持久化 ===
+[05:59:08] systemd 服务已配置
+[05:59:08] Cron 保活已设置
+[05:59:08] === STEP 8: 验证 ===
+[05:59:08] --- API (localhost:8450) ---
  OK
-[14:47:35] --- cloudflared 进程 ---
-root     2779765  4.5  1.9 1294420 38224 ?       Sl   14:47   0:00 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
-root     2779856  0.0  1.0 1292484 21440 ?       Rl   14:47   0:00 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
-[14:47:35] --- aishield.tools ---
+[05:59:08] --- cloudflared 进程 ---
+root      261877  3.3  1.9 1294420 39268 ?       Sl   05:59   0:00 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
+root      261986  0.0  1.3 1292484 27556 ?       Rl   05:59   0:00 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
+[05:59:08] --- aishield.tools ---
  OK
-[14:47:37] --- DNS CNAME ---
-[14:47:38] --- DNS A ---
-104.21.81.46
+[05:59:10] --- DNS CNAME ---
+[05:59:10] --- DNS A ---
 172.67.188.44
-[14:47:38] === 部署汇总 ===
-[14:47:38] Tunnel Mode: cert
-[14:47:38] Tunnel ID: 0c39bcfb-0c96-4858-9025-d54131e062ec
-[14:47:38] API: http://localhost:8450
-[14:47:38] 域名: https://aishield.tools
-[14:47:38] cloudflared: /usr/local/bin/cloudflared
-[14:47:38] PID: 2779765
-[14:47:38] Config: /root/.cloudflared/config.yml
-[14:47:38] CNAME: 0c39bcfb-0c96-4858-9025-d54131e062ec.cfargotunnel.com
-[14:47:38] 状态: Named Tunnel (cert 模式) 已配置
+104.21.81.46
+[05:59:10] === 部署汇总 ===
+[05:59:10] Tunnel Mode: cert
+[05:59:10] Tunnel ID: 0c39bcfb-0c96-4858-9025-d54131e062ec
+[05:59:10] API: http://localhost:8450
+[05:59:10] 域名: https://aishield.tools
+[05:59:10] cloudflared: /usr/local/bin/cloudflared
+[05:59:10] PID: 261877
+[05:59:10] Config: /root/.cloudflared/config.yml
+[05:59:10] CNAME: 0c39bcfb-0c96-4858-9025-d54131e062ec.cfargotunnel.com
+[05:59:10] 状态: Named Tunnel (cert 模式) 已配置
 === TUNNEL INFO ===
 Tunnel ID: NOT SET
 Token File: NOT SET
@@ -142,14 +142,14 @@ cert.pem: -rw------- 1 root root 282 Jul 28 11:02 /root/.cloudflared/cert.pem
 === SYSTEMD STATUS ===
 ● cloudflared-tunnel.service - Cloudflare Named Tunnel for AIShield
      Loaded: loaded (/etc/systemd/system/cloudflared-tunnel.service; enabled; vendor preset: enabled)
-     Active: active (running) since Sun 2026-08-02 14:47:35 CST; 1 day 14h ago
-   Main PID: 2779855 (start-tunnel.sh)
-      Tasks: 10 (limit: 2216)
-     Memory: 19.9M
-        CPU: 3min 33.150s
+     Active: active (running) since Tue 2026-08-04 05:59:08 CST; 8s ago
+   Main PID: 261978 (start-tunnel.sh)
+      Tasks: 9 (limit: 2216)
+     Memory: 17.9M
+        CPU: 128ms
      CGroup: /system.slice/cloudflared-tunnel.service
-             ├─2779855 /bin/bash /opt/start-tunnel.sh
-             └─2779856 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
+             ├─261978 /bin/bash /opt/start-tunnel.sh
+             └─261986 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
 === PORTS ===
 LISTEN 0      5            0.0.0.0:8450       0.0.0.0:*    users:(("python3",pid=2590363,fd=3))                                                 
 === CRONTAB ===
@@ -180,10 +180,10 @@ fi
 wait $CF_PID
 
 === HTTPS Test from Runner ===
-Time: Mon Aug  3 21:32:44 UTC 2026
+Time: Mon Aug  3 21:59:17 UTC 2026
 
 === curl test (aishield.tools) ===
-{"status": "ok", "version": "4.2", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 133, "uptime": 1785792764.761538, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup"}
+{"status": "ok", "version": "4.2", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 133, "uptime": 1785794358.3282268, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup"}
 === DNS lookup ===
 172.67.188.44
 104.21.81.46
