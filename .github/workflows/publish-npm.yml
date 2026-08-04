@@ -183,6 +183,8 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           TAG="${{ github.event.inputs.npm_tag || 'latest' }}"
+          echo "Authenticated npm user (whoami):"
+          npm whoami 2>&1 || echo "(npm whoami failed — token likely invalid/expired/read-only)"
           if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
             echo "演练模式，不真正发布"
             npm publish --access public --dry-run
@@ -191,13 +193,19 @@ jobs:
           set +e
           OUT=$(npm publish --access public --provenance --tag "$TAG" 2>&1)
           CODE=$?
+          # provenance 需要正确的 OIDC 配置；个别 token 无法签名时退回无 provenance 发布
+          if [ $CODE -ne 0 ] && echo "$OUT" | grep -qiE "provenance|E402|ENOPROV|sigstore"; then
+            echo "::warning::provenance 签名失败，退回无 --provenance 发布"
+            OUT=$(npm publish --access public --tag "$TAG" 2>&1)
+            CODE=$?
+          fi
           set -e
           echo "$OUT"
           if [ $CODE -ne 0 ]; then
-            # 首次发布 scoped 包时最常见的失败是 scope 组织不存在
-            if echo "$OUT" | grep -qiE "403|Forbidden|scope|not found"; then
-              echo "::error::发布被拒。若包名为 @scope/name，需先在 npmjs.com 创建同名组织（免费），"
-              echo "::error::或改用未加 scope 的包名后重试。"
+            if echo "$OUT" | grep -qiE "403|Forbidden|scope|not found|404"; then
+              echo "::error::发布被拒。可能原因："
+              echo "::error::  1) scoped 包需先在 npmjs.com 创建同名组织（本包已改为非 scoped，通常不适用）；"
+              echo "::error::  2) NPM_TOKEN 无效/过期/只读/作用域不符——请在 npmjs.com 重新生成 Automation token 并更新仓库 Secret NPM_TOKEN。"
             fi
             exit $CODE
           fi
