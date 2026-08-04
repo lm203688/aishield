@@ -51,7 +51,7 @@ def _pkg_field(field: str, fallback: str) -> str:
     """从 package.json 读取字段。
 
     这里刻意不硬编码包名：曾经硬编码成 @aishield/mcp-scanner，
-    而真实包名是 @aishield/mcp-server —— 追踪器于是长期在
+    而真实包名是 aishield-mcp-server —— 追踪器于是长期在
     查询一个根本不存在的包，「未发布」这条待办从一开始就查错了对象。
     单一事实来源 = package.json 本身。
     """
@@ -62,7 +62,7 @@ def _pkg_field(field: str, fallback: str) -> str:
         return fallback
 
 
-NPM_PKG = os.environ.get("NPM_PKG") or _pkg_field("name", "@aishield/mcp-server")
+NPM_PKG = os.environ.get("NPM_PKG") or _pkg_field("name", "aishield-mcp-server")
 
 
 def _now() -> str:

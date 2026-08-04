@@ -25,7 +25,7 @@ title: AIShield —— AI Agent 安全扫描
   "mainEntity": [
     { "@type": "Question", "name": "AIShield 是什么？", "acceptedAnswer": { "@type": "Answer", "text": "AIShield 是一个开源、本地优先的 AI Agent 安全扫描器与信任机构，检测工具投毒、提示注入、密钥泄露与供应链风险，覆盖 141 个风险类别，对齐 OWASP MCP Top 10 与 OWASP Agentic AI Top 10。" } },
     { "@type": "Question", "name": "AIShield 免费吗？是否本地运行？", "acceptedAnswer": { "@type": "Answer", "text": "是的。AIShield 开源、免费，并完全离线/本地运行——代码不会上传到云端，与 Claude Security、Microsoft MDASH 等云端扫描器不同。" } },
-    { "@type": "Question", "name": "如何使用 AIShield？", "acceptedAnswer": { "@type": "Answer", "text": "以 MCP Server 运行 npx @aishield/mcp-server，或调用 API https://aishield.tools/api/v1/health，或将安全门禁集成进 CI/CD。" } },
+    { "@type": "Question", "name": "如何使用 AIShield？", "acceptedAnswer": { "@type": "Answer", "text": "以 MCP Server 运行 npx aishield-mcp-server，或调用 API https://aishield.tools/api/v1/health，或将安全门禁集成进 CI/CD。" } },
     { "@type": "Question", "name": "AIShield 是否覆盖 OWASP Agentic AI Top 10？", "acceptedAnswer": { "@type": "Answer", "text": "覆盖。AIShield 的检测同时映射 OWASP MCP Top 10 与 OWASP Agentic AI Top 10（ASI01–ASI10）：目标劫持、工具滥用、身份权限滥用、供应链、非预期代码执行、记忆/上下文投毒、不安全的智能体间通信、级联失败、人-智能体信任滥用、流氓智能体。" } }
   ]
 }
@@ -42,7 +42,7 @@ title: AIShield —— AI Agent 安全扫描
 作为 MCP Server 接入你的 Agent：
 
 ```bash
-npx @aishield/mcp-server
+npx aishield-mcp-server
 ```
 
 或直接调用安全数据源 API：
@@ -91,7 +91,7 @@ AIShield 为 agent 与 LLM 提供标准化发现入口：
 | [.well-known/agent-card.json](./.well-known/agent-card.json) | A2A Agent Card（A2A 协议身份/技能声明） |
 | [.well-known/mcp/server-card.json](./.well-known/mcp/server-card.json) | MCP Server Card（工具清单） |
 | `https://aishield.tools/api/v1/mcp` | MCP 远程端点（streamable-http） |
-| `npx @aishield/mcp-server` | 本地 MCP Server（stdio） |
+| `npx aishield-mcp-server` | 本地 MCP Server（stdio） |
 
 ---
 

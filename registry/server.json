@@ -13,7 +13,7 @@
     {
       "registryType": "npm",
       "registryBaseUrl": "https://registry.npmjs.org",
-      "identifier": "@aishield/mcp-server",
+      "identifier": "aishield-mcp-server",
       "version": "4.2.0",
       "transport": {
         "type": "stdio"

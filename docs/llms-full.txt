@@ -24,7 +24,7 @@ AIShield protects AI agents and the MCP (Model Context Protocol) tools they call
 
 ## 2. How to use AIShield
 
-- **MCP server (stdio):** `npx @aishield/mcp-server` — connects to any MCP-capable agent (Claude, Cursor, etc.).
+- **MCP server (stdio):** `npx aishield-mcp-server` — connects to any MCP-capable agent (Claude, Cursor, etc.).
 - **MCP remote (streamable-http):** `https://aishield.tools/api/v1/mcp`
 - **REST API:** `https://aishield.tools/api/v1/health`
 - **A2A Agent Card:** `https://aishield.tools/.well-known/agent-card.json`

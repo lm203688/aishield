@@ -7,7 +7,7 @@
  * 6 tools: scan / guardrail / prompt_check / banned_words / rug_pull / handshake
  * 
  * Usage:
- *   npx @aishield/mcp-server
+ *   npx aishield-mcp-server
  * 
  * Env:
  *   AISHIELD_API_URL  — backend API URL (default: https://api.aishield.tools)

@@ -43,7 +43,7 @@ TZ = timezone(timedelta(hours=8))
 PLATFORMS = {
     "smithery": {
         "name": "Smithery.ai",
-        "url": "https://smithery.ai/server/@aishield/mcp-server",
+        "url": "https://smithery.ai/server/aishield-mcp-server",
         "auto": True,
         "method": "yaml",
         "yaml_file": "mcp-server/smithery.yaml",
@@ -185,7 +185,7 @@ def generate_awesome_pr_body(manifest):
   "mcpServers": {{
     "aishield": {{
       "command": "npx",
-      "args": ["-y", "@aishield/mcp-server"]
+      "args": ["-y", "aishield-mcp-server"]
     }}
   }}
 }}

@@ -21,7 +21,7 @@
   "documentation": "https://aishield.tools/docs",
   "installation": {
     "type": "npx",
-    "command": "npx @aishield/mcp-server"
+    "command": "npx aishield-mcp-server"
   },
   "endpoints": {
     "http": {

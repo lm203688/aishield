@@ -1,5 +1,5 @@
-﻿{
-  "name": "@aishield/mcp-server",
+{
+  "name": "aishield-mcp-server",
   "version": "4.2.0",
   "description": "AIShield - OWASP MCP Top 10 aligned security scanner. Scan MCP servers, detect tool poisoning, prompt injection, and supply chain risks.",
   "main": "dist/index.js",
@@ -25,9 +25,17 @@
     "start": "node dist/index.js"
   },
   "keywords": [
-    "mcp", "mcp-server", "security", "scanner", "owasp",
-    "ai-safety", "tool-poisoning", "prompt-injection",
-    "supply-chain", "agent-security", "aishield"
+    "mcp",
+    "mcp-server",
+    "security",
+    "scanner",
+    "owasp",
+    "ai-safety",
+    "tool-poisoning",
+    "prompt-injection",
+    "supply-chain",
+    "agent-security",
+    "aishield"
   ],
   "author": "AIShield Team",
   "license": "MIT",

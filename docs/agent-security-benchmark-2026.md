@@ -113,7 +113,7 @@ mid-2026 的 MCP/Agent 安全品类已显著拥挤，分三派：
 
 ## 6. 采用方式
 
-1. **开发者**：`npx @aishield/mcp-server scan <repo>` 或自托管 `python api/server.py`
+1. **开发者**：`npx aishield-mcp-server scan <repo>` 或自托管 `python api/server.py`
 2. **Agent 市场**：调用 Trust API (`/api/v1/trust/score/{agent_id}`) 对挂牌 agent 出安全证书
 3. **CI**：消费 `/api/v1/export/sarif` 接入 GitHub Code Scanning
 4. **安全团队**：订阅 CycloneDX SBOM 做供应链持续监控

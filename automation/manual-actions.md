@@ -115,7 +115,7 @@
 ### 6. npm 包发布（Smithery 需要）
 
 **状态**: npm 账户已创建，等待邮箱 OTP 验证
-**影响**: @aishield/mcp-server 需发布到 npm
+**影响**: aishield-mcp-server 需发布到 npm
 
 **已完成**:
 - ✅ mcp-server/package.json 配置完成 (v4.1.0, MIT)

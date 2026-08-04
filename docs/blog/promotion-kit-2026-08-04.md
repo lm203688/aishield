@@ -71,7 +71,7 @@ That's the gap cloud scanners can't close.
 
 **Tweet 8**
 Works in CI today:
-`npx @aishield/mcp-server scan ./my-agent`
+`npx aishield-mcp-server scan ./my-agent`
 → SARIF for GitHub Code Scanning + CycloneDX SBOM for your SCA pipeline.
 
 Or self-host `api/server.py` and call the Trust API from your own registry.
@@ -79,7 +79,7 @@ Or self-host `api/server.py` and call the Trust API from your own registry.
 **Tweet 9**
 Open source. Free. No account, no upload, no telemetry.
 
-`npx @aishield/mcp-server`
+`npx aishield-mcp-server`
 github.com/lm203688/aishield
 aishield.tools
 
@@ -127,7 +127,7 @@ Two things bug me about most of them:
 
 We built AIShield to be the opposite: 100% local, stdlib-only (no install baggage), covers both MCP Top 10 and Agentic AI Top 10 (201 rules), emits CycloneDX SBOM + SARIF for CI, and acts as a neutral trust authority (cert L1–L3, 0–100 Trust Score, badge, Trust API, x402 billing).
 
-Open source, free, no account. `npx @aishield/mcp-server`.
+Open source, free, no account. `npx aishield-mcp-server`.
 
 Posting because I want feedback from people running agents in prod: what's your real trust model for third-party agents/skills your system calls?
 
@@ -148,7 +148,7 @@ AIShield:
 - Ships a neutral trust registry: certify agents (L1–L3), 0–100 Trust Score, embeddable badge, machine-callable Trust API, x402/USDC billing for agent-economy transactions
 - Agent-native: llms.txt + A2A Agent Card + MCP server card so other agents can find/vet it
 
-`npx @aishield/mcp-server scan ./your-server`
+`npx aishield-mcp-server scan ./your-server`
 Self-host: `api/server.py`
 
 GitHub: https://github.com/lm203688/aishield

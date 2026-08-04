@@ -5,7 +5,7 @@ OWASP MCP Top 10 aligned security scanner for AI Agent tools.
 ## Install
 
 ```bash
-npx @aishield/mcp-server
+npx aishield-mcp-server
 ```
 
 ## Claude Desktop / Cursor / Windsurf
@@ -15,7 +15,7 @@ npx @aishield/mcp-server
   "mcpServers": {
     "aishield": {
       "command": "npx",
-      "args": ["-y", "@aishield/mcp-server"],
+      "args": ["-y", "aishield-mcp-server"],
       "env": { "AISHIELD_API_KEY": "your-key" }
     }
   }

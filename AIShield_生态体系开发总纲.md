@@ -251,7 +251,7 @@
 - 现有MCP Server优化（3工具 → 10+工具）
 - 支持MCP 2026-07-28新规范（无状态/能力发现/Tasks/Elicitation）
 - 远程模式支持（URL字段，免安装）
-- npm包发布（@aishield/mcp-server）
+- npm包发布（aishield-mcp-server）
 
 **A2A协议：**
 - 兼容Google A2A v1.0规范
@@ -276,7 +276,7 @@
 **P0 交付物（第1-4周）：**
 - [ ] 扫描引擎对齐OWASP MCP Top 10（50+规则）
 - [ ] 上架7个MCP Registry（Smithery/Glama/mcp.so/PulseMCP/MCPMarket/ToolPlex/官方Registry）
-- [ ] npm包 @aishield/mcp-server 发布
+- [ ] npm包 aishield-mcp-server 发布
 - [ ] PyPI包 aishield SDK 发布
 - [ ] GitHub公开仓库创建 + GitHub Action上架Marketplace
 - [ ] MCP远程模式支持

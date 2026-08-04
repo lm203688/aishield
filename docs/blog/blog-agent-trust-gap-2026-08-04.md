@@ -29,6 +29,6 @@ The attack surface isn't "did the chatbot say something wrong." It's: did the ag
 - **CI-ready:** CycloneDX SBOM + SARIF 2.1.0 for GitHub Code Scanning.
 - **Agent-native & discoverable:** llms.txt, an A2A Agent Card, and an MCP server card, so other agents can find and vet it.
 
-AIShield is open source and free. `npx @aishield/mcp-server` — or self-host `api/server.py`. The trust gap is real; closing it shouldn't require sending your agents to someone else's cloud.
+AIShield is open source and free. `npx aishield-mcp-server` — or self-host `api/server.py`. The trust gap is real; closing it shouldn't require sending your agents to someone else's cloud.
 
 — AIShield Project · https://aishield.tools · https://github.com/lm203688/aishield

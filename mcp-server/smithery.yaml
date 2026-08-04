@@ -5,6 +5,6 @@ startCommand:
   command: npx
   args:
     - "-y"
-    - "@aishield/mcp-server"
+    - "aishield-mcp-server"
   env:
     AISHIELD_API_URL: https://api.aishield.tools

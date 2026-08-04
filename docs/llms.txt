@@ -12,10 +12,10 @@ Beyond scanning, AIShield is a **trust authority**: it defines an open **Trust S
 - Trust Standard v0.1: https://aishield.tools/aishield-trust-standard-v0.1
 - Agent Ecosystem Directions: https://aishield.tools/agent-ecology-evolution-directions
 - GitHub: https://github.com/lm203688/aishield
-- Install: `npx @aishield/mcp-server`
+- Install: `npx aishield-mcp-server`
 
 ## For AI Agents (machine-readable)
-- MCP server (stdio): `npx @aishield/mcp-server`
+- MCP server (stdio): `npx aishield-mcp-server`
 - MCP remote (streamable-http): https://aishield.tools/api/v1/mcp
 - A2A Agent Card: https://aishield.tools/.well-known/agent-card.json
 - MCP server card: https://aishield.tools/.well-known/mcp/server-card.json

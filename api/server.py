@@ -781,7 +781,7 @@ class AIShieldHandler(BaseHTTPRequestHandler):
                     "POST /api/v1/webhooks/creem — Creem payment webhook",
                 ],
                 "docs": "https://aishield.tools/docs",
-                "mcp_install": "npx @aishield/mcp-server",
+                "mcp_install": "npx aishield-mcp-server",
             })
             return
 

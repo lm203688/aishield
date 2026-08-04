@@ -25,7 +25,7 @@
 - [x] 发布 MCP Server 到 Smithery.ai 目录（lm203688/aishield）
 - [x] 提交 Cursor Directory（等待安全扫描）
 - [x] 配置 Glama.ai Topics（等待爬虫索引）
-- [ ] 发布 `@aishield/mcp-server` npm 包（本地 stdio wrapper）
+- [ ] 发布 `aishield-mcp-server` npm 包（本地 stdio wrapper）
 - [ ] 申请 Claude Desktop 官方推荐
 - [ ] 申请 VS Code Copilot MCP 集成
 

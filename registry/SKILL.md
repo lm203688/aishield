@@ -172,7 +172,7 @@ tags: [security, mcp, owasp, scanner, agent-safety, prompt-injection, compliance
 ### MCP 协议端点
 AIShield 同时支持 MCP StreamableHTTP 协议：
 - 端点：`/api/v1/mcp`
-- 安装命令：`npx @aishield/mcp-server`
+- 安装命令：`npx aishield-mcp-server`
 - 支持 `initialize`、`tools/list`、`tools/call` 等 MCP 标准方法
 
 ### 自定义 API 地址
