@@ -1,5 +1,5 @@
 """
-AIShield 扫描规则 v4.0 — 严格对齐 OWASP MCP Top 10 (2025 v0.1)
+AIShield 扫描规则 v4.2 — 双维对齐 OWASP MCP Top 10 (2025 v0.1) + OWASP Agentic AI Top 10 (2025)
 
 OWASP MCP Top 10 (2025 v0.1) 真实映射:
   MCP01 - Improper Token & Secret Management (令牌管理不当与密钥暴露)
@@ -13,7 +13,7 @@ OWASP MCP Top 10 (2025 v0.1) 真实映射:
   MCP09 - Shadow MCP Servers (影子MCP服务器)
   MCP10 - Context Injection & Over-Sharing (上下文注入与过度共享)
 
-规则统计目标: 10类 × 6条 = 60+ 规则
+规则统计目标: MCP 10类 × 6条 + Agentic(AIS) 10类 × 6条 = 120+ 规则
 """
 
 import re
@@ -350,6 +350,193 @@ ZH_PROMPT_INJECTION_RULES = {
 }
 
 # ============================================================
+# OWASP Agentic AI Top 10 (2025) 真实映射
+# 与 MCP Top 10 并列，构成 "MCP + Agentic" 双维检测体系
+# ============================================================
+OWASP_AGENTIC_AI_TOP10 = {
+    "ASI01": {
+        "name": "Goal and Instruction Manipulation",
+        "name_cn": "目标与指令操纵",
+        "severity": "critical",
+        "description": "通过提示注入或上下文操纵篡改Agent的目标、计划与决策边界"
+    },
+    "ASI02": {
+        "name": "Tool Misuse",
+        "name_cn": "工具滥用",
+        "severity": "critical",
+        "description": "Agent调用工具超出授权范围或用于恶意目的(邮件/支付/文件系统)"
+    },
+    "ASI03": {
+        "name": "Excessive Agency",
+        "name_cn": "过度代理",
+        "severity": "high",
+        "description": "Agent拥有超出必要的最小权限，或在无人值守下自动执行高危操作"
+    },
+    "ASI04": {
+        "name": "Memory Manipulation",
+        "name_cn": "记忆操纵与投毒",
+        "severity": "high",
+        "description": "对共享记忆/知识库/RAG的读写缺乏校验，导致记忆投毒与跨会话污染"
+    },
+    "ASI05": {
+        "name": "Agent Identity and Trust",
+        "name_cn": "智能体身份与信任",
+        "severity": "high",
+        "description": "Agent间缺乏身份认证与信任锚定，可被伪造身份或冒名调用"
+    },
+    "ASI06": {
+        "name": "Agent Communication and Supply Chain",
+        "name_cn": "智能体通信与供应链",
+        "severity": "high",
+        "description": "接入未验证的MCP/A2A服务器或第三方工具，形成供应链攻击面"
+    },
+    "ASI07": {
+        "name": "Unbounded Resource Consumption",
+        "name_cn": "无限制资源消耗",
+        "severity": "medium",
+        "description": "缺少迭代、Token、并发与超时上限，导致失控的成本与拒绝服务"
+    },
+    "ASI08": {
+        "name": "Observability and Monitoring Gaps",
+        "name_cn": "可观测性与监控缺口",
+        "severity": "medium",
+        "description": "缺少Agent行为追踪、决策审计与异常告警，攻击不可见"
+    },
+    "ASI09": {
+        "name": "Cascading Failures & Multi-Agent Risks",
+        "name_cn": "级联失败与多智能体风险",
+        "severity": "high",
+        "description": "多Agent委派/编排缺乏熔断与共识校验，单点故障级联放大"
+    },
+    "ASI10": {
+        "name": "Rogue Agent & Human-Autonomy Boundary",
+        "name_cn": "流氓智能体与人-机自治边界",
+        "severity": "critical",
+        "description": "Agent可自我修改、绕过人类确认边界或缺少终止开关"
+    },
+}
+
+# ============================================================
+# ASI01 - 目标与指令操纵 (6条规则)
+# ============================================================
+ASI01_RULES = {
+    r'\b(goal|objective|task)\s*[:=]\s*["\'].*?(ignore|override|bypass|redefine|change)\b': ("目标/指令被运行时重定义", "critical"),
+    r'(redefine|rewrite|change)\s+(your\s+)?(goal|objective|system\s+prompt)': ("运行时改写系统目标或提示", "critical"),
+    r'<goal>.*?</goal>': ("可外部注入的目标标签", "high"),
+    r'\b(plan|replan|strategy)\s*[:=]\s*["\'].*?(without|skip).{0,20}(validation|approval|check)': ("计划生成跳过校验", "high"),
+    r'instruction_override\s*[:=]': ("指令覆盖参数", "critical"),
+    r'prompt_injection_protection\s*[:=]\s*(false|off|disabled|0)': ("提示注入防护被显式关闭", "high"),
+}
+
+# ============================================================
+# ASI02 - 工具滥用 (6条规则)
+# ============================================================
+ASI02_RULES = {
+    r'allowed_tools\s*[:=]\s*["\']\*["\']': ("工具白名单通配符(可被滥用)", "critical"),
+    r'\b(tools|functions)\s*[:=]\s*(all|["\']\*["\'])': ("工具集声明为全部", "high"),
+    r'allowed_functions\s*[:=]\s*\[\s*\]': ("空工具限制(等同于全开)", "high"),
+    r'\b(send_email|send_mail|smtp)\b.*\b(agent|auto|without|no_?approval)': ("Agent自动发送邮件无确认", "critical"),
+    r'(transfer|send|withdraw)\s*(money|fund|payment).{0,20}(agent|auto|without|no_?approval)': ("Agent自动转账/支付无确认", "critical"),
+    r'\bautonomous.{0,20}(file|delete|remove|rm)\b': ("Agent自主删除文件", "high"),
+}
+
+# ============================================================
+# ASI03 - 过度代理 (6条规则)
+# ============================================================
+ASI03_RULES = {
+    r'(auto_approve|autoapprove|auto_accept)\s*[:=]\s*(true|1|on|yes)': ("自动批准已启用(无人值守)", "critical"),
+    r'(human_in_the_loop|require_approval|human_approval)\s*[:=]\s*(false|0|off|no)': ("关闭人类确认环", "critical"),
+    r'(dangerously|disable.{0,8}guardrail|disable.{0,8}safety)\b': ("显式关闭安全护栏", "critical"),
+    r'\bautonomous_mode\s*[:=]\s*(true|1|on)': ("自主模式无检查点", "high"),
+    r'(no|without).{0,20}(confirmation|approval|checkpoint)': ("缺少确认/检查点", "high"),
+    r'permissions\s*[:=]\s*["\']?write["\']?': ("授予写权限(最小权限违反)", "medium"),
+}
+
+# ============================================================
+# ASI04 - 记忆操纵与投毒 (6条规则)
+# ============================================================
+ASI04_RULES = {
+    r'(memory|vector_db|knowledge_base|rag)\s*\.\s*(upsert|insert|add|write|store)\s*\(': ("向记忆/知识库写入(需校验来源)", "high"),
+    r'\b(append|update)\s*(conversation|chat|episodic)\s*_?memory\b': ("更新会话记忆无来源校验", "high"),
+    r'(documents?|corpus|dataset|knowledge_base)\s*\.\s*(insert|upsert|add)\s*\(': ("向语料插入内容(RAG投毒风险)", "critical"),
+    r'(memory|context)\s*(shared|global|persistent)\b': ("共享/持久记忆(跨会话污染风险)", "medium"),
+    r'(sanitize|validate|escape)\s*\(\s*\)\s*#\s*(no|todo|fixme|skip)': ("记忆写入缺少净化(占位未实现)", "high"),
+    r'\bmemories?\.(set|put|write)\s*\(': ("记忆存储写入", "medium"),
+}
+
+# ============================================================
+# ASI05 - 智能体身份与信任 (6条规则)
+# ============================================================
+ASI05_RULES = {
+    r'(agent_card|agent-card|\.well-known/agent\.json)\b.*(skip|ignore|not.?verify|no_?verify)': ("Agent Card未验证", "critical"),
+    r'(verify_agent|verify_identity|authenticate_agent)\s*[:=]\s*(false|0|off|no|null)': ("Agent身份认证被关闭", "critical"),
+    r'(trust_all_agents|trust_all|allow_anonymous_agent)\b': ("信任所有Agent(无身份校验)", "critical"),
+    r'(unsigned|unverified)\s*(agent|message|request)\b': ("接受未签名Agent消息", "high"),
+    r'(mTLS|mutual_tls|client_cert)\s*[:=]\s*(false|off|disabled|null)': ("Agent间mTLS禁用", "high"),
+    r'(spiffe|spire|oidc|oauth)\s+(for|to)\s+agent\b': ("Agent身份应使用标准协议(检查配置)", "info"),
+}
+
+# ============================================================
+# ASI06 - 智能体通信与供应链 (6条规则)
+# ============================================================
+ASI06_RULES = {
+    r'mcpServers\s*[=:]\s*\{[^}]*"(url|command)"\s*:\s*["\']https?://[^"\']*(?:169\.254|10\.|192\.168|172\.)': ("MCP服务器指向内网(供应链/SSRF)", "critical"),
+    r'(a2a_endpoint|a2a_url|agent_endpoint)\s*[:=]\s*["\']https?://': ("远程Agent通信端点(需验证)", "medium"),
+    r'(trust|verify|pin)\s*[:=]\s*(false|off)\s*.*(server|tool|agent|dependency)': ("未验证的服务器/依赖信任", "high"),
+    r'(install|load|import)\s+(mcp|skill|plugin|tool)\s+from\s+https?://': ("从远程加载工具/插件(供应链)", "high"),
+    r'(checksum|signature|integrity)\s*[:=]\s*(null|""|false|none)': ("缺少完整性校验(供应链)", "high"),
+    r'(pin|lock).{0,20}(version|dependency|tool)\b': ("建议锁定依赖版本(检查)", "info"),
+}
+
+# ============================================================
+# ASI07 - 无限制资源消耗 (6条规则)
+# ============================================================
+ASI07_RULES = {
+    r'(max_iterations|max_steps|max_turns)\s*[:=]\s*(null|0|inf|None|-1)': ("迭代次数无上限", "high"),
+    r'(max_tokens|token_limit|context_limit)\s*[:=]\s*(null|0|None|inf)': ("Token上限缺失", "high"),
+    r'(concurrency|max_concurrent|parallel)\s*[:=]\s*(null|0|inf|None|-1|"unlimited")': ("并发数无限制", "high"),
+    r'(timeout|deadline|ttl)\s*[:=]\s*(null|0|None|inf)': ("超时缺失(可能挂起)", "medium"),
+    r'while\s*\(?\s*true|for\s*\(;;\)': ("无限循环风险", "high"),
+    r'(no|without).{0,20}(rate.?limit|throttl|cost_?budget)': ("缺少速率/预算限制", "medium"),
+}
+
+# ============================================================
+# ASI08 - 可观测性与监控缺口 (6条规则)
+# ============================================================
+ASI08_RULES = {
+    r'(trace|tracing|langsmith|otel|opentelemetry)\s*[:=]\s*(false|off|disabled|null)': ("追踪被禁用(不可观测)", "high"),
+    r'(audit_log|audit_logs|action_log)\s*[:=]\s*(false|off|null|"")': ("Agent操作审计日志缺失", "critical"),
+    r'(monitor|alert|anomaly_detection)\s*[:=]\s*(false|off|null)': ("异常监控关闭", "high"),
+    r'(log|logging)\s*[:=]\s*(false|off|null|disabled)': ("日志被禁用", "medium"),
+    r'#\s*(todo|fixme|xxx).{0,20}(log|trace|monitor|audit)': ("可观测性待实现(占位)", "medium"),
+    r'(decision|tool_call|reasoning)\s*[:=]\s*["\'].*?(no|without).{0,20}(log|record)': ("决策/工具调用未记录", "high"),
+}
+
+# ============================================================
+# ASI09 - 级联失败与多智能体风险 (6条规则)
+# ============================================================
+ASI09_RULES = {
+    r'(delegates_to|delegate_to|spawn_agent|sub_agent|subagent)\b': ("Agent委派(需熔断/共识)", "medium"),
+    r'(retry|retries)\s*[:=]\s*(inf|infinite|null|-1|0)': ("无限重试(级联放大)", "high"),
+    r'(circuit_breaker|fallback|backoff)\s*[:=]\s*(false|off|null|none)': ("缺少熔断/降级(级联风险)", "high"),
+    r'(consensus|vote|quorum|approval)\s*[:=]\s*(none|false|"")': ("多Agent无共识校验", "high"),
+    r'(cascade|propagate|fan.?out)\s*[:=]\s*(true|on)': ("级联传播启用无隔离", "medium"),
+    r'(shared_state|global_state|blackboard)\s*[:=]': ("共享状态(多Agent竞态风险)", "medium"),
+}
+
+# ============================================================
+# ASI10 - 流氓智能体与人-机自治边界 (6条规则)
+# ============================================================
+ASI10_RULES = {
+    r'(self_modif|self_modify|update.{0,12}own.{0,12}(code|weights|prompt|config))': ("Agent可自我修改", "critical"),
+    r'(kill_switch|stop_signal|halt)\s*[:=]\s*(false|off|null|none|"")': ("终止开关缺失", "critical"),
+    r'(execute|run|eval)\s*\(?\s*(arbitrary|dynamic|user.{0,8}provided|runtime)': ("执行任意/动态代码(失控)", "critical"),
+    r'(human|user).{0,20}(override|veto|approval)\s*[:=]\s*(false|off|null|none)': ("人类否决权被关闭", "critical"),
+    r'(autonomous|unattended|no.?human).{0,20}(deploy|execute|act)\b': ("无人值守自主执行", "high"),
+    r'(guardrail|safety_check|policy_check)\s*[:=]\s*(bypass|skip|false|off)': ("护栏被绕过", "critical"),
+}
+
+# ============================================================
 # 合并所有规则
 # ============================================================
 ALL_RULES = {}
@@ -363,7 +550,69 @@ ALL_RULES.update(MCP07_RULES)
 ALL_RULES.update(MCP08_RULES)
 ALL_RULES.update(MCP09_RULES)
 ALL_RULES.update(MCP10_RULES)
+ALL_RULES.update(ASI01_RULES)
+ALL_RULES.update(ASI02_RULES)
+ALL_RULES.update(ASI03_RULES)
+ALL_RULES.update(ASI04_RULES)
+ALL_RULES.update(ASI05_RULES)
+ALL_RULES.update(ASI06_RULES)
+ALL_RULES.update(ASI07_RULES)
+ALL_RULES.update(ASI08_RULES)
+ALL_RULES.update(ASI09_RULES)
+ALL_RULES.update(ASI10_RULES)
 ALL_RULES.update(ZH_PROMPT_INJECTION_RULES)
+
+# ============================================================
+# 情报驱动的动态规则（数据飞轮闭环的最后一齿）
+# ============================================================
+# 此前情报库只进不出：采集的漏洞从未转化为检测能力，扫描规则常年不变。
+# 现由 scripts/intel_to_rules.py 从 OSV / NVD / GitHub Advisory 权威情报
+# 自动生成规则，在此载入合并 —— 情报每更新一次，检测能力同步增强一次。
+GENERATED_RULES = {}
+GENERATED_PACKAGE_BLACKLIST = {}
+_GENERATED_META = {}
+
+
+def _load_generated_rules():
+    """载入 data/generated_rules.json。文件缺失或损坏时静默降级，不影响基础规则。"""
+    global GENERATED_RULES, GENERATED_PACKAGE_BLACKLIST, _GENERATED_META
+    import json as _json
+    import os as _os
+
+    path = _os.path.join(
+        _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))),
+        "data", "generated_rules.json",
+    )
+    if not _os.path.exists(path):
+        return
+    try:
+        with open(path, encoding="utf-8") as f:
+            data = _json.load(f)
+    except Exception:
+        return
+
+    for pattern, meta in (data.get("pattern_rules") or {}).items():
+        GENERATED_RULES[pattern] = (
+            f"[情报驱动] {meta.get('description', '')}",
+            meta.get("severity", "medium"),
+        )
+    GENERATED_PACKAGE_BLACKLIST = data.get("package_blacklist") or {}
+    _GENERATED_META = {
+        "generated_at": data.get("generated_at"),
+        "source_intel_count": data.get("source_intel_count", 0),
+        "total_rules": data.get("total_rules", 0),
+        "owasp_distribution": data.get("owasp_distribution", {}),
+    }
+
+
+_load_generated_rules()
+ALL_RULES.update(GENERATED_RULES)
+
+
+def get_generated_rules_meta():
+    """返回情报驱动规则的元信息，供报告与元监控展示规则库新鲜度。"""
+    return dict(_GENERATED_META)
+
 
 # 危险npm包（已知恶意）
 DANGEROUS_NPM_PACKAGES = {
@@ -375,6 +624,159 @@ DANGEROUS_NPM_PACKAGES = {
 DANGEROUS_PYPI_PACKAGES = {
     "pickle", "subprocess32",
 }
+
+# 由权威漏洞情报自动扩充的高危包名单（随情报库同步增长）
+for _key, _entry in GENERATED_PACKAGE_BLACKLIST.items():
+    _eco = (_entry.get("ecosystem") or "").lower()
+    _name = _entry.get("package")
+    if not _name:
+        continue
+    if _eco in ("npm", "node"):
+        DANGEROUS_NPM_PACKAGES.add(_name)
+    elif _eco in ("pypi", "pip", "python"):
+        DANGEROUS_PYPI_PACKAGES.add(_name)
+
+# ============================================================
+# 离线「幻觉包 / 投毒依赖」检测（typosquat + 仿冒 + 形近字符）
+# 对标 agent-security-scanner-mcp 的 hallucination-package detection。
+# 纯本地、零依赖、不联网；联网校验作为可选远程项（见 engine 的 LLM 供应链分析）。
+# ============================================================
+
+# 可信包名录（常见 npm / PyPI 官方包，用于编辑距离比对）
+LEGIT_PACKAGE_CATALOG = {
+    # npm
+    "express", "lodash", "react", "react-dom", "vue", "axios", "request",
+    "chalk", "commander", "fs-extra", "dotenv", "jsonwebtoken", "bcrypt",
+    "webpack", "babel", "eslint", "prettier", "mongoose", "sequelize",
+    "socket.io", "moment", "underscore", "async", "body-parser", "cors",
+    "node-fetch", "express-validator", "helmet", "passport", "socketio",
+    "typescript", "tslib", "rimraf", "glob", "minimist", "yargs", "debug",
+    "chai", "mocha", "jest", "npm", "yarn", "pnpm", "@modelcontextprotocol/sdk",
+    # pypi
+    "numpy", "pandas", "flask", "django", "requests", "sqlalchemy",
+    "pytest", "setuptools", "click", "jinja2", "fastapi", "uvicorn",
+    "scipy", "matplotlib", "scikit-learn", "tensorflow", "torch", "pytorch",
+    "openai", "anthropic", "langchain", "pypdf", "pillow", "boto3",
+    "pydantic", "httpx", "aiohttp", "beautifulsoup4", "lxml", "cryptography",
+    "python-dotenv", "six", "certifi", "urllib3", "idna", "charset-normalizer",
+    "rich", "typer", "structlog", "loguru", "mcp", "pymupdf",
+}
+
+
+def _levenshtein(a, b):
+    """标准编辑距离（本地、零依赖）。"""
+    if a == b:
+        return 0
+    la, lb = len(a), len(b)
+    if la == 0:
+        return lb
+    if lb == 0:
+        return la
+    prev = list(range(lb + 1))
+    for i, ca in enumerate(a, 1):
+        cur = [i]
+        for j, cb in enumerate(b, 1):
+            cost = 0 if ca == cb else 1
+            cur.append(min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + cost))
+        prev = cur
+    return prev[lb]
+
+
+# 形近字符归一化（防 homoglyph 投毒：0/o 1/l 3/e 5/s @/a）
+_HOMOGLYPH_MAP = str.maketrans("01358@", "olzebo")
+
+
+def _homoglyph_normalize(name):
+    return name.translate(_HOMOGLYPH_MAP)
+
+
+# 仿冒官方厂商包名的可疑销售词
+_BRAND_ROOTS = {
+    "openai", "anthropic", "claude", "mcp", "langchain", "aws", "google",
+    "azure", "gpt", "modelcontextprotocol", "huggingface", "cohere", "ollama",
+}
+_IMPERSONATION_SOCIAL = (
+    "official", "real", "true", "genuine", "safe", "secure", "security",
+    "wrapper", "proxy", "apikey", "api-key", "sdk", "client", "auth",
+)
+
+
+def _entropy(s):
+    """简单香农熵，用于判断包名尾部是否为随机串。"""
+    if not s:
+        return 0.0
+    from collections import Counter
+    import math
+    cnt = Counter(s)
+    return -sum((c / len(s)) * math.log2(c / len(s)) for c in cnt.values())
+
+
+def check_package_name(name, ecosystem="npm"):
+    """
+    离线检测单个依赖名是否为幻觉包 / typosquat / 仿冒包。
+    返回 findings 列表（每项含 type/severity/description/owasp_category/evidence）。
+    纯本地启发式，不联网。
+    """
+    findings = []
+    if not name or not isinstance(name, str):
+        return findings
+    n = name.strip().lower()
+    # 去掉 npm scope 前缀（如 @scope/name -> name）
+    if n.startswith("@") and "/" in n:
+        n = n.split("/", 1)[1]
+    if not n or n in LEGIT_PACKAGE_CATALOG:
+        return findings
+    # 已知恶意包由 dependency_analysis 处理，这里不重复
+    if ecosystem in ("npm", "node") and n in DANGEROUS_NPM_PACKAGES:
+        return findings
+    if ecosystem in ("pypi", "pip", "python") and n in DANGEROUS_PYPI_PACKAGES:
+        return findings
+
+    # 1) 编辑距离 typosquat
+    best, best_d = None, 99
+    for legit in LEGIT_PACKAGE_CATALOG:
+        if abs(len(legit) - len(n)) > 3:
+            continue
+        d = _levenshtein(n, legit)
+        if d < best_d:
+            best_d, best = d, legit
+    if best is not None:
+        if best_d == 1 or (best_d == 2 and len(n) >= 8):
+            findings.append({
+                "type": "typosquatting",
+                "severity": "high",
+                "description": f"可能的 typosquatting 包名: '{name}' 形近官方包 '{best}'",
+                "owasp_category": "MCP04",
+                "evidence": f"{name} ~ {best} (dist={best_d})",
+            })
+            return findings
+
+    # 2) 形近字符（homoglyph）
+    norm = _homoglyph_normalize(n)
+    if norm in LEGIT_PACKAGE_CATALOG and norm != n:
+        findings.append({
+            "type": "typosquatting",
+            "severity": "high",
+            "description": f"形近字符(homoglyph)投毒: '{name}' 归一后为官方包 '{norm}'",
+            "owasp_category": "MCP04",
+            "evidence": f"{name} -> {norm}",
+        })
+        return findings
+
+    # 3) 厂商名仿冒（仅当尾部含可疑销售词或高熵随机串时告警，降低误报）
+    root = n.split("-")[0].split("_")[0].split(".")[0]
+    if root in _BRAND_ROOTS and n != root:
+        tail = n[len(root):].lstrip("-_.")
+        if any(w in tail for w in _IMPERSONATION_SOCIAL) or (len(tail) >= 6 and _entropy(tail) > 3.0):
+            findings.append({
+                "type": "brand_impersonation",
+                "severity": "medium",
+                "description": f"疑似仿冒官方厂商包名: '{name}' 借用 '{root}' 品牌",
+                "owasp_category": "MCP04",
+                "evidence": f"{name} (root={root})",
+            })
+
+    return findings
 
 # 跳过的文件（非代码）
 SKIP_EXTENSIONS = {'.ini', '.cfg', '.env', '.lock', '.log', '.svg', '.png', '.jpg'}
@@ -401,6 +803,10 @@ def get_owasp_category_rules(category):
         "MCP04": MCP04_RULES, "MCP05": MCP05_RULES, "MCP06": MCP06_RULES,
         "MCP07": MCP07_RULES, "MCP08": MCP08_RULES, "MCP09": MCP09_RULES,
         "MCP10": MCP10_RULES,
+        "ASI01": ASI01_RULES, "ASI02": ASI02_RULES, "ASI03": ASI03_RULES,
+        "ASI04": ASI04_RULES, "ASI05": ASI05_RULES, "ASI06": ASI06_RULES,
+        "ASI07": ASI07_RULES, "ASI08": ASI08_RULES, "ASI09": ASI09_RULES,
+        "ASI10": ASI10_RULES,
     }
     return len(mapping.get(category, {}))
 
@@ -410,11 +816,36 @@ def get_owasp_coverage(findings):
     covered = set()
     for f in findings:
         cat = f.get("owasp_category")
-        if cat:
+        if cat and cat.startswith("MCP"):
             covered.add(cat)
     categories_detail = {}
     for cat in covered:
         info = OWASP_MCP_TOP10.get(cat, {})
+        categories_detail[cat] = {
+            "name": info.get("name", cat),
+            "name_cn": info.get("name_cn", cat),
+            "rules_triggered": len([f for f in findings if f.get("owasp_category") == cat]),
+            "total_rules": get_owasp_category_rules(cat),
+        }
+    return {
+        "covered": sorted(covered),
+        "covered_count": len(covered),
+        "total": 10,
+        "coverage_percent": len(covered) * 10,
+        "categories": categories_detail,
+    }
+
+
+def get_agentic_coverage(findings):
+    """计算OWASP Agentic AI Top 10 (ASI01-ASI10) 覆盖情况"""
+    covered = set()
+    for f in findings:
+        cat = f.get("owasp_category")
+        if cat and cat.startswith("ASI"):
+            covered.add(cat)
+    categories_detail = {}
+    for cat in covered:
+        info = OWASP_AGENTIC_AI_TOP10.get(cat, {})
         categories_detail[cat] = {
             "name": info.get("name", cat),
             "name_cn": info.get("name_cn", cat),
@@ -474,6 +905,7 @@ def analyze(files, tool_type="mcp"):
         "total_files": len(files),
         "patterns_checked": len(rules),
         "owasp_coverage": get_owasp_coverage(findings),
+        "agentic_coverage": get_agentic_coverage(findings),
     }
 
 
@@ -489,4 +921,14 @@ def _get_owasp_category(pattern):
     if pattern in MCP08_RULES: return "MCP08"
     if pattern in MCP09_RULES: return "MCP09"
     if pattern in MCP10_RULES: return "MCP10"
+    if pattern in ASI01_RULES: return "ASI01"
+    if pattern in ASI02_RULES: return "ASI02"
+    if pattern in ASI03_RULES: return "ASI03"
+    if pattern in ASI04_RULES: return "ASI04"
+    if pattern in ASI05_RULES: return "ASI05"
+    if pattern in ASI06_RULES: return "ASI06"
+    if pattern in ASI07_RULES: return "ASI07"
+    if pattern in ASI08_RULES: return "ASI08"
+    if pattern in ASI09_RULES: return "ASI09"
+    if pattern in ASI10_RULES: return "ASI10"
     return None

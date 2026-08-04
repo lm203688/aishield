@@ -105,8 +105,9 @@ mid-2026 的 MCP/Agent 安全品类已显著拥挤，分三派：
 3. **中性信任机构（空白点）**：认证 L1–L3 + 0–100 信任分 + 可嵌入 badge + Trust API + x402 —— 全品类无人做中性信任注册中心，AIShield 先发卡位。
 4. **CI 门禁 + SBOM + SARIF** —— 比仅运行时或仅扫描更可落地。
 5. **Agent-native & GEO**（llms.txt / Agent Card / MCP Server Card / A2A-ready）—— 竞品几乎无 agent 可发现存在。
+6. **供应链幻觉包检测（已落地）**：离线 typosquat / 形近字符(homoglyph) / 厂商仿冒检测（Levenshtein 编辑距离 + 归一化 + 熵启发式），纯本地零依赖、不联网，覆盖 package.json / requirements.txt / pyproject.toml —— 直接补齐与 agent-security-scanner-mcp「幻觉包检测」的差距，且无需上传代码。
 
-> 直接竞品 agent-security-scanner-mcp（1700+ AST 规则、A-F 评级、幻觉包检测）概念最接近「4维评分+badge」；AIShield 以「生态扫描(MCP/skill/agent)+认证信任+x402 市场」错位竞争，不拼语义深度。
+> 直接竞品 agent-security-scanner-mcp（1700+ AST 规则、A-F 评级、幻觉包检测）概念最接近「4维评分+badge」；AIShield 以「生态扫描(MCP/skill/agent)+认证信任+x402 市场+本地幻觉包检测」错位竞争，不拼语义深度。
 
 ---
 

@@ -17,6 +17,7 @@ from ipaddress import ip_address
 from .rules import (
     OWASP_MCP_TOP10, DANGEROUS_NPM_PACKAGES, DANGEROUS_PYPI_PACKAGES,
     SKIP_EXTENSIONS, SKIP_NAMES, analyze as rules_analyze,
+    check_package_name,
 )
 
 try:
@@ -162,6 +163,9 @@ def dependency_analysis(files):
                         dependencies.append({"name": name, "version": ver, "source": "npm"})
                         if name in DANGEROUS_NPM_PACKAGES:
                             findings.append({"type": "dangerous_dependency", "package": name, "severity": "critical", "description": f"已知恶意npm包: {name}", "owasp_category": "MCP04"})
+                        for _f in check_package_name(name, "npm"):
+                            _f["file"] = fname
+                            findings.append(_f)
             except Exception:
                 pass
         elif fname == "requirements.txt":
@@ -174,11 +178,29 @@ def dependency_analysis(files):
                     dependencies.append({"name": name, "version": ver, "source": "pypi"})
                     if name in DANGEROUS_PYPI_PACKAGES:
                         findings.append({"type": "dangerous_dependency", "package": name, "severity": "critical", "description": f"已知恶意PyPI包: {name}", "owasp_category": "MCP04"})
+                    for _f in check_package_name(name, "pypi"):
+                        _f["file"] = fname
+                        findings.append(_f)
         elif fname == "pyproject.toml":
+            # PEP 621 数组形式: dependencies = ["a", "b>=1.0"]
+            for m in re.finditer(r'dependencies\s*=\s*\[(.*?)\]', content, re.DOTALL):
+                for item in re.findall(r'["\']([a-zA-Z0-9_.\-]+)["\']', m.group(1)):
+                    _name = re.split(r'[<>=!~ ]', item, 1)[0].strip()
+                    if not _name or _name == "dependencies":
+                        continue
+                    dependencies.append({"name": _name, "version": "unknown", "source": "pypi"})
+                    for _f in check_package_name(_name, "pypi"):
+                        _f["file"] = fname
+                        findings.append(_f)
+            # 单依赖写法: name = "ver"
             for line in content.split('\n'):
                 m = re.match(r'^\s*([a-zA-Z0-9_-]+)\s*[=<>!]', line)
-                if m:
-                    dependencies.append({"name": m.group(1), "version": "unknown", "source": "pypi"})
+                if m and m.group(1) != "dependencies":
+                    _name = m.group(1)
+                    dependencies.append({"name": _name, "version": "unknown", "source": "pypi"})
+                    for _f in check_package_name(_name, "pypi"):
+                        _f["file"] = fname
+                        findings.append(_f)
 
     return {"findings": findings, "dependencies": dependencies, "total_dependencies": len(dependencies)}
 
@@ -243,46 +265,7 @@ def tool_poisoning_detection(files):
                     "owasp_category": "MCP03",
                 })
 
-    # 依赖typosquatting检测
-    LEGIT_PACKAGES = {
-        'express', 'lodash', 'react', 'vue', 'axios', 'request', 'chalk',
-        'commander', 'fs-extra', 'dotenv', 'jsonwebtoken', 'bcrypt',
-        'numpy', 'pandas', 'flask', 'django', 'requests', 'sqlalchemy',
-        'pytest', 'setuptools', 'click', 'jinja2', 'fastapi', 'uvicorn',
-    }
-
-    for filepath, content in files.items():
-        if filepath not in ("package.json", "requirements.txt", "pyproject.toml"):
-            continue
-        deps = []
-        if filepath == "package.json":
-            try:
-                pkg = json.loads(content)
-                deps = list(pkg.get('dependencies', {}).keys()) + list(pkg.get('devDependencies', {}).keys())
-            except Exception:
-                pass
-        elif filepath == "requirements.txt":
-            for line in content.splitlines():
-                line = line.strip().split('==')[0].split('>=')[0].split('<=')[0].strip()
-                if line and not line.startswith('#'):
-                    deps.append(line)
-
-        for dep in deps:
-            dep_lower = dep.lower()
-            for legit in LEGIT_PACKAGES:
-                if legit == dep_lower:
-                    continue
-                if len(legit) >= 4 and len(dep_lower) >= 4:
-                    if dep_lower.startswith(legit) and 0 < len(dep_lower) - len(legit) <= 2:
-                        findings.append({
-                            "type": "typosquatting",
-                            "severity": "high",
-                            "description": f"可能的typosquatting: '{dep}' 模仿 '{legit}'",
-                            "file": filepath,
-                            "lines": "N/A",
-                            "evidence": f"{dep} vs {legit}",
-                            "owasp_category": "MCP04",
-                        })
+    # typosquat / 幻觉包检测已下沉到 dependency_analysis（离线编辑距离 + 形近字符 + 厂商仿冒）
 
     return findings
 
@@ -433,6 +416,7 @@ def calculate_scores(static, dependency, secrets, poisoning, taint, total_files)
         "risk_level": risk_level,
         "badge_level": badge,
         "owasp_coverage": static.get("owasp_coverage", {}),
+        "agentic_coverage": static.get("agentic_coverage", {}),
         "rules_count": static.get("patterns_checked", 0),
     }
 
