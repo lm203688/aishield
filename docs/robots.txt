@@ -1,0 +1,46 @@
+# AIShield crawl policy — Agent-native & GEO-first
+#
+# We WANT AI engines (ChatGPT, Claude, Perplexity, Gemini, Grok, Apple Intelligence)
+# to read, understand and CITE this site. Blocking AI crawlers is the #1 GEO mistake
+# of 2026 — we explicitly allow every major retrieval bot.
+# (Reference: findloc.ai GEO playbook, searchscore.io AI-crawler audit, clairon.ai 8-bot strategy)
+
+User-agent: GPTBot
+Allow: /
+User-agent: OAI-SearchBot
+Allow: /
+User-agent: ChatGPT-User
+Allow: /
+User-agent: ClaudeBot
+Allow: /
+User-agent: Claude-User
+Allow: /
+User-agent: Claude-SearchBot
+Allow: /
+User-agent: PerplexityBot
+Allow: /
+User-agent: Google-Extended
+Allow: /
+User-agent: Applebot-Extended
+Allow: /
+User-agent: Meta-ExternalAgent
+Allow: /
+User-agent: Bytespider
+Allow: /
+User-agent: CCBot
+Disallow: /
+
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/private/
+
+Sitemap: https://aishield.tools/sitemap.xml
+Sitemap: https://lm203688.github.io/aishield/sitemap.xml
+
+# Machine-readable discovery endpoints for agents & LLMs
+# llms.txt:                 https://aishield.tools/llms.txt
+# Full LLM briefing:        https://aishield.tools/llms-full.txt
+# A2A Agent Card:           https://aishield.tools/.well-known/agent-card.json
+# MCP server card:          https://aishield.tools/.well-known/mcp/server-card.json
+# Trust / Cert API:         https://aishield.tools/api/v1/trust/score/{did}

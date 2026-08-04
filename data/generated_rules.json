@@ -1,0 +1,228 @@
+{
+  "generated_at": "2026-08-04T06:37:09.218206+00:00",
+  "source_intel_count": 93,
+  "package_blacklist": {
+    "pip:cryptography": {
+      "ecosystem": "pip",
+      "package": "cryptography",
+      "severity": "high",
+      "advisories": [
+        "GHSA-jwv3-5hgf-82ww"
+      ]
+    },
+    "pip:GitPython": {
+      "ecosystem": "pip",
+      "package": "GitPython",
+      "severity": "high",
+      "advisories": [
+        "GHSA-3f7w-8rr8-f37f"
+      ]
+    },
+    "npm:jodit": {
+      "ecosystem": "npm",
+      "package": "jodit",
+      "severity": "high",
+      "advisories": [
+        "GHSA-rxcw-mc6f-6hr3"
+      ]
+    },
+    "pip:nltk": {
+      "ecosystem": "pip",
+      "package": "nltk",
+      "severity": "high",
+      "advisories": [
+        "GHSA-qvv7-cg9c-w4x3",
+        "GHSA-fg7f-2386-8897",
+        "GHSA-6hm5-jgcp-p838",
+        "GHSA-xh95-f55m-82fw"
+      ]
+    },
+    "npm:@dynatrace-oss/dynatrace-mcp-server": {
+      "ecosystem": "npm",
+      "package": "@dynatrace-oss/dynatrace-mcp-server",
+      "severity": "high",
+      "advisories": [
+        "GHSA-p7w7-4929-vpj5"
+      ]
+    },
+    "pip:flyto-core": {
+      "ecosystem": "pip",
+      "package": "flyto-core",
+      "severity": "critical",
+      "advisories": [
+        "GHSA-pgwh-4jj4-qm8v",
+        "GHSA-qq9q-xgm3-xv9g",
+        "GHSA-hr7p-wg7r-hg9m",
+        "GHSA-2956-977x-2w3r"
+      ]
+    },
+    "npm:@aws/agentcore": {
+      "ecosystem": "npm",
+      "package": "@aws/agentcore",
+      "severity": "high",
+      "advisories": [
+        "GHSA-m4x6-gwgp-4pm7"
+      ]
+    },
+    "pip:datamodel-code-generator": {
+      "ecosystem": "pip",
+      "package": "datamodel-code-generator",
+      "severity": "high",
+      "advisories": [
+        "GHSA-vx7x-vcc2-c44g",
+        "GHSA-954p-556p-r752",
+        "GHSA-5578-w22f-pfx9"
+      ]
+    },
+    "pip:bedrock-agentcore": {
+      "ecosystem": "pip",
+      "package": "bedrock-agentcore",
+      "severity": "high",
+      "advisories": [
+        "GHSA-j6g5-3hh3-pgw8"
+      ]
+    },
+    "pip:awslabs.aws-api-mcp-server": {
+      "ecosystem": "pip",
+      "package": "awslabs.aws-api-mcp-server",
+      "severity": "high",
+      "advisories": [
+        "GHSA-29w2-fq35-v728"
+      ]
+    },
+    "pypi:mcp": {
+      "ecosystem": "pypi",
+      "package": "mcp",
+      "severity": "high",
+      "advisories": [
+        "GHSA-vj7q-gjh5-988w",
+        "GHSA-jpw9-pfvf-9f58",
+        "GHSA-hvrp-rf83-w775"
+      ]
+    }
+  },
+  "pattern_rules": {
+    "(?i)(requests\\.(get|post)|urllib\\.request\\.urlopen|fetch)\\s*\\(\\s*[^)]*(user|input|param|req\\.)": {
+      "description": "SSRF: 请求目标来自不可信输入",
+      "severity": "high",
+      "owasp": "LLM06",
+      "owasp_name": "过度代理权限 (Excessive Agency)",
+      "derived_from": "ssrf",
+      "intel_hits": 7,
+      "evidence": [
+        "GHSA-qvv7-cg9c-w4x3",
+        "GHSA-pgwh-4jj4-qm8v",
+        "GHSA-qq9q-xgm3-xv9g",
+        "GHSA-vx7x-vcc2-c44g",
+        "GHSA-954p-556p-r752"
+      ]
+    },
+    "(?i)(\\.\\./){2,}|(%2e%2e%2f)": {
+      "description": "路径遍历: 越权访问上级目录",
+      "severity": "high",
+      "owasp": "LLM06",
+      "owasp_name": "过度代理权限 (Excessive Agency)",
+      "derived_from": "path traversal",
+      "intel_hits": 6,
+      "evidence": [
+        "GHSA-6hm5-jgcp-p838",
+        "GHSA-xh95-f55m-82fw",
+        "GHSA-f42x-p2mx-hm8r",
+        "CVE-2026-44192",
+        "CVE-2026-50181"
+      ]
+    },
+    "(?i)(session|token)\\s*[:=]\\s*['\\\"][^'\\\"]{0,8}['\\\"]": {
+      "description": "会话安全: 会话标识过短或硬编码",
+      "severity": "high",
+      "owasp": "LLM07",
+      "owasp_name": "系统提示泄露 (System Prompt Leakage)",
+      "derived_from": "session",
+      "intel_hits": 13,
+      "evidence": [
+        "GHSA-p7w7-4929-vpj5",
+        "GHSA-xrmj-5g4g-8987",
+        "CVE-2026-67431",
+        "CVE-2026-67430",
+        "GHSA-f42x-p2mx-hm8r"
+      ]
+    },
+    "(?i)(Access-Control-Allow-Origin['\\\"]?\\s*[:,]\\s*['\\\"]\\*|cors\\s*\\(\\s*\\)\\s*)": {
+      "description": "跨域校验缺失: 允许任意来源",
+      "severity": "high",
+      "owasp": "LLM07",
+      "owasp_name": "系统提示泄露 (System Prompt Leakage)",
+      "derived_from": "origin",
+      "intel_hits": 8,
+      "evidence": [
+        "GHSA-p7w7-4929-vpj5",
+        "CVE-2026-63118",
+        "GHSA-x36r-4347-pm5x",
+        "PYSEC-2026-3483",
+        "GHSA-vj7q-gjh5-988w"
+      ]
+    },
+    "(?i)(auth(entication)?\\s*[:=]\\s*(False|None|null|0)\\b|verify\\s*=\\s*False)": {
+      "description": "认证绕过: 显式关闭校验",
+      "severity": "critical",
+      "owasp": "LLM07",
+      "owasp_name": "系统提示泄露 (System Prompt Leakage)",
+      "derived_from": "authentication",
+      "intel_hits": 4,
+      "evidence": [
+        "GHSA-p7w7-4929-vpj5",
+        "CVE-2026-46555",
+        "PYSEC-2026-1617",
+        "CVE-2026-49257"
+      ]
+    },
+    "(?i)(ignore|disregard|forget)\\s+(all\\s+)?(previous|prior|above)\\s+(instruction|prompt|rule)": {
+      "description": "提示注入: 覆盖历史指令",
+      "severity": "critical",
+      "owasp": "LLM01",
+      "owasp_name": "提示注入 (Prompt Injection)",
+      "derived_from": "prompt injection",
+      "intel_hits": 17,
+      "evidence": [
+        "CVE-2026-44192",
+        "CVE-2026-65056",
+        "CVE-2026-11371",
+        "CVE-2026-61447",
+        "CVE-2026-61439"
+      ]
+    },
+    "(?i)(docker\\.sock|/proc/self/|privileged\\s*[:=]\\s*true|--cap-add\\s*=?\\s*SYS_ADMIN)": {
+      "description": "沙箱逃逸: 容器高危配置",
+      "severity": "critical",
+      "owasp": "LLM05",
+      "owasp_name": "不当输出处理 (Improper Output Handling)",
+      "derived_from": "sandbox escape",
+      "intel_hits": 3,
+      "evidence": [
+        "CVE-2026-54769",
+        "CVE-2024-58351",
+        "GHSA-gr75-jv2w-4656"
+      ]
+    },
+    "(?i)(os\\.system|subprocess\\.(call|run|Popen)|child_process\\.exec)\\s*\\(\\s*[^)]*(\\+|%|\\$\\{|f['\\\"])": {
+      "description": "命令注入: 动态拼接系统命令",
+      "severity": "critical",
+      "owasp": "LLM05",
+      "owasp_name": "不当输出处理 (Improper Output Handling)",
+      "derived_from": "command injection",
+      "intel_hits": 3,
+      "evidence": [
+        "CVE-2026-59800",
+        "CVE-2026-48719",
+        "CVE-2026-42853"
+      ]
+    }
+  },
+  "owasp_distribution": {
+    "LLM06": 2,
+    "LLM07": 3,
+    "LLM01": 1,
+    "LLM05": 2
+  },
+  "total_rules": 19
+}

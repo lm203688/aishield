@@ -1,0 +1,40 @@
+# GitHub Pages / Jekyll 站点配置
+#
+# 站点地址：https://lm203688.github.io/aishield/
+# 仓库不是 <user>.github.io，因此必须设置 baseurl，否则所有相对链接
+# 都会指向域名根部而 404 —— 这是 Pages 最常见的静默失效方式。
+
+title: AIShield
+tagline: AI Agent 安全扫描 · 信任认证 · OWASP MCP & Agentic AI Top 10
+description: >-
+  开源、本地优先的 AI Agent 安全扫描器与信任机构。检测工具投毒、提示注入、
+  密钥泄露与供应链风险，覆盖 OWASP MCP Top 10 与 OWASP Agentic AI Top 10（ASI01–ASI10），
+  并运营 Agent 注册中心、可信认证与市场交易。
+
+url: https://lm203688.github.io
+baseurl: /aishield
+
+theme: jekyll-theme-cayman
+
+# 构建范围
+include:
+  - .well-known
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - vendor
+  - node_modules
+
+# 文章默认布局
+defaults:
+  - scope:
+      path: "blog"
+    values:
+      layout: default
+
+plugins:
+  - jekyll-sitemap
+  - jekyll-seo-tag
+
+# 关闭 Jekyll 对未知目录的告警式失败，避免单篇内容格式问题拖垮整站构建
+strict_front_matter: false

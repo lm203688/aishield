@@ -1,0 +1,22 @@
+{
+  "name": "aishield-mcp",
+  "version": "4.2.0",
+  "description": "AIShield security scanner as an MCP server: scan MCP tools and AI agents for poisoning, injection, leakage, and supply-chain risk (OWASP MCP Top 10 + Agentic AI Top 10).",
+  "endpoint": "https://aishield.tools/api/v1/mcp",
+  "transport": "streamable-http",
+  "install": "npx @aishield/mcp-server",
+  "tools": [
+    {
+      "name": "security_scan",
+      "description": "Scan an MCP server or agent description for 141 risk categories."
+    },
+    {
+      "name": "agentic_audit",
+      "description": "Audit an agent against OWASP Agentic AI Top 10 (ASI01-ASI10)."
+    },
+    {
+      "name": "trust_score",
+      "description": "Look up an agent's AIShield Trust Score and certification level from the registry."
+    }
+  ]
+}

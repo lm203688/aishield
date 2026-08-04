@@ -554,6 +554,9 @@ class BillingService:
                 gateway = AlipayGateway()
             elif gateway_name == "creem":
                 gateway = CreemGateway()
+            elif gateway_name == "x402":
+                from .x402 import X402Gateway
+                gateway = X402Gateway()
             else:
                 gateway = AlipayGateway()
 

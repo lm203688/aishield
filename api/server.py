@@ -285,7 +285,19 @@ class AIShieldHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         parsed = urlparse(self.path)
         path = parsed.path
-        
+
+        # ── Trust API (P1): 认证/信任评分/注册中心/Agent Card ──
+        if (path.startswith("/api/v1/trust") or path.startswith("/api/v1/registry")
+                or path == "/.well-known/agent-card.json"):
+            try:
+                import trust_api
+                payload, status = trust_api.handle_get(path, parsed.query)
+                self._send_json(payload, status)
+            except Exception as e:
+                self._send_json({"error": str(e)}, 500)
+            _record_usage("trust-api", self.client_address[0])
+            return
+
         # Landing Page — Agent SEO
         if path == "/agent.html":
             html_path = os.path.join(BASE, "static", "agent.html")
@@ -824,6 +836,50 @@ class AIShieldHandler(BaseHTTPRequestHandler):
         parsed = urlparse(self.path)
         path = parsed.path
 
+        # ── Trust API (P1): 自动认证 / 显式认证 ──
+        if path.startswith("/api/v1/trust"):
+            try:
+                body = self._read_body()
+                if body is None:
+                    return
+                data = json.loads(body) if body else {}
+            except json.JSONDecodeError:
+                self._send_json({"error": "Invalid JSON"}, 400)
+                return
+            try:
+                import trust_api
+                payload, status = trust_api.handle_post(path, data)
+                self._send_json(payload, status)
+            except Exception as e:
+                self._send_json({"error": str(e)}, 500)
+            _record_usage("trust-api", self.client_address[0])
+            return
+
+        # ── SBOM / SARIF 导出 (P2) ──
+        if path in ("/api/v1/export/sbom", "/api/v1/export/sarif"):
+            try:
+                body = self._read_body()
+                if body is None:
+                    return
+                edata = json.loads(body) if body else {}
+            except json.JSONDecodeError:
+                self._send_json({"error": "Invalid JSON"}, 400)
+                return
+            try:
+                from scanner.sbom import cyclonedx_sbom, sarif_from_scan
+                sr = edata.get("scan_result") or edata.get("scan_report") or {}
+                tname = edata.get("target_name", "unknown")
+                tver = edata.get("target_version", "0.0.0")
+                if path.endswith("sbom"):
+                    payload = cyclonedx_sbom(sr, tname, tver)
+                else:
+                    payload = sarif_from_scan(sr, tname)
+                self._send_json(payload, 200)
+            except Exception as e:
+                self._send_json({"error": str(e)}, 500)
+            _record_usage("export", self.client_address[0])
+            return
+
         # ── Creem Webhook（最高优先级，需要 raw body 验证签名）──
         if path == "/api/v1/webhooks/creem":
             self._handle_creem_webhook()
@@ -1241,7 +1297,14 @@ blockquote{{border-left:4px solid #3b82f6;padding-left:16px;margin-left:0;color:
         
         try:
             result = scan(source_url, tool_type, name)
-            
+
+            # P2: 生成 CycloneDX SBOM + SARIF, 供 CI / 安全工具链直接消费
+            try:
+                from scanner.sbom import attach_sbom_sarif
+                attach_sbom_sarif(result, name or source_url, result.get("version", "0.0.0"))
+            except Exception:
+                pass
+
             # 保存审计记录
             audits = _load_json(AUDIT_FILE, [])
             audits.append({

@@ -1,101 +1,67 @@
-# 定时任务注册表
+# AIShield 自动化台账
 
-> 更新时间: 2026-07-31
-> 总计: 28个定时任务
-> 备注: aishield.tools 已于 2026-07-31 07:31 通过 Cloudflare Named Tunnel 恢复访问
+> **本文件由 `scripts/gen_task_registry.py` 自动生成，请勿手工编辑。**
+> 生成时间：2026-08-04 09:51 UTC
 
-## AIShield 项目 (4个)
+历史教训：本台账曾手工声称「二十八项定时任务在跑」，而仓库实际只有十四个 workflow，其中 self-heal 因 YAML 语法错静默失效 48 天。台账一旦脱离现实，就会把「看起来很自动化」的幻觉喂给每一次决策。现改为从 workflow 真实内容派生。
 
-| ID | 任务名 | 频率 | 状态 | 产出路径 |
-|----|--------|------|------|----------|
-| a8119491 | AIShield 每日闭环 | 每日 02:00 | Active | eco/reports/daily-YYYYMMDD.md |
-| 57b788bd | AIShield 每周综合闭环 | 每周一 02:00 | Active | eco/reports/weekly-YYYY-WNN.md |
-| 7ca5f776 | AIShield 月度闭环 | 每月1日 03:00 | Active | eco/reports/monthly-YYYYMM.md |
-| a139728d | AIShield 季度战略闭环 | 每季首月1日 03:00 | Active | eco/reports/quarterly-YYYYQX.md |
+## 总览
 
-## HealthLens 项目 (6个)
+| 指标 | 数值 |
+|------|------|
+| 本仓库 workflow 总数 | 17 个任务 |
+| 其中定时驱动 | 12 个 |
+| 其中事件驱动 | 5 个 |
+| 存在断链/语法问题 | 0 个 |
 
-| ID | 任务名 | 频率 | 状态 | 产出路径 |
-|----|--------|------|------|----------|
-| ad51c5f8 | HealthLens 每周综合闭环 | 每周一 03:00 | Active | healthlens/ops/weekly/ |
-| be76cc10 | HealthLens 月度综合闭环 | 每月1日 03:00 | Active | healthlens/ops/monthly/ |
-| 2af0f9fe | HealthLens 季度战略闭环 | 每季首月1日 04:00 | Active | healthlens/ops/quarterly/ |
-| 29669df3 | HealthLens 每周内容生产闭环 | 每周五 03:00 | Active | healthlens/ops/content/ |
-| 0ed9d6aa | HealthLens 季度策略报告 | 每季首月1日 04:00 | Active | healthlens/ops/quarterly/ |
-| bedf4997 | HealthLens 月度综合报告 | 每月1日 03:00 | Active | healthlens/ops/monthly/ |
-| 0e990a0c | 推广技术深度追踪 | 每月15日 03:00 | Active | healthlens/ops/promotion/ |
-| d4aab6f5 | HealthLens 周报-闭环全流程 | 每周一 03:00 | Active | healthlens/ops/weekly/ |
+## 定时任务
 
-## GeneTech 项目 (3个)
+| Workflow | 名称 | 调度 | Jobs | 闭环环节 |
+|----------|------|------|------|----------|
+| `acquisition-automation.yml` | Acquisition Automation | 每周一 01:12 UTC / 每日 01:42 UTC | 2 | 动作✓验证✓ ⚠️缺检测告警 |
+| `aishield-scan.yml` | AIShield MCP Security Scan | 每周一 02:34 UTC | 1 | 检测✓验证✓ ⚠️缺动作告警 |
+| `channel-distribution.yml` | AIShield Channel Distribution (Content + Registry + Social) | 每周四 06:47 UTC | 6 | 检测✓动作✓验证✓告警✓ |
+| `ci.yml` | AIShield CI/CD | 每日 03:08 UTC | 6 | 检测✓验证✓ ⚠️缺动作告警 |
+| `data-scan-flywheel.yml` | AIShield Data Flywheel (Batch Scan to Self-Built Database) | 每周二、周五 05:30 UTC | 2 | 检测✓动作✓验证✓告警✓ |
+| `deploy-server.yml` | Deploy to Production Server | 每 4 小时（第 17 分）UTC | 2 | 检测✓动作✓验证✓告警✓ |
+| `feature-closed-loop.yml` | AIShield Intelligence-to-Feature Closed-Loop | 每周一 08:20 UTC | 4 | 检测✓动作✓验证✓告警✓ |
+| `meta-monitor.yml` | AIShield Meta-Monitor (监控自动化体系本身) | 每 6 小时（第 15 分）UTC | 2 | 检测✓动作✓验证✓告警✓ |
+| `security-scan.yml` | Security Scan | 每周一 04:52 UTC | 1 | 检测✓验证✓ ⚠️缺动作告警 |
+| `self-heal-closed-loop.yml` | AIShield Auto Self-Heal Closed-Loop | 每 4 小时（第 23 分）UTC | 6 | 检测✓动作✓验证✓告警✓ |
+| `stale.yml` | Stale Issues Manager | 每日 02:26 UTC | 1 | 验证✓ ⚠️缺检测动作告警 |
+| `threat-intel-feed.yml` | AIShield Threat-Intel Feed Update | 每周一、周四 07:15 UTC | 5 | 检测✓动作✓验证✓告警✓ |
 
-| ID | 任务名 | 频率 | 状态 | 产出路径 |
-|----|--------|------|------|----------|
-| 6e208d24 | GeneTech 每日运营闭环 | 每日 23:00 | Active | genetech/ops/daily/ |
-| c223b50f | GeneTech 每周战略闭环 | 每周一 23:30 | Active | genetech/ops/weekly/ |
-| f3e0bd56 | GeneTech 每月变现闭环 | 每月1日 23:30 | Active | genetech/ops/monthly/ |
+## 事件驱动任务
 
-## RoboParts 项目 (3个)
+| Workflow | 名称 | 触发 | Jobs |
+|----------|------|------|------|
+| `deploy.yml` | Deploy to Railway | push(main) | 1 |
+| `issue-labeler.yml` | Auto Label Issues | Issue 事件 | 1 |
+| `pages.yml` | Pages Site (内容站构建与发布) | push(main) / workflow_run / 手动 | 4 |
+| `publish-mcp-registry.yml` | Publish to MCP Registry | workflow_run / 手动 | 2 |
+| `publish-npm.yml` | Publish to npm | release / push / 手动 | 5 |
 
-| ID | 任务名 | 频率 | 状态 | 产出路径 |
-|----|--------|------|------|----------|
-| 222f04bf | RoboParts 每日综合闭环 | 每日 02:30 | Active | robopart/ops/daily/ |
-| 7b5c030a | RoboParts 每周综合运营 | 每周一 03:00 | Active | robopart/ops/weekly/ |
-| f0fd67f2 | RoboParts 月度经营闭环 | 每月1日 02:00 | Active | robopart/ops/monthly/ |
+## 状态总线最近更新
 
-## SwarmLabs 项目 (5个)
+> 机器可读状态存于 `data/state/<域>.json`，是闭环之间唯一的通信介质。
 
-| ID | 任务名 | 频率 | 状态 | 产出路径 |
-|----|--------|------|------|----------|
-| 5287068f | 外部情报与竞品分析 | 每日 23:00 | Active | swarmlabs/ops/daily/ |
-| 08382da4 | 健康检查+自动修复+回归 | 每日 23:45 | Active | swarmlabs/ops/daily/ |
-| f9cc1bee | 用户增长与推广 | 每日 00:30 | Active | swarmlabs/ops/daily/ |
-| 41f78fbd | 财务合规核对 | 每日 01:15 | Active | swarmlabs/ops/daily/ |
-| 67c78357 | 知识沉淀与汇总 | 每日 01:45 | Active | swarmlabs/ops/daily/ |
+| 状态域 | 最近更新 |
+|--------|----------|
+| distribution | 2026-08-04 09:36:23 |
+| feature | 2026-08-04 06:41:12 |
+| health | 2026-08-04 07:04:13 |
+| intel | 2026-08-04 06:35:13 |
+| meta | 2026-08-04 09:46:19 |
+| registry | 2026-08-04 09:33:55 |
+| rules | 2026-08-04 06:37:09 |
 
-## OracleMind 项目 (3个)
+## 健康问题
 
-| ID | 任务名 | 频率 | 状态 | 产出路径 |
-|----|--------|------|------|----------|
-| ca211cbb | OracleMind 每日闭环 | 每日 02:00 | Active | oraclemind/ops/daily/ |
-| 8e1aa100 | OracleMind 每周综合闭环 | 每周一 03:00 | Active | oraclemind/ops/weekly/ |
-| 27f6417a | OracleMind 月度闭环 | 每月1日 02:00 | Active | oraclemind/ops/monthly/ |
-
-## 获客基础设施 (2个)
-
-| ID | 任务名 | 频率 | 状态 | 产出路径 |
-|----|--------|------|------|----------|
-| cf65d67b | 获客基础设施每日健康闭环 | 每日 02:10 | Active | robopart/ops/daily/ |
-| df8b69f3 | 获客指标周报与渠道验证 | 每周二 04:00 | Active | robopart/ops/weekly/ |
-
-## 最近执行状态
-
-### AIShield 每日闭环 (a8119491)
-- 执行次数: 3次
-- 上次执行: 2026-07-30 02:19 (北京时间)
-- 下次执行: 2026-07-31 02:01 (北京时间)
-- 产出: eco/reports/daily-20260730.md
-- 状态: ✅ 服务已恢复（Named Tunnel 已部署），下次执行预期闭环率恢复正常
-- 备注: 07-24 至 07-31 因备案SNI拦截导致服务不可达，已通过 Cloudflare Named Tunnel 解决
-
-### AIShield 每周综合闭环 (57b788bd)
-- 执行次数: 0次
-- 下次执行: 2026-08-03 02:00 (北京时间)
-- 状态: 待首次执行
-
-### 获客基础设施每日健康闭环 (cf65d67b)
-- 执行次数: 5次
-- 上次执行: 2026-07-30 02:17 (北京时间)
-- 下次执行: 2026-07-31 02:11 (北京时间)
-- 状态: 正常运行
+当前无语法错误、无脚本断链。
 
 ---
 
-## 基础设施维护任务（非定时，随部署触发）
+## 跨项目调度任务（外部，不计入本仓库统计）
 
-| 任务 | 触发方式 | 状态 | 说明 |
-|------|----------|------|------|
-| Cloudflare Named Tunnel 部署 | GitHub Actions push to main | ✅ 已部署 | cert.pem 认证，自动创建/复用 tunnel，API 更新 DNS |
-| cloudflared 进程保活 | Cron 每分钟检查 | ✅ 运行中 | `pgrep -f 'cloudflared tunnel' \|\| /opt/start-tunnel.sh` |
-| cloudflared-tunnel systemd 服务 | systemd 自动管理 | ✅ active (running) | Restart=always, RestartSec=10 |
-| API 服务 (端口 8450) | Docker / Python nohup | ✅ 运行中 | 健康检查: /api/v1/health |
-| 部署诊断报告 | GitHub Actions (always) | ✅ 自动生成 | diagnostics/deploy-result.md |
+HealthLens / GeneTech / RoboParts / SwarmLabs / OracleMind 等项目的定时任务由 WorkBuddy 调度器管理，不在本仓库内，**其运行状态无法从这里验证**，因此不并入上方计数。需核对时请直接查询调度器。
+

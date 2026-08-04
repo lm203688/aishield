@@ -1,0 +1,37 @@
+{
+  "domain": "feature",
+  "current": {
+    "adopted": 8,
+    "issues_created": 7,
+    "by_source": {
+      "S1 用户反馈": 0,
+      "S2 生态位待办": 3,
+      "S3 体系问题": 3,
+      "S4 情报驱动": 2
+    },
+    "p1_count": 7,
+    "last_run": "2026-08-04T06:41:12.560843+00:00",
+    "_source": "feedback_aggregator",
+    "_ts": "2026-08-04T06:41:12.560892+00:00"
+  },
+  "history": [
+    {
+      "ts": "2026-08-04T06:41:12.560898+00:00",
+      "source": "feedback_aggregator",
+      "state": {
+        "adopted": 8,
+        "issues_created": 7,
+        "by_source": {
+          "S1 用户反馈": 0,
+          "S2 生态位待办": 3,
+          "S3 体系问题": 3,
+          "S4 情报驱动": 2
+        },
+        "p1_count": 7,
+        "last_run": "2026-08-04T06:41:12.560843+00:00"
+      }
+    }
+  ],
+  "updated": "2026-08-04T06:41:12.560901+00:00",
+  "desc": "功能迭代闭环采纳结果"
+}

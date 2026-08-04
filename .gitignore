@@ -85,6 +85,8 @@ AIShield_完整备案包.zip
 .env
 .env.local
 .env.*.local
+meta_tmp.json
+state_bus_*.json
 
 # =====================
 # WorkBuddy (personal memory + private skills)

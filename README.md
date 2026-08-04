@@ -380,3 +380,14 @@ docker run -p 8450:8450 aishield
 ## 许可证
 
 [MIT License](./LICENSE) © 2025 AIShield Contributors
+
+<!--LATEST_POSTS_START-->
+
+### 📰 最新安全洞察
+
+- [MCP 2026-07-28 无状态化：安全网关必须回答的 3 个问题](https://lm203688.github.io/aishield/blog/blog-mcp-stateless-security-2026-08-03.html) `2026-08-03`
+- [从 HuggingFace 被入侵看 Agent 沙箱逃逸的 4 个必要条件](https://lm203688.github.io/aishield/blog/blog-sandbox-escape-2026-08-03.html) `2026-08-03`
+- [深入分析：filesystem-test 如何修复安全漏洞](https://lm203688.github.io/aishield/blog/case-filesystem-test-2026-07-25.html) `2026-07-25`
+- [MCP 安全扫描周报 #30：发现 0 个高危风险](https://lm203688.github.io/aishield/blog/weekly-2026-07-25.html) `2026-07-25`
+
+<!--LATEST_POSTS_END-->

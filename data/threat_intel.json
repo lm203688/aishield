@@ -1,0 +1,1461 @@
+{
+  "intel": [
+    {
+      "id": "GHSA-jwv3-5hgf-82ww",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": null,
+      "title": "python-cryptography: Duplicate self-signed intermediates can cause exponential path-building",
+      "summary": "### Summary\nWhen resolving invalid certificate chains that include duplicate copies of self-signed certificates, the processing recursively invokes the same candidate, leading to an exponential blowup. Although the limitation that the chain depth cannot exceed a specified maximum depth prevents unbounded recursion and guarantees termination, an attacker-controlled certificate chain can lead the processing to easily take more than 5s to reject in testing. This amplification could form the basis f",
+      "affected": "pip:cryptography",
+      "references": [
+        "https://github.com/advisories/GHSA-jwv3-5hgf-82ww"
+      ],
+      "published": "2026-08-03T21:26:50Z",
+      "fetched": "2026-08-04T06:35:12.736309+00:00"
+    },
+    {
+      "id": "GHSA-3f7w-8rr8-f37f",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 8.1,
+      "title": "GitPython: Unguarded git option forwarding in IndexFile.checkout() and TagReference.create() enables arbitrary file overwrite and arbitrary file read",
+      "summary": "**Target:** gitpython-developers/GitPython\n**Tested:** HEAD `07e80555` (2026-07-25), latest release 3.1.55, `git version 2.50.1`\n**Reported instances:** 2 exploitable, from a sweep of 14 unguarded call sites\n\n## Summary\n\nGitPython blocks dangerous git options through `Git.check_unsafe_options()`, gated per method by an `allow_unsafe_options` parameter. That guard is applied **per call site**, so any API that forwards `**kwargs` into a git command without calling it passes caller-controlled optio",
+      "affected": "pip:GitPython",
+      "references": [
+        "https://github.com/advisories/GHSA-3f7w-8rr8-f37f"
+      ],
+      "published": "2026-08-03T20:09:56Z",
+      "fetched": "2026-08-04T06:35:12.736525+00:00"
+    },
+    {
+      "id": "GHSA-c5px-58j2-7fqp",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 6.2,
+      "title": "gemini-bridge vulnerable to arbitrary local file read via consult_gemini_with_files inline mode",
+      "summary": "### Summary\n`consult_gemini_with_files` in **inline mode** read any file path supplied in\nthe `files` argument without confining it to the working `directory`, then\nforwarded the contents to the Gemini CLI. Because the caller also controls\n`query`, the file contents are echoed back through the Gemini round-trip\n(and sent to Google), making this an arbitrary local file read.\n\n### Impact\nAn MCP client — or an LLM that has been prompt-injected into calling the tool —\ncan read **any file the server ",
+      "affected": "pip:gemini-bridge",
+      "references": [
+        "https://github.com/advisories/GHSA-c5px-58j2-7fqp"
+      ],
+      "published": "2026-07-31T22:31:20Z",
+      "fetched": "2026-08-04T06:35:12.736542+00:00"
+    },
+    {
+      "id": "GHSA-vccv-cmxp-4j9h",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 5.4,
+      "title": "sanitize-html has incomplete URI scheme validation in that allows javascript: URIs through action, formaction, data, poster, and background attributes",
+      "summary": "## Summary\n\nsanitize-html uses `allowedSchemesAppliedToAttributes` (default: `['href', 'src', 'cite']`) to gate the `naughtyHref()` function that blocks dangerous URI schemes like `javascript:` and `vbscript:`. The HTML specification defines 10+ attributes that accept URIs (`action`, `formaction`, `data`, `poster`, `background`, `ping`, `xlink:href`, `dynsrc`, `lowsrc`), but none of these are included in the default gate list. When a developer allows any of these attributes in their configuratio",
+      "affected": "npm:sanitize-html",
+      "references": [
+        "https://github.com/advisories/GHSA-vccv-cmxp-4j9h"
+      ],
+      "published": "2026-07-31T21:43:51Z",
+      "fetched": "2026-08-04T06:35:09.194982+00:00"
+    },
+    {
+      "id": "CVE-2026-18394",
+      "source": "nvd",
+      "severity": "high",
+      "cvss": 7.4,
+      "title": "Incorrect authorization in the http_request tool in Strands Agents Tools before 0.8.2 might allow remote attackers to obtain credentials configured via HTTP_REQUEST_TOKEN_CONFIG by influencing the LLM",
+      "summary": "Incorrect authorization in the http_request tool in Strands Agents Tools before 0.8.2 might allow remote attackers to obtain credentials configured via HTTP_REQUEST_TOKEN_CONFIG by influencing the LLM to route requests through actor-controlled proxy infrastructure.\n\n\n\nTo remediate this issue, users should upgrade to version 0.8.2.",
+      "affected": "llm agent",
+      "references": [
+        "https://aws.amazon.com/security/security-bulletins/2026-069-aws/",
+        "https://github.com/strands-agents/tools/releases/tag/v0.8.2",
+        "https://github.com/strands-agents/tools/security/advisories/GHSA-qhw6-2h72-m84v"
+      ],
+      "published": "2026-07-31T20:16:49.780",
+      "fetched": "2026-08-04T06:35:01.639544+00:00"
+    },
+    {
+      "id": "GHSA-rxcw-mc6f-6hr3",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.2,
+      "title": "Jodit Editor: Mutation XSS in jodit clean-html via a MathML/style rawtext carrier",
+      "summary": "### Summary\njodit's built-in `clean-html` sanitizer can be bypassed by a MathML/`<style>` carrier that hides a dangerous element from the sanitizer's element walk, so a no-interaction event handler survives into the editor value. When an application supplies attacker-influenced HTML to the editor's value-set or insertion paths, the sanitized output still contains a live `<img ... onload=...>` (or another non-`onerror` handler such as `onfocus`). A consumer that renders that output (`element.inne",
+      "affected": "npm:jodit",
+      "references": [
+        "https://github.com/advisories/GHSA-rxcw-mc6f-6hr3"
+      ],
+      "published": "2026-07-31T19:12:40Z",
+      "fetched": "2026-08-04T06:35:09.195123+00:00"
+    },
+    {
+      "id": "GHSA-qvv7-cg9c-w4x3",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 8.6,
+      "title": "Natural Language Toolkit (NLTK): DNS-rebinding SSRF filter bypass in nltk.pathsec.urlopen (nltk.download / nltk.data.load) defeats ENFORCE mode",
+      "summary": "### Summary\n`nltk.pathsec` provides an SSRF filter that NLTK documents as a security control, blocking loopback, private, link-local, and multicast ranges (including obfuscated forms) and recommending strict `ENFORCE` mode for security-sensitive environments. The filter is bypassable by DNS rebinding: `validate_network_url()` resolves the hostname and checks the resulting IP, but the actual HTTP connection re-resolves the hostname independently at connect time and connects to that second result.",
+      "affected": "pip:nltk",
+      "references": [
+        "https://github.com/advisories/GHSA-qvv7-cg9c-w4x3"
+      ],
+      "published": "2026-07-31T16:51:29Z",
+      "fetched": "2026-08-04T06:35:12.736721+00:00"
+    },
+    {
+      "id": "GHSA-fg7f-2386-8897",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.5,
+      "title": "Natural Language Toolkit (NLTK): ReDoS in NLTK ReviewsCorpusReader FEATURES regex",
+      "summary": "### Summary\n`ReviewsCorpusReader` extracts feature annotations of the form *label* followed by a bracketed signed digit (e.g. a label then `[+2]`) from each review line, using the module-level `FEATURES` regex. The feature-label sub-pattern is unbounded — an optional greedy run of word-plus-whitespace groups followed by another word, which must then be followed by a literal `[`. On a long bracket-less line the label can match from every search position to the end of the line, causing quadratic b",
+      "affected": "pip:nltk",
+      "references": [
+        "https://github.com/advisories/GHSA-fg7f-2386-8897"
+      ],
+      "published": "2026-07-31T16:51:09Z",
+      "fetched": "2026-08-04T06:35:12.736772+00:00"
+    },
+    {
+      "id": "GHSA-6hm5-jgcp-p838",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.5,
+      "title": "Natural Language Toolkit (NLTK): Path Traversal in NKJPCorpusReader leads to Arbitrary File Read and bypasses the nltk.pathsec sandbox (ENFORCE=True)",
+      "summary": "### Summary\n   A path-traversal vulnerability in `NKJPCorpusReader` allows an attacker who can\n   influence the `fileids` argument of its public read methods (`header`, `raw`,\n   `words`, `sents`, `tagged_words`) to read files outside the corpus root. The\n   reader builds the file path with no containment check and opens it with the\n   builtin `open()`, so it bypasses NLTK's `nltk.pathsec` sandbox — including the\n   strict `ENFORCE = True` mode that `SECURITY.md` recommends for web/multi-tenant\n",
+      "affected": "pip:nltk",
+      "references": [
+        "https://github.com/advisories/GHSA-6hm5-jgcp-p838"
+      ],
+      "published": "2026-07-31T16:50:55Z",
+      "fetched": "2026-08-04T06:35:12.736819+00:00"
+    },
+    {
+      "id": "GHSA-xh95-f55m-82fw",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.5,
+      "title": "Natural Language Toolkit (NLTK) has path traversal in FramenetCorpusReader.frame() that allows arbitrary XML file read, bypassing the nltk.pathsec sandbox (ENFORCE=True)",
+      "summary": "### Summary\n`FramenetCorpusReader.frame(name)` interpolates a caller-supplied frame name into an XML file path that is read with the builtin `open()`, bypassing `CorpusReader.open()` and the `nltk.pathsec` sandbox — including strict `ENFORCE=True` mode. A `../` sequence in the name escapes the corpus root, yielding an arbitrary XML file read whose parsed content is returned to the caller.\n\n\n### Details\n`frame_by_name` builds the path by joining the corpus root, the frame directory, and the calle",
+      "affected": "pip:nltk",
+      "references": [
+        "https://github.com/advisories/GHSA-xh95-f55m-82fw"
+      ],
+      "published": "2026-07-31T16:50:41Z",
+      "fetched": "2026-08-04T06:35:12.736873+00:00"
+    },
+    {
+      "id": "GHSA-p7w7-4929-vpj5",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.5,
+      "title": "`@dynatrace-oss/dynatrace-mcp-server` has Unauthenticated HTTP MCP Tool Invocation",
+      "summary": "### Summary\n\n`@dynatrace-oss/dynatrace-mcp-server` v1.8.5 exposes an HTTP transport mode (`--http` flag) that performs no authentication, session validation, or origin/host verification before dispatching MCP tool calls. Any network-reachable attacker can send a raw JSON-RPC `tools/call` request without an `Authorization` header and have it executed directly under the victim server's Dynatrace credentials. Confirmed high-impact tools reachable without authentication include `execute_dql` (reads ",
+      "affected": "npm:@dynatrace-oss/dynatrace-mcp-server",
+      "references": [
+        "https://github.com/advisories/GHSA-p7w7-4929-vpj5"
+      ],
+      "published": "2026-07-31T16:05:57Z",
+      "fetched": "2026-08-04T06:35:09.195444+00:00"
+    },
+    {
+      "id": "GHSA-xrmj-5g4g-8987",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 4.2,
+      "title": "@dynatrace-oss/dynatrace-mcp-server has a workflow template injection via create_workflow_for_notification",
+      "summary": "### Summary\nA template injection vulnerability in the `create_workflow_for_notification` tool lets a caller embed Jinja2 expressions that the Dynatrace workflow engine evaluates at runtime, exfiltrating event data to attacker-controlled destinations through a workflow that persists in the tenant after the MCP session ends.\n\n### Details\nThe `create_workflow_for_notification` tool interpolates three caller-supplied parameters (`teamName`, `problemType`, `channel`) directly into a Dynatrace Workflo",
+      "affected": "npm:@dynatrace-oss/dynatrace-mcp-server",
+      "references": [
+        "https://github.com/advisories/GHSA-xrmj-5g4g-8987"
+      ],
+      "published": "2026-07-31T16:01:07Z",
+      "fetched": "2026-08-04T06:35:09.195875+00:00"
+    },
+    {
+      "id": "GHSA-pqh8-p93p-2rx7",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 4.3,
+      "title": "@dynatrace-oss/dynatrace-mcp-server has a DQL injection via parameters not documented as DQL",
+      "summary": "### Summary\nA DQL injection vulnerability in several read tools lets a caller bypass the tools' documented field-scope, time-window, and display caps by injecting DQL pipeline stages through parameters typed as identifiers.\n\n### Details\nSeveral tools interpolate caller-supplied parameters directly into DQL query strings without quoting or escaping. The affected parameters are documented in their Zod schemas as identifiers or constrained shorthand (such as `\"24h\"` timeframe values or Kubernetes U",
+      "affected": "npm:@dynatrace-oss/dynatrace-mcp-server",
+      "references": [
+        "https://github.com/advisories/GHSA-pqh8-p93p-2rx7"
+      ],
+      "published": "2026-07-31T15:56:12Z",
+      "fetched": "2026-08-04T06:35:09.195885+00:00"
+    },
+    {
+      "id": "GHSA-pgwh-4jj4-qm8v",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 8.5,
+      "title": "Flyto2 Core: Multiple HTTP-family modules fetch client-controlled URLs without the SSRF guard their siblings apply (SSRF to internal/metadata)",
+      "summary": "## Summary\nNumerous HTTP-emitting modules (`core.api.http_get`, `core.api.http_post`, `graphql.query`/`graphql.mutation`, `monitor.http_check`, `communication.slack_send`, `notification.{discord,slack,teams}.send_message`, `ai.vision_analyze` [anthropic path], `verify.visual_diff`, `browser.proxy_rotate`, and the `agent`/`llm` inline base_url branch) perform outbound requests to a fully client-controlled URL **without calling the project's own SSRF guard** (`validate_url_with_env_config`) that t",
+      "affected": "pip:flyto-core",
+      "references": [
+        "https://github.com/advisories/GHSA-pgwh-4jj4-qm8v"
+      ],
+      "published": "2026-07-30T14:48:05Z",
+      "fetched": "2026-08-04T06:35:12.737005+00:00"
+    },
+    {
+      "id": "GHSA-qq9q-xgm3-xv9g",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 8.6,
+      "title": "Flyto2 Core: LLM/API keys leak to an attacker-controlled base_url",
+      "summary": "## Summary\n\n`llm.chat` reads the operator's provider key from the environment (`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, ...) and sends it in the `Authorization: Bearer` header to `base_url`, a parameter the caller controls. `base_url` is only checked against the SSRF guard, and the guard allows any public host, so pointing `base_url` at an attacker's server hands them the operator's key. flyto-core's own bounty scale rates \"environment access exposing secrets (e.g. `ANTHROPIC_API_KEY`)\" as High.\n\n",
+      "affected": "pip:flyto-core",
+      "references": [
+        "https://github.com/advisories/GHSA-qq9q-xgm3-xv9g"
+      ],
+      "published": "2026-07-30T14:47:16Z",
+      "fetched": "2026-08-04T06:35:12.737057+00:00"
+    },
+    {
+      "id": "GHSA-hr7p-wg7r-hg9m",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 8.6,
+      "title": "Flyto2 Core: ${env.VAR} interpolation reads any env secret despite env.get being denylisted",
+      "summary": "## Summary\n\nThe capability policy denies the `env.get` and `env.load_dotenv` modules by default, with the stated reason that they read arbitrary host environment variables (API keys, DSNs) and are a secret-exfil risk. But the workflow engine's variable resolver expands `${env.VAR}` for any environment variable with no allowlist and no policy check, so the exact capability the denylist blocks is available to any workflow parameter. The resolved secret can then be sent out through any allowed modu",
+      "affected": "pip:flyto-core",
+      "references": [
+        "https://github.com/advisories/GHSA-hr7p-wg7r-hg9m"
+      ],
+      "published": "2026-07-30T14:47:01Z",
+      "fetched": "2026-08-04T06:35:12.737074+00:00"
+    },
+    {
+      "id": "GHSA-2956-977x-2w3r",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": 10.0,
+      "title": "Flyto2 Core: Arbitrary file write via image.download (and other file-writing modules)",
+      "summary": "## Summary\n\n`image.download` fetches a URL and writes the response to disk. It does not use the central path guard (`validate_path_with_env_config`, which confines writes to `FLYTO_SANDBOX_DIR`); instead it confines the output to `output_dir`, but `output_dir` is itself a caller parameter. Since the attacker sets both the target and the base it is checked against, the check is meaningless, and attacker-controlled bytes (the HTTP response) land at any absolute path the process can write.\n\n## Affe",
+      "affected": "pip:flyto-core",
+      "references": [
+        "https://github.com/advisories/GHSA-2956-977x-2w3r"
+      ],
+      "published": "2026-07-30T14:46:43Z",
+      "fetched": "2026-08-04T06:35:12.737099+00:00"
+    },
+    {
+      "id": "CVE-2026-67432",
+      "source": "nvd",
+      "severity": "high",
+      "cvss": 7.5,
+      "title": "MCP Ruby SDK is the official Ruby SDK for Model Context Protocol servers and clients. Prior to 0.23.0, MCP::Server::Transports::StreamableHTTPTransport in the mcp gem reads and parses an entire JSON-R",
+      "summary": "MCP Ruby SDK is the official Ruby SDK for Model Context Protocol servers and clients. Prior to 0.23.0, MCP::Server::Transports::StreamableHTTPTransport in the mcp gem reads and parses an entire JSON-RPC POST body without a size limit, allowing an unauthenticated remote attacker to exhaust process memory. This issue is fixed in version 0.23.0.",
+      "affected": "model context protocol",
+      "references": [
+        "https://github.com/modelcontextprotocol/ruby-sdk/commit/772e0cb1f9db69312006926eee59a7287ad50166",
+        "https://github.com/modelcontextprotocol/ruby-sdk/releases/tag/v0.23.0",
+        "https://github.com/modelcontextprotocol/ruby-sdk/security/advisories/GHSA-h669-8m4g-r2hc",
+        "https://github.com/modelcontextprotocol/ruby-sdk/security/advisories/GHSA-h669-8m4g-r2hc"
+      ],
+      "published": "2026-07-29T20:17:12.277",
+      "fetched": "2026-08-04T06:34:53.913958+00:00"
+    },
+    {
+      "id": "CVE-2026-67431",
+      "source": "nvd",
+      "severity": "unknown",
+      "cvss": null,
+      "title": "MCP Ruby SDK is the official Ruby SDK for Model Context Protocol servers and clients. Prior to 0.23.0, MCP::Server::Transports::StreamableHTTPTransport in the mcp gem does not bind a session ID to a s",
+      "summary": "MCP Ruby SDK is the official Ruby SDK for Model Context Protocol servers and clients. Prior to 0.23.0, MCP::Server::Transports::StreamableHTTPTransport in the mcp gem does not bind a session ID to a session owner, allowing an attacker with a stolen session ID to send tools/call requests that execute in the victim's session. This issue is fixed in version 0.23.0.",
+      "affected": "model context protocol",
+      "references": [
+        "https://github.com/modelcontextprotocol/ruby-sdk/commit/35466605319a34e4c7808712ae9bb1ca1afb2356",
+        "https://github.com/modelcontextprotocol/ruby-sdk/releases/tag/v0.23.0",
+        "https://github.com/modelcontextprotocol/ruby-sdk/security/advisories/GHSA-5p9g-j988-pcwv",
+        "https://github.com/modelcontextprotocol/ruby-sdk/security/advisories/GHSA-5p9g-j988-pcwv"
+      ],
+      "published": "2026-07-29T20:17:12.120",
+      "fetched": "2026-08-04T06:34:53.913956+00:00"
+    },
+    {
+      "id": "CVE-2026-67430",
+      "source": "nvd",
+      "severity": "medium",
+      "cvss": 5.3,
+      "title": "MCP Ruby SDK is the official Ruby SDK for Model Context Protocol servers and clients. Prior to 0.23.0, MCP::Server::Transports::StreamableHTTPTransport in the mcp gem does not expire sessions by defau",
+      "summary": "MCP Ruby SDK is the official Ruby SDK for Model Context Protocol servers and clients. Prior to 0.23.0, MCP::Server::Transports::StreamableHTTPTransport in the mcp gem does not expire sessions by default, so repeated initialize requests retain unbounded ServerSession objects and can exhaust process memory. This issue is fixed in version 0.23.0.",
+      "affected": "model context protocol",
+      "references": [
+        "https://github.com/modelcontextprotocol/ruby-sdk/commit/afb968c468c178c4d3294b423fcce250621692f4",
+        "https://github.com/modelcontextprotocol/ruby-sdk/releases/tag/v0.23.0",
+        "https://github.com/modelcontextprotocol/ruby-sdk/security/advisories/GHSA-52jp-gj8w-j6xh",
+        "https://github.com/modelcontextprotocol/ruby-sdk/security/advisories/GHSA-52jp-gj8w-j6xh"
+      ],
+      "published": "2026-07-29T20:17:11.960",
+      "fetched": "2026-08-04T06:34:53.913954+00:00"
+    },
+    {
+      "id": "CVE-2026-63119",
+      "source": "nvd",
+      "severity": "medium",
+      "cvss": 6.2,
+      "title": "MCP Ruby SDK is the official Ruby SDK for Model Context Protocol servers and clients. Prior to 0.23.0, MCP::Server::Transports::StdioTransport and MCP::Client::Stdio in the mcp gem use IO#gets without",
+      "summary": "MCP Ruby SDK is the official Ruby SDK for Model Context Protocol servers and clients. Prior to 0.23.0, MCP::Server::Transports::StdioTransport and MCP::Client::Stdio in the mcp gem use IO#gets without a byte limit, allowing a peer that sends data without a newline to exhaust process memory. This issue is fixed in version 0.23.0.",
+      "affected": "model context protocol",
+      "references": [
+        "https://github.com/modelcontextprotocol/ruby-sdk/commit/267b8fa6285453525c81ce43db6b7dcd7a8a8c2f",
+        "https://github.com/modelcontextprotocol/ruby-sdk/releases/tag/v0.23.0",
+        "https://github.com/modelcontextprotocol/ruby-sdk/security/advisories/GHSA-7683-3w9x-ch42",
+        "https://github.com/modelcontextprotocol/ruby-sdk/security/advisories/GHSA-7683-3w9x-ch42"
+      ],
+      "published": "2026-07-29T20:17:10.790",
+      "fetched": "2026-08-04T06:34:53.913953+00:00"
+    },
+    {
+      "id": "CVE-2026-63118",
+      "source": "nvd",
+      "severity": "unknown",
+      "cvss": null,
+      "title": "MCP Ruby SDK is the official Ruby SDK for Model Context Protocol servers and clients. Prior to 0.23.0, MCP::Server::Transports::StreamableHTTPTransport in the mcp gem does not validate the HTTP Host o",
+      "summary": "MCP Ruby SDK is the official Ruby SDK for Model Context Protocol servers and clients. Prior to 0.23.0, MCP::Server::Transports::StreamableHTTPTransport in the mcp gem does not validate the HTTP Host or Origin request headers, which allows a malicious browser page to use DNS rebinding to reach a locally running MCP server and invoke exposed tools. This issue is fixed in version 0.23.0.",
+      "affected": "model context protocol",
+      "references": [
+        "https://github.com/modelcontextprotocol/ruby-sdk/commit/ba543083a7594e7892b29464b89091816446ff7a",
+        "https://github.com/modelcontextprotocol/ruby-sdk/releases/tag/v0.23.0",
+        "https://github.com/modelcontextprotocol/ruby-sdk/security/advisories/GHSA-rjr6-rcgv-9m7m",
+        "https://github.com/modelcontextprotocol/ruby-sdk/security/advisories/GHSA-rjr6-rcgv-9m7m"
+      ],
+      "published": "2026-07-29T20:17:10.630",
+      "fetched": "2026-08-04T06:34:53.913951+00:00"
+    },
+    {
+      "id": "CVE-2026-67428",
+      "source": "nvd",
+      "severity": "high",
+      "cvss": 8.5,
+      "title": "Flyto2 Core is an execution kernel for automation and AI-agent workflows. Prior to 2.26.7, HTTP-emitting modules including src/core/modules/third_party/developer/http/requests.py, core.api.http_get, c",
+      "summary": "Flyto2 Core is an execution kernel for automation and AI-agent workflows. Prior to 2.26.7, HTTP-emitting modules including src/core/modules/third_party/developer/http/requests.py, core.api.http_get, core.api.http_post, graphql.query, graphql.mutation, monitor.http_check, communication.slack_send, notification.discord.send_message, notification.slack.send_message, notification.teams.send_message, ai.vision_analyze, verify.visual_diff, browser.proxy_rotate, and the agent and llm inline base_url br",
+      "affected": "llm agent",
+      "references": [
+        "https://github.com/flytohub/flyto-core/commit/0a0a528520ec18f5a21f1ddf858a71cc1edfb6e9",
+        "https://github.com/flytohub/flyto-core/releases/tag/v2.26.7",
+        "https://github.com/flytohub/flyto-core/security/advisories/GHSA-pgwh-4jj4-qm8v",
+        "https://github.com/flytohub/flyto-core/security/advisories/GHSA-pgwh-4jj4-qm8v"
+      ],
+      "published": "2026-07-29T19:16:52.087",
+      "fetched": "2026-08-04T06:35:01.639542+00:00"
+    },
+    {
+      "id": "GHSA-fm7p-gw32-828p",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 6.3,
+      "title": "mathlive's Lack of Escaping of HTML allows for XSS",
+      "summary": "### Summary\n\nDespite the 0.104.0 patch escaping attribute-bearing constructs (`\\htmlData`, `\\href`), text-content reflection was missed. The `\\text{}`, `\\mbox{}` commands accept arbitrary characters in their body and emit them raw and unescaped into both the HTML markup and the MathML output, leading to XSS.\n\n### Details\n\n`Box.toMarkup` at `src/core/box.ts:356` concatenates `this.value` into the rendered span without HTML-escaping. In text mode any literal character (`<`, `>`, `&`, `\"`) is wrapp",
+      "affected": "npm:mathlive",
+      "references": [
+        "https://github.com/advisories/GHSA-fm7p-gw32-828p"
+      ],
+      "published": "2026-07-29T17:21:26Z",
+      "fetched": "2026-08-04T06:35:09.195938+00:00"
+    },
+    {
+      "id": "GHSA-m4x6-gwgp-4pm7",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 9.0,
+      "title": "AgentCore CLI Bedrock Agent Import Vulnerable to Code Injection via Improper Triple-Quote Escaping",
+      "summary": "### Summary\nThe AgentCore CLI (@aws/agentcore) is a developer tool for managing agent infrastructure lifecycle on Amazon Bedrock AgentCore. An issue exists where, under certain circumstances, a crafted collaborationInstruction value stored in Bedrock Agent collaborator metadata can break out of a Python triple-quoted string in code generated by the `agentcore add agent --type import` command, resulting in arbitrary code execution when the generated file is loaded or deployed.\n\n### Impact\nWhen a ",
+      "affected": "npm:@aws/agentcore, npm:@aws/agentcore, npm:@aws/agentcore",
+      "references": [
+        "https://github.com/advisories/GHSA-m4x6-gwgp-4pm7"
+      ],
+      "published": "2026-07-29T16:10:46Z",
+      "fetched": "2026-08-04T06:35:09.195960+00:00"
+    },
+    {
+      "id": "GHSA-pc2w-4mq8-32qw",
+      "source": "github-advisory",
+      "severity": "low",
+      "cvss": 3.7,
+      "title": "@dynatrace-oss/dynatrace-mcp-server's create_dynatrace_notebook missing the human-approval gate",
+      "summary": "### Summary\nA missing human-approval gate on the `create_dynatrace_notebook` tool allows a caller to create persistent tenant-visible documents containing arbitrary content (including embedded DQL that other users execute when opening the notebook) without operator consent.\n\n### Details\n`dynatrace-mcp-server` registers six write tools: `send_slack_message`, `send_email`, `send_event`, `create_workflow_for_notification`, `make_workflow_public`, and `create_dynatrace_notebook`. Five of these call ",
+      "affected": "npm:@dynatrace-oss/dynatrace-mcp-server",
+      "references": [
+        "https://github.com/advisories/GHSA-pc2w-4mq8-32qw"
+      ],
+      "published": "2026-07-29T15:36:19Z",
+      "fetched": "2026-08-04T06:35:09.195969+00:00"
+    },
+    {
+      "id": "GHSA-f42x-p2mx-hm8r",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 5.9,
+      "title": "Penelope unsafe tar extraction allows arbitrary local file write via crafted session archive",
+      "summary": "### Summary\n\nPenelope versions prior to 0.19.3 extracted tar archives received from remote sessions without validating archive member paths. When using the affected Unix download path, a malicious or compromised remote session could return a crafted tar archive containing path traversal entries, such as `../`, causing files to be written outside the intended download directory on the Penelope operator's machine.\n\nThe impact is limited to files writable by the user running Penelope. In some cases",
+      "affected": "pip:penelope-shell-handler",
+      "references": [
+        "https://github.com/advisories/GHSA-f42x-p2mx-hm8r"
+      ],
+      "published": "2026-07-29T15:34:16Z",
+      "fetched": "2026-08-04T06:35:12.737238+00:00"
+    },
+    {
+      "id": "GHSA-x36r-4347-pm5x",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 6.1,
+      "title": "swagger-typescript-api vulnerable to Server-Side Request Forgery via spec `$ref`",
+      "summary": "### Summary\n\n`swagger-typescript-api` walks every `$ref` value in the input OpenAPI spec and, for any `$ref` whose target is an `http(s)://` URL, issues an HTTP GET to that URL during generation (`warmUpRemoteSchemasCache`). The only URL filter is a regex that matches `^https?://` — there is **no private-IP allowlist, no DNS-rebinding protection, no redirect cap, and no same-origin check against the spec source**. A malicious OpenAPI spec can therefore force the generator process to issue HTTP r",
+      "affected": "npm:swagger-typescript-api",
+      "references": [
+        "https://github.com/advisories/GHSA-x36r-4347-pm5x"
+      ],
+      "published": "2026-07-29T14:28:58Z",
+      "fetched": "2026-08-04T06:35:09.196245+00:00"
+    },
+    {
+      "id": "GHSA-vx7x-vcc2-c44g",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.5,
+      "title": "datamodel-code-generator vulnerable to SSRF protection bypass via DNS rebinding",
+      "summary": "### Summary\n\n`datamodel-code-generator`'s anti-SSRF guard validates the resolved IP of a fetch target once and then lets `httpx` perform its own independent DNS resolution to connect, so the validated address is never pinned. A hostname that resolves to a public IP at validation time and a private IP at connection time (DNS rebinding) bypasses the guard and reaches loopback, link-local cloud-metadata endpoints (`169.254.169.254`), and other internal services — even with the default `allow_privat",
+      "affected": "pip:datamodel-code-generator",
+      "references": [
+        "https://github.com/advisories/GHSA-vx7x-vcc2-c44g"
+      ],
+      "published": "2026-07-28T21:45:48Z",
+      "fetched": "2026-08-04T06:35:12.737392+00:00"
+    },
+    {
+      "id": "GHSA-954p-556p-r752",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 8.2,
+      "title": "datamodel-code-generator vulnerable to SSRF via JSON-Schema `$ref` to HTTP URL (silent by default)",
+      "summary": "### Summary\n\nJSON-Schema `$ref` values pointing at HTTP or HTTPS URLs are silently dereferenced by `datamodel-code-generator` with no IP/host validation, no scheme allow-list, and redirects followed unconditionally. The `--allow-remote-refs` gate added in 0.56.0 defaults to `None`, which only emits a deprecation warning and then fetches the URL anyway; only explicit `--allow-remote-refs=false` blocks the request. The fetched body is parsed as a sub-schema and reflected verbatim into the generate",
+      "affected": "pip:datamodel-code-generator",
+      "references": [
+        "https://github.com/advisories/GHSA-954p-556p-r752"
+      ],
+      "published": "2026-07-28T21:42:22Z",
+      "fetched": "2026-08-04T06:35:12.737479+00:00"
+    },
+    {
+      "id": "GHSA-5578-w22f-pfx9",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.5,
+      "title": "datamodel-code-generator vulnerable to code injection via `x-python-import` / `customTypePath` in generated import statements",
+      "summary": "#### Summary\n\nA malicious input schema (OpenAPI / JSON Schema) can execute arbitrary Python code on the machine that **imports** the generated model. The `x-python-import` and `customTypePath` schema extensions flow, unsanitized, into the `import` statements datamodel-code-generator emits. A newline embedded in the extension value breaks out of the `from … import …` line and injects an attacker-controlled statement at module scope, which runs at import time. This is an unauthenticated, schema-co",
+      "affected": "pip:datamodel-code-generator",
+      "references": [
+        "https://github.com/advisories/GHSA-5578-w22f-pfx9"
+      ],
+      "published": "2026-07-28T21:40:20Z",
+      "fetched": "2026-08-04T06:35:12.737543+00:00"
+    },
+    {
+      "id": "GHSA-j6g5-3hh3-pgw8",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.3,
+      "title": "AWS Bedrock AgentCore: Improper neutralization of argument delimiters in the Python SDK install_packages()",
+      "summary": "### Summary\n\nThe AWS Bedrock AgentCore Python SDK (bedrock-agentcore) provides tools for building AI agents, including a Code Interpreter client that installs Python packages into a managed sandbox. An issue exists where, under certain circumstances, improper neutralization of argument delimiters in the install_packages() method allows a remote authenticated user to execute arbitrary commands within the Code Interpreter sandbox via crafted package name arguments.\n\n### Impact\nInsufficient input v",
+      "affected": "pip:bedrock-agentcore",
+      "references": [
+        "https://github.com/advisories/GHSA-j6g5-3hh3-pgw8"
+      ],
+      "published": "2026-07-24T22:38:56Z",
+      "fetched": "2026-08-04T06:35:12.737871+00:00"
+    },
+    {
+      "id": "GHSA-29w2-fq35-v728",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.0,
+      "title": "AWS API MCP Server Security Policy Bypass via Startup Initialization Failure",
+      "summary": "## Summary\nThe AWS API MCP Server is an open source Model Context Protocol (MCP) server that enables AI assistants to interact with AWS services and resources through AWS CLI commands. It provides programmatic access to manage your AWS infrastructure while maintaining proper security controls. It includes an optional, user-configured security policy that can deny or gate specific AWS operations. An issue exists where, if the data used to enforce this policy fails to initialize at server startup,",
+      "affected": "pip:awslabs.aws-api-mcp-server",
+      "references": [
+        "https://github.com/advisories/GHSA-29w2-fq35-v728"
+      ],
+      "published": "2026-07-24T22:33:19Z",
+      "fetched": "2026-08-04T06:35:12.737964+00:00"
+    },
+    {
+      "id": "CVE-2026-65699",
+      "source": "nvd",
+      "severity": "medium",
+      "cvss": 4.2,
+      "title": "AgentGPT through 1.0.0 contains an authorization bypass through user-controlled key vulnerability that allows authenticated users to attach tasks to another user's agent run by supplying a target run_",
+      "summary": "AgentGPT through 1.0.0 contains an authorization bypass through user-controlled key vulnerability that allows authenticated users to attach tasks to another user's agent run by supplying a target run_id in the request body without ownership verification. The AgentCRUD.create_task and validate_task_count functions look up the target AgentRun using the client-supplied run_id without confirming the run belongs to the requesting user, enabling an attacker who obtains a valid run_id to corrupt task h",
+      "affected": "llm agent",
+      "references": [
+        "https://github.com/geo-chen/oss/blob/main/AgentGPT.md",
+        "https://www.vulncheck.com/advisories/agentgpt-authorization-bypass-via-agent-task-creation"
+      ],
+      "published": "2026-07-23T18:17:01.153",
+      "fetched": "2026-08-04T06:35:01.639540+00:00"
+    },
+    {
+      "id": "PYSEC-2026-3483",
+      "source": "osv",
+      "severity": "unknown",
+      "cvss": null,
+      "title": "MCP Python SDK: WebSocket server transport does not support Host/Origin validation",
+      "summary": "### Summary\nIn affected versions, the deprecated WebSocket server transport (`mcp.server.websocket.websocket_server`) accepted the WebSocket handshake without applying any `Host` or `Origin` header validation. The `TransportSecuritySettings` mechanism that the SSE and Streamable HTTP transports use for this purpose was not wired into the WebSocket transport, so there was no SDK-level way to restrict which origins could connect.\n\n### Am I affected?\nOnly if a developer's application server exposes",
+      "affected": "PyPI:mcp",
+      "references": [
+        "https://github.com/modelcontextprotocol/python-sdk/security/advisories/GHSA-vj7q-gjh5-988w",
+        "https://nvd.nist.gov/vuln/detail/CVE-2026-59950",
+        "https://github.com/modelcontextprotocol/python-sdk/pull/2992",
+        "https://github.com/modelcontextprotocol/python-sdk/commit/777b8d06710c140e3606b0d4598e2aa48546c266",
+        "https://github.com/modelcontextprotocol/python-sdk"
+      ],
+      "published": "2026-07-23T11:41:46.534440Z",
+      "fetched": "2026-08-04T06:34:39.432409+00:00"
+    },
+    {
+      "id": "PYSEC-2026-3482",
+      "source": "osv",
+      "severity": "unknown",
+      "cvss": null,
+      "title": "MCP Python SDK: HTTP transports serve session requests without verifying the authenticated principal",
+      "summary": "### Summary\nIn affected versions, the SSE and Streamable HTTP server transports routed incoming requests to an existing session based only on the session identifier, without verifying that the request was authenticated as the same principal that created the session. Anyone who learned or guessed a session ID could send JSON-RPC messages on that session, regardless of which bearer token the request carried.\n\n### Am I affected?\nOnly if a developer's application server uses an HTTP transport (SSE, ",
+      "affected": "PyPI:mcp",
+      "references": [
+        "https://github.com/modelcontextprotocol/python-sdk/security/advisories/GHSA-jpw9-pfvf-9f58",
+        "https://nvd.nist.gov/vuln/detail/CVE-2026-52869",
+        "https://github.com/modelcontextprotocol/python-sdk/pull/2690",
+        "https://github.com/modelcontextprotocol/python-sdk/pull/2719",
+        "https://github.com/modelcontextprotocol/python-sdk/commit/1abcca2408a6b50e10ec601181f63f9978705c00"
+      ],
+      "published": "2026-07-23T11:41:46.472358Z",
+      "fetched": "2026-08-04T06:34:39.432406+00:00"
+    },
+    {
+      "id": "PYSEC-2026-3481",
+      "source": "osv",
+      "severity": "unknown",
+      "cvss": null,
+      "title": "MCP Python SDK: Experimental task handlers allow any client to access and cancel other clients' tasks",
+      "summary": "### Summary\nIn affected versions, the default request handlers installed by the experimental tasks feature (`server.experimental.enable_tasks()`) did not check which session created a task before acting on it. On a server with more than one connected client, any client could observe, read results from, and cancel tasks belonging to other clients.\n\n### Am I affected?\nOnly if the developer's application server calls `server.experimental.enable_tasks()`. If `grep -r enable_tasks` over their codebas",
+      "affected": "PyPI:mcp",
+      "references": [
+        "https://github.com/modelcontextprotocol/python-sdk/security/advisories/GHSA-hvrp-rf83-w775",
+        "https://nvd.nist.gov/vuln/detail/CVE-2026-52870",
+        "https://github.com/modelcontextprotocol/python-sdk/pull/2720",
+        "https://github.com/modelcontextprotocol/python-sdk/commit/62137874ff26dd74d2fea80ff528a7fd9ca7a5e7",
+        "https://github.com/modelcontextprotocol/python-sdk"
+      ],
+      "published": "2026-07-23T11:41:46.409906Z",
+      "fetched": "2026-08-04T06:34:39.432403+00:00"
+    },
+    {
+      "id": "CVE-2026-44192",
+      "source": "nvd",
+      "severity": "medium",
+      "cvss": 6.6,
+      "title": "A flaw was found in the Ansible Lightspeed Model Context Protocol (MCP) server. This vulnerability, known as path traversal, allows an attacker to manipulate an AI agent through indirect prompt inject",
+      "summary": "A flaw was found in the Ansible Lightspeed Model Context Protocol (MCP) server. This vulnerability, known as path traversal, allows an attacker to manipulate an AI agent through indirect prompt injection. By doing so, the attacker can cause the server to write files to unauthorized locations on the user's system. This can result in the exposure of sensitive host information and enable the attacker to execute malicious commands, potentially leading to a full system compromise.",
+      "affected": "model context protocol",
+      "references": [
+        "https://access.redhat.com/security/cve/CVE-2026-44192",
+        "https://bugzilla.redhat.com/show_bug.cgi?id=2466760"
+      ],
+      "published": "2026-07-22T12:18:00.063",
+      "fetched": "2026-08-04T06:34:53.913949+00:00"
+    },
+    {
+      "id": "CVE-2026-65056",
+      "source": "nvd",
+      "severity": "high",
+      "cvss": 8.2,
+      "title": "mcp-webresearch 0.1.7 contains a server-side request forgery vulnerability that allows attackers to access internal network services by supplying loopback, link-local, or cloud metadata addresses to t",
+      "summary": "mcp-webresearch 0.1.7 contains a server-side request forgery vulnerability that allows attackers to access internal network services by supplying loopback, link-local, or cloud metadata addresses to the visit_page tool, which only validates the URL protocol without filtering private or reserved IP ranges. Attackers can steer the LLM-controlled URL argument through prompt injection to navigate the server's Playwright browser to internal endpoints such as cloud instance metadata services, causing ",
+      "affected": "model context protocol",
+      "references": [
+        "https://github.com/geo-chen/oss/blob/main/mcp-webresearch.md",
+        "https://www.npmjs.com/package/@mzxrai/mcp-webresearch",
+        "https://www.vulncheck.com/advisories/mcp-webresearch-server-side-request-forgery-in-visit-page-due-to-missing-internal-ip-filtering",
+        "https://github.com/geo-chen/oss/blob/main/mcp-webresearch.md"
+      ],
+      "published": "2026-07-21T21:16:54.287",
+      "fetched": "2026-08-04T06:34:53.913947+00:00"
+    },
+    {
+      "id": "CVE-2026-46555",
+      "source": "nvd",
+      "severity": "high",
+      "cvss": 7.7,
+      "title": "WhatsApp MCP Server is a Model Context Protocol (MCP) server for WhatsApp, enabling Claude to read and send WhatsApp messages. Prior to version 0.2.1, the `whatsapp-bridge` HTTP API listens on `127.0.",
+      "summary": "WhatsApp MCP Server is a Model Context Protocol (MCP) server for WhatsApp, enabling Claude to read and send WhatsApp messages. Prior to version 0.2.1, the `whatsapp-bridge` HTTP API listens on `127.0.0.1:8080` without authentication and without Host header validation, and the `/api/send` endpoint accepts an absolute `media_path` parameter without confining it to a safe directory. Combined, these issues allow any local process running as the same user as the bridge to send WhatsApp messages from ",
+      "affected": "model context protocol",
+      "references": [
+        "https://github.com/verygoodplugins/whatsapp-mcp/blob/main/SECURITY.md",
+        "https://github.com/verygoodplugins/whatsapp-mcp/releases/tag/v0.2.1",
+        "https://github.com/verygoodplugins/whatsapp-mcp/security/advisories/GHSA-7jj9-4qqq-4xc4"
+      ],
+      "published": "2026-07-20T17:17:09.820",
+      "fetched": "2026-08-04T06:34:53.913945+00:00"
+    },
+    {
+      "id": "GHSA-vj7q-gjh5-988w",
+      "source": "osv",
+      "severity": "high",
+      "cvss": null,
+      "title": "MCP Python SDK: WebSocket server transport does not support Host/Origin validation",
+      "summary": "### Summary\nIn affected versions, the deprecated WebSocket server transport (`mcp.server.websocket.websocket_server`) accepted the WebSocket handshake without applying any `Host` or `Origin` header validation. The `TransportSecuritySettings` mechanism that the SSE and Streamable HTTP transports use for this purpose was not wired into the WebSocket transport, so there was no SDK-level way to restrict which origins could connect.\n\n### Am I affected?\nOnly if a developer's application server exposes",
+      "affected": "PyPI:mcp",
+      "references": [
+        "https://github.com/modelcontextprotocol/python-sdk/security/advisories/GHSA-vj7q-gjh5-988w",
+        "https://nvd.nist.gov/vuln/detail/CVE-2026-59950",
+        "https://github.com/modelcontextprotocol/python-sdk/pull/2992",
+        "https://github.com/modelcontextprotocol/python-sdk/commit/777b8d06710c140e3606b0d4598e2aa48546c266",
+        "https://github.com/modelcontextprotocol/python-sdk"
+      ],
+      "published": "2026-07-16T20:14:34Z",
+      "fetched": "2026-08-04T06:34:39.432391+00:00"
+    },
+    {
+      "id": "GHSA-jpw9-pfvf-9f58",
+      "source": "osv",
+      "severity": "high",
+      "cvss": null,
+      "title": "MCP Python SDK: HTTP transports serve session requests without verifying the authenticated principal",
+      "summary": "### Summary\nIn affected versions, the SSE and Streamable HTTP server transports routed incoming requests to an existing session based only on the session identifier, without verifying that the request was authenticated as the same principal that created the session. Anyone who learned or guessed a session ID could send JSON-RPC messages on that session, regardless of which bearer token the request carried.\n\n### Am I affected?\nOnly if a developer's application server uses an HTTP transport (SSE, ",
+      "affected": "PyPI:mcp",
+      "references": [
+        "https://github.com/modelcontextprotocol/python-sdk/security/advisories/GHSA-jpw9-pfvf-9f58",
+        "https://nvd.nist.gov/vuln/detail/CVE-2026-52869",
+        "https://github.com/modelcontextprotocol/python-sdk/pull/2690",
+        "https://github.com/modelcontextprotocol/python-sdk/pull/2719",
+        "https://github.com/modelcontextprotocol/python-sdk/commit/1abcca2408a6b50e10ec601181f63f9978705c00"
+      ],
+      "published": "2026-07-16T19:58:53Z",
+      "fetched": "2026-08-04T06:34:39.432385+00:00"
+    },
+    {
+      "id": "GHSA-hvrp-rf83-w775",
+      "source": "osv",
+      "severity": "high",
+      "cvss": null,
+      "title": "MCP Python SDK: Experimental task handlers allow any client to access and cancel other clients' tasks",
+      "summary": "### Summary\nIn affected versions, the default request handlers installed by the experimental tasks feature (`server.experimental.enable_tasks()`) did not check which session created a task before acting on it. On a server with more than one connected client, any client could observe, read results from, and cancel tasks belonging to other clients.\n\n### Am I affected?\nOnly if the developer's application server calls `server.experimental.enable_tasks()`. If `grep -r enable_tasks` over their codebas",
+      "affected": "PyPI:mcp",
+      "references": [
+        "https://github.com/modelcontextprotocol/python-sdk/security/advisories/GHSA-hvrp-rf83-w775",
+        "https://nvd.nist.gov/vuln/detail/CVE-2026-52870",
+        "https://github.com/modelcontextprotocol/python-sdk/pull/2720",
+        "https://github.com/modelcontextprotocol/python-sdk/commit/62137874ff26dd74d2fea80ff528a7fd9ca7a5e7",
+        "https://github.com/modelcontextprotocol/python-sdk"
+      ],
+      "published": "2026-07-16T19:56:12Z",
+      "fetched": "2026-08-04T06:34:39.432361+00:00"
+    },
+    {
+      "id": "CVE-2026-46341",
+      "source": "nvd",
+      "severity": "medium",
+      "cvss": 6.1,
+      "title": "The Apify MCP server enables AI agents to extract data from websites using ready-made scrapers, crawlers, and automation tools available on the Apify Store. Prior to 0.9.21, the fetch-apify-docs tool ",
+      "summary": "The Apify MCP server enables AI agents to extract data from websites using ready-made scrapers, crawlers, and automation tools available on the Apify Store. Prior to 0.9.21, the fetch-apify-docs tool in src/tools/common/fetch_apify_docs.ts validates allowlisted documentation domains with String.startsWith() rather than URL hostname comparison, allowing attacker-controlled URLs such as `https://docs.apify.com.evil.com/` and `https://docs.apify.com@evil.com/` to pass the ALLOWED_DOC_DOMAINS check ",
+      "affected": "llm agent",
+      "references": [
+        "https://github.com/apify/apify-mcp-server/commit/e39bdee530da1db0b3b3d3713558b33c9608e629",
+        "https://github.com/apify/apify-mcp-server/pull/781",
+        "https://github.com/apify/apify-mcp-server/releases/tag/v0.9.21",
+        "https://github.com/apify/apify-mcp-server/security/advisories/GHSA-jwp7-wg77-3w9v",
+        "https://github.com/apify/apify-mcp-server/security/advisories/GHSA-jwp7-wg77-3w9v"
+      ],
+      "published": "2026-07-16T18:16:43.913",
+      "fetched": "2026-08-04T06:35:01.639537+00:00"
+    },
+    {
+      "id": "CVE-2026-44970",
+      "source": "nvd",
+      "severity": "low",
+      "cvss": 3.1,
+      "title": "dbt-mcp is a Model Context Protocol server for interacting with dbt. Prior to 1.17.1, DefaultUsageTracker.emit_tool_called_event() in src/dbt_mcp/tracking/tracking.py serialized every MCP tool call's ",
+      "summary": "dbt-mcp is a Model Context Protocol server for interacting with dbt. Prior to 1.17.1, DefaultUsageTracker.emit_tool_called_event() in src/dbt_mcp/tracking/tracking.py serialized every MCP tool call's complete arguments dictionary and sent it through dbtlabs_vortex.producer.log_proto without redaction, including sql_query from show, vars from run, build, and test, and node_selection from compile, while usage_tracking_enabled in settings.py enabled telemetry by default unless DBT_SEND_ANONYMOUS_US",
+      "affected": "model context protocol",
+      "references": [
+        "https://github.com/dbt-labs/dbt-mcp/commit/6534507b5e7a729758d5baece155602cad0bb22f",
+        "https://github.com/dbt-labs/dbt-mcp/pull/752",
+        "https://github.com/dbt-labs/dbt-mcp/releases/tag/v1.17.1",
+        "https://github.com/dbt-labs/dbt-mcp/security/advisories/GHSA-jj54-r8gm-2fcf",
+        "https://github.com/dbt-labs/dbt-mcp/security/advisories/GHSA-jj54-r8gm-2fcf"
+      ],
+      "published": "2026-07-16T18:16:43.377",
+      "fetched": "2026-08-04T06:34:53.913942+00:00"
+    },
+    {
+      "id": "CVE-2026-44969",
+      "source": "nvd",
+      "severity": "low",
+      "cvss": 2.5,
+      "title": "dbt-mcp is a Model Context Protocol server for interacting with dbt. Prior to 1.17.1, DbtMCP.call_tool() in src/dbt_mcp/mcp/server.py logged the raw arguments dictionary at INFO level before each tool",
+      "summary": "dbt-mcp is a Model Context Protocol server for interacting with dbt. Prior to 1.17.1, DbtMCP.call_tool() in src/dbt_mcp/mcp/server.py logged the raw arguments dictionary at INFO level before each tool call and at ERROR level on exceptions, and configure_file_logging() wrote those records to dbt-mcp.log when DBT_MCP_SERVER_FILE_LOGGING=true, preserving sensitive sql_query, vars, and node_selection values in plaintext without automatic rotation or deletion. This issue is fixed in version 1.17.1.",
+      "affected": "model context protocol",
+      "references": [
+        "https://github.com/dbt-labs/dbt-mcp/commit/6534507b5e7a729758d5baece155602cad0bb22f",
+        "https://github.com/dbt-labs/dbt-mcp/pull/752",
+        "https://github.com/dbt-labs/dbt-mcp/releases/tag/v1.17.1",
+        "https://github.com/dbt-labs/dbt-mcp/security/advisories/GHSA-7xgw-6qf3-7w59",
+        "https://github.com/dbt-labs/dbt-mcp/security/advisories/GHSA-7xgw-6qf3-7w59"
+      ],
+      "published": "2026-07-16T18:16:43.247",
+      "fetched": "2026-08-04T06:34:53.913940+00:00"
+    },
+    {
+      "id": "CVE-2026-44968",
+      "source": "nvd",
+      "severity": "medium",
+      "cvss": 6.3,
+      "title": "dbt-mcp is a Model Context Protocol server for interacting with dbt. Prior to 1.17.1, _run_dbt_command() in src/dbt_mcp/dbt_cli/tools.py appended unsanitized node_selection and resource_type values to",
+      "summary": "dbt-mcp is a Model Context Protocol server for interacting with dbt. Prior to 1.17.1, _run_dbt_command() in src/dbt_mcp/dbt_cli/tools.py appended unsanitized node_selection and resource_type values to the dbt subprocess argument list, allowing an MCP client to inject dbt global flags such as --profiles-dir, --project-dir, and --target into subprocess.Popen even though shell=False prevents shell metacharacter injection. This issue is fixed in version 1.17.1.",
+      "affected": "model context protocol",
+      "references": [
+        "https://github.com/dbt-labs/dbt-mcp/commit/6534507b5e7a729758d5baece155602cad0bb22f",
+        "https://github.com/dbt-labs/dbt-mcp/pull/752",
+        "https://github.com/dbt-labs/dbt-mcp/releases/tag/v1.17.1",
+        "https://github.com/dbt-labs/dbt-mcp/security/advisories/GHSA-xpww-f6pm-cfhq",
+        "https://github.com/dbt-labs/dbt-mcp/security/advisories/GHSA-xpww-f6pm-cfhq"
+      ],
+      "published": "2026-07-16T18:16:43.100",
+      "fetched": "2026-08-04T06:34:53.913939+00:00"
+    },
+    {
+      "id": "CVE-2026-11371",
+      "source": "nvd",
+      "severity": "medium",
+      "cvss": 6.1,
+      "title": "The BetterDocs  WordPress plugin before 4.5.5 does not sanitise an AI-generated documentation summary before storing and outputting it, and the feature that generates it is exposed to unauthenticated ",
+      "summary": "The BetterDocs  WordPress plugin before 4.5.5 does not sanitise an AI-generated documentation summary before storing and outputting it, and the feature that generates it is exposed to unauthenticated users, allowing them to store a malicious payload via prompt injection that executes in the browser of any visitor who views the affected page, including administrators.",
+      "affected": "prompt injection",
+      "references": [
+        "https://wpscan.com/vulnerability/db41e3db-74c2-4b94-bbff-bd1493295241/"
+      ],
+      "published": "2026-07-16T07:16:46.480",
+      "fetched": "2026-08-04T06:34:46.965320+00:00"
+    },
+    {
+      "id": "CVE-2026-59950",
+      "source": "nvd",
+      "severity": "high",
+      "cvss": 8.1,
+      "title": "The MCP Python SDK, called mcp on PyPI, is a Python implementation of the Model Context Protocol (MCP). Prior to 1.28.1, the deprecated mcp.server.websocket.websocket_server transport accepted WebSock",
+      "summary": "The MCP Python SDK, called mcp on PyPI, is a Python implementation of the Model Context Protocol (MCP). Prior to 1.28.1, the deprecated mcp.server.websocket.websocket_server transport accepted WebSocket handshakes without applying Host or Origin header validation, leaving no SDK-level way to restrict which origins could connect to applications that exposed that transport. This issue is fixed in version 1.28.1.",
+      "affected": "model context protocol",
+      "references": [
+        "https://github.com/modelcontextprotocol/python-sdk/commit/777b8d06710c140e3606b0d4598e2aa48546c266",
+        "https://github.com/modelcontextprotocol/python-sdk/pull/2992",
+        "https://github.com/modelcontextprotocol/python-sdk/releases/tag/v1.28.1",
+        "https://github.com/modelcontextprotocol/python-sdk/security/advisories/GHSA-vj7q-gjh5-988w"
+      ],
+      "published": "2026-07-15T21:16:55.683",
+      "fetched": "2026-08-04T06:34:53.913937+00:00"
+    },
+    {
+      "id": "CVE-2026-52870",
+      "source": "nvd",
+      "severity": "high",
+      "cvss": 7.6,
+      "title": "The MCP Python SDK, called mcp on PyPI, is a Python implementation of the Model Context Protocol (MCP). From 1.23.0 until 1.27.2, default handlers installed by server.experimental.enable_tasks() for t",
+      "summary": "The MCP Python SDK, called mcp on PyPI, is a Python implementation of the Model Context Protocol (MCP). From 1.23.0 until 1.27.2, default handlers installed by server.experimental.enable_tasks() for tasks/list, tasks/get, tasks/result, and tasks/cancel operate only on task identifiers without recording the session that created each task, allowing any connected client to enumerate, read results from, consume messages for, or cancel other clients' tasks. This issue is fixed in version 1.27.2.",
+      "affected": "model context protocol",
+      "references": [
+        "https://github.com/modelcontextprotocol/python-sdk/commit/62137874ff26dd74d2fea80ff528a7fd9ca7a5e7",
+        "https://github.com/modelcontextprotocol/python-sdk/pull/2720",
+        "https://github.com/modelcontextprotocol/python-sdk/releases/tag/v1.27.2",
+        "https://github.com/modelcontextprotocol/python-sdk/security/advisories/GHSA-hvrp-rf83-w775"
+      ],
+      "published": "2026-07-15T20:17:38.577",
+      "fetched": "2026-08-04T06:34:53.913935+00:00"
+    },
+    {
+      "id": "CVE-2026-52869",
+      "source": "nvd",
+      "severity": "high",
+      "cvss": 7.1,
+      "title": "The MCP Python SDK, called mcp on PyPI, is a Python implementation of the Model Context Protocol (MCP). Prior to 1.27.2, the SSE and stateful Streamable HTTP transports mcp.server.sse.SseServerTranspo",
+      "summary": "The MCP Python SDK, called mcp on PyPI, is a Python implementation of the Model Context Protocol (MCP). Prior to 1.27.2, the SSE and stateful Streamable HTTP transports mcp.server.sse.SseServerTransport and mcp.server.streamable_http_manager.StreamableHTTPSessionManager route requests to existing sessions using only the session_id query parameter or Mcp-Session-Id header without verifying the authenticated principal that created the session, allowing a different bearer-token-authenticated client",
+      "affected": "model context protocol",
+      "references": [
+        "https://github.com/modelcontextprotocol/python-sdk/commit/1abcca2408a6b50e10ec601181f63f9978705c00",
+        "https://github.com/modelcontextprotocol/python-sdk/commit/ce267b6fc515dc4efc1dc70b6975b16ff0feef0a",
+        "https://github.com/modelcontextprotocol/python-sdk/pull/2690",
+        "https://github.com/modelcontextprotocol/python-sdk/pull/2719",
+        "https://github.com/modelcontextprotocol/python-sdk/releases/tag/v1.27.2"
+      ],
+      "published": "2026-07-15T20:17:38.427",
+      "fetched": "2026-08-04T06:34:53.913933+00:00"
+    },
+    {
+      "id": "CVE-2026-15746",
+      "source": "nvd",
+      "severity": "medium",
+      "cvss": 6.5,
+      "title": "Strands Agents is an open-source Python SDK for building and running AI agents. The strands-agents-tools package provides pre-built tools for use with the SDK, including the elasticsearch_memory tool ",
+      "summary": "Strands Agents is an open-source Python SDK for building and running AI agents. The strands-agents-tools package provides pre-built tools for use with the SDK, including the elasticsearch_memory tool for agent memory storage. We identified CVE-2026-15746, a server-side request forgery (SSRF) issue in the elasticsearch_memory tool. The tool exposed its connection parameters (es_url, cloud_id, api_key) as fields the large language model (LLM) could control through the tool schema. When a caller om",
+      "affected": "llm agent",
+      "references": [
+        "https://aws.amazon.com/security/security-bulletins/2026-056-aws/",
+        "https://github.com/strands-agents/tools/security/advisories/GHSA-ppcf-fpr3-x46v",
+        "https://pypi.org/project/strands-agents-tools/0.7.0/"
+      ],
+      "published": "2026-07-15T19:16:57.773",
+      "fetched": "2026-08-04T06:35:01.639534+00:00"
+    },
+    {
+      "id": "CVE-2026-15643",
+      "source": "nvd",
+      "severity": "high",
+      "cvss": 7.3,
+      "title": "AWS HealthLake MCP Server (awslabs.healthlake-mcp-server) is a Model Context Protocol server that enables AI assistants to interact with AWS HealthLake FHIR datastores. A server-side request forgery i",
+      "summary": "AWS HealthLake MCP Server (awslabs.healthlake-mcp-server) is a Model Context Protocol server that enables AI assistants to interact with AWS HealthLake FHIR datastores. A server-side request forgery in the pagination handling component in AWS awslabs.healthlake-mcp-server before 0.0.14 on all platforms might allow a remote authenticated user to exfiltrate AWS temporary security credentials to an arbitrary endpoint via a crafted next_token parameter. The server does not validate that pagination U",
+      "affected": "model context protocol",
+      "references": [
+        "https://aws.amazon.com/security/security-bulletins/2026-054-aws/",
+        "https://pypi.org/project/awslabs.healthlake-mcp-server/0.0.14/"
+      ],
+      "published": "2026-07-14T21:16:41.293",
+      "fetched": "2026-08-04T06:34:53.913930+00:00"
+    },
+    {
+      "id": "CVE-2026-61447",
+      "source": "nvd",
+      "severity": "critical",
+      "cvss": 10.0,
+      "title": "PraisonAI before 1.6.78 contains a remote code execution vulnerability in CodeAgent._execute_python() that executes LLM-generated Python code without AST validation, import restrictions, or sandbox en",
+      "summary": "PraisonAI before 1.6.78 contains a remote code execution vulnerability in CodeAgent._execute_python() that executes LLM-generated Python code without AST validation, import restrictions, or sandbox enforcement. Attackers can influence LLM output through prompt injection to exfiltrate all environment secrets and execute arbitrary code on the host system.",
+      "affected": "prompt injection",
+      "references": [
+        "https://github.com/MervinPraison/PraisonAI/security/advisories/GHSA-2xv2-w8cq-5gxw",
+        "https://www.vulncheck.com/advisories/praisonai-before-remote-code-execution-via-codeagent",
+        "https://github.com/MervinPraison/PraisonAI/security/advisories/GHSA-2xv2-w8cq-5gxw"
+      ],
+      "published": "2026-07-11T14:16:23.377",
+      "fetched": "2026-08-04T06:34:46.965319+00:00"
+    },
+    {
+      "id": "CVE-2026-61439",
+      "source": "nvd",
+      "severity": "high",
+      "cvss": 7.5,
+      "title": "PraisonAI versions before 4.6.78 contain a prompt injection defense misconfiguration where the block threshold defaults to CRITICAL severity, allowing HIGH-level threats to pass through unblocked. Att",
+      "summary": "PraisonAI versions before 4.6.78 contain a prompt injection defense misconfiguration where the block threshold defaults to CRITICAL severity, allowing HIGH-level threats to pass through unblocked. Attackers can submit single-vector prompt injection attacks such as instruction overrides or financial manipulation that trigger HIGH severity detection but are logged without blocking, enabling system prompt extraction and unauthorized tool invocations.",
+      "affected": "prompt injection",
+      "references": [
+        "https://github.com/MervinPraison/PraisonAI/security/advisories/GHSA-fj8f-m44g-c479",
+        "https://www.vulncheck.com/advisories/praisonai-before-prompt-injection-defense-bypass",
+        "https://github.com/MervinPraison/PraisonAI/security/advisories/GHSA-fj8f-m44g-c479"
+      ],
+      "published": "2026-07-11T14:16:22.870",
+      "fetched": "2026-08-04T06:34:46.965317+00:00"
+    },
+    {
+      "id": "CVE-2026-60086",
+      "source": "nvd",
+      "severity": "medium",
+      "cvss": 5.3,
+      "title": "PraisonAI before 4.6.78 contains a prompt injection defense bypass vulnerability where the injection defense only blocks threats classified as CRITICAL, requiring three or more detector families to ma",
+      "summary": "PraisonAI before 4.6.78 contains a prompt injection defense bypass vulnerability where the injection defense only blocks threats classified as CRITICAL, requiring three or more detector families to match simultaneously. Attackers can craft single or double-vector prompt injections that are classified as HIGH threat level and pass through unblocked to reach the model.",
+      "affected": "prompt injection",
+      "references": [
+        "https://github.com/MervinPraison/PraisonAI/security/advisories/GHSA-4r3p-w3mc-5v34",
+        "https://www.vulncheck.com/advisories/praisonai-before-prompt-injection-defense-bypass",
+        "https://github.com/MervinPraison/PraisonAI/security/advisories/GHSA-4r3p-w3mc-5v34"
+      ],
+      "published": "2026-07-10T15:16:49.417",
+      "fetched": "2026-08-04T06:34:46.965315+00:00"
+    },
+    {
+      "id": "CVE-2026-55615",
+      "source": "nvd",
+      "severity": "unknown",
+      "cvss": null,
+      "title": "Langroid is a framework for building large-language-model-powered applications. Prior to version 0.65.5, Neo4jChatAgent passes LLM-generated Cypher queries straight to the Neo4j driver with no validat",
+      "summary": "Langroid is a framework for building large-language-model-powered applications. Prior to version 0.65.5, Neo4jChatAgent passes LLM-generated Cypher queries straight to the Neo4j driver with no validation, no statement-type allowlist, and no opt-out gate. The query text is influenceable by prompt injection (direct user input or indirect content the agent reads back via RAG), so an attacker who can influence the prompt can read or destroy all graph data and, when APOC or dbms.security procedures a",
+      "affected": "prompt injection",
+      "references": [
+        "https://github.com/langroid/langroid/commit/5a3097d9dd6378b08ced5480b0caf76cc58d00fa",
+        "https://github.com/langroid/langroid/security/advisories/GHSA-2pq5-3q89-j7cc",
+        "https://github.com/langroid/langroid/security/advisories/GHSA-2pq5-3q89-j7cc"
+      ],
+      "published": "2026-07-10T00:16:33.867",
+      "fetched": "2026-08-04T06:34:46.965312+00:00"
+    },
+    {
+      "id": "CVE-2026-55615",
+      "source": "nvd",
+      "severity": "unknown",
+      "cvss": null,
+      "title": "Langroid is a framework for building large-language-model-powered applications. Prior to version 0.65.5, Neo4jChatAgent passes LLM-generated Cypher queries straight to the Neo4j driver with no validat",
+      "summary": "Langroid is a framework for building large-language-model-powered applications. Prior to version 0.65.5, Neo4jChatAgent passes LLM-generated Cypher queries straight to the Neo4j driver with no validation, no statement-type allowlist, and no opt-out gate. The query text is influenceable by prompt injection (direct user input or indirect content the agent reads back via RAG), so an attacker who can influence the prompt can read or destroy all graph data and, when APOC or dbms.security procedures a",
+      "affected": "llm agent",
+      "references": [
+        "https://github.com/langroid/langroid/commit/5a3097d9dd6378b08ced5480b0caf76cc58d00fa",
+        "https://github.com/langroid/langroid/security/advisories/GHSA-2pq5-3q89-j7cc",
+        "https://github.com/langroid/langroid/security/advisories/GHSA-2pq5-3q89-j7cc"
+      ],
+      "published": "2026-07-10T00:16:33.867",
+      "fetched": "2026-08-04T06:35:01.639531+00:00"
+    },
+    {
+      "id": "CVE-2026-54769",
+      "source": "nvd",
+      "severity": "critical",
+      "cvss": 10.0,
+      "title": "Langroid is a framework for building large-language-model-powered applications. Versions prior to 0.65.2 are vulnerable to a critical Sandbox Escape leading to Remote Code Execution (RCE) in its `Tabl",
+      "summary": "Langroid is a framework for building large-language-model-powered applications. Versions prior to 0.65.2 are vulnerable to a critical Sandbox Escape leading to Remote Code Execution (RCE) in its `TableChatAgent` and `VectorStore` capabilities. When these agents evaluate LLM-generated tool messages with `full_eval=True`, they attempt to sandbox the execution by explicitly setting `locals` to an empty dictionary `{}` inside Python's `eval()` function. However, this relies on an incomplete understa",
+      "affected": "llm agent",
+      "references": [
+        "https://github.com/langroid/langroid/security/advisories/GHSA-q9p7-wqxg-mrhc",
+        "https://github.com/langroid/langroid/security/advisories/GHSA-q9p7-wqxg-mrhc"
+      ],
+      "published": "2026-07-10T00:16:33.603",
+      "fetched": "2026-08-04T06:35:01.639528+00:00"
+    },
+    {
+      "id": "CVE-2026-50181",
+      "source": "nvd",
+      "severity": "high",
+      "cvss": 7.1,
+      "title": "Langroid is a framework for building large-language-model-powered applications. Prior to version 0.64.0, Langroid's `ReadFileTool` and `WriteFileTool` appear to treat `curr_dir` as the intended workin",
+      "summary": "Langroid is a framework for building large-language-model-powered applications. Prior to version 0.64.0, Langroid's `ReadFileTool` and `WriteFileTool` appear to treat `curr_dir` as the intended working-directory boundary for file operations. However, the tools only change the process working directory to `curr_dir` and then operate on the user-supplied `file_path` without resolving and enforcing that the final path remains inside `curr_dir`. As a result, a tool caller can supply path traversal s",
+      "affected": "llm agent",
+      "references": [
+        "https://github.com/langroid/langroid/commit/56e2756ecab70a70a7e6edbee2f2187b8484683e",
+        "https://github.com/langroid/langroid/security/advisories/GHSA-fg23-3346-88f5",
+        "https://github.com/langroid/langroid/security/advisories/GHSA-fg23-3346-88f5"
+      ],
+      "published": "2026-07-10T00:16:33.340",
+      "fetched": "2026-08-04T06:35:01.639526+00:00"
+    },
+    {
+      "id": "CVE-2026-50180",
+      "source": "nvd",
+      "severity": "unknown",
+      "cvss": null,
+      "title": "Langroid is a framework for building large-language-model-powered applications. Prior to version 0.64.0, `SQLChatAgent` in `langroid` ships a `_validate_query` defense-in-depth layer whose `_DANGEROUS",
+      "summary": "Langroid is a framework for building large-language-model-powered applications. Prior to version 0.64.0, `SQLChatAgent` in `langroid` ships a `_validate_query` defense-in-depth layer whose `_DANGEROUS_SQL_PATTERNS` regex blocklist enumerates dangerous SQL primitives by specific function name. The list misses the canonical PostgreSQL filesystem-disclosure family `pg_read_file()`, `pg_stat_file()`, `pg_ls_logdir()`, `pg_ls_waldir()`, `pg_current_logfile()` (and similar `SELECT`-shaped functions in",
+      "affected": "llm agent",
+      "references": [
+        "https://github.com/langroid/langroid/commit/00b7dd7b79c5d03c94be284cf3459d98195ebfba",
+        "https://github.com/langroid/langroid/security/advisories/GHSA-pmch-g965-grmr"
+      ],
+      "published": "2026-07-10T00:16:33.197",
+      "fetched": "2026-08-04T06:35:01.639523+00:00"
+    },
+    {
+      "id": "CVE-2026-59807",
+      "source": "nvd",
+      "severity": "medium",
+      "cvss": 6.8,
+      "title": "Composio SDK before 0.2.32-beta.283 contains a path validation bypass vulnerability that allows attackers to read and exfiltrate sensitive files by exploiting a missing assertSafeFileUploadPath check ",
+      "summary": "Composio SDK before 0.2.32-beta.283 contains a path validation bypass vulnerability that allows attackers to read and exfiltrate sensitive files by exploiting a missing assertSafeFileUploadPath check in the readFileFromDisk function within tool-file-uploads.ts. Attackers can exploit prompt injection to manipulate file_uploadable parameters to reference sensitive paths such as SSH private keys, causing the CLI to upload credential files to attacker-controlled storage.",
+      "affected": "prompt injection",
+      "references": [
+        "https://github.com/ComposioHQ/composio/commit/fc17c37bf95b7ece5c038cb7e2ab7e3e4a064e3a",
+        "https://github.com/ComposioHQ/composio/issues/3746",
+        "https://github.com/ComposioHQ/composio/pull/3763",
+        "https://github.com/ComposioHQ/composio/releases/tag/%40composio%2Fcli%400.2.32-beta.283",
+        "https://www.vulncheck.com/advisories/composio-sdk-beta-283-sensitive-file-upload-via-tool-file-uploads-ts"
+      ],
+      "published": "2026-07-08T20:16:57.123",
+      "fetched": "2026-08-04T06:34:46.965309+00:00"
+    },
+    {
+      "id": "CVE-2026-59800",
+      "source": "nvd",
+      "severity": "critical",
+      "cvss": 9.8,
+      "title": "9Router before 0.4.44 contains an OS command injection vulnerability in the unauthenticated POST /api/tunnel/tailscale-install endpoint (this route is not covered by the dashboard middleware matcher, ",
+      "summary": "9Router before 0.4.44 contains an OS command injection vulnerability in the unauthenticated POST /api/tunnel/tailscale-install endpoint (this route is not covered by the dashboard middleware matcher, so no authorization check is applied). The sudoPassword field from the request body is written to the stdin of a 'sudo -S sh' child process. When sudo does not prompt for a password (the process runs as root, NOPASSWD is configured, or a recent sudo timestamp cache exists), the sudoPassword value is",
+      "affected": "prompt injection",
+      "references": [
+        "https://github.com/decolua/9router/security/advisories/GHSA-g6g7-pvmx-m74p",
+        "https://www.vulncheck.com/advisories/9router-os-command-injection-via-sudopassword-parameter-in-tailscale-install-endpoint",
+        "https://github.com/decolua/9router/security/advisories/GHSA-g6g7-pvmx-m74p"
+      ],
+      "published": "2026-07-07T19:16:55.260",
+      "fetched": "2026-08-04T06:34:46.965307+00:00"
+    },
+    {
+      "id": "PYSEC-2026-1617",
+      "source": "osv",
+      "severity": "unknown",
+      "cvss": null,
+      "title": "Model Context Protocol (MCP) Python SDK does not enable DNS rebinding protection by default",
+      "summary": "### Description\n\nThe Model Context Protocol (MCP) Python SDK does not enable DNS rebinding protection by default for HTTP-based servers. When an HTTP-based MCP server is run on localhost without authentication using `FastMCP` with streamable HTTP or SSE transport, and has not configured `TransportSecuritySettings`, a malicious website could exploit DNS rebinding to bypass same-origin policy restrictions and send requests to the local MCP server. This could allow an attacker to invoke tools or ac",
+      "affected": "PyPI:mcp",
+      "references": [
+        "https://github.com/modelcontextprotocol/python-sdk/security/advisories/GHSA-9h52-p55h-vw2f",
+        "https://nvd.nist.gov/vuln/detail/CVE-2025-66416",
+        "https://github.com/modelcontextprotocol/python-sdk/commit/d3a184119e4479ea6a63590bc41f01dc06e3fa99",
+        "https://github.com/modelcontextprotocol/python-sdk",
+        "https://pypi.org/project/mcp"
+      ],
+      "published": "2026-07-07T16:03:11.859199Z",
+      "fetched": "2026-08-04T06:34:39.432397+00:00"
+    },
+    {
+      "id": "PYSEC-2026-1616",
+      "source": "osv",
+      "severity": "unknown",
+      "cvss": null,
+      "title": "MCP Python SDK vulnerability in the FastMCP Server causes validation error, leading to DoS",
+      "summary": "A validation error in the MCP SDK can cause an unhandled exception when processing malformed requests, resulting in service unavailability (500 errors) until manually restarted. Impact may vary depending on the deployment conditions, and presence of infrastructure-level resilience measures.\n\nThank you to Rich Harang for reporting this issue.",
+      "affected": "PyPI:mcp",
+      "references": [
+        "https://github.com/modelcontextprotocol/python-sdk/security/advisories/GHSA-3qhf-m339-9g5v",
+        "https://nvd.nist.gov/vuln/detail/CVE-2025-53366",
+        "https://github.com/modelcontextprotocol/python-sdk/pull/822",
+        "https://github.com/modelcontextprotocol/python-sdk/commit/29c69e6a47d0104d0afcea6ac35e7ab02fde809a",
+        "https://github.com/modelcontextprotocol/python-sdk"
+      ],
+      "published": "2026-07-07T16:02:56.172263Z",
+      "fetched": "2026-08-04T06:34:39.432394+00:00"
+    },
+    {
+      "id": "PYSEC-2026-1618",
+      "source": "osv",
+      "severity": "unknown",
+      "cvss": null,
+      "title": "MCP Python SDK has Unhandled Exception in Streamable HTTP Transport, Leading to Denial of Service",
+      "summary": "If a client deliberately triggers an exception after establishing a streamable HTTP session, this can lead to an uncaught ClosedResourceError on the server side, causing the server to crash and requiring a restart to restore service. Impact may vary depending on the deployment conditions, and presence of infrastructure-level resilience measures.\n\nThank you to Rich Harang for reporting this issue.",
+      "affected": "PyPI:mcp",
+      "references": [
+        "https://github.com/modelcontextprotocol/python-sdk/security/advisories/GHSA-j975-95f5-7wqh",
+        "https://nvd.nist.gov/vuln/detail/CVE-2025-53365",
+        "https://github.com/modelcontextprotocol/python-sdk/pull/967",
+        "https://github.com/modelcontextprotocol/python-sdk/commit/7b420656de48cfdb90b39eb582e60b6d55c2f891",
+        "https://github.com/modelcontextprotocol/python-sdk"
+      ],
+      "published": "2026-07-07T16:02:56.105116Z",
+      "fetched": "2026-08-04T06:34:39.432400+00:00"
+    },
+    {
+      "id": "CVE-2026-14898",
+      "source": "nvd",
+      "severity": "medium",
+      "cvss": 6.5,
+      "title": "The OpenAI Codex desktop app for macOS rendered remote images from Markdown in model responses. An attacker who could place an indirect prompt injection in content processed by Codex, such as a connec",
+      "summary": "The OpenAI Codex desktop app for macOS rendered remote images from Markdown in model responses. An attacker who could place an indirect prompt injection in content processed by Codex, such as a connected-tool result or another untrusted source, could induce the model to construct a remote image URL containing sensitive data. The app automatically fetched that URL when rendering the response, sending the embedded data to an attacker-controlled server without a separate user click. Successful expl",
+      "affected": "prompt injection",
+      "references": [
+        "https://openai.com/codex/"
+      ],
+      "published": "2026-07-06T20:16:30.580",
+      "fetched": "2026-08-04T06:34:46.965304+00:00"
+    },
+    {
+      "id": "CVE-2026-44934",
+      "source": "nvd",
+      "severity": "unknown",
+      "cvss": null,
+      "title": "A information disclosure when DEBUG loglevel is set in SUSE Rancher AI Agent 1.0 before 1.0.2 could leak API keys or LLM response text with potential sensitive data into logfiles, allowing local attac",
+      "summary": "A information disclosure when DEBUG loglevel is set in SUSE Rancher AI Agent 1.0 before 1.0.2 could leak API keys or LLM response text with potential sensitive data into logfiles, allowing local attackers to misuse respective gained data or credentials.",
+      "affected": "llm agent",
+      "references": [
+        "https://github.com/rancher/rancher-ai-agent/security/advisories/GHSA-5r2r-h824-fr5v"
+      ],
+      "published": "2026-07-06T09:16:36.170",
+      "fetched": "2026-08-04T06:35:01.639520+00:00"
+    },
+    {
+      "id": "CVE-2026-13341",
+      "source": "nvd",
+      "severity": "high",
+      "cvss": 7.4,
+      "title": "A vulnerability exists in the Kong Konnect Model Context Protocol (MCP) server prior to version 1.0.0, which could allow a remote attacker to perform an indirect prompt injection attack and execute un",
+      "summary": "A vulnerability exists in the Kong Konnect Model Context Protocol (MCP) server prior to version 1.0.0, which could allow a remote attacker to perform an indirect prompt injection attack and execute unintended API requests.",
+      "affected": "prompt injection",
+      "references": [
+        "https://github.com/Kong/mcp-konnect/security/advisories/GHSA-7767-3m3w-2p44"
+      ],
+      "published": "2026-07-03T11:16:27.720",
+      "fetched": "2026-08-04T06:34:46.965302+00:00"
+    },
+    {
+      "id": "CVE-2026-13341",
+      "source": "nvd",
+      "severity": "high",
+      "cvss": 7.4,
+      "title": "A vulnerability exists in the Kong Konnect Model Context Protocol (MCP) server prior to version 1.0.0, which could allow a remote attacker to perform an indirect prompt injection attack and execute un",
+      "summary": "A vulnerability exists in the Kong Konnect Model Context Protocol (MCP) server prior to version 1.0.0, which could allow a remote attacker to perform an indirect prompt injection attack and execute unintended API requests.",
+      "affected": "model context protocol",
+      "references": [
+        "https://github.com/Kong/mcp-konnect/security/advisories/GHSA-7767-3m3w-2p44"
+      ],
+      "published": "2026-07-03T11:16:27.720",
+      "fetched": "2026-08-04T06:34:53.913927+00:00"
+    },
+    {
+      "id": "CVE-2026-10564",
+      "source": "nvd",
+      "severity": "high",
+      "cvss": 8.2,
+      "title": "IBM Langflow OSS 1.0.0 through 1.9.6 contains a Server-Side Request Forgery (SSRF). The legacy RSSReaderComponent in rss.py and SearXNG component in searxng.py make unvalidated HTTP requests to user-c",
+      "summary": "IBM Langflow OSS 1.0.0 through 1.9.6 contains a Server-Side Request Forgery (SSRF). The legacy RSSReaderComponent in rss.py and SearXNG component in searxng.py make unvalidated HTTP requests to user-controlled URLs, bypassing SSRF protections introduced in version 1.9.3. An authenticated attacker can exploit this to access internal resources including cloud metadata services (AWS/Azure/GCP IMDS), potentially exfiltrating IAM credentials and enumerating internal networks. The vulnerability can al",
+      "affected": "prompt injection",
+      "references": [
+        "https://www.ibm.com/support/pages/node/7277995"
+      ],
+      "published": "2026-06-30T20:17:27.387",
+      "fetched": "2026-08-04T06:34:46.965300+00:00"
+    },
+    {
+      "id": "CVE-2026-55607",
+      "source": "nvd",
+      "severity": "high",
+      "cvss": 8.8,
+      "title": "Claude Code is an agentic coding tool.  From 2.1.38 until 2.1.163, Claude Code's worktree handling allowed creation of worktrees named \".git\" and navigation to worktrees outside the sandbox context, e",
+      "summary": "Claude Code is an agentic coding tool.  From 2.1.38 until 2.1.163, Claude Code's worktree handling allowed creation of worktrees named \".git\" and navigation to worktrees outside the sandbox context, enabling git directory confusion attacks. By exploiting symlink manipulation and git fsmonitor execution during worktree operations, an attacker could overwrite files in the user's home directory (such as .zshenv), leading to code execution outside of seatbelt sandbox restrictions. Reliably exploitin",
+      "affected": "prompt injection",
+      "references": [
+        "https://github.com/anthropics/claude-code/security/advisories/GHSA-7835-87q9-rgvv"
+      ],
+      "published": "2026-06-29T15:16:41.597",
+      "fetched": "2026-08-04T06:34:46.965298+00:00"
+    },
+    {
+      "id": "CVE-2026-55583",
+      "source": "nvd",
+      "severity": "high",
+      "cvss": 7.6,
+      "title": "Twenty is an open-source CRM (customer relationship management) platform. Prior to 2.9.0, Twenty was vulnerable to a cross-workspace insecure direct object reference (IDOR) in the AI agent monitor's A",
+      "summary": "Twenty is an open-source CRM (customer relationship management) platform. Prior to 2.9.0, Twenty was vulnerable to a cross-workspace insecure direct object reference (IDOR) in the AI agent monitor's AgentTurnResolver, in packages/twenty-server/src/engine/metadata-modules/ai/ai-agent-monitor/reso lvers/agent-turn.resolver.ts. The agentTurns(agentId) query and the evaluateAgentTurn(turnId) mutation looked up rows by agentId or id only; although AgentTurnEntity has a workspaceId column, it was not ",
+      "affected": "llm agent",
+      "references": [
+        "https://github.com/twentyhq/twenty/security/advisories/GHSA-v39r-w5vg-j9pp",
+        "https://github.com/twentyhq/twenty/security/advisories/GHSA-v39r-w5vg-j9pp"
+      ],
+      "published": "2026-06-24T20:16:33.100",
+      "fetched": "2026-08-04T06:35:01.639516+00:00"
+    },
+    {
+      "id": "CVE-2026-48719",
+      "source": "nvd",
+      "severity": "high",
+      "cvss": 8.0,
+      "title": "Warp is an agentic development environment. From 0.2025.08.06.08.12.stable_00 until 0.2026.05.06.15.42.stable_01, Warp contains a command injection in the prompt branch selector. A user who can publis",
+      "summary": "Warp is an agentic development environment. From 0.2025.08.06.08.12.stable_00 until 0.2026.05.06.15.42.stable_01, Warp contains a command injection in the prompt branch selector. A user who can publish a branch to a Git repository opened in Warp can cause a crafted branch name to be interpreted by the victim's shell if the victim selects that branch from the UI. This vulnerability is fixed in 0.2026.05.06.15.42.stable_01.",
+      "affected": "prompt injection",
+      "references": [
+        "https://github.com/warpdotdev/warp/commit/4295ec08d01912fe355351547e541277f29288cd",
+        "https://github.com/warpdotdev/warp/security/advisories/GHSA-hgvx-4xvm-39pw"
+      ],
+      "published": "2026-06-24T18:17:17.983",
+      "fetched": "2026-08-04T06:34:46.965296+00:00"
+    },
+    {
+      "id": "CVE-2026-55249",
+      "source": "nvd",
+      "severity": "medium",
+      "cvss": 6.3,
+      "title": "@rtk-ai/rtk-rewrite transparently rewrites shell commands executed via OpenClaw's exec tool to their RTK equivalents. In 1.0.0, the @rtk-ai/rtk-rewrite OpenClaw plugin passes attacker-controlled input",
+      "summary": "@rtk-ai/rtk-rewrite transparently rewrites shell commands executed via OpenClaw's exec tool to their RTK equivalents. In 1.0.0, the @rtk-ai/rtk-rewrite OpenClaw plugin passes attacker-controlled input directly into a shell-backed execSync() template string without shell-safe escaping. JSON.stringify() wraps the value in double quotes and escapes inner double-quotes and backslashes, but leaves $() and backtick shell metacharacters untouched. Because execSync delegates execution to /bin/sh -c, the",
+      "affected": "llm agent",
+      "references": [
+        "https://github.com/rtk-ai/rtk/security/advisories/GHSA-fqgj-m2gp-mr3q",
+        "https://github.com/rtk-ai/rtk/security/advisories/GHSA-fqgj-m2gp-mr3q"
+      ],
+      "published": "2026-06-23T19:17:11.713",
+      "fetched": "2026-08-04T06:35:01.639513+00:00"
+    },
+    {
+      "id": "CVE-2026-48520",
+      "source": "nvd",
+      "severity": "medium",
+      "cvss": 6.1,
+      "title": "Langflow is a tool for building and deploying AI-powered agents and workflows. Prior to 1.10.0, the \"Shareable Playground\" (or \"Public Flows\" in code) contains a potential arbitrary file-read vulnerab",
+      "summary": "Langflow is a tool for building and deploying AI-powered agents and workflows. Prior to 1.10.0, the \"Shareable Playground\" (or \"Public Flows\" in code) contains a potential arbitrary file-read vulnerability, depending on the exact flow configuration used. By making a flow public, public execution of the flow is allowed. The execution request can contain a list of files that gets read by Langflow and fed into the LLM. The files path can be any path supported by the storage - it can be either a loc",
+      "affected": "llm agent",
+      "references": [
+        "https://github.com/langflow-ai/langflow/security/advisories/GHSA-rcjh-r59h-gq37",
+        "https://github.com/langflow-ai/langflow/security/advisories/GHSA-rcjh-r59h-gq37"
+      ],
+      "published": "2026-06-23T17:17:01.367",
+      "fetched": "2026-08-04T06:35:01.639510+00:00"
+    },
+    {
+      "id": "CVE-2026-33760",
+      "source": "nvd",
+      "severity": "high",
+      "cvss": 8.8,
+      "title": "Langflow is a tool for building and deploying AI-powered agents and workflows. Prior to 1.9.0, Langflow's /api/v1/monitor router exposes 7 endpoints that perform read, write, and delete operations on ",
+      "summary": "Langflow is a tool for building and deploying AI-powered agents and workflows. Prior to 1.9.0, Langflow's /api/v1/monitor router exposes 7 endpoints that perform read, write, and delete operations on user-owned resources — messages, sessions, build artifacts, and LLM transaction logs — without verifying that the authenticated requester owns the targeted resource. Any authenticated user can read, modify, rename, or permanently delete another user's data by supplying the target's resource ID or fl",
+      "affected": "llm agent",
+      "references": [
+        "https://github.com/langflow-ai/langflow/security/advisories/GHSA-9c59-2mvc-vfr8"
+      ],
+      "published": "2026-06-23T17:16:52.790",
+      "fetched": "2026-08-04T06:35:01.639507+00:00"
+    },
+    {
+      "id": "CVE-2026-55443",
+      "source": "nvd",
+      "severity": "medium",
+      "cvss": 5.1,
+      "title": "LangChain is a framework for building agents and LLM-powered applications. Prior to 1.3.9, several LangChain components that resolve filesystem paths or expand search patterns do not consistently conf",
+      "summary": "LangChain is a framework for building agents and LLM-powered applications. Prior to 1.3.9, several LangChain components that resolve filesystem paths or expand search patterns do not consistently confine the resolved path to the intended root directory. Affected behaviors include: a file-search agent middleware that validates a starting directory but not the search pattern or the resolved target of matched files, so glob patterns and symlinks can reach files outside the configured root; prompt- ",
+      "affected": "llm agent",
+      "references": [
+        "https://github.com/langchain-ai/langchain/commit/dcaf7795a3e6590af55c3ff7bda6add6355e9ea6",
+        "https://github.com/langchain-ai/langchain/security/advisories/GHSA-gr75-jv2w-4656"
+      ],
+      "published": "2026-06-22T19:17:21.537",
+      "fetched": "2026-08-04T06:35:01.639502+00:00"
+    },
+    {
+      "id": "CVE-2025-66389",
+      "source": "nvd",
+      "severity": "high",
+      "cvss": 7.5,
+      "title": "GitHub Copilot 1.372.0 allows filesystem access outside of a workspace folder (without user approval) via a file-handler URI parameter to fetch_webpage. Therefore, exfiltration could occur if there is",
+      "summary": "GitHub Copilot 1.372.0 allows filesystem access outside of a workspace folder (without user approval) via a file-handler URI parameter to fetch_webpage. Therefore, exfiltration could occur if there is indirect prompt injection.",
+      "affected": "prompt injection",
+      "references": [
+        "https://blindcyber.com/2025/10/28/copilot-fun/",
+        "https://github.com/microsoft/vscode-copilot-chat/",
+        "https://github.com/microsoft/vscode/blob/03baef1008086ed4960042fa463e570072173bb5/src/vs/workbench/contrib/chat/electron-browser/tools/fetchPageTool.ts#L152"
+      ],
+      "published": "2026-06-22T14:16:24.073",
+      "fetched": "2026-08-04T06:34:46.965294+00:00"
+    },
+    {
+      "id": "CVE-2024-58351",
+      "source": "nvd",
+      "severity": "critical",
+      "cvss": 9.8,
+      "title": "Flowise before 2.1.4 allows configuration to be injected into the Chainflow during execution via the overrideConfig option, supported in both the frontend web integration and the backend Prediction AP",
+      "summary": "Flowise before 2.1.4 allows configuration to be injected into the Chainflow during execution via the overrideConfig option, supported in both the frontend web integration and the backend Prediction API. Because this feature is enabled by default with no allow-list of permitted variables and relies on vm2 for sandboxing, an attacker can abuse it to achieve remote code execution and sandbox escape, denial of service by crashing the server, server-side request forgery, prompt injection, and server ",
+      "affected": "prompt injection",
+      "references": [
+        "https://github.com/FlowiseAI/Flowise/security/advisories/GHSA-5cph-wvm9-45gj",
+        "https://www.vulncheck.com/advisories/flowise-remote-code-execution-via-overrideconfig-parameter"
+      ],
+      "published": "2026-06-20T16:17:03.973",
+      "fetched": "2026-08-04T06:34:46.965291+00:00"
+    },
+    {
+      "id": "CVE-2026-12045",
+      "source": "nvd",
+      "severity": "critical",
+      "cvss": 9.0,
+      "title": "Read-only transaction bypass in the pgAdmin 4 AI Assistant allows an attacker who can influence database content that the assistant reads to execute arbitrary SQL with the privileges of the pgAdmin us",
+      "summary": "Read-only transaction bypass in the pgAdmin 4 AI Assistant allows an attacker who can influence database content that the assistant reads to execute arbitrary SQL with the privileges of the pgAdmin user's database role.\n\nThe AI Assistant's execute_sql_query tool runs LLM-generated SQL inside a BEGIN TRANSACTION READ ONLY wrapper to prevent data modification. The LLM-supplied query was forwarded to the database driver without restriction to a single statement or to read-only verbs, so a multi-sta",
+      "affected": "prompt injection",
+      "references": [
+        "https://github.com/pgadmin-org/pgadmin4/commit/bf4792444446f0e7ab721d23cbd6bfe6afaa7a8b",
+        "https://github.com/pgadmin-org/pgadmin4/issues/10022"
+      ],
+      "published": "2026-06-19T00:16:46.703",
+      "fetched": "2026-08-04T06:34:46.965289+00:00"
+    },
+    {
+      "id": "CVE-2026-56075",
+      "source": "nvd",
+      "severity": "high",
+      "cvss": 8.8,
+      "title": "PraisonAI before 4.5.128 contains an arbitrary shell command execution vulnerability where the UI modules hardcode approval_mode to auto, overriding administrator configuration from PRAISON_APPROVAL_M",
+      "summary": "PraisonAI before 4.5.128 contains an arbitrary shell command execution vulnerability where the UI modules hardcode approval_mode to auto, overriding administrator configuration from PRAISON_APPROVAL_MODE environment variable. Authenticated attackers can instruct the LLM agent to execute arbitrary shell commands via subprocess.run with shell=True, bypassing the manual approval gate and insufficient command sanitization blocklists.",
+      "affected": "llm agent",
+      "references": [
+        "https://github.com/MervinPraison/PraisonAI/security/advisories/GHSA-qwgj-rrpj-75xm",
+        "https://www.vulncheck.com/advisories/praisonai-arbitrary-shell-command-execution-via-hardcoded-approval-mode-override",
+        "https://github.com/MervinPraison/PraisonAI/security/advisories/GHSA-qwgj-rrpj-75xm"
+      ],
+      "published": "2026-06-18T23:16:19.357",
+      "fetched": "2026-08-04T06:35:01.639497+00:00"
+    },
+    {
+      "id": "CVE-2026-49257",
+      "source": "nvd",
+      "severity": "critical",
+      "cvss": 10.0,
+      "title": "mcp-pinot is a Python-based Model Context Protocol (MCP) server for interacting with Apache Pinot. In versions 3.0.1 and below, mcp-pinot defaults to running an HTTP MCP server bound to 0.0.0.0:8080 w",
+      "summary": "mcp-pinot is a Python-based Model Context Protocol (MCP) server for interacting with Apache Pinot. In versions 3.0.1 and below, mcp-pinot defaults to running an HTTP MCP server bound to 0.0.0.0:8080 with no authentication enabled. All MCP tools, including SQL query execution, schema creation, and table-config mutation, are reachable by any network-adjacent caller. The server proxies these calls using server-side Pinot credentials, producing a confused-deputy condition that yields full read/write",
+      "affected": "model context protocol",
+      "references": [
+        "https://github.com/startreedata/mcp-pinot/commit/1c7d3f9cd384854bf72c127d230bdb32299475ad",
+        "https://github.com/startreedata/mcp-pinot/issues/90",
+        "https://github.com/startreedata/mcp-pinot/pull/95",
+        "https://github.com/startreedata/mcp-pinot/security/advisories/GHSA-73cv-556c-w3g6",
+        "https://github.com/startreedata/mcp-pinot/security/advisories/GHSA-73cv-556c-w3g6"
+      ],
+      "published": "2026-06-18T21:16:29.780",
+      "fetched": "2026-08-04T06:34:53.913925+00:00"
+    },
+    {
+      "id": "CVE-2026-46580",
+      "source": "nvd",
+      "severity": "high",
+      "cvss": 8.8,
+      "title": "In Eclipse Theia versions prior to 1.71.0, files matching the pattern .prompts/*.prompttemplate in a workspace were automatically loaded and could override or extend the AI agent's system prompts. An ",
+      "summary": "In Eclipse Theia versions prior to 1.71.0, files matching the pattern .prompts/*.prompttemplate in a workspace were automatically loaded and could override or extend the AI agent's system prompts. An attacker could craft a malicious repository containing prompt template files that, when the workspace was opened in Theia, replaced the AI's system instructions with attacker-controlled content (indirect prompt injection). Combined with other AI chat features available in untrusted workspaces, this ",
+      "affected": "prompt injection",
+      "references": [
+        "https://gitlab.eclipse.org/security/cve-assignment/-/work_items/114"
+      ],
+      "published": "2026-06-18T16:16:54.213",
+      "fetched": "2026-08-04T06:34:46.965287+00:00"
+    },
+    {
+      "id": "CVE-2026-44688",
+      "source": "nvd",
+      "severity": "high",
+      "cvss": 8.8,
+      "title": "In Eclipse Theia versions prior to 1.71.0, the AI chat agent processed workspace file and directory names as part of its prompt context without distinguishing them from system instructions. An attacke",
+      "summary": "In Eclipse Theia versions prior to 1.71.0, the AI chat agent processed workspace file and directory names as part of its prompt context without distinguishing them from system instructions. An attacker could craft a malicious repository with adversarial directory or file names that, when analyzed by the AI agent, would cause the agent to follow attacker-controlled instructions (indirect prompt injection). Combined with other AI chat features available in untrusted workspaces, this enabled attack",
+      "affected": "prompt injection",
+      "references": [
+        "https://gitlab.eclipse.org/security/cve-assignment/-/work_items/113"
+      ],
+      "published": "2026-06-18T16:16:53.977",
+      "fetched": "2026-08-04T06:34:46.965284+00:00"
+    },
+    {
+      "id": "CVE-2026-22551",
+      "source": "nvd",
+      "severity": "medium",
+      "cvss": 6.5,
+      "title": "In Eclipse Theia versions prior to 1.71.0, the AI chat rendered Markdown image tags from AI responses, triggering HTTP requests to arbitrary external URLs without restriction. Combined with prompt inj",
+      "summary": "In Eclipse Theia versions prior to 1.71.0, the AI chat rendered Markdown image tags from AI responses, triggering HTTP requests to arbitrary external URLs without restriction. Combined with prompt injection in a malicious workspace, an attacker could induce the AI agent to construct image URLs encoding sensitive information from the workspace or conversation context, exfiltrating it to attacker-controlled servers. The workspace trust enforcement introduced in v1.71.0 mitigates the documented att",
+      "affected": "prompt injection",
+      "references": [
+        "https://gitlab.eclipse.org/security/cve-assignment/-/work_items/115"
+      ],
+      "published": "2026-06-18T16:16:52.960",
+      "fetched": "2026-08-04T06:34:46.965281+00:00"
+    },
+    {
+      "id": "CVE-2026-55743",
+      "source": "nvd",
+      "severity": "critical",
+      "cvss": 9.6,
+      "title": "The shell tool command allowlist in the SecurityPolicy of OpenHuman desktop agent through 0.54.0 (default Supervised security policy) can be bypassed to execute arbitrary OS commands with the privileg",
+      "summary": "The shell tool command allowlist in the SecurityPolicy of OpenHuman desktop agent through 0.54.0 (default Supervised security policy) can be bypassed to execute arbitrary OS commands with the privileges of the desktop user. Two flaws in src/openhuman/security/policy.rs combine: (1) is_args_safe() blocks the find flags -exec and -ok but not the functionally identical -execdir and -okdir, which also execute an arbitrary command for each matched file; and (2) skip_env_assignments() strips leading i",
+      "affected": "prompt injection",
+      "references": [
+        "https://github.com/tinyhumansai/openhuman",
+        "https://github.com/tinyhumansai/openhuman/blob/v0.53.49-staging/src/openhuman/security/policy.rs",
+        "https://github.com/tinyhumansai/openhuman/commit/60050aa09a870f53ed7e4cd40ed41fd2860329e7"
+      ],
+      "published": "2026-06-17T15:17:02.337",
+      "fetched": "2026-08-04T06:34:46.965277+00:00"
+    },
+    {
+      "id": "CVE-2026-55743",
+      "source": "nvd",
+      "severity": "critical",
+      "cvss": 9.6,
+      "title": "The shell tool command allowlist in the SecurityPolicy of OpenHuman desktop agent through 0.54.0 (default Supervised security policy) can be bypassed to execute arbitrary OS commands with the privileg",
+      "summary": "The shell tool command allowlist in the SecurityPolicy of OpenHuman desktop agent through 0.54.0 (default Supervised security policy) can be bypassed to execute arbitrary OS commands with the privileges of the desktop user. Two flaws in src/openhuman/security/policy.rs combine: (1) is_args_safe() blocks the find flags -exec and -ok but not the functionally identical -execdir and -okdir, which also execute an arbitrary command for each matched file; and (2) skip_env_assignments() strips leading i",
+      "affected": "llm agent",
+      "references": [
+        "https://github.com/tinyhumansai/openhuman",
+        "https://github.com/tinyhumansai/openhuman/blob/v0.53.49-staging/src/openhuman/security/policy.rs",
+        "https://github.com/tinyhumansai/openhuman/commit/60050aa09a870f53ed7e4cd40ed41fd2860329e7"
+      ],
+      "published": "2026-06-17T15:17:02.337",
+      "fetched": "2026-08-04T06:35:01.639475+00:00"
+    },
+    {
+      "id": "GHSA-gr75-jv2w-4656",
+      "source": "osv",
+      "severity": "moderate",
+      "cvss": null,
+      "title": "LangChain: Path traversal and sandbox escape in LangChain file-search middleware and loaders",
+      "summary": "## Summary\n\nSeveral LangChain components that resolve filesystem paths or expand search patterns do not consistently confine the *resolved* path to the intended root directory. Affected behaviors include: a file-search agent middleware that validates a starting directory but not the search pattern or the resolved target of matched files, so glob patterns and symlinks can reach files outside the configured root; prompt- and chain/agent-configuration loaders that accept path fields and resolve the",
+      "affected": "PyPI:langchain",
+      "references": [
+        "https://github.com/langchain-ai/langchain/security/advisories/GHSA-gr75-jv2w-4656",
+        "https://nvd.nist.gov/vuln/detail/CVE-2026-55443",
+        "https://github.com/langchain-ai/langchain/commit/dcaf7795a3e6590af55c3ff7bda6add6355e9ea6",
+        "https://github.com/langchain-ai/langchain"
+      ],
+      "published": "2026-06-16T15:03:14Z",
+      "fetched": "2026-08-04T06:34:42.258032+00:00"
+    },
+    {
+      "id": "CVE-2026-11624",
+      "source": "nvd",
+      "severity": "unknown",
+      "cvss": null,
+      "title": "The Model Context Protocol has a security warning advising servers to validate the \"Origin\" header on all incoming connections to prevent DNS rebinding attacks. Prior to the v0.25.0 release, users had",
+      "summary": "The Model Context Protocol has a security warning advising servers to validate the \"Origin\" header on all incoming connections to prevent DNS rebinding attacks. Prior to the v0.25.0 release, users had no way to validate the origin's host. In v0.25.0, a new \"--allowed-hosts\" flag was introduced alongside the existing \"--allowed-origins\" flag, enabling users to specify permitted hosts at server startup. Both flags default to \"*\", allowing users to implement strict access controls as needed without",
+      "affected": "model context protocol",
+      "references": [
+        "https://github.com/googleapis/mcp-toolbox/issues/3113",
+        "https://github.com/googleapis/mcp-toolbox/pull/2254"
+      ],
+      "published": "2026-06-13T10:16:17.700",
+      "fetched": "2026-08-04T06:34:53.913923+00:00"
+    },
+    {
+      "id": "CVE-2026-42853",
+      "source": "nvd",
+      "severity": "medium",
+      "cvss": 6.5,
+      "title": "ApostropheCMS is an open-source Node.js content management system. Versions of the @apostrophecms/cli package up to and including 3.6.0 contain a command injection vulnerability in the apos create com",
+      "summary": "ApostropheCMS is an open-source Node.js content management system. Versions of the @apostrophecms/cli package up to and including 3.6.0 contain a command injection vulnerability in the apos create command. User-supplied input from the password prompt is embedded directly into a shell command without proper sanitization or escaping. This allows execution of arbitrary commands on the host system. As of time of publication, no known patched versions are available.",
+      "affected": "prompt injection",
+      "references": [
+        "https://github.com/apostrophecms/apostrophe/security/advisories/GHSA-hcwq-x9fw-8cfq",
+        "https://github.com/apostrophecms/apostrophe/security/advisories/GHSA-hcwq-x9fw-8cfq"
+      ],
+      "published": "2026-06-12T21:16:21.300",
+      "fetched": "2026-08-04T06:34:46.965255+00:00"
+    },
+    {
+      "id": "CVE-2026-47250",
+      "source": "nvd",
+      "severity": "medium",
+      "cvss": 6.1,
+      "title": "mcp-server-kubernetes is a Model Context Protocol server for Kubernetes cluster management. Prior to version 3.7.0, the kubectl_generic tool in mcp-server-kubernetes passes user-supplied flags directl",
+      "summary": "mcp-server-kubernetes is a Model Context Protocol server for Kubernetes cluster management. Prior to version 3.7.0, the kubectl_generic tool in mcp-server-kubernetes passes user-supplied flags directly to kubectl without any allowlist, enabling a privilege escalation attack within Kubernetes environments. An attacker who already has limited cluster or codebase access, for example, a developer with pod-deployment permissions but not cluster-admin credentials, can plant a single structured JSON li",
+      "affected": "model context protocol",
+      "references": [
+        "https://github.com/Flux159/mcp-server-kubernetes/releases/tag/v3.7.0",
+        "https://github.com/Flux159/mcp-server-kubernetes/security/advisories/GHSA-6mx4-4h42-r8vh",
+        "https://github.com/Flux159/mcp-server-kubernetes/security/advisories/GHSA-6mx4-4h42-r8vh"
+      ],
+      "published": "2026-06-11T19:16:46.770",
+      "fetched": "2026-08-04T06:34:53.913919+00:00"
+    },
+    {
+      "id": "CVE-2026-46519",
+      "source": "nvd",
+      "severity": "high",
+      "cvss": 8.8,
+      "title": "mcp-server-kubernetes is a Model Context Protocol server for Kubernetes cluster management. Prior to version 3.6.0, mcp-server-kubernetes exposes three environment variables (ALLOW_ONLY_READONLY_TOOLS",
+      "summary": "mcp-server-kubernetes is a Model Context Protocol server for Kubernetes cluster management. Prior to version 3.6.0, mcp-server-kubernetes exposes three environment variables (ALLOW_ONLY_READONLY_TOOLS, ALLOW_ONLY_NON_DESTRUCTIVE_TOOLS, ALLOWED_TOOLS) documented as access controls for restricting which Kubernetes operations are available. These controls are enforced at the tool discovery layer (tools/list) but not at the execution layer (tools/call). Any client that knows a tool name can invoke i",
+      "affected": "model context protocol",
+      "references": [
+        "https://github.com/Flux159/mcp-server-kubernetes/releases/tag/v3.6.0",
+        "https://github.com/Flux159/mcp-server-kubernetes/security/advisories/GHSA-cr22-wjx7-2w6m",
+        "https://github.com/Flux159/mcp-server-kubernetes/security/advisories/GHSA-cr22-wjx7-2w6m"
+      ],
+      "published": "2026-06-11T19:16:42.213",
+      "fetched": "2026-08-04T06:34:53.913899+00:00"
+    }
+  ],
+  "updated": "2026-08-04T06:35:13.239330+00:00",
+  "sources": [
+    "osv",
+    "nvd",
+    "github-advisory"
+  ],
+  "stats": {
+    "high": 43,
+    "medium": 24,
+    "critical": 9,
+    "unknown": 13,
+    "low": 3,
+    "moderate": 1
+  },
+  "total": 93
+}

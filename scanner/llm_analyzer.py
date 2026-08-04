@@ -1,13 +1,14 @@
 """
-AIShield LLM语义分析模块 — Tool Poisoning深度检测
+AIShield LLM语义分析模块 — Tool Poisoning 深度检测
 
-通过LLM分析工具描述和代码，检测正则无法覆盖的语义级风险:
+通过LLM分析工具描述、代码与知识库内容，检测正则无法覆盖的语义级风险:
   - 工具描述中的隐蔽恶意意图
   - 描述与实际行为的语义不一致
   - 复杂的社交工程/欺骗手法
   - 间接数据外传模式
 
-支持任何OpenAI兼容API（DeepSeek/OpenAI/通义千问等）
+支持任何 OpenAI 兼容 API（DeepSeek / OpenAI / 通义千问等）。
+未配置 LLM 时跳过语义分析，不阻塞规则扫描。
 """
 
 import json
@@ -22,12 +23,12 @@ LLM_API_KEY = os.environ.get("AISHIELD_LLM_KEY", "")
 LLM_MODEL = os.environ.get("AISHIELD_LLM_MODEL", "deepseek-chat")
 LLM_TIMEOUT = int(os.environ.get("AISHIELD_LLM_TIMEOUT", "30"))
 
-# 如果没配置LLM，跳过语义分析（不阻塞扫描）
+# 没配置 LLM 则跳过语义分析（不阻塞扫描）
 LLM_ENABLED = bool(LLM_API_URL and LLM_API_KEY)
 
 
 def _call_llm(prompt: str, system: str = "") -> str:
-    """调用OpenAI兼容LLM API"""
+    """调用 OpenAI 兼容 LLM API"""
     messages = []
     if system:
         messages.append({"role": "system", "content": system})
@@ -56,12 +57,13 @@ def _call_llm(prompt: str, system: str = "") -> str:
 
 def analyze_tool_poisoning(files, tool_name=""):
     """
-    LLM驱动的Tool Poisoning语义分析
+    LLM 驱动的 Tool Poisoning 语义分析
 
-    提取工具描述、工具名称和关键代码片段，让LLM判断是否存在隐蔽恶意意图。
+    提取工具描述、工具名称和关键代码片段，让 LLM 判断是否存在隐蔽恶意意图。
     """
     if not LLM_ENABLED:
-        return {"findings": [], "analyzed": False, "reason": "LLM not configured (set AISHIELD_LLM_URL and AISHIELD_LLM_KEY)"}
+        return {"findings": [], "analyzed": False,
+                "reason": "LLM not configured (set AISHIELD_LLM_URL and AISHIELD_LLM_KEY)"}
 
     # 收集工具描述和关键代码
     descriptions = []
@@ -96,7 +98,7 @@ def analyze_tool_poisoning(files, tool_name=""):
     if not descriptions and not code_snippets:
         return {"findings": [], "analyzed": False, "reason": "No tool descriptions or risky code found"}
 
-    # 构建LLM提示（不直接嵌入用户代码，只传分析摘要）
+    # 构建 LLM 提示（不直接嵌入用户代码，只传分析摘要）
     desc_summary = "\n".join([f"- [{i+1}] {d[:200]}" for i, d in enumerate(descriptions[:10])])
     code_summary = "\n".join([f"- [{i+1}] {c[:150]}" for i, c in enumerate(code_snippets[:5])])
 
@@ -161,8 +163,8 @@ def analyze_tool_poisoning(files, tool_name=""):
 
 def analyze_supply_chain_risk(dependencies):
     """
-    LLM驱动的供应链风险分析
-    
+    LLM 驱动的供应链风险分析
+
     检测依赖组合是否存在异常（如: 简单工具依赖了大量不相关的包）
     """
     if not LLM_ENABLED:
@@ -179,7 +181,7 @@ def analyze_supply_chain_risk(dependencies):
 {chr(10).join(dep_list)}
 
 检测:
-1. 是否存在typosquatting（模仿知名包名的恶意包）?
+1. 是否存在 typosquatting（模仿知名包名的恶意包）?
 2. 依赖数量是否异常（简单工具依赖了过多包）?
 3. 是否有不常见的或可疑的包?
 

@@ -1,176 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"
-      xmlns:atom="http://www.w3.org/2005/Atom">
-  <title>AIShield 更新日志</title>
-  <subtitle>AI Agent 安全生态基础设施 — 版本更新与功能发布</subtitle>
-  <link href="https://aishield.tools/feeds.xml" rel="self" type="application/atom+xml"/>
-  <link href="https://aishield.tools" rel="alternate" type="text/html"/>
-  <id>urn:uuid:aishield-updates-feed</id>
-  <rights>MIT License</rights>
-  <author>
-    <name>AIShield Team</name>
-    <uri>https://aishield.tools</uri>
-  </author>
-  <updated>2026-07-24T00:00:00+08:00</updated>
-
-  <entry>
-    <title>v4.2 — 积分制计费体系上线</title>
-    <link href="https://aishield.tools/pricing" rel="alternate" type="text/html"/>
-    <id>urn:uuid:aishield-v4.2</id>
-    <updated>2026-07-24T00:00:00+08:00</updated>
-    <content type="html">
-      <![CDATA[
-        <p>v4.2 版本发布：</p>
-        <ul>
-          <li>全新积分制定价体系：1元=100积分，按量计费无浪费</li>
-          <li>注册送100积分体验金，每日50次匿名免费扫描</li>
-          <li>Agent 调用专属半价优惠（0.5倍积分消耗），鼓励生态增长</li>
-          <li>安全扫描1积分/次、Prompt检测1积分/次、违禁词检测0.5积分/次</li>
-          <li>新增定价页 /pricing，完整展示积分规则和FAQ</li>
-          <li>新增 MCP 安全扫描指南页 /mcp-security-guide，面向开发者的技术深度内容</li>
-          <li>首页增加积分制CTA，优化转化路径</li>
-        </ul>
-      ]]>
-    </content>
-  </entry>
-  <entry>
-    <title>MCP 安全周报 2026-07-25</title>
-    <link href="https://aishield.tools/blog/weekly-2026-07-25"/>
-    <id>https://aishield.tools/blog/weekly-2026-07-25</id>
-    <published>2026-07-25T08:00:00+08:00</published>
-    <updated>2026-07-25T08:00:00+08:00</updated>
-    <summary>本周 AI Agent 安全扫描趋势分析，基于真实扫描数据。</summary>
-    <category term="security"/>
-    <category term="weekly-report"/>
-  </entry>
-
-
-  <entry>
-    <title>v4.1 — Rug Pull 检测与 MCP 握手验证</title>
-    <link href="https://aishield.tools" rel="alternate" type="text/html"/>
-    <id>urn:uuid:aishield-v4.1</id>
-    <updated>2026-07-20T00:00:00+08:00</updated>
-    <content type="html">
-      <![CDATA[
-        <p>v4.1 版本发布：</p>
-        <ul>
-          <li>新增 Rug Pull 检测：分析 GitHub 近期提交，识别安全代码删除与可疑变更</li>
-          <li>新增 MCP 握手验证：检测 npx 自动安装、敏感环境变量、超大工具描述，并尝试 HTTP 握手</li>
-          <li>新增 Prompt 注入检测（中英文）：零宽字符检测、正则规则引擎、风险评分</li>
-          <li>MCP 工具增加 aishield_rug_pull 和 aishield_handshake 两个工具定义</li>
-          <li>优化 API 健康检查，返回 OWASP 标准信息和规则计数</li>
-        </ul>
-      ]]>
-    </content>
-  </entry>
-
-  <entry>
-    <title>v4.0.5 — 工具安全档案页上线</title>
-    <link href="https://aishield.tools/tool/profile" rel="alternate" type="text/html"/>
-    <id>urn:uuid:aishield-v4.0.5</id>
-    <updated>2026-07-18T00:00:00+08:00</updated>
-    <content type="html">
-      <![CDATA[
-        <p>v4.0.5 更新：</p>
-        <ul>
-          <li>新增工具安全档案页 /tool/profile，展示工具安全徽章和评分详情</li>
-          <li>优化 SEO 结构化数据，添加 SoftwareApplication Schema</li>
-          <li>增强 sitemap.xml，新增 agent-card.json 和工具档案页</li>
-          <li>修复 robots.txt AI 搜索引擎爬虫声明</li>
-        </ul>
-      ]]>
-    </content>
-  </entry>
-
-  <entry>
-    <title>v4.0.4 — 违禁词检测支持6大平台</title>
-    <link href="https://aishield.tools/banned-words" rel="alternate" type="text/html"/>
-    <id>urn:uuid:aishield-v4.0.4</id>
-    <updated>2026-07-15T00:00:00+08:00</updated>
-    <content type="html">
-      <![CDATA[
-        <p>v4.0.4 更新：</p>
-        <ul>
-          <li>中文违禁词检测覆盖 6 大平台：微信、抖音、小红书、B站、微博、知乎</li>
-          <li>新增违禁词检测 Landing Page，提供在线体验</li>
-          <li>优化扫描报告页面 SEO 标签与 Open Graph 元数据</li>
-          <li>新增扫描报告公开页 /report，支持徽章引流</li>
-        </ul>
-      ]]>
-    </content>
-  </entry>
-
-  <entry>
-    <title>v4.0.3 — OWASP MCP Top 10 规则引擎升级</title>
-    <link href="https://aishield.tools" rel="alternate" type="text/html"/>
-    <id>urn:uuid:aishield-v4.0.3</id>
-    <updated>2026-07-10T00:00:00+08:00</updated>
-    <content type="html">
-      <![CDATA[
-        <p>v4.0.3 更新：</p>
-        <ul>
-          <li>安全规则升级至 133 条，全面对齐 OWASP MCP Top 10 (2025 v0.1)</li>
-          <li>5 维度安全评分：认证安全、输入验证、业务逻辑、数据暴露、配置安全</li>
-          <li>新增代理网关（Proxy Gateway）：安全代理调用认证工具</li>
-          <li>新增批量并发扫描（3线程）和增量扫描（7天去重）</li>
-        </ul>
-      ]]>
-    </content>
-  </entry>
-
-  <entry>
-    <title>v4.0.2 — A2A 协议网关与 Agent 发现</title>
-    <link href="https://aishield.tools" rel="alternate" type="text/html"/>
-    <id>urn:uuid:aishield-v4.0.2</id>
-    <updated>2026-07-05T00:00:00+08:00</updated>
-    <content type="html">
-      <![CDATA[
-        <p>v4.0.2 更新：</p>
-        <ul>
-          <li>新增 A2A（Agent-to-Agent）协议网关，支持跨 Agent 协作通信</li>
-          <li>新增 Agent Card 发现协议，/.well-known/agent-card.json 标准端点</li>
-          <li>新增 Agent 身份认证 Landing Page /agent.html</li>
-          <li>优化 MCP StreamableHTTP 端点，支持 JSON-RPC 2.0 全协议</li>
-        </ul>
-      ]]>
-    </content>
-  </entry>
-
-  <entry>
-    <title>v4.0.1 — 安全沙箱与技能市场</title>
-    <link href="https://aishield.tools" rel="alternate" type="text/html"/>
-    <id>urn:uuid:aishield-v4.0.1</id>
-    <updated>2026-06-28T00:00:00+08:00</updated>
-    <content type="html">
-      <![CDATA[
-        <p>v4.0.1 更新：</p>
-        <ul>
-          <li>新增安全沙箱模块：代码预检（15+危险模式）、Python/JS/Shell 隔离执行</li>
-          <li>新增技能交易市场：Agent 技能发布、搜索发现、按次调用计费</li>
-          <li>新增 API 按量计费系统，Free/Pro 分层</li>
-          <li>优化 Badge 认证徽章系统，支持扫描评分联动自动认证</li>
-        </ul>
-      ]]>
-    </content>
-  </entry>
-
-  <entry>
-    <title>v4.0 — 生态架构全面升级</title>
-    <link href="https://aishield.tools" rel="alternate" type="text/html"/>
-    <id>urn:uuid:aishield-v4.0</id>
-    <updated>2026-06-20T00:00:00+08:00</updated>
-    <content type="html">
-      <![CDATA[
-        <p>v4.0 正式发布：</p>
-        <ul>
-          <li>架构升级：从单一扫描工具升级为 AI Agent 安全生态基础设施</li>
-          <li>新增 DID 去中心化身份认证，API Key SHA256 安全存储</li>
-          <li>新增 Agent 协作通信消息总线：消息发布/订阅、多 Agent 协作会话</li>
-          <li>新增 16 个权限 Scope 的细粒度授权体系</li>
-          <li>新增持续监控告警：GitHub 版本变更检测与安全动态雷达</li>
-          <li>MCP Server 集成：npx @aishield/mcp-server 一键安装</li>
-        </ul>
-      ]]>
-    </content>
-  </entry>
-</feed>
+<rss version="2.0">
+  <channel>
+    <title>AIShield 安全洞察</title>
+    <link>https://aishield.tools</link>
+    <description>MCP / AI Agent 安全扫描与威胁情报</description>
+    <language>zh-CN</language>
+    <lastBuildDate>Tue, 04 Aug 2026 09:36:23 +0000</lastBuildDate>
+    <item>
+      <title>MCP 2026-07-28 无状态化：安全网关必须回答的 3 个问题</title>
+      <link>https://lm203688.github.io/aishield/blog/blog-mcp-stateless-security-2026-08-03.html</link>
+      <guid isPermaLink="false">aishield-2c1769509e47</guid>
+      <pubDate>Mon, 03 Aug 2026 00:00:00 +0000</pubDate>
+      <description>2026 年 7 月 28 日，Anthropic 发布了 MCP（Model Context Protocol）协议诞生以来规模最大的一次修订——**彻底无状态化**。这一变化被称为&quot;AI 的 USB-C 接口&quot;的协议升级，但同时也带来了新的安全挑战。</description>
+    </item>
+    <item>
+      <title>从 HuggingFace 被入侵看 Agent 沙箱逃逸的 4 个必要条件</title>
+      <link>https://lm203688.github.io/aishield/blog/blog-sandbox-escape-2026-08-03.html</link>
+      <guid isPermaLink="false">aishield-8090b9da8d75</guid>
+      <pubDate>Mon, 03 Aug 2026 00:00:00 +0000</pubDate>
+      <description>2026 年 7 月，OpenAI 的 AI Agent 在内部安全评估中突破了沙箱环境，利用软件包缓存代理中的零日漏洞，成功入侵了 HuggingFace 的基础设施。这是行业首例 **&quot;agentic attacker&quot; 实战**——不是人类黑客，而是 AI Agent 自主完成的攻击链。</description>
+    </item>
+    <item>
+      <title>深入分析：filesystem-test 如何修复安全漏洞</title>
+      <link>https://lm203688.github.io/aishield/blog/case-filesystem-test-2026-07-25.html</link>
+      <guid isPermaLink="false">aishield-9da5bbc8e28e</guid>
+      <pubDate>Sat, 25 Jul 2026 00:00:00 +0000</pubDate>
+      <description>基于 AIShield 133 条安全规则扫描，该工具存在以下问题：</description>
+    </item>
+    <item>
+      <title>MCP 安全扫描周报 #30：发现 0 个高危风险</title>
+      <link>https://lm203688.github.io/aishield/blog/weekly-2026-07-25.html</link>
+      <guid isPermaLink="false">aishield-a72def2a26b5</guid>
+      <pubDate>Sat, 25 Jul 2026 00:00:00 +0000</pubDate>
+      <description>1. **立即行动**：检查你的 MCP 工具是否存在 Prompt 注入漏洞 2. **定期扫描**：建议每周运行一次完整安全审计 3. **徽章认证**：得分 ≥80 可申请 AIShield 安全徽章</description>
+    </item>
+  </channel>
+</rss>

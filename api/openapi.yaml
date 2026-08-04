@@ -1,0 +1,172 @@
+openapi: 3.1.0
+info:
+  title: AIShield Trust & Certification API
+  version: 0.1.0
+  description: >
+    Public API for the AIShield Trust Standard v0.1: Agent Security Certification,
+    Trust Score, and Agent Registry lookup. Surfaces the existing Trust Standard
+    (docs/aishield-trust-standard-v0.1) as machine-readable, agent-callable endpoints.
+    This is the API that marketplaces (UUMit, Gate, MAXIA, Google A2A Marketplace)
+    can call to certify listed agents/tools.
+  license:
+    name: CC BY 4.0
+    url: https://creativecommons.org/licenses/by/4.0/
+servers:
+  - url: https://aishield.tools/api/v1
+    description: Production
+  - url: https://lm203688.github.io/aishield/api/v1
+    description: GitHub Pages mirror
+tags:
+  - name: certification
+  - name: trust-score
+  - name: registry
+paths:
+  /aishield-cert/v1/submit:
+    post:
+      tags: [certification]
+      summary: Submit an agent/tool for security certification
+      operationId: submitCertification
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CertificationRequest'
+      responses:
+        '202':
+          description: Accepted; scan queued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CertificationReceipt'
+  /aishield-cert/v1/cert/{cert_id}:
+    get:
+      tags: [certification]
+      summary: Verify a certificate by ID
+      operationId: getCertificate
+      parameters:
+        - name: cert_id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Certificate (may be marked expired)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Certificate'
+        '404':
+          description: Not found
+  /aishield-trust/v1/score/{did}:
+    get:
+      tags: [trust-score]
+      summary: Get an agent's Trust Score
+      operationId: getTrustScore
+      parameters:
+        - name: did
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Trust Score response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrustScoreResponse'
+        '404':
+          description: Agent DID not found
+  /aishield-trust/v1/scores/batch:
+    post:
+      tags: [trust-score]
+      summary: Batch Trust Score lookup
+      operationId: batchTrustScore
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                dids:
+                  type: array
+                  items: { type: string }
+      responses:
+        '200':
+          description: Batch scores
+  /registry/v1/agents/{agent_id}:
+    get:
+      tags: [registry]
+      summary: Look up a registered agent (A2A card + reputation)
+      operationId: getAgent
+      parameters:
+        - name: agent_id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Agent record
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    CertificationRequest:
+      type: object
+      properties:
+        requested_level:
+          type: integer
+          enum: [1, 2, 3]
+        agent:
+          type: object
+          properties:
+            did: { type: string }
+            name: { type: string }
+            endpoint: { type: string }
+            version: { type: string }
+        tool_descriptions:
+          type: array
+          items:
+            type: object
+    CertificationReceipt:
+      type: object
+      properties:
+        cert_id: { type: string }
+        status: { type: string }
+        scan_id: { type: string }
+    Certificate:
+      type: object
+      properties:
+        cert_id: { type: string }
+        agent_did: { type: string }
+        level: { type: integer }
+        level_name: { type: string }
+        score: { type: integer }
+        issued_at: { type: string, format: date-time }
+        expires_at: { type: string, format: date-time }
+        expired: { type: boolean }
+        verification_url: { type: string }
+    TrustScoreResponse:
+      type: object
+      properties:
+        agent_did: { type: string }
+        agent_name: { type: string }
+        trust_score: { type: integer }
+        computed_at: { type: string, format: date-time }
+        dimensions:
+          type: object
+          additionalProperties:
+            type: object
+    AgentRecord:
+      type: object
+      properties:
+        agent_id: { type: string }
+        name: { type: string }
+        url: { type: string }
+        reputation_score: { type: integer }
+        status: { type: string }
