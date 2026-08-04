@@ -1,6 +1,432 @@
 {
   "intel": [
     {
+      "id": "GHSA-2f54-p244-32q6",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 6.5,
+      "title": "Open WebUI: Any authenticated user can stall a worker via a knowledge-search pattern that backtracks catastrophically",
+      "summary": "## Summary\nThe built-in knowledge search tools let a chat participant choose the pattern used to grep knowledge files. Patterns containing regex metacharacters were compiled with Python's backtracking `re` engine and run against every line of every reachable file, with no time limit anywhere on that path. A single crafted pattern and a single short line of matching text pin one CPU core for as long as the attacker wants, and because the search runs synchronously inside the event loop, that worke",
+      "affected": "pip:open-webui",
+      "references": [
+        "https://github.com/advisories/GHSA-2f54-p244-32q6"
+      ],
+      "published": "2026-08-04T20:56:23Z",
+      "fetched": "2026-08-04T22:32:12.865907+00:00"
+    },
+    {
+      "id": "GHSA-3r7g-q6cg-q2vx",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 6.5,
+      "title": "Open WebUI: Tool source code disclosed to read-only users via the tool list and get endpoints",
+      "summary": "## Summary\n\nA workspace tool shared with a read grant returned its full Python source to the recipient. Any authenticated non-admin who could use a shared tool could also read its source, including any user on the instance when a tool was shared publicly. Source is meant to be a writer-only tier: the list response schema deliberately omits it and source export sits behind its own permission. The read endpoints delivered it anyway.\n\n## Preconditions\n\n- Authentication enabled (`WEBUI_AUTH=true`, d",
+      "affected": "pip:open-webui",
+      "references": [
+        "https://github.com/advisories/GHSA-3r7g-q6cg-q2vx"
+      ],
+      "published": "2026-08-04T20:51:41Z",
+      "fetched": "2026-08-04T22:32:12.866021+00:00"
+    },
+    {
+      "id": "GHSA-5gpj-vj23-vhhv",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 6.3,
+      "title": "Open WebUI: Unapproved accounts can open terminal sessions via a WebSocket auth path missing the role check",
+      "summary": "## Summary\nThe terminal WebSocket route authenticates its own first-message JWT instead of going through the HTTP dependency chain, and never applies the role check that `get_verified_user` enforces on every HTTP terminal route. An account whose role is `pending`, meaning registered but not approved, or approved and later deactivated back to `pending`, can therefore open an interactive terminal session that the HTTP terminal endpoints would refuse. The missing control is the verified-user role g",
+      "affected": "pip:open-webui",
+      "references": [
+        "https://github.com/advisories/GHSA-5gpj-vj23-vhhv"
+      ],
+      "published": "2026-08-04T20:45:00Z",
+      "fetched": "2026-08-04T22:32:12.866054+00:00"
+    },
+    {
+      "id": "GHSA-6xhv-rxhv-pwm4",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 5.3,
+      "title": "Open WebUI: Cross-user file content disclosure via request-scoped direct model knowledge metadata",
+      "summary": "## Summary\nOpen WebUI lets a client define a model inline on a chat request instead of selecting a saved workspace model. The knowledge attached to such an inline model was used as-is, without checking that the caller can read what it points at. Any authenticated user who knows another user's file id could therefore have the builtin knowledge tools return that file's indexed content back to them.\n\n## Preconditions\nAuthenticated user of any role, no admin rights needed. The request must carry a s",
+      "affected": "pip:open-webui",
+      "references": [
+        "https://github.com/advisories/GHSA-6xhv-rxhv-pwm4"
+      ],
+      "published": "2026-08-04T20:35:53Z",
+      "fetched": "2026-08-04T22:32:12.866166+00:00"
+    },
+    {
+      "id": "CVE-2026-70477",
+      "source": "nvd",
+      "severity": "unknown",
+      "cvss": null,
+      "title": "Flowise is a drag & drop user interface to build a customized large language model flow. Prior to 3.1.3, a prompt injection sent to a chatflow using a CSV Agent node can cause the LLM to respond with ",
+      "summary": "Flowise is a drag & drop user interface to build a customized large language model flow. Prior to 3.1.3, a prompt injection sent to a chatflow using a CSV Agent node can cause the LLM to respond with a malicious Python script that bypasses the blocklist validator and executes in an unsandboxed Pyodide environment. The specific flaw exists within the run method of the CSV_Agents class, where untrusted data is used to construct an LLM prompt and the resulting pythonCode is validated by validatePyt",
+      "affected": "prompt injection",
+      "references": [
+        "https://github.com/FlowiseAI/Flowise/commit/f4e2794f6a576b94578f2fdafbf49c2fb304626c",
+        "https://github.com/FlowiseAI/Flowise/pull/6499",
+        "https://github.com/FlowiseAI/Flowise/releases/tag/flowise@3.1.3",
+        "https://github.com/FlowiseAI/Flowise/security/advisories/GHSA-5xvg-pmgg-3mxr"
+      ],
+      "published": "2026-08-04T20:16:54.473",
+      "fetched": "2026-08-04T22:31:51.615800+00:00"
+    },
+    {
+      "id": "CVE-2026-70477",
+      "source": "nvd",
+      "severity": "unknown",
+      "cvss": null,
+      "title": "Flowise is a drag & drop user interface to build a customized large language model flow. Prior to 3.1.3, a prompt injection sent to a chatflow using a CSV Agent node can cause the LLM to respond with ",
+      "summary": "Flowise is a drag & drop user interface to build a customized large language model flow. Prior to 3.1.3, a prompt injection sent to a chatflow using a CSV Agent node can cause the LLM to respond with a malicious Python script that bypasses the blocklist validator and executes in an unsandboxed Pyodide environment. The specific flaw exists within the run method of the CSV_Agents class, where untrusted data is used to construct an LLM prompt and the resulting pythonCode is validated by validatePyt",
+      "affected": "llm agent",
+      "references": [
+        "https://github.com/FlowiseAI/Flowise/commit/f4e2794f6a576b94578f2fdafbf49c2fb304626c",
+        "https://github.com/FlowiseAI/Flowise/pull/6499",
+        "https://github.com/FlowiseAI/Flowise/releases/tag/flowise@3.1.3",
+        "https://github.com/FlowiseAI/Flowise/security/advisories/GHSA-5xvg-pmgg-3mxr"
+      ],
+      "published": "2026-08-04T20:16:54.473",
+      "fetched": "2026-08-04T22:32:04.400278+00:00"
+    },
+    {
+      "id": "GHSA-3xpf-xq7r-v8c5",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 8.2,
+      "title": "Open WebUI: Same-origin XSS to account takeover via terminal file-preview iframe hardcoding allow-same-origin",
+      "summary": "## Summary\nAny authenticated user with access to a terminal server could get script of their choosing to run in the Open WebUI origin itself. The HTML file preview rendered terminal-served files in an iframe whose sandbox always granted `allow-same-origin` alongside `allow-scripts`, and the file is served from a path on the application's own origin, so the sandbox provided no isolation at all. Script in a previewed file could read the victim's session token and take over the account.\n\n## Precond",
+      "affected": "pip:open-webui",
+      "references": [
+        "https://github.com/advisories/GHSA-3xpf-xq7r-v8c5"
+      ],
+      "published": "2026-08-04T20:02:03Z",
+      "fetched": "2026-08-04T22:32:12.866202+00:00"
+    },
+    {
+      "id": "GHSA-g423-grf7-98rv",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 4.3,
+      "title": "Open WebUI: Users denied the image-generation permission can still generate images via chat completions",
+      "summary": "## Summary\nAn authenticated user whose `features.image_generation` permission has been revoked can still make the server generate images by sending the feature flag in a chat-completion request. The chat pipeline took the client-supplied `features` object at face value and never re-checked the permission that the direct image routes enforce, so the denial applied to the UI affordance but not to the server-side generation path.\n\n## Preconditions\nImage generation must be enabled and a provider con",
+      "affected": "pip:open-webui",
+      "references": [
+        "https://github.com/advisories/GHSA-g423-grf7-98rv"
+      ],
+      "published": "2026-08-04T19:56:57Z",
+      "fetched": "2026-08-04T22:32:12.866288+00:00"
+    },
+    {
+      "id": "GHSA-rffm-9q57-q649",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 4.1,
+      "title": "Open WebUI: Client-side SSRF via unrestricted external resource loading in Vega/Vega-Lite chart rendering",
+      "summary": "## Summary\nOpen WebUI renders `vega` and `vega-lite` fenced code blocks in chat content by building a Vega view in the viewer's browser without a restricted resource loader. Any user who can place such a block where another user will see it can make that user's browser issue attacker-chosen outbound GET requests, and read back responses from same-origin or CORS-permissive targets into the rendered page. Because the request comes from the browser, server-side SSRF protections never see it.\n\n## Pr",
+      "affected": "pip:open-webui",
+      "references": [
+        "https://github.com/advisories/GHSA-rffm-9q57-q649"
+      ],
+      "published": "2026-08-04T19:54:57Z",
+      "fetched": "2026-08-04T22:32:12.866337+00:00"
+    },
+    {
+      "id": "GHSA-5xvg-pmgg-3mxr",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": null,
+      "title": "Flowise: CSV Agent Prompt Injection Remote Code Execution Vulnerability",
+      "summary": "-- ABSTRACT -------------------------------------\n\nTrend Micro's Zero Day Initiative has identified a vulnerability affecting the following products:\nFlowise - Flowise\n\n-- VULNERABILITY DETAILS ------------------------\n* Version tested: 3.1.1\n* Installer file: https://github.com/FlowiseAI/Flowise (npm install flowise@3.1.1)\n* Platform tested: Ubuntu 25.10\n\n---\n\nA prompt injection sent to a chatflow using a CSV Agent node can cause the LLM to respond with a malicious Python script that bypasses t",
+      "affected": "npm:flowise, npm:flowise-components",
+      "references": [
+        "https://github.com/advisories/GHSA-5xvg-pmgg-3mxr"
+      ],
+      "published": "2026-08-04T19:29:26Z",
+      "fetched": "2026-08-04T22:32:11.354480+00:00"
+    },
+    {
+      "id": "GHSA-8gj2-2cvc-6xx7",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": null,
+      "title": "Flowise: Unauthenticated Credential Abuse via Text-to-Speech Endpoint Allows Unauthorized Use of Private Chatflow TTS Credentials",
+      "summary": "## Summary\n\nThe `/api/v1/text-to-speech/generate` endpoint is whitelisted (requires no authentication) and accepts any `chatflowId` without checking whether the referenced chatflow is public. An unauthenticated attacker who knows a valid chatflow UUID can abuse that chatflow's TTS credential (OpenAI or ElevenLabs API key) to generate unlimited text-to-speech audio, incurring costs on the chatflow owner's account.\n\n## Details\n\nThe TTS `generateTextToSpeech` controller at `packages/server/src/cont",
+      "affected": "npm:flowise",
+      "references": [
+        "https://github.com/advisories/GHSA-8gj2-2cvc-6xx7"
+      ],
+      "published": "2026-08-04T19:19:44Z",
+      "fetched": "2026-08-04T22:32:11.354554+00:00"
+    },
+    {
+      "id": "GHSA-wch5-xp77-fxg4",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": null,
+      "title": "Flowise: Cross-Workspace OAuth2 Credential Metadata Leak",
+      "summary": "## Summary\n\nThree OAuth2 credential endpoints look up credentials by `id` alone with no `workspaceId` filter. Two of these endpoints (`callback`, `refresh`) are whitelisted from all authentication. This allows:\n\n1. **Cross-workspace credential access** — Any authenticated user can initiate OAuth2 flows against credentials belonging to other workspaces.\n2. **Unauthenticated token injection** — An unauthenticated attacker can forge OAuth2 callbacks to overwrite tokens in any credential.\n3. **Unaut",
+      "affected": "npm:flowise",
+      "references": [
+        "https://github.com/advisories/GHSA-wch5-xp77-fxg4"
+      ],
+      "published": "2026-08-04T18:01:29Z",
+      "fetched": "2026-08-04T22:32:11.354769+00:00"
+    },
+    {
+      "id": "GHSA-rwrp-9823-p2xq",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 6.5,
+      "title": "Flowise: Incomplete Credential Redaction Exposes Secrets via API",
+      "summary": "## Summary\n\nThe `GET /api/v1/credentials/:id` endpoint decrypts stored credential data and returns it in the `plainDataObj` field of the API response. While a `redactCredentialWithPasswordType()` function masks fields defined with `type: 'password'` in their component schema, many credential types store highly sensitive data (database connection URLs with embedded passwords, Google service account JSON with RSA private keys, AWS access keys) in fields defined as `type: 'string'`. These string-ty",
+      "affected": "npm:flowise",
+      "references": [
+        "https://github.com/advisories/GHSA-rwrp-9823-p2xq"
+      ],
+      "published": "2026-08-04T17:57:35Z",
+      "fetched": "2026-08-04T22:32:11.354817+00:00"
+    },
+    {
+      "id": "GHSA-fr6g-7cq8-fg82",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": null,
+      "title": "Flowise: Information Disclosure in GET /api/v1/upsert-history returns the entire server-wide upsert history",
+      "summary": "### Summary\nThe **GET `/api/v1/upsert-history`** endpoint returns the **entire server-wide upsert history** (response size **>100MB**) instead of being scoped to the requesting user/tenant/workspace. The response includes **sensitive configuration data** (e.g., Vector Store settings such as **Qdrant Server URL** and **collection name**), resulting in a **High severity information disclosure** that may enable further targeted attacks.\n\n### Details\n- **Affected endpoint:** `GET /api/v1/upsert-hist",
+      "affected": "npm:flowise",
+      "references": [
+        "https://github.com/advisories/GHSA-fr6g-7cq8-fg82"
+      ],
+      "published": "2026-08-04T17:57:27Z",
+      "fetched": "2026-08-04T22:32:11.354836+00:00"
+    },
+    {
+      "id": "GHSA-chm3-vqcf-52rx",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": null,
+      "title": "Flowise: Cross-workspace credential IDOR in openai-assistants-vector-store",
+      "summary": "# Summary \n\nThese endpoints accept a client-controlled `credential` parameter. The server loads credentials by `id` and uses them directly, without checking whether that credential belongs to the caller’s workspace. If an attacker knows another workspace’s `credentialId`, they can use that workspace’s OpenAI key.\n\n# Details\n\nRoute permissions (`assistants:*`) only check feature access. They do not check credential ownership. The controller passes `req.query.credential` straight to the service. T",
+      "affected": "npm:flowise",
+      "references": [
+        "https://github.com/advisories/GHSA-chm3-vqcf-52rx"
+      ],
+      "published": "2026-08-04T17:51:48Z",
+      "fetched": "2026-08-04T22:32:11.354858+00:00"
+    },
+    {
+      "id": "GHSA-4j8x-x6v7-w9rq",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": null,
+      "title": "Flowise: RCE via CSVAgent csvFile data URI base64 segment is interpolated into Python source without validation",
+      "summary": "### Summary\nFlowise's `CSVAgent` interpolates an attacker-controlled segment of the\n`csvFile` data URI directly into a Python source-code template that is then\nexecuted by Pyodide. Because Pyodide is loaded with the default `js` bridge\nto `globalThis` (which on Node.js exposes `eval` and dynamic `import()`), the\nattacker can break out of the Python string literal, hand a JS string to\n`js.eval`, dynamically import any Node built-in module (`fs`, `child_process`,\n…), and execute arbitrary file I/O",
+      "affected": "npm:flowise, npm:flowise-components",
+      "references": [
+        "https://github.com/advisories/GHSA-4j8x-x6v7-w9rq"
+      ],
+      "published": "2026-08-04T17:43:48Z",
+      "fetched": "2026-08-04T22:32:11.355010+00:00"
+    },
+    {
+      "id": "GHSA-8r8h-6vcc-xhrv",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": null,
+      "title": "Flowise: RBAC Bypass Leading to Unauthorized Workspace Variables Disclosure",
+      "summary": "## Finding — Unauthorized Workspace Variables disclosure via $vars injection (bypasses variables:view)\n\n  ### What’s wrong (code locations)\n\n  - Variables for the active workspace are fetched without checking “variables:view” at this call site: flowise-src/\n    packages/components/src/utils.ts:932\n  - Runtime variables are resolved from server environment variables: flowise-src/packages/components/src/utils.ts:976\n  - $vars is always injected into the code execution sandbox: flowise-src/packages",
+      "affected": "npm:flowise",
+      "references": [
+        "https://github.com/advisories/GHSA-8r8h-6vcc-xhrv"
+      ],
+      "published": "2026-08-04T17:43:36Z",
+      "fetched": "2026-08-04T22:32:11.355251+00:00"
+    },
+    {
+      "id": "GHSA-52fh-8v99-63c2",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": null,
+      "title": "Flowise: Pyodide validator Unicode homoglyph bypass leads to RCE",
+      "summary": "### Summary\nThe validatePythonCodeForDataFrame blacklist in packages/components/src/pythonCodeValidator.ts can be bypassed with Unicode homoglyph identifiers, allowing arbitrary Python execution inside Pyodide and full OS command execution on the Flowise host via Pyodide's js module interop. This reopens the RCE paths patched as GHSA-3hjv-c53m-58jj (CSV Agent) and GHSA-v38x-c887-992f (Airtable Agent).\n\n### Details\npackages/components/src/pythonCodeValidator.ts gates every call to pyodide.runPyth",
+      "affected": "npm:flowise, npm:flowise-components",
+      "references": [
+        "https://github.com/advisories/GHSA-52fh-8v99-63c2"
+      ],
+      "published": "2026-08-04T17:31:09Z",
+      "fetched": "2026-08-04T22:32:11.355314+00:00"
+    },
+    {
+      "id": "GHSA-xc48-889x-5qmw",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": null,
+      "title": "Flowise: CVE-2025-8943 Patch Bypass: npm_config_yes bypasses MCP environment variable blocklist (Unauthenticated RCE)",
+      "summary": "## Summary\n\nThe mitigation shipped for CVE-2025-8943 blocks the `-y` and `--yes` flags on `npx` to stop auto-installation of arbitrary packages. That flag filter works. The environment-variable check in the same patch denies only four variable names by exact string match, and `npm` reads its configuration directly from `npm_config_*` environment variables. Setting `npm_config_yes=true` reproduces the `--yes` behaviour the flag filter is meant to prevent, so `npx` auto-installs and executes the n",
+      "affected": "npm:flowise, npm:flowise-components",
+      "references": [
+        "https://github.com/advisories/GHSA-xc48-889x-5qmw"
+      ],
+      "published": "2026-08-04T17:09:48Z",
+      "fetched": "2026-08-04T22:32:11.355326+00:00"
+    },
+    {
+      "id": "GHSA-p5w8-m249-4r4v",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": null,
+      "title": "Flowise: `DELETE /api/v1/chatflows/:id` does not validate resource type, allowing `agentflows:delete` and `chatflows:delete` to delete each other’s flow type",
+      "summary": "# summary:\nIn Flowise, `DELETE /api/v1/chatflows/:id` authorizes requests with `checkAnyPermission('chatflows:delete,agentflows:delete')`. Possession of either permission is sufficient to reach the delete path. The delete logic does not validate the target resource `type`, allowing a caller with only `agentflows:delete` to delete a `CHATFLOW`, and a caller with only `chatflows:delete` to delete an `AGENTFLOW`.\n\n# details:\nThe delete route accepts either `chatflows:delete` or `agentflows:delete`.",
+      "affected": "npm:flowise",
+      "references": [
+        "https://github.com/advisories/GHSA-p5w8-m249-4r4v"
+      ],
+      "published": "2026-08-04T16:50:32Z",
+      "fetched": "2026-08-04T22:32:11.355344+00:00"
+    },
+    {
+      "id": "GHSA-x3hf-7cj6-3r4m",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": null,
+      "title": "Flowise RCE via SQLite Record Manager Node",
+      "summary": "=============================================================================\n                                                            Security Advisory\n                                                                       elttam\n\nTopic:          Flowise RCE via SQLite Record Manager Node\n\nModule:         FlowiseAI/Flowise\nDisclosed:      24-Apr-2026\nCredits:        Alex Brown\nAffects:        `FlowiseAI/Flowise 3.1.2`\n\n# I.   Background\n\nFlowise AI is an open-source, low-code platform for bu",
+      "affected": "npm:flowise, npm:flowise-components",
+      "references": [
+        "https://github.com/advisories/GHSA-x3hf-7cj6-3r4m"
+      ],
+      "published": "2026-08-04T16:05:10Z",
+      "fetched": "2026-08-04T22:32:11.355464+00:00"
+    },
+    {
+      "id": "GHSA-6vh2-wg4h-4vwj",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": null,
+      "title": "Flowise: Unauthenticated Property Injection into Flow Execution Context via Ungated `overrideConfig` Spread in Prediction API",
+      "summary": "#### Summary\n\nThe `POST /api/v1/prediction/:id` endpoint — which is unauthenticated (whitelisted in `WHITELIST_URLS`) — accepts an `overrideConfig` object in the request body. This object is unconditionally spread into the internal `flowConfig` and `flowData` objects at two locations in the codebase **without checking** `apiOverrideStatus`. This allows an unauthenticated attacker to inject arbitrary properties into the flow execution context of any public chatflow, enabling session hijacking, cr",
+      "affected": "npm:flowise",
+      "references": [
+        "https://github.com/advisories/GHSA-6vh2-wg4h-4vwj"
+      ],
+      "published": "2026-08-04T15:56:11Z",
+      "fetched": "2026-08-04T22:32:11.355522+00:00"
+    },
+    {
+      "id": "GHSA-c6xh-wv4j-ppv5",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": null,
+      "title": "Flowise: SSRF Protection Bypass via IPv4-Mapped IPv6 Addresses",
+      "summary": "## Summary\n\nFlowise's HTTP security module (`httpSecurity.ts`) fails to normalize IPv4-mapped IPv6 addresses (e.g., `::ffff:127.0.0.1`, `::ffff:169.254.169.254`) before checking them against the deny list. Due to an `ipaddr.js` kind mismatch (`ipv6` vs `ipv4`), all IPv4 CIDR deny rules are silently skipped for IPv4-mapped IPv6 addresses. An attacker who controls DNS resolution for a hostname can set a AAAA record to `::ffff:<target_ipv4>`, completely bypassing all SSRF protections and accessing ",
+      "affected": "npm:flowise",
+      "references": [
+        "https://github.com/advisories/GHSA-c6xh-wv4j-ppv5"
+      ],
+      "published": "2026-08-04T15:51:58Z",
+      "fetched": "2026-08-04T22:32:11.355621+00:00"
+    },
+    {
+      "id": "GHSA-x6vm-w76m-8j7g",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": null,
+      "title": "Flowise: Remote Code Execution Vulnerability in CSVAgent",
+      "summary": "### Summary\n\nThe CSVAgent node was observed to allow users to write Python code which gets executed via `pyodide`. The original intent was to allow users to utilise the `pandas` library for CSV processing. Although there is a denylist that checks for dangerous Python constructs from being passed in, `pandas` has a `read_pickle()` [function](https://pandas.pydata.org/docs/reference/api/pandas.read_pickle.html) that deserialises a pickled payload and this can be leveraged to achieve code execution",
+      "affected": "npm:flowise-components, npm:flowise",
+      "references": [
+        "https://github.com/advisories/GHSA-x6vm-w76m-8j7g"
+      ],
+      "published": "2026-08-04T15:46:20Z",
+      "fetched": "2026-08-04T22:32:11.355637+00:00"
+    },
+    {
+      "id": "GHSA-vmv7-4m6c-3cg5",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": null,
+      "title": "Flowise: CSV Agent Remote Code Execution via Pyodide Code Injection — Root Shell Verified",
+      "summary": "## UPDATE 2026-05-20: Full RCE as root VERIFIED\n\n**This is not theoretical — a Meterpreter reverse shell session as root has been established on Flowise 3.1.2.**\n\n### Verified Exploit Chain\n\n1. Python code injection via `base64_string = \"${base64String}\"` (CSVAgent.ts line 161)\n2. Pyodide `js` bridge provides access to the host Node.js process\n3. `process.mainModule.constructor._load('child_process')` loads child_process (bypasses ESM require restriction)\n4. `.execSync('CMD')` executes arbitrary",
+      "affected": "npm:flowise, npm:flowise-components",
+      "references": [
+        "https://github.com/advisories/GHSA-vmv7-4m6c-3cg5"
+      ],
+      "published": "2026-08-04T15:40:28Z",
+      "fetched": "2026-08-04T22:32:11.355665+00:00"
+    },
+    {
+      "id": "GHSA-3769-jgqc-cxm7",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": null,
+      "title": "Flowise: RCE via NodeVM Sandbox Escape in executeJavaScriptCode() nodeVMOptions Override",
+      "summary": "### Summary\nA sandbox escape vulnerability in `executeJavaScriptCode()` allows any authenticated user to execute arbitrary system commands as root on the Flowise server. The function accepts caller-provided `nodeVMOptions` that override the\n  default sandbox security settings via JavaScript's spread operator, allowing an attacker to re-enable blocked modules like `child_process` and `fs`.\n\n### Details\nThe vulnerability is in `packages/components/src/utils.ts` at line 1755:\n\n  ```typescript\n  con",
+      "affected": "npm:flowise, npm:flowise-components",
+      "references": [
+        "https://github.com/advisories/GHSA-3769-jgqc-cxm7"
+      ],
+      "published": "2026-08-04T15:29:12Z",
+      "fetched": "2026-08-04T22:32:11.355824+00:00"
+    },
+    {
+      "id": "GHSA-wg86-r78f-74mp",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": null,
+      "title": "Flowise Sandbox Escape to RCE",
+      "summary": "=============================================================================\n                                                            Security Advisory\n                                                                       elttam\n\nTopic:          Flowise JavaScript Sandbox Escape\n\nModule:         FlowiseAI/Flowise, FlowiseAI/nodevm\nDisclosed:      11-Apr-2026\nCredits:        Luke Jahnke and Alex Brown\nAffects:        `FlowiseAI/Flowise 3.1.1`, `FlowiseAI/nodevm  3.9.25`\n\n# I.   Background\n\nF",
+      "affected": "npm:flowise, npm:flowise-components",
+      "references": [
+        "https://github.com/advisories/GHSA-wg86-r78f-74mp"
+      ],
+      "published": "2026-08-04T15:13:33Z",
+      "fetched": "2026-08-04T22:32:11.356076+00:00"
+    },
+    {
+      "id": "GHSA-wp74-f5hh-5f3r",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": null,
+      "title": "Flowise: Missing authorization on `/api/v1/files` allows low-privileged API keys to list and delete files across workspaces within the same organization",
+      "summary": "# summary:\nIn Flowise, the `/api/v1/files` route is protected only by the `feat:files` feature gate and does not enforce `checkPermission(...)` on either `GET` or `DELETE`. As a result, any authenticated API key within the organization, even one with unrelated permissions, can list and delete files belonging to other workspaces in the same organization.\n\n# details:\nThe `/files` route is mounted with `IdentityManager.checkFeatureByPlan('feat:files')` only and has no additional permission middlewa",
+      "affected": "npm:flowise",
+      "references": [
+        "https://github.com/advisories/GHSA-wp74-f5hh-5f3r"
+      ],
+      "published": "2026-08-04T14:54:03Z",
+      "fetched": "2026-08-04T22:32:11.356126+00:00"
+    },
+    {
+      "id": "GHSA-g32j-mmxr-gfq5",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": null,
+      "title": "Flowise RCE via TypeORM DataSource",
+      "summary": "=============================================================================\n                                                            Security Advisory\n                                                                       elttam\n\nTopic:          Flowise RCE via TypeORM DataSource\n\nModule:         FlowiseAI/Flowise\nDisclosed:      15-Apr-2026\nCredits:        Alex Brown\nAffects:        `FlowiseAI/Flowise 3.1.2`\n\n# I.   Background\n\nFlowise AI is an open-source, low-code platform for building A",
+      "affected": "npm:flowise, npm:flowise-components",
+      "references": [
+        "https://github.com/advisories/GHSA-g32j-mmxr-gfq5"
+      ],
+      "published": "2026-08-04T14:28:04Z",
+      "fetched": "2026-08-04T22:32:11.356189+00:00"
+    },
+    {
+      "id": "GHSA-2364-jh4q-m9vm",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": null,
+      "title": "Flowise: IDOR vulnerability exists at the GET /api/v1/organization/customer-default-source endpoint",
+      "summary": "### Summary\nAn Insecure Direct Object Reference (IDOR) vulnerability exists at the **GET /api/v1/organization/customer-default-source** endpoint. This flaw allows an authenticated attacker to bypass authorization checks and retrieve sensitive payment and profile information of other customers by manipulating the customerId parameter. The exposed data includes email addresses, account balances, currency types, and internal billing configurations.\n\n### Details\nThe application fails to implement pr",
+      "affected": "npm:flowise",
+      "references": [
+        "https://github.com/advisories/GHSA-2364-jh4q-m9vm"
+      ],
+      "published": "2026-08-04T14:16:46Z",
+      "fetched": "2026-08-04T22:32:11.356246+00:00"
+    },
+    {
       "id": "GHSA-jwv3-5hgf-82ww",
       "source": "github-advisory",
       "severity": "high",
@@ -13,6 +439,38 @@
       ],
       "published": "2026-08-03T21:26:50Z",
       "fetched": "2026-08-04T06:35:12.736309+00:00"
+    },
+    {
+      "id": "CVE-2026-18733",
+      "source": "nvd",
+      "severity": "high",
+      "cvss": 8.8,
+      "title": "A prompt injection vulnerability in the shell tool in Amazon Strands Agents Tools before 0.8.0 might allow remote actors to execute arbitrary operating system commands on the agent's host via a crafte",
+      "summary": "A prompt injection vulnerability in the shell tool in Amazon Strands Agents Tools before 0.8.0 might allow remote actors to execute arbitrary operating system commands on the agent's host via a crafted prompt that sets the non_interactive parameter to true, bypassing the human consent gate.\n\n\n\nTo remediate this issue, users should upgrade to version 0.8.0.",
+      "affected": "prompt injection",
+      "references": [
+        "https://aws.amazon.com/security/security-bulletins/2026-072-aws/",
+        "https://github.com/strands-agents/tools/security/advisories/GHSA-mqvc-p852-wf8x",
+        "https://pypi.org/project/strands-agents-tools/0.8.0/"
+      ],
+      "published": "2026-08-03T21:16:37.963",
+      "fetched": "2026-08-04T22:31:51.615797+00:00"
+    },
+    {
+      "id": "CVE-2026-18655",
+      "source": "nvd",
+      "severity": "medium",
+      "cvss": 6.5,
+      "title": "Improper restriction of intended endpoints in the RabbitMQ broker connection tools of the Amazon MQ MCP Server (awslabs.amazon-mq-mcp-server) before 2.0.24 may allow a remote unauthenticated actor (vi",
+      "summary": "Improper restriction of intended endpoints in the RabbitMQ broker connection tools of the Amazon MQ MCP Server (awslabs.amazon-mq-mcp-server) before 2.0.24 may allow a remote unauthenticated actor (via prompt injection) to obtain Amazon MQ for RabbitMQ broker credentials or OAuth access tokens sent to a crafted endpoint controlled through a broker hostname introduced in the MCP client context.\n\n\n\nTo remediate this issue, users should upgrade to version 2.0.24.",
+      "affected": "prompt injection",
+      "references": [
+        "https://aws.amazon.com/security/security-bulletins/2026-070-aws/",
+        "https://github.com/awslabs/mcp/security/advisories/GHSA-xwj6-8x5h-hjp6",
+        "https://pypi.org/project/awslabs.amazon-mq-mcp-server/2.0.24/"
+      ],
+      "published": "2026-08-03T20:17:17.557",
+      "fetched": "2026-08-04T22:31:51.615793+00:00"
     },
     {
       "id": "GHSA-3f7w-8rr8-f37f",
@@ -455,6 +913,23 @@
       "fetched": "2026-08-04T06:35:12.737543+00:00"
     },
     {
+      "id": "CVE-2026-17534",
+      "source": "nvd",
+      "severity": "medium",
+      "cvss": 5.5,
+      "title": "Kimi Code (@moonshot-ai/kimi-code) before 0.27.0 implements FetchURL SSRF hardening as a static hostname and IP-literal denylist in assertSafeFetchTarget, without resolving DNS or re-validating hosts ",
+      "summary": "Kimi Code (@moonshot-ai/kimi-code) before 0.27.0 implements FetchURL SSRF hardening as a static hostname and IP-literal denylist in assertSafeFetchTarget, without resolving DNS or re-validating hosts after HTTP redirects. An attacker who can influence a FetchURL call (for example via prompt injection) can supply a crafted public hostname that resolves to loopback or another internal address, or a public URL that redirects to such a target, and thereby reach internal network services that the den",
+      "affected": "prompt injection",
+      "references": [
+        "https://github.com/MoonshotAI/kimi-code",
+        "https://github.com/MoonshotAI/kimi-code/commit/31449728b72df94e22bcb2de350a1e7624895e30",
+        "https://github.com/MoonshotAI/kimi-code/pull/1791",
+        "https://github.com/MoonshotAI/kimi-code/releases/tag/%40moonshot-ai%2Fkimi-code%400.27.0"
+      ],
+      "published": "2026-07-27T10:16:37.747",
+      "fetched": "2026-08-04T22:31:51.615790+00:00"
+    },
+    {
       "id": "GHSA-j6g5-3hh3-pgw8",
       "source": "github-advisory",
       "severity": "high",
@@ -481,6 +956,23 @@
       ],
       "published": "2026-07-24T22:33:19Z",
       "fetched": "2026-08-04T06:35:12.737964+00:00"
+    },
+    {
+      "id": "CVE-2026-66004",
+      "source": "nvd",
+      "severity": "medium",
+      "cvss": 5.3,
+      "title": "BlenderMCP before commit 30a3308 contains a path traversal vulnerability in the download_polyhaven_asset method that allows attackers to write arbitrary files by injecting traversal sequences in API r",
+      "summary": "BlenderMCP before commit 30a3308 contains a path traversal vulnerability in the download_polyhaven_asset method that allows attackers to write arbitrary files by injecting traversal sequences in API response include keys. Attackers performing MITM attacks or prompt injection can supply malicious paths like '../../.bashrc' to overwrite sensitive files and achieve persistent code execution.",
+      "affected": "prompt injection",
+      "references": [
+        "https://github.com/ahujasid/blender-mcp/commit/30a3308446cd8f81a9446e5a2ed657c0d8d86072",
+        "https://github.com/ahujasid/blender-mcp/issues/257",
+        "https://github.com/ahujasid/blender-mcp/pull/258",
+        "https://www.vulncheck.com/advisories/blendermcp-path-traversal-via-download-polyhaven-asset-api"
+      ],
+      "published": "2026-07-24T15:19:07.050",
+      "fetched": "2026-08-04T22:31:51.615787+00:00"
     },
     {
       "id": "CVE-2026-65699",
@@ -582,6 +1074,20 @@
       ],
       "published": "2026-07-21T21:16:54.287",
       "fetched": "2026-08-04T06:34:53.913947+00:00"
+    },
+    {
+      "id": "CVE-2026-57495",
+      "source": "nvd",
+      "severity": "unknown",
+      "cvss": null,
+      "title": "AgenticMail gives AI agents real email addresses and phone numbers. In @agenticmail/claudecode prior to version 0.2.39, @agenticmail/codex prior to version 0.1.33, @agenticmail/core prior to version 0",
+      "summary": "AgenticMail gives AI agents real email addresses and phone numbers. In @agenticmail/claudecode prior to version 0.2.39, @agenticmail/codex prior to version 0.1.33, @agenticmail/core prior to version 0.9.43, and @agenticmail/openclaw prior to version 0.5.71, two inbound-mail handlers act on a privileged effect without verifying that the sender is the operator, while a sibling handler in the same repo does. The higher-impact one: any external email routed to the bridge inbox causes the dispatcher ",
+      "affected": "prompt injection",
+      "references": [
+        "https://github.com/agenticmail/agenticmail/security/advisories/GHSA-fq4x-789w-jg5h"
+      ],
+      "published": "2026-07-20T22:17:17.107",
+      "fetched": "2026-08-04T22:31:51.615775+00:00"
     },
     {
       "id": "CVE-2026-46555",
@@ -1443,19 +1949,19 @@
       "fetched": "2026-08-04T06:34:53.913899+00:00"
     }
   ],
-  "updated": "2026-08-04T06:35:13.239330+00:00",
+  "updated": "2026-08-04T22:32:13.369548+00:00",
   "sources": [
     "osv",
     "nvd",
     "github-advisory"
   ],
   "stats": {
-    "high": 43,
-    "medium": 24,
-    "critical": 9,
-    "unknown": 13,
+    "medium": 36,
+    "unknown": 16,
+    "high": 54,
+    "critical": 18,
     "low": 3,
     "moderate": 1
   },
-  "total": 93
+  "total": 128
 }
