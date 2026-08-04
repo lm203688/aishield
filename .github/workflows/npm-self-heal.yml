@@ -1,0 +1,81 @@
+name: npm self-heal
+
+# 自动兜底发布：每隔 6 小时检查 npm 上是否已有当前版本包。
+# - 已发布 → 什么都不做。
+# - 未发布 且 NPM_TOKEN 有效（npm whoami 通过）→ 自动 dispatch publish-npm。
+# - 未发布 但 NPM_TOKEN 无效 → 静默跳过，待令牌修复后下一次检查自动重试（不报警、不刷屏）。
+# 这样用户只需在 npmjs.com 重新生成有效 Automation token 并更新仓库 Secret NPM_TOKEN，
+# 无需再回来要求发布，流水线会自行完成。
+
+on:
+  schedule:
+    - cron: '23 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: write
+
+concurrency:
+  group: npm-self-heal
+  cancel-in-progress: false
+
+jobs:
+  ensure-published:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Read package metadata
+        id: meta
+        run: |
+          VERSION=$(node -p "require('./mcp-server/package.json').version")
+          PKG=$(node -p "require('./mcp-server/package.json').name")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "pkg=$PKG" >> "$GITHUB_OUTPUT"
+          echo "检查 $PKG@$VERSION"
+
+      - name: Already published?
+        id: check
+        run: |
+          CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+            "https://registry.npmjs.org/${{ steps.meta.outputs.pkg }}/${{ steps.meta.outputs.version }}")
+          echo "registry_http=$CODE"
+          if [ "$CODE" = "200" ]; then
+            echo "published=true" >> "$GITHUB_OUTPUT"
+            echo "${{ steps.meta.outputs.pkg }}@${{ steps.meta.outputs.version }} 已存在于 npm，无需发布"
+          else
+            echo "published=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Validate NPM_TOKEN before dispatching
+        id: validate
+        if: steps.check.outputs.published != 'true'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if ! npm whoami >/dev/null 2>&1; then
+            echo "NPM_TOKEN 尚未有效（npm whoami 失败），跳过本次自动发布；令牌修复后下次检查自动重试。"
+            echo "valid=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "NPM_TOKEN 有效，准备触发发布"
+          echo "valid=true" >> "$GITHUB_OUTPUT"
+
+      - name: Dispatch publish-npm
+        if: steps.check.outputs.published != 'true' && steps.validate.outputs.valid == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          curl -s -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            -d '{"ref":"main","inputs":{"npm_tag":"latest","dry_run":false}}' \
+            "https://api.github.com/repos/${{ github.repository }}/actions/workflows/publish-npm.yml/dispatches"
+          echo "已触发 publish-npm"
