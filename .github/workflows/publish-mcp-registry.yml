@@ -1,0 +1,161 @@
+name: Publish to MCP Registry
+
+# 生态位闭环的最后一环
+# ------------------
+# 长期以来「向 MCP 官方 registry 提交 server.json」只是台账里的一条待办，
+# 待办不会自己变成动作。这里把它变成 npm 发布成功后的自动后续步骤。
+#
+# 认证方式为 GitHub OIDC：server.json 的 name 是 io.github.lm203688/aishield，
+# registry 通过 OIDC 验证调用方确实是 lm203688 名下仓库，无需任何长期密钥。
+
+on:
+  # npm 发布成功后自动上架 —— registry 里的包指向 npm，顺序不能反
+  workflow_run:
+    workflows: ["Publish to npm"]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: '只校验不提交'
+        type: boolean
+        required: false
+        default: false
+
+permissions:
+  contents: read
+  id-token: write
+  issues: write
+
+concurrency:
+  group: mcp-registry
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Validate & Publish
+    runs-on: ubuntu-latest
+    # 上游失败时不上架：registry 会指向一个并不存在的 npm 版本
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Sync version from package.json
+        run: python scripts/validate_registry.py --sync
+
+      - name: Validate server.json
+        run: |
+          # description 上限 100 字符这类约束，服务端只会回一句笼统的 400，
+          # 在这里提前拦下并说清楚是哪一条。
+          python scripts/validate_registry.py --check
+
+      - name: Assert npm package is actually available
+        run: |
+          # registry 记录指向 npm 包；包还没上去就先上架，用户装不上，
+          # 比不上架更糟 —— 那是一个可见但坏掉的入口。
+          PKG=$(python -c "import json;d=json.load(open('registry/server.json',encoding='utf-8'));print([p['identifier'] for p in d.get('packages',[]) if p.get('registryType')=='npm'][0])")
+          VER=$(python -c "import json;d=json.load(open('registry/server.json',encoding='utf-8'));print([p['version'] for p in d.get('packages',[]) if p.get('registryType')=='npm'][0])")
+          CODE=$(curl -s -o /dev/null -w "%{http_code}" "https://registry.npmjs.org/${PKG/\//%2F}/$VER")
+          echo "$PKG@$VER -> HTTP $CODE"
+          if [ "$CODE" != "200" ]; then
+            echo "::error::npm 上不存在 $PKG@$VER，先完成 npm 发布再上架 registry"
+            exit 1
+          fi
+
+      - name: Install mcp-publisher
+        run: |
+          curl -fsSL -o publisher.tar.gz \
+            "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_linux_amd64.tar.gz"
+          tar xzf publisher.tar.gz mcp-publisher
+          chmod +x mcp-publisher
+          ./mcp-publisher --version || true
+
+      - name: Dry run
+        if: github.event.inputs.dry_run == 'true'
+        run: |
+          echo "演练模式，跳过实际提交。server.json 内容："
+          cat registry/server.json
+          exit 0
+
+      - name: Login via GitHub OIDC
+        if: github.event.inputs.dry_run != 'true'
+        run: |
+          cd registry
+          ../mcp-publisher login github-oidc
+
+      - name: Publish
+        if: github.event.inputs.dry_run != 'true'
+        run: |
+          cd registry
+          ../mcp-publisher publish
+
+      - name: Verify listing
+        if: github.event.inputs.dry_run != 'true'
+        id: verify
+        run: |
+          # 提交成功≠可检索。轮询确认记录真的出现在公开列表里。
+          NAME=$(python -c "import json;print(json.load(open('registry/server.json',encoding='utf-8'))['name'])")
+          OK=0
+          for i in 1 2 3 4 5; do
+            if curl -s --max-time 20 "https://registry.modelcontextprotocol.io/v0/servers?limit=100&search=aishield" \
+               | grep -q "$NAME"; then OK=1; break; fi
+            echo "  第 $i 次未检索到，等待..."
+            sleep 15
+          done
+          echo "ok=$OK" >> "$GITHUB_OUTPUT"
+          [ "$OK" = "1" ] || { echo "::error::提交后仍未在 registry 检索到 $NAME"; exit 1; }
+          echo "已收录：$NAME"
+
+      - name: Record state & refresh position
+        if: always() && github.event.inputs.dry_run != 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python scripts/state_bus.py set mcp_registry \
+            --json "{\"listed\":${{ steps.verify.outputs.ok == '1' && 'true' || 'false' }}}" \
+            --source publish-mcp-registry || true
+          python scripts/registry_tracker.py || true
+
+      - name: Resolve alert
+        if: steps.verify.outputs.ok == '1'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python scripts/notify.py --resolve \
+            --fingerprint "mcp-registry-fail" \
+            --title "已成功上架 MCP 官方 registry" || true
+
+  alert:
+    name: Alert
+    needs: publish
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Notify
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NOTIFY_WEBHOOK: ${{ secrets.NOTIFY_WEBHOOK }}
+        run: |
+          printf '%s\n' \
+            "MCP 官方 registry 上架失败，生态入口仍然缺位。" \
+            "" \
+            "常见原因：" \
+            "1. server.json 的 name 命名空间与仓库 owner 不符（须为 io.github.<owner>/<name>）" \
+            "2. description 超过 100 字符" \
+            "3. npm 包尚未发布，registry 拒绝指向不存在的包" \
+            "" \
+            "运行链接: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            > /tmp/reg_alert.md
+          python scripts/notify.py --level P1 \
+            --title "MCP registry 上架失败" \
+            --fingerprint "mcp-registry-fail" \
+            --body "$(cat /tmp/reg_alert.md)" || true

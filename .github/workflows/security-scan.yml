@@ -5,7 +5,7 @@ on:
   pull_request:
     branches: [main]
   schedule:
-    - cron: '0 0 * * 1'  # 每周一凌晨运行
+    - cron: '52 4 * * 1'  # 每周一凌晨运行
   workflow_dispatch:
 
 permissions:

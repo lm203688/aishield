@@ -6,9 +6,56 @@ on:
   pull_request:
     branches: [ main ]
   schedule:
-    - cron: '0 3 * * *'
+    - cron: '8 3 * * *'
+  workflow_dispatch:      # 补齐手动触发，故障时可立即补跑而无需等下一个 cron
 
 jobs:
+  # 门禁：任何工作流 YAML 语法错误 / 依赖断链 / 缺失脚本都在此拦截
+  # 缘由：self-heal-closed-loop.yml 曾因 YAML 语法错静默失效 48 天
+  workflow-lint:
+    name: Workflow Integrity Gate
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.13'
+
+    - name: Install YAML parser
+      run: pip install pyyaml
+
+    - name: Validate all workflows
+      run: python scripts/validate_workflows.py
+
+    # 版本曾在 6 处声明位漂移出 3 个不同值（4.0.0 / 4.1.0 / 4.2.0），
+    # 导致各分发渠道各自宣称不同版本，出问题时无法定位用户跑的是哪份代码
+    - name: Assert version consistency
+      run: |
+        if ! python scripts/sync_version.py --check; then
+          echo "::error::版本声明不一致"
+          echo "修复方式：本地运行 python scripts/sync_version.py --sync 并提交"
+          exit 1
+        fi
+
+    # server.json 的 description 上限 100 字符这类约束，
+    # 服务端只回一句笼统的 400，必须在提交前校验
+    - name: Validate MCP registry manifest
+      run: python scripts/validate_registry.py --check --offline
+
+    # 台账必须与实际 workflow 一致，否则「28 个任务在跑」的幻觉会再次出现
+    - name: Assert task registry is up to date
+      run: |
+        if ! python scripts/gen_task_registry.py --check; then
+          echo "::error::automation/task-registry.md 已过期"
+          echo "修复方式：本地运行 python scripts/gen_task_registry.py 并提交"
+          python scripts/gen_task_registry.py
+          git --no-pager diff --stat automation/task-registry.md || true
+          exit 1
+        fi
+
   test:
     runs-on: ubuntu-latest
     steps:
@@ -22,7 +69,7 @@ jobs:
 
     - name: Run syntax check
       run: |
-        python -m py_compile api/server.py eco/*.py scanner/*.py
+        python -m py_compile api/server.py eco/*.py scanner/*.py scripts/*.py
 
     - name: Run quick tests
       run: |
@@ -118,8 +165,7 @@ jobs:
         print(f'Overall score: {result.get(\"score\", \"N/A\")}')
         if duration > 5:
           print(f'Warning: Scan took {duration:.2f}s (limit: 5s)')
-          exit(1
-        )
+          exit(1)
         print('Performance check passed')
         "
 

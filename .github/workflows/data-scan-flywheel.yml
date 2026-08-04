@@ -37,6 +37,10 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    outputs:
+      before: ${{ steps.before.outputs.count }}
+      after: ${{ steps.verify.outputs.count }}
+      grew: ${{ steps.verify.outputs.grew }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -45,6 +49,13 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.13'
+
+      - name: Record DB size before scan
+        id: before
+        run: |
+          N=$(python -c "import json,os;p='${BATCH_DB}';d=json.load(open(p)) if os.path.exists(p) else [];print(len(d) if isinstance(d,list) else len(d.get('scans',[])))" 2>/dev/null || echo 0)
+          echo "count=$N" >> "$GITHUB_OUTPUT"
+          echo "扫描前库存: $N 条"
 
       - name: Run batch scan (数据飞轮增量入库)
         id: scan
@@ -62,6 +73,25 @@ jobs:
         run: |
           python -m scanner.batch_scanner --report 2>&1 | tail -20
 
+      # 验证：飞轮的价值在于"越转越大"，停止增长即等于失效
+      - name: Verify flywheel actually grew
+        id: verify
+        run: |
+          N=$(python -c "import json,os;p='${BATCH_DB}';d=json.load(open(p)) if os.path.exists(p) else [];print(len(d) if isinstance(d,list) else len(d.get('scans',[])))" 2>/dev/null || echo 0)
+          BEFORE="${{ steps.before.outputs.count }}"
+          echo "count=$N" >> "$GITHUB_OUTPUT"
+          if [ "$N" -gt "$BEFORE" ]; then
+            echo "grew=true" >> "$GITHUB_OUTPUT"
+            echo "飞轮增长: $BEFORE -> $N (+$((N-BEFORE)))"
+          else
+            echo "grew=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::飞轮未增长（$BEFORE -> $N），数据源可能已失效"
+          fi
+          GREW=$([ "$N" -gt "$BEFORE" ] && echo true || echo false)
+          python scripts/state_bus.py set data \
+            "{\"total\":$N,\"before\":$BEFORE,\"grew\":$GREW}" \
+            --source data-scan-flywheel || true
+
       - name: Commit database update
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -69,10 +99,74 @@ jobs:
           git config user.name "github-actions[full]"
           git config user.email "github-actions[full]@users.noreply.github.com"
           git add data/batch_scans.json data/monitored_tools.json data/security_report.md 2>/dev/null
+          git add data/batch_scans.json data/monitored_tools.json data/security_report.md data/state/ 2>/dev/null
           if ! git diff --cached --quiet; then
             git commit -m "auto: 批量扫描入库 [skip ci]"
+            git pull --rebase --autostash origin main || true
             git push origin main
             echo "DB updated & committed"
           else
             echo "No new scan data this cycle"
           fi
+
+  # 告警：飞轮停转是渐进式失效，不主动喊就会悄无声息地死掉
+  alert:
+    name: Alert on Flywheel Stall
+    needs: scan
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Escalate scan failure
+        if: needs.scan.result == 'failure'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NOTIFY_WEBHOOK: ${{ secrets.NOTIFY_WEBHOOK }}
+          GH_OWNER: lm203688
+          GH_REPO: aishield
+        run: |
+          {
+            printf '%s\n' "数据飞轮批量扫描执行失败，自建库本周期未入库。"
+            printf '%s\n' "运行链接: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          } > /tmp/flywheel_fail.md
+          python scripts/notify.py --level P1 \
+            --title "数据飞轮扫描失败" \
+            --fingerprint "flywheel-scan-fail" \
+            --body "$(cat /tmp/flywheel_fail.md)"
+
+      - name: Warn on zero growth
+        if: needs.scan.result == 'success' && needs.scan.outputs.grew == 'false'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NOTIFY_WEBHOOK: ${{ secrets.NOTIFY_WEBHOOK }}
+          GH_OWNER: lm203688
+          GH_REPO: aishield
+        run: |
+          {
+            printf '%s\n' "数据飞轮本周期零增长：库存仍为 ${{ needs.scan.outputs.after }} 条。"
+            printf '%s\n' ""
+            printf '%s\n' "可能原因：上游数据源接口变更 / 增量去重过于激进 / 采集配额耗尽。"
+            printf '%s\n' "飞轮的护城河来自数据量，停止增长等同于失去竞争力。"
+          } > /tmp/flywheel_stall.md
+          python scripts/notify.py --level P2 \
+            --title "数据飞轮零增长" \
+            --fingerprint "flywheel-no-growth" \
+            --cooldown 72 \
+            --body "$(cat /tmp/flywheel_stall.md)"
+
+      - name: Clear alarms on healthy growth
+        if: needs.scan.result == 'success' && needs.scan.outputs.grew == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_OWNER: lm203688
+          GH_REPO: aishield
+        run: |
+          python scripts/notify.py --resolve --fingerprint "flywheel-scan-fail" \
+            --title "数据飞轮恢复" --body "扫描已恢复正常。" || true
+          python scripts/notify.py --resolve --fingerprint "flywheel-no-growth" \
+            --title "数据飞轮恢复增长" \
+            --body "库存 ${{ needs.scan.outputs.before }} -> ${{ needs.scan.outputs.after }}。" || true

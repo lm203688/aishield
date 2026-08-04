@@ -134,9 +134,64 @@ jobs:
       run: |
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
-        git add diagnostics/deploy-result.md
+        git add diagnostics/deploy-result.md data/state/ 2>/dev/null || true
         git commit -m "chore: update deploy diagnostics [skip ci]" || echo "No changes to commit"
-        git pull --rebase origin main || true
+        git pull --rebase --autostash origin main || true
         git push || echo "Push failed"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ── 部署后验证闸门：补齐"部署→验证"缺口 ───────────────────────────
+  # 原版部署完就结束，从不确认线上是否真的好了。部署成功 ≠ 服务可用。
+  post-deploy-verify:
+    name: Post-Deploy Verification Gate
+    needs: deploy
+    if: always() && needs.deploy.result != 'skipped'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.13'
+
+    - name: Verify live service (三路探测，最多轮询 3 分钟)
+      id: verify
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        NOTIFY_WEBHOOK: ${{ secrets.NOTIFY_WEBHOOK }}
+      run: |
+        ok=false
+        for i in $(seq 1 9); do
+          if python scripts/health_probe.py >/dev/null 2>&1; then
+            echo "✅ 部署后验证通过（第 $i 次探测）"
+            ok=true
+            break
+          fi
+          sleep 20
+        done
+        if [ "$ok" != "true" ]; then
+          python scripts/notify.py --level P0 --force \
+            --fingerprint deploy-verify-failed \
+            --title "部署后验证失败：线上服务不可用" \
+            --body "部署流程已执行，但 3 分钟轮询内线上服务始终未通过三路健康探测。请检查 run ${{ github.run_id }}。"
+          exit 1
+        fi
+        python scripts/notify.py --resolve --fingerprint deploy-verify-failed \
+          --title "部署后验证恢复" --body "本次部署已通过线上验证。" || true
+
+    - name: Record deploy state
+      if: always()
+      run: |
+        python scripts/state_bus.py set selfheal '{"last_deploy_verify":"${{ steps.verify.outcome }}","deploy_run_id":"${{ github.run_id }}"}' --source deploy-server
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git add data/state/ 2>/dev/null || true
+        if ! git diff --cached --quiet; then
+          git commit -m "auto: 部署验证状态回写 [skip ci]" || true
+          git pull --rebase --autostash origin main || true
+          git push || echo "push skipped"
+        fi

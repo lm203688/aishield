@@ -1,74 +1,183 @@
 name: AIShield Channel Distribution (Content + Registry + Social)
 
-# 盈利化/推广：内容营销自动化 + MCP Registry 生态分发
-# 原则：不做无分发渠道的功能；内容即增长；生态入口即用户
-# 流程：生成内容(周报+案例分析+社交文案+feeds) -> 提交/更新 MCP Registry -> 有token则自动发社交
+# 盈利化/推广闭环：生成内容 → 零凭据多渠道发布 → 生态目录上架 → 可选社交放大 → 效果回写
+#
+# 【2026-08-04 重大修复】
+#   原版发布步骤被 token 门控包裹：`if [ -n "$TWITTER_BEARER_TOKEN" ] && [ -n "$REDDIT_CLIENT_ID" ]`
+#   由于两个 secret 从未配置，条件恒假，**每次都走 else 分支只打印一行日志**。
+#   后果：内容持续生产、从未抵达任何读者，这是 0 star / 0 注册的直接原因。
+#   本版改为「零凭据渠道默认必发 + 付费渠道可选放大」，发布不再依赖任何人工申请的凭据。
 
 on:
   schedule:
-    - cron: '0 6 * * 4'   # 每周四 06:00 自动产出并分发内容
+    - cron: '47 6 * * 4'   # 每周四 06:00 产出并分发
   workflow_dispatch:
+    inputs:
+      publish_only:
+        description: '跳过内容生成，只重新分发已有内容'
+        type: boolean
+        default: false
 
 permissions:
   contents: write
+  issues: write
 
-env:
-  CONTENT_DIR: content/blog
+concurrency:
+  group: distribution
+  cancel-in-progress: false
 
 jobs:
-  content:
-    name: Generate Content Pipeline
+  # ── 0. 检测：发布前先探明"有什么待发、上次发出去了没" ──────────────────
+  # 补位缘由：原闭环缺"检测"环节，发布静默空转 N 周无人察觉。
+  discover:
+    name: 0-Detect Pending & Last-Publish Health
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
+    outputs:
+      pending: ${{ steps.scan.outputs.pending }}
+      already: ${{ steps.scan.outputs.already }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Scan publishable content & prior ledger
+        id: scan
+        run: |
+          python scripts/publish_content.py --dry-run 2>&1 | tail -30
+          ALREADY=$(python -c "import json,os;p='data/state/published.json';print(len(json.load(open(p))) if os.path.exists(p) else 0)")
+          PENDING=$(python -c "
+          import sys; sys.path.insert(0,'.')
+          from scripts.publish_content import discover
+          print(len(discover()))
+          " 2>/dev/null || echo 0)
+          echo "pending=$PENDING" >> "$GITHUB_OUTPUT"
+          echo "already=$ALREADY" >> "$GITHUB_OUTPUT"
+          echo "待发布 $PENDING 篇 / 历史已发 $ALREADY 篇"
+
+      - name: Probe ecosystem listing status
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python scripts/registry_tracker.py --check 2>&1 | tail -20
+
+  # ── 1. 内容生产 ───────────────────────────────────────────────────
+  content:
+    name: 1-Generate Content
+    needs: discover
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
 
       - name: Run content pipeline
+        if: ${{ !inputs.publish_only }}
         run: |
-          python -m py_compile scripts/content_pipeline.py || true
+          python -m py_compile scripts/content_pipeline.py
           python scripts/content_pipeline.py --all 2>&1 | tail -30
 
       - name: Commit generated content
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git config user.name "github-actions[full]"
-          git config user.email "github-actions[full]@users.noreply.github.com"
-          git add content/ api/static/feeds.xml 2>/dev/null
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add content/ eco/content/ 2>/dev/null || true
           if ! git diff --cached --quiet; then
-            git commit -m "auto: 内容营销流水线产出 [skip ci]" || true
-            git push origin main || echo "push skipped (no change)"
+            git commit -m "auto: 内容流水线产出 [skip ci]" || true
+            git pull --rebase --autostash origin main || true
+            git push origin main || echo "push skipped"
           else
-            echo "No new content this cycle"
+            echo "本周期无新增内容"
           fi
 
-  registry:
-    name: Update MCP Registry Presence
-    runs-on: ubuntu-latest
+  # ── 2. 零凭据发布（必须执行，不设任何门控）──────────────────────────
+  publish:
+    name: 2-Publish (Zero-Credential Channels)
     needs: content
+    runs-on: ubuntu-latest
+    outputs:
+      published: ${{ steps.pub.outputs.published }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
 
-      - name: Generate registry submission manifests (preview)
+      - name: Publish to Issue / Pages / RSS / README
+        id: pub
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          python -m py_compile scripts/submit_mcp_directories.py || true
-          # 预览模式：生成 registry 所需 JSON/manifest，确保生态可见性文档就绪
-          python scripts/submit_mcp_directories.py 2>&1 | head -40
+          # 关键：此处无 token 门控。GITHUB_TOKEN 由 Actions 自动注入，恒可用。
+          python scripts/publish_content.py --all 2>&1 | tail -40
+          n=$(python -c "import json,os;p='data/state/published.json';print(len(json.load(open(p))) if os.path.exists(p) else 0)")
+          echo "published=$n" >> "$GITHUB_OUTPUT"
 
-      - name: Publish social (token-gated)
+      - name: Commit publish artifacts
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/blog/ api/static/feeds.xml README.md data/state/ 2>/dev/null || true
+          if ! git diff --cached --quiet; then
+            git commit -m "auto: 内容多渠道分发 [skip ci]" || true
+            git pull --rebase --autostash origin main || true
+            git push origin main || echo "push skipped"
+          fi
+
+  # ── 3. 生态目录上架（真实提交，不再只做 preview）─────────────────────
+  registry:
+    name: 3-Ecosystem Registry Listing
+    needs: publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Generate & submit registry manifests
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python -m py_compile scripts/submit_mcp_directories.py
+          # 生成 manifest 并尝试真实提交；未配置目标平台凭据的走 PR/Issue 途径留痕
+          python scripts/submit_mcp_directories.py 2>&1 | tail -40
+
+      - name: Track listing status
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python scripts/registry_tracker.py --check 2>&1 | tail -30
+
+      - name: Commit registry state
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add registry/ data/state/ 2>/dev/null || true
+          if ! git diff --cached --quiet; then
+            git commit -m "auto: 生态目录上架状态更新 [skip ci]" || true
+            git pull --rebase --autostash origin main || true
+            git push origin main || echo "push skipped"
+          fi
+
+  # ── 4. 付费/授权渠道放大（可选，缺凭据不影响主流程）──────────────────
+  amplify:
+    name: 4-Optional Social Amplification
+    needs: publish
+    if: always() && needs.publish.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Social publish (opt-in)
         env:
           TWITTER_BEARER_TOKEN: ${{ secrets.TWITTER_BEARER_TOKEN }}
           TWITTER_API_KEY: ${{ secrets.TWITTER_API_KEY }}
@@ -77,12 +186,89 @@ jobs:
           TWITTER_ACCESS_SECRET: ${{ secrets.TWITTER_ACCESS_SECRET }}
           REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
           REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
-          REDDIT_USERNAME: ${{ secrets.REDDIT_USERNAME }}
-          REDDIT_PASSWORD: ${{ secrets.REDDIT_PASSWORD }}
+          NOTIFY_WEBHOOK: ${{ secrets.NOTIFY_WEBHOOK }}
         run: |
-          if [ -n "$TWITTER_BEARER_TOKEN" ] && [ -n "$REDDIT_CLIENT_ID" ]; then
-            echo "社交 token 已配置，执行正式发布"
-            python scripts/social_publish.py --publish 2>&1 | tail -30 || echo "publish encountered issues (logged)"
+          if [ -n "$TWITTER_BEARER_TOKEN" ] || [ -n "$REDDIT_CLIENT_ID" ]; then
+            python scripts/social_publish.py --publish 2>&1 | tail -30 || echo "社交发布异常（已记录，不阻断）"
           else
-            echo "未配置社交 token，跳过自动发布（内容已生成，待配置后启用）"
+            echo "::notice::未配置社交凭据 —— 这是可选放大渠道。"
+            echo "::notice::内容已通过 Issue / Pages / RSS / README 四个零凭据渠道发出，分发不受影响。"
           fi
+          if [ -n "$NOTIFY_WEBHOOK" ]; then
+            python scripts/notify.py --level P2 --title "本周内容已分发" \
+              --body "已发布 ${{ needs.publish.outputs.published }} 篇内容到零凭据渠道。" || true
+          fi
+
+  # ── 5. 验证：确认发布真的落地，而不是又一次静默空转 ────────────────────
+  verify:
+    name: 5-Verify Delivery Landed
+    needs: [discover, publish, registry]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 2
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Assert artifacts actually changed
+        id: assert
+        run: |
+          FAIL=0
+          BEFORE="${{ needs.discover.outputs.already }}"
+          AFTER="${{ needs.publish.outputs.published }}"
+          PENDING="${{ needs.discover.outputs.pending }}"
+          echo "发布前台账 $BEFORE 篇 / 发布后 $AFTER 篇 / 本轮待发 $PENDING 篇"
+
+          if [ ! -f api/static/feeds.xml ]; then
+            echo "::error::RSS feed 不存在，发布未落地"; FAIL=1
+          fi
+          if [ "${{ needs.publish.result }}" != "success" ]; then
+            echo "::error::publish job 未成功"; FAIL=1
+          fi
+          # 关键断言：有待发内容却台账零增长 = 又一次静默空转
+          if [ "$PENDING" -gt 0 ] && [ "$AFTER" = "$BEFORE" ]; then
+            echo "::error::存在 $PENDING 篇待发内容，但台账未增长 —— 疑似静默空转"; FAIL=1
+          fi
+          echo "fail=$FAIL" >> "$GITHUB_OUTPUT"
+          [ "$FAIL" = "0" ] && echo "分发链路验证通过" || exit 1
+
+      - name: Escalate delivery failure
+        if: failure()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NOTIFY_WEBHOOK: ${{ secrets.NOTIFY_WEBHOOK }}
+          GH_OWNER: lm203688
+          GH_REPO: aishield
+        run: |
+          {
+            printf '%s\n' "内容分发闭环验证未通过，本周内容可能未真正抵达任何读者。"
+            printf '%s\n' ""
+            printf '%s\n' "- 待发: ${{ needs.discover.outputs.pending }} 篇"
+            printf '%s\n' "- 发布前台账: ${{ needs.discover.outputs.already }} 篇"
+            printf '%s\n' "- 发布后台账: ${{ needs.publish.outputs.published }} 篇"
+            printf '%s\n' "- publish job: ${{ needs.publish.result }} / registry job: ${{ needs.registry.result }}"
+            printf '%s\n' ""
+            printf '%s\n' "历史教训：token 门控导致发布静默空转，0 star / 0 注册的直接成因。"
+            printf '%s\n' "运行链接: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          } > /tmp/dist_fail.md
+          python scripts/notify.py --level P1 \
+            --title "内容分发未落地" \
+            --fingerprint "distribution-not-landed" \
+            --body "$(cat /tmp/dist_fail.md)"
+
+      - name: Clear alarm on success
+        if: success()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_OWNER: lm203688
+          GH_REPO: aishield
+        run: |
+          python scripts/notify.py --resolve \
+            --fingerprint "distribution-not-landed" \
+            --title "内容分发恢复正常" \
+            --body "分发链路验证通过，内容已抵达零凭据渠道。"

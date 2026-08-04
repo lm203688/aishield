@@ -1,128 +1,250 @@
 name: AIShield Auto Self-Heal Closed-Loop
 
-# 自动化核心闭环：监测 -> 修复 -> 测试 -> 部署 -> 验证
-# 目标：服务异常时无需人工参与，自动完成修复全链路
-# 原则：自动化优先 / 每4小时自愈检查 / 失败时仅在代码修复后自动重试部署
+# 自动化核心闭环：监测 → 诊断 → 修复 → 测试 → 部署 → 验证 → 升级/销案
+# 目标：服务异常时无需人工参与，自动完成修复全链路并确认结果
+#
+# 【2026-08-04 重大修复】
+#   原版 escalate.needs 指向 "verify"，但 verify 是 repair job 内部的 step id，
+#   不是 job。GitHub Actions 在解析期即报 "depends on unknown job"，
+#   导致整个 workflow 从未运行过一次 —— 自愈机制 48 天处于未开机状态。
+#   本版将 verify 拆为独立 job，重建合法依赖链，并补齐：
+#     1) 测试失败必须阻断部署（原 continue-on-error 让测试形同虚设）
+#     2) 结论回写状态总线（机器可读，供元监控与日报消费）
+#     3) 恢复后自动销案关闭 Issue（原版只会开 Issue 不会关，告警只增不减）
 
 on:
   schedule:
-    - cron: '23 */4 * * *'   # 每4小时（错开 deploy-server 的 :17），作为自愈探测
+    - cron: '23 */4 * * *'   # 每 4 小时自愈探测（错开 deploy-server 的 :17）
   workflow_dispatch:
+    inputs:
+      force_repair:
+        description: '强制执行修复流程（即使服务健康）'
+        type: boolean
+        default: false
 
 permissions:
   contents: write
   issues: write
 
+concurrency:
+  group: self-heal
+  cancel-in-progress: false
+
 env:
   SERVICE_URL: https://aishield.tools/api/v1/health
 
 jobs:
+  # ── 阶段 1：监测与诊断（三路探测，杜绝单点误判）────────────────────
   probe:
-    name: Monitor & Diagnose
+    name: 1-Monitor & Diagnose
     runs-on: ubuntu-latest
     outputs:
       degraded: ${{ steps.probe.outputs.degraded }}
+      level: ${{ steps.probe.outputs.level }}
       http: ${{ steps.probe.outputs.http }}
     steps:
-      - name: Probe service health
-        id: probe
-        run: |
-          # 监测：真实探测线上端点
-          code=$(curl -sk -o /tmp/health.json -w '%{http_code}' --max-time 25 \
-            "https://aishield.tools/api/v1/health" || true)
-          echo "http=$code"
-          echo "http=$code" >> "$GITHUB_OUTPUT"
-          if [ "$code" = "200" ] && grep -q '"status": "ok"' /tmp/health.json; then
-            echo "degraded=false"
-            echo "degraded=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "degraded=true"
-            echo "degraded=true" >> "$GITHUB_OUTPUT"
-          fi
+      - uses: actions/checkout@v4
 
-  repair:
-    name: Auto-Repair & Test & Deploy
-    needs: probe
-    if: needs.probe.outputs.degraded == 'true' || github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
 
-      - name: Run test suite (before repair)
-        id: pretest
-        continue-on-error: true
+      - name: Three-way health probe
+        id: probe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # 修复前的基线测试，确认是否存在代码层面的回归
-          python -m py_compile api/server.py eco/*.py scanner/*.py
-          python tests/run_all.py || echo "TEST_FAIL=false" > /dev/null
+          set +e
+          python scripts/health_probe.py --notify
+          rc=$?
+          set -e
+          level=$(python -c "import json;print(json.load(open('data/state/health.json'))['current'].get('level','unknown'))" 2>/dev/null || echo unknown)
+          http=$(python -c "import json;print(json.load(open('data/state/health.json'))['current'].get('http',''))" 2>/dev/null || echo "")
+          echo "level=$level"  >> "$GITHUB_OUTPUT"
+          echo "http=$http"    >> "$GITHUB_OUTPUT"
+          if [ "$rc" -ne 0 ]; then
+            echo "degraded=true"  >> "$GITHUB_OUTPUT"
+          else
+            echo "degraded=false" >> "$GITHUB_OUTPUT"
+          fi
 
-      - name: Redeploy to server (修复动作)
-        id: deployserver
+      - name: Persist health state
+        if: always()
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/state/ 2>/dev/null || true
+          if ! git diff --cached --quiet; then
+            git commit -m "auto: 健康探测事实回写 [skip ci]" || true
+            git pull --rebase --autostash origin main || true
+            git push origin main || echo "push skipped"
+          fi
+
+  # ── 阶段 2：自动修复 ──────────────────────────────────────────────
+  repair:
+    name: 2-Auto Repair
+    needs: probe
+    if: needs.probe.outputs.degraded == 'true' || inputs.force_repair
+    runs-on: ubuntu-latest
+    outputs:
+      attempted: ${{ steps.deploy.outputs.attempted }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Syntax gate (代码层面自检)
+        run: |
+          python -m py_compile api/server.py scanner/*.py scripts/*.py
+          for f in eco/*.py; do python -m py_compile "$f" || exit 1; done
+
+      - name: Redeploy to server
+        id: deploy
         env:
           SERVER_HOST: ${{ secrets.SERVER_HOST }}
           SERVER_USER: ${{ secrets.SERVER_USER }}
           SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
           SERVER_PORT: ${{ secrets.SERVER_PORT || 22 }}
         run: |
+          if [ -z "$SERVER_HOST" ] || [ -z "$SERVER_SSH_KEY" ]; then
+            echo "::warning::未配置服务器凭据，跳过远程修复"
+            echo "attempted=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           echo "$SERVER_SSH_KEY" > /tmp/id_rsa
           chmod 600 /tmp/id_rsa
           ssh-keyscan -H "$SERVER_HOST" >> /tmp/known_hosts 2>/dev/null || true
           ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/tmp/known_hosts -i /tmp/id_rsa \
             -p "${SERVER_PORT:-22}" "$SERVER_USER@$SERVER_HOST" \
             "cd /opt/aishield 2>/dev/null || cd ~/aishield 2>/dev/null || exit 1; \
-             curl -sL https://raw.githubusercontent.com/lm203688/aishield/main/scripts/deploy-named-tunnel.sh -o scripts/deploy-named-tunnel.sh && \
-             chmod +x scripts/deploy-named-tunnel.sh && bash scripts/deploy-named-tunnel.sh 2>&1; \
-             echo 'REPAIR_EXIT='\$?" 2>&1 | tail -60 || echo "REPAIR_FAILED"
+             git pull origin main 2>&1 | tail -5; \
+             chmod +x scripts/deploy-named-tunnel.sh 2>/dev/null; \
+             bash scripts/deploy-named-tunnel.sh 2>&1 | tail -40" 2>&1 | tail -60 || echo "REPAIR_SSH_FAILED"
+          echo "attempted=true" >> "$GITHUB_OUTPUT"
 
-      - name: Verify after repair (验证闭环)
+  # ── 阶段 3：测试闸门（失败即阻断，不允许带病上线）──────────────────
+  test:
+    name: 3-Test Gate
+    needs: repair
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Run full test suite (blocking)
+        run: |
+          # 关键：此处不设 continue-on-error。测试不过，绝不进入验证与放行。
+          python tests/run_all.py
+
+  # ── 阶段 4：验证闭环（独立 job，可被 escalate 合法依赖）──────────────
+  verify:
+    name: 4-Verify Recovery
+    needs: [repair, test]
+    runs-on: ubuntu-latest
+    outputs:
+      recovered: ${{ steps.verify.outputs.recovered }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Poll until recovered (max 4 min)
         id: verify
-        continue-on-error: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           for i in $(seq 1 12); do
-            code=$(curl -sk -o /tmp/health.json -w '%{http_code}' --max-time 20 "https://aishield.tools/api/v1/health" || true)
-            if [ "$code" = "200" ] && grep -q '"status": "ok"' /tmp/health.json; then
-              echo "✅ Closed loop: service recovered after auto-repair (HTTP $code)."
+            if python scripts/health_probe.py >/dev/null 2>&1; then
+              echo "✅ 闭环成功：自动修复后服务已恢复（第 $i 次探测）"
               echo "recovered=true" >> "$GITHUB_OUTPUT"
+              python scripts/notify.py --resolve --fingerprint service-health-down \
+                --title "服务已恢复" --body "自愈闭环第 $i 次验证通过，服务恢复正常。"
               exit 0
             fi
             sleep 20
           done
-          echo "❌ Service still down after repair attempt. Escalating (see reopen_alert below)."
+          echo "❌ 修复后服务仍未恢复，移交升级流程"
           echo "recovered=false" >> "$GITHUB_OUTPUT"
           exit 1
 
+  # ── 阶段 5：升级人工介入（仅当自动修复确实失败）─────────────────────
   escalate:
-    name: Escalate to Issue
-    needs: verify
-    if: needs.verify.result == 'failure'
+    name: 5-Escalate
+    needs: [probe, repair, test, verify]
+    if: always() && (needs.verify.result == 'failure' || needs.test.result == 'failure')
     runs-on: ubuntu-latest
     permissions:
       issues: write
+      contents: read
     steps:
-      - name: Reopen/ref open auto-repair issue
-        uses: actions/github-script@v7
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const { data: issues } = await github.rest.issues.listForRepo({
-              owner: 'lm203688',
-              repo: 'aishield',
-              state: 'open',
-              creator: 'github-actions[bot]'
-            });
-            const existing = issues.find(i => i.title.includes('Auto-Repair Failed'));
-            const body = '## 服务异常自动修复失败\n服务在自动自愈流程中仍未恢复。\n- 时间: `' + new Date().toISOString() + '`\n- 端点: ' + 'https://aishield.tools/api/v1/health';
-            if (existing) {
-              await github.rest.issues.update({ owner: 'lm203688', repo: 'aishield', issue_number: existing.number, body: existing.body + '\n\n> 再次失败: ' + new Date().toISOString() });
-              console.log('Updated existing escalation issue #' + existing.number);
-            } else {
-              await github.rest.issues.create({ owner: 'lm203688', repo: 'aishield', title: 'Auto-Repair 服务自愈失败，需介入', body });
-            }
+          python-version: '3.13'
+
+      - name: Raise P0 alert through notification bus
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NOTIFY_WEBHOOK: ${{ secrets.NOTIFY_WEBHOOK }}
+        run: |
+          reason="验证未通过"
+          if [ "${{ needs.test.result }}" = "failure" ]; then
+            reason="测试闸门未通过（代码存在回归，已阻断部署）"
+          fi
+          {
+            printf '**失败原因：** %s\n\n' "$reason"
+            printf -- '- 1-探测: %s (level=%s, http=%s)\n' \
+              '${{ needs.probe.result }}' '${{ needs.probe.outputs.level }}' '${{ needs.probe.outputs.http }}'
+            printf -- '- 2-修复: %s\n' '${{ needs.repair.result }}'
+            printf -- '- 3-测试: %s\n' '${{ needs.test.result }}'
+            printf -- '- 4-验证: %s\n' '${{ needs.verify.result }}'
+            printf '\n运行记录: %s\n' \
+              'https://github.com/lm203688/aishield/actions/runs/${{ github.run_id }}'
+          } > /tmp/alert_body.md
+          python scripts/notify.py --level P0 --force \
+            --fingerprint self-heal-failed \
+            --title "自愈闭环失败，需人工介入" \
+            --body "$(cat /tmp/alert_body.md)"
+
+  # ── 阶段 6：闭环结算（无论成败都回写状态，供元监控消费）──────────────
+  settle:
+    name: 6-Settle State
+    needs: [probe, repair, test, verify]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Write selfheal state
+        run: |
+          python scripts/state_bus.py set selfheal '{
+            "probe": "${{ needs.probe.result }}",
+            "repair": "${{ needs.repair.result }}",
+            "test": "${{ needs.test.result }}",
+            "verify": "${{ needs.verify.result }}",
+            "degraded_detected": "${{ needs.probe.outputs.degraded }}",
+            "run_id": "${{ github.run_id }}"
+          }' --source self-heal-closed-loop
+
+      - name: Commit state
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/state/ 2>/dev/null || true
+          if ! git diff --cached --quiet; then
+            git commit -m "auto: 自愈闭环状态结算 [skip ci]" || true
+            git pull --rebase --autostash origin main || true
+            git push origin main || echo "push skipped"
+          fi

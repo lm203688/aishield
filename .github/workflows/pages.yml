@@ -1,0 +1,163 @@
+name: Pages Site (内容站构建与发布)
+
+# 触发设计说明
+# ------------
+# 内容分发流水线提交 docs/blog/ 时用的是 "[skip ci]"，因此**不能只靠 push 触发** —— 
+# 那样内容会进仓库、站点却永远不重建，形成又一处「看起来在跑、实际没送达」的死结。
+# 用 workflow_run 监听内容分发完成，它不受 [skip ci] 影响。
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - '.github/workflows/pages.yml'
+  workflow_run:
+    # 必须与目标 workflow 的 name: 字段逐字一致。
+    # GitHub 对写错的名字不会报错，只是永不触发 —— 又一种静默失效。
+    workflows: ["AIShield Channel Distribution (Content + Registry + Social)"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+  issues: write
+
+# 同一时刻只允许一次部署；新的构建取消排队中的旧构建，但不打断正在进行的部署
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  # ── 1. 构建 ──────────────────────────────────────────────────────
+  build:
+    name: 1-Build Jekyll
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Pages
+        id: pages
+        uses: actions/configure-pages@v5
+
+      - name: Build with Jekyll
+        uses: actions/jekyll-build-pages@v1
+        with:
+          source: ./docs
+          destination: ./_site
+
+      - name: Assert build output is not empty
+        run: |
+          # 构建"成功"但产物为空是 Jekyll 的经典静默失败：
+          # 配置写错时它会跳过所有文件却仍然退出 0。
+          if [ ! -f ./_site/index.html ]; then
+            echo "::error::构建产物缺少 index.html —— docs/index.md 或 _config.yml 有问题"
+            ls -R ./_site | head -50
+            exit 1
+          fi
+          COUNT=$(find ./_site -name '*.html' | wc -l)
+          echo "生成 $COUNT 个 HTML 页面"
+          if [ "$COUNT" -lt 3 ]; then
+            echo "::error::只生成了 $COUNT 个页面，远少于预期（首页+博客索引+文章）"
+            exit 1
+          fi
+          if [ ! -f ./_site/blog/index.html ]; then
+            echo "::error::缺少 blog/index.html —— 内容站主入口不可达"
+            exit 1
+          fi
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+
+  # ── 2. 部署 ──────────────────────────────────────────────────────
+  deploy:
+    name: 2-Deploy
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  # ── 3. 验证（部署≠可达）─────────────────────────────────────────
+  verify:
+    name: 3-Verify Reachable
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Poll site until reachable
+        id: poll
+        run: |
+          # Pages 部署返回成功后 CDN 仍需要时间生效，直接探测会假阴性
+          URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/blog/"
+          echo "探测 $URL"
+          OK=0
+          for i in 1 2 3 4 5 6; do
+            CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 20 "$URL" || echo 000)
+            echo "  第 $i 次: HTTP $CODE"
+            if [ "$CODE" = "200" ]; then OK=1; break; fi
+            sleep 20
+          done
+          echo "ok=$OK" >> "$GITHUB_OUTPUT"
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+          [ "$OK" = "1" ]
+
+      - name: Record state
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python scripts/state_bus.py set pages \
+            --json "{\"reachable\":${{ steps.poll.outputs.ok == '1' && 'true' || 'false' }},\"url\":\"${{ steps.poll.outputs.url }}\"}" \
+            --source pages-workflow || true
+
+      - name: Resolve alert on success
+        if: steps.poll.outputs.ok == '1'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python scripts/notify.py --resolve \
+            --fingerprint "pages-unreachable" \
+            --title "内容站已恢复可达" || true
+
+  # ── 4. 失败告警 ──────────────────────────────────────────────────
+  alert:
+    name: 4-Alert
+    needs: [build, deploy, verify]
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Notify
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NOTIFY_WEBHOOK: ${{ secrets.NOTIFY_WEBHOOK }}
+        run: |
+          printf '%s\n' \
+            "内容站构建或发布失败，读者侧入口当前不可达。" \
+            "" \
+            "build=${{ needs.build.result }}  deploy=${{ needs.deploy.result }}  verify=${{ needs.verify.result }}" \
+            "" \
+            "若 deploy 步骤报 \"Pages site not found\" 或 404，说明仓库尚未启用 Actions 部署：" \
+            "Settings → Pages → Build and deployment → Source 选择 \"GitHub Actions\"。" \
+            "" \
+            "运行链接: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            > /tmp/pages_alert.md
+          python scripts/notify.py --level P1 \
+            --title "内容站发布失败（读者侧入口不可达）" \
+            --fingerprint "pages-unreachable" \
+            --body "$(cat /tmp/pages_alert.md)" || true

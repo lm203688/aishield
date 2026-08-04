@@ -1,109 +1,233 @@
 name: AIShield Threat-Intel Feed Update
 
-# 专业数据库对接：拉取 NVD/GitHub 安全公告中的 MCP/Agent 相关漏洞 -> 自建威胁情报库
-# 原则：Research-Informed / 安全可信 / 自动化
-# 数据飞轮：情报库越全，规则更新越准，检测越强
+# 数据飞轮闭环：权威漏洞源 → 情报入库 → 转化为检测规则 → 扫描能力增强 → 验证 → 告警
+#
+# 【2026-08-04 重大修复】
+#   原版号称"专业数据库对接"，实际只调 GitHub 的 search/repositories 接口按
+#   关键词搜仓库名，拿回来的是**仓库列表而不是漏洞记录**——这不是威胁情报。
+#   更关键的是：情报入库后没有任何环节把它转成检测能力，情报库只进不出，
+#   数据飞轮缺了最重要的那一齿，采集越多越只是死数据。
+#   本版改为：
+#     1) 对接 OSV.dev / NVD / GitHub Advisory 三个真正的权威源
+#     2) 新增 intel_to_rules 环节，把漏洞自动转成扫描规则（飞轮闭合）
+#     3) 新增回归验证与高危告警（原版无任何验证与告警环节）
 
 on:
   schedule:
-    - cron: '15 7 * * 1,4'  # 每周一、周四 07:15 更新威胁情报
+    - cron: '15 7 * * 1,4'   # 每周一、周四 07:15
   workflow_dispatch:
+    inputs:
+      days:
+        description: '拉取最近 N 天的漏洞'
+        default: '30'
 
 permissions:
   contents: write
+  issues: write
 
-env:
-  THREAT_DB: data/threat_intel.json
+concurrency:
+  group: threat-intel
+  cancel-in-progress: false
 
 jobs:
-  feed:
-    name: Fetch MCP/Agent CVEs & Append to Threat DB
+  # ── 1. 采集：三个权威源 ────────────────────────────────────────────
+  fetch:
+    name: 1-Fetch Authoritative Feeds
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
+    outputs:
+      total: ${{ steps.fetch.outputs.total }}
+      high: ${{ steps.fetch.outputs.high }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
 
-      - name: Fetch & merge threat intelligence
+      - name: Fetch from OSV / NVD / GitHub Advisory
         id: fetch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NOTIFY_WEBHOOK: ${{ secrets.NOTIFY_WEBHOOK }}
         run: |
-          python - <<'PY' 2>&1 | tail -50
-          import json, os, urllib.request, urllib.parse, time
-          from datetime import datetime, timezone
+          python scripts/fetch_vuln_feeds.py --days "${{ inputs.days || 30 }}" --notify 2>&1 | tail -30
+          total=$(python -c "import json;print(json.load(open('data/threat_intel.json'))['total'])")
+          high=$(python -c "import json;d=json.load(open('data/state/intel.json'))['current'];print(d.get('high_new',0))")
+          echo "total=$total" >> "$GITHUB_OUTPUT"
+          echo "high=$high"   >> "$GITHUB_OUTPUT"
 
-          THREAT_DB = "data/threat_intel.json"
-          os.makedirs("data", exist_ok=True)
+      - name: Upload intel artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: threat-intel
+          path: |
+            data/threat_intel.json
+            data/state/intel.json
+          retention-days: 7
 
-          db = []
-          if os.path.exists(THREAT_DB):
+  # ── 2. 转化：情报 → 检测规则（飞轮的关键一齿）───────────────────────
+  to-rules:
+    name: 2-Convert Intel to Detection Rules
+    needs: fetch
+    runs-on: ubuntu-latest
+    outputs:
+      rules: ${{ steps.conv.outputs.rules }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: threat-intel
+          path: /tmp/intel
+
+      - name: Restore fetched intel
+        run: |
+          cp /tmp/intel/threat_intel.json data/threat_intel.json 2>/dev/null || true
+          mkdir -p data/state
+          cp /tmp/intel/intel.json data/state/intel.json 2>/dev/null || true
+
+      - name: Generate detection rules from intel
+        id: conv
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python scripts/intel_to_rules.py --notify 2>&1 | tail -30
+          rules=$(python -c "import json;print(json.load(open('data/generated_rules.json'))['total_rules'])")
+          echo "rules=$rules" >> "$GITHUB_OUTPUT"
+
+      - name: Upload rules artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: generated-rules
+          path: |
+            data/generated_rules.json
+            data/threat_intel.json
+            data/state/
+          retention-days: 7
+
+  # ── 3. 验证：新规则不得破坏扫描器（原版完全缺失这一环）──────────────
+  verify:
+    name: 3-Verify Scanner Integrity
+    needs: to-rules
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: generated-rules
+          path: /tmp/rules
+
+      - name: Restore generated rules
+        run: |
+          cp /tmp/rules/generated_rules.json data/generated_rules.json 2>/dev/null || true
+          cp /tmp/rules/threat_intel.json    data/threat_intel.json    2>/dev/null || true
+          mkdir -p data/state && cp -r /tmp/rules/state/. data/state/ 2>/dev/null || true
+
+      - name: Validate generated regex patterns compile
+        run: |
+          python - <<'PY'
+          import json, re, sys
+          d = json.load(open("data/generated_rules.json", encoding="utf-8"))
+          bad = []
+          for p in (d.get("pattern_rules") or {}):
               try:
-                  db = json.load(open(THREAT_DB, encoding="utf-8"))
-                  if isinstance(db, dict): db = db.get("intel", [])
-              except Exception:
-                  db = []
-
-          new = []
-
-          # 1) GitHub search API: recent AI/MCP security advisories & CVE keywork
-          def gh_search(q, per_page=10):
-              url = "https://api.github.com/search/repositories?sort=updated&q=" + urllib.parse.quote(q)
-              req = urllib.request.Request(url, headers={
-                  "Accept": "application/vnd.github+json",
-                  "User-Agent": "aishield-intel",
-              })
-              try:
-                  with urllib.request.urlopen(req, timeout=30) as r:
-                      return json.load(r).get("items", [])
-              except Exception as e:
-                  print("!! gh search failed:", e)
-                  return []
-
-          kws = ["MCP server security CVE", "prompt injection vulnerability", "AI agent supply chain"]
-          for kw in kws:
-              for it in gh_search(kw):
-                  new.append({
-                      "source": "github",
-                      "type": "keyword:" + kw,
-                      "title": it.get("full_name", ""),
-                      "url": it.get("html_url", ""),
-                      "desc": (it.get("description") or "")[:200],
-                      "updated": it.get("updated_at", ""),
-                      "fetched": datetime.now(timezone.utc).isoformat(),
-                  })
-
-          # 2) Merge: dedupe by url
-          seen = {d.get("url") for d in db}
-          added = 0
-          for it in new:
-              if it.get("url") and it["url"] not in seen:
-                  db.append(it)
-                  seen.add(it["url"])
-                  added += 1
-
-          db = db[-500:]  # 控制库规模
-          with open(THREAT_DB, "w", encoding="utf-8") as f:
-              json.dump({"intel": db, "updated": datetime.now(timezone.utc).isoformat()}, f,
-                        ensure_ascii=False, indent=2)
-
-          print(f"Threat DB: {len(db)} entries total, {added} new this cycle.")
+                  re.compile(p)
+              except re.error as e:
+                  bad.append((p, str(e)))
+          if bad:
+              print("非法正则，拒绝合入：")
+              for p, e in bad:
+                  print(f"  {p}  -> {e}")
+              sys.exit(1)
+          print(f"全部 {len(d.get('pattern_rules') or {})} 条生成规则语法合法")
           PY
 
-      - name: Commit threat intel update
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run full test suite (blocking)
         run: |
-          git config user.name "github-actions[full]"
-          git config user.email "github-actions[full]@users.noreply.github.com"
-          git add data/threat_intel.json
+          # 新规则若引发扫描器回归，此处即阻断，绝不带病入库
+          python tests/run_all.py
+
+      - name: Confirm rules actually loaded by scanner
+        run: |
+          python - <<'PY'
+          from scanner import rules
+          meta = rules.get_generated_rules_meta()
+          n = len(rules.GENERATED_RULES)
+          print(f"扫描器已载入情报驱动规则 {n} 条，总规则 {rules.get_rule_count()} 条")
+          print(f"情报来源条数: {meta.get('source_intel_count')}")
+          assert n > 0, "情报规则未被扫描器加载——飞轮断裂"
+          PY
+
+  # ── 4. 入库：验证通过才提交 ─────────────────────────────────────────
+  commit:
+    name: 4-Commit Intel & Rules
+    needs: [fetch, to-rules, verify]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: generated-rules
+          path: /tmp/rules
+
+      - name: Restore and commit
+        run: |
+          cp /tmp/rules/generated_rules.json data/generated_rules.json 2>/dev/null || true
+          cp /tmp/rules/threat_intel.json    data/threat_intel.json    2>/dev/null || true
+          mkdir -p data/state && cp -r /tmp/rules/state/. data/state/ 2>/dev/null || true
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/threat_intel.json data/generated_rules.json data/state/ 2>/dev/null || true
           if ! git diff --cached --quiet; then
-            git commit -m "auto: 更新威胁情报库 [skip ci]" || true
+            git commit -m "auto: 威胁情报入库 + 检测规则更新（情报 ${{ needs.fetch.outputs.total }} 条 / 规则 ${{ needs.to-rules.outputs.rules }} 条）[skip ci]" || true
+            git pull --rebase --autostash origin main || true
             git push origin main || echo "push skipped"
           else
-            echo "No new intel this cycle"
+            echo "本周期无情报与规则变化"
           fi
+
+  # ── 5. 告警：任一环节失败必须有人知道（原版无告警环节）────────────────
+  alert:
+    name: 5-Alert on Failure
+    needs: [fetch, to-rules, verify, commit]
+    if: always() && contains(needs.*.result, 'failure')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Escalate through notification bus
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NOTIFY_WEBHOOK: ${{ secrets.NOTIFY_WEBHOOK }}
+        run: |
+          {
+            printf '威胁情报闭环执行失败，数据飞轮已停转。\n\n'
+            printf -- '- 1-采集: %s\n' '${{ needs.fetch.result }}'
+            printf -- '- 2-转规则: %s\n' '${{ needs.to-rules.result }}'
+            printf -- '- 3-验证: %s\n' '${{ needs.verify.result }}'
+            printf -- '- 4-入库: %s\n' '${{ needs.commit.result }}'
+            printf '\n运行记录: %s\n' \
+              'https://github.com/lm203688/aishield/actions/runs/${{ github.run_id }}'
+          } > /tmp/body.md
+          python scripts/notify.py --level P1 --force \
+            --fingerprint threat-intel-failed \
+            --title "威胁情报闭环失败" \
+            --body "$(cat /tmp/body.md)"

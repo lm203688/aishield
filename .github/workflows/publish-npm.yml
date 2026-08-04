@@ -1,53 +1,289 @@
 name: Publish to npm
 
+# 为什么 npm 上一直没有这个包
+# --------------------------
+# 旧版本只在 `release: created` 时触发，而仓库从未创建过任何 release，
+# 于是这条流水线「配置完好、一次未跑」—— 与 self-heal 静默死亡 48 天同类。
+# 现补上 tag 推送触发：`git tag v4.2.0 && git push origin v4.2.0` 即可发版。
+
 on:
   release:
     types: [created]
+  push:
+    tags:
+      - 'v*'
   workflow_dispatch:
     inputs:
-      tag:
-        description: 'NPM tag (latest or beta)'
+      npm_tag:
+        description: 'npm dist-tag (latest / beta)'
         required: false
         default: 'latest'
+      dry_run:
+        description: '只演练不真发布'
+        type: boolean
+        required: false
+        default: false
+
+permissions:
+  contents: read
+  id-token: write
+  issues: write
+
+concurrency:
+  group: npm-publish
+  cancel-in-progress: false
 
 jobs:
-  publish:
+  # ── 1. 发布前门禁 ────────────────────────────────────────────────
+  preflight:
+    name: 1-Preflight
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write
+    outputs:
+      version: ${{ steps.meta.outputs.version }}
+      pkg: ${{ steps.meta.outputs.pkg }}
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        registry-url: 'https://registry.npmjs.org'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
 
-    - name: Install dependencies
-      working-directory: mcp-server
-      run: npm ci
+      - name: Assert NPM_TOKEN exists
+        run: |
+          # 缺 token 时 npm publish 会报一句极难懂的 ENEEDAUTH，
+          # 在这里提前拦下并说清楚要做什么。
+          if [ -z "${{ secrets.NPM_TOKEN }}" ]; then
+            echo "::error::缺少 NPM_TOKEN。到 npmjs.com → Access Tokens 生成 Automation token，"
+            echo "::error::再到本仓库 Settings → Secrets and variables → Actions 添加 NPM_TOKEN。"
+            exit 1
+          fi
+          echo "NPM_TOKEN 已配置"
 
-    - name: Build
-      working-directory: mcp-server
-      run: npm run build
+      - name: Version consistency gate
+        run: |
+          # 六处版本声明必须一致，否则 npm 上的版本会和 mcp.json / registry 配置对不上，
+          # 用户报障时无法确定跑的是哪份代码。
+          python scripts/sync_version.py --check
 
-    - name: Verify dist
-      working-directory: mcp-server
-      run: |
-        test -f dist/index.js || { echo "dist/index.js missing"; exit 1; }
-        test -f dist/index.d.ts || { echo "dist/index.d.ts missing"; exit 1; }
-        echo "Build output verified"
+      - name: Read package metadata
+        id: meta
+        run: |
+          VERSION=$(node -p "require('./mcp-server/package.json').version")
+          PKG=$(node -p "require('./mcp-server/package.json').name")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "pkg=$PKG" >> "$GITHUB_OUTPUT"
+          echo "准备发布 $PKG@$VERSION"
 
-    - name: Publish to npm
-      working-directory: mcp-server
-      run: npm publish --access public --provenance
-      env:
-        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Assert tag matches package version
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          TAG="${GITHUB_REF#refs/tags/v}"
+          VERSION="${{ steps.meta.outputs.version }}"
+          if [ "$TAG" != "$VERSION" ]; then
+            echo "::error::tag v$TAG 与 package.json 版本 $VERSION 不符。"
+            echo "::error::先运行 python scripts/sync_version.py --set $TAG 再打 tag。"
+            exit 1
+          fi
+          echo "tag 与版本一致：$VERSION"
 
-    - name: Verify publication
-      run: |
-        sleep 10
-        npm view @aishield/mcp-server version || echo "Package may take a few minutes to appear"
+      - name: Assert version not already published
+        run: |
+          PKG="${{ steps.meta.outputs.pkg }}"
+          VERSION="${{ steps.meta.outputs.version }}"
+          CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+            "https://registry.npmjs.org/${PKG/\//%2F}/$VERSION")
+          if [ "$CODE" = "200" ]; then
+            echo "::error::$PKG@$VERSION 已存在于 npm，无法重复发布。请先升版本。"
+            exit 1
+          fi
+          echo "版本可用（HTTP $CODE）"
+
+  # ── 2. 构建与测试 ────────────────────────────────────────────────
+  build:
+    name: 2-Build & Test
+    needs: preflight
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install dependencies
+        working-directory: mcp-server
+        run: npm ci
+
+      - name: Build
+        working-directory: mcp-server
+        run: npm run build
+
+      - name: Verify build output
+        working-directory: mcp-server
+        run: |
+          test -f dist/index.js   || { echo "::error::dist/index.js 缺失"; exit 1; }
+          test -f dist/index.d.ts || { echo "::error::dist/index.d.ts 缺失"; exit 1; }
+          # 产物存在还不够，得能被 Node 真正加载
+          node -e "require('./dist/index.js')" 2>/dev/null \
+            || node --input-type=module -e "import('./dist/index.js')" \
+            || { echo "::error::dist/index.js 无法被 Node 加载"; exit 1; }
+          echo "构建产物可加载"
+
+      - name: Run scanner test suite
+        run: python tests/run_all.py
+
+      - name: Pack and inspect tarball
+        working-directory: mcp-server
+        run: |
+          # 发布前看清楚到底会打进去什么，避免把 node_modules 或密钥文件发上去
+          npm pack --dry-run 2>&1 | tail -40
+          if npm pack --dry-run 2>&1 | grep -qE "\.env|node_modules/|\.git/"; then
+            echo "::error::打包内容包含敏感或冗余文件，检查 .npmignore / files 字段"
+            exit 1
+          fi
+
+      - name: Upload build output
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-dist
+          path: mcp-server/dist/
+          retention-days: 1
+
+  # ── 3. 发布 ──────────────────────────────────────────────────────
+  publish:
+    name: 3-Publish
+    needs: [preflight, build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        working-directory: mcp-server
+        run: npm ci
+
+      - name: Restore build output
+        uses: actions/download-artifact@v4
+        with:
+          name: npm-dist
+          path: mcp-server/dist/
+
+      - name: Publish
+        working-directory: mcp-server
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          TAG="${{ github.event.inputs.npm_tag || 'latest' }}"
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            echo "演练模式，不真正发布"
+            npm publish --access public --dry-run
+            exit 0
+          fi
+          set +e
+          OUT=$(npm publish --access public --provenance --tag "$TAG" 2>&1)
+          CODE=$?
+          set -e
+          echo "$OUT"
+          if [ $CODE -ne 0 ]; then
+            # 首次发布 scoped 包时最常见的失败是 scope 组织不存在
+            if echo "$OUT" | grep -qiE "403|Forbidden|scope|not found"; then
+              echo "::error::发布被拒。若包名为 @scope/name，需先在 npmjs.com 创建同名组织（免费），"
+              echo "::error::或改用未加 scope 的包名后重试。"
+            fi
+            exit $CODE
+          fi
+
+  # ── 4. 发布后验证（发布≠可安装）─────────────────────────────────
+  verify:
+    name: 4-Verify Installable
+    needs: [preflight, publish]
+    if: github.event.inputs.dry_run != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Poll npm registry
+        id: poll
+        run: |
+          # 旧版本这里写的是 `npm view ... || echo "可能需要几分钟"`，
+          # 等于发布失败也判绿 —— 验证步骤不允许吞掉失败。
+          PKG="${{ needs.preflight.outputs.pkg }}"
+          VERSION="${{ needs.preflight.outputs.version }}"
+          OK=0
+          for i in 1 2 3 4 5 6; do
+            CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+              "https://registry.npmjs.org/${PKG/\//%2F}/$VERSION")
+            echo "  第 $i 次: HTTP $CODE"
+            if [ "$CODE" = "200" ]; then OK=1; break; fi
+            sleep 20
+          done
+          echo "ok=$OK" >> "$GITHUB_OUTPUT"
+          [ "$OK" = "1" ] || { echo "::error::$PKG@$VERSION 发布后 2 分钟仍不可获取"; exit 1; }
+
+      - name: Smoke test via npx
+        run: |
+          PKG="${{ needs.preflight.outputs.pkg }}"
+          VERSION="${{ needs.preflight.outputs.version }}"
+          # 能被 install 才算真正抵达用户
+          npm install --no-save "$PKG@$VERSION"
+          echo "安装成功"
+
+      - name: Record state & refresh registry position
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python scripts/state_bus.py set npm \
+            --json "{\"published\":${{ steps.poll.outputs.ok == '1' && 'true' || 'false' }},\"version\":\"${{ needs.preflight.outputs.version }}\",\"package\":\"${{ needs.preflight.outputs.pkg }}\"}" \
+            --source publish-npm || true
+          python scripts/registry_tracker.py || true
+
+      - name: Resolve alert
+        if: steps.poll.outputs.ok == '1'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python scripts/notify.py --resolve \
+            --fingerprint "npm-publish-fail" \
+            --title "npm 包已成功发布" || true
+
+  # ── 5. 失败告警 ──────────────────────────────────────────────────
+  alert:
+    name: 5-Alert
+    needs: [preflight, build, publish, verify]
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Notify
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NOTIFY_WEBHOOK: ${{ secrets.NOTIFY_WEBHOOK }}
+        run: |
+          printf '%s\n' \
+            "npm 发布流水线失败，包未能抵达用户侧。" \
+            "" \
+            "preflight=${{ needs.preflight.result }}  build=${{ needs.build.result }}  publish=${{ needs.publish.result }}  verify=${{ needs.verify.result }}" \
+            "" \
+            "运行链接: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            > /tmp/npm_alert.md
+          python scripts/notify.py --level P1 \
+            --title "npm 发布失败" \
+            --fingerprint "npm-publish-fail" \
+            --body "$(cat /tmp/npm_alert.md)" || true

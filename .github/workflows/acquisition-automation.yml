@@ -3,9 +3,9 @@ name: Acquisition Automation
 on:
   schedule:
     # 每周一 08:00 生成内容营销素材
-    - cron: '0 0 * * 1'
+    - cron: '12 1 * * 1'
     # 每天 09:00 检查获客指标
-    - cron: '0 1 * * *'
+    - cron: '42 1 * * *'
   workflow_dispatch:
 
 jobs:

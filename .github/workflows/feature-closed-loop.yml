@@ -1,80 +1,145 @@
 name: AIShield Intelligence-to-Feature Closed-Loop
 
-# 自动化闭环：情报/用户反馈采集 -> 分析 -> 采纳 -> 测试 -> 部署
-# 目标：将用户 Issue 与外部情报转化为产品迭代，无需人工 pass
-# 原则：跟踪驱动（Research-Informed）与 用户反馈驱动迭代
+# 自动化闭环：多源反馈采集 -> 聚合定级 -> 采纳写入 ROADMAP -> 建跟踪 Issue -> 测试 -> 落库
+# 修复记录 F6：原版本 update-roadmap 只 echo 不 commit，闭环断在"采纳"环节
+# 现版本：feedback_aggregator.py 真实写入 ROADMAP.md + data/state/feature.json 并 commit
 
 on:
   schedule:
-    - cron: '40 3 * * 1'   # 每周一 03:40 自动执行情报->功能采纳闭环
+    - cron: '20 8 * * 1'   # 每周一 03:40
   issues:
     types: [opened, reopened]
   workflow_dispatch:
+    inputs:
+      dry_run:
+        description: '仅预览不写入'
+        type: boolean
+        default: false
 
 permissions:
   contents: write
-  pull-requests: write
-  issues: read
+  issues: write
 
 jobs:
-  triage:
-    name: Collect New Feedback & Features
+  aggregate:
+    name: Aggregate Multi-Source Feedback
     runs-on: ubuntu-latest
     outputs:
-      count: ${{ steps.triage.outputs.count }}
-    steps:
-      - name: Fetch recent open issues
-        id: triage
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const { data: issues } = await github.rest.issues.listForRepo({
-              owner: 'lm203688', repo: 'aishield',
-              state: 'open', per_page: 30
-            });
-            const actionable = issues.filter(i =>
-              i.labels.some(l => ['enhancement','bug-auto','feature'].includes(l.name)) ||
-              /\[auto\]|自动|feature|enhancement|需求/.test((i.title || '') + (i.body || ''))
-            );
-            console.log(`Open issues: ${issues.length}, actionable: ${actionable.length}`);
-            require('fs').writeFileSync('/tmp/actionable.json', JSON.stringify(actionable.map(i => ({
-              number: i.number, title: i.title, labels: i.labels.map(l => l.name)
-            })), null, 2));
-            core.setOutput('count', String(actionable.length));
-
-  update-roadmap:
-    name: Adopt into ROADMAP
-    needs: triage
-    runs-on: ubuntu-latest
+      count: ${{ steps.agg.outputs.count }}
+      p0p1: ${{ steps.agg.outputs.p0p1 }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: dev
           fetch-depth: 0
-      - name: Append actionable items to ROADMAP (auto-adopt)
-        run: |
-          if [ ! -s ROADMAP.md ]; then echo "no roadmap"; exit 0; fi
-          echo "" >> ROADMAP.md
-          echo "## 自动采纳项（来自用户反馈闭环）" >> ROADMAP.md
-          echo "> 由 feature-closed-loop workflow 于 $(date +%Y-%m-%d) 自动追加" >> ROADMAP.md
-        env:
-          PATH_FOR_DEMO: "1"
 
-  dispatch-deploy:
-    name: Test & Trigger Deploy Pipeline
-    needs: update-roadmap
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Aggregate feedback (4 sources)
+        id: agg
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_OWNER: lm203688
+          GH_REPO: aishield
+        run: |
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            python scripts/feedback_aggregator.py --dry-run | tee /tmp/agg.log
+          else
+            python scripts/feedback_aggregator.py --adopt | tee /tmp/agg.log
+          fi
+          COUNT=$(python -c "import json;d=json.load(open('data/state/feature.json'));print(d['current'].get('adopted',0))" 2>/dev/null || echo 0)
+          P0P1=$(python -c "import json;d=json.load(open('data/state/feature.json'));print(d['current'].get('p1_count',0))" 2>/dev/null || echo 0)
+          echo "count=$COUNT" >> $GITHUB_OUTPUT
+          echo "p0p1=$P0P1" >> $GITHUB_OUTPUT
+          echo "聚合结果: total=$COUNT p0p1=$P0P1"
+
+      - name: Upload aggregation artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: feedback-state
+          path: |
+            data/state/feature.json
+            ROADMAP.md
+          retention-days: 7
+
+  verify:
+    name: Verify Repo Still Green
+    needs: aggregate
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Run full test suite
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Compile & test
         run: |
-          python -m py_compile api/server.py eco/*.py scanner/*.py
+          python -m py_compile api/server.py scanner/*.py scripts/*.py
           python tests/run_all.py
-      - name: Confirm any pending PRs deploy via deploy-server (push triggers)
+      - name: Validate workflow syntax
         run: |
-          echo "Feature loop done. Any merged changes deploy automatically via Deploy to Production Server workflow."
+          pip install pyyaml
+          python scripts/validate_workflows.py
+
+  settle:
+    name: Commit Adoption Result
+    needs: [aggregate, verify]
+    if: needs.aggregate.result == 'success' && needs.verify.result == 'success' && github.event.inputs.dry_run != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Download aggregation artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: feedback-state
+          path: /tmp/agg
+
+      - name: Apply and commit
+        run: |
+          cp /tmp/agg/feature.json data/state/feature.json 2>/dev/null || true
+          cp /tmp/agg/ROADMAP.md ROADMAP.md 2>/dev/null || true
+          git config user.name  "aishield-bot"
+          git config user.email "bot@aishield.local"
+          git add ROADMAP.md data/state/feature.json
+          if git diff --cached --quiet; then
+            echo "无变更，跳过提交"
+          else
+            git commit -m "chore(feature-loop): 自动采纳 ${{ needs.aggregate.outputs.count }} 项反馈 (P0/P1: ${{ needs.aggregate.outputs.p0p1 }})"
+            git push
+            echo "已提交采纳结果"
+          fi
+
+  alert:
+    name: Alert on Loop Failure
+    needs: [aggregate, verify, settle]
+    if: always() && (needs.aggregate.result == 'failure' || needs.verify.result == 'failure' || needs.settle.result == 'failure')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Notify
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NOTIFY_WEBHOOK: ${{ secrets.NOTIFY_WEBHOOK }}
+          GH_OWNER: lm203688
+          GH_REPO: aishield
+        run: |
+          {
+            printf '%s\n' "功能迭代闭环执行失败，本周反馈未能采纳进 ROADMAP。"
+            printf '%s\n' ""
+            printf '%s\n' "- aggregate: ${{ needs.aggregate.result }}"
+            printf '%s\n' "- verify: ${{ needs.verify.result }}"
+            printf '%s\n' "- settle: ${{ needs.settle.result }}"
+            printf '%s\n' ""
+            printf '%s\n' "运行链接: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          } > /tmp/loop_fail.md
+          python scripts/notify.py --level P1 \
+            --title "功能闭环执行失败" \
+            --fingerprint "feature-loop-fail" \
+            --body "$(cat /tmp/loop_fail.md)"

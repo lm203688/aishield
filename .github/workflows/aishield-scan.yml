@@ -17,7 +17,7 @@ on:
           - skill
           - gpt
   schedule:
-    - cron: '0 0 * * 1'  # 每周一自动扫描
+    - cron: '34 2 * * 1'  # 每周一自动扫描
   pull_request:
     paths:
       - 'scanner/**'
