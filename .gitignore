@@ -85,3 +85,8 @@ AIShield_完整备案包.zip
 .env
 .env.local
 .env.*.local
+
+# =====================
+# WorkBuddy (personal memory + private skills)
+# =====================
+.workbuddy/

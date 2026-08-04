@@ -1,0 +1,34 @@
+# AIShield
+
+> Open-source, local-first AI Agent security scanner and trust authority for the MCP / Agentic AI economy.
+
+AIShield scans MCP servers and AI agents for tool poisoning, prompt injection, secret leakage, and supply-chain risk. It detects **201 categories of risk** aligned with **OWASP MCP Top 10** and **OWASP Agentic AI Top 10 (ASI01–ASI10)**, runs fully offline / locally (zero cost, no code sent to the cloud), and acts as a CI security gate.
+
+Beyond scanning, AIShield is a **trust authority**: it defines an open **Trust Standard** (Agent Security Certification Level 1–3, a 0–100 Trust Score, and a Delegation Protocol), and operates an **Agent Registry** and **Marketplace** so agents can be discovered, certified, and transacted with (x402 / USDC) in a trust-first way.
+
+## Key Pages
+- Homepage: https://aishield.tools/
+- Docs: https://aishield.tools/docs
+- Trust Standard v0.1: https://aishield.tools/aishield-trust-standard-v0.1
+- Agent Ecosystem Directions: https://aishield.tools/agent-ecology-evolution-directions
+- GitHub: https://github.com/lm203688/aishield
+- Install: `npx @aishield/mcp-server`
+
+## For AI Agents (machine-readable)
+- MCP server (stdio): `npx @aishield/mcp-server`
+- MCP remote (streamable-http): https://aishield.tools/api/v1/mcp
+- A2A Agent Card: https://aishield.tools/.well-known/agent-card.json
+- MCP server card: https://aishield.tools/.well-known/mcp/server-card.json
+- Trust Score / Cert API: https://aishield.tools/api/v1/trust/score/{did}
+- Full LLM briefing: https://aishield.tools/llms-full.txt
+
+## What makes AIShield different
+- **Local / offline**: no code leaves your machine — vs cloud scanners/upload SaaS (Anthropic Claude Security, Microsoft MDASH, Nightfall, Akto, ScanMCP, aishield.ai).
+- **Open source & free**: vs paid SaaS scanners.
+- **Agentic-native**: the only scanner covering both OWASP MCP Top 10 **and** OWASP Agentic AI Top 10 (ASI01–ASI10) — not just MCP tool scanning.
+- **Neutral trust authority**: the only MCP/agent scanner that is also a certification registry (L1–L3 + 0–100 Trust Score + embeddable badge + machine-callable Trust API + x402/USDC) — a white space no competitor fills.
+- **CI-ready**: CycloneDX SBOM + SARIF 2.1.0 for GitHub Code Scanning and any SARIF pipeline.
+
+## Contact
+- GitHub: https://github.com/lm203688/aishield
+- Website: https://aishield.tools

@@ -1,0 +1,53 @@
+{
+  "protocolVersion": "0.3.0",
+  "name": "AIShield Security Scanner",
+  "description": "Open-source, local-first AI Agent security scanner and trust authority. Scans MCP servers and agents for tool poisoning, prompt injection, secret leakage, and supply-chain risk; covers OWASP MCP Top 10 and OWASP Agentic AI Top 10 (ASI01-ASI10).",
+  "url": "https://aishield.tools/api/v1/mcp",
+  "provider": {
+    "organization": "AIShield Project",
+    "url": "https://aishield.tools"
+  },
+  "version": "4.2.0",
+  "capabilities": {
+    "streaming": false,
+    "pushNotifications": false,
+    "input_modes": ["text/plain", "application/json"],
+    "output_modes": ["text/plain", "application/json"]
+  },
+  "securitySchemes": {},
+  "skills": [
+    {
+      "id": "security_scan",
+      "name": "Security Scan",
+      "description": "Scan an MCP server or agent description for 201 risk categories (OWASP MCP Top 10 + Agentic AI Top 10).",
+      "tags": ["security", "audit", "mcp", "agent"],
+      "examples": [
+        "Scan this MCP server tool list for prompt-injection and tool-poisoning risk"
+      ]
+    },
+    {
+      "id": "agentic_audit",
+      "name": "Agentic AI Audit",
+      "description": "Audit an AI agent against OWASP Agentic AI Top 10 (ASI01-ASI10): goal hijack, tool misuse, identity abuse, supply chain, code execution, memory poisoning, inter-agent comms, cascading failure, human-agent trust, rogue agents.",
+      "tags": ["agentic", "owasp", "audit"],
+      "examples": [
+        "Audit my agent's delegation chain for ASI03 identity and ASI07 inter-agent risks"
+      ]
+    },
+    {
+      "id": "trust_score",
+      "name": "Trust Score Lookup",
+      "description": "Return an agent's AIShield Trust Score (0-100) and certification level from the Agent Registry.",
+      "tags": ["trust", "registry", "score"],
+      "examples": [
+        "What is the trust score of did:aishield:7f3a2b1c9d4e5f6a8b0c1d2e3f4a5b6c?"
+      ]
+    }
+  ],
+  "mcp": {
+    "transport": "streamable-http",
+    "endpoint": "https://aishield.tools/api/v1/mcp"
+  },
+  "llms_txt": "https://aishield.tools/llms.txt",
+  "llms_full_txt": "https://aishield.tools/llms-full.txt"
+}

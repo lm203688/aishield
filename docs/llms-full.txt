@@ -1,0 +1,104 @@
+# AIShield — Full LLM Briefing
+
+*Canonical: https://aishield.tools · GitHub: https://github.com/lm203688/aishield · Version: 4.2.0*
+
+AIShield is an open-source, local-first **AI Agent security scanner and trust authority** for the MCP / Agentic AI economy. This file is the long-form, machine-readable briefing for LLMs and agents (paired with the short `/llms.txt`).
+
+---
+
+## 1. What AIShield does
+
+AIShield protects AI agents and the MCP (Model Context Protocol) tools they call. It detects:
+
+- **Tool poisoning** — malicious or rug-pulled tool descriptions, hidden instructions in tool metadata.
+- **Prompt injection** — goal-hijack patterns in tool results, fetched web content, and agent inputs.
+- **Secret leakage** — API keys, tokens, credentials in tool arguments, outputs, or environment.
+- **Supply-chain risk** — compromised MCP servers, malicious npm/PyPI packages, dependencies.
+- **Agentic AI risks (OWASP Agentic AI Top 10, ASI01–ASI10)** — goal hijack, tool misuse, identity & privilege abuse, supply chain, unexpected code execution, memory/context poisoning, insecure inter-agent communication, cascading failures, human-agent trust exploitation, rogue agents.
+
+**Scale:** 201 detection rule categories — 110 OWASP MCP Top 10 rules, 60 OWASP Agentic AI Top 10 (ASI01–ASI10) rules, and 31 Chinese prompt-injection rules. Rule base tracks OWASP MCP Top 10 and OWASP Agentic AI Top 10.
+
+**Deployment:** fully local / offline. No source code is uploaded to any cloud. Detection runs on the developer's machine or in CI.
+
+---
+
+## 2. How to use AIShield
+
+- **MCP server (stdio):** `npx @aishield/mcp-server` — connects to any MCP-capable agent (Claude, Cursor, etc.).
+- **MCP remote (streamable-http):** `https://aishield.tools/api/v1/mcp`
+- **REST API:** `https://aishield.tools/api/v1/health`
+- **A2A Agent Card:** `https://aishield.tools/.well-known/agent-card.json`
+- **CI gate:** fail the build on risk above a threshold.
+
+---
+
+## 3. The Trust Standard (AIShield Trust Standard v0.1)
+
+AIShield is more than a scanner — it is a **trust authority** for the agent economy. The open standard defines three sub-standards:
+
+### Sub-standard A — Agent Security Certification
+Three levels:
+- **Level 1 (Basic):** automatic scan, score ≥ 60/100, 90-day cert.
+- **Level 2 (Verified):** automatic scan + human review, score ≥ 80/100, 180-day cert.
+- **Level 3 (Enterprise):** Level 2 + on-chain anchoring + continuous monitoring, SLA ≥ 99.5%.
+
+Certificates are published at each agent's `/.well-known/aishield-cert.json` and verifiable via `GET /aishield-trust/v1/cert/{cert_id}`.
+
+### Sub-standard B — Agent Trust Score
+A 0–100 score from five weighted dimensions: Security (30%), Reliability (25%), Reputation (25%), Activity (10%), Identity (10%). Queryable at `GET /aishield-trust/v1/score/{did}`. Includes anti-gaming (new-agent caps, rating-weighting, collusion detection) and an appeal process.
+
+### Sub-standard C — Agent Delegation Protocol
+An extension of Google's A2A Task model adding: escrow (USDC), trust requirements, security requirements, dispute resolution, and completion receipts. Enables safe agent-to-agent task delegation.
+
+---
+
+## 4. Service-system modules already built (data + spec layer)
+
+- **Agent Registry** (`api/data/agent_registry.json`): agents with A2A cards, skills, reputation scores, DID-style identity, status.
+- **Marketplace** (`api/data/marketplace.json`): listed tools, badges (gold/silver/bronze), webhook events (`tool.certified`, `tool.scanned`).
+- **Billing** (`api/data/billing.json`): accounts, plans (free/pro), monthly usage, payment history. (Agent-native x402/USDC billing is implemented in `eco/x402.py`.)
+- **Certifications** (`api/data/certifications.json`): issued cert records.
+- **Ecosystem evolution docs:** delegation-chain visualization & verification (P0), agent-culture integrity / drift detection (P1).
+
+---
+
+## 5. Competitive positioning (2026-08)
+
+The MCP/agent-security category is now crowded (mid-2026): open-source static scanners (Cisco mcp-scanner, Invariant mcp-scan, Snyk agent-scan, agent-security-scanner-mcp, mcp-audit), cloud SaaS (Nightfall, Akto, ScanMCP, aishield.ai), and enterprise gateways (Palo Alto Prisma AIRS AI Gateway, Cyera, Teleport, MCP Guardian). AIShield's defensible edges:
+
+| Dimension | AIShield | Cloud SaaS (Nightfall/Akto/ScanMCP/aishield.ai) | MCP-only scanners (mcp-scan/mcp-audit/Cisco) | Enterprise gateways (Palo Alto/Cyera) |
+|---|---|---|---|---|
+| Runs locally / offline (no code to cloud) | Yes | No | Yes | No (runtime proxy) |
+| Open source & free | Yes | No | Yes / Partial | No |
+| OWASP MCP Top 10 | Yes (110) | Partial | Yes | N/A (runtime) |
+| OWASP Agentic AI Top 10 (ASI01–10) | Yes (60) | Partial | No | Partial |
+| Neutral trust authority (cert L1–3 + score + badge + API + x402) | Yes | No | No | No |
+| CycloneDX SBOM + SARIF 2.1.0 | Yes | Varies | Partial | No |
+| Agent-native & GEO (llms.txt / Agent Card / A2A) | Yes | Rare | Rare | No |
+
+---
+
+## 6. Status & roadmap (2026-08)
+
+**Shipped in v4.2.0 (all live in code):**
+- Agentic AI Top 10 detection module (60 ASI rules on the 201-rule base).
+- Trust Standard productized: live cert + score API (`/api/v1/trust/*`), auto-issued certs, SVG badges, Agent Registry + Marketplace data.
+- Local-first architecture: zero third-party dependencies, rule engine fully offline; optional remote LLM for semantic analysis only.
+- SBOM (CycloneDX 1.5) + SARIF 2.1.0 export (`/api/v1/export/sbom`, `/api/v1/export/sarif`).
+- x402 / USDC agent-native billing rail (`eco/x402.py`).
+- Multi-channel distribution: Claude Skill, GPT Store manifest, Hugging Face card, MCP Hub entry.
+
+**Next (from 2026-08 competitive intelligence):**
+- Runtime governance hooks (ASI08/ASI10): kill-switch + behavior monitoring spec for the Agent Registry.
+- Supply-chain package-hallucination detection (mirror agent-security-scanner-mcp's 4.3M-package check) as a rules-layer hook.
+- Neutral trust-authority narrative amplification + GEO/agent-native discovery (llms.txt, Agent Card, A2A).
+- Independent benchmark + first-to-market "Agentic AI Top 10 certified" claim.
+
+---
+
+## 7. Contact & references
+- Website: https://aishield.tools
+- GitHub: https://github.com/lm203688/aishield
+- Trust Standard: https://aishield.tools/aishield-trust-standard-v0.1
+- Agent Ecosystem Directions: https://aishield.tools/agent-ecology-evolution-directions
+- Short LLM briefing: https://aishield.tools/llms.txt
