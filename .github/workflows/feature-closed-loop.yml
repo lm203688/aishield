@@ -109,7 +109,8 @@ jobs:
             echo "无变更，跳过提交"
           else
             git commit -m "chore(feature-loop): 自动采纳 ${{ needs.aggregate.outputs.count }} 项反馈 (P0/P1: ${{ needs.aggregate.outputs.p0p1 }})"
-            git push
+            git pull --rebase --autostash origin main || true
+            git push origin main
             echo "已提交采纳结果"
           fi
 
