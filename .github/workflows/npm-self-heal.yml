@@ -9,7 +9,7 @@ name: npm self-heal
 
 on:
   schedule:
-    - cron: '23 */6 * * *'
+    - cron: '*/20 * * * *'  # 加速期每20分钟（2026-08-31 回滚至 '23 */6 * * *'）
   workflow_dispatch:
 
 permissions:
