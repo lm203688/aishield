@@ -342,6 +342,27 @@ class AIShieldHandler(BaseHTTPRequestHandler):
                 self.wfile.write(body)
                 _record_usage("demo-delegation-chain", self.client_address[0])
                 return
+
+        # ── 战略补齐前端 (F4 攻击图 / F5 Fleet / Phase3 企业控制台) ──
+        _STATIC_PAGES = {
+            "/attack-graph": "attack-graph.html",
+            "/fleet": "fleet.html",
+            "/enterprise": "enterprise.html",
+        }
+        if path in _STATIC_PAGES:
+            html_path = os.path.join(BASE, "static", _STATIC_PAGES[path])
+            if os.path.exists(html_path):
+                with open(html_path, "r", encoding="utf-8") as f:
+                    html = f.read()
+                body = html.encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "text/html; charset=utf-8")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+                _record_usage(path.lstrip("/"), self.client_address[0])
+                return
+
         # Sitemap XML
         if path == "/sitemap.xml":
             sitemap_path = os.path.join(BASE, "static", "sitemap.xml")
@@ -814,6 +835,35 @@ class AIShieldHandler(BaseHTTPRequestHandler):
                 self._send_json({"error": str(e)}, 500)
             return
 
+        # ── Fleet 聚合 (F5) ──
+        if path == "/api/v1/fleet":
+            try:
+                from scanner.fleet import summary as fleet_summary
+                self._send_json({"success": True, **fleet_summary()})
+            except Exception as e:
+                self._send_json({"error": str(e)}, 500)
+            _record_usage("fleet", self.client_address[0])
+            return
+        if path == "/api/v1/fleet/list":
+            try:
+                from scanner.fleet import list_members
+                self._send_json({"success": True, "members": list_members()})
+            except Exception as e:
+                self._send_json({"error": str(e)}, 500)
+            _record_usage("fleet-list", self.client_address[0])
+            return
+
+        # ── 认证列表 (Phase3 企业控制台) ──
+        if path == "/api/v1/certify/list":
+            try:
+                from eco.badge import CertificationService
+                certs = CertificationService().list_certifications()
+                self._send_json({"success": True, "certifications": certs})
+            except Exception as e:
+                self._send_json({"error": str(e)}, 500)
+            _record_usage("certify-list", self.client_address[0])
+            return
+
         # Eco模块路由
         if _eco_dispatch_get(self):
             return
@@ -1014,6 +1064,63 @@ class AIShieldHandler(BaseHTTPRequestHandler):
             except Exception as e:
                 self._send_json({"error": str(e)}, 500)
             _record_usage("osv", self.client_address[0])
+            return
+
+        # ── Fleet 收纳 (F5) ──
+        if path == "/api/v1/fleet/ingest":
+            try:
+                body = self._read_body()
+                if body is None:
+                    return
+                fdata = json.loads(body) if body else {}
+            except json.JSONDecodeError:
+                self._send_json({"error": "Invalid JSON"}, 400)
+                return
+            try:
+                from scanner.fleet import ingest as fleet_ingest
+                res = fleet_ingest(fdata.get("scan_result") or fdata)
+                self._send_json(res, 200 if res.get("success") else 400)
+            except Exception as e:
+                self._send_json({"error": str(e)}, 500)
+            _record_usage("fleet-ingest", self.client_address[0])
+            return
+
+        # ── 付费认证：请求 x402 支付要求 (Phase3) ──
+        if path == "/api/v1/certify/request-payment":
+            try:
+                body = self._read_body()
+                if body is None:
+                    return
+                pdata = json.loads(body) if body else {}
+            except json.JSONDecodeError:
+                self._send_json({"error": "Invalid JSON"}, 400)
+                return
+            try:
+                from eco.monetization import request_cert_payment
+                res = request_cert_payment(pdata.get("source_url"), pdata.get("scan_report"))
+                self._send_json(res, 200 if res.get("success") else 400)
+            except Exception as e:
+                self._send_json({"error": str(e)}, 500)
+            _record_usage("certify-pay-req", self.client_address[0])
+            return
+
+        # ── 付费认证：履约签发 (Phase3) ──
+        if path == "/api/v1/certify/fulfill":
+            try:
+                body = self._read_body()
+                if body is None:
+                    return
+                fdata = json.loads(body) if body else {}
+            except json.JSONDecodeError:
+                self._send_json({"error": "Invalid JSON"}, 400)
+                return
+            try:
+                from eco.monetization import fulfill_cert
+                res = fulfill_cert(fdata.get("order_id"), fdata.get("payment_header"), fdata.get("scan_report"))
+                self._send_json(res, 200 if res.get("success") else 400)
+            except Exception as e:
+                self._send_json({"error": str(e)}, 500)
+            _record_usage("certify-fulfill", self.client_address[0])
             return
 
         # ── Creem Webhook（最高优先级，需要 raw body 验证签名）──
