@@ -4,6 +4,8 @@
 
 AIShield scans MCP servers and AI agents for tool poisoning, prompt injection, secret leakage, and supply-chain risk. It detects **201 categories of risk** aligned with **OWASP MCP Top 10** and **OWASP Agentic AI Top 10 (ASI01–ASI10)**, runs fully offline / locally (zero cost, no code sent to the cloud), and acts as a CI security gate.
 
+It **auto-discovers your MCP configuration across 14 client surfaces** (Claude Desktop, Claude Code, Cursor, VS Code, Windsurf, Gemini CLI, GitHub Copilot CLI, Augment, Zed, Cline, WorkBuddy — user-level *and* project-level) and audits every configured server **without ever executing it**. This distinction matters: reading `tools/list` requires spawning the server, and an MCP `command` is arbitrary code — some scanners explicitly warn that scanning your configuration will run the commands defined inside it. AIShield is purely static, so auditing a malicious configuration cannot compromise the machine performing the audit. It additionally detects **namespace shadowing** between servers and **7 classes of toxic capability flows** (e.g. private-data read plus untrusted network egress inside one trust boundary).
+
 It also ships **offline slopsquatting detection** — the AI-hallucinated-package supply-chain attack class. Unlike similarity-only typosquat checks, AIShield covers the ~50% of hallucinated names that are *not* edit-distance-similar to any real package (e.g. `react-codeshift`, which spread through 237 repos via AI-generated skill files in Jan 2026), plus cross-registry confusion, dependency confusion, install-script poisoning and lockfile discipline — all without a network call.
 
 Beyond scanning, AIShield is a **trust authority**: it defines an open **Trust Standard** (Agent Security Certification Level 1–3, a 0–100 Trust Score, and a Delegation Protocol), and operates an **Agent Registry** and **Marketplace** so agents can be discovered, certified, and transacted with (x402 / USDC) in a trust-first way.
@@ -29,6 +31,7 @@ Beyond scanning, AIShield is a **trust authority**: it defines an open **Trust S
 - **Open source & free**: vs paid SaaS scanners.
 - **Agentic-native**: the only scanner covering both OWASP MCP Top 10 **and** OWASP Agentic AI Top 10 (ASI01–ASI10) — not just MCP tool scanning.
 - **Neutral trust authority**: the only MCP/agent scanner that is also a certification registry (L1–L3 + 0–100 Trust Score + embeddable badge + machine-callable Trust API + x402/USDC) — a white space no competitor fills.
+- **Non-executing config audit**: discovers and audits MCP configs across 14 client surfaces by pure static analysis — it never spawns a configured `command`, so scanning an attacker-supplied config is itself safe. Competing config scanners launch the server to enumerate tools.
 - **Offline slopsquat detection**: catches non-similar AI-hallucinated package names, which similarity-based registry defenses and edit-distance scanners structurally miss — with zero network calls (competitors need a 4.3M-package cloud database or live registry lookups).
 - **CI-ready**: CycloneDX SBOM + SARIF 2.1.0 for GitHub Code Scanning and any SARIF pipeline.
 
