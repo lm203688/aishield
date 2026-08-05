@@ -880,6 +880,34 @@ class AIShieldHandler(BaseHTTPRequestHandler):
             _record_usage("export", self.client_address[0])
             return
 
+        # ── 多客户端 MCP 配置分析（纯静态；服务端绝不执行配置中的命令）──
+        if path == "/api/v1/scan/client-config":
+            try:
+                body = self._read_body()
+                if body is None:
+                    return
+                cdata = json.loads(body) if body else {}
+            except json.JSONDecodeError:
+                self._send_json({"error": "Invalid JSON"}, 400)
+                return
+            try:
+                from scanner.client_discovery import scan_client_configs, CLIENT_PROFILES
+                configs = cdata.get("configs")
+                if not configs:
+                    self._send_json({
+                        "error": "Missing 'configs'",
+                        "hint": "传入 {path: content} 映射或 [{path, content, client, scope}] 列表",
+                        "clients_supported": sorted({p["client"] for p in CLIENT_PROFILES}),
+                    }, 400)
+                    return
+                result = scan_client_configs(configs)
+                result["note"] = "静态分析，未执行任何配置中的命令"
+                self._send_json(result, 200)
+            except Exception as e:
+                self._send_json({"error": str(e)}, 500)
+            _record_usage("client-config-scan", self.client_address[0])
+            return
+
         # ── Creem Webhook（最高优先级，需要 raw body 验证签名）──
         if path == "/api/v1/webhooks/creem":
             self._handle_creem_webhook()
