@@ -902,10 +902,118 @@ class AIShieldHandler(BaseHTTPRequestHandler):
                     return
                 result = scan_client_configs(configs)
                 result["note"] = "静态分析，未执行任何配置中的命令"
+                if cdata.get("enable_live_probe"):
+                    from scanner.live_probe import probe_server_metadata
+                    probes = [probe_server_metadata(s, enable=True) for s in result.get("inventory", [])]
+                    result["live_probes"] = probes
+                    result["note"] += "；已对远程 server 做只读元数据探测（不 spawn 任何命令）"
                 self._send_json(result, 200)
             except Exception as e:
                 self._send_json({"error": str(e)}, 500)
             _record_usage("client-config-scan", self.client_address[0])
+            return
+
+        # ── 攻击路径求解 (M4) ──
+        if path == "/api/v1/scan/attack-path":
+            try:
+                body = self._read_body()
+                if body is None:
+                    return
+                apdata = json.loads(body) if body else {}
+            except json.JSONDecodeError:
+                self._send_json({"error": "Invalid JSON"}, 400)
+                return
+            try:
+                from scanner.attack_path import solve_minimal_removal, attack_graph_json
+                inv = apdata.get("inventory") or []
+                tox = apdata.get("toxic_findings") or []
+                self._send_json({
+                    "recommendation": solve_minimal_removal(inv, tox),
+                    "graph": attack_graph_json(inv, tox),
+                }, 200)
+            except Exception as e:
+                self._send_json({"error": str(e)}, 500)
+            _record_usage("attack-path", self.client_address[0])
+            return
+
+        # ── Nucleus / SIEM 导出 (F3) ──
+        if path in ("/api/v1/export/nucleus", "/api/v1/export/splunk"):
+            try:
+                body = self._read_body()
+                if body is None:
+                    return
+                edata = json.loads(body) if body else {}
+            except json.JSONDecodeError:
+                self._send_json({"error": "Invalid JSON"}, 400)
+                return
+            try:
+                from scanner.exporters import to_nucleus, to_splunk
+                findings = edata.get("findings") or []
+                if path.endswith("nucleus"):
+                    payload = to_nucleus(findings, edata.get("asset_name", "aishield-scan"))
+                else:
+                    payload = to_splunk(findings)
+                self._send_json(payload, 200)
+            except Exception as e:
+                self._send_json({"error": str(e)}, 500)
+            _record_usage("export", self.client_address[0])
+            return
+
+        # ── 策略即代码评估 (F6) ──
+        if path == "/api/v1/policy/check":
+            try:
+                body = self._read_body()
+                if body is None:
+                    return
+                pdata = json.loads(body) if body else {}
+            except json.JSONDecodeError:
+                self._send_json({"error": "Invalid JSON"}, 400)
+                return
+            try:
+                from scanner.policy import evaluate_policy
+                result = evaluate_policy(pdata.get("scan_result", {}), policy_path=pdata.get("policy_path"))
+                self._send_json(result, 200)
+            except Exception as e:
+                self._send_json({"error": str(e)}, 500)
+            _record_usage("policy-check", self.client_address[0])
+            return
+
+        # ── 跨注册中心发现 (D3) ──
+        if path == "/api/v1/registry/discover":
+            try:
+                body = self._read_body()
+                if body is None:
+                    return
+                rdata = json.loads(body) if body else {}
+            except json.JSONDecodeError:
+                self._send_json({"error": "Invalid JSON"}, 400)
+                return
+            try:
+                from scanner.registry_discovery import discover_across_registries
+                result = discover_across_registries(rdata.get("query", ""), rdata.get("registries"))
+                self._send_json(result, 200)
+            except Exception as e:
+                self._send_json({"error": str(e)}, 500)
+            _record_usage("registry-discover", self.client_address[0])
+            return
+
+        # ── OSV 实时 CVE (D1) ──
+        if path == "/api/v1/osv":
+            try:
+                body = self._read_body()
+                if body is None:
+                    return
+                odata = json.loads(body) if body else {}
+            except json.JSONDecodeError:
+                self._send_json({"error": "Invalid JSON"}, 400)
+                return
+            try:
+                from scanner.osv import check_osv
+                deps = odata.get("dependencies") or []
+                self._send_json({"findings": check_osv(deps, use_network=True)}, 200)
+            except Exception as e:
+                self._send_json({"error": str(e)}, 500)
+            _record_usage("osv", self.client_address[0])
             return
 
         # ── Creem Webhook（最高优先级，需要 raw body 验证签名）──
