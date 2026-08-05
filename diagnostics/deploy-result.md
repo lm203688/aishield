@@ -189,3 +189,14 @@ Time: Wed Aug  5 01:36:50 UTC 2026
 104.21.81.46
 
 === DNS CNAME check ===
+
+=== HTTPS Test from Runner ===
+Time: Wed Aug  5 01:43:55 UTC 2026
+
+=== curl test (aishield.tools) ===
+{"status": "ok", "version": "4.2", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 133, "uptime": 1785894235.6678276, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup"}
+=== DNS lookup ===
+104.21.81.46
+172.67.188.44
+
+=== DNS CNAME check ===
