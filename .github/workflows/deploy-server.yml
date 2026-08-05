@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main ]
   schedule:
-    - cron: '*/20 * * * *'   # 加速期每20分钟（2026-08-31 回滚至 '17 */4 * * *'）
+    - cron: '0 * * * *'   # 加速期每小时（2026-08-31 回滚至 '17 */4 * * *'）
   workflow_dispatch:
 
 permissions:
