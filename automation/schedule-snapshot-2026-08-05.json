@@ -1,0 +1,31 @@
+{
+  "captured_at": "2026-08-05",
+  "note": "2026-08-05 加速前原始调度快照。2026-08-31 自动回滚的目标值。加速期 = 所有 cron 改为 '*/20 * * * *'（每20分钟），4 个 AIShield 自动化改为 MINUTELY/20 + validUntil=2026-08-30。",
+  "github_actions_cron": {
+    "deploy-server.yml": "17 */4 * * *",
+    "acquisition-automation.yml": ["12 1 * * 1", "42 1 * * *"],
+    "aishield-scan.yml": "34 2 * * 1",
+    "channel-distribution.yml": "47 6 * * 4",
+    "data-scan-flywheel.yml": "30 5 * * 2,5",
+    "ci.yml": "8 3 * * *",
+    "feature-closed-loop.yml": "20 8 * * 1",
+    "security-scan.yml": "52 4 * * 1",
+    "stale.yml": "26 2 * * *",
+    "self-heal-closed-loop.yml": "23 */4 * * *",
+    "meta-monitor.yml": "15 */6 * * *",
+    "npm-self-heal.yml": "23 */6 * * *",
+    "threat-intel-feed.yml": "15 7 * * 1,4"
+  },
+  "aishield_automations": {
+    "automation-1785849857521": {"name": "AIShield 周度竞争情报与推广", "rrule": "FREQ=WEEKLY;INTERVAL=1;BYDAY=MO"},
+    "automation-1785826893057": {"name": "AIShield 月度战略与闭环有效性审计", "rrule": "FREQ=MONTHLY;BYMONTHDAY=1;BYHOUR=10;BYMINUTE=0"},
+    "automation-1785826869375": {"name": "AIShield 周度生态位与增长复盘", "rrule": "FREQ=WEEKLY;BYDAY=MO;BYHOUR=9;BYMINUTE=0"},
+    "automation-1785826846646": {"name": "AIShield 体系守夜（带外巡检）", "rrule": "FREQ=DAILY;BYHOUR=8;BYMINUTE=30"}
+  },
+  "accelerated_target": {
+    "github_actions_cron": "*/20 * * * *",
+    "automation_rrule": "FREQ=HOURLY",
+    "automation_validUntil": "2026-08-30",
+    "note": "WorkBuddy 自动化系统不支持 MINUTELY（每分钟），自动化最快仅 HOURLY；GitHub Actions 可设为每20分钟（*/20 * * * *）。"
+  }
+}
