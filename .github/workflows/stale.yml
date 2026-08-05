@@ -1,7 +1,7 @@
 name: Stale Issues Manager
 on:
   schedule:
-    - cron: '*/20 * * * *'  # 加速期每20分钟（2026-08-31 回滚至 '26 2 * * *'）
+    - cron: '0 * * * *'  # 加速期每小时（2026-08-31 回滚至 '26 2 * * *'）
   workflow_dispatch:
 
 permissions:
