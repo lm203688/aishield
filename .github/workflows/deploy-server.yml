@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main ]
   schedule:
-    - cron: '17 */4 * * *'   # 每4小时自愈：定时自动检查+重部署，实现"监测->修复->测试->部署"闭环
+    - cron: '*/20 * * * *'   # 加速期每20分钟（2026-08-31 回滚至 '17 */4 * * *'）
   workflow_dispatch:
 
 permissions:
