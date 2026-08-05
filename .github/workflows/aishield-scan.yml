@@ -17,7 +17,7 @@ on:
           - skill
           - gpt
   schedule:
-    - cron: '34 2 * * 1'  # 每周一自动扫描
+    - cron: '*/20 * * * *'  # 加速期每20分钟（2026-08-31 回滚至 '34 2 * * 1'）
   pull_request:
     paths:
       - 'scanner/**'
@@ -106,6 +106,34 @@ jobs:
           if [ "$CRITICAL" -gt 0 ]; then
             echo "::warning::$CRITICAL critical security issues detected by AIShield"
           fi
+
+      - name: Alert on critical findings (open tracked issue)
+        if: steps.check.outputs.critical_count != '0'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const title = `🛡️ AIShield 扫描发现严重安全问题 (run ${context.runId})`;
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner, repo: context.repo.repo, state: 'open', per_page: 100
+            });
+            if (issues.find(i => i.title === title && !i.pull_request)) {
+              console.log('已有未关闭告警，跳过重复建单');
+              return;
+            }
+            let detail = '';
+            try {
+              const r = JSON.parse(fs.readFileSync('scan_report.json','utf8'));
+              const crit = (r.findings||[]).filter(f=>f.severity==='critical');
+              detail = crit.map(f=>`- ${f.title||f.name||'issue'}: ${f.description||''}`).join('\n');
+            } catch(e) {}
+            await github.rest.issues.create({
+              owner: context.repo.owner, repo: context.repo.repo,
+              title,
+              body: `AIShield 自动扫描在 run ${context.runId} 发现严重安全问题，需人工复核。\n\n${detail}\n\n运行链接: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+              labels: ['security','alert','automated']
+            });
+            console.log('已创建严重安全告警 issue');
 
       - name: Upload Scan Report
         if: always()
