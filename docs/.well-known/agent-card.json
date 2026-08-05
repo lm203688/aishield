@@ -35,6 +35,16 @@
       ]
     },
     {
+      "id": "supply_chain_audit",
+      "name": "Supply Chain & Hallucinated Package Audit",
+      "description": "Offline detection of slopsquatting / AI-hallucinated dependencies in package.json, requirements.txt and pyproject.toml. Covers typosquat (Levenshtein), homoglyph poisoning, brand impersonation, composite hallucination (the ~50% of fabricated names that are NOT edit-distance-similar to any real package, e.g. react-codeshift), cross-registry confusion, dependency confusion, install-script poisoning, untrusted sources, unpinned versions and missing lockfiles. Zero network calls, zero package database.",
+      "tags": ["supply-chain", "slopsquatting", "typosquat", "sbom", "offline"],
+      "examples": [
+        "Check this package.json for hallucinated or typosquatted dependencies",
+        "Does my requirements.txt install anything from a non-PyPI source?"
+      ]
+    },
+    {
       "id": "trust_score",
       "name": "Trust Score Lookup",
       "description": "Return an agent's AIShield Trust Score (0-100) and certification level from the Agent Registry.",
