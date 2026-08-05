@@ -91,4 +91,4 @@ state_bus_*.json
 # =====================
 # WorkBuddy (personal memory + private skills)
 # =====================
-.workbuddy/
+.workbuddy/.cache/
