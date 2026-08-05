@@ -13,7 +13,7 @@ AIShield protects AI agents and the MCP (Model Context Protocol) tools they call
 - **Tool poisoning** — malicious or rug-pulled tool descriptions, hidden instructions in tool metadata.
 - **Prompt injection** — goal-hijack patterns in tool results, fetched web content, and agent inputs.
 - **Secret leakage** — API keys, tokens, credentials in tool arguments, outputs, or environment.
-- **Supply-chain risk** — compromised MCP servers, malicious npm/PyPI packages, dependencies; offline **hallucination-package / typosquat detection** (Levenshtein distance + homoglyph + brand-impersonation heuristics, zero network) across package.json / requirements.txt / pyproject.toml.
+- **Supply-chain risk** — compromised MCP servers, malicious npm/PyPI packages, dependencies; offline **slopsquatting / hallucinated-package detection** across package.json / requirements.txt / pyproject.toml. Six channels, zero network calls: Levenshtein typosquat, homoglyph normalization, brand impersonation, **composite hallucination (the ~50% of AI-fabricated names that are NOT edit-distance-similar to any real package, e.g. `react-codeshift`)**, cross-registry confusion (8.7% of Python-hallucinated names exist on npm), and dependency confusion / internal-namespace leakage. Plus manifest hygiene: install-script poisoning (`postinstall` running curl/wget/base64/chmod), untrusted sources (`git+`/`http://`/`file:`), unpinned specs (`*`/`latest`), and missing lockfile.
 - **Agentic AI risks (OWASP Agentic AI Top 10, ASI01–ASI10)** — goal hijack, tool misuse, identity & privilege abuse, supply chain, unexpected code execution, memory/context poisoning, insecure inter-agent communication, cascading failures, human-agent trust exploitation, rogue agents.
 
 **Scale:** 201 detection rule categories — 110 OWASP MCP Top 10 rules, 60 OWASP Agentic AI Top 10 (ASI01–ASI10) rules, and 31 Chinese prompt-injection rules. Rule base tracks OWASP MCP Top 10 and OWASP Agentic AI Top 10.
@@ -74,6 +74,7 @@ The MCP/agent-security category is now crowded (mid-2026): open-source static sc
 | OWASP Agentic AI Top 10 (ASI01–10) | Yes (60) | Partial | No | Partial |
 | Neutral trust authority (cert L1–3 + score + badge + API + x402) | Yes | No | No | No |
 | CycloneDX SBOM + SARIF 2.1.0 | Yes | Varies | Partial | No |
+| Offline hallucinated-package detection (incl. non-similar names) | Yes | No | Rare | No |
 | Agent-native & GEO (llms.txt / Agent Card / A2A) | Yes | Rare | Rare | No |
 
 ---
@@ -86,12 +87,13 @@ The MCP/agent-security category is now crowded (mid-2026): open-source static sc
 - Local-first architecture: zero third-party dependencies, rule engine fully offline; optional remote LLM for semantic analysis only.
 - SBOM (CycloneDX 1.5) + SARIF 2.1.0 export (`/api/v1/export/sbom`, `/api/v1/export/sarif`).
 - x402 / USDC agent-native billing rail (`eco/x402.py`).
-- Offline hallucination-package / typosquat detection for npm & PyPI (package.json / requirements.txt / pyproject.toml): Levenshtein distance, homoglyph normalization, brand-impersonation heuristics — pure local, zero network.
+- **Slopsquatting detection v2 (2026-08-05)** — offline hallucinated-package detection for npm & PyPI covering the non-similar half that edit-distance scanners structurally miss, plus cross-registry confusion, dependency confusion, and manifest hygiene (install-script poisoning, untrusted sources, unpinned specs, missing lockfile). Composite-hallucination findings ship at `info` severity with zero score deduction and a 5-per-manifest cap, because offline non-existence cannot be proven. Measured **0 false positives on 40 real widely-used packages**; **127 tests passing**.
 - Multi-channel distribution: Claude Skill, GPT Store manifest, Hugging Face card, MCP Hub entry.
 
-**Next (from 2026-08 competitive intelligence):**
-- Runtime governance hooks (ASI08/ASI10): kill-switch + behavior monitoring spec for the Agent Registry.
-- Optional remote registry verification for package existence (opt-in, off by default) to extend the offline typosquat heuristic with full 4.3M-package coverage.
+**Next (from 2026-08-05 competitive intelligence):**
+- Runtime governance hooks (ASI08/ASI10): **fail-closed enforcement gateway + immutable decision log**, per CoSAI Workstream 4 *Agentic Identity and Access Management* (approved 2026-03-20). Almost nothing in the OSS tooling space implements this yet.
+- Multi-client MCP config auto-discovery (Claude Desktop, Cursor, VS Code, Windsurf, Claude Code, Copilot CLI) — closes a visible gap vs mcp-audit.
+- Optional remote registry verification for package existence/age/downloads (opt-in, off by default) to extend the offline heuristic; default stays fully offline.
 - Neutral trust-authority narrative amplification + GEO/agent-native discovery (llms.txt, Agent Card, A2A).
 - Independent benchmark + first-to-market "Agentic AI Top 10 certified" claim.
 
