@@ -1,7 +1,15 @@
 {
-  "generated_at": "2026-08-05T14:17:21.503948+00:00",
-  "source_intel_count": 128,
+  "generated_at": "2026-08-05T16:44:34.623286+00:00",
+  "source_intel_count": 129,
   "package_blacklist": {
+    "npm:electron": {
+      "ecosystem": "npm",
+      "package": "electron",
+      "severity": "high",
+      "advisories": [
+        "GHSA-h7rp-cf8h-j98x"
+      ]
+    },
     "pip:open-webui": {
       "ecosystem": "pip",
       "package": "open-webui",
@@ -277,5 +285,5 @@
     "LLM06": 2,
     "LLM05": 2
   },
-  "total_rules": 22
+  "total_rules": 23
 }

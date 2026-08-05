@@ -1,6 +1,20 @@
 {
   "intel": [
     {
+      "id": "GHSA-h7rp-cf8h-j98x",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.5,
+      "title": "Electron: Context isolation bypass via Function.prototype.bind hijack",
+      "summary": "### Impact\nApps that expose Promise-returning functions to web content via `contextBridge` may be vulnerable to a context isolation bypass. Untrusted web content could obtain access to the isolated preload world and, through it, every capability the preload script has. In renderers without a sandbox, or with `nodeIntegration` enabled, this may escalate to Node.js access.\n\nApps are affected if they expose Promise-returning functions via `contextBridge` — the standard pattern for wrapping `ipcRend",
+      "affected": "npm:electron, npm:electron, npm:electron, npm:electron",
+      "references": [
+        "https://github.com/advisories/GHSA-h7rp-cf8h-j98x"
+      ],
+      "published": "2026-08-05T15:46:08Z",
+      "fetched": "2026-08-05T16:44:20.993816+00:00"
+    },
+    {
       "id": "GHSA-2f54-p244-32q6",
       "source": "github-advisory",
       "severity": "medium",
@@ -1949,19 +1963,19 @@
       "fetched": "2026-08-04T06:34:53.913899+00:00"
     }
   ],
-  "updated": "2026-08-05T14:17:09.202007+00:00",
+  "updated": "2026-08-05T16:44:22.802514+00:00",
   "sources": [
     "osv",
     "nvd",
     "github-advisory"
   ],
   "stats": {
+    "high": 55,
     "medium": 36,
     "unknown": 16,
-    "high": 54,
     "critical": 18,
     "low": 3,
     "moderate": 1
   },
-  "total": 128
+  "total": 129
 }
