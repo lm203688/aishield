@@ -24,6 +24,7 @@ def main():
         'tests.test_linkages',
         'tests.test_geo',
         'tests.test_security',
+        'tests.test_supply_chain',
     ]
 
     loaded = 0
