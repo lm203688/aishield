@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>AIShield · Enterprise Console</title>
+<style>
+  :root{--bg:#0f1419;--panel:#161c24;--panel2:#1d2530;--line:#2a3340;--txt:#e6edf3;
+        --muted:#8b98a8;--accent:#3fb950;--accent2:#58a6ff;--crit:#f85149;--high:#ff7b72;--med:#d29922}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,Segoe UI,Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
+       background:var(--bg);color:var(--txt);padding:18px;max-width:1080px;margin:0 auto}
+  h1{font-size:17px;margin:0 0 4px}
+  .sub{color:var(--muted);font-size:12px;margin-bottom:18px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .box{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:16px}
+  .box h2{font-size:12px;color:var(--muted);margin:0 0 12px;text-transform:uppercase;letter-spacing:.5px}
+  input,button{font-family:inherit}
+  input{width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--txt);
+         border-radius:6px;padding:8px;font-size:12px;margin:4px 0}
+  button{background:var(--accent2);color:#06121f;border:none;padding:8px 14px;border-radius:6px;
+         font-weight:600;cursor:pointer;font-size:12px;margin-top:6px;margin-right:6px}
+  button.ghost{background:transparent;color:var(--txt);border:1px solid var(--line)}
+  .kv{font-size:12px;line-height:1.9}
+  .kv .k{color:var(--muted);display:inline-block;width:140px}
+  .pill{display:inline-block;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:2px 9px;margin:2px;font-size:11px;word-break:break-all}
+  pre{background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:10px;font-size:11px;
+      overflow:auto;max-height:200px;white-space:pre-wrap;word-break:break-all}
+  .ok{color:var(--accent)} .bad{color:var(--high)} .warn{color:var(--med)}
+  .step{display:flex;gap:8px;align-items:center;font-size:12px;margin:6px 0}
+  .dot{width:18px;height:18px;border-radius:50%;background:var(--panel2);border:1px solid var(--line);
+       display:flex;align-items:center;justify-content:center;font-size:10px;flex:none}
+  .dot.done{background:var(--accent);color:#06121f;border-color:var(--accent)}
+  @media(max-width:760px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<h1>🏢 AIShield Enterprise Console</h1>
+<div class="sub">Phase 3 · 中性信任机构 × Fleet 态势 × x402 付费认证闭环 · 本地优先</div>
+
+<div class="grid">
+  <div class="box">
+    <h2>Fleet 快照</h2>
+    <div id="fleet" class="kv"><span class="muted">加载中…</span></div>
+    <button class="ghost" onclick="loadFleet()">刷新</button>
+  </div>
+  <div class="box">
+    <h2>认证 Store (badge 仓库)</h2>
+    <div id="certs" class="kv"><span class="muted">加载中…</span></div>
+    <button class="ghost" onclick="loadCerts()">刷新</button>
+  </div>
+</div>
+
+<div class="box">
+  <h2>x402 付费认证闭环 (demo)</h2>
+  <div class="step"><span class="dot" id="d1">1</span><span>提交 source_url + 扫描分数，生成 x402 支付要求</span></div>
+  <input id="src" placeholder="https://github.com/acme/mcp-tool" value="https://github.com/acme/mcp-tool"/>
+  <input id="score" placeholder="overall_score (0-100)" value="92" type="number"/>
+  <button onclick="requestPay()">① 请求付费认证</button>
+  <div id="reqOut" style="margin-top:8px"></div>
+
+  <div class="step"><span class="dot" id="d2">2</span><span>客户端钱包对 paymentRequirements 签名（demo 用占位签名模拟）</span></div>
+  <button class="ghost" id="payBtn" onclick="simulatePay()" disabled>② 模拟钱包支付并履约</button>
+  <div id="payOut" style="margin-top:8px"></div>
+
+  <div class="step"><span class="dot" id="d3">3</span><span>服务端校验 Payment 头 → 签发认证徽章</span></div>
+  <div id="certOut" style="margin-top:8px"></div>
+</div>
+
+<script>
+let pendingOrder=null;
+
+async function loadFleet(){
+  const el=document.getElementById('fleet');
+  try{
+    const s=await (await fetch('/api/v1/fleet')).json();
+    el.innerHTML=`<div><span class="k">机队规模</span>${s.total||0}</div>
+      <div><span class="k">通过率</span><b class="${(s.pass_rate||0)>=70?'ok':'bad'}">${s.pass_rate||0}%</b></div>
+      <div><span class="k">平均分</span><b class="${(s.avg_score||0)>=70?'ok':'bad'}">${s.avg_score||0}</b></div>
+      <div><span class="k">达标/不达标</span>${(s.pass||0)} / ${(s.fail||0)}</div>
+      <div style="margin-top:8px"><span class="k">最差成员</span><br>${(s.worst_offenders||[]).map(w=>`<span class="pill">${esc(w.name)} · ${w.overall_score}</span>`).join('')||'—'}</div>`;
+  }catch(e){el.innerHTML=`<span class="bad">加载失败: ${e.message}</span>`;}
+}
+async function loadCerts(){
+  const el=document.getElementById('certs');
+  try{
+    const d=await (await fetch('/api/v1/certify/list')).json();
+    const list=d.certifications||[];
+    if(!list.length){el.innerHTML='<span class="muted">尚无认证</span>';return;}
+    el.innerHTML=list.slice(0,8).map(c=>`<div style="margin:6px 0"><span class="pill">${esc(c.source_url)}</span>
+      <b class="${c.status==='certified'?'ok':c.status==='expired'?'warn':'bad'}">${c.status}</b>
+      · ${c.badge_level} · ${c.score}</div>`).join('');
+  }catch(e){el.innerHTML=`<span class="bad">加载失败: ${e.message}</span>`;}
+}
+
+async function requestPay(){
+  const src=document.getElementById('src').value.trim();
+  const score=parseInt(document.getElementById('score').value||'0',10);
+  if(!src){alert('请填 source_url');return;}
+  const out=document.getElementById('reqOut');
+  out.innerHTML='请求中…';
+  try{
+    const r=await fetch('/api/v1/certify/request-payment',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({source_url:src,scan_report:{overall_score:score,total_findings:0}})});
+    const d=await r.json();
+    if(!d.success){out.innerHTML=`<span class="bad">${esc(d.error)}</span>`;return;}
+    pendingOrder=d.order_id;
+    const pr=d.payment_requirements?.paymentRequirements?.[0]||{};
+    out.innerHTML=`<div class="kv">
+      <div><span class="k">状态</span><b class="ok">${d.status}</b></div>
+      <div><span class="k">order_id</span>${d.order_id}</div>
+      <div><span class="k">badge 等级</span>${d.badge_level}</div>
+      <div><span class="k">金额</span><b>${d.amount_usd} ${d.currency}</b> · ${d.network}</div>
+      <div><span class="k">收款地址</span><span class="pill">${esc(d.pay_to)}</span></div>
+      <div><span class="k">x402 要求</span></div></div>
+      <pre>${esc(JSON.stringify(d.payment_requirements,null,2))}</pre>`;
+    document.getElementById('d1').classList.add('done');
+    document.getElementById('payBtn').disabled=false;
+  }catch(e){out.innerHTML=`<span class="bad">失败: ${e.message}</span>`;}
+}
+
+function simulatePay(){
+  if(!pendingOrder){alert('请先请求付费认证');return;}
+  // 真实环境：客户端钱包(viem/ethers)对 paymentRequirements 做 EIP-3009 签名。
+  // Demo：构造结构合法的 Payment 头(占位签名)以跑通闭环——后端仅做结构校验。
+  const req=JSON.parse(document.getElementById('reqOut').querySelector('pre').textContent);
+  const pr=req.paymentRequirements[0];
+  const signed={from:"0xDemoClient",to:pr.payTo,value:String(Math.round(parseFloat(pr.maxAmountRequired)*1e6)),
+    validAfter:"0",validBefore:"9999999999",nonce:"0xDEMO",signature:"0xDemoSignature"};
+  const payload={x402Version:1,scheme:"exact",network:pr.network,
+    payload:{signature:signed.signature,authorization:{from:signed.from,to:signed.to,value:signed.value,
+      validAfter:signed.validAfter,validBefore:signed.validBefore,nonce:signed.nonce}}};
+  const header=btoa(JSON.stringify(payload));
+  fulfill(header);
+}
+
+async function fulfill(header){
+  const out=document.getElementById('payOut');
+  out.innerHTML='履约中…';
+  try{
+    const r=await fetch('/api/v1/certify/fulfill',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({order_id:pendingOrder,payment_header:header})});
+    const d=await r.json();
+    if(!d.success){out.innerHTML=`<span class="bad">${esc(d.error)}</span>`;return;}
+    document.getElementById('d2').classList.add('done');
+    out.innerHTML=`<span class="ok">✓ 支付头校验通过 · 结算状态: ${d.settlement}</span>`;
+    const cert=d.certification||{};
+    document.getElementById('certOut').innerHTML=`<div class="kv">
+      <div><span class="k">认证状态</span><b class="ok">${cert.status}</b></div>
+      <div><span class="k">cert_id</span>${cert.cert_id}</div>
+      <div><span class="k">score / level</span>${cert.score} · ${cert.badge_level}</div>
+      <div><span class="k">有效期至</span>${cert.expires_at||'—'}</div></div>
+      <div class="warn" style="margin-top:6px">${esc(d.note||'')}</div>`;
+    document.getElementById('d3').classList.add('done');
+    loadCerts();
+  }catch(e){out.innerHTML=`<span class="bad">失败: ${e.message}</span>`;}
+}
+
+function esc(s){return String(s==null?'':s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+loadFleet(); loadCerts();
+</script>
+</body>
+</html>
