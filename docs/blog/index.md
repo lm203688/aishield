@@ -7,6 +7,8 @@ title: AIShield 安全洞察
 
 MCP / AI Agent 安全领域的持续观察，由 AIShield 自动化情报流水线产出。
 
+- **[扫描你的 MCP 配置，不等于运行它 —— AIShield 的非执行式配置审计](blog-config-scan-without-execution-2026-08-05.html)** — `2026-08-05`  
+  多数配置扫描器为读取 `tools/list` 必须先启动 server，而 MCP 的 `command` 就是任意代码——「检查是否恶意」的动作本身即是一次执行。AIShield 放弃 `tools/list`，改用纯静态推断：14 客户端面自动发现、10 类单 server 风险、命名空间遮蔽与 7 类毒性能力流；20 份官方配置 0 误报（94 分），10 份恶意配置 10/10 检出（0 分）。附一个值得记录的自毁式评分器 bug。
 - **[一半的 AI 幻觉包与真实包毫不形近 —— 如何离线检出它们](blog-slopsquat-offline-detection-2026-08-05.html)** — `2026-08-05`  
   USENIX 2025：19.7% 的模型推荐包不存在，205,474 个虚构名，其中约一半与任何真实包都不形近，编辑距离检测结构性失效。AIShield 新增离线复合式幻觉包 advisory + 跨注册表混淆 + 依赖混淆 + 依赖卫生检查，零网络调用，40 个真实包 0 误报。
 - **[The agent trust gap: 为什么 2026 年需要本地 + Agentic-AI-Top-10 + 中性信任机构](blog-agent-trust-gap-2026-08-04.html)** — `2026-08-04`  
