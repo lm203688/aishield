@@ -1,0 +1,19 @@
+{
+  "name": "AIShield 默认治理策略",
+  "description": "零信任基线：总分不低于 70，安全分不低于 60，禁止任何 critical 漏洞，阻断已知高危 OWASP 类别。",
+  "min_overall_score": 70,
+  "min_security_score": 60,
+  "min_permissions_score": 50,
+  "min_data_handling_score": 50,
+  "min_supply_chain_score": 60,
+  "min_reliability_score": 50,
+  "max_findings_by_severity": {
+    "critical": 0,
+    "high": 2,
+    "medium": 10,
+    "low": 50
+  },
+  "blocked_owasp_categories": ["MCP03", "MCP05"],
+  "disallow_unauthenticated_remote": true,
+  "deny_servers": []
+}
