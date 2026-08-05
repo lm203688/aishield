@@ -25,6 +25,7 @@ def main():
         'tests.test_geo',
         'tests.test_security',
         'tests.test_supply_chain',
+        'tests.test_client_discovery',
     ]
 
     loaded = 0
