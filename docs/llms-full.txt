@@ -15,6 +15,9 @@ AIShield protects AI agents and the MCP (Model Context Protocol) tools they call
 - **Secret leakage** — API keys, tokens, credentials in tool arguments, outputs, or environment.
 - **Supply-chain risk** — compromised MCP servers, malicious npm/PyPI packages, dependencies; offline **slopsquatting / hallucinated-package detection** across package.json / requirements.txt / pyproject.toml. Six channels, zero network calls: Levenshtein typosquat, homoglyph normalization, brand impersonation, **composite hallucination (the ~50% of AI-fabricated names that are NOT edit-distance-similar to any real package, e.g. `react-codeshift`)**, cross-registry confusion (8.7% of Python-hallucinated names exist on npm), and dependency confusion / internal-namespace leakage. Plus manifest hygiene: install-script poisoning (`postinstall` running curl/wget/base64/chmod), untrusted sources (`git+`/`http://`/`file:`), unpinned specs (`*`/`latest`), and missing lockfile.
 - **Agentic AI risks (OWASP Agentic AI Top 10, ASI01–ASI10)** — goal hijack, tool misuse, identity & privilege abuse, supply chain, unexpected code execution, memory/context poisoning, insecure inter-agent communication, cascading failures, human-agent trust exploitation, rogue agents.
+- **Misconfigured MCP clients** — auto-discovery and static audit of MCP server configurations across **14 client surfaces**: Claude Desktop, Claude Code (user + project), Cursor (user + project), VS Code (user + project), Windsurf, Gemini CLI, GitHub Copilot CLI, Augment, Zed, Cline, WorkBuddy. Per-server checks: privileged launch (`sudo`/`runas`), STDIO command-execution exposure, runtime package fetch at startup (`npx -y` / `uvx` pulling latest), shell-interpreter invocation (`bash -c`, `cmd /c`), non-registry provenance (`git+`, raw URL, local path), inline plaintext credentials, insecure transport (`http://` remote), wildcard bind (`0.0.0.0`), unauthenticated remote endpoints, and project-level configuration trust traps. Cross-server checks: **namespace shadowing** (two servers exposing colliding tool names — the NSA-flagged confused-deputy pattern) and **7 classes of toxic capability flows** (private-data read + untrusted egress, credential access + code execution, filesystem write + network fetch, etc.).
+
+  **Design invariant — never execute the scanned config.** Enumerating a server's `tools/list` requires spawning it, and an MCP `command` is arbitrary code; some scanners state outright that scanning configurations will execute the commands defined in them. AIShield performs pure static analysis: it parses the config, infers capabilities from command/args/env shape, and never launches a process. Auditing a hostile configuration therefore cannot compromise the auditing machine. Credentials found in a config are reported as `<redacted:kind>` — the raw value is never echoed back.
 
 **Scale:** 201 detection rule categories — 110 OWASP MCP Top 10 rules, 60 OWASP Agentic AI Top 10 (ASI01–ASI10) rules, and 31 Chinese prompt-injection rules. Rule base tracks OWASP MCP Top 10 and OWASP Agentic AI Top 10.
 
@@ -75,6 +78,9 @@ The MCP/agent-security category is now crowded (mid-2026): open-source static sc
 | Neutral trust authority (cert L1–3 + score + badge + API + x402) | Yes | No | No | No |
 | CycloneDX SBOM + SARIF 2.1.0 | Yes | Varies | Partial | No |
 | Offline hallucinated-package detection (incl. non-similar names) | Yes | No | Rare | No |
+| Multi-client MCP config auto-discovery | Yes (14 surfaces) | Rare | Yes (varies) | No |
+| Config audit **without executing** the scanned config | Yes (pure static) | N/A | No (spawns server for `tools/list`) | N/A |
+| Namespace shadowing + toxic-flow cross-server analysis | Yes | Rare | Rare | Partial |
 | Agent-native & GEO (llms.txt / Agent Card / A2A) | Yes | Rare | Rare | No |
 
 ---
@@ -88,11 +94,11 @@ The MCP/agent-security category is now crowded (mid-2026): open-source static sc
 - SBOM (CycloneDX 1.5) + SARIF 2.1.0 export (`/api/v1/export/sbom`, `/api/v1/export/sarif`).
 - x402 / USDC agent-native billing rail (`eco/x402.py`).
 - **Slopsquatting detection v2 (2026-08-05)** — offline hallucinated-package detection for npm & PyPI covering the non-similar half that edit-distance scanners structurally miss, plus cross-registry confusion, dependency confusion, and manifest hygiene (install-script poisoning, untrusted sources, unpinned specs, missing lockfile). Composite-hallucination findings ship at `info` severity with zero score deduction and a 5-per-manifest cap, because offline non-existence cannot be proven. Measured **0 false positives on 40 real widely-used packages**; **127 tests passing**.
+- **Multi-client MCP config discovery & static audit (2026-08-05)** — 14 client surfaces, 10 per-server risk checks, namespace-shadowing and 7 toxic-flow classes across servers, exposed at `POST /api/v1/scan/client-config` and via `scanner.discover_and_scan()`. Purely static: no configured command is ever executed; credentials are redacted in evidence. Measured **0 false positives across 20 officially recommended configurations (score 94/100)** and **10/10 detection on 10 malicious configurations (score 0/100)**; **190 tests passing**.
 - Multi-channel distribution: Claude Skill, GPT Store manifest, Hugging Face card, MCP Hub entry.
 
 **Next (from 2026-08-05 competitive intelligence):**
-- Runtime governance hooks (ASI08/ASI10): **fail-closed enforcement gateway + immutable decision log**, per CoSAI Workstream 4 *Agentic Identity and Access Management* (approved 2026-03-20). Almost nothing in the OSS tooling space implements this yet.
-- Multi-client MCP config auto-discovery (Claude Desktop, Cursor, VS Code, Windsurf, Claude Code, Copilot CLI) — closes a visible gap vs mcp-audit.
+- Runtime governance hooks (ASI08/ASI10): **fail-closed enforcement gateway + immutable decision log**, per CoSAI Workstream 4 *Agentic Identity and Access Management* (approved 2026-03-20). This is now the category's centre of gravity — 2026 H2 competitor releases moved from pre-deployment scanning to runtime proxying/firewalling, typically requiring a cloud API token. AIShield's differentiated answer must stay local and tokenless.
 - Optional remote registry verification for package existence/age/downloads (opt-in, off by default) to extend the offline heuristic; default stays fully offline.
 - Neutral trust-authority narrative amplification + GEO/agent-native discovery (llms.txt, Agent Card, A2A).
 - Independent benchmark + first-to-market "Agentic AI Top 10 certified" claim.
