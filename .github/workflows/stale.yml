@@ -1,7 +1,7 @@
 name: Stale Issues Manager
 on:
   schedule:
-    - cron: '26 2 * * *'  # 每天凌晨 2 点运行
+    - cron: '*/20 * * * *'  # 加速期每20分钟（2026-08-31 回滚至 '26 2 * * *'）
   workflow_dispatch:
 
 permissions:
@@ -38,3 +38,11 @@ jobs:
           exempt-pr-labels: 'pinned,work-in-progress'
           # 不处理已分配的 Issue
           exempt-all-assignees: true
+
+      - name: Detection summary
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          OPEN=$(gh issue list --label stale --state open --limit 100 --json number -q 'length' 2>/dev/null || echo '?')
+          echo "::notice::Stale 管理执行完成：当前 open 且带 stale 标签的 Issue 共 ${OPEN} 个"
