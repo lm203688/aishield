@@ -133,7 +133,6 @@
 
 | 优先级 | 来源 | 事项 | 参考 |
 |--------|------|------|------|
-| P1 | S2 生态位待办 | npm 包分发（Agent 直接调用入口）：执行 npm publish —— 这是 Agent 能'直接用上'AIShield 的最短路径 | — |
 | P1 | S2 生态位待办 | MCP 官方 Registry 收录：向 modelcontextprotocol/registry 提交 server.json —— 生态入口即用户入口 | — |
 | P1 | S4 情报驱动 | 评审本轮 52 条新增高危漏洞的检测覆盖情况 | — |
 | P2 | S1 用户反馈 | [P1] 评审本轮 52 条新增高危漏洞的检测覆盖情况 | [链接](https://github.com/lm203688/aishield/issues/7) |
