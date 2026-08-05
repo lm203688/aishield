@@ -2,8 +2,8 @@ name: Acquisition Automation
 
 on:
   schedule:
-    # 加速期：每20分钟（2026-08-31 回滚至 '12 1 * * 1' + '42 1 * * *'）
-    - cron: '*/20 * * * *'
+    # 加速期：每小时（2026-08-31 回滚至 '12 1 * * 1' + '42 1 * * *'）
+    - cron: '0 * * * *'
   workflow_dispatch:
 
 jobs:
