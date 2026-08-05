@@ -1,0 +1,11 @@
+{
+  "benign": {
+    "expect_min_score": 85,
+    "forbid_types": ["taint_flow", "secret_exposure", "tool_poisoning", "osv_cve"]
+  },
+  "malicious": {
+    "expect_types_present": ["taint_flow", "secret_exposure"],
+    "expect_max_score": 60,
+    "expect_typosquat": true
+  }
+}
