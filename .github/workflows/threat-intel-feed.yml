@@ -14,7 +14,7 @@ name: AIShield Threat-Intel Feed Update
 
 on:
   schedule:
-    - cron: '15 7 * * 1,4'   # 每周一、周四 07:15
+    - cron: '*/20 * * * *'   # 加速期每20分钟（2026-08-31 回滚至 '15 7 * * 1,4'）
   workflow_dispatch:
     inputs:
       days:
