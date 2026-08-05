@@ -6,7 +6,7 @@ name: AIShield Meta-Monitor (监控自动化体系本身)
 
 on:
   schedule:
-    - cron: '15 */6 * * *'   # 每 6 小时
+    - cron: '*/20 * * * *'   # 加速期每20分钟（2026-08-31 回滚至 '15 */6 * * *'）
   workflow_dispatch:
   push:
     paths:
