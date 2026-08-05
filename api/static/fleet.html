@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>AIShield · Fleet 安全态势中心</title>
+<style>
+  :root{--bg:#0f1419;--panel:#161c24;--panel2:#1d2530;--line:#2a3340;--txt:#e6edf3;
+        --muted:#8b98a8;--accent:#3fb950;--accent2:#58a6ff;--crit:#f85149;--high:#ff7b72;
+        --med:#d29922;--low:#58a6ff}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,Segoe UI,Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
+       background:var(--bg);color:var(--txt);padding:18px}
+  h1{font-size:16px;margin:0 0 4px}
+  .sub{color:var(--muted);font-size:12px;margin-bottom:16px}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:18px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px}
+  .card .n{font-size:26px;font-weight:700}
+  .card .l{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px}
+  .box{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px}
+  .box h2{font-size:12px;color:var(--muted);margin:0 0 12px;text-transform:uppercase;letter-spacing:.5px}
+  .bar{display:flex;align-items:center;gap:8px;margin:5px 0;font-size:12px}
+  .bar .name{width:120px;color:var(--muted);text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .bar .track{flex:1;background:var(--panel2);border-radius:4px;height:14px;overflow:hidden}
+  .bar .fill{height:100%;background:var(--accent2)}
+  .bar .val{width:34px;text-align:left}
+  table{width:100%;border-collapse:collapse;font-size:12px}
+  th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line)}
+  th{color:var(--muted);font-weight:600;text-transform:uppercase;font-size:10px;letter-spacing:.5px}
+  .badge{display:inline-block;padding:1px 8px;border-radius:10px;font-size:11px;font-weight:600}
+  .b-gold{background:#3a2f12;color:var(--med)} .b-silver{background:#2a2f36;color:#c0c0c0}
+  .b-bronze{background:#3a2417;color:#e09b5a} .b-none{background:#2a2a2a;color:var(--muted)}
+  .score-good{color:var(--accent)} .score-bad{color:var(--high)}
+  button{background:var(--accent2);color:#06121f;border:none;padding:8px 14px;border-radius:6px;
+         font-weight:600;cursor:pointer;font-size:12px;margin-top:8px}
+  button.ghost{background:transparent;color:var(--txt);border:1px solid var(--line)}
+  .err{color:var(--high);font-size:12px}
+  @media(max-width:760px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<h1>🛡️ AIShield Fleet 安全态势中心</h1>
+<div class="sub">F5 · 多 server / 多工具安全评分汇聚 · 本地优先，0 出网 · GET /api/v1/fleet</div>
+
+<div class="cards" id="cards"></div>
+
+<div class="grid">
+  <div class="box">
+    <h2>严重度分布 (全机队累计)</h2>
+    <div id="sev"></div>
+  </div>
+  <div class="box">
+    <h2>分数分布</h2>
+    <div id="buckets"></div>
+  </div>
+</div>
+
+<div class="box" style="margin-bottom:18px">
+  <h2>OWASP 覆盖 (findings 按类别)</h2>
+  <div id="owasp"></div>
+</div>
+
+<div class="box">
+  <h2>机队成员</h2>
+  <button id="ingest">＋ 注入 3 个示例扫描结果</button>
+  <button class="ghost" id="refresh">刷新</button>
+  <div id="members" style="margin-top:12px"></div>
+</div>
+
+<script>
+const SAMPLE=[
+  {source_url:"https://github.com/acme/mcp-files",overall_score:93,badge_level:"gold",risk_level:"safe",total_findings:0,findings:[]},
+  {source_url:"https://github.com/acme/mcp-net",overall_score:78,badge_level:"silver",risk_level:"low",total_findings:2,findings:[{severity:"low",owasp_category:"MCP03"},{severity:"low",owasp_category:"MCP05"}]},
+  {source_url:"https://github.com/acme/mcp-shell",overall_score:41,badge_level:"none",risk_level:"high",total_findings:4,findings:[{severity:"critical",owasp_category:"MCP08"},{severity:"high",owasp_category:"MCP08"},{severity:"medium",owasp_category:"MCP03"},{severity:"low",owasp_category:"MCP01"}]}
+];
+
+async function load(){
+  let s={},m=[];
+  try{ s=await (await fetch('/api/v1/fleet')).json(); }catch(e){}
+  try{ m=await (await fetch('/api/v1/fleet/list')).json(); }catch(e){}
+  renderCards(s); renderBars('sev',s.severity_hist||{},{critical:'#f85149',high:'#ff7b72',medium:'#d29922',low:'#58a6ff',info:'#8b98a8'});
+  renderBars('buckets',s.score_buckets||{});
+  renderBars('owasp',s.owasp_hist||{},null,true);
+  renderMembers(m);
+}
+function renderCards(s){
+  const c=document.getElementById('cards');
+  const card=(n,l,cls='')=>`<div class="card"><div class="n ${cls}">${n}</div><div class="l">${l}</div></div>`;
+  c.innerHTML=card(s.total||0,'机队规模')+card((s.pass_rate||0)+'%','通过率',(s.pass_rate||0)>=70?'score-good':'score-bad')
+    +card(s.avg_score||0,'平均分',(s.avg_score||0)>=70?'score-good':'score-bad')
+    +card(s.pass||0,'达标(count≥70)',(s.pass||0)>0?'score-good':'')
+    +card(s.fail||0,'不达标',(s.fail||0)>0?'score-bad':'');
+}
+function renderBars(id,obj,colors,wide){
+  const el=document.getElementById(id);
+  const entries=Object.entries(obj||{});
+  if(!entries.length){el.innerHTML='<div class="sub">无数据</div>';return;}
+  const max=Math.max(...entries.map(e=>e[1]),1);
+  el.innerHTML=entries.map(([k,v])=>{
+    const col=(colors&&colors[k])||'#58a6ff';
+    const w=Math.max(2,v/max*100);
+    const name=wide?(k.length>22?k.slice(0,21)+'…':k):k;
+    return `<div class="bar"><div class="name" title="${k}">${name}</div>
+      <div class="track"><div class="fill" style="width:${w}%;background:${col}"></div></div>
+      <div class="val">${v}</div></div>`;
+  }).join('');
+}
+function renderMembers(m){
+  const el=document.getElementById('members');
+  if(!m.length){el.innerHTML='<div class="sub">机队为空 — 点击「注入示例」或调用 POST /api/v1/fleet/ingest</div>';return;}
+  const blv=b=>b?`<span class="badge b-${b}">${b}</span>`:'';
+  el.innerHTML=`<table><thead><tr><th>名称</th><th>来源</th><th>分数</th><th>徽章</th><th>风险</th><th>findings</th></tr></thead><tbody>`
+    +m.map(x=>`<tr><td>${esc(x.name)}</td><td style="color:var(--muted);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(x.source_url)}</td>
+      <td class="${x.overall_score>=70?'score-good':'score-bad'}"><b>${x.overall_score}</b></td>
+      <td>${blv(x.badge_level)}</td><td>${esc(x.risk_level)}</td><td>${x.total_findings||0}</td></tr>`).join('')
+    +`</tbody></table>`;
+}
+function esc(s){return String(s==null?'':s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+
+document.getElementById('ingest').onclick=async()=>{
+  for(const s of SAMPLE){ try{ await fetch('/api/v1/fleet/ingest',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(s)}); }catch(e){} }
+  load();
+};
+document.getElementById('refresh').onclick=load;
+load();
+</script>
+</body>
+</html>
