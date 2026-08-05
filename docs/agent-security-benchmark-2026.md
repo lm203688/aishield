@@ -21,6 +21,8 @@ AIShield 是少数同时覆盖 **MCP Top 10** 与 **Agentic AI Top 10** 双维�
 | 静态规则 | **201 条正则检测规则** | 110 MCP 规则 + 60 Agentic(AIS) 规则 + 31 中文提示注入规则 |
 | 语义分析 | LLM 可选后端 | Tool Poisoning 语义（可选远程 LLM）；规则引擎零依赖、全程本地 |
 | 供应链 | SBOM + 依赖审计 | CycloneDX 1.5 SBOM 输出、危险包黑名单(OSV/NVD 情报驱动) |
+| 幻觉包 | **离线 slopsquat 检测** | 编辑距离 typosquat + homoglyph + 品牌仿冒 + **复合式幻觉(非形近)** + 跨注册表混淆 + 依赖混淆；零网络、零包数据库 |
+| 依赖卫生 | manifest 级检查 | 安装脚本投毒(critical)、非注册表来源(high)、未锁定版本(medium)、缺 lockfile(low) |
 | 可集成 | SARIF 2.1.0 | 直接接入 GitHub Code Scanning / 任意 SARIF 工具链 |
 | 信任层 | Trust API | 自动签发认证证书 + 0-100 信任评分，供服务交易市场调用 |
 
@@ -77,15 +79,20 @@ AIShield 是少数同时覆盖 **MCP Top 10** 与 **Agentic AI Top 10** 双维�
 
 ## 5. 差异化定位
 
-| 维度 | AIShield | Claude Security | aishield.ai | mcp-audit |
-|------|----------|----------------|-------------|-----------|
-| MCP Top 10 | ✅ 110 规则 | 语义(云) | ✅ | ✅ 89 |
-| Agentic AI Top 10 | ✅ 60 规则 | 部分 | ❌ | ❌ |
-| 本地/零依赖 | ✅ 规则引擎本地零依赖 | ❌ 上云 | ❓ | ✅ |
-| 零成本 | ✅ 开源 | ❌ 计费 | ❌ 付费 | ✅ |
-| SBOM/SARIF | ✅ | ⚠️ | ❌ | ✅ SBOM |
-| 信任/认证 API | ✅ | ❌ | ⚠️ | ❌ |
-| 中文提示注入 | ✅ 31 条 | ⚠️ | ❌ | ❌ |
+| 维度 | AIShield | Claude Security | aishield.ai | mcp-audit | mcpaudit(PyPI) | agent-security-scanner-mcp |
+|------|----------|----------------|-------------|-----------|----------------|----------------------------|
+| MCP Top 10 | ✅ 110 规则 | 语义(云) | ✅ | ✅ 89 | ✅ 72+ | ✅ |
+| Agentic AI Top 10 | ✅ 60 规则 | 部分 | ❌ | ❌ | ⚠️ 宣称覆盖 | 部分 |
+| 本地/零依赖 | ✅ 规则引擎本地零依赖 | ❌ 上云 | ❓ | ✅ | ✅ | ⚠️ 需 430 万包库 |
+| 零成本 | ✅ 开源 | ❌ 计费 | ❌ 付费 | ✅ | ✅ | ✅ |
+| SBOM/SARIF | ✅ | ⚠️ | ❌ | ✅ SBOM | ✅ SARIF | ✅ CycloneDX |
+| 信任/认证 API | ✅ L1–L3 + 0–100 分 | ❌ | ⚠️ | ❌ | ⚠️ 仅 Trust Score | ⚠️ 仅 A–F 评级 |
+| 幻觉包检测 | ✅ **含非形近幻觉（离线）** | ❌ | ❌ | ⚠️ 仅 typosquat | ❌ | ✅ 大库比对 |
+| 跨注册表混淆 | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| 依赖卫生（安装脚本/锁文件） | ✅ | ⚠️ | ❌ | ⚠️ | ❌ | ✅ |
+| 中文提示注入 | ✅ 31 条 | ⚠️ | ❌ | ❌ | ❌ | ❌ |
+
+> **诚实标注**：测试规模上 AIShield（127）低于 mcp-audit（2,484）与 mcpaudit（6,430+）；深度 AST/taint 分析弱于 agent-security-scanner-mcp（1,000+ 规则、12 语言）。AIShield 的差异化不在"规则条数"，而在**双维覆盖 + 中性信任层 + 全离线幻觉包检测**这三项组合。
 
 ### 5.1 2026-08 生态快照：竞争全景（运营情报更新）
 
@@ -98,6 +105,8 @@ mid-2026 的 MCP/Agent 安全品类已显著拥挤，分三派：
 | 企业网关/平台 | Palo Alto Prisma AIRS AI Gateway(GA 2026-07-16)、Cyera AI Guardian、Teleport、MCP Guardian(EQTY Lab)、Cisco AI Defense | 运行时 inline/代理 | 定位不同（运行时 vs 扫描+信任） |
 
 **关键威胁数据（论证紧迫性）：** Palo Alto Unit 42 测得单 agent 连 5 个 MCP server 时 **78.3%** 独立攻击成功率；Cisco 分析 **31,000+** agent skills 中 **26%** 含 ≥1 漏洞；Dark Reading poll 显示 48% 安全从业者视 agentic AI 为 2026 头号攻击向量。
+
+**供应链专项（2026-08 更新）：** USENIX Security 2025 测 16 个模型 / 57.6 万代码样本，**19.7%** 的模型推荐包不存在，产生 **205,474** 个唯一虚构包名，**43–58%** 可复现（开源模型 21.7% vs 商业 5.2%；2026 复现研究收敛至 4.62%–6.10%，未归零）。其中**约 50% 的幻觉名与任何真实包都不形近**，相似度/编辑距离检测结构性失效；另有 **8.7%** 的 Python 幻觉名在 npm 上真实存在，构成跨注册表攻击面。真实案例：`react-codeshift`（2026-01）经 **AI 生成的 skill 文件** 在 **237 个仓库** 间 agent→agent 扩散。**AIShield v4.2.0+ 已针对这两类盲区补齐纯离线检测。**
 
 **AIShield 可放大优势（错位竞争，不硬刚）：**
 1. **本地零依赖、代码不上云** —— 压制所有云 SaaS（Nightfall/Akto/ScanMCP/aishield.ai）。
