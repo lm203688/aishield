@@ -18,6 +18,7 @@ from .rules import (
     OWASP_MCP_TOP10, DANGEROUS_NPM_PACKAGES, DANGEROUS_PYPI_PACKAGES,
     SKIP_EXTENSIONS, SKIP_NAMES, analyze as rules_analyze,
     check_package_name,
+    check_dependency_hygiene,
 )
 
 try:
@@ -172,7 +173,7 @@ def dependency_analysis(files):
             for line in content.strip().split('\n'):
                 line = line.strip()
                 if line and not line.startswith('#'):
-                    parts = re.split('[=<>!]+', line, 1)
+                    parts = re.split('[=<>!]+', line, maxsplit=1)
                     name = parts[0].strip()
                     ver = parts[1].strip() if len(parts) > 1 else "latest"
                     dependencies.append({"name": name, "version": ver, "source": "pypi"})
@@ -201,6 +202,21 @@ def dependency_analysis(files):
                     for _f in check_package_name(_name, "pypi"):
                         _f["file"] = fname
                         findings.append(_f)
+
+    # manifest 级依赖卫生（安装脚本投毒 / 不可信来源 / 未锁定版本 / 缺 lockfile）
+    try:
+        findings.extend(check_dependency_hygiene(files))
+    except Exception:
+        pass
+
+    # 幻觉包 advisory 降噪：同类 info 级最多保留 5 条
+    _advisory = [f for f in findings if f.get("type") == "suspected_hallucinated_package"]
+    if len(_advisory) > 5:
+        keep = set(id(f) for f in _advisory[:5])
+        findings = [
+            f for f in findings
+            if f.get("type") != "suspected_hallucinated_package" or id(f) in keep
+        ]
 
     return {"findings": findings, "dependencies": dependencies, "total_dependencies": len(dependencies)}
 
