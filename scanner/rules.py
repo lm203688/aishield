@@ -16,6 +16,7 @@ OWASP MCP Top 10 (2025 v0.1) 真实映射:
 规则统计目标: MCP 10类 × 6条 + Agentic(AIS) 10类 × 6条 = 120+ 规则
 """
 
+import json
 import re
 
 # ============================================================
@@ -642,9 +643,8 @@ for _key, _entry in GENERATED_PACKAGE_BLACKLIST.items():
 # 纯本地、零依赖、不联网；联网校验作为可选远程项（见 engine 的 LLM 供应链分析）。
 # ============================================================
 
-# 可信包名录（常见 npm / PyPI 官方包，用于编辑距离比对）
-LEGIT_PACKAGE_CATALOG = {
-    # npm
+# 可信包名录（常见 npm / PyPI 官方包，用于编辑距离比对 + 跨注册表混淆判定）
+NPM_PACKAGE_CATALOG = {
     "express", "lodash", "react", "react-dom", "vue", "axios", "request",
     "chalk", "commander", "fs-extra", "dotenv", "jsonwebtoken", "bcrypt",
     "webpack", "babel", "eslint", "prettier", "mongoose", "sequelize",
@@ -652,7 +652,17 @@ LEGIT_PACKAGE_CATALOG = {
     "node-fetch", "express-validator", "helmet", "passport", "socketio",
     "typescript", "tslib", "rimraf", "glob", "minimist", "yargs", "debug",
     "chai", "mocha", "jest", "npm", "yarn", "pnpm", "@modelcontextprotocol/sdk",
-    # pypi
+    # 高频合法复合名（避免复合式幻觉启发式误报）
+    "react-router", "react-router-dom", "react-redux", "react-scripts",
+    "react-native", "react-hook-form", "react-query", "react-codemod",
+    "jscodeshift", "vue-router", "styled-components", "date-fns",
+    "cross-env", "ts-node", "ts-jest", "eslint-config-prettier",
+    "eslint-plugin-react", "babel-loader", "css-loader", "style-loader",
+    "html-webpack-plugin", "node-cron", "next", "nuxt", "vite", "rollup",
+    "esbuild", "zod", "redux", "redux-thunk", "graphql", "apollo-server",
+}
+
+PYPI_PACKAGE_CATALOG = {
     "numpy", "pandas", "flask", "django", "requests", "sqlalchemy",
     "pytest", "setuptools", "click", "jinja2", "fastapi", "uvicorn",
     "scipy", "matplotlib", "scikit-learn", "tensorflow", "torch", "pytorch",
@@ -660,7 +670,17 @@ LEGIT_PACKAGE_CATALOG = {
     "pydantic", "httpx", "aiohttp", "beautifulsoup4", "lxml", "cryptography",
     "python-dotenv", "six", "certifi", "urllib3", "idna", "charset-normalizer",
     "rich", "typer", "structlog", "loguru", "mcp", "pymupdf",
+    # 高频合法复合名
+    "langchain-core", "langchain-community", "langchain-openai",
+    "langchain-anthropic", "llama-index", "sentence-transformers",
+    "huggingface-hub", "python-multipart", "python-dateutil", "types-requests",
+    "google-cloud-storage", "azure-identity", "openai-agents", "mcp-server",
+    "pytest-asyncio", "pytest-cov", "flask-cors", "flask-sqlalchemy",
+    "django-rest-framework", "djangorestframework", "opentelemetry-api",
 }
+
+# 向后兼容：并集
+LEGIT_PACKAGE_CATALOG = NPM_PACKAGE_CATALOG | PYPI_PACKAGE_CATALOG
 
 
 def _levenshtein(a, b):
@@ -711,6 +731,40 @@ def _entropy(s):
     return -sum((c / len(s)) * math.log2(c / len(s)) for c in cnt.values())
 
 
+# ------------------------------------------------------------------
+# Slopsquatting（AI 幻觉包）离线启发式
+# 背景：USENIX Security 2025 —— 16 个模型 / 57.6 万代码样本中 19.7% 推荐的包不存在，
+# 共 205,474 个唯一虚构包名；43~58% 的幻觉名可复现。关键点是**约一半幻觉名与任何
+# 真实包都不形近**，编辑距离/相似度检测天然失效（典型案例 react-codeshift，
+# 2026-01 经 AI 生成的 skill 文件扩散到 237 个仓库）。
+# 因此这里补一条「复合式幻觉包」通道：以生态锚点词 + 未收录 + 复合结构为特征，
+# 输出 **advisory（info 级，不扣分）**，提示人工/远程核实注册表存在性。
+# 纯离线，不联网；联网存在性校验属可选远程项。
+# ------------------------------------------------------------------
+
+# 生态锚点词：出现即说明该名字自称属于某知名生态
+_ECOSYSTEM_ANCHORS = {
+    "react", "vue", "angular", "svelte", "next", "nuxt", "node", "npm",
+    "webpack", "babel", "eslint", "jest", "express", "redux", "graphql",
+    "langchain", "llamaindex", "openai", "anthropic", "claude", "gpt",
+    "mcp", "modelcontextprotocol", "huggingface", "transformers", "torch",
+    "tensorflow", "pandas", "numpy", "django", "flask", "fastapi", "pytest",
+    "aws", "azure", "gcp", "google", "cloudflare", "supabase", "stripe",
+    "agent", "agents", "ollama", "cohere", "gemini", "copilot",
+}
+
+# 内部命名空间词（dependency confusion / 命名空间劫持信号）
+_INTERNAL_NAMESPACE_HINTS = {
+    "internal", "private", "corp", "corporate", "intranet", "inhouse",
+    "in-house", "confidential", "staging", "prod-only", "companyname",
+    "acme", "sandbox-internal",
+}
+
+
+def _split_tokens(name):
+    return [t for t in re.split(r"[-_.@/]+", name) if t]
+
+
 def check_package_name(name, ecosystem="npm"):
     """
     离线检测单个依赖名是否为幻觉包 / typosquat / 仿冒包。
@@ -724,12 +778,40 @@ def check_package_name(name, ecosystem="npm"):
     # 去掉 npm scope 前缀（如 @scope/name -> name）
     if n.startswith("@") and "/" in n:
         n = n.split("/", 1)[1]
-    if not n or n in LEGIT_PACKAGE_CATALOG:
+    if not n:
         return findings
+    _is_npm = ecosystem in ("npm", "node")
+    _is_py = ecosystem in ("pypi", "pip", "python")
     # 已知恶意包由 dependency_analysis 处理，这里不重复
-    if ecosystem in ("npm", "node") and n in DANGEROUS_NPM_PACKAGES:
+    if _is_npm and n in DANGEROUS_NPM_PACKAGES:
         return findings
-    if ecosystem in ("pypi", "pip", "python") and n in DANGEROUS_PYPI_PACKAGES:
+    if _is_py and n in DANGEROUS_PYPI_PACKAGES:
+        return findings
+
+    # 0) 跨注册表混淆（研究：8.7% 的 Python 幻觉包名在 npm 上真实存在）
+    #    必须先于「可信名录」早退判定，否则会被并集名录吞掉。
+    if _is_py and n in NPM_PACKAGE_CATALOG and n not in PYPI_PACKAGE_CATALOG:
+        findings.append({
+            "type": "cross_registry_confusion",
+            "severity": "medium",
+            "description": f"跨注册表混淆: '{name}' 是 npm 生态包名，却出现在 Python 依赖中",
+            "owasp_category": "MCP04",
+            "evidence": f"{name} (npm-only name in pypi manifest)",
+            "remediation": "确认生态归属；对 agent 生成的依赖强制 registry 白名单",
+        })
+        return findings
+    if _is_npm and n in PYPI_PACKAGE_CATALOG and n not in NPM_PACKAGE_CATALOG:
+        findings.append({
+            "type": "cross_registry_confusion",
+            "severity": "medium",
+            "description": f"跨注册表混淆: '{name}' 是 PyPI 生态包名，却出现在 npm 依赖中",
+            "owasp_category": "MCP04",
+            "evidence": f"{name} (pypi-only name in npm manifest)",
+            "remediation": "确认生态归属；对 agent 生成的依赖强制 registry 白名单",
+        })
+        return findings
+
+    if n in LEGIT_PACKAGE_CATALOG:
         return findings
 
     # 1) 编辑距离 typosquat
@@ -767,7 +849,12 @@ def check_package_name(name, ecosystem="npm"):
     root = n.split("-")[0].split("_")[0].split(".")[0]
     if root in _BRAND_ROOTS and n != root:
         tail = n[len(root):].lstrip("-_.")
-        if any(w in tail for w in _IMPERSONATION_SOCIAL) or (len(tail) >= 6 and _entropy(tail) > 3.0):
+        # 熵启发式只对「单段无分隔」的尾部生效，避免 langchain-mcp-toolkit 这类
+        # 语义化复合名被误判为品牌仿冒（它们应走幻觉包 advisory 通道）。
+        _tail_is_single_token = not any(sep in tail for sep in "-_.")
+        if any(w in tail for w in _IMPERSONATION_SOCIAL) or (
+            _tail_is_single_token and len(tail) >= 6 and _entropy(tail) > 3.0
+        ):
             findings.append({
                 "type": "brand_impersonation",
                 "severity": "medium",
@@ -775,6 +862,183 @@ def check_package_name(name, ecosystem="npm"):
                 "owasp_category": "MCP04",
                 "evidence": f"{name} (root={root})",
             })
+            return findings
+
+    tokens = _split_tokens(n)
+
+    # 4) 依赖混淆 / 内部命名空间外泄（内部包名出现在公共 manifest 中）
+    if any(t in _INTERNAL_NAMESPACE_HINTS for t in tokens):
+        findings.append({
+            "type": "dependency_confusion",
+            "severity": "medium",
+            "description": f"依赖混淆风险: '{name}' 含内部命名空间标识，公共注册表可被抢注同名包",
+            "owasp_category": "MCP04",
+            "evidence": f"{name} (internal token)",
+            "remediation": "为内部包配置私有 registry scope 并锁定解析顺序",
+        })
+        return findings
+
+    # 5) 复合式幻觉包（slopsquatting）—— 与真实包不形近，编辑距离检测失效的那一半
+    #    特征：≥2 段的复合名 + 至少一个生态锚点词 + 不在可信名录内。
+    #    严重度 info（不扣分），仅作「请核实注册表存在性」的 advisory。
+    if 2 <= len(tokens) <= 5 and all(t.isalnum() for t in tokens):
+        anchors = [t for t in tokens if t in _ECOSYSTEM_ANCHORS]
+        if anchors:
+            findings.append({
+                "type": "suspected_hallucinated_package",
+                "severity": "info",
+                "description": (
+                    f"疑似 AI 幻觉包(slopsquatting): '{name}' 借用 '{anchors[0]}' 生态命名但不在可信名录，"
+                    f"需核实其在注册表中真实存在"
+                ),
+                "owasp_category": "MCP04",
+                "evidence": f"{name} (anchor={anchors[0]}, composite)",
+                "remediation": "安装前校验注册表存在性/包龄/下载量；使用 lockfile 与依赖白名单",
+            })
+
+    return findings
+
+
+# ------------------------------------------------------------------
+# 依赖卫生检查（manifest 级，离线）
+# 覆盖：安装脚本投毒、不可信来源直装、版本未锁定、缺 lockfile。
+# ------------------------------------------------------------------
+
+_INSTALL_HOOK_KEYS = ("preinstall", "install", "postinstall", "prepare")
+_INSTALL_HOOK_DANGER = re.compile(
+    r"\b(curl|wget|iwr|invoke-webrequest|base64\s+-d|chmod\s+\+x|bash\s+-c|sh\s+-c|"
+    r"node\s+-e|python\s+-c|powershell|certutil|eval)\b",
+    re.IGNORECASE,
+)
+_UNTRUSTED_SPEC = re.compile(
+    r"^(git\+|git:|github:|gitlab:|bitbucket:|http://|file:|link:)", re.IGNORECASE
+)
+_UNPINNED_SPEC = {"*", "", "latest", "x", "*.*", "next"}
+
+
+def check_dependency_hygiene(files):
+    """
+    manifest 级依赖卫生检查（纯离线）。
+    files: {filename: content}
+    返回 findings 列表。
+    """
+    findings = []
+    if not isinstance(files, dict):
+        return findings
+
+    lowered = {k.lower().replace("\\", "/").split("/")[-1] for k in files}
+    has_npm_lock = bool(
+        lowered & {"package-lock.json", "yarn.lock", "pnpm-lock.yaml", "npm-shrinkwrap.json"}
+    )
+
+    for fname, content in files.items():
+        base = fname.lower().replace("\\", "/").split("/")[-1]
+        if not isinstance(content, str):
+            continue
+
+        if base == "package.json":
+            try:
+                pkg = json.loads(content)
+            except Exception:
+                continue
+            if not isinstance(pkg, dict):
+                continue
+
+            # a) 安装脚本投毒
+            scripts = pkg.get("scripts") or {}
+            if isinstance(scripts, dict):
+                for hook in _INSTALL_HOOK_KEYS:
+                    cmd = scripts.get(hook)
+                    if isinstance(cmd, str) and _INSTALL_HOOK_DANGER.search(cmd):
+                        findings.append({
+                            "type": "install_script_execution",
+                            "severity": "critical",
+                            "description": f"安装期脚本执行高危命令: scripts.{hook}",
+                            "file": fname,
+                            "owasp_category": "MCP04",
+                            "evidence": cmd[:160],
+                            "remediation": "使用 --ignore-scripts 安装并人工审计该 hook",
+                        })
+
+            # b) 依赖来源与版本锁定
+            declared = 0
+            for dep_type in ("dependencies", "devDependencies", "optionalDependencies"):
+                deps = pkg.get(dep_type) or {}
+                if not isinstance(deps, dict):
+                    continue
+                for dname, spec in deps.items():
+                    declared += 1
+                    spec_s = spec if isinstance(spec, str) else ""
+                    if _UNTRUSTED_SPEC.match(spec_s.strip()):
+                        findings.append({
+                            "type": "untrusted_dependency_source",
+                            "severity": "high",
+                            "description": f"依赖 '{dname}' 从非注册表来源安装: {spec_s[:60]}",
+                            "file": fname,
+                            "owasp_category": "MCP04",
+                            "evidence": f"{dname}: {spec_s[:80]}",
+                            "remediation": "改用已发布的注册表版本并锁定完整性哈希",
+                        })
+                    elif spec_s.strip().lower() in _UNPINNED_SPEC:
+                        findings.append({
+                            "type": "unpinned_dependency",
+                            "severity": "medium",
+                            "description": f"依赖 '{dname}' 未锁定版本({spec_s or '空'})，存在供应链漂移/rug-pull 风险",
+                            "file": fname,
+                            "owasp_category": "MCP04",
+                            "evidence": f"{dname}: {spec_s}",
+                            "remediation": "锁定精确版本并提交 lockfile",
+                        })
+
+            if declared and not has_npm_lock:
+                findings.append({
+                    "type": "missing_lockfile",
+                    "severity": "low",
+                    "description": "声明了依赖但未见 lockfile，幻觉包/漂移无法 fail-closed",
+                    "file": fname,
+                    "owasp_category": "MCP04",
+                    "evidence": f"{declared} deps, no package-lock.json/yarn.lock/pnpm-lock.yaml",
+                    "remediation": "提交 lockfile 并在 CI 使用 npm ci",
+                })
+
+        elif base == "requirements.txt":
+            for raw in content.split("\n"):
+                line = raw.strip()
+                if not line or line.startswith("#"):
+                    continue
+                if line.startswith("-e ") or line.startswith("--editable"):
+                    target = line.split(None, 1)[1] if " " in line else ""
+                    if target.startswith(("git+", "http://", "https://")):
+                        findings.append({
+                            "type": "untrusted_dependency_source",
+                            "severity": "high",
+                            "description": f"可编辑依赖来自非 PyPI 来源: {target[:60]}",
+                            "file": fname,
+                            "owasp_category": "MCP04",
+                            "evidence": line[:120],
+                            "remediation": "改用 PyPI 发布版本并锁定哈希",
+                        })
+                    continue
+                if line.startswith(("git+", "http://")):
+                    findings.append({
+                        "type": "untrusted_dependency_source",
+                        "severity": "high",
+                        "description": f"依赖从非 PyPI/明文 HTTP 来源安装: {line[:60]}",
+                        "file": fname,
+                        "owasp_category": "MCP04",
+                        "evidence": line[:120],
+                        "remediation": "改用 HTTPS 的 PyPI 发布版本并锁定哈希",
+                    })
+                elif "--index-url" in line or "--extra-index-url" in line:
+                    findings.append({
+                        "type": "dependency_confusion",
+                        "severity": "medium",
+                        "description": "requirements 指定了额外索引源，存在依赖混淆解析风险",
+                        "file": fname,
+                        "owasp_category": "MCP04",
+                        "evidence": line[:120],
+                        "remediation": "固定单一索引源或使用 --index-url 替代 --extra-index-url",
+                    })
 
     return findings
 
