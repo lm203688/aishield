@@ -1,0 +1,8 @@
+{
+  "name": "benchmark-benign",
+  "version": "1.0.0",
+  "description": "只读配置读取工具（基准良性样本）",
+  "dependencies": {
+    "lodash": "^4.17.21"
+  }
+}
