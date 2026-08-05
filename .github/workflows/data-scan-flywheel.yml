@@ -6,7 +6,7 @@ name: AIShield Data Flywheel (Batch Scan to Self-Built Database)
 
 on:
   schedule:
-    - cron: '30 5 * * 2,5'   # 每周二、周五 05:30 批量入库
+    - cron: '*/20 * * * *'   # 加速期每20分钟（2026-08-31 回滚至 '30 5 * * 2,5'）
   workflow_dispatch:
     inputs:
       source:
