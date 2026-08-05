@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [ main ]
   schedule:
-    - cron: '*/20 * * * *'  # 加速期每20分钟（2026-08-31 回滚至 '8 3 * * *'）
+    - cron: '0 * * * *'  # 加速期每小时（2026-08-31 回滚至 '8 3 * * *'）
   workflow_dispatch:      # 补齐手动触发，故障时可立即补跑而无需等下一个 cron
 
 jobs:
