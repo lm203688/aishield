@@ -5,13 +5,12 @@ on:
   pull_request:
     branches: [main]
   schedule:
-    - cron: '*/20 * * * *'  # 加速期每20分钟（2026-08-31 回滚至 '52 4 * * 1'）
+    - cron: '0 * * * *'  # 加速期每小时（2026-08-31 回滚至 '52 4 * * 1'）
   workflow_dispatch:
 
 permissions:
   contents: read
   security-events: write
-  issues: write
 
 jobs:
   aishield-self-scan:
@@ -51,7 +50,7 @@ jobs:
 
       - name: Check Risk Level
         run: |
-          SCORE=$(cat scan-report.json | python3 -c "import sys,json; d=json.load(sys.stdin); r=d.get('report') or {}; print(r.get('overall_score', d.get('score',0)))")
+          SCORE=$(cat scan-report.json | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('score',0))")
           echo "Security Score: $SCORE"
           if [ "$SCORE" -lt 60 ]; then
             echo "::error::Security score $SCORE is below threshold (60)"
@@ -65,7 +64,7 @@ jobs:
           script: |
             const fs = require('fs');
             let score = 0;
-            try { const d = JSON.parse(fs.readFileSync('scan-report.json','utf8')); score = (d.report && d.report.overall_score != null) ? d.report.overall_score : (d.score ?? 0); } catch(e) { console.log('no report'); }
+            try { const d = JSON.parse(fs.readFileSync('scan-report.json','utf8')); score = d.score ?? 0; } catch(e) { console.log('no report'); }
             if (score >= 60) { console.log('安全得分正常:', score); return; }
             const title = `🔒 安全门禁未通过：得分 ${score}/100 (run ${context.runId})`;
             const { data: issues } = await github.rest.issues.listForRepo({
