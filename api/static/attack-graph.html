@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AIShield · 攻击路径图 (Attack Path Graph)</title>
+<style>
+  :root{
+    --bg:#0f1419; --panel:#161c24; --panel2:#1d2530; --line:#2a3340;
+    --txt:#e6edf3; --muted:#8b98a8; --accent:#3fb950; --accent2:#58a6ff;
+    --crit:#f85149; --high:#ff7b72; --med:#d29922; --low:#58a6ff; --info:#8b98a8;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,Segoe UI,Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
+       background:var(--bg);color:var(--txt);height:100vh;display:flex;flex-direction:column}
+  header{padding:12px 18px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px}
+  header h1{font-size:15px;margin:0;font-weight:600}
+  header .tag{font-size:11px;color:var(--muted);border:1px solid var(--line);padding:2px 8px;border-radius:10px}
+  .main{flex:1;display:flex;min-height:0}
+  .sidebar{width:330px;background:var(--panel);border-right:1px solid var(--line);
+           display:flex;flex-direction:column;min-height:0}
+  .sidebar .sec{padding:14px;border-bottom:1px solid var(--line)}
+  .sidebar h2{font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin:0 0 10px}
+  textarea{width:100%;height:150px;background:var(--panel2);color:var(--txt);border:1px solid var(--line);
+           border-radius:6px;padding:8px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;resize:vertical}
+  .row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+  button{background:var(--accent2);color:#06121f;border:none;padding:7px 12px;border-radius:6px;
+         font-size:12px;font-weight:600;cursor:pointer}
+  button.ghost{background:transparent;color:var(--txt);border:1px solid var(--line)}
+  button:hover{filter:brightness(1.1)}
+  .graph-wrap{flex:1;position:relative;min-width:0}
+  svg{width:100%;height:100%;display:block;background:
+      radial-gradient(circle at 30% 20%, #14202c 0, var(--bg) 70%)}
+  .node circle{r:18;stroke:#0c1116;stroke-width:2;cursor:grab}
+  .node text{fill:var(--txt);font-size:11px;text-anchor:middle;pointer-events:none;paint-order:stroke;
+             stroke:#0c1116;stroke-width:3px;stroke-linejoin:round}
+  .link{stroke-opacity:.55}
+  .legend{position:absolute;left:12px;bottom:12px;background:rgba(22,28,36,.85);border:1px solid var(--line);
+          border-radius:8px;padding:10px 12px;font-size:11px;color:var(--muted)}
+  .legend b{color:var(--txt)}
+  .rec{font-size:12px;line-height:1.7}
+  .rec .k{color:var(--muted)}
+  .rec .v{color:var(--txt);font-weight:600}
+  .pill{display:inline-block;background:var(--panel2);border:1px solid var(--line);border-radius:10px;
+        padding:1px 8px;margin:2px 2px 0 0;font-size:11px}
+  .stat{display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:1px dashed var(--line)}
+  .stat .v{font-weight:600}
+  .err{color:var(--high);font-size:12px;white-space:pre-wrap}
+  .hint{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.5}
+</style>
+</head>
+<body>
+<header>
+  <h1>🔗 AIShield 攻击路径图</h1>
+  <span class="tag">F4 · 离线渲染 · 0 出网</span>
+  <span class="tag" id="meta">POST /api/v1/scan/attack-path</span>
+</header>
+<div class="main">
+  <div class="sidebar">
+    <div class="sec">
+      <h2>输入 (inventory + toxic_findings)</h2>
+      <textarea id="input" spellcheck="false"></textarea>
+      <div class="row">
+        <button id="run">▶ 运行分析</button>
+        <button class="ghost" id="sample">载入示例</button>
+        <button class="ghost" id="clear">清空图</button>
+      </div>
+      <div class="hint">结构: <code>{"inventory":[{"name","client","capabilities":[]}],"toxic_findings":[{"type":"cross_server_toxic_flow","capability_pair":["a","b"],"severity":"high"}]}</code></div>
+    </div>
+    <div class="sec">
+      <h2>最小移除集建议 (hitting set)</h2>
+      <div id="rec" class="rec"><span class="k">尚未分析</span></div>
+    </div>
+  </div>
+  <div class="graph-wrap">
+    <svg id="svg"></svg>
+    <div class="legend">
+      <div><b>节点</b> = MCP server（颜色 = 客户端）</div>
+      <div><b>连线</b> = 跨 server 毒性能力流（颜色 = 严重度）</div>
+      <div>critical <span style="color:var(--crit)">■</span> high <span style="color:var(--high)">■</span> medium <span style="color:var(--med)">■</span> low <span style="color:var(--low)">■</span></div>
+      <div style="margin-top:4px">拖拽节点可重新布局 · 滚轮缩放</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SAMPLE = {
+  inventory: [
+    {name:"file-reader", client:"claude", capabilities:["file-read","fs-write"]},
+    {name:"net-sender", client:"claude", capabilities:["network","http-post"]},
+    {name:"shell-runner", client:"cursor", capabilities:["shell-exec"]},
+    {name:"db-query", client:"vscode", capabilities:["sql","data-read"]},
+    {name:"web-fetch", client:"claude", capabilities:["network","http-get"]}
+  ],
+  toxic_findings: [
+    {type:"cross_server_toxic_flow", severity:"high", capability_pair:["file-read","network"], description:"读文件后外发"},
+    {type:"cross_server_toxic_flow", severity:"critical", capability_pair:["shell-exec","network"], description:"任意命令执行+外联"},
+    {type:"cross_server_toxic_flow", severity:"medium", capability_pair:["sql","network"], description:"数据库外泄"}
+  ]
+};
+
+const svg = document.getElementById('svg');
+const input = document.getElementById('input');
+const recBox = document.getElementById('rec');
+let nodes=[], links=[], sim=null, view={k:1, x:0, y:0};
+
+const CLIENT_COLORS = {};
+const PALETTE = ['#58a6ff','#3fb950','#d29922','#bc8cff','#f778ba','#39c5cf','#ff9e64'];
+function colorFor(client){
+  if(!CLIENT_COLORS[client]){
+    const i=Object.keys(CLIENT_COLORS).length;
+    CLIENT_COLORS[client]=PALETTE[i%PALETTE.length];
+  }
+  return CLIENT_COLORS[client];
+}
+const SEV_COLOR={critical:'#f85149',high:'#ff7b72',medium:'#d29922',low:'#58a6ff',info:'#8b98a8'};
+const SEV_W={critical:3.5,high:2.6,medium:1.8,low:1.2,info:1};
+
+function svgSize(){return {w:svg.clientWidth,h:svg.clientHeight};}
+
+function render(){
+  const {w,h}=svgSize();
+  let html='';
+  for(const l of links){
+    const a=byId(l.source), b=byId(l.target);
+    if(!a||!b) continue;
+    const col=SEV_COLOR[l.severity]||'#888';
+    const sw=SEV_W[l.severity]||1;
+    html+=`<line class="link" x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="${col}" stroke-width="${sw}"/>`;
+  }
+  for(const n of nodes){
+    const c=colorFor(n.client);
+    html+=`<g class="node" transform="translate(${n.x},${n.y})">
+      <circle r="18" fill="${c}"/>`;
+    const label=n.label.length>12?n.label.slice(0,11)+'…':n.label;
+    html+=`<text y="4">${escapeHtml(label)}</text></g>`;
+  }
+  svg.innerHTML=html;
+  bindDrag();
+}
+function byId(id){return nodes.find(n=>n.id===id);}
+function escapeHtml(s){return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+
+function simulate(steps=300){
+  const {w,h}=svgSize();
+  const cx=w/2, cy=h/2;
+  for(let s=0;s<steps;s++){
+    // 电荷斥力
+    for(let i=0;i<nodes.length;i++){
+      const a=nodes[i]; let fx=0,fy=0;
+      for(let j=0;j<nodes.length;j++){
+        if(i===j) continue;
+        const b=nodes[j];
+        let dx=a.x-b.x, dy=a.y-b.y;
+        let d2=dx*dx+dy*dy+0.01;
+        const f=2000/d2;
+        fx+=dx/Math.sqrt(d2)*f; fy+=dy/Math.sqrt(d2)*f;
+      }
+      a.vx=(a.vx||0)+(fx*0.01); a.vy=(a.vy||0)+(fy*0.01);
+    }
+    // 连线弹簧
+    for(const l of links){
+      const a=byId(l.source), b=byId(l.target); if(!a||!b) continue;
+      let dx=b.x-a.x, dy=b.y-a.y;
+      let d=Math.sqrt(dx*dx+dy*dy)+0.01;
+      const target=120, f=(d-target)/d*0.05;
+      a.vx=(a.vx||0)+dx*f; a.vy=(a.vy||0)+dy*f;
+      b.vx=(b.vx||0)-dx*f; b.vy=(b.vy||0)-dy*f;
+    }
+    // 向心力 + 积分 + 阻尼
+    for(const n of nodes){
+      n.vx=(n.vx||0)+(cx-n.x)*0.002;
+      n.vy=(n.vy||0)+(cy-n.y)*0.002;
+      n.vx*=0.85; n.vy*=0.85;
+      n.x+=n.vx; n.y+=n.vy;
+      n.x=Math.max(24,Math.min(w-24,n.x));
+      n.y=Math.max(24,Math.min(h-24,n.y));
+    }
+  }
+  render();
+}
+
+function loadGraph(graph){
+  nodes=(graph.nodes||[]).map((n,i)=>({...n,x:svgSize().w/2+Math.cos(i)*120,y:svgSize().h/2+Math.sin(i)*120,vx:0,vy:0}));
+  links=(graph.links||[]).map(l=>({...l}));
+  render(); simulate(220);
+}
+
+function showRec(r){
+  if(!r){recBox.innerHTML='<span class="k">无数据</span>';return;}
+  let html='';
+  html+=`<div class="stat"><span class="k">毒性流总数</span><span class="v">${r.total_flows??0}</span></div>`;
+  html+=`<div class="stat"><span class="k">已打破</span><span class="v" style="color:var(--accent)">${r.broken_flows??0}</span></div>`;
+  html+=`<div class="stat"><span class="k">剩余未打破</span><span class="v" style="color:${r.remaining_flows?'var(--high)':'var(--accent)'}">${r.remaining_flows??0}</span></div>`;
+  html+=`<div class="stat"><span class="k">迭代</span><span class="v">${r.iterations??0}</span></div>`;
+  const rm=r.removed_servers||[];
+  html+=`<div style="margin-top:8px"><span class="k">建议移除 server：</span><br>`;
+  html+= rm.length? rm.map(s=>`<span class="pill">${escapeHtml(s)}</span>`).join('') : '<span class="k">无需移除</span>';
+  html+=`</div>`;
+  if(r.note) html+=`<div class="hint">${escapeHtml(r.note)}</div>`;
+  recBox.innerHTML=html;
+}
+
+async function analyze(){
+  let payload;
+  try{ payload=JSON.parse(input.value||'{}'); }
+  catch(e){ recBox.innerHTML=`<div class="err">JSON 解析失败: ${e.message}</div>`; return; }
+  recBox.innerHTML='<span class="k">请求中…</span>';
+  try{
+    const resp=await fetch('/api/v1/scan/attack-path',{method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({inventory:payload.inventory||[],toxic_findings:payload.toxic_findings||[]})});
+    const data=await resp.json();
+    if(data.graph) loadGraph(data.graph);
+    showRec(data.recommendation);
+  }catch(e){
+    recBox.innerHTML=`<div class="err">请求失败: ${e.message}\n(确保 api/server.py 已启动于 :8450)</div>`;
+  }
+}
+
+function bindDrag(){
+  const gs=svg.querySelectorAll('.node');
+  gs.forEach(g=>{
+    g.addEventListener('mousedown',ev=>{
+      ev.preventDefault();
+      const id=g.querySelector('text').textContent;
+      const n=nodes.find(x=>{const l=x.label.length>12?x.label.slice(0,11)+'…':x.label;return l===id;});
+      if(!n) return;
+      let moved=true;
+      function move(e){
+        const r=svg.getBoundingClientRect();
+        n.x=e.clientX-r.left; n.y=e.clientY-r.top; n.vx=0;n.vy=0; render();
+      }
+      function up(){ document.removeEventListener('mousemove',move); document.removeEventListener('mouseup',up); }
+      document.addEventListener('mousemove',move); document.addEventListener('mouseup',up);
+    });
+  });
+}
+
+document.getElementById('run').onclick=analyze;
+document.getElementById('sample').onclick=()=>{input.value=JSON.stringify(SAMPLE,null,2);analyze();};
+document.getElementById('clear').onclick=()=>{nodes=[];links=[];render();showRec(null);};
+
+window.addEventListener('resize',()=>{if(nodes.length)render();});
+input.value=JSON.stringify(SAMPLE,null,2);
+analyze();
+</script>
+</body>
+</html>
