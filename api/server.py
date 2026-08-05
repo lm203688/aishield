@@ -1366,6 +1366,11 @@ blockquote{{border-left:4px solid #3b82f6;padding-left:16px;margin-left:0;color:
             # 品牌水印
             response = {
                 "success": True,
+                # 顶层便捷字段：供 CI 门禁 / Agent 直接读取，避免深路径取值失败静默得 0。
+                # 与 report.overall_score 恒等，属附加字段，不破坏既有结构。
+                "score": result.get("overall_score", 0),
+                "badge_level": result.get("badge_level", "none"),
+                "risk_level": result.get("risk_level", ""),
                 "report": result,
                 "powered_by": {
                     "name": "AIShield",
