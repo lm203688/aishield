@@ -19,6 +19,8 @@ from .telemetry import record_scan, get_aggregates, reset as telemetry_reset
 from .live_probe import probe_server_metadata
 from .registry_discovery import discover_across_registries, search_registry
 from .engine import explain_score
+# Fleet 中心化聚合 (F5)
+from .fleet import FleetService, ingest as fleet_ingest, summary as fleet_summary, list_members as fleet_list_members
 
 __all__ = [
     "get_rule_count", "get_all_rules", "OWASP_MCP_TOP10",
@@ -36,4 +38,6 @@ __all__ = [
     "record_scan", "get_aggregates", "telemetry_reset",
     "probe_server_metadata", "discover_across_registries", "search_registry",
     "explain_score",
+    # Fleet 中心化聚合 (F5)
+    "FleetService", "fleet_ingest", "fleet_summary", "fleet_list_members",
 ]
