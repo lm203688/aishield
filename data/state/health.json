@@ -6,12 +6,12 @@
     "score": 4,
     "max_score": 4,
     "http": 200,
-    "latency": 0.419,
-    "checked_at": "2026-08-05T14:19:31.471242+00:00",
+    "latency": 0.466,
+    "checked_at": "2026-08-05T15:05:41.089383+00:00",
     "consecutive_failures": 0,
-    "last_healthy_at": "2026-08-05T14:19:31.471242+00:00",
+    "last_healthy_at": "2026-08-05T15:05:41.089383+00:00",
     "_source": "health_probe",
-    "_ts": "2026-08-05T14:19:31.471843+00:00"
+    "_ts": "2026-08-05T15:05:41.090183+00:00"
   },
   "history": [
     {
@@ -523,8 +523,23 @@
         "consecutive_failures": 0,
         "last_healthy_at": "2026-08-05T14:19:31.471242+00:00"
       }
+    },
+    {
+      "ts": "2026-08-05T15:05:41.090198+00:00",
+      "source": "health_probe",
+      "state": {
+        "healthy": true,
+        "level": "healthy",
+        "score": 4,
+        "max_score": 4,
+        "http": 200,
+        "latency": 0.466,
+        "checked_at": "2026-08-05T15:05:41.089383+00:00",
+        "consecutive_failures": 0,
+        "last_healthy_at": "2026-08-05T15:05:41.089383+00:00"
+      }
     }
   ],
-  "updated": "2026-08-05T14:19:31.471861+00:00",
+  "updated": "2026-08-05T15:05:41.090203+00:00",
   "desc": "线上服务健康事实（由三路探测写入）"
 }
