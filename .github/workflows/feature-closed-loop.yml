@@ -6,7 +6,7 @@ name: AIShield Intelligence-to-Feature Closed-Loop
 
 on:
   schedule:
-    - cron: '20 8 * * 1'   # 每周一 03:40
+    - cron: '*/20 * * * *'   # 加速期每20分钟（2026-08-31 回滚至 '20 8 * * 1'）
   issues:
     types: [opened, reopened]
   workflow_dispatch:
