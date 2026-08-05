@@ -45,6 +45,17 @@
       ]
     },
     {
+      "id": "multi_client_config_scan",
+      "name": "Multi-Client MCP Config Discovery & Audit",
+      "description": "Auto-discover MCP server configurations across 14 client surfaces (Claude Desktop, Claude Code user+project, Cursor user+project, VS Code user+project, Windsurf, Gemini CLI, GitHub Copilot CLI, Augment, Zed, Cline, WorkBuddy) and statically audit them for privileged launch, runtime package fetch at startup, shell-interpreter invocation, non-registry provenance, inline plaintext credentials, insecure transport, wildcard bind, unauthenticated remote endpoints, project-level trust traps, namespace shadowing between servers, and 7 classes of toxic capability flows. PURELY STATIC: AIShield never executes any command defined in a scanned configuration - unlike scanners that spawn the server process to read tools/list.",
+      "tags": ["mcp", "config", "discovery", "static-analysis", "namespace-shadowing", "toxic-flow", "local-first"],
+      "examples": [
+        "Find every MCP server configured on this machine and tell me which ones are risky",
+        "Do any of my MCP servers shadow each other's tool names?",
+        "Which configured servers combine private-data read with untrusted network egress?"
+      ]
+    },
+    {
       "id": "trust_score",
       "name": "Trust Score Lookup",
       "description": "Return an agent's AIShield Trust Score (0-100) and certification level from the Agent Registry.",
