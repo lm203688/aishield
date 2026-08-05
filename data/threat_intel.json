@@ -1,6 +1,20 @@
 {
   "intel": [
     {
+      "id": "GHSA-279x-mwfv-vcqv",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": 9.6,
+      "title": "Unauthenticated Nuxt DevTools RPC allows arbitrary command execution on the developer's host",
+      "summary": "### Impact\n\nNuxt DevTools (development mode only) exposes a bidirectional RPC channel over the Vite HMR WebSocket via the `nuxt:devtools:rpc` plugin. On affected versions the channel has no authentication: any client that can reach the Vite HMR endpoint (`ws://<host>:<port>/`, subprotocol `vite-hmr`) can call RPC methods, with no token, handshake, or origin check before the channel is established. The `updateOptions()`, `clearOptions()`, and `openInEditor()` methods do not enforce the `ensureDev",
+      "affected": "npm:@nuxt/devtools",
+      "references": [
+        "https://github.com/advisories/GHSA-279x-mwfv-vcqv"
+      ],
+      "published": "2026-08-05T21:27:39Z",
+      "fetched": "2026-08-05T22:14:56.370143+00:00"
+    },
+    {
       "id": "CVE-2026-9196",
       "source": "nvd",
       "severity": "high",
@@ -2047,19 +2061,19 @@
       "fetched": "2026-08-04T06:34:53.913899+00:00"
     }
   ],
-  "updated": "2026-08-05T20:35:47.854257+00:00",
+  "updated": "2026-08-05T22:14:58.042635+00:00",
   "sources": [
     "osv",
     "nvd",
     "github-advisory"
   ],
   "stats": {
+    "critical": 19,
     "high": 58,
     "medium": 39,
     "unknown": 16,
-    "critical": 18,
     "low": 3,
     "moderate": 1
   },
-  "total": 135
+  "total": 136
 }
