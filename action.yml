@@ -1,0 +1,44 @@
+name: "AIShield MCP/Agent Security Scan"
+description: "本地优先、零出网的 AI 工具（MCP server / Agent skills / GPTs / prompts）安全扫描器：OWASP MCP Top 10 + Agentic ASI01-10 双维评分、SBOM/SARIF 导出、信任 badge。"
+author: "AIShield"
+branding:
+  icon: "shield"
+  color: "green"
+inputs:
+  source_url:
+    description: "待扫描的 GitHub 仓库 URL（MCP server / skill / agent）"
+    required: true
+  tool_type:
+    description: "工具类型：mcp / skill / gpt / prompt"
+    required: false
+    default: "mcp"
+  name:
+    description: "工具名称（可选，用于报告与 badge）"
+    required: false
+    default: ""
+  enable_osv:
+    description: "是否联网查询 OSV.dev 实时 CVE（默认关闭，隐私/限流优先）"
+    required: false
+    default: "false"
+  fail_on:
+    description: "达到该风险级别则使 CI 失败：safe / medium / high / critical"
+    required: false
+    default: "high"
+outputs:
+  score:
+    description: "总体安全评分 (0-100)"
+  risk_level:
+    description: "风险级别 safe/medium/high/critical"
+  report:
+    description: "JSON 扫描报告路径"
+  sarif:
+    description: "SARIF 文件路径（可上传 GitHub Security tab）"
+runs:
+  using: "docker"
+  image: "Dockerfile"
+  env:
+    INPUT_SOURCE_URL: ${{ inputs.source_url }}
+    INPUT_TOOL_TYPE: ${{ inputs.tool_type }}
+    INPUT_NAME: ${{ inputs.name }}
+    INPUT_ENABLE_OSV: ${{ inputs.enable_osv }}
+    INPUT_FAIL_ON: ${{ inputs.fail_on }}
