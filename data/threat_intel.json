@@ -1,6 +1,76 @@
 {
   "intel": [
     {
+      "id": "GHSA-p2rr-rvmm-c5fp",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 5.4,
+      "title": "Electron: Sandboxed iframes can launch external protocol handlers",
+      "summary": "### Impact\nRequests to open external protocol URLs from web content did not take iframe sandbox restrictions into account, so a sandboxed iframe could cause an OS-registered external application to be launched. The frame's sandbox state was also not made available to the app's permission handlers.\n\nApps are only affected if they render untrusted content in sandboxed iframes and grant the `openExternal` permission (granted by default when no `setPermissionRequestHandler` is installed). Apps whose",
+      "affected": "npm:electron, npm:electron, npm:electron, npm:electron",
+      "references": [
+        "https://github.com/advisories/GHSA-p2rr-rvmm-c5fp"
+      ],
+      "published": "2026-08-05T17:56:50Z",
+      "fetched": "2026-08-05T18:24:24.797632+00:00"
+    },
+    {
+      "id": "GHSA-f2r8-jv7c-xqmp",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 6.9,
+      "title": "Electron: DevTools embedder handler executes arbitrary files via shell open",
+      "summary": "### Impact\nThe DevTools \"reveal in file manager\" action could launch the target file rather than reveal it. An attacker with a separate means of running script inside the DevTools frontend (such as a malicious DevTools extension) could use this to execute native code outside the sandbox.\n\nApps are only affected if DevTools is opened for windows exposed to untrusted content or untrusted DevTools extensions. Apps that do not open DevTools in that context are not affected.\n\n### Workarounds\nDo not o",
+      "affected": "npm:electron, npm:electron, npm:electron, npm:electron",
+      "references": [
+        "https://github.com/advisories/GHSA-f2r8-jv7c-xqmp"
+      ],
+      "published": "2026-08-05T17:49:14Z",
+      "fetched": "2026-08-05T18:24:24.797656+00:00"
+    },
+    {
+      "id": "GHSA-4f78-qhmw-8j8m",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 5.7,
+      "title": "Electron: DevTools JavaScript Injection via Unsanitized Dock State Parameter",
+      "summary": "### Impact\nThe `mode` option of `webContents.openDevTools()` was not sanitized before use by the DevTools frontend. If an attacker can influence this value, script under their control may run in the DevTools context, which in unsandboxed configurations has access to Node.js.\n\nApps are only affected if untrusted input can reach the `mode` argument of `openDevTools()`, or if untrusted content can call `openDevTools()` on a `<webview>` it embeds. Apps that only ever pass a fixed dock mode are not a",
+      "affected": "npm:electron, npm:electron, npm:electron, npm:electron",
+      "references": [
+        "https://github.com/advisories/GHSA-4f78-qhmw-8j8m"
+      ],
+      "published": "2026-08-05T17:32:47Z",
+      "fetched": "2026-08-05T18:24:24.797677+00:00"
+    },
+    {
+      "id": "GHSA-9f4c-93c8-jc8g",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.2,
+      "title": "Electron: Sandboxed iframe can bypass the allow-popups restriction via the OpenURL navigation path",
+      "summary": "### Impact\nA sandboxed iframe without the `allow-popups` keyword could still open a new window (or trigger `setWindowOpenHandler`) with no user interaction, because new-window navigations taking the OpenURL path did not apply the iframe sandbox popup restriction.\n\nApps that embed untrusted content in sandboxed iframes and rely on the absence of `allow-popups` to prevent window creation are affected. Apps that deny window creation in `setWindowOpenHandler`, or that do not embed untrusted content ",
+      "affected": "npm:electron, npm:electron, npm:electron",
+      "references": [
+        "https://github.com/advisories/GHSA-9f4c-93c8-jc8g"
+      ],
+      "published": "2026-08-05T17:27:18Z",
+      "fetched": "2026-08-05T18:24:24.797687+00:00"
+    },
+    {
+      "id": "CVE-2026-8446",
+      "source": "nvd",
+      "severity": "high",
+      "cvss": 7.5,
+      "title": "IBM Langflow OSS 1.0.0 through 1.10.3 contain an authentication bypass vulnerability in the Model Context Protocol (MCP) composer endpoint when mcp_composer_enabled=true (default) and projects are con",
+      "summary": "IBM Langflow OSS 1.0.0 through 1.10.3 contain an authentication bypass vulnerability in the Model Context Protocol (MCP) composer endpoint when mcp_composer_enabled=true (default) and projects are configured with auth_type=oauth .",
+      "affected": "model context protocol",
+      "references": [
+        "https://www.ibm.com/support/pages/node/7282147"
+      ],
+      "published": "2026-08-05T17:16:55.983",
+      "fetched": "2026-08-05T18:24:11.373407+00:00"
+    },
+    {
       "id": "GHSA-h7rp-cf8h-j98x",
       "source": "github-advisory",
       "severity": "high",
@@ -1963,19 +2033,19 @@
       "fetched": "2026-08-04T06:34:53.913899+00:00"
     }
   ],
-  "updated": "2026-08-05T16:44:22.802514+00:00",
+  "updated": "2026-08-05T18:24:26.747086+00:00",
   "sources": [
     "osv",
     "nvd",
     "github-advisory"
   ],
   "stats": {
-    "high": 55,
-    "medium": 36,
+    "medium": 39,
+    "high": 57,
     "unknown": 16,
     "critical": 18,
     "low": 3,
     "moderate": 1
   },
-  "total": 129
+  "total": 134
 }

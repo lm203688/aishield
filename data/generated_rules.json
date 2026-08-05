@@ -1,12 +1,13 @@
 {
-  "generated_at": "2026-08-05T16:44:34.623286+00:00",
-  "source_intel_count": 129,
+  "generated_at": "2026-08-05T18:24:39.289336+00:00",
+  "source_intel_count": 134,
   "package_blacklist": {
     "npm:electron": {
       "ecosystem": "npm",
       "package": "electron",
       "severity": "high",
       "advisories": [
+        "GHSA-9f4c-93c8-jc8g",
         "GHSA-h7rp-cf8h-j98x"
       ]
     },
@@ -166,13 +167,13 @@
       "owasp": "LLM07",
       "owasp_name": "系统提示泄露 (System Prompt Leakage)",
       "derived_from": "authentication",
-      "intel_hits": 7,
+      "intel_hits": 8,
       "evidence": [
+        "CVE-2026-8446",
         "GHSA-3r7g-q6cg-q2vx",
         "GHSA-8gj2-2cvc-6xx7",
         "GHSA-wch5-xp77-fxg4",
-        "GHSA-p7w7-4929-vpj5",
-        "CVE-2026-46555"
+        "GHSA-p7w7-4929-vpj5"
       ]
     },
     "(?i)(session|token)\\s*[:=]\\s*['\\\"][^'\\\"]{0,8}['\\\"]": {
