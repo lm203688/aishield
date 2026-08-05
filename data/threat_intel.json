@@ -1,6 +1,20 @@
 {
   "intel": [
     {
+      "id": "CVE-2026-9196",
+      "source": "nvd",
+      "severity": "high",
+      "cvss": 8.1,
+      "title": "IBM Langflow OSS 1.0.0 through 1.10.3 could allow an authenticated attacker to execute unintended code during Agentic Assistant validation due to improper handling of LLM‑generated components. The app",
+      "summary": "IBM Langflow OSS 1.0.0 through 1.10.3 could allow an authenticated attacker to execute unintended code during Agentic Assistant validation due to improper handling of LLM‑generated components. The application executes model‑generated Python code in the backend during validation prior to user approval, which may allow an attacker to trigger side effects such as outbound network access, file system interaction, or data exfiltration with the privileges of the Langflow backend process.",
+      "affected": "llm agent",
+      "references": [
+        "https://www.ibm.com/support/pages/node/7282646"
+      ],
+      "published": "2026-08-05T19:17:48.523",
+      "fetched": "2026-08-05T20:35:38.925579+00:00"
+    },
+    {
       "id": "GHSA-p2rr-rvmm-c5fp",
       "source": "github-advisory",
       "severity": "medium",
@@ -2033,19 +2047,19 @@
       "fetched": "2026-08-04T06:34:53.913899+00:00"
     }
   ],
-  "updated": "2026-08-05T18:24:26.747086+00:00",
+  "updated": "2026-08-05T20:35:47.854257+00:00",
   "sources": [
     "osv",
     "nvd",
     "github-advisory"
   ],
   "stats": {
+    "high": 58,
     "medium": 39,
-    "high": 57,
     "unknown": 16,
     "critical": 18,
     "low": 3,
     "moderate": 1
   },
-  "total": 134
+  "total": 135
 }
