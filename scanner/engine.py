@@ -333,15 +333,30 @@ def taint_analysis(files):
     return findings
 
 
-def calculate_scores(static, dependency, secrets, poisoning, taint, total_files):
-    """5维评分"""
-    # 收集所有findings
+# 维度配置：(标签, 权重, 扣分表, 类别过滤)
+_DIM_CONFIG = {
+    "security_score":     ("security",     0.40, {"critical": 20, "high": 10, "medium": 4, "low": 1, "info": 0}, None),
+    "permissions_score":  ("permissions",  0.20, {"critical": 25, "high": 15, "medium": 8, "low": 2, "info": 0}, "MCP02"),
+    "data_handling_score":("data",         0.20, {"critical": 20, "high": 10, "medium": 5, "low": 2, "info": 0}, ("MCP01", "MCP04", "MCP10")),
+    "supply_chain_score": ("supply",       0.10, {"critical": 30, "high": 15, "medium": 5, "low": 0, "info": 0}, "MCP04"),
+    "reliability_score":  ("reliability",  0.10, {"critical": 15, "high": 8, "medium": 3, "low": 0, "info": 0}, ("MCP07", "MCP08")),
+}
+
+
+def calculate_scores(static, dependency, secrets, poisoning, taint, total_files, extra_findings=None):
+    """
+    5维评分 + 可解释归因（M3）。
+
+    返回除分数外，额外携带 score_breakdown：每个维度的 base/penalty/主要扣分项，
+    以及 top_deductions 全局排序，让"为什么 72 不是 71"可解释、可申诉。
+    """
+    # 收集所有 findings（含 LLM 语义分析等额外来源）
     all_findings = []
-    for f in static.get("findings", []): all_findings.append(f)
-    for f in dependency.get("findings", []): all_findings.append(f)
-    for f in secrets.get("findings", []): all_findings.append(f)
-    for f in poisoning: all_findings.append(f)
-    for f in taint: all_findings.append(f)
+    for src in (static.get("findings", []), dependency.get("findings", []),
+                secrets.get("findings", []), poisoning, taint):
+        all_findings.extend(src)
+    if extra_findings:
+        all_findings.extend(extra_findings)
 
     # 去重
     seen = set()
@@ -352,63 +367,56 @@ def calculate_scores(static, dependency, secrets, poisoning, taint, total_files)
             seen.add(key)
             unique.append(f)
 
-    # 安全分 (40%)
-    security = 100
-    seen_descs = set()
-    for f in unique:
-        desc_key = f.get("description", "")
-        if desc_key in seen_descs:
-            continue
-        seen_descs.add(desc_key)
-        deductions = {"critical": 20, "high": 10, "medium": 4, "low": 1, "info": 0}
-        security -= deductions.get(f.get("severity", "info"), 0)
-    if total_files == 0:
-        security = min(security, 65)
-    security = max(0, min(100, security))
+    dims = {}
+    breakdown = {}
+    for dim_key, (label, w, ded, catfilter) in _DIM_CONFIG.items():
+        penalties = []
+        seen_desc = set()
+        for f in unique:
+            cat = f.get("owasp_category", "")
+            if catfilter is not None:
+                if isinstance(catfilter, str):
+                    if cat != catfilter:
+                        continue
+                elif cat not in catfilter:
+                    continue
+            desc = f.get("description", "")
+            if desc in seen_desc:
+                continue
+            seen_desc.add(desc)
+            amt = ded.get(f.get("severity", "info"), 0)
+            if amt > 0:
+                penalties.append({"reason": desc, "severity": f.get("severity", "info"),
+                                   "amount": amt, "owasp": cat})
+        total_pen = sum(p["amount"] for p in penalties)
+        base = 100
+        # total_files==0 阻尼（空扫描不虚高）
+        if total_files == 0:
+            if dim_key == "security_score":
+                base = min(base, 65)
+            elif dim_key == "data_handling_score":
+                base = min(base, 70)
+            elif dim_key == "reliability_score":
+                base = max(0, base - 30)
+        score = max(0, min(100, base - total_pen))
+        dims[dim_key] = score
+        breakdown[dim_key] = {
+            "base": base,
+            "penalty": total_pen,
+            "contributors": sorted(penalties, key=lambda p: -p["amount"])[:5],
+        }
 
-    # 权限分 (20%)
-    permissions = 100
-    for f in unique:
-        cat = f.get("owasp_category", "")
-        if cat == "MCP02":
-            permissions -= {"critical": 25, "high": 15, "medium": 8, "low": 2}.get(f.get("severity", "info"), 0)
-    permissions = max(0, min(100, permissions))
+    overall = int(round(
+        dims["security_score"] * 0.40 + dims["permissions_score"] * 0.20 +
+        dims["data_handling_score"] * 0.20 + dims["supply_chain_score"] * 0.10 +
+        dims["reliability_score"] * 0.10
+    ))
 
-    # 数据处理分 (20%)
-    data_handling = 100
-    for f in unique:
-        cat = f.get("owasp_category", "")
-        if cat in ("MCP01", "MCP04", "MCP10"):
-            data_handling -= {"critical": 20, "high": 10, "medium": 5, "low": 2}.get(f.get("severity", "info"), 0)
-    if total_files == 0:
-        data_handling = min(data_handling, 70)
-    data_handling = max(0, min(100, data_handling))
-
-    # 供应链分 (10%)
-    supply_chain = 100
-    for f in unique:
-        cat = f.get("owasp_category", "")
-        if cat == "MCP04":
-            supply_chain -= {"critical": 30, "high": 15, "medium": 5}.get(f.get("severity", "info"), 0)
-    supply_chain = max(0, min(100, supply_chain))
-
-    # 可靠性分 (10%)
-    reliability = 100
-    for f in unique:
-        cat = f.get("owasp_category", "")
-        if cat in ("MCP07", "MCP08"):
-            reliability -= {"critical": 15, "high": 8, "medium": 3}.get(f.get("severity", "info"), 0)
-    if total_files == 0:
-        reliability -= 30
-    reliability = max(0, min(100, reliability))
-
-    overall = int(security * 0.40 + permissions * 0.20 + data_handling * 0.20 + supply_chain * 0.10 + reliability * 0.10)
-
-    if security < 40:
+    if dims["security_score"] < 40:
         risk_level = "critical"
-    elif security < 60:
+    elif dims["security_score"] < 60:
         risk_level = "high"
-    elif security < 80:
+    elif dims["security_score"] < 80:
         risk_level = "medium"
     else:
         risk_level = "safe"
@@ -422,19 +430,43 @@ def calculate_scores(static, dependency, secrets, poisoning, taint, total_files)
     else:
         badge = "none"
 
+    # 全局 Top 扣分项（可解释性核心）
+    all_pen = []
+    for dim_key, b in breakdown.items():
+        for c in b["contributors"]:
+            all_pen.append({"dimension": dim_key, **c})
+    top_deductions = sorted(all_pen, key=lambda p: -p["amount"])[:8]
+
     return {
-        "security_score": security,
-        "permissions_score": permissions,
-        "data_handling_score": data_handling,
-        "supply_chain_score": supply_chain,
-        "reliability_score": reliability,
+        "security_score": dims["security_score"],
+        "permissions_score": dims["permissions_score"],
+        "data_handling_score": dims["data_handling_score"],
+        "supply_chain_score": dims["supply_chain_score"],
+        "reliability_score": dims["reliability_score"],
         "overall_score": overall,
         "risk_level": risk_level,
         "badge_level": badge,
         "owasp_coverage": static.get("owasp_coverage", {}),
         "agentic_coverage": static.get("agentic_coverage", {}),
         "rules_count": static.get("patterns_checked", 0),
+        "score_breakdown": breakdown,
+        "top_deductions": top_deductions,
     }
+
+
+def explain_score(scores: dict) -> str:
+    """把评分拆解转成一句话人话解释（供报告/CLI 使用）。"""
+    lines = [f"总分 {scores.get('overall_score')}（{scores.get('risk_level')}，badge={scores.get('badge_level')}）"]
+    for dim_key in ("security_score", "permissions_score", "data_handling_score",
+                    "supply_chain_score", "reliability_score"):
+        b = scores.get("score_breakdown", {}).get(dim_key, {})
+        lines.append(f"  · {dim_key}: {scores.get(dim_key)} (基准 {b.get('base')} - 扣分 {b.get('penalty')})")
+    top = scores.get("top_deductions", [])[:3]
+    if top:
+        lines.append("主要扣分项:")
+        for t in top:
+            lines.append(f"  - [{t.get('severity')}] {t.get('reason')} (-{t.get('amount')})")
+    return "\n".join(lines)
 
 
 def generate_recommendations(findings, scores):
@@ -466,16 +498,17 @@ def generate_recommendations(findings, scores):
     return recs
 
 
-def scan(source_url, tool_type="mcp", name="", description=""):
+def scan(source_url, tool_type="mcp", name="", description="", enable_osv=False):
     """
     完整扫描流水线
-    
+
     Args:
         source_url: GitHub repo URL 或工具内容
         tool_type: mcp / skill / gpt / prompt
         name: 工具名称（可选）
         description: 工具描述（可选）
-    
+        enable_osv: 是否联网查 OSV.dev 实时 CVE（默认 False，隐私/限流优先）
+
     Returns:
         dict: 完整扫描报告
     """
@@ -511,6 +544,17 @@ def scan(source_url, tool_type="mcp", name="", description=""):
     # Step 3: 依赖分析
     dependency_results = dependency_analysis(files)
 
+    # Step 3b: OSV.dev 实时 CVE（D1，默认关闭）
+    osv_findings = []
+    if enable_osv:
+        try:
+            from .osv import check_osv
+            osv_findings = check_osv(dependency_results.get("dependencies", []), use_network=True)
+            for _f in osv_findings:
+                _f["file"] = "dependencies"
+        except Exception:
+            osv_findings = []
+
     # Step 4: 密钥检测
     secrets_results = secrets_detection(files)
 
@@ -527,8 +571,11 @@ def scan(source_url, tool_type="mcp", name="", description=""):
     # Step 6: 污点分析
     taint_results = taint_analysis(files)
 
-    # Step 7: 评分
-    scores = calculate_scores(static_results, dependency_results, secrets_results, poisoning_results, taint_results, total_files)
+    # Step 7: 评分（含 LLM 语义 findings 归因）
+    scores = calculate_scores(
+        static_results, dependency_results, secrets_results, poisoning_results, taint_results,
+        total_files, extra_findings=llm_results.get("findings", []) + llm_sc_results.get("findings", []),
+    )
 
     # 汇总去重
     all_findings = []
@@ -539,6 +586,7 @@ def scan(source_url, tool_type="mcp", name="", description=""):
     for f in taint_results: all_findings.append(f)
     for f in llm_results.get("findings", []): all_findings.append(f)
     for f in llm_sc_results.get("findings", []): all_findings.append(f)
+    for f in osv_findings: all_findings.append(f)
 
     seen = set()
     unique_findings = []
@@ -562,6 +610,7 @@ def scan(source_url, tool_type="mcp", name="", description=""):
         "secrets_detection": secrets_results,
         "llm_analysis": llm_results,
         "llm_supply_chain": llm_sc_results,
+        "osv_cve": osv_findings,
         "commit_hash": source_data.get("commit_hash", ""),
         "recommendations": recommendations,
         "scanned_at": datetime.now(TZ).strftime("%Y-%m-%d %H:%M:%S"),
