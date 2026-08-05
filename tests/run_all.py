@@ -26,6 +26,7 @@ def main():
         'tests.test_security',
         'tests.test_supply_chain',
         'tests.test_client_discovery',
+        'tests.test_ci_contract',
     ]
 
     loaded = 0
