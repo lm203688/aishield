@@ -1,5 +1,5 @@
 """
-运行所有测试 — 串联 test_linkages, test_geo, test_security
+运行所有测试 — 串联 test_linkages, test_geo, test_security, test_hupijiao 等
 
 用法:
   python tests/run_all.py
@@ -28,6 +28,7 @@ def main():
         'tests.test_client_discovery',
         'tests.test_ci_contract',
         'tests.test_commercialization',
+        'tests.test_hupijiao',
     ]
 
     loaded = 0
