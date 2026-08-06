@@ -89,6 +89,22 @@ meta_tmp.json
 state_bus_*.json
 
 # =====================
+# Secrets — 绝不入库（仓库为 public）
+# =====================
+.secrets.json
+.secrets.*.json
+secrets.json
+*.pem
+*.key
+*-pat.txt
+*_pat.txt
+*token*.txt
+.workbuddy/*.txt
+data/fleet.json
+data/payments.json
+data/telemetry.jsonl
+
+# =====================
 # WorkBuddy (personal memory + private skills)
 # =====================
 .workbuddy/.cache/
