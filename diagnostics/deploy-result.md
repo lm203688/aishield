@@ -1,5 +1,5 @@
 === DIAGNOSTIC ===
-Time: Thu Aug 6 09:10:22 AM CST 2026
+Time: Thu Aug 6 12:50:50 PM CST 2026
 === USER ===
 root
 === GIT LOG ===
@@ -13,19 +13,11 @@ dbcf345 fix: download script from GitHub raw if git reset fails, add script vers
 # 解决 Quick Tunnel 的 error 1014 (CNAME Cross-User Banned) 问题
 #
 === API STATUS ===
-{"status": "ok", "version": "4.2", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 133, "uptime": 1785978622.7348766, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup"}OK
+{"status": "ok", "version": "4.2", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 133, "uptime": 1785991850.385127, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup"}OK
 === CLOUDFLARED PROCESS ===
-root     1858935  0.1  1.2 1294676 24872 ?       Sl   Aug05   1:20 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
-root     1859040  0.1  1.2 1294676 24608 ?       Sl   Aug05   1:20 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
+root     1858935  0.1  1.4 1294676 29264 ?       Sl   Aug05   1:41 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
+root     1859040  0.1  1.4 1294676 28324 ?       Sl   Aug05   1:41 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
 === CLOUDFLARED LOG (last 30 lines) ===
-2026-08-05T16:03:10Z ERR failed to run the datagram handler error="Application error 0x0 (remote)" connIndex=3 event=0 ip=198.41.192.57
-2026-08-05T16:03:10Z ERR failed to serve tunnel connection error="accept stream listener encountered a failure while serving" connIndex=3 event=0 ip=198.41.192.57
-2026-08-05T16:03:10Z ERR Serve tunnel error error="accept stream listener encountered a failure while serving" connIndex=3 event=0 ip=198.41.192.57
-2026-08-05T16:03:10Z INF Retrying connection in up to 8s connIndex=3 event=0 ip=198.41.192.57
-2026-08-05T16:03:10Z ERR failed to accept incoming stream requests error="failed to accept QUIC stream: Application error 0x0 (remote)" connIndex=1 event=0 ip=198.41.192.107
-2026-08-05T16:03:10Z ERR failed to run the datagram handler error="context canceled" connIndex=1 event=0 ip=198.41.192.107
-2026-08-05T16:03:10Z ERR failed to serve tunnel connection error="control stream encountered a failure while serving" connIndex=1 event=0 ip=198.41.192.107
-2026-08-05T16:03:10Z ERR Serve tunnel error error="control stream encountered a failure while serving" connIndex=1 event=0 ip=198.41.192.107
 2026-08-05T16:03:10Z INF Retrying connection in up to 8s connIndex=1 event=0 ip=198.41.192.107
 2026-08-05T16:03:11Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=0 event=0 ip=198.41.200.113
 2026-08-05T16:03:11Z ERR failed to accept incoming stream requests error="failed to accept QUIC stream: Application error 0x0 (remote)" connIndex=0 event=0 ip=198.41.200.113
@@ -48,6 +40,14 @@ root     1859040  0.1  1.2 1294676 24608 ?       Sl   Aug05   1:20 /usr/local/bi
 2026-08-05T18:24:13Z ERR Request failed error="stream 21 canceled by remote with error code 0" connIndex=3 dest=https://aishield.tools/ event=0 ip=198.41.192.57 type=http
 2026-08-05T20:52:03Z ERR  error="stream 25 canceled by remote with error code 0" connIndex=1 event=1 ingressRule=0 originService=http://localhost:8450
 2026-08-05T20:52:03Z ERR Request failed error="stream 25 canceled by remote with error code 0" connIndex=1 dest=https://aishield.tools/ event=0 ip=198.41.192.107 type=http
+2026-08-06T04:21:33Z ERR failed to accept incoming stream requests error="failed to accept QUIC stream: timeout: no recent network activity" connIndex=3 event=0 ip=198.41.192.57
+2026-08-06T04:21:33Z ERR failed to run the datagram handler error="timeout: no recent network activity" connIndex=3 event=0 ip=198.41.192.57
+2026-08-06T04:21:33Z WRN failed to serve tunnel connection error="accept stream listener encountered a failure while serving" connIndex=3 event=0 ip=198.41.192.57
+2026-08-06T04:21:33Z WRN Serve tunnel error error="accept stream listener encountered a failure while serving" connIndex=3 event=0 ip=198.41.192.57
+2026-08-06T04:21:33Z INF Retrying connection in up to 1s connIndex=3 event=0 ip=198.41.192.57
+2026-08-06T04:21:34Z WRN Connection terminated error="accept stream listener encountered a failure while serving" connIndex=3
+2026-08-06T04:21:51Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=3 event=0 ip=198.41.192.57
+2026-08-06T04:21:52Z INF Registered tunnel connection connIndex=3 connection=ae89e9c1-9526-406a-a99a-d8cc3d7f0a90 event=0 ip=198.41.192.57 location=lax07 protocol=quic
 === DEPLOY LOG ===
 === AIShield Named Tunnel Deployment ===
 [18:14:49] Time: Wed Aug  5 06:14:49 PM CST 2026
@@ -142,11 +142,11 @@ cert.pem: -rw------- 1 root root 282 Jul 28 11:02 /root/.cloudflared/cert.pem
 === SYSTEMD STATUS ===
 ● cloudflared-tunnel.service - Cloudflare Named Tunnel for AIShield
      Loaded: loaded (/etc/systemd/system/cloudflared-tunnel.service; enabled; vendor preset: enabled)
-     Active: active (running) since Wed 2026-08-05 18:16:32 CST; 14h ago
+     Active: active (running) since Wed 2026-08-05 18:16:32 CST; 18h ago
    Main PID: 1859039 (start-tunnel.sh)
       Tasks: 10 (limit: 2216)
-     Memory: 20.1M
-        CPU: 1min 20.648s
+     Memory: 23.1M
+        CPU: 1min 41.928s
      CGroup: /system.slice/cloudflared-tunnel.service
              ├─1859039 /bin/bash /opt/start-tunnel.sh
              └─1859040 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
@@ -180,10 +180,10 @@ fi
 wait $CF_PID
 
 === HTTPS Test from Runner ===
-Time: Thu Aug  6 01:10:23 UTC 2026
+Time: Thu Aug  6 04:50:50 UTC 2026
 
 === curl test (aishield.tools) ===
-{"status": "ok", "version": "4.2", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 133, "uptime": 1785978623.3464737, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup"}
+{"status": "ok", "version": "4.2", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 133, "uptime": 1785991851.0116937, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup"}
 === DNS lookup ===
 172.67.188.44
 104.21.81.46
