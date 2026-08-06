@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-08-06T00:02:51.640241+00:00",
-  "source_intel_count": 136,
+  "generated_at": "2026-08-06T04:16:11.792010+00:00",
+  "source_intel_count": 138,
   "package_blacklist": {
     "npm:@nuxt/devtools": {
       "ecosystem": "npm",

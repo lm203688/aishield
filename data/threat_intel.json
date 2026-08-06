@@ -1,6 +1,36 @@
 {
   "intel": [
     {
+      "id": "CVE-2026-67531",
+      "source": "nvd",
+      "severity": "unknown",
+      "cvss": null,
+      "title": "FrontMCP is a TypeScript-first framework for the Model Context Protocol (MCP). Prior to 1.5.7, the sandboxed codecall:execute tool exposes live host Zod schema instances to the script via getTool(), a",
+      "summary": "FrontMCP is a TypeScript-first framework for the Model Context Protocol (MCP). Prior to 1.5.7, the sandboxed codecall:execute tool exposes live host Zod schema instances to the script via getTool(), and because Zod v4 defines _zod as a non-configurable, non-writable own property, the ECMAScript Proxy invariants force the security membrane to hand back the raw host object, letting a script reach _zod.constr.constructor (the host Function constructor) and execute arbitrary code in the server proce",
+      "affected": "prompt injection",
+      "references": [
+        "https://github.com/agentfront/frontmcp/commit/209cddd19a8d4db0777f725b527818da7df6f67f",
+        "https://github.com/agentfront/frontmcp/security/advisories/GHSA-mp29-fxh8-92px"
+      ],
+      "published": "2026-08-06T00:16:53.733",
+      "fetched": "2026-08-06T04:15:37.206735+00:00"
+    },
+    {
+      "id": "CVE-2026-67531",
+      "source": "nvd",
+      "severity": "unknown",
+      "cvss": null,
+      "title": "FrontMCP is a TypeScript-first framework for the Model Context Protocol (MCP). Prior to 1.5.7, the sandboxed codecall:execute tool exposes live host Zod schema instances to the script via getTool(), a",
+      "summary": "FrontMCP is a TypeScript-first framework for the Model Context Protocol (MCP). Prior to 1.5.7, the sandboxed codecall:execute tool exposes live host Zod schema instances to the script via getTool(), and because Zod v4 defines _zod as a non-configurable, non-writable own property, the ECMAScript Proxy invariants force the security membrane to hand back the raw host object, letting a script reach _zod.constr.constructor (the host Function constructor) and execute arbitrary code in the server proce",
+      "affected": "model context protocol",
+      "references": [
+        "https://github.com/agentfront/frontmcp/commit/209cddd19a8d4db0777f725b527818da7df6f67f",
+        "https://github.com/agentfront/frontmcp/security/advisories/GHSA-mp29-fxh8-92px"
+      ],
+      "published": "2026-08-06T00:16:53.733",
+      "fetched": "2026-08-06T04:15:43.400405+00:00"
+    },
+    {
       "id": "GHSA-279x-mwfv-vcqv",
       "source": "github-advisory",
       "severity": "critical",
@@ -2061,19 +2091,19 @@
       "fetched": "2026-08-04T06:34:53.913899+00:00"
     }
   ],
-  "updated": "2026-08-06T00:02:35.821200+00:00",
+  "updated": "2026-08-06T04:15:57.684436+00:00",
   "sources": [
     "osv",
     "nvd",
     "github-advisory"
   ],
   "stats": {
+    "unknown": 18,
     "critical": 19,
     "high": 58,
     "medium": 39,
-    "unknown": 16,
     "low": 3,
     "moderate": 1
   },
-  "total": 136
+  "total": 138
 }
