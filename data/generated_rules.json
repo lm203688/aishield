@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-06T12:59:22.166709+00:00",
+  "generated_at": "2026-08-06T15:23:26.751854+00:00",
   "source_intel_count": 138,
   "package_blacklist": {
     "npm:@nuxt/devtools": {
