@@ -67,6 +67,21 @@
   <div id="certOut" style="margin-top:8px"></div>
 </div>
 
+<div class="box">
+  <h2>人民币付费认证 (虎皮椒 · 微信/支付宝)</h2>
+  <div class="sub" style="margin-bottom:12px">国内个人 / 小团队轨道：扫码即付，虎皮椒异步回调自动签发认证。</div>
+  <input id="cnySrc" placeholder="https://github.com/acme/mcp-tool" value="https://github.com/acme/mcp-tool"/>
+  <input id="cnyScore" placeholder="overall_score (0-100，≥50 可认证)" value="92" type="number"/>
+  <select id="cnyPay" style="width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--txt);border-radius:6px;padding:8px;font-size:12px;margin:4px 0">
+    <option value="wechat">微信支付</option>
+    <option value="alipay">支付宝</option>
+  </select>
+  <button onclick="requestCny()">请求人民币付费认证</button>
+  <button class="ghost" onclick="loadCnyStatus()">通道状态</button>
+  <div id="cnyOut" style="margin-top:8px"></div>
+  <div id="cnyStatusBox" style="margin-top:8px"></div>
+</div>
+
 <script>
 let pendingOrder=null;
 
@@ -157,6 +172,60 @@ async function fulfill(header){
 }
 
 function esc(s){return String(s==null?'':s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+
+async function requestCny(){
+  const src=document.getElementById('cnySrc').value.trim();
+  const score=parseInt(document.getElementById('cnyScore').value||'0',10);
+  const pay=document.getElementById('cnyPay').value;
+  if(!src){alert('请填 source_url');return;}
+  const out=document.getElementById('cnyOut');
+  out.innerHTML='请求中…';
+  try{
+    const r=await fetch('/api/v1/certify/request-payment-cny',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({source_url:src,scan_report:{overall_score:score},payment:pay})});
+    const d=await r.json();
+    if(!d.success){out.innerHTML=`<span class="bad">${esc(d.error||'下单失败')}</span>`;return;}
+    let html=`<div class="kv">
+      <div><span class="k">状态</span><b class="ok">${d.status}</b></div>
+      <div><span class="k">order_id</span>${d.order_id}</div>
+      <div><span class="k">认证等级</span>${d.badge_level}</div>
+      <div><span class="k">金额</span><b>${d.amount_cny} ${d.currency}</b> · ${d.payment}</div>
+      <div><span class="k">支付链接</span><a style="color:var(--accent2)" href="${esc(d.pay_url)}" target="_blank">${esc(d.pay_url)}</a></div>`;
+    if(d.qrcode_url){html+=`<div><span class="k">二维码</span><br><img src="${esc(d.qrcode_url)}" style="width:160px;border-radius:8px;margin-top:4px" alt="pay qr"/></div>`;}
+    html+=`<div class="warn" style="margin-top:6px">${esc(d.note||'')}</div></div>`;
+    html+=`<div style="margin-top:8px"><button class="ghost" onclick="checkCny('${d.order_id}')">查询支付状态</button></div>`;
+    html+=`<div id="cnyQ_${d.order_id}"></div>`;
+    out.innerHTML=html;
+    window._cnyOrder=d.order_id;
+  }catch(e){out.innerHTML=`<span class="bad">失败: ${e.message}</span>`;}
+}
+
+async function checkCny(orderId){
+  orderId=orderId||window._cnyOrder;
+  if(!orderId){alert('请先请求付费认证');return;}
+  const box=document.getElementById('cnyQ_'+orderId)||document.getElementById('cnyOut');
+  const r=await fetch('/api/v1/pay/hupijiao/query?trade_order_id='+encodeURIComponent(orderId));
+  const d=await r.json();
+  const paid=d.paid||false;
+  const msg=paid
+    ? `<span class="ok">✓ 已支付（${esc(d.remote_status||'')}）· 认证由回调自动签发，刷新上方「认证 Store」可见</span>`
+    : `<span class="warn">待支付（${esc(d.remote_status||'WP')}）· 完成支付后回调将自动签发认证</span>`;
+  box.innerHTML=`<div style="margin-top:6px">${msg}</div>`;
+  if(paid) loadCerts();
+}
+
+async function loadCnyStatus(){
+  const box=document.getElementById('cnyStatusBox');
+  try{
+    const d=await (await fetch('/api/v1/pay/hupijiao/status')).json();
+    box.innerHTML=`<div class="kv">
+      <div><span class="k">通道已配置</span><b class="${d.configured?'ok':'bad'}">${d.configured?'是':'否'}</b></div>
+      <div><span class="k">appid</span><span class="pill">${esc(d.appid||'—')}</span></div>
+      <div><span class="k">api_base</span>${esc(d.api_base||'—')} <b class="${d.api_base_allowed?'ok':'bad'}">${d.api_base_allowed?'白名单✓':'越权✗'}</b></div>
+      <div><span class="k">支持方式</span>${(d.supported_payments||[]).join(' / ')}</div></div>`;
+  }catch(e){box.innerHTML=`<span class="bad">加载失败: ${e.message}</span>`;}
+}
+
 loadFleet(); loadCerts();
 </script>
 </body>
