@@ -864,6 +864,41 @@ class AIShieldHandler(BaseHTTPRequestHandler):
             _record_usage("certify-list", self.client_address[0])
             return
 
+        # ── 虎皮椒：通道配置状态（脱敏，不含任何明文密钥）──
+        if path == "/api/v1/pay/hupijiao/status":
+            try:
+                from eco.hupijiao import HupijiaoGateway
+                self._send_json({"success": True, **HupijiaoGateway().status()})
+            except Exception as e:
+                self._send_json({"error": str(e)}, 500)
+            return
+
+        # ── 虎皮椒：主动查单（回调丢失时的兜底）──
+        if path == "/api/v1/pay/hupijiao/query":
+            try:
+                from eco.hupijiao import HupijiaoGateway
+                q = parse_qs(parsed.query)
+                res = HupijiaoGateway().query_order(
+                    trade_order_id=(q.get("trade_order_id") or [None])[0],
+                    open_order_id=(q.get("open_order_id") or [None])[0],
+                )
+                self._send_json(res, 200 if res.get("success") else 400)
+            except Exception as e:
+                self._send_json({"error": str(e)}, 500)
+            _record_usage("hupijiao-query", self.client_address[0])
+            return
+
+        # ── 虎皮椒：本地订单台账 ──
+        if path == "/api/v1/pay/hupijiao/orders":
+            try:
+                from eco.hupijiao import list_orders
+                q = parse_qs(parsed.query)
+                orders = list_orders(status=(q.get("status") or [None])[0])
+                self._send_json({"success": True, "total": len(orders), "orders": orders})
+            except Exception as e:
+                self._send_json({"error": str(e)}, 500)
+            return
+
         # Eco模块路由
         if _eco_dispatch_get(self):
             return
@@ -1123,6 +1158,11 @@ class AIShieldHandler(BaseHTTPRequestHandler):
             _record_usage("certify-fulfill", self.client_address[0])
             return
 
+        # ── 虎皮椒回调（form-urlencoded，需 raw body 验签，必须回纯文本 success）──
+        if path == "/api/v1/pay/hupijiao/notify":
+            self._handle_hupijiao_notify()
+            return
+
         # ── Creem Webhook（最高优先级，需要 raw body 验证签名）──
         if path == "/api/v1/webhooks/creem":
             self._handle_creem_webhook()
@@ -1136,6 +1176,41 @@ class AIShieldHandler(BaseHTTPRequestHandler):
             data = json.loads(body) if body else {}
         except json.JSONDecodeError:
             self._send_json({"error": "Invalid JSON"}, 400)
+            return
+
+        # ── 虎皮椒：创建人民币支付订单 ──
+        if path == "/api/v1/pay/hupijiao/create":
+            try:
+                from eco.hupijiao import HupijiaoGateway
+                gw = HupijiaoGateway()
+                res = gw.create_payment(
+                    amount=data.get("amount", 0),
+                    order_id=data.get("order_id"),
+                    description=data.get("description", "AIShield 服务"),
+                    payment=data.get("payment", "wechat"),
+                    attach=data.get("attach", ""),
+                    metadata=data.get("metadata"),
+                )
+                self._send_json(res, 200 if res.get("success") else 400)
+            except Exception as e:
+                self._send_json({"error": str(e)}, 500)
+            _record_usage("hupijiao-create", self.client_address[0])
+            return
+
+        # ── 认证付费（人民币轨道 · 微信/支付宝）──
+        if path == "/api/v1/certify/request-payment-cny":
+            try:
+                from eco.monetization import request_cert_payment_cny
+                res = request_cert_payment_cny(
+                    data.get("source_url", ""),
+                    data.get("scan_report"),
+                    data.get("payment", "wechat"),
+                    data.get("amount_cny"),
+                )
+                self._send_json(res, 200 if res.get("success") else 400)
+            except Exception as e:
+                self._send_json({"error": str(e)}, 500)
+            _record_usage("certify-request-payment-cny", self.client_address[0])
             return
 
         # ── Creem Checkout 创建 ──
@@ -1722,6 +1797,69 @@ blockquote{{border-left:4px solid #3b82f6;padding-left:16px;margin-left:0;color:
             _record_usage("checkout-create", self.client_address[0], success=False)
 
     # ── Creem Webhook 处理 ──
+    def _handle_hupijiao_notify(self):
+        """虎皮椒异步回调（application/x-www-form-urlencoded）。
+
+        协议要求：验签通过必须回**纯文本 `success`**，否则平台会持续重推。
+        安全上依赖 eco.hupijiao.verify_notify 的四道校验：
+        appid 归属 → 签名（恒定时间比对）→ 支付状态 → 金额未被篡改 + 重放去重。
+        """
+        raw_body = self._read_raw_body()
+        if raw_body is None:
+            self._send_text("fail", 413)
+            return
+
+        try:
+            from eco.hupijiao import HupijiaoGateway
+            gw = HupijiaoGateway()
+            result = gw.handle_notify(raw_body)
+        except Exception as e:
+            print(f"❌ 虎皮椒回调处理异常: {e}")
+            self._send_text("fail", 500)
+            return
+
+        reason = result.get("reason", "")
+        order_id = result.get("order_id", "")
+
+        if not result.get("ok"):
+            # already_settled 是幂等重推，属正常情况，回 success 让平台停止重试
+            if reason == "already_settled":
+                print(f"ℹ️  虎皮椒回调重复推送（已结算）: {order_id}")
+                self._send_text("success", 200)
+                return
+            # 其余均为异常/疑似攻击，记录并回 fail（平台会重试，便于观察）
+            print(f"⚠️  虎皮椒回调校验失败 [{reason}] order={order_id}")
+            self._send_text("fail", 400)
+            return
+
+        # 验签通过 → 尝试履约（认证类订单自动签发徽章；其它类型跳过）
+        try:
+            from eco.monetization import settle_cny_order
+            settle = settle_cny_order(order_id, result.get("params"))
+            if settle.get("success"):
+                cert = (settle.get("certification") or {}).get("cert_id", "")
+                print(f"✅ 虎皮椒支付成功并签发认证: order={order_id} cert={cert}")
+            else:
+                print(f"✅ 虎皮椒支付成功（非认证订单）: order={order_id}")
+        except Exception as e:
+            # 履约失败不能让平台无限重推——支付本身已确认并落账，履约可后台补偿
+            print(f"❌ 虎皮椒履约异常（支付已落账，需人工补偿）: order={order_id} err={e}")
+
+        self._send_text("success", 200)
+        _record_usage("hupijiao-notify", self.client_address[0])
+
+    def _send_text(self, text, status=200):
+        """发送纯文本响应（支付回调等要求非 JSON 的场景）。"""
+        try:
+            body = text.encode("utf-8")
+            self.send_response(status)
+            self.send_header("Content-Type", "text/plain; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+        except (ConnectionAbortedError, BrokenPipeError, OSError):
+            pass
+
     def _handle_creem_webhook(self):
         """处理 Creem Webhook 事件（checkout.completed 等）"""
         raw_body = self._read_raw_body()
