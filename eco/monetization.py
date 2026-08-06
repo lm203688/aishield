@@ -30,6 +30,9 @@ _lock = threading.Lock()
 PRICE_BY_LEVEL = {"gold": 0.05, "silver": 0.02, "bronze": 0.01, "none": 0.0}
 DEFAULT_PAY_TO = os.environ.get("X402_PAY_TO", "0xAIShieldTreasuryPlaceholderAddress")
 
+# 人民币定价（虎皮椒 · 微信/支付宝）。面向国内个人与小团队，x402 之外的第二条轨道。
+PRICE_CNY_BY_LEVEL = {"gold": 39.00, "silver": 19.00, "bronze": 9.00, "none": 0.0}
+
 
 def _now_iso():
     return datetime.now(TZ).isoformat()
@@ -153,6 +156,114 @@ class BadgeMonetization:
             "note": "认证已签发；链上 USDC 结算需钱包 + 在线 facilitator（当前为离线降级）",
         }
 
+    # ══════════════════════════════════════════
+    #  人民币轨道（虎皮椒 · 微信/支付宝）
+    # ══════════════════════════════════════════
+
+    def request_cert_payment_cny(self, source_url, scan_report=None,
+                                 payment="wechat", amount_cny=None):
+        """发起一次"人民币付费认证"订单，返回可扫码/可跳转的支付链接。
+
+        与 x402 版本同构，区别只在结算轨道：这条给国内用户，那条给 agent。
+        """
+        if not source_url:
+            return {"success": False, "error": "source_url is required"}
+        level = _level_from_report(scan_report)
+        if level == "none":
+            return {"success": False, "error": "score < 50，无认证资格",
+                    "status": "rejected", "badge_level": "none"}
+        price = amount_cny if amount_cny is not None else PRICE_CNY_BY_LEVEL[level]
+        if not price or price <= 0:
+            return {"success": False, "error": "定价无效", "badge_level": level}
+
+        from eco.hupijiao import HupijiaoGateway
+        gw = HupijiaoGateway()
+        if not gw.configured:
+            return {"success": False, "error": "人民币通道未配置（虎皮椒凭证缺失）",
+                    "gateway": "hupijiao"}
+
+        order_id = f"cert{uuid.uuid4().hex[:12]}"
+        res = gw.create_payment(
+            amount=price,
+            order_id=order_id,
+            description=f"AIShield {level} 认证",
+            payment=payment,
+            attach=order_id,
+            metadata={"type": "cert", "source_url": source_url,
+                      "badge_level": level, "scan_report": scan_report},
+        )
+        if not res.get("success"):
+            return {"success": False, "error": res.get("error", "下单失败"),
+                    "gateway": "hupijiao", "order_id": order_id}
+
+        # 同步登记到统一订单簿，使 /api/v1/certify/list 能同时看到两条轨道
+        data = _load()
+        data.setdefault("orders", {})[order_id] = {
+            "order_id": order_id,
+            "type": "cert",
+            "gateway": "hupijiao",
+            "source_url": source_url,
+            "badge_level": level,
+            "amount_cny": price,
+            "currency": "CNY",
+            "payment": payment,
+            "status": "pending_payment",
+            "scan_report": scan_report,
+            "pay_url": res.get("pay_url"),
+            "qrcode_url": res.get("qrcode_url"),
+            "created_at": _now_iso(),
+        }
+        _save(data)
+
+        return {
+            "success": True,
+            "status": "requires_payment",
+            "gateway": "hupijiao",
+            "order_id": order_id,
+            "badge_level": level,
+            "amount_cny": price,
+            "currency": "CNY",
+            "payment": payment,
+            "pay_url": res.get("pay_url"),
+            "qrcode_url": res.get("qrcode_url"),
+            "note": "扫码或打开 pay_url 完成支付；支付成功后虎皮椒回调 /api/v1/pay/hupijiao/notify 自动签发认证。",
+        }
+
+    def settle_cny_order(self, trade_order_id, notify_params=None):
+        """虎皮椒回调验签通过后调用：幂等地签发认证。
+
+        只处理 metadata.type == "cert" 的订单；其它订单（充值等）原样跳过。
+        """
+        if not trade_order_id:
+            return {"success": False, "error": "trade_order_id is required"}
+
+        data = _load()
+        order = data.get("orders", {}).get(trade_order_id)
+        if not order:
+            # 非认证类订单（如套餐充值），不属于本闭环
+            return {"success": False, "error": "非认证订单或订单不存在",
+                    "order_id": trade_order_id, "skipped": True}
+        if order.get("status") in ("settled", "settled_offline", "paid"):
+            # 幂等：重复回调直接返回既有认证，不重复签发
+            return {"success": True, "order_id": trade_order_id, "idempotent": True,
+                    "settlement": order.get("status"),
+                    "certification": order.get("certification")}
+
+        order["status"] = "paid"
+        order["settled_at"] = _now_iso()
+        order["settlement"] = "hupijiao_cny"
+        if notify_params:
+            order["transaction_id"] = notify_params.get("transaction_id", "")
+
+        from eco.badge import CertificationService
+        cert = CertificationService().certify_tool(
+            order.get("source_url", ""), order.get("scan_report") or {})
+        order["certification"] = cert
+        _save(data)
+
+        return {"success": True, "order_id": trade_order_id,
+                "settlement": "hupijiao_cny", "certification": cert}
+
     def get_order(self, order_id):
         return _load().get("orders", {}).get(order_id)
 
@@ -184,6 +295,14 @@ def request_cert_payment(source_url, scan_report=None, amount_usd=None):
 
 def fulfill_cert(order_id, payment_header, scan_report=None):
     return _default.fulfill_cert(order_id, payment_header, scan_report)
+
+
+def request_cert_payment_cny(source_url, scan_report=None, payment="wechat", amount_cny=None):
+    return _default.request_cert_payment_cny(source_url, scan_report, payment, amount_cny)
+
+
+def settle_cny_order(trade_order_id, notify_params=None):
+    return _default.settle_cny_order(trade_order_id, notify_params)
 
 
 def get_order(order_id):
