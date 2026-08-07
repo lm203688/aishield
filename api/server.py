@@ -899,6 +899,86 @@ class AIShieldHandler(BaseHTTPRequestHandler):
                 self._send_json({"error": str(e)}, 500)
             return
 
+        # ── 运行时治理：策略与熔断状态（含审计链自校验）──
+        if path == "/api/v1/governance/status":
+            try:
+                from eco import runtime_governance as rg
+                self._send_json({"success": True, **rg.status()})
+            except Exception as e:
+                self._send_json({"error": str(e)}, 500)
+            return
+
+        # ── 运行时治理：不可篡改审计日志 ──
+        if path == "/api/v1/governance/audit":
+            try:
+                from eco import runtime_governance as rg
+                q = parse_qs(parsed.query)
+                limit = int((q.get("limit") or ["100"])[0])
+                entries = rg.read_audit(limit=max(1, min(limit, 1000)),
+                                        event=(q.get("event") or [None])[0])
+                self._send_json({"success": True, "total": len(entries),
+                                 "chain": rg.verify_chain(), "entries": entries})
+            except Exception as e:
+                self._send_json({"error": str(e)}, 500)
+            return
+
+        # ── 支付上限：额度用量 ──
+        if path == "/api/v1/spend-cap/usage":
+            try:
+                from eco import spend_cap
+                q = parse_qs(parsed.query)
+                self._send_json({"success": True, **spend_cap.usage(
+                    (q.get("payer_id") or ["anonymous"])[0],
+                    (q.get("currency") or ["CNY"])[0])})
+            except Exception as e:
+                self._send_json({"error": str(e)}, 500)
+            return
+
+        # ── 持续鉴证：套餐 / 订阅列表 / 到期提醒 / 信任状态 ──
+        if path == "/api/v1/attestation/plans":
+            try:
+                from eco import attestation
+                self._send_json({"success": True, "plans": attestation.plans()})
+            except Exception as e:
+                self._send_json({"error": str(e)}, 500)
+            return
+
+        if path == "/api/v1/attestation/list":
+            try:
+                from eco import attestation
+                q = parse_qs(parsed.query)
+                subs = attestation.list_subscriptions(
+                    status=(q.get("status") or [None])[0],
+                    payer_id=(q.get("payer_id") or [None])[0])
+                self._send_json({"success": True, "total": len(subs), "subscriptions": subs})
+            except Exception as e:
+                self._send_json({"error": str(e)}, 500)
+            return
+
+        if path == "/api/v1/attestation/expiring":
+            try:
+                from eco import attestation
+                q = parse_qs(parsed.query)
+                items = attestation.get_expiring(days=int((q.get("days") or ["7"])[0]))
+                self._send_json({"success": True, "total": len(items), "subscriptions": items})
+            except Exception as e:
+                self._send_json({"error": str(e)}, 500)
+            return
+
+        if path == "/api/v1/attestation/trust":
+            try:
+                from eco import attestation
+                q = parse_qs(parsed.query)
+                src = (q.get("source_url") or [""])[0]
+                if not src:
+                    self._send_json({"success": False, "error": "source_url 必填"}, 400)
+                    return
+                self._send_json({"success": True, **attestation.trust_status(src)})
+            except Exception as e:
+                self._send_json({"error": str(e)}, 500)
+            _record_usage("attestation-trust", self.client_address[0])
+            return
+
         # Eco模块路由
         if _eco_dispatch_get(self):
             return
@@ -1132,8 +1212,11 @@ class AIShieldHandler(BaseHTTPRequestHandler):
                 return
             try:
                 from eco.monetization import request_cert_payment
-                res = request_cert_payment(pdata.get("source_url"), pdata.get("scan_report"))
-                self._send_json(res, 200 if res.get("success") else 400)
+                res = request_cert_payment(pdata.get("source_url"), pdata.get("scan_report"),
+                                           pdata.get("amount_usd"), pdata.get("payer_id"))
+                code = 200 if res.get("success") else (
+                    429 if res.get("status") == "blocked_by_spend_cap" else 400)
+                self._send_json(res, code)
             except Exception as e:
                 self._send_json({"error": str(e)}, 500)
             _record_usage("certify-pay-req", self.client_address[0])
@@ -1206,11 +1289,146 @@ class AIShieldHandler(BaseHTTPRequestHandler):
                     data.get("scan_report"),
                     data.get("payment", "wechat"),
                     data.get("amount_cny"),
+                    data.get("payer_id"),
                 )
-                self._send_json(res, 200 if res.get("success") else 400)
+                # 被支付上限拦下时返回 429（配额语义），便于客户端区分"付不起"和"参数错"
+                code = 200 if res.get("success") else (
+                    429 if res.get("status") == "blocked_by_spend_cap" else 400)
+                self._send_json(res, code)
             except Exception as e:
                 self._send_json({"error": str(e)}, 500)
             _record_usage("certify-request-payment-cny", self.client_address[0])
+            return
+
+        # ══════════════════════════════════════════
+        #  运行时治理（ASI08/10）：决策网关 · kill switch · 事故熔断
+        # ══════════════════════════════════════════
+        if path == "/api/v1/governance/evaluate":
+            try:
+                from eco import runtime_governance as rg
+                res = rg.evaluate(data.get("server", ""), data.get("tool", ""),
+                                  data.get("context"))
+                # 拒绝用 403，让调用方无需解析 body 即可 fail-closed
+                self._send_json({"success": True, **res}, 200 if res["allowed"] else 403)
+            except Exception as e:
+                self._send_json({"error": str(e)}, 500)
+            _record_usage("governance-evaluate", self.client_address[0])
+            return
+
+        if path == "/api/v1/governance/kill":
+            try:
+                from eco import runtime_governance as rg
+                res = rg.kill(data.get("server", ""), data.get("reason", "manual kill switch"))
+                self._send_json(res, 200 if res.get("success") else 400)
+            except Exception as e:
+                self._send_json({"error": str(e)}, 500)
+            _record_usage("governance-kill", self.client_address[0])
+            return
+
+        if path == "/api/v1/governance/revive":
+            try:
+                from eco import runtime_governance as rg
+                res = rg.revive(data.get("server", ""), data.get("reason", "manual revive"))
+                self._send_json(res, 200 if res.get("success") else 400)
+            except Exception as e:
+                self._send_json({"error": str(e)}, 500)
+            return
+
+        if path == "/api/v1/governance/incident":
+            try:
+                from eco import runtime_governance as rg
+                res = rg.record_incident(data.get("server", ""),
+                                         data.get("severity", "high"),
+                                         data.get("detail"))
+                self._send_json(res, 200 if res.get("success") else 400)
+            except Exception as e:
+                self._send_json({"error": str(e)}, 500)
+            return
+
+        if path == "/api/v1/governance/policy":
+            try:
+                from eco import runtime_governance as rg
+                action = (data.get("action") or "").strip()
+                if action == "allow":
+                    res = rg.allow_tool(data.get("server", ""), data.get("tools", "*"))
+                elif action == "deny":
+                    res = rg.deny_tool(data.get("server", ""), data.get("tools", "*"))
+                elif action == "default_deny":
+                    res = rg.set_default_deny(bool(data.get("enabled", True)))
+                else:
+                    res = {"success": False,
+                           "error": "action 必须是 allow / deny / default_deny"}
+                self._send_json(res, 200 if res.get("success") else 400)
+            except Exception as e:
+                self._send_json({"error": str(e)}, 500)
+            return
+
+        # ══════════════════════════════════════════
+        #  支付上限策略
+        # ══════════════════════════════════════════
+        if path == "/api/v1/spend-cap/policy":
+            try:
+                from eco import spend_cap
+                res = spend_cap.set_policy(
+                    data.get("payer_id", ""), data.get("currency", "CNY"),
+                    data.get("per_tx"), data.get("daily"), data.get("monthly"),
+                    data.get("note", ""))
+                self._send_json(res, 200 if res.get("success") else 400)
+            except Exception as e:
+                self._send_json({"error": str(e)}, 500)
+            return
+
+        # ══════════════════════════════════════════
+        #  持续鉴证订阅
+        # ══════════════════════════════════════════
+        if path == "/api/v1/attestation/subscribe":
+            try:
+                from eco import attestation
+                res = attestation.subscribe(
+                    data.get("source_url", ""), data.get("plan", "monthly"),
+                    data.get("payer_id"), data.get("cert_id"),
+                    data.get("attest_interval_days", attestation.DEFAULT_ATTEST_INTERVAL_DAYS))
+                self._send_json(res, 201 if res.get("success") else 400)
+            except Exception as e:
+                self._send_json({"error": str(e)}, 500)
+            _record_usage("attestation-subscribe", self.client_address[0])
+            return
+
+        if path == "/api/v1/attestation/renew":
+            try:
+                from eco import attestation
+                res = attestation.renew_subscription(
+                    data.get("subscription_id", ""), data.get("periods", 1),
+                    data.get("plan"))
+                self._send_json(res, 200 if res.get("success") else 400)
+            except Exception as e:
+                self._send_json({"error": str(e)}, 500)
+            return
+
+        if path == "/api/v1/attestation/cancel":
+            try:
+                from eco import attestation
+                res = attestation.cancel(data.get("subscription_id", ""),
+                                         data.get("reason", ""))
+                self._send_json(res, 200 if res.get("success") else 400)
+            except Exception as e:
+                self._send_json({"error": str(e)}, 500)
+            return
+
+        if path == "/api/v1/attestation/run-cycle":
+            try:
+                from eco import attestation
+                sid = data.get("subscription_id")
+                force = bool(data.get("force", False))
+                if sid:
+                    res = attestation.attest_once(sid, force=force)
+                else:
+                    res = attestation.run_cycle(force=force)
+                self._send_json({"success": True, **res} if "success" not in res else res,
+                                200 if res.get("success", True) else 400)
+            except Exception as e:
+                self._send_json({"error": str(e)}, 500)
+            _record_usage("attestation-run-cycle", self.client_address[0])
             return
 
         # ── Creem Checkout 创建 ──
