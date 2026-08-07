@@ -1,6 +1,20 @@
 {
   "intel": [
     {
+      "id": "GHSA-7c4v-fwgw-9rf7",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": null,
+      "title": "Nuxt dev server discloses project root and workspace UUID via the Chrome DevTools workspace endpoint",
+      "summary": "### Impact\n\nWhen a Nuxt dev server is bound to a network-reachable interface (for example `nuxt dev --host` for on-device testing), the default-enabled Chrome DevTools workspace endpoint `GET /.well-known/appspecific/com.chrome.devtools.json` returns the absolute project root (`workspace.root`, i.e. `rootDir`) and a persistent per-project workspace UUID.\n\n`GHSA-rq7w-g337-39qq` added a gate (`isLocalDevRequest`) intended to restrict this endpoint to local requests, but that gate is header-based: ",
+      "affected": "npm:nuxt, npm:nuxt",
+      "references": [
+        "https://github.com/advisories/GHSA-7c4v-fwgw-9rf7"
+      ],
+      "published": "2026-08-07T16:45:21Z",
+      "fetched": "2026-08-07T17:51:11.014692+00:00"
+    },
+    {
       "id": "GHSA-hmq2-w58f-27jc",
       "source": "github-advisory",
       "severity": "high",
@@ -2163,19 +2177,19 @@
       "fetched": "2026-08-04T06:34:53.913899+00:00"
     }
   ],
-  "updated": "2026-08-07T16:01:14.902670+00:00",
+  "updated": "2026-08-07T17:51:12.710126+00:00",
   "sources": [
     "osv",
     "nvd",
     "github-advisory"
   ],
   "stats": {
+    "medium": 42,
     "high": 61,
-    "medium": 41,
     "unknown": 18,
     "critical": 19,
     "low": 3,
     "moderate": 1
   },
-  "total": 143
+  "total": 144
 }
