@@ -136,6 +136,7 @@
 | P1 | S2 生态位待办 | MCP 官方 Registry 收录：向 modelcontextprotocol/registry 提交 server.json —— 生态入口即用户入口 | — |
 | P1 | S3 体系问题 | 修复自动化体系缺陷 — M3 状态新鲜度: 状态域 ['feature', 'intel'] 超过 72 小时未更新，对应环节可能已停摆 | — |
 | P1 | S4 情报驱动 | 评审本轮 52 条新增高危漏洞的检测覆盖情况 | — |
+| P2 | S1 用户反馈 | [P1] 修复自动化体系缺陷 — M3 状态新鲜度: 状态域 ['feature', 'intel'] 超过 72 小时未更新，对应环节可能已停摆 | [链接](https://github.com/lm203688/aishield/issues/41) |
 | P2 | S1 用户反馈 | [P1] 评审本轮 52 条新增高危漏洞的检测覆盖情况 | [链接](https://github.com/lm203688/aishield/issues/7) |
 | P2 | S1 用户反馈 | [P1] 修复自动化体系缺陷 — M2 运行活性: 2 个任务超期未执行 —— 这是静默失效的典型信号 | [链接](https://github.com/lm203688/aishield/issues/6) |
 | P2 | S1 用户反馈 | [P1] 内容站 GitHub Pages：在仓库 Settings → Pages 开启 GitHub Pages（Source: main /docs） | [链接](https://github.com/lm203688/aishield/issues/5) |
