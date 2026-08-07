@@ -69,6 +69,13 @@ TARGETS: List[Tuple[str, str, str]] = [
     ("setup.py",
      r'(version\s*=\s*")([^"]+)(")',
      r"\g<1>{v}\g<3>"),
+    # 协议层自报版本：MCP 客户端握手时看到的就是这个字符串。
+    # 它曾长期硬编码 '3.0.0'，而 npm 上的包已经发到 4.2.x —— 用户报障时
+    # 说"我用的 3.0.0"，谁也对不上是哪份代码。这正是本脚本要消灭的漂移，
+    # 只不过它藏在 TS 源码里而非配置文件，所以一直逃过了门禁。
+    ("mcp-server/src/index.ts",
+     r"(const SERVER_VERSION\s*=\s*')([^']+)(')",
+     r"\g<1>{v}\g<3>"),
 ]
 
 SEMVER = re.compile(r"^(\d+)\.(\d+)\.(\d+)")
