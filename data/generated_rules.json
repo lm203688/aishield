@@ -1,7 +1,16 @@
 {
-  "generated_at": "2026-08-07T14:56:51.627849+00:00",
-  "source_intel_count": 142,
+  "generated_at": "2026-08-07T16:01:34.338653+00:00",
+  "source_intel_count": 143,
   "package_blacklist": {
+    "pip:GitPython": {
+      "ecosystem": "pip",
+      "package": "GitPython",
+      "severity": "high",
+      "advisories": [
+        "GHSA-hmq2-w58f-27jc",
+        "GHSA-3f7w-8rr8-f37f"
+      ]
+    },
     "npm:ngx-extended-pdf-viewer": {
       "ecosystem": "npm",
       "package": "ngx-extended-pdf-viewer",
@@ -83,14 +92,6 @@
       "severity": "high",
       "advisories": [
         "GHSA-jwv3-5hgf-82ww"
-      ]
-    },
-    "pip:GitPython": {
-      "ecosystem": "pip",
-      "package": "GitPython",
-      "severity": "high",
-      "advisories": [
-        "GHSA-3f7w-8rr8-f37f"
       ]
     },
     "npm:jodit": {

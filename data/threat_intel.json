@@ -1,6 +1,20 @@
 {
   "intel": [
     {
+      "id": "GHSA-hmq2-w58f-27jc",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 8.2,
+      "title": "GitPython: Arbitrary Git Repository Creation Outside the Working Tree via Unvalidated .gitmodules Submodule Name in GitPython",
+      "summary": "### Summary\nGitPython computes the on-disk location of a submodule's separate Git directory (`.git/modules/<name>`) from the submodule's `.gitmodules` section name with no validation. Because that name is fully attacker-controlled content of a cloned repository, a malicious repository can set a submodule name to a traversal string (e.g. `../../../../home/victim/.something`) and cause GitPython to create and initialize a full Git repository at an attacker-chosen filesystem path outside the intend",
+      "affected": "pip:GitPython",
+      "references": [
+        "https://github.com/advisories/GHSA-hmq2-w58f-27jc"
+      ],
+      "published": "2026-08-07T15:45:39Z",
+      "fetched": "2026-08-07T16:01:14.399270+00:00"
+    },
+    {
       "id": "CVE-2026-19111",
       "source": "nvd",
       "severity": "high",
@@ -2149,19 +2163,19 @@
       "fetched": "2026-08-04T06:34:53.913899+00:00"
     }
   ],
-  "updated": "2026-08-07T14:56:39.168572+00:00",
+  "updated": "2026-08-07T16:01:14.902670+00:00",
   "sources": [
     "osv",
     "nvd",
     "github-advisory"
   ],
   "stats": {
-    "high": 60,
+    "high": 61,
     "medium": 41,
     "unknown": 18,
     "critical": 19,
     "low": 3,
     "moderate": 1
   },
-  "total": 142
+  "total": 143
 }
