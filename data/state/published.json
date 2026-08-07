@@ -2,21 +2,21 @@
   "2c1769509e47": {
     "title": "MCP 2026-07-28 无状态化：安全网关必须回答的 3 个问题",
     "issue": "https://github.com/lm203688/aishield/issues/8",
-    "at": "2026-08-07T09:04:39.241568+00:00"
+    "at": "2026-08-07T10:57:09.520380+00:00"
   },
   "8090b9da8d75": {
     "title": "从 HuggingFace 被入侵看 Agent 沙箱逃逸的 4 个必要条件",
     "issue": "https://github.com/lm203688/aishield/issues/10",
-    "at": "2026-08-07T09:04:39.609939+00:00"
+    "at": "2026-08-07T10:57:09.904923+00:00"
   },
   "9da5bbc8e28e": {
     "title": "深入分析：filesystem-test 如何修复安全漏洞",
     "issue": "https://github.com/lm203688/aishield/issues/11",
-    "at": "2026-08-07T09:04:40.097533+00:00"
+    "at": "2026-08-07T10:57:10.270619+00:00"
   },
   "a72def2a26b5": {
     "title": "MCP 安全扫描周报 #30：发现 0 个高危风险",
     "issue": "https://github.com/lm203688/aishield/issues/12",
-    "at": "2026-08-07T09:04:40.435284+00:00"
+    "at": "2026-08-07T10:57:10.591604+00:00"
   }
 }
