@@ -1,6 +1,64 @@
 {
   "intel": [
     {
+      "id": "CVE-2026-19111",
+      "source": "nvd",
+      "severity": "high",
+      "cvss": 8.1,
+      "title": "Insecure direct object reference in the mongodb_memory, elasticsearch_memory, and mem0_memory tools in Amazon Strands Agents Tools before 0.8.3 might allow remote authenticated users to access, modify",
+      "summary": "Insecure direct object reference in the mongodb_memory, elasticsearch_memory, and mem0_memory tools in Amazon Strands Agents Tools before 0.8.3 might allow remote authenticated users to access, modify, or delete memories belonging to other tenants by influencing the LLM to emit tool calls with a forged namespace parameter.\n\n\n\nTo remediate this issue, users should upgrade to version 0.8.3.",
+      "affected": "llm agent",
+      "references": [
+        "https://aws.amazon.com/security/security-bulletins/2026-077-aws/",
+        "https://github.com/strands-agents/tools/security/advisories/GHSA-mpxq-953j-42m4",
+        "https://pypi.org/project/strands-agents-tools/0.8.3/"
+      ],
+      "published": "2026-08-06T22:16:55.410",
+      "fetched": "2026-08-07T00:05:53.685599+00:00"
+    },
+    {
+      "id": "GHSA-w9hm-4m3m-fxmm",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": null,
+      "title": "ngx-extended-pdf-viewer bundles a version of pdf.js vulnerable to CVE-2026-16633",
+      "summary": "ngx-extended-pdf-viewer embeds a fork of Mozilla's pdf.js rather than depending on pdfjs-dist, so this vulnerability is not visible to dependency scanners through package.json.\n\n### Impact\nOpening a malicious PDF can execute attacker-controlled JavaScript in the context of the hosting page. Upstream advisory: GHSA-hq66-cqwq-w95j / CVE-2026-16633.\n\n### Exposure. \nThe sandbox half of the issue requires enableScripting, which pdf.js enables by default but this library does not — so the default conf",
+      "affected": "npm:ngx-extended-pdf-viewer",
+      "references": [
+        "https://github.com/advisories/GHSA-w9hm-4m3m-fxmm"
+      ],
+      "published": "2026-08-06T21:13:59Z",
+      "fetched": "2026-08-07T00:06:00.636840+00:00"
+    },
+    {
+      "id": "GHSA-hqvf-45jj-mccq",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 6.8,
+      "title": "AWS CLI: Disabled SSH host key verification in Amazon AWS CLI EMR helper commands",
+      "summary": "### Summary\nThe AWS Command Line Interface (AWS CLI) is a unified tool to manage AWS services from the command line. An issue exists where the EMR SSH helper commands (`aws emr ssh`, `aws emr socks`, `aws emr put`, `aws emr get`) passed `StrictHostKeyChecking=no` to the underlying SSH client, disabling host key verification.\n\n### Impact\nA network-positioned actor could perform a man-in-the-middle action to intercept SSH sessions and file transfers between the client and EMR cluster instances. Su",
+      "affected": "pip:awscli",
+      "references": [
+        "https://github.com/advisories/GHSA-hqvf-45jj-mccq"
+      ],
+      "published": "2026-08-06T20:15:30Z",
+      "fetched": "2026-08-07T00:06:01.872291+00:00"
+    },
+    {
+      "id": "GHSA-6x64-9x62-f2gx",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": null,
+      "title": "Mermaid allows CSS injection applying to sibling elements of the diagram",
+      "summary": "### Summary\n\nMermaid does not fully restrict CSS to the rendered SVG subtree. Although selectors are prefixed with `#mermaid-X`, sibling (`~` and `+`) combinators can still escape the Mermaid container and inject styles to DOM elements adjacent to the diagram `<svg>`.\n\n**Most users of mermaid would not be affected by this**, as mermaid adds its `<svg>` as an only child of it's parent element. However, you may be affected if you manually insert the `<svg>` (or other elements) into the DOM yoursel",
+      "affected": "npm:mermaid, npm:mermaid",
+      "references": [
+        "https://github.com/advisories/GHSA-6x64-9x62-f2gx"
+      ],
+      "published": "2026-08-06T19:55:31Z",
+      "fetched": "2026-08-07T00:06:00.637000+00:00"
+    },
+    {
       "id": "CVE-2026-67531",
       "source": "nvd",
       "severity": "unknown",
@@ -2091,19 +2149,19 @@
       "fetched": "2026-08-04T06:34:53.913899+00:00"
     }
   ],
-  "updated": "2026-08-06T15:23:00.096449+00:00",
+  "updated": "2026-08-07T00:06:02.375740+00:00",
   "sources": [
     "osv",
     "nvd",
     "github-advisory"
   ],
   "stats": {
+    "high": 60,
+    "medium": 41,
     "unknown": 18,
     "critical": 19,
-    "high": 58,
-    "medium": 39,
     "low": 3,
     "moderate": 1
   },
-  "total": 138
+  "total": 142
 }
