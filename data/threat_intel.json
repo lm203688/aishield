@@ -1,6 +1,51 @@
 {
   "intel": [
     {
+      "id": "CVE-2026-48039",
+      "source": "nvd",
+      "severity": "critical",
+      "cvss": 9.1,
+      "title": "Meta Ads MCP is a Model Context Protocol (MCP) server that lets AI assistants run Meta Ads. Prior to version 1.0.109, `AuthInjectionMiddleware.dispatch()` at `http_auth_integration.py:272` uncondition",
+      "summary": "Meta Ads MCP is a Model Context Protocol (MCP) server that lets AI assistants run Meta Ads. Prior to version 1.0.109, `AuthInjectionMiddleware.dispatch()` at `http_auth_integration.py:272` unconditionally forwards unauthenticated Streamable HTTP requests to downstream MCP tool handlers without issuing a `401` response, allowing any network-reachable caller to invoke MCP tools without authentication. When no per-request credential is present, tool handlers fall back to the `META_ACCESS_TOKEN` env",
+      "affected": "model context protocol",
+      "references": [
+        "https://github.com/pipeboard-co/meta-ads-mcp/releases/tag/1.0.109",
+        "https://github.com/pipeboard-co/meta-ads-mcp/security/advisories/GHSA-9gw6-46qc-99vr",
+        "https://github.com/pypa/advisory-database/tree/main/vulns/meta-ads-mcp/PYSEC-2026-413.yaml",
+        "https://github.com/pipeboard-co/meta-ads-mcp/security/advisories/GHSA-9gw6-46qc-99vr"
+      ],
+      "published": "2026-08-07T20:16:51.723",
+      "fetched": "2026-08-07T20:45:07.152309+00:00"
+    },
+    {
+      "id": "GHSA-gm37-52c6-37mw",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.5,
+      "title": "pymdown-extensions: exponential-backtracking ReDoS in caret, tilde, betterem, and magiclink inline processors",
+      "summary": "### Summary\n\nFour inline processors in pymdown-extensions contain regular expressions with\nexponential backtracking. A single untrusted Markdown line under\n50 bytes drives `markdown.markdown()` into unbounded CPU on the rendering thread\n(seconds at ~45 bytes, growing exponentially with each added character). All four\nfire in the extension's **default configuration**\nand are reachable through the documented public API. The `caret`/`tilde`/\n`betterem` blow-up was introduced by the emphasis-pattern",
+      "affected": "pip:pymdown-extensions",
+      "references": [
+        "https://github.com/advisories/GHSA-gm37-52c6-37mw"
+      ],
+      "published": "2026-08-07T18:26:07Z",
+      "fetched": "2026-08-07T20:45:20.825202+00:00"
+    },
+    {
+      "id": "GHSA-wcx4-wpfv-mc5c",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.8,
+      "title": "jsii-diff: Command Injection via npm: package argument",
+      "summary": "## Summary\n\njsii-diff is a command line tool to compare the API differences between two jsii assemblies, and report errors if there are backwards-incompatible changes to the API. An issue exists where specially formatted command line arguments can be used to execute shell commands via this tool.\n\n## Impact\njsii-diff supports downloading packages to compare directly from NPM, so that you can compare a proposed candidate version of your jsii package with an already-published version, by passing an",
+      "affected": "npm:jsii-diff",
+      "references": [
+        "https://github.com/advisories/GHSA-wcx4-wpfv-mc5c"
+      ],
+      "published": "2026-08-07T18:15:47Z",
+      "fetched": "2026-08-07T20:45:19.831033+00:00"
+    },
+    {
       "id": "GHSA-7c4v-fwgw-9rf7",
       "source": "github-advisory",
       "severity": "medium",
@@ -2177,19 +2222,19 @@
       "fetched": "2026-08-04T06:34:53.913899+00:00"
     }
   ],
-  "updated": "2026-08-07T17:51:12.710126+00:00",
+  "updated": "2026-08-07T20:45:21.328737+00:00",
   "sources": [
     "osv",
     "nvd",
     "github-advisory"
   ],
   "stats": {
+    "critical": 20,
+    "high": 63,
     "medium": 42,
-    "high": 61,
     "unknown": 18,
-    "critical": 19,
     "low": 3,
     "moderate": 1
   },
-  "total": 144
+  "total": 147
 }

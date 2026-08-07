@@ -1,7 +1,23 @@
 {
-  "generated_at": "2026-08-07T17:51:28.249424+00:00",
-  "source_intel_count": 144,
+  "generated_at": "2026-08-07T20:45:33.790525+00:00",
+  "source_intel_count": 147,
   "package_blacklist": {
+    "pip:pymdown-extensions": {
+      "ecosystem": "pip",
+      "package": "pymdown-extensions",
+      "severity": "high",
+      "advisories": [
+        "GHSA-gm37-52c6-37mw"
+      ]
+    },
+    "npm:jsii-diff": {
+      "ecosystem": "npm",
+      "package": "jsii-diff",
+      "severity": "high",
+      "advisories": [
+        "GHSA-wcx4-wpfv-mc5c"
+      ]
+    },
     "pip:GitPython": {
       "ecosystem": "pip",
       "package": "GitPython",
@@ -178,6 +194,35 @@
     }
   },
   "pattern_rules": {
+    "(?i)(auth(entication)?\\s*[:=]\\s*(False|None|null|0)\\b|verify\\s*=\\s*False)": {
+      "description": "认证绕过: 显式关闭校验",
+      "severity": "critical",
+      "owasp": "LLM07",
+      "owasp_name": "系统提示泄露 (System Prompt Leakage)",
+      "derived_from": "authentication",
+      "intel_hits": 10,
+      "evidence": [
+        "CVE-2026-48039",
+        "GHSA-279x-mwfv-vcqv",
+        "CVE-2026-8446",
+        "GHSA-3r7g-q6cg-q2vx",
+        "GHSA-8gj2-2cvc-6xx7"
+      ]
+    },
+    "(?i)(os\\.system|subprocess\\.(call|run|Popen)|child_process\\.exec)\\s*\\(\\s*[^)]*(\\+|%|\\$\\{|f['\\\"])": {
+      "description": "命令注入: 动态拼接系统命令",
+      "severity": "critical",
+      "owasp": "LLM05",
+      "owasp_name": "不当输出处理 (Improper Output Handling)",
+      "derived_from": "command injection",
+      "intel_hits": 4,
+      "evidence": [
+        "GHSA-wcx4-wpfv-mc5c",
+        "CVE-2026-59800",
+        "CVE-2026-48719",
+        "CVE-2026-42853"
+      ]
+    },
     "(?i)(session|token)\\s*[:=]\\s*['\\\"][^'\\\"]{0,8}['\\\"]": {
       "description": "会话安全: 会话标识过短或硬编码",
       "severity": "high",
@@ -206,21 +251,6 @@
         "GHSA-rffm-9q57-q649",
         "GHSA-x6vm-w76m-8j7g",
         "GHSA-p7w7-4929-vpj5"
-      ]
-    },
-    "(?i)(auth(entication)?\\s*[:=]\\s*(False|None|null|0)\\b|verify\\s*=\\s*False)": {
-      "description": "认证绕过: 显式关闭校验",
-      "severity": "critical",
-      "owasp": "LLM07",
-      "owasp_name": "系统提示泄露 (System Prompt Leakage)",
-      "derived_from": "authentication",
-      "intel_hits": 9,
-      "evidence": [
-        "GHSA-279x-mwfv-vcqv",
-        "CVE-2026-8446",
-        "GHSA-3r7g-q6cg-q2vx",
-        "GHSA-8gj2-2cvc-6xx7",
-        "GHSA-wch5-xp77-fxg4"
       ]
     },
     "(?i)(ignore|disregard|forget)\\s+(all\\s+)?(previous|prior|above)\\s+(instruction|prompt|rule)": {
@@ -282,26 +312,13 @@
         "CVE-2026-66004",
         "CVE-2026-44192"
       ]
-    },
-    "(?i)(os\\.system|subprocess\\.(call|run|Popen)|child_process\\.exec)\\s*\\(\\s*[^)]*(\\+|%|\\$\\{|f['\\\"])": {
-      "description": "命令注入: 动态拼接系统命令",
-      "severity": "critical",
-      "owasp": "LLM05",
-      "owasp_name": "不当输出处理 (Improper Output Handling)",
-      "derived_from": "command injection",
-      "intel_hits": 3,
-      "evidence": [
-        "CVE-2026-59800",
-        "CVE-2026-48719",
-        "CVE-2026-42853"
-      ]
     }
   },
   "owasp_distribution": {
     "LLM07": 3,
+    "LLM05": 2,
     "LLM01": 1,
-    "LLM06": 2,
-    "LLM05": 2
+    "LLM06": 2
   },
-  "total_rules": 25
+  "total_rules": 27
 }
