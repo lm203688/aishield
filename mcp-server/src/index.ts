@@ -1,7 +1,7 @@
 ﻿#!/usr/bin/env node
 
 /**
- * AIShield MCP Server v3.0
+ * AIShield MCP Server
  * 
  * OWASP MCP Top 10 aligned security scanner.
  * 6 tools: scan / guardrail / prompt_check / banned_words / rug_pull / handshake
@@ -18,6 +18,10 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
 
+// 版本单一真源。由 scripts/sync_version.py 统一维护，CI 的版本一致性门禁会校验它，
+// 因此这里不再手写数字 —— 硬编码的 '3.0.0' 曾与已发布的 4.2.x 差了一个大版本。
+const SERVER_VERSION = '4.2.2';
+
 const API_BASE = process.env.AISHIELD_API_URL || 'https://api.aishield.tools';
 const API_KEY = process.env.AISHIELD_API_KEY || '';
 
@@ -26,7 +30,7 @@ async function apiCall(path: string, body: Record<string, unknown>, timeoutMs = 
   const url = `${API_BASE}${path}`;
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    'User-Agent': 'AIShield-MCP-Server/3.0',
+    'User-Agent': `AIShield-MCP-Server/${SERVER_VERSION}`,
   };
   if (API_KEY) headers['Authorization'] = `Bearer ${API_KEY}`;
 
@@ -50,11 +54,35 @@ async function apiCall(path: string, body: Record<string, unknown>, timeoutMs = 
   }
 }
 
+// ── Audit response unwrapping ──
+//
+// /api/v1/audit 的成功响应形状是：
+//   { success, score, badge_level, risk_level, report: { overall_score, findings, ... } }
+// 顶层只有三个便捷字段，五维分数 / findings / owasp_coverage 全都在 report 里。
+//
+// 早期版本直接读 data.overall_score —— 这个键在顶层根本不存在，于是每次扫描都显示
+// "Score: 0/100"、五维全 0、findings 为空；guardrail 更糟：score 恒为 0 就永远走到
+// BLOCK 分支，对再干净的仓库也判"不要安装"。一个对什么都报警的安全工具，
+// 和没有安全工具是一回事，甚至更坏 —— 用户会直接卸载它。
+//
+// 这里统一解包，同时兼容「扁平响应」的老部署（自建 API 可能还没升级）。
+function unwrapAudit(data: any): { report: any; score: number } {
+  const hasNested = data && typeof data.report === 'object' && data.report !== null;
+  const report = hasNested ? data.report : (data || {});
+  // 顶层 score 优先（API 承诺与 report.overall_score 恒等），回退到嵌套值。
+  const score = toNum(data?.score, toNum(report?.overall_score, 0));
+  return { report, score };
+}
+
+function toNum(v: unknown, fallback: number): number {
+  return typeof v === 'number' && Number.isFinite(v) ? v : fallback;
+}
+
 // ── Create Server ──
 const server = new McpServer({
   name: 'AIShield Security Scanner',
-  version: '3.0.0',
-  description: 'OWASP MCP Top 10 aligned security scanner — 133 rules, 5-dimension scoring, tool poisoning & supply chain detection',
+  version: SERVER_VERSION,
+  description: 'OWASP MCP Top 10 + Agentic AI Top 10 aligned security scanner — 201 rules, 5-dimension scoring, tool poisoning & supply chain detection',
 });
 
 // ══════════════════════════════════════════════════════════════
@@ -65,7 +93,7 @@ server.tool(
   'aishield_scan',
   `AIShield安全扫描 — 扫描MCP Server/AI工具的安全风险。
 
-对齐OWASP MCP Top 10 (2025 v0.1)，82+条规则覆盖10大风险类别。
+对齐OWASP MCP Top 10 (2025 v0.1) 与 Agentic AI Top 10，201条规则覆盖两套风险分类。
 5维评分: 安全(40%)/权限(20%)/数据处理(20%)/供应链(10%)/可靠性(10%)
 返回: 评分 + 风险等级 + OWASP合规矩阵 + 修复建议`,
   {
@@ -99,10 +127,10 @@ server.tool(
   },
   async ({ source_url, auto_block }) => {
     try {
-      const data = await apiCall('/api/v1/audit', { source_url, tool_type: 'mcp', auto_block });
-      const score = data.overall_score || 0;
-      const risk = data.risk_level || 'unknown';
-      const badge = data.badge_level || 'none';
+      const raw = await apiCall('/api/v1/audit', { source_url, tool_type: 'mcp', auto_block });
+      const { report: data, score } = unwrapAudit(raw);
+      const risk = raw?.risk_level || data.risk_level || 'unknown';
+      const badge = raw?.badge_level || data.badge_level || 'none';
 
       let verdict: string;
       if (score >= 70) {
@@ -273,10 +301,10 @@ server.tool(
 );
 
 // ── Helper ──
-function formatScanResult(data: any) {
-  const score = data.overall_score || 0;
-  const badge = data.badge_level || 'none';
-  const risk = data.risk_level || 'unknown';
+function formatScanResult(raw: any) {
+  const { report: data, score } = unwrapAudit(raw);
+  const badge = raw?.badge_level || data.badge_level || 'none';
+  const risk = raw?.risk_level || data.risk_level || 'unknown';
 
   const lines = [
     `AIShield Security Scan Report`,
@@ -337,7 +365,7 @@ function formatScanResult(data: any) {
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error('AIShield MCP Server v3.0 — OWASP MCP Top 10 aligned');
+  console.error(`AIShield MCP Server v${SERVER_VERSION} — OWASP MCP Top 10 aligned`);
   console.error(`  API: ${API_BASE}`);
   console.error(`  Key: ${API_KEY ? '***' + API_KEY.slice(-4) : '(not set — free tier)'}`);
 }
