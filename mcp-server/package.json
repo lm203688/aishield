@@ -1,6 +1,6 @@
 {
   "name": "aishield-mcp-server",
-  "version": "4.2.1",
+  "version": "4.2.2",
   "mcpName": "io.github.lm203688/aishield",
   "description": "AIShield - OWASP MCP Top 10 aligned security scanner. Scan MCP servers, detect tool poisoning, prompt injection, and supply chain risks.",
   "main": "dist/index.js",
