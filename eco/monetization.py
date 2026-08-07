@@ -74,8 +74,12 @@ def _level_from_report(scan_report):
 class BadgeMonetization:
     """认证徽章 ↔ x402 收费闭环服务。"""
 
-    def request_cert_payment(self, source_url, scan_report=None, amount_usd=None):
-        """发起一次"付费认证"订单，返回 x402 402 支付要求。"""
+    def request_cert_payment(self, source_url, scan_report=None, amount_usd=None, payer_id=None):
+        """发起一次"付费认证"订单，返回 x402 402 支付要求。
+
+        payer_id: 付款方标识（agent id / account id）。用于支付层 spend cap 限额，
+                  缺省归入 "anonymous" 共用额度池。
+        """
         if not source_url:
             return {"success": False, "error": "source_url is required"}
         level = _level_from_report(scan_report)
@@ -86,11 +90,23 @@ class BadgeMonetization:
         if not price or price <= 0:
             return {"success": False, "error": "定价无效", "badge_level": level}
 
-        from eco.x402 import X402Gateway
-        gw = X402Gateway(pay_to=DEFAULT_PAY_TO)
+        from eco import spend_cap
         order_id = f"cert_{uuid.uuid4().hex[:12]}"
-        pay = gw.create_payment(amount=price, currency="USD", order_id=order_id,
-                                description=f"AIShield {level} 认证 · {source_url}")
+        hold = spend_cap.reserve(payer_id, price, "USD", order_id=order_id)
+        if not hold.get("success"):
+            return {"success": False, "status": "blocked_by_spend_cap",
+                    "error": f"超出支付上限: {hold.get('reason')}",
+                    "reason": hold.get("reason"), "detail": hold.get("detail"),
+                    "payer_id": payer_id or "anonymous", "badge_level": level}
+
+        try:
+            from eco.x402 import X402Gateway
+            gw = X402Gateway(pay_to=DEFAULT_PAY_TO)
+            pay = gw.create_payment(amount=price, currency="USD", order_id=order_id,
+                                    description=f"AIShield {level} 认证 · {source_url}")
+        except Exception as exc:
+            spend_cap.release(order_id=order_id)
+            return {"success": False, "error": f"x402 下单失败: {exc}", "order_id": order_id}
 
         order = {
             "order_id": order_id,
@@ -98,6 +114,7 @@ class BadgeMonetization:
             "source_url": source_url,
             "badge_level": level,
             "amount_usd": price,
+            "payer_id": payer_id or "anonymous",
             "status": "pending_payment",
             "scan_report": scan_report,
             "payment_requirements": pay.get("payment_requirements"),
@@ -117,6 +134,7 @@ class BadgeMonetization:
             "currency": "USDC",
             "network": pay.get("network", "base"),
             "pay_to": DEFAULT_PAY_TO,
+            "payer_id": payer_id or "anonymous",
             "payment_requirements": pay.get("payment_requirements"),
             "note": "客户端用钱包对 paymentRequirements 签名后，通过 Payment 头回传 /api/v1/certify/fulfill",
         }
@@ -143,6 +161,12 @@ class BadgeMonetization:
         order["status"] = settlement
         order["settled_at"] = _now_iso()
         order["payment_header_valid"] = True
+
+        # 钱已收，额度必须落账（预留可能已 TTL 过期 → 带参补记，不漏账）
+        from eco import spend_cap
+        order["spend_cap"] = spend_cap.commit(
+            order_id=order_id, payer_id=order.get("payer_id"),
+            amount=order.get("amount_usd"), currency="USD")
         _save(data)
 
         report = scan_report or order.get("scan_report") or {}
@@ -161,10 +185,11 @@ class BadgeMonetization:
     # ══════════════════════════════════════════
 
     def request_cert_payment_cny(self, source_url, scan_report=None,
-                                 payment="wechat", amount_cny=None):
+                                 payment="wechat", amount_cny=None, payer_id=None):
         """发起一次"人民币付费认证"订单，返回可扫码/可跳转的支付链接。
 
         与 x402 版本同构，区别只在结算轨道：这条给国内用户，那条给 agent。
+        payer_id 用于支付层 spend cap 限额，与 x402 轨道共用同一套策略引擎。
         """
         if not source_url:
             return {"success": False, "error": "source_url is required"}
@@ -182,7 +207,16 @@ class BadgeMonetization:
             return {"success": False, "error": "人民币通道未配置（虎皮椒凭证缺失）",
                     "gateway": "hupijiao"}
 
+        from eco import spend_cap
         order_id = f"cert{uuid.uuid4().hex[:12]}"
+        hold = spend_cap.reserve(payer_id, price, "CNY", order_id=order_id)
+        if not hold.get("success"):
+            return {"success": False, "status": "blocked_by_spend_cap",
+                    "error": f"超出支付上限: {hold.get('reason')}",
+                    "reason": hold.get("reason"), "detail": hold.get("detail"),
+                    "payer_id": payer_id or "anonymous",
+                    "gateway": "hupijiao", "badge_level": level}
+
         res = gw.create_payment(
             amount=price,
             order_id=order_id,
@@ -190,9 +224,11 @@ class BadgeMonetization:
             payment=payment,
             attach=order_id,
             metadata={"type": "cert", "source_url": source_url,
-                      "badge_level": level, "scan_report": scan_report},
+                      "badge_level": level, "scan_report": scan_report,
+                      "payer_id": payer_id or "anonymous"},
         )
         if not res.get("success"):
+            spend_cap.release(order_id=order_id)   # 下单失败必须退回冻结额度
             return {"success": False, "error": res.get("error", "下单失败"),
                     "gateway": "hupijiao", "order_id": order_id}
 
@@ -207,6 +243,7 @@ class BadgeMonetization:
             "amount_cny": price,
             "currency": "CNY",
             "payment": payment,
+            "payer_id": payer_id or "anonymous",
             "status": "pending_payment",
             "scan_report": scan_report,
             "pay_url": res.get("pay_url"),
@@ -255,6 +292,12 @@ class BadgeMonetization:
         if notify_params:
             order["transaction_id"] = notify_params.get("transaction_id", "")
 
+        # 真实到账 → 额度落账（预留可能已过期，带参补记确保不漏账）
+        from eco import spend_cap
+        order["spend_cap"] = spend_cap.commit(
+            order_id=trade_order_id, payer_id=order.get("payer_id"),
+            amount=order.get("amount_cny"), currency="CNY")
+
         from eco.badge import CertificationService
         cert = CertificationService().certify_tool(
             order.get("source_url", ""), order.get("scan_report") or {})
@@ -289,16 +332,17 @@ def x402_requirements(amount_usd, resource, description="AIShield service"):
 _default = BadgeMonetization()
 
 
-def request_cert_payment(source_url, scan_report=None, amount_usd=None):
-    return _default.request_cert_payment(source_url, scan_report, amount_usd)
+def request_cert_payment(source_url, scan_report=None, amount_usd=None, payer_id=None):
+    return _default.request_cert_payment(source_url, scan_report, amount_usd, payer_id)
 
 
 def fulfill_cert(order_id, payment_header, scan_report=None):
     return _default.fulfill_cert(order_id, payment_header, scan_report)
 
 
-def request_cert_payment_cny(source_url, scan_report=None, payment="wechat", amount_cny=None):
-    return _default.request_cert_payment_cny(source_url, scan_report, payment, amount_cny)
+def request_cert_payment_cny(source_url, scan_report=None, payment="wechat",
+                             amount_cny=None, payer_id=None):
+    return _default.request_cert_payment_cny(source_url, scan_report, payment, amount_cny, payer_id)
 
 
 def settle_cny_order(trade_order_id, notify_params=None):
