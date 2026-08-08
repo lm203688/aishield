@@ -72,3 +72,4 @@
 {"ts": "2026-08-08T13:36:15.848508+00:00", "level": "RESOLVED", "title": "部署后验证恢复", "fingerprint": "deploy-verify-failed", "note": "本次部署已通过线上验证。"}
 {"ts": "2026-08-08T14:20:44.189950+00:00", "level": "P0", "title": "部署后验证失败：线上服务不可用", "body": "部署流程已执行，但 3 分钟轮询内线上服务始终未通过三路健康探测。请检查 run 31261403119。", "fingerprint": "deploy-verify-failed", "channels": ["github-issue"], "delivered": true}
 {"ts": "2026-08-08T14:35:23.339338+00:00", "level": "RESOLVED", "title": "服务已恢复", "fingerprint": "service-health-down", "note": "三路探测确认服务恢复正常，HTTP 200，延迟 0.423s。"}
+{"ts": "2026-08-08T15:15:55.777789+00:00", "level": "RESOLVED", "title": "部署后验证恢复", "fingerprint": "deploy-verify-failed", "note": "本次部署已通过线上验证。"}
