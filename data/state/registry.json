@@ -16,38 +16,11 @@
         "priority": "P2"
       }
     ],
-    "checked_at": "2026-08-08T22:34:14.747036+00:00",
+    "checked_at": "2026-08-08T23:33:35.405655+00:00",
     "_source": "registry_tracker",
-    "_ts": "2026-08-08T22:34:14.747347+00:00"
+    "_ts": "2026-08-08T23:33:35.405967+00:00"
   },
   "history": [
-    {
-      "ts": "2026-08-04T09:33:55.460435+00:00",
-      "source": "registry_tracker",
-      "state": {
-        "coverage_pct": 25,
-        "listed": 1,
-        "total": 4,
-        "todos": [
-          {
-            "niche": "npm 包分发（Agent 直接调用入口）",
-            "action": "执行 npm publish —— 这是 Agent 能'直接用上'AIShield 的最短路径",
-            "priority": "P1"
-          },
-          {
-            "niche": "MCP 官方 Registry 收录",
-            "action": "向 modelcontextprotocol/registry 提交 server.json —— 生态入口即用户入口",
-            "priority": "P1"
-          },
-          {
-            "niche": "内容站 GitHub Pages",
-            "action": "在仓库 Settings → Pages 开启 GitHub Pages（Source: main /docs）",
-            "priority": "P1"
-          }
-        ],
-        "checked_at": "2026-08-04T09:33:55.460212+00:00"
-      }
-    },
     {
       "ts": "2026-08-04T22:32:29.387371+00:00",
       "source": "registry_tracker",
@@ -1135,8 +1108,30 @@
         ],
         "checked_at": "2026-08-08T22:34:14.747036+00:00"
       }
+    },
+    {
+      "ts": "2026-08-08T23:33:35.405981+00:00",
+      "source": "registry_tracker",
+      "state": {
+        "coverage_pct": 60,
+        "listed": 3,
+        "total": 5,
+        "todos": [
+          {
+            "niche": "MCP 官方 Registry 收录",
+            "action": "向 modelcontextprotocol/registry 提交 server.json —— 生态入口即用户入口",
+            "priority": "P1"
+          },
+          {
+            "niche": "GitHub Topics 检索曝光",
+            "action": "补齐 GitHub topics: ai-security —— 零成本获取平台内检索流量",
+            "priority": "P2"
+          }
+        ],
+        "checked_at": "2026-08-08T23:33:35.405655+00:00"
+      }
     }
   ],
-  "updated": "2026-08-08T22:34:14.747365+00:00",
+  "updated": "2026-08-08T23:33:35.405986+00:00",
   "desc": "MCP Registry / npm / Marketplace 上架状态"
 }
