@@ -74,3 +74,4 @@
 {"ts": "2026-08-08T14:35:23.339338+00:00", "level": "RESOLVED", "title": "服务已恢复", "fingerprint": "service-health-down", "note": "三路探测确认服务恢复正常，HTTP 200，延迟 0.423s。"}
 {"ts": "2026-08-08T15:15:55.777789+00:00", "level": "RESOLVED", "title": "部署后验证恢复", "fingerprint": "deploy-verify-failed", "note": "本次部署已通过线上验证。"}
 {"ts": "2026-08-08T16:16:29.441804+00:00", "level": "RESOLVED", "title": "部署后验证恢复", "fingerprint": "deploy-verify-failed", "note": "本次部署已通过线上验证。"}
+{"ts": "2026-08-08T17:18:35.574150+00:00", "level": "RESOLVED", "title": "部署后验证恢复", "fingerprint": "deploy-verify-failed", "note": "本次部署已通过线上验证。"}
