@@ -4,31 +4,31 @@
   "score": 4,
   "max_score": 4,
   "http": 200,
-  "latency": 0.538,
-  "checked_at": "2026-08-08T18:17:20.569313+00:00",
+  "latency": 0.427,
+  "checked_at": "2026-08-08T18:42:54.703860+00:00",
   "probes": {
     "api_health": {
       "ok": true,
       "http": 200,
-      "elapsed": 0.538,
+      "elapsed": 0.427,
       "attempt": 1
     },
     "root": {
       "ok": true,
       "http": 200,
-      "elapsed": 0.345,
+      "elapsed": 0.376,
       "attempt": 1
     },
     "openapi": {
       "ok": true,
       "http": 404,
-      "elapsed": 0.344,
+      "elapsed": 0.352,
       "attempt": 1,
       "note": "4xx 视为服务存活"
     },
     "tcp": {
       "ok": true,
-      "elapsed": 0.019
+      "elapsed": 0.003
     },
     "dns": {
       "ok": true,
@@ -41,5 +41,5 @@
     }
   },
   "consecutive_failures": 0,
-  "last_healthy_at": "2026-08-08T18:17:20.569313+00:00"
+  "last_healthy_at": "2026-08-08T18:42:54.703860+00:00"
 }
