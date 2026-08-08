@@ -88,12 +88,25 @@ def _gh(method: str, path: str, payload: Optional[dict] = None) -> Optional[Any]
 INTERNAL_PREFIXES = ("content-plan", "social-", "draft-")
 
 
-def discover() -> List[Path]:
+def discover_all() -> List[Path]:
+    """返回全部可发布内容（含已发布），用于生成完整归档（Pages/RSS/README）。"""
     out: List[Path] = []
     for d in CONTENT_DIRS:
         if d.exists():
             out.extend(sorted(d.glob("*.md")))
     return [p for p in out if not p.name.startswith(INTERNAL_PREFIXES)]
+
+
+def discover() -> List[Path]:
+    """返回尚未发布的内容（真正的待发队列）。
+
+    此前 discover() 返回全部内容，导致稳态下 verify 步骤把已发布内容
+    误判为 '待发'（PENDING 恒 > 0 且台账零增长），触发静默空转误报。
+    现改为只返回不在发布台账中的内容；稳态下返回 0，verify 不再误报。
+    """
+    ledger = load_ledger()
+    published_ids = set(ledger.keys())
+    return [p for p in discover_all() if parse_article(p)["id"] not in published_ids]
 
 
 # 摘要提取时需要跳过的行：这些都不是「正文第一句」
@@ -320,30 +333,33 @@ def main() -> int:
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
 
-    articles = [parse_article(p) for p in discover()]
-    if not articles:
-        print("未发现可发布内容")
+    all_articles = [parse_article(p) for p in discover_all()]
+    pending_articles = [parse_article(p) for p in discover()]
+    if not all_articles:
+        print("未发现任何可发布内容")
         return 0
 
-    print(f"发现 {len(articles)} 篇内容：")
-    for a in articles:
+    print(f"内容库共 {len(all_articles)} 篇，其中待发布 {len(pending_articles)} 篇：")
+    for a in pending_articles:
         print(f"  - {a['title']}  ({a['file']})")
+    if not pending_articles:
+        print("  （本轮无新增待发布内容，仅刷新归档渠道 Pages/RSS/README）")
 
     ledger = load_ledger()
     print("\n渠道 1/4 GitHub Issue（可索引社区入口）")
-    for a in articles:
+    for a in pending_articles:
         url = publish_issue(a, args.dry_run)
         if url:
             ledger[a["id"]] = {"title": a["title"], "issue": url, "at": _now()}
 
     print("\n渠道 2/4 GitHub Pages 静态站")
-    publish_pages(articles, args.dry_run)
+    publish_pages(all_articles, args.dry_run)
 
     print("\n渠道 3/4 RSS Feed")
-    publish_feed(articles, args.dry_run)
+    publish_feed(all_articles, args.dry_run)
 
     print("\n渠道 4/4 README 首页导流")
-    update_readme(articles, args.dry_run)
+    update_readme(all_articles, args.dry_run)
 
     if not args.dry_run:
         save_ledger(ledger)
