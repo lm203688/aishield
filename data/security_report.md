@@ -1,54 +1,66 @@
 # AIShield MCP安全扫描报告
 
-生成时间: 2026-08-02 14:37:52
+生成时间: 2026-08-08 22:26:59
 扫描引擎版本: 4.1
-扫描工具总数: 47
-平均安全评分: 75.7/100
+扫描工具总数: 57
+平均安全评分: 71.6/100
 
 ## 评分分布
 
 | 等级 | 数量 |
 |------|------|
-| gold | 12 |
-| silver | 25 |
-| bronze | 4 |
-| none | 6 |
+| gold | 15 |
+| silver | 17 |
+| bronze | 14 |
+| none | 11 |
 
 ## OWASP MCP Top 10 覆盖率
 
-- **MCP01** 令牌管理不当: 6/47 (13%)
-- **MCP010** : 0/47 (0%)
-- **MCP02** 权限范围蔓延: 12/47 (26%)
-- **MCP03** 工具投毒: 2/47 (4%)
-- **MCP04** 供应链攻击: 11/47 (23%)
-- **MCP05** 命令注入: 8/47 (17%)
-- **MCP06** 提示注入: 18/47 (38%)
-- **MCP07** 认证不足: 1/47 (2%)
-- **MCP08** 审计缺失: 16/47 (34%)
-- **MCP09** 影子服务器: 18/47 (38%)
+- **MCP01** 令牌管理不当: 8/57 (14%)
+- **MCP010** : 0/57 (0%)
+- **MCP02** 权限范围蔓延: 32/57 (56%)
+- **MCP03** 工具投毒: 10/57 (18%)
+- **MCP04** 供应链攻击: 19/57 (33%)
+- **MCP05** 命令注入: 17/57 (30%)
+- **MCP06** 提示注入: 39/57 (68%)
+- **MCP07** 认证不足: 3/57 (5%)
+- **MCP08** 审计缺失: 38/57 (67%)
+- **MCP09** 影子服务器: 43/57 (75%)
 
 ## 高风险工具 (score < 60)
 
-- **skyvern** — 35/100, 38 issues
-- **wandb-openui** — 38/100, 30 issues
-- **snyk-agent-scan** — 39/100, 27 issues
-- **claude-code** — 43/100, 10 issues
-- **sweep-ai** — 50/100, 20 issues
-- **pip** — 51/100, 13 issues
-- **langgraph** — 56/100, 16 issues
-- **crewai** — 59/100, 14 issues
+- **arcadeai-labs/smithery-cli** — 36/100, 27 issues
+- **zylon-ai/private-gpt** — 40/100, 30 issues
+- **assafelovic/gpt-researcher** — 45/100, 42 issues
+- **sansan0/TrendRadar** — 47/100, 42 issues
+- **snyk/agent-scan** — 48/100, 39 issues
+- **czlonkowski/n8n-mcp** — 48/100, 22 issues
+- **mrexodia/ida-pro-mcp** — 50/100, 34 issues
+- **oraios/serena** — 50/100, 21 issues
+- **silly-geese/estonian-mcp** — 51/100, 34 issues
+- **wonderwhy-er/DesktopCommanderMCP** — 53/100, 19 issues
+- **perplexityai/modelcontextprotocol** — 54/100, 41 issues
+- **modelcontextprotocol/ext-apps** — 55/100, 11 issues
+- **ruvnet/ruflo** — 55/100, 38 issues
+- **modelcontextprotocol/inspector** — 55/100, 47 issues
+- **koala73/worldmonitor** — 58/100, 15 issues
+- **upstash/context7** — 58/100, 27 issues
+- **mksglu/context-mode** — 59/100, 20 issues
 
 ## 最安全工具 (score >= 85)
 
-- **pr-agent** — 85/100
-- **uv** — 86/100
-- **openclaw** — 87/100
-- **azure-sdk** — 90/100
-- **gcloud-python** — 92/100
-- **dify** — 94/100
-- **cloudflare-mcp** — 95/100
-- **zep-mcp** — 96/100
-- **llama-index** — 97/100
-- **openbmb-agentverse** — 98/100
-- **agentops** — 100/100
-- **e2b-code-interpreter** — 100/100
+- **nitrocloudofficial/nitrostack** — 85/100
+- **nukeop/nuclear** — 85/100
+- **awslabs/mcp** — 87/100
+- **Dot-Fun/fathom-mcp** — 88/100
+- **modelcontextprotocol/typescript-sdk** — 92/100
+- **hangwin/mcp-chrome** — 93/100
+- **microsoft/mcp-for-beginners** — 94/100
+- **open-metadata/OpenMetadata** — 95/100
+- **Decodo/mcp-server** — 96/100
+- **liaokongVFX/MCP-Chinese-Getting-Started-Guide** — 96/100
+- **opensolon/solon** — 96/100
+- **call518/MCP-OpenStack-Ops** — 98/100
+- **modelcontextprotocol/modelcontextprotocol** — 98/100
+- **modelscope/FunASR** — 98/100
+- **aeriis-kr/opendata-mcp** — 99/100

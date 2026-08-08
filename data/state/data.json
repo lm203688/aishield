@@ -1,0 +1,23 @@
+{
+  "domain": "data",
+  "current": {
+    "total": 1,
+    "before": 0,
+    "grew": true,
+    "_source": "data-scan-flywheel",
+    "_ts": "2026-08-08T14:26:59.434692+00:00"
+  },
+  "history": [
+    {
+      "ts": "2026-08-08T14:26:59.434702+00:00",
+      "source": "data-scan-flywheel",
+      "state": {
+        "total": 1,
+        "before": 0,
+        "grew": true
+      }
+    }
+  ],
+  "updated": "2026-08-08T14:26:59.434705+00:00",
+  "desc": ""
+}
