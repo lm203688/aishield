@@ -78,7 +78,11 @@ Thumbs.db
 # Project specific
 # =====================
 api/data/*.json
-data/batch_scans.json
+# 数据飞轮核心自建库必须入库（否则每个周期扫描结果无法持久化，before 永远为 0）
+# data/batch_scans.json
+# guard 巡检存活信号经 Contents API 直写 main，不受 gitignore 影响；
+# 忽略它可避免 flywheel 的 `git add data/state/` 把 health.json 一并提交，与 guard 抢同一文件导致 push 冲突
+data/state/health.json
 mcp-server/dist/
 *.zip
 AIShield_完整备案包.zip
