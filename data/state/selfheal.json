@@ -2,9 +2,9 @@
   "domain": "selfheal",
   "current": {
     "last_deploy_verify": "success",
-    "deploy_run_id": "31303006666",
+    "deploy_run_id": "31303519188",
     "_source": "deploy-server",
-    "_ts": "2026-08-09T08:14:46.684697+00:00",
+    "_ts": "2026-08-09T08:26:47.266839+00:00",
     "probe": "success",
     "repair": "skipped",
     "test": "skipped",
@@ -13,20 +13,6 @@
     "run_id": "31300229689"
   },
   "history": [
-    {
-      "ts": "2026-08-08T04:00:51.264059+00:00",
-      "source": "deploy-server",
-      "state": {
-        "last_deploy_verify": "success",
-        "deploy_run_id": "31238458395",
-        "probe": "success",
-        "repair": "skipped",
-        "test": "skipped",
-        "verify": "skipped",
-        "degraded_detected": "false",
-        "run_id": "31237586404"
-      }
-    },
     {
       "ts": "2026-08-08T05:02:01.002156+00:00",
       "source": "self-heal-closed-loop",
@@ -712,8 +698,22 @@
         "degraded_detected": "false",
         "run_id": "31300229689"
       }
+    },
+    {
+      "ts": "2026-08-09T08:26:47.266854+00:00",
+      "source": "deploy-server",
+      "state": {
+        "last_deploy_verify": "success",
+        "deploy_run_id": "31303519188",
+        "probe": "success",
+        "repair": "skipped",
+        "test": "skipped",
+        "verify": "skipped",
+        "degraded_detected": "false",
+        "run_id": "31300229689"
+      }
     }
   ],
-  "updated": "2026-08-09T08:14:46.684721+00:00",
+  "updated": "2026-08-09T08:26:47.266859+00:00",
   "desc": "自愈闭环执行结果（修复/测试/部署/验证）"
 }
