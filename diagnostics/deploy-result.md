@@ -1,5 +1,5 @@
 === DIAGNOSTIC ===
-Time: Sun Aug 9 11:17:57 PM CST 2026
+Time: Mon Aug 10 12:17:56 AM CST 2026
 === USER ===
 root
 === GIT LOG ===
@@ -13,41 +13,41 @@ dbcf345 fix: download script from GitHub raw if git reset fails, add script vers
 # 解决 Quick Tunnel 的 error 1014 (CNAME Cross-User Banned) 问题
 #
 === API STATUS ===
-{"status": "ok", "version": "4.2", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 133, "uptime": 1786288677.9035208, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup"}OK
+{"status": "ok", "version": "4.2", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 133, "uptime": 1786292276.5572982, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup"}OK
 === CLOUDFLARED PROCESS ===
-root     1747768  0.1  1.5 1294676 31620 ?       Sl   17:03   0:34 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
-root     1747907  0.1  1.6 1294676 33316 ?       Sl   17:03   0:34 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
+root     1747768  0.1  1.6 1294676 32712 ?       Sl   Aug09   0:39 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
+root     1747907  0.1  1.6 1294676 33904 ?       Sl   Aug09   0:40 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
 === CLOUDFLARED LOG (last 30 lines) ===
-2026-08-09T12:02:07Z WRN Serve tunnel error error="control stream encountered a failure while serving" connIndex=1 event=0 ip=198.41.192.37
-2026-08-09T12:02:07Z INF Retrying connection in up to 8s connIndex=1 event=0 ip=198.41.192.37
-2026-08-09T12:02:13Z WRN Connection terminated error="control stream encountered a failure while serving" connIndex=1
-2026-08-09T12:03:24Z ERR failed to accept incoming stream requests error="failed to accept QUIC stream: timeout: no recent network activity" connIndex=0 event=0 ip=198.41.200.233
-2026-08-09T12:03:24Z ERR failed to run the datagram handler error="timeout: no recent network activity" connIndex=0 event=0 ip=198.41.200.233
-2026-08-09T12:03:24Z WRN failed to serve tunnel connection error="accept stream listener encountered a failure while serving" connIndex=0 event=0 ip=198.41.200.233
-2026-08-09T12:03:24Z WRN Serve tunnel error error="accept stream listener encountered a failure while serving" connIndex=0 event=0 ip=198.41.200.233
-2026-08-09T12:03:24Z INF Retrying connection in up to 1s connIndex=0 event=0 ip=198.41.200.233
-2026-08-09T12:03:25Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=0 event=0 ip=198.41.200.233
-2026-08-09T12:03:29Z INF Registered tunnel connection connIndex=0 connection=dd1e47e9-2e3f-4d69-af48-65cf774bf30b event=0 ip=198.41.200.233 location=lax01 protocol=quic
-2026-08-09T12:03:49Z ERR failed to accept incoming stream requests error="failed to accept QUIC stream: timeout: no recent network activity" connIndex=0 event=0 ip=198.41.200.233
-2026-08-09T12:03:49Z ERR failed to run the datagram handler error="timeout: no recent network activity" connIndex=0 event=0 ip=198.41.200.233
-2026-08-09T12:03:49Z WRN failed to serve tunnel connection error="accept stream listener encountered a failure while serving" connIndex=0 event=0 ip=198.41.200.233
-2026-08-09T12:03:49Z WRN Serve tunnel error error="accept stream listener encountered a failure while serving" connIndex=0 event=0 ip=198.41.200.233
-2026-08-09T12:03:49Z INF Retrying connection in up to 1s connIndex=0 event=0 ip=198.41.200.233
-2026-08-09T12:03:51Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=0 event=0 ip=198.41.200.233
-2026-08-09T12:03:56Z WRN Failed to dial a quic connection error="failed to dial to edge with quic: timeout: no recent network activity" connIndex=0 event=0 ip=198.41.200.233
-2026-08-09T12:03:56Z INF Retrying connection in up to 4s connIndex=0 event=0 ip=198.41.200.233
-2026-08-09T12:03:57Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=0 event=0 ip=198.41.200.63
-2026-08-09T12:04:05Z INF Registered tunnel connection connIndex=0 connection=142440d6-c11e-420a-a18a-7669e9a4f730 event=0 ip=198.41.200.63 location=lax01 protocol=quic
-2026-08-09T12:04:46Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=3 event=0 ip=198.41.192.57
-2026-08-09T12:04:46Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=1 event=0 ip=198.41.192.37
-2026-08-09T12:04:46Z INF Registered tunnel connection connIndex=3 connection=8810bcc4-4c14-4977-bd0f-438dc532d409 event=0 ip=198.41.192.57 location=lax07 protocol=quic
-2026-08-09T12:04:47Z INF Registered tunnel connection connIndex=1 connection=40191ae6-af14-49a2-8603-99dad2707818 event=0 ip=198.41.192.37 location=lax11 protocol=quic
-2026-08-09T12:20:54Z ERR  error="stream 13 canceled by remote with error code 0" connIndex=0 event=1 ingressRule=0 originService=http://localhost:8450
-2026-08-09T12:20:54Z ERR Request failed error="stream 13 canceled by remote with error code 0" connIndex=0 dest=https://aishield.tools/ event=0 ip=198.41.200.63 type=http
 2026-08-09T12:58:54Z ERR  error="stream 21 canceled by remote with error code 0" connIndex=2 event=1 ingressRule=0 originService=http://localhost:8450
 2026-08-09T12:58:54Z ERR Request failed error="stream 21 canceled by remote with error code 0" connIndex=2 dest=https://aishield.tools/ event=0 ip=198.41.200.43 type=http
 2026-08-09T14:38:37Z ERR  error="stream 37 canceled by remote with error code 0" connIndex=0 event=1 ingressRule=0 originService=http://localhost:8450
 2026-08-09T14:38:37Z ERR Request failed error="stream 37 canceled by remote with error code 0" connIndex=0 dest=https://aishield.tools/ event=0 ip=198.41.200.63 type=http
+2026-08-09T15:29:40Z ERR failed to run the datagram handler error="timeout: no recent network activity" connIndex=1 event=0 ip=198.41.192.37
+2026-08-09T15:29:40Z ERR failed to accept incoming stream requests error="failed to accept QUIC stream: timeout: no recent network activity" connIndex=1 event=0 ip=198.41.192.37
+2026-08-09T15:29:40Z WRN failed to serve tunnel connection error="datagram manager encountered a failure while serving" connIndex=1 event=0 ip=198.41.192.37
+2026-08-09T15:29:40Z WRN Serve tunnel error error="datagram manager encountered a failure while serving" connIndex=1 event=0 ip=198.41.192.37
+2026-08-09T15:29:40Z INF Retrying connection in up to 1s connIndex=1 event=0 ip=198.41.192.37
+2026-08-09T15:29:41Z WRN Connection terminated error="datagram manager encountered a failure while serving" connIndex=1
+2026-08-09T15:29:42Z ERR failed to accept incoming stream requests error="failed to accept QUIC stream: timeout: no recent network activity" connIndex=3 event=0 ip=198.41.192.57
+2026-08-09T15:29:42Z ERR failed to run the datagram handler error="timeout: no recent network activity" connIndex=3 event=0 ip=198.41.192.57
+2026-08-09T15:29:42Z WRN failed to serve tunnel connection error="accept stream listener encountered a failure while serving" connIndex=3 event=0 ip=198.41.192.57
+2026-08-09T15:29:42Z WRN Serve tunnel error error="accept stream listener encountered a failure while serving" connIndex=3 event=0 ip=198.41.192.57
+2026-08-09T15:29:42Z INF Retrying connection in up to 1s connIndex=3 event=0 ip=198.41.192.57
+2026-08-09T15:29:42Z WRN Connection terminated error="accept stream listener encountered a failure while serving" connIndex=3
+2026-08-09T15:29:59Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=3 event=0 ip=198.41.192.57
+2026-08-09T15:29:59Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=1 event=0 ip=198.41.192.37
+2026-08-09T15:30:06Z INF Registered tunnel connection connIndex=3 connection=e778a4ab-b4d1-4483-86bc-893406028180 event=0 ip=198.41.192.57 location=lax07 protocol=quic
+2026-08-09T15:30:08Z INF Registered tunnel connection connIndex=1 connection=f9502f2f-764f-4c7d-b0cf-a8d43745eaea event=0 ip=198.41.192.37 location=lax11 protocol=quic
+2026-08-09T15:30:15Z ERR failed to accept incoming stream requests error="failed to accept QUIC stream: timeout: no recent network activity" connIndex=1 event=0 ip=198.41.192.37
+2026-08-09T15:30:15Z ERR failed to run the datagram handler error="timeout: no recent network activity" connIndex=1 event=0 ip=198.41.192.37
+2026-08-09T15:30:15Z WRN failed to serve tunnel connection error="accept stream listener encountered a failure while serving" connIndex=1 event=0 ip=198.41.192.37
+2026-08-09T15:30:15Z WRN Serve tunnel error error="accept stream listener encountered a failure while serving" connIndex=1 event=0 ip=198.41.192.37
+2026-08-09T15:30:15Z INF Retrying connection in up to 1s connIndex=1 event=0 ip=198.41.192.37
+2026-08-09T15:30:17Z WRN Connection terminated error="accept stream listener encountered a failure while serving" connIndex=1
+2026-08-09T15:30:45Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=1 event=0 ip=198.41.192.37
+2026-08-09T15:30:46Z INF Registered tunnel connection connIndex=1 connection=8302d508-aa24-4c1b-86a6-dd442cfa3142 event=0 ip=198.41.192.37 location=lax11 protocol=quic
+2026-08-09T15:35:42Z ERR  error="stream 5 canceled by remote with error code 0" connIndex=3 event=1 ingressRule=0 originService=http://localhost:8450
+2026-08-09T15:35:42Z ERR Request failed error="stream 5 canceled by remote with error code 0" connIndex=3 dest=https://aishield.tools/ event=0 ip=198.41.192.57 type=http
 === DEPLOY LOG ===
 === AIShield Named Tunnel Deployment ===
 [17:03:44] Time: Sun Aug  9 05:03:44 PM CST 2026
@@ -142,11 +142,11 @@ cert.pem: -rw------- 1 root root 282 Jul 28 11:02 /root/.cloudflared/cert.pem
 === SYSTEMD STATUS ===
 ● cloudflared-tunnel.service - Cloudflare Named Tunnel for AIShield
      Loaded: loaded (/etc/systemd/system/cloudflared-tunnel.service; enabled; vendor preset: enabled)
-     Active: active (running) since Sun 2026-08-09 17:04:00 CST; 6h ago
+     Active: active (running) since Sun 2026-08-09 17:04:00 CST; 7h ago
    Main PID: 1747903 (start-tunnel.sh)
       Tasks: 10 (limit: 2216)
-     Memory: 21.3M
-        CPU: 34.343s
+     Memory: 21.8M
+        CPU: 40.167s
      CGroup: /system.slice/cloudflared-tunnel.service
              ├─1747903 /bin/bash /opt/start-tunnel.sh
              └─1747907 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
@@ -180,12 +180,12 @@ fi
 wait $CF_PID
 
 === HTTPS Test from Runner ===
-Time: Sun Aug  9 15:17:58 UTC 2026
+Time: Sun Aug  9 16:17:56 UTC 2026
 
 === curl test (aishield.tools) ===
-{"status": "ok", "version": "4.2", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 133, "uptime": 1786288678.5776339, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup"}
+{"status": "ok", "version": "4.2", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 133, "uptime": 1786292277.063581, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup"}
 === DNS lookup ===
-104.21.81.46
 172.67.188.44
+104.21.81.46
 
 === DNS CNAME check ===
