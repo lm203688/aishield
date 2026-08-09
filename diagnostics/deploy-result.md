@@ -1,5 +1,5 @@
 === DIAGNOSTIC ===
-Time: Sun Aug 9 08:20:40 PM CST 2026
+Time: Sun Aug 9 09:39:10 PM CST 2026
 === USER ===
 root
 === GIT LOG ===
@@ -13,15 +13,11 @@ dbcf345 fix: download script from GitHub raw if git reset fails, add script vers
 # 解决 Quick Tunnel 的 error 1014 (CNAME Cross-User Banned) 问题
 #
 === API STATUS ===
-{"status": "ok", "version": "4.2", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 133, "uptime": 1786278040.4738731, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup"}OK
+{"status": "ok", "version": "4.2", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 133, "uptime": 1786282750.7908463, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup"}OK
 === CLOUDFLARED PROCESS ===
-root     1747768  0.1  1.7 1294676 34852 ?       Sl   17:03   0:17 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
-root     1747907  0.1  1.8 1294676 36272 ?       Sl   17:03   0:17 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
+root     1747768  0.1  1.7 1294676 35168 ?       Sl   17:03   0:24 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
+root     1747907  0.1  1.7 1294676 35952 ?       Sl   17:03   0:24 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
 === CLOUDFLARED LOG (last 30 lines) ===
-2026-08-09T12:01:58Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=1 event=0 ip=198.41.192.37
-2026-08-09T12:02:04Z WRN Failed to dial a quic connection error="failed to dial to edge with quic: timeout: no recent network activity" connIndex=3 event=0 ip=198.41.192.77
-2026-08-09T12:02:04Z INF Retrying connection in up to 4s connIndex=3 event=0 ip=198.41.192.77
-2026-08-09T12:02:06Z WRN Connection terminated error="failed to dial to edge with quic: timeout: no recent network activity" connIndex=3
 2026-08-09T12:02:07Z ERR failed to run the datagram handler error="context canceled" connIndex=1 event=0 ip=198.41.192.37
 2026-08-09T12:02:07Z WRN failed to serve tunnel connection error="control stream encountered a failure while serving" connIndex=1 event=0 ip=198.41.192.37
 2026-08-09T12:02:07Z WRN Serve tunnel error error="control stream encountered a failure while serving" connIndex=1 event=0 ip=198.41.192.37
@@ -48,6 +44,10 @@ root     1747907  0.1  1.8 1294676 36272 ?       Sl   17:03   0:17 /usr/local/bi
 2026-08-09T12:04:46Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=1 event=0 ip=198.41.192.37
 2026-08-09T12:04:46Z INF Registered tunnel connection connIndex=3 connection=8810bcc4-4c14-4977-bd0f-438dc532d409 event=0 ip=198.41.192.57 location=lax07 protocol=quic
 2026-08-09T12:04:47Z INF Registered tunnel connection connIndex=1 connection=40191ae6-af14-49a2-8603-99dad2707818 event=0 ip=198.41.192.37 location=lax11 protocol=quic
+2026-08-09T12:20:54Z ERR  error="stream 13 canceled by remote with error code 0" connIndex=0 event=1 ingressRule=0 originService=http://localhost:8450
+2026-08-09T12:20:54Z ERR Request failed error="stream 13 canceled by remote with error code 0" connIndex=0 dest=https://aishield.tools/ event=0 ip=198.41.200.63 type=http
+2026-08-09T12:58:54Z ERR  error="stream 21 canceled by remote with error code 0" connIndex=2 event=1 ingressRule=0 originService=http://localhost:8450
+2026-08-09T12:58:54Z ERR Request failed error="stream 21 canceled by remote with error code 0" connIndex=2 dest=https://aishield.tools/ event=0 ip=198.41.200.43 type=http
 === DEPLOY LOG ===
 === AIShield Named Tunnel Deployment ===
 [17:03:44] Time: Sun Aug  9 05:03:44 PM CST 2026
@@ -142,11 +142,11 @@ cert.pem: -rw------- 1 root root 282 Jul 28 11:02 /root/.cloudflared/cert.pem
 === SYSTEMD STATUS ===
 ● cloudflared-tunnel.service - Cloudflare Named Tunnel for AIShield
      Loaded: loaded (/etc/systemd/system/cloudflared-tunnel.service; enabled; vendor preset: enabled)
-     Active: active (running) since Sun 2026-08-09 17:04:00 CST; 3h 16min ago
+     Active: active (running) since Sun 2026-08-09 17:04:00 CST; 4h 35min ago
    Main PID: 1747903 (start-tunnel.sh)
       Tasks: 9 (limit: 2216)
-     Memory: 20.3M
-        CPU: 17.709s
+     Memory: 20.4M
+        CPU: 24.981s
      CGroup: /system.slice/cloudflared-tunnel.service
              ├─1747903 /bin/bash /opt/start-tunnel.sh
              └─1747907 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
@@ -180,12 +180,12 @@ fi
 wait $CF_PID
 
 === HTTPS Test from Runner ===
-Time: Sun Aug  9 12:20:40 UTC 2026
+Time: Sun Aug  9 13:39:11 UTC 2026
 
 === curl test (aishield.tools) ===
-{"status": "ok", "version": "4.2", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 133, "uptime": 1786278040.8956199, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup"}
+{"status": "ok", "version": "4.2", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 133, "uptime": 1786282751.1792784, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup"}
 === DNS lookup ===
-104.21.81.46
 172.67.188.44
+104.21.81.46
 
 === DNS CNAME check ===
