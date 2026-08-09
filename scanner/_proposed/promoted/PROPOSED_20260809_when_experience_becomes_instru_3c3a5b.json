@@ -1,0 +1,33 @@
+{
+  "status": "ready",
+  "_instructions": [
+    "1. Read the source signal URL and understand the attack.",
+    "2. Fill in `rules`: each needs a real regex `pattern`, a Chinese `description` and a `severity` (critical|high|medium|low).",
+    "3. Set `status` to `ready`.",
+    "4. Run: python scripts/promote_rule.py --check   (validates every candidate: regex compiles, no false positives on benign corpus)",
+    "5. Run: python scripts/promote_rule.py --promote <file>",
+    "   Rejected? Fix or delete the file -- do not leave drafts to rot."
+  ],
+  "drafted_at": "2026-08-09",
+  "signal": {
+    "id": "3c3a5b1122",
+    "title": "When Experience Becomes Instruction: Trajectory Poisoning in Self-Evolving Agent Skill Systems",
+    "url": "https://arxiv.org/abs/2608.05563",
+    "source": "arxiv"
+  },
+  "attack_category": "trajectory-poisoning",
+  "severity": "high",
+  "rules": [
+    {
+      "pattern": "(?:写入|追加|保存|append|persist|store)[^\\n]{0,16}(?:记忆|经验|轨迹|memory|trajectory|experience)[^\\n]{0,40}(?:从此|今后|以后|每次|always|from now on|every time)",
+      "description": "轨迹投毒: 向记忆/经验库写入跨会话持久指令 (ASI 自进化技能系统)",
+      "severity": "high"
+    },
+    {
+      "pattern": "(?:learned|经验表明|根据经验|based on (?:past )?experience)[^\\n]{0,30}(?:you must|必须|务必|should always)[^\\n]{0,40}(?:执行|运行|上传|发送|exec|upload|send|curl|wget)",
+      "description": "轨迹投毒: 伪装成\"历史经验\"的强制执行指令",
+      "severity": "high"
+    }
+  ],
+  "review_notes": "论文指出自进化 agent 会把执行轨迹回写进 skill/memory，攻击者污染轨迹后，被污染内容在下一轮被当作\"经验\"重新加载并当成指令执行。检测面：技能/记忆写回处出现跨会话的持久化祈使句。"
+}
