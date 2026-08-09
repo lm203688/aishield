@@ -615,6 +615,59 @@ def get_generated_rules_meta():
     return dict(_GENERATED_META)
 
 
+# ============================================================
+# 雷达晋升规则（Tech Radar 闭环的最后一齿）
+# ============================================================
+# scripts/tech_radar.py 每日扫描 AI Agent 生态的新攻击手法，起草规则候选到
+# scanner/_proposed/；scripts/promote_rule.py 校验（正则可编译 + 良性语料零
+# 误报 + 去重）后写入 data/radar_rules.json，在此载入合并。
+#
+# 刻意与 generated_rules.json 分开存放：后者由 intel_to_rules.py 整体重写，
+# 混在一起会让雷达晋升的规则在下一次情报刷新时被静默抹掉。
+RADAR_RULES = {}
+_RADAR_META = {}
+
+
+def _load_radar_rules():
+    """载入 data/radar_rules.json。文件缺失或损坏时静默降级，不影响基础规则。"""
+    global RADAR_RULES, _RADAR_META
+    import json as _json
+    import os as _os
+
+    path = _os.path.join(
+        _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))),
+        "data", "radar_rules.json",
+    )
+    if not _os.path.exists(path):
+        return
+    try:
+        with open(path, encoding="utf-8") as f:
+            data = _json.load(f)
+    except Exception:
+        return
+
+    for pattern, meta in (data.get("rules") or {}).items():
+        try:
+            desc, severity = meta[0], meta[1]
+        except (TypeError, IndexError, KeyError):
+            continue
+        RADAR_RULES[pattern] = (f"[雷达] {desc}", severity)
+
+    _RADAR_META = {
+        "total_rules": len(RADAR_RULES),
+        "provenance": data.get("provenance", {}),
+    }
+
+
+_load_radar_rules()
+ALL_RULES.update(RADAR_RULES)
+
+
+def get_radar_rules_meta():
+    """返回雷达晋升规则的元信息（含每条规则的情报溯源）。"""
+    return dict(_RADAR_META)
+
+
 # 危险npm包（已知恶意）
 DANGEROUS_NPM_PACKAGES = {
     "event-stream", "flatmap-stream", "ddos", "koa-session",
