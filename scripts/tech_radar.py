@@ -44,6 +44,9 @@ import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import capability_gap  # noqa: E402  (sibling module, adopt-line analysis)
+
 # ---------------------------------------------------------------------------
 # Paths and constants
 # ---------------------------------------------------------------------------
@@ -134,16 +137,38 @@ def _load_state():
     return {"seen_ids": [], "last_run": None, "runs": 0}
 
 def _save_state(state):
-    state["last_run"] = _now_utc().isoformat()
-    state["runs"] = state.get("runs", 0) + 1
+    # Merge onto whatever is on disk: mid-scan writers (e.g. the arXiv endpoint
+    # hint) must not be clobbered by the stale copy main() loaded at startup.
+    merged = _load_state()
+    merged.update(state)
+    merged["last_run"] = _now_utc().isoformat()
+    merged["runs"] = merged.get("runs", 0) + 1
     open(STATE_FILE, "w", encoding="utf-8").write(
-        json.dumps(state, ensure_ascii=False, indent=2)
+        json.dumps(merged, ensure_ascii=False, indent=2)
     )
+
+def _save_endpoint_hint(state):
+    """Persist state without touching run counters (used mid-scan)."""
+    try:
+        os.makedirs(os.path.dirname(STATE_FILE), exist_ok=True)
+        open(STATE_FILE, "w", encoding="utf-8").write(
+            json.dumps(state, ensure_ascii=False, indent=2)
+        )
+    except Exception:
+        pass
 
 def _signal_id(sig):
     h = hashlib.sha1()
     h.update(json.dumps(sig, sort_keys=True, ensure_ascii=False).encode("utf-8"))
     return h.hexdigest()[:12]
+
+def _within_days(date_str, days):
+    """True if YYYY-MM-DD is within the look-back window (unparseable -> keep)."""
+    try:
+        dt = datetime.datetime.strptime((date_str or "")[:10], "%Y-%m-%d")
+    except Exception:
+        return True
+    return (_now_utc() - dt).days <= days
 
 
 # ---------------------------------------------------------------------------
@@ -193,89 +218,211 @@ def scan_github_trending(days=7, max_per_keyword=8):
 # ---------------------------------------------------------------------------
 # Source: arXiv recent papers on agent security / prompt injection
 # ---------------------------------------------------------------------------
-def scan_arxiv(days=7, max_results=10):
-    queries = [
-        'all:"prompt injection" AND all:"agent"',
-        'all:"jailbreak" AND all:"tool"',
-        'all:"mcp" AND all:"security"',
-        'all:"agentic" AND all:"attack"',
-        'all:"model context protocol"',
-    ]
-    signals = []
-    seen_ids = set()
-    headers = {}
+ARXIV_QUERIES = [
+    'all:"prompt injection" AND all:"agent"',
+    'all:"jailbreak" AND all:"tool"',
+    'all:"mcp" AND all:"security"',
+    'all:"agentic" AND all:"attack"',
+    'all:"model context protocol"',
+]
 
-    # Cheap probe first: if arXiv is broadly broken today, skip the whole
-    # source instead of burning ~100s on retries. arXiv has flaky days.
-    probe_q = queries[0]
+# Categories polled by the RSS / listing fallbacks. Keyword filtering is then
+# applied locally, so we do not depend on the (often unreachable) search API.
+ARXIV_CATEGORIES = ["cs.CR", "cs.AI", "cs.MA", "cs.SE"]
+
+# Relevance filter applied to RSS/listing results (search API already filters).
+ARXIV_RELEVANCE = [
+    "agent", "agentic", "llm", "language model", "prompt", "injection",
+    "jailbreak", "tool use", "tool-use", "mcp", "model context protocol",
+    "multi-agent", "autonomous", "guardrail", "red team", "adversarial",
+]
+
+
+def _arxiv_relevant(text):
+    t = (text or "").lower()
+    return any(k in t for k in ARXIV_RELEVANCE)
+
+
+def _arxiv_via_api(days, max_results):
+    """Endpoint A: export.arxiv.org search API (most precise, often DNS-blocked)."""
+    signals, seen = [], set()
+
+    # Cheap probe first: skip the whole endpoint if unreachable rather than
+    # burning ~100s on retries.
     probe_url = (
-        "http://export.arxiv.org/api/query?"
-        + urllib.parse.urlencode({
-            "search_query": probe_q,
-            "max_results": 1,
-        }, quote_via=urllib.parse.quote)
+        "https://export.arxiv.org/api/query?"
+        + urllib.parse.urlencode(
+            {"search_query": ARXIV_QUERIES[0], "max_results": 1},
+            quote_via=urllib.parse.quote,
+        )
     )
-    ps, _ = _http_text(probe_url, headers=headers, timeout=15)
+    ps, _ = _http_text(probe_url, timeout=12)
     if ps != 200:
-        return [{
-            "_source": "arxiv",
-            "_query": "probe",
-            "_error": f"arXiv probe failed HTTP {ps} -- skipping source (likely transient outage)",
-        }]
+        raise RuntimeError(f"export.arxiv.org probe failed (HTTP {ps})")
 
-    for q in queries:
+    for q in ARXIV_QUERIES:
         url = (
-            "http://export.arxiv.org/api/query?"
+            "https://export.arxiv.org/api/query?"
             + urllib.parse.urlencode({
                 "search_query": q,
                 "start": 0,
                 "max_results": max_results,
                 "sortBy": "submittedDate",
                 "sortOrder": "desc",
-            }, quote_via=urllib.parse.quote)  # arXiv rejects %2B; need %20 for spaces
+            }, quote_via=urllib.parse.quote)  # arXiv rejects %2B; needs %20
         )
-        # arXiv is intermittently flaky -- retry on 5xx/timeout
-        body = ""
-        status = -1
-        for attempt in range(2):
-            status, body = _http_text(url, headers=headers, timeout=30)
-            if status == 200:
-                break
-            time.sleep(2 * (attempt + 1))
+        status, body = _http_text(url, timeout=30)
         if status != 200 or not body:
-            signals.append({"_source": "arxiv", "_query": q, "_error": f"HTTP {status}"})
             continue
         try:
             root = ET.fromstring(body)
-            ns = {"a": "http://www.w3.org/2005/Atom"}
-            for entry in root.findall("a:entry", ns):
-                eid = entry.findtext("a:id", default="", namespaces=ns)
-                if eid in seen_ids:
-                    continue
-                seen_ids.add(eid)
-                title = (entry.findtext("a:title", default="", namespaces=ns) or "").strip()
-                summary = (entry.findtext("a:summary", default="", namespaces=ns) or "").strip()
-                published = entry.findtext("a:published", default="", namespaces=ns)[:10]
-                # filter: only include last 7 days
-                try:
-                    pub_dt = datetime.datetime.strptime(published, "%Y-%m-%d")
-                    if (_now_utc() - pub_dt).days > days:
-                        continue
-                except Exception:
-                    pass
-                signals.append({
-                    "_source": "arxiv",
-                    "id": _signal_id({"arxiv": eid}),
-                    "title": title[:200],
-                    "summary": summary[:400],
-                    "url": eid,
-                    "published": published,
-                    "query": q,
-                })
-        except ET.ParseError as e:
-            signals.append({"_source": "arxiv", "_query": q, "_error": f"parse: {e}"})
+        except ET.ParseError:
+            continue
+        ns = {"a": "http://www.w3.org/2005/Atom"}
+        for entry in root.findall("a:entry", ns):
+            eid = entry.findtext("a:id", default="", namespaces=ns)
+            if not eid or eid in seen:
+                continue
+            seen.add(eid)
+            published = (entry.findtext("a:published", default="", namespaces=ns) or "")[:10]
+            if not _within_days(published, days):
+                continue
+            signals.append({
+                "_source": "arxiv",
+                "_endpoint": "api",
+                "id": _signal_id({"arxiv": eid}),
+                "title": (entry.findtext("a:title", default="", namespaces=ns) or "").strip()[:200],
+                "summary": (entry.findtext("a:summary", default="", namespaces=ns) or "").strip()[:400],
+                "url": eid,
+                "published": published,
+                "query": q,
+            })
         time.sleep(1.0)  # arXiv asks for politeness
     return signals
+
+
+def _arxiv_via_rss(days, max_results):
+    """Endpoint B: rss.arxiv.org per-category feed (fast, weekdays only)."""
+    signals, seen = [], set()
+    reachable = False
+    for cat in ARXIV_CATEGORIES:
+        status, body = _http_text(f"https://rss.arxiv.org/rss/{cat}", timeout=20)
+        if status != 200 or not body:
+            continue
+        reachable = True
+        try:
+            root = ET.fromstring(body)
+        except ET.ParseError:
+            continue
+        for item in root.iter("item"):
+            link = (item.findtext("link") or "").strip()
+            title = (item.findtext("title") or "").strip()
+            if not link or link in seen:
+                continue
+            seen.add(link)
+            desc = (item.findtext("description") or "").strip()
+            if not _arxiv_relevant(f"{title} {desc}"):
+                continue
+            signals.append({
+                "_source": "arxiv",
+                "_endpoint": "rss",
+                "id": _signal_id({"arxiv": link}),
+                "title": title[:200],
+                "summary": re.sub(r"<[^>]+>", " ", desc)[:400],
+                "url": link,
+                "published": _today_str(),
+                "query": f"cat:{cat}",
+            })
+        time.sleep(0.3)
+    if not reachable:
+        raise RuntimeError("rss.arxiv.org unreachable for all categories")
+    # RSS is empty on weekends/holidays -- that is valid, not an error.
+    return signals[: max_results * len(ARXIV_CATEGORIES)]
+
+
+_LIST_ENTRY_RE = re.compile(
+    r'<a href\s*="/abs/(?P<id>\d{4}\.\d{4,5})".*?'
+    r"<div class='list-title mathjax'>\s*<span class='descriptor'>Title:</span>\s*"
+    r"(?P<title>.*?)\s*</div>",
+    re.S,
+)
+
+
+def _arxiv_via_listing(days, max_results):
+    """Endpoint C: arxiv.org/list/<cat>/recent HTML (last-resort, always up)."""
+    signals, seen = [], set()
+    reachable = False
+    for cat in ARXIV_CATEGORIES:
+        status, html = _http_text(
+            f"https://arxiv.org/list/{cat}/recent",
+            headers={"User-Agent": "Mozilla/5.0 (compatible; aishield-tech-radar/1.0)"},
+            timeout=30,
+        )
+        if status != 200 or not html:
+            continue
+        reachable = True
+        for m in _LIST_ENTRY_RE.finditer(html):
+            aid, title = m.group("id"), re.sub(r"\s+", " ", m.group("title")).strip()
+            if aid in seen or not title:
+                continue
+            seen.add(aid)
+            if not _arxiv_relevant(title):
+                continue
+            signals.append({
+                "_source": "arxiv",
+                "_endpoint": "listing",
+                "id": _signal_id({"arxiv": f"https://arxiv.org/abs/{aid}"}),
+                "title": title[:200],
+                "summary": "",
+                "url": f"https://arxiv.org/abs/{aid}",
+                "published": _today_str(),
+                "query": f"cat:{cat}",
+            })
+        time.sleep(0.5)
+    if not reachable:
+        raise RuntimeError("arxiv.org listing unreachable for all categories")
+    return signals[: max_results * len(ARXIV_CATEGORIES)]
+
+
+def scan_arxiv(days=7, max_results=10):
+    """Scan arXiv via a three-tier endpoint chain.
+
+    Root cause of past 0-yield days: `export.arxiv.org` fails DNS resolution
+    from some networks (WinError 11002), which the old probe misreported as an
+    "arXiv outage". `rss.arxiv.org` and `arxiv.org` remain reachable, so we now
+    degrade to category feeds + local keyword filtering instead of giving up.
+    """
+    chain = [
+        ("api",     _arxiv_via_api),
+        ("rss",     _arxiv_via_rss),
+        ("listing", _arxiv_via_listing),
+    ]
+    # Try last known-good endpoint first -- avoids re-probing a DNS-blocked
+    # host every single run (saves ~15s/day on networks that block export.*).
+    preferred = _load_state().get("arxiv_endpoint")
+    if preferred:
+        chain.sort(key=lambda item: 0 if item[0] == preferred else 1)
+
+    attempts = []
+    for name, fn in chain:
+        try:
+            out = fn(days, max_results)
+        except Exception as e:  # endpoint unreachable -> try the next one
+            attempts.append(f"{name}: {e}")
+            continue
+        if out:
+            st = _load_state()
+            if st.get("arxiv_endpoint") != name:
+                st["arxiv_endpoint"] = name
+                _save_endpoint_hint(st)
+            return out
+        # Endpoint worked but returned nothing (e.g. RSS on a weekend).
+        attempts.append(f"{name}: reachable but 0 relevant items")
+    return [{
+        "_source": "arxiv",
+        "_query": "endpoint-chain",
+        "_error": "no arXiv endpoint yielded items -- " + " | ".join(attempts),
+    }]
 
 
 # ---------------------------------------------------------------------------
@@ -443,30 +590,67 @@ def scan_user_platforms(pat):
 # ---------------------------------------------------------------------------
 # Classification & criticality
 # ---------------------------------------------------------------------------
+# Ordered most-specific -> most-generic; first match wins.
+# Each entry maps to an attack category that AIShield can (or should) detect.
 ATTACK_PATTERNS = [
-    (r"prompt\s*injection",                "prompt-injection"),
-    (r"tool\s*(poison|injection|use)",     "tool-poisoning"),
-    (r"jailbreak",                         "jailbreak"),
-    (r"rug\s*pull",                        "rug-pull"),
-    (r"mcp\s*(poison|vuln|exploit)",       "mcp-attack"),
-    (r"agent\s*(card\s*)?spoof",           "agent-spoof"),
-    (r"credential\s*(exfil|leak|theft)",   "credential-theft"),
-    (r"supply\s*chain",                    "supply-chain"),
+    # -- Skill / plugin surface (AIShield scans skills, so this is core) ------
+    (r"(malicious|poison\w*|backdoor\w*)\s+skill",           "skill-poisoning"),
+    (r"skill\s*(file|system)s?\b.*\b(risk|attack|malicious)", "skill-poisoning"),
+    (r"skill\s*injection",                                    "skill-poisoning"),
+    # -- Memory / trajectory / self-evolving state ---------------------------
+    (r"trajectory\s*poison",                                  "trajectory-poisoning"),
+    (r"memory\s*(poison|injection|corruption)",               "memory-poisoning"),
+    (r"self[- ]evolving\s+agent",                             "trajectory-poisoning"),
+    # -- Prompt / instruction layer -----------------------------------------
+    (r"prompt\s*injection",                                   "prompt-injection"),
+    (r"indirect\s+injection",                                 "prompt-injection"),
+    (r"instruction\s*(backdoor|hijack)",                      "instruction-hijack"),
+    (r"jailbreak",                                            "jailbreak"),
+    # -- Tool / MCP layer ----------------------------------------------------
+    (r"tool\s*(poison|injection|squatting)",                  "tool-poisoning"),
+    (r"(mcp|model context protocol)\b.*\b(poison|vuln|exploit|attack|threat)",
+                                                              "mcp-attack"),
+    (r"rug\s*pull",                                           "rug-pull"),
+    (r"confused\s+deputy",                                    "confused-deputy"),
+    (r"excessive\s+agency",                                   "excessive-agency"),
+    # -- Identity / trust ----------------------------------------------------
+    (r"agent\s*(card\s*)?spoof",                              "agent-spoof"),
+    (r"(impersonat\w+|identity\s+spoof)\s*.*agent",           "agent-spoof"),
+    # -- Data / credentials --------------------------------------------------
+    (r"credential\s*(exfil\w*|leak\w*|theft|steal\w*)",       "credential-theft"),
+    (r"data\s*exfiltrat\w+",                                  "data-exfiltration"),
+    # -- Supply chain --------------------------------------------------------
+    (r"supply\s*chain",                                       "supply-chain"),
+    (r"(dependency|package)\s*(confusion|typosquat\w*)",      "supply-chain"),
+    # -- Generic agent attack (catch-all, keep last) -------------------------
+    (r"backdoor\s*(attack|trigger)",                          "backdoor"),
+    (r"(llm|agent|agentic)\s*.*\b(red[- ]team\w*|adversarial attack)\b",
+                                                              "adversarial-agent"),
 ]
+
+# Title cues that escalate severity.
+_SEV_CRITICAL = ["bypass", "exploit", "rce", "remote code", "unauthenticated",
+                 "zero-day", "0-day", "wormable", "privilege escalation"]
+_SEV_HIGH = ["new attack", "first", "novel", "breaking", "automated attack",
+             "practical attack", "real-world attack", "in the wild"]
+
 
 def classify_signal(sig):
     """Return (category, severity) for a signal, or (None, None)."""
     text = " ".join(str(v) for v in sig.values() if isinstance(v, str)).lower()
-    cats = [c for pat, c in ATTACK_PATTERNS if re.search(pat, text)]
-    if not cats:
+    cat = next((c for pat, c in ATTACK_PATTERNS if re.search(pat, text)), None)
+    if not cat:
         return None, None
-    # Heuristic: papers with "bypass" or "exploit" in title -> critical
     title = (sig.get("title") or "").lower()
-    if any(k in title for k in ["bypass", "exploit", "rce", "remote code", "unauthenticated"]):
-        return cats[0], "critical"
-    if any(k in title for k in ["new attack", "first", "novel", "breaking"]):
-        return cats[0], "high"
-    return cats[0], "medium"
+    if any(k in title for k in _SEV_CRITICAL):
+        return cat, "critical"
+    if any(k in title for k in _SEV_HIGH):
+        return cat, "high"
+    # A defence/benchmark paper describes an attack but is not itself a threat.
+    if any(k in title for k in ["defen", "guard", "mitigat", "survey", "benchmark",
+                                "detect", "safeguard", "certification"]):
+        return cat, "medium"
+    return cat, "high"
 
 
 def is_critical(sig):
@@ -477,77 +661,59 @@ def is_critical(sig):
 # ---------------------------------------------------------------------------
 # Auto-draft rule candidates
 # ---------------------------------------------------------------------------
-RULE_TEMPLATE = '''# -*- coding: utf-8 -*-
-"""
-Auto-drafted rule candidate -- PROPOSED, NOT ACTIVE.
-====================================================
-
-Generated by scripts/tech_radar.py on {date}
-Source signal: {source_url}
-Attack pattern: {attack_category}
-Severity:       {severity}
-
-Review instructions:
-  1. Read the source signal (URL above) to understand the attack.
-  2. Implement the `check()` method below with detection logic.
-  3. Test against {source_kind} samples -- real positive AND real negative.
-  4. If valid: move this file into scanner/rules.py and assign a permanent id.
-     If false positive or out of scope: delete this file.
-
-Original signal title:
-  {signal_title}
-"""
-from __future__ import annotations
-from scanner.rules import Rule, RuleResult
-
-
-class ProposedRule_{slug}(Rule):
-    id = "PROPOSED-{date_slug}-{slug}"
-    description = "Detects {attack_category} per radar signal {signal_id}"
-    severity = "{severity}"
-    category = "{attack_category}"
-
-    def check(self, manifest, content=""):
-        # TODO(operator): implement detection logic based on source signal.
-        # Suggested fields to inspect in `manifest`:
-        #   - manifest.tools        (list of tool defs)
-        #   - manifest.prompts      (list of prompt strings)
-        #   - manifest.resources    (list of resource URIs)
-        #   - manifest.config       (raw config dict)
-        #   - content               (raw file content as string)
-        # Return RuleResult(fired=True, reason="...") when detected.
-        return RuleResult(fired=False, reason="draft -- implement check()")
-'''
-
-
 def _slugify(text):
     s = re.sub(r"[^a-z0-9]+", "_", (text or "").lower()).strip("_")
     return (s[:30] or "rule")
 
 
 def draft_rule_candidate(sig):
-    """Generate a rule stub file for a high-severity signal. Return path or None."""
+    """Write a rule candidate for a high-severity signal. Return path or None.
+
+    Candidates are JSON, matching how the scanner actually stores rules
+    (`{pattern: (description, severity)}` -- see scanner/rules.py). An earlier
+    version emitted Python stubs subclassing `Rule`/`RuleResult`; those classes
+    do not exist in this project, so every stub was unusable by construction.
+    """
     cat, sev = classify_signal(sig)
     if not cat:
         return None
     slug = _slugify(sig.get("title", "rule")) + "_" + sig.get("id", "x")[:6]
     date = _today_str()
-    date_slug = date.replace("-", "")
-    fname = f"PROPOSED_{date_slug}_{slug}.py"
+    fname = f"PROPOSED_{date.replace('-', '')}_{slug}.json"
     fpath = os.path.join(PROPOSED_DIR, fname)
-    body = RULE_TEMPLATE.format(
-        date=date,
-        date_slug=date_slug,
-        slug=slug,
-        source_url=sig.get("url", ""),
-        source_kind=sig.get("_source", "unknown"),
-        signal_id=sig.get("id", ""),
-        signal_title=(sig.get("title") or "")[:120],
-        attack_category=cat,
-        severity=sev,
-    )
+
+    candidate = {
+        "status": "draft",
+        "_instructions": [
+            "1. Read the source signal URL and understand the attack.",
+            "2. Fill in `rules`: each needs a real regex `pattern`, a Chinese "
+            "`description` and a `severity` (critical|high|medium|low).",
+            "3. Set `status` to `ready`.",
+            "4. Run: python scripts/promote_rule.py --check   (validates every "
+            "candidate: regex compiles, no false positives on benign corpus)",
+            "5. Run: python scripts/promote_rule.py --promote <file>",
+            "   Rejected? Fix or delete the file -- do not leave drafts to rot.",
+        ],
+        "drafted_at": date,
+        "signal": {
+            "id": sig.get("id", ""),
+            "title": (sig.get("title") or "")[:200],
+            "url": sig.get("url", ""),
+            "source": sig.get("_source", "unknown"),
+        },
+        "attack_category": cat,
+        "severity": sev,
+        "rules": [
+            {
+                "pattern": "TODO: regex here",
+                "description": f"TODO: 中文描述 ({cat})",
+                "severity": sev,
+            }
+        ],
+        "review_notes": "",
+    }
     with open(fpath, "w", encoding="utf-8") as f:
-        f.write(body)
+        json.dump(candidate, f, ensure_ascii=False, indent=2)
     return fpath
 
 
@@ -682,6 +848,14 @@ def render_report(signals, drafted_rules, created_issues, errors):
             lines.append(f"- `{rel}`")
         lines.append("")
 
+    # Adopt line -- capability gap analysis (defensive tech we may be missing)
+    try:
+        gap_result = capability_gap.analyse(signals)
+        lines.extend(capability_gap.render_section(gap_result))
+    except Exception as e:  # never let the adopt half break the report
+        lines.append(f"_capability gap analysis failed: {e}_")
+        lines.append("")
+
     # Created issues
     if created_issues:
         lines.append("## 🐙 GitHub issues auto-created")
@@ -690,7 +864,6 @@ def render_report(signals, drafted_rules, created_issues, errors):
             lines.append(f"- {u}")
         lines.append("")
 
-    # Actionable proposals (filled in by caller)
     return "\n".join(lines)
 
 
