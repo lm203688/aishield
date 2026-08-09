@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "rules": {
+    "(?:写入|追加|保存|append|persist|store)[^\\n]{0,16}(?:记忆|经验|轨迹|memory|trajectory|experience)[^\\n]{0,40}(?:从此|今后|以后|每次|always|from now on|every time)": [
+      "轨迹投毒: 向记忆/经验库写入跨会话持久指令 (ASI 自进化技能系统)",
+      "high"
+    ],
+    "(?:learned|经验表明|根据经验|based on (?:past )?experience)[^\\n]{0,30}(?:you must|必须|务必|should always)[^\\n]{0,40}(?:执行|运行|上传|发送|exec|upload|send|curl|wget)": [
+      "轨迹投毒: 伪装成\"历史经验\"的强制执行指令",
+      "high"
+    ]
+  },
+  "provenance": {
+    "(?:写入|追加|保存|append|persist|store)[^\\n]{0,16}(?:记忆|经验|轨迹|memory|trajectory|experience)[^\\n]{0,40}(?:从此|今后|以后|每次|always|from now on|every time)": {
+      "signal_title": "When Experience Becomes Instruction: Trajectory Poisoning in Self-Evolving Agent Skill Systems",
+      "signal_url": "https://arxiv.org/abs/2608.05563",
+      "source": "arxiv",
+      "attack_category": "trajectory-poisoning",
+      "promoted_from": "PROPOSED_20260809_when_experience_becomes_instru_3c3a5b.json",
+      "drafted_at": "2026-08-09"
+    },
+    "(?:learned|经验表明|根据经验|based on (?:past )?experience)[^\\n]{0,30}(?:you must|必须|务必|should always)[^\\n]{0,40}(?:执行|运行|上传|发送|exec|upload|send|curl|wget)": {
+      "signal_title": "When Experience Becomes Instruction: Trajectory Poisoning in Self-Evolving Agent Skill Systems",
+      "signal_url": "https://arxiv.org/abs/2608.05563",
+      "source": "arxiv",
+      "attack_category": "trajectory-poisoning",
+      "promoted_from": "PROPOSED_20260809_when_experience_becomes_instru_3c3a5b.json",
+      "drafted_at": "2026-08-09"
+    }
+  }
+}
