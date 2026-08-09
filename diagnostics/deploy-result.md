@@ -1,5 +1,5 @@
 === DIAGNOSTIC ===
-Time: Sun Aug 9 06:19:24 PM CST 2026
+Time: Sun Aug 9 07:17:00 PM CST 2026
 === USER ===
 root
 === GIT LOG ===
@@ -13,13 +13,11 @@ dbcf345 fix: download script from GitHub raw if git reset fails, add script vers
 # 解决 Quick Tunnel 的 error 1014 (CNAME Cross-User Banned) 问题
 #
 === API STATUS ===
-{"status": "ok", "version": "4.2", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 133, "uptime": 1786270764.8155575, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup"}OK
+{"status": "ok", "version": "4.2", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 133, "uptime": 1786274220.8570206, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup"}OK
 === CLOUDFLARED PROCESS ===
-root     1747768  0.1  1.6 1294676 33804 ?       Sl   17:03   0:06 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
-root     1747907  0.1  1.7 1294676 35792 ?       Sl   17:03   0:06 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
+root     1747768  0.1  1.7 1294676 34384 ?       Sl   17:03   0:12 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
+root     1747907  0.1  1.7 1294676 35604 ?       Sl   17:03   0:12 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
 === CLOUDFLARED LOG (last 30 lines) ===
-2026-08-09T09:04:05Z INF |  UDP Connectivity  region1.v2.argotunnel.com  PASS    QUIC connection successful    |
-2026-08-09T09:04:05Z INF |  UDP Connectivity  region2.v2.argotunnel.com  PASS    QUIC connection successful    |
 2026-08-09T09:04:05Z INF |  TCP Connectivity  region1.v2.argotunnel.com  PASS    HTTP/2 connection successful  |
 2026-08-09T09:04:05Z INF |  TCP Connectivity  region2.v2.argotunnel.com  PASS    HTTP/2 connection successful  |
 2026-08-09T09:04:05Z INF |  Cloudflare API    api.cloudflare.com:443     PASS    API is reachable              |
@@ -48,6 +46,8 @@ root     1747907  0.1  1.7 1294676 35792 ?       Sl   17:03   0:06 /usr/local/bi
 2026-08-09T10:06:58Z WRN Connection terminated error="control stream encountered a failure while serving" connIndex=1
 2026-08-09T10:07:19Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=1 event=0 ip=198.41.192.167
 2026-08-09T10:07:19Z INF Registered tunnel connection connIndex=1 connection=599aa115-16b1-47ba-a268-b2e41f349e83 event=0 ip=198.41.192.167 location=lax08 protocol=quic
+2026-08-09T10:38:47Z ERR  error="stream 41 canceled by remote with error code 0" connIndex=0 event=1 ingressRule=0 originService=http://localhost:8450
+2026-08-09T10:38:47Z ERR Request failed error="stream 41 canceled by remote with error code 0" connIndex=0 dest=https://aishield.tools/ event=0 ip=198.41.200.233 type=http
 === DEPLOY LOG ===
 === AIShield Named Tunnel Deployment ===
 [17:03:44] Time: Sun Aug  9 05:03:44 PM CST 2026
@@ -142,11 +142,11 @@ cert.pem: -rw------- 1 root root 282 Jul 28 11:02 /root/.cloudflared/cert.pem
 === SYSTEMD STATUS ===
 ● cloudflared-tunnel.service - Cloudflare Named Tunnel for AIShield
      Loaded: loaded (/etc/systemd/system/cloudflared-tunnel.service; enabled; vendor preset: enabled)
-     Active: active (running) since Sun 2026-08-09 17:04:00 CST; 1h 15min ago
+     Active: active (running) since Sun 2026-08-09 17:04:00 CST; 2h 13min ago
    Main PID: 1747903 (start-tunnel.sh)
       Tasks: 9 (limit: 2216)
-     Memory: 18.9M
-        CPU: 6.924s
+     Memory: 19.4M
+        CPU: 12.115s
      CGroup: /system.slice/cloudflared-tunnel.service
              ├─1747903 /bin/bash /opt/start-tunnel.sh
              └─1747907 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
@@ -180,12 +180,12 @@ fi
 wait $CF_PID
 
 === HTTPS Test from Runner ===
-Time: Sun Aug  9 10:19:25 UTC 2026
+Time: Sun Aug  9 11:17:01 UTC 2026
 
 === curl test (aishield.tools) ===
-{"status": "ok", "version": "4.2", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 133, "uptime": 1786270765.2425485, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup"}
+{"status": "ok", "version": "4.2", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 133, "uptime": 1786274221.36185, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup"}
 === DNS lookup ===
-104.21.81.46
 172.67.188.44
+104.21.81.46
 
 === DNS CNAME check ===
