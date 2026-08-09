@@ -1,5 +1,5 @@
 === DIAGNOSTIC ===
-Time: Sun Aug 9 04:14:32 PM CST 2026
+Time: Sun Aug 9 04:26:35 PM CST 2026
 === USER ===
 root
 === GIT LOG ===
@@ -13,13 +13,12 @@ dbcf345 fix: download script from GitHub raw if git reset fails, add script vers
 # 解决 Quick Tunnel 的 error 1014 (CNAME Cross-User Banned) 问题
 #
 === API STATUS ===
-{"status": "ok", "version": "4.2", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 133, "uptime": 1786263272.19303, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup"}OK
+{"status": "ok", "version": "4.2", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 133, "uptime": 1786263995.6329043, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup"}OK
 === CLOUDFLARED PROCESS ===
-root     1706265  1.0  1.8 1294420 36948 ?       Sl   16:14   0:00 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
-root     1706474  1.4  1.9 1294100 38440 ?       Sl   16:14   0:00 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
-root     1706764  1.4  1.9 1294676 39700 ?       Sl   16:14   0:00 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
+root     1706265  0.1  1.7 1294932 34224 ?       Sl   16:14   0:01 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
+root     1706474  0.1  1.7 1294420 35100 ?       Sl   16:14   0:01 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
+root     1706764  0.1  1.7 1294676 34668 ?       Sl   16:14   0:01 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
 === CLOUDFLARED LOG (last 30 lines) ===
-2026-08-09T08:14:23Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=0 event=0 ip=198.41.200.43
 2026-08-09T08:14:24Z INF Registered tunnel connection connIndex=0 connection=96763967-68d5-487c-a915-24cf918244d8 event=0 ip=198.41.200.43 location=lax01 protocol=quic
 2026-08-09T08:14:24Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=1 event=0 ip=198.41.192.107
 2026-08-09T08:14:24Z INF Registered tunnel connection connIndex=1 connection=ce053d05-4a17-40dc-a9f9-4970c7d6b69a event=0 ip=198.41.192.107 location=lax07 protocol=quic
@@ -27,28 +26,29 @@ root     1706764  1.4  1.9 1294676 39700 ?       Sl   16:14   0:00 /usr/local/bi
 2026-08-09T08:14:25Z INF Registered tunnel connection connIndex=2 connection=2b58eab3-f6f1-4ff5-af42-a69b531793cc event=0 ip=198.41.192.27 location=lax05 protocol=quic
 2026-08-09T08:14:26Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=3 event=0 ip=198.41.200.233
 2026-08-09T08:14:26Z INF Registered tunnel connection connIndex=3 connection=a91c5e3d-ed1b-4a2f-858a-23c836dcf9f7 event=0 ip=198.41.200.233 location=lax01 protocol=quic
-2026-08-09T08:14:28Z INF +-------------------------------------------------------------------------------------+
-2026-08-09T08:14:28Z INF |                               CONNECTIVITY PRE-CHECKS                               |
-2026-08-09T08:14:28Z INF +-------------------------------------------------------------------------------------+
-2026-08-09T08:14:28Z INF |  COMPONENT         TARGET                     STATUS  DETAILS                       |
-2026-08-09T08:14:28Z INF |  DNS Resolution    region1.v2.argotunnel.com  PASS    DNS Resolved successfully     |
-2026-08-09T08:14:28Z INF |  DNS Resolution    region2.v2.argotunnel.com  PASS    DNS Resolved successfully     |
-2026-08-09T08:14:28Z INF |  UDP Connectivity  region1.v2.argotunnel.com  PASS    QUIC connection successful    |
-2026-08-09T08:14:28Z INF |  UDP Connectivity  region2.v2.argotunnel.com  PASS    QUIC connection successful    |
-2026-08-09T08:14:28Z INF |  TCP Connectivity  region1.v2.argotunnel.com  PASS    HTTP/2 connection successful  |
-2026-08-09T08:14:28Z INF |  TCP Connectivity  region2.v2.argotunnel.com  PASS    HTTP/2 connection successful  |
-2026-08-09T08:14:28Z INF |  Cloudflare API    api.cloudflare.com:443     PASS    API is reachable              |
-2026-08-09T08:14:28Z INF |                                                                                     |
-2026-08-09T08:14:28Z INF |  SUMMARY: Environment is healthy. cloudflared will use 'quic' as primary protocol.  |
-2026-08-09T08:14:28Z INF +-------------------------------------------------------------------------------------+
-2026-08-09T08:14:28Z INF precheck component="DNS Resolution" details="DNS Resolved successfully" run_id=2c6496e8-ee5a-43c0-82e2-b0a67b54917b status=pass target=region1.v2.argotunnel.com
-2026-08-09T08:14:28Z INF precheck component="DNS Resolution" details="DNS Resolved successfully" run_id=2c6496e8-ee5a-43c0-82e2-b0a67b54917b status=pass target=region2.v2.argotunnel.com
-2026-08-09T08:14:28Z INF precheck component="UDP Connectivity" details="QUIC connection successful" run_id=2c6496e8-ee5a-43c0-82e2-b0a67b54917b status=pass target=region1.v2.argotunnel.com
-2026-08-09T08:14:28Z INF precheck component="UDP Connectivity" details="QUIC connection successful" run_id=2c6496e8-ee5a-43c0-82e2-b0a67b54917b status=pass target=region2.v2.argotunnel.com
-2026-08-09T08:14:28Z INF precheck component="TCP Connectivity" details="HTTP/2 connection successful" run_id=2c6496e8-ee5a-43c0-82e2-b0a67b54917b status=pass target=region1.v2.argotunnel.com
-2026-08-09T08:14:28Z INF precheck component="TCP Connectivity" details="HTTP/2 connection successful" run_id=2c6496e8-ee5a-43c0-82e2-b0a67b54917b status=pass target=region2.v2.argotunnel.com
-2026-08-09T08:14:28Z INF precheck component="Cloudflare API" details="API is reachable" run_id=2c6496e8-ee5a-43c0-82e2-b0a67b54917b status=pass target=api.cloudflare.com:443
-2026-08-09T08:14:28Z INF precheck complete hard_fail=false run_id=2c6496e8-ee5a-43c0-82e2-b0a67b54917b suggested_protocol=quic
+2026-08-09T08:14:33Z INF +-----------------------------------------------------------------------------------------------+
+2026-08-09T08:14:33Z INF |                                    CONNECTIVITY PRE-CHECKS                                    |
+2026-08-09T08:14:33Z INF +-----------------------------------------------------------------------------------------------+
+2026-08-09T08:14:33Z INF |  COMPONENT         TARGET                     STATUS  DETAILS                                 |
+2026-08-09T08:14:33Z INF |  DNS Resolution    region1.v2.argotunnel.com  PASS    DNS Resolved successfully               |
+2026-08-09T08:14:33Z INF |  DNS Resolution    region2.v2.argotunnel.com  PASS    DNS Resolved successfully               |
+2026-08-09T08:14:33Z INF |  UDP Connectivity  region1.v2.argotunnel.com  PASS    QUIC connection successful              |
+2026-08-09T08:14:33Z INF |  UDP Connectivity  region2.v2.argotunnel.com  FAIL    QUIC connection failed                  |
+2026-08-09T08:14:33Z INF |  TCP Connectivity  region1.v2.argotunnel.com  PASS    HTTP/2 connection successful            |
+2026-08-09T08:14:33Z INF |  TCP Connectivity  region2.v2.argotunnel.com  PASS    HTTP/2 connection successful            |
+2026-08-09T08:14:33Z INF |  Cloudflare API    api.cloudflare.com:443     PASS    API is reachable                        |
+2026-08-09T08:14:33Z INF |  WARNING: Allow outbound QUIC traffic on port 7844 or use HTTP2.                              |
+2026-08-09T08:14:33Z INF |                                                                                               |
+2026-08-09T08:14:33Z INF |  SUMMARY: Environment ready with degraded transport. cloudflared will proceed using 'http2'.  |
+2026-08-09T08:14:33Z INF +-----------------------------------------------------------------------------------------------+
+2026-08-09T08:14:33Z INF precheck component="DNS Resolution" details="DNS Resolved successfully" run_id=22942d6c-bb1e-4994-a2af-97551cf79555 status=pass target=region1.v2.argotunnel.com
+2026-08-09T08:14:33Z INF precheck component="DNS Resolution" details="DNS Resolved successfully" run_id=22942d6c-bb1e-4994-a2af-97551cf79555 status=pass target=region2.v2.argotunnel.com
+2026-08-09T08:14:33Z INF precheck component="UDP Connectivity" details="QUIC connection successful" run_id=22942d6c-bb1e-4994-a2af-97551cf79555 status=pass target=region1.v2.argotunnel.com
+2026-08-09T08:14:33Z INF precheck component="UDP Connectivity" details="QUIC connection failed" run_id=22942d6c-bb1e-4994-a2af-97551cf79555 status=fail target=region2.v2.argotunnel.com
+2026-08-09T08:14:33Z INF precheck component="TCP Connectivity" details="HTTP/2 connection successful" run_id=22942d6c-bb1e-4994-a2af-97551cf79555 status=pass target=region1.v2.argotunnel.com
+2026-08-09T08:14:33Z INF precheck component="TCP Connectivity" details="HTTP/2 connection successful" run_id=22942d6c-bb1e-4994-a2af-97551cf79555 status=pass target=region2.v2.argotunnel.com
+2026-08-09T08:14:33Z INF precheck component="Cloudflare API" details="API is reachable" run_id=22942d6c-bb1e-4994-a2af-97551cf79555 status=pass target=api.cloudflare.com:443
+2026-08-09T08:14:33Z INF precheck complete hard_fail=false run_id=22942d6c-bb1e-4994-a2af-97551cf79555 suggested_protocol=http2
 === DEPLOY LOG ===
 === AIShield Named Tunnel Deployment ===
 [16:13:59] Time: Sun Aug  9 04:13:59 PM CST 2026
@@ -309,11 +309,11 @@ cert.pem: -rw------- 1 root root 282 Jul 28 11:02 /root/.cloudflared/cert.pem
 === SYSTEMD STATUS ===
 ● cloudflared-tunnel.service - Cloudflare Named Tunnel for AIShield
      Loaded: loaded (/etc/systemd/system/cloudflared-tunnel.service; enabled; vendor preset: enabled)
-     Active: active (running) since Sun 2026-08-09 16:14:25 CST; 6s ago
+     Active: active (running) since Sun 2026-08-09 16:14:25 CST; 12min ago
    Main PID: 1706754 (start-tunnel.sh)
       Tasks: 9 (limit: 2216)
-     Memory: 18.5M
-        CPU: 116ms
+     Memory: 16.8M
+        CPU: 1.263s
      CGroup: /system.slice/cloudflared-tunnel.service
              ├─1706754 /bin/bash /opt/start-tunnel.sh
              └─1706764 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
@@ -347,12 +347,12 @@ fi
 wait $CF_PID
 
 === HTTPS Test from Runner ===
-Time: Sun Aug  9 08:14:32 UTC 2026
+Time: Sun Aug  9 08:26:36 UTC 2026
 
 === curl test (aishield.tools) ===
-{"status": "ok", "version": "4.2", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 133, "uptime": 1786263273.023921, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup"}
+{"status": "ok", "version": "4.2", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 133, "uptime": 1786263996.202798, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup"}
 === DNS lookup ===
-104.21.81.46
 172.67.188.44
+104.21.81.46
 
 === DNS CNAME check ===
