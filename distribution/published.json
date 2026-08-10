@@ -1,0 +1,64 @@
+{
+  "_comment": "对外发布台账。任何投放到外部渠道的产物都必须在此登记，且 source_dir 内必须留底源文件。由 scripts/verify_distribution.py 门禁校验。",
+  "schema_version": 1,
+  "updated": "2026-08-10",
+  "policy": {
+    "min_overall_score": 80,
+    "block_severities": ["critical", "high"],
+    "require_source_in_repo": true
+  },
+  "entries": [
+    {
+      "channel": "agensi",
+      "name": "chinese-seo-compliance",
+      "kind": "skill",
+      "version": "1.1.0",
+      "published_version": "1.0.0",
+      "published_at": "2026-08-10",
+      "source_dir": "distribution/agensi/chinese-seo-compliance",
+      "source_status": "rebuilt",
+      "notes": "v1.0 首发时源未入库（发布留底流程缺失）。1.1.0 为按 AIShield 规范重建并通过自检的版本，下次更新以此覆盖发布，届时 published_version 同步为 1.1.0。",
+      "signals": {
+        "downloads": 1,
+        "first_download_at": "2026-08-10T12:01:00+08:00",
+        "source": "noreply@agensi.io 下载通知"
+      }
+    },
+    {
+      "channel": "claude-skills",
+      "name": "aishield-security-scan",
+      "kind": "skill",
+      "version": "4.2.2",
+      "published_version": null,
+      "published_at": null,
+      "source_dir": "distribution/claude-skill",
+      "source_status": "in_repo",
+      "notes": "源已就绪，待提交 Claude 技能市场。",
+      "signals": {}
+    },
+    {
+      "channel": "gpt-store",
+      "name": "aishield-gpt",
+      "kind": "gpt",
+      "version": "4.2.2",
+      "published_version": null,
+      "published_at": null,
+      "source_dir": "distribution/gpt-store",
+      "source_status": "in_repo",
+      "notes": "Actions 接 AIShield Trust API。",
+      "signals": {}
+    },
+    {
+      "channel": "huggingface",
+      "name": "aishield-agent-security-benchmark",
+      "kind": "dataset-card",
+      "version": "4.2.2",
+      "published_version": null,
+      "published_at": null,
+      "source_dir": "distribution/huggingface",
+      "source_status": "in_repo",
+      "notes": "安全基准 + 复现卡。",
+      "signals": {}
+    }
+  ]
+}
