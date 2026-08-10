@@ -34,6 +34,9 @@ def main():
         'tests.test_mcp_contract',
         'tests.test_tech_radar',
         'tests.test_workspace_scan',
+        'tests.test_sandbox_rules',
+        'tests.test_guardrail_harness',
+        'tests.test_attestation_live',
     ]
 
     loaded = 0
