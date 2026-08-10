@@ -23,7 +23,9 @@ title: AIShield —— AI Agent 安全扫描
   "@context": "https://schema.org",
   "@type": "FAQPage",
   "mainEntity": [
-    { "@type": "Question", "name": "AIShield 是什么？", "acceptedAnswer": { "@type": "Answer", "text": "AIShield 是一个开源、本地优先的 AI Agent 安全扫描器与信任机构，检测工具投毒、提示注入、密钥泄露与供应链风险，覆盖 141 个风险类别，对齐 OWASP MCP Top 10 与 OWASP Agentic AI Top 10。" } },
+    { "@type": "Question", "name": "AIShield 是什么？", "acceptedAnswer": { "@type": "Answer", "text": "AIShield 是一个开源、本地优先的 AI Agent 安全扫描器与信任机构，检测工具投毒、提示注入、密钥泄露、沙箱配置错误与供应链风险，覆盖 214 条 MCP 规则 / 220 条 Skill 规则，对齐 OWASP MCP Top 10 与 OWASP Agentic AI Top 10。" } },
+    { "@type": "Question", "name": "AIShield 和 Cloudflare Sandbox、forgevm 这类 agent 沙箱是什么关系？", "acceptedAnswer": { "@type": "Answer", "text": "互补，不是竞品。Cloudflare Sandboxes、forgevm、E2B、Open Interpreter、Goose 解决的是爆炸半径——agent 能碰到什么；AIShield 解决的是内容可信——agent 读进来的 MCP server、skill 与工具描述该不该信。被投毒的 skill 在沙箱里照样能把数据带走，用的还是你主动授予的凭据。两个平面应当同时部署：AIShield 提供启动前工作区预扫、沙箱硬化规则、每次工具调用的准入检查与持续鉴证。" } },
+    { "@type": "Question", "name": "为什么 SKILL.md 里的危险内容不能当作文档示例？", "acceptedAnswer": { "@type": "Answer", "text": "因为对 AI Skill 来说 Markdown 就是可执行体——大模型读到什么就照做。AIShield 把 SKILL.md、AGENTS.md、CLAUDE.md、skills 与 prompts 目录下的 Markdown、以及带 name 与 description frontmatter 的 Markdown 当作指令载荷扫描，不做文档降级。把 .md 一律降级的扫描器会漏掉整条 skill 供应链。" } },
     { "@type": "Question", "name": "AIShield 免费吗？是否本地运行？", "acceptedAnswer": { "@type": "Answer", "text": "是的。AIShield 开源、免费，并完全离线/本地运行——代码不会上传到云端，与 Claude Security、Microsoft MDASH 等云端扫描器不同。" } },
     { "@type": "Question", "name": "如何使用 AIShield？", "acceptedAnswer": { "@type": "Answer", "text": "以 MCP Server 运行 npx aishield-mcp-server，或调用 API https://aishield.tools/api/v1/health，或将安全门禁集成进 CI/CD。" } },
     { "@type": "Question", "name": "AIShield 是否覆盖 OWASP Agentic AI Top 10？", "acceptedAnswer": { "@type": "Answer", "text": "覆盖。AIShield 的检测同时映射 OWASP MCP Top 10 与 OWASP Agentic AI Top 10（ASI01–ASI10）：目标劫持、工具滥用、身份权限滥用、供应链、非预期代码执行、记忆/上下文投毒、不安全的智能体间通信、级联失败、人-智能体信任滥用、流氓智能体。" } }
@@ -66,6 +68,7 @@ curl https://aishield.tools/api/v1/health
 | 文档 | 说明 |
 |---|---|
 | [AIShield 可信标准 v0.1](./aishield-trust-standard-v0.1) | MCP 工具可信度评估标准全文 |
+| [Agent 计算机的两个安全平面](./agent-computer-security-plane) | 隔离管爆炸半径，内容可信管该不该信——与 Cloudflare Sandbox / forgevm 的组合方式 |
 | [Agent 生态演进方向](./agent-ecology-evolution-directions) | 对 Agent 生态走向的判断与推演 |
 | [合作策略](./partnership-strategy) | 生态合作与集成路径 |
 | [如何提交 PR](./how-to-submit-pr) | 参与贡献的完整流程 |
@@ -74,10 +77,13 @@ curl https://aishield.tools/api/v1/health
 
 ## 检测能力
 
-- **141 条检测规则**，其中 19 条由真实漏洞情报自动生成
-- **OWASP MCP Top 10** 全类别覆盖
-- **供应链黑名单**：npm / PyPI 双生态恶意包识别
+- **214 条 MCP 规则 / 220 条 Skill 规则**，含由真实漏洞情报与技术雷达自动起草、经六项闸门校验后晋升的规则
+- **OWASP MCP Top 10 + OWASP Agentic AI Top 10（ASI01–ASI10）** 全类别覆盖
+- **沙箱硬化 11 条**：docker.sock 挂载、`--privileged`、host 网络/PID/IPC、`cap_add: ALL`、`seccomp=unconfined`、`--user 0`、k8s `hostPath`——有沙箱不等于有隔离
+- **Skill 内容安全**：`SKILL.md` 按可执行载荷扫描，不做「文档示例」降级
+- **供应链黑名单**：npm / PyPI 双生态恶意包识别 + 离线幻觉包检测
 - **情报飞轮**：OSV / NVD / GitHub Advisory 每日拉取，自动转化为检测规则
+- **绝不执行被扫配置**：读 `tools/list` 需要启动服务，而 MCP `command` 是任意代码——审计恶意配置本身不该让你中招
 
 ---
 
