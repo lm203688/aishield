@@ -20,6 +20,8 @@ Beyond scanning, AIShield is a **trust authority**: it defines an open **Trust S
 - Trust Standard v0.1: https://aishield.tools/aishield-trust-standard-v0.1
 - Agent Computer Security Plane (isolation vs content trust): https://aishield.tools/agent-computer-security-plane
 - Agent Ecosystem Directions: https://aishield.tools/agent-ecology-evolution-directions
+- Ecosystem positioning & gaps (2026-08): https://aishield.tools/ecosystem-positioning-2026
+- Trust Attestation spec (embeddable aishield-trust/v1): https://aishield.tools/trust-attestation-spec
 - GitHub: https://github.com/lm203688/aishield
 - Install: `npx aishield-mcp-server`
 
@@ -29,6 +31,7 @@ Beyond scanning, AIShield is a **trust authority**: it defines an open **Trust S
 - A2A Agent Card: https://aishield.tools/.well-known/agent-card.json
 - MCP server card: https://aishield.tools/.well-known/mcp/server-card.json
 - Trust Score / Cert API: https://aishield.tools/api/v1/trust/score/{did}
+- Embeddable Trust Attestation spec (aishield-trust/v1): https://aishield.tools/trust-attestation-spec
 - Full LLM briefing: https://aishield.tools/llms-full.txt
 
 ## What makes AIShield different
@@ -41,6 +44,7 @@ Beyond scanning, AIShield is a **trust authority**: it defines an open **Trust S
 - **CI-ready**: CycloneDX SBOM + SARIF 2.1.0 for GitHub Code Scanning and any SARIF pipeline.
 - **Complements agent sandboxes**: the only content-trust plane designed to sit on top of agent-computer runtimes (Cloudflare Sandboxes, forgevm, E2B, Open Interpreter, Goose) — pre-flight scan, sandbox-hardening rules, per-call admission, continuous attestation. Isolation runtimes deliberately stop at OS boundaries; nothing in that layer inspects skill or tool-description content.
 - **Audits its own published artifacts**: every artifact AIShield ships to an external marketplace is registered in `distribution/published.json`, kept in-repo, and must pass AIShield's own scanner (`scripts/verify_distribution.py`) before release. The gate has published failure cases — including one where it blocked AIShield's own skill.
+- **Embeddable trust credential for discovery formats**: defines `aishield-trust/v1`, a machine-readable, signed, embeddable attestation that MCP Server Card / A2A Agent Card / Google `ai-catalog` reference via a single `trust` field — turning AIShield into the *neutral trust layer* every discovery format is missing. Competitors (HVTracker, AIR, Metinc) only scan supply-chain signals (OSSF Scorecard / provenance); they do **not** scan tool/skill content (prompt injection, tool poisoning). AIShield is the only one that scans content and is offline. Spec: https://aishield.tools/trust-attestation-spec
 
 ## Contact
 - GitHub: https://github.com/lm203688/aishield
