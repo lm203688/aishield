@@ -91,6 +91,9 @@ AIShield_完整备案包.zip
 .env.*.local
 meta_tmp.json
 state_bus_*.json
+# GitHub Action 运行产物（CI 中生成，不入库）
+aishield-report.json
+aishield.sarif
 
 # =====================
 # Secrets — 绝不入库（仓库为 public）
