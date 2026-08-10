@@ -538,9 +538,40 @@ ASI10_RULES = {
 }
 
 # ============================================================
+# SANDBOX - Agent 计算机沙箱逃逸原语（沙箱硬化规则包，2026-08-10 新增）
+# 对齐 OWASP MCP02（权限范围蔓延）+ ASI-sandbox 扩展类。
+# 目标：在 manifest 层检出容器/沙箱逃逸与权限外溢原语——这些正是由
+# forge / forgevm / Cloudflare Sandbox / Goose / Open Interpreter 等"给 agent
+# 一台电脑"的平台在配置里经常暴露、却从不扫描的危险。
+# 设计约束：每条正则必须足够具体——良性 Dockerfile / compose / k8s 不误报。
+# ============================================================
+SANDBOX_RULES = {
+    # Docker socket 挂载 → 等于把宿主 docker 控制权交给容器内进程（经典逃逸）
+    r'/var/run/docker\.sock': ("挂载 Docker socket（容器逃逸至高权限宿主）", "critical"),
+    # 特权容器
+    r'--privileged\b': ("docker run --privileged 特权容器（关闭全部隔离）", "critical"),
+    r'privileged:\s*true': ("compose/k8s privileged: true 特权容器", "critical"),
+    # host 命名空间共享
+    r'--network\s*(host|=host)|\bnetwork_mode:\s*host': ("共享宿主网络命名空间（network_mode: host）", "high"),
+    r'--pid\s*=\s*host|\bpid:\s*host': ("共享宿主 PID 命名空间（--pid=host）", "high"),
+    r'--ipc\s*=\s*host|\bipc:\s*host': ("共享宿主 IPC 命名空间（--ipc=host）", "high"),
+    # 能力提权
+    r'--cap-add\s*=\s*ALL|cap_add:\s*(\[|\n\s*-\s*)?["\']?ALL|CAP_SYS_ADMIN': ("授予 ALL 能力 / CAP_SYS_ADMIN（提权逃逸）", "critical"),
+    # 关闭内核沙箱
+    r'--security-opt\s+\S*:unconfined|security_opt:\s*.*unconfined': ("关闭 seccomp / apparmor 沙箱（unconfined）", "high"),
+    # root 运行 / 用户命名空间逃逸
+    r'--user\s+(0|root)\b|userns:\s*host': ("以 root（uid 0）运行 / 用户命名空间逃逸", "high"),
+    # k8s 宿主命名空间共享
+    r'hostNetwork:\s*true|hostPID:\s*true|hostIPC:\s*true': ("k8s 共享宿主网络/PID/IPC 命名空间", "high"),
+    # k8s hostPath 挂载宿主文件系统
+    r'hostPath:': ("k8s hostPath 挂载宿主文件系统", "high"),
+}
+
+# ============================================================
 # 合并所有规则
 # ============================================================
 ALL_RULES = {}
+ALL_RULES.update(SANDBOX_RULES)
 ALL_RULES.update(MCP01_RULES)
 ALL_RULES.update(MCP02_RULES)
 ALL_RULES.update(MCP03_RULES)
@@ -1123,7 +1154,7 @@ def get_owasp_category_rules(category):
         "ASI01": ASI01_RULES, "ASI02": ASI02_RULES, "ASI03": ASI03_RULES,
         "ASI04": ASI04_RULES, "ASI05": ASI05_RULES, "ASI06": ASI06_RULES,
         "ASI07": ASI07_RULES, "ASI08": ASI08_RULES, "ASI09": ASI09_RULES,
-        "ASI10": ASI10_RULES,
+        "ASI10": ASI10_RULES, "SANDBOX": SANDBOX_RULES,
     }
     return len(mapping.get(category, {}))
 
