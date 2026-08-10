@@ -1,0 +1,23 @@
+# forge / forgevm agent 配置示例（示意模板，按你的 forge 版本字段调整）
+# 把 AIShield guardrail 注册为一个 stdio 工具服务器，让 agent 在每次工具调用前先过护栏。
+agent:
+  name: research-bot
+  # 把 guardrail 作为首个被调用的「拦截工具」服务器挂上
+  mcp_servers:
+    - name: aishield-guardrail
+      transport: stdio
+      command: python
+      args:
+        - eco/guardrail_harness.py
+      # 建议：把真实工具服务器也挂上，但 agent 的 system prompt 要求
+      # 「任何工具调用前先调用 aishield-guardrail.intercept，decision=deny 则中止」
+      env:
+        AISHIELD_FAIL_CLOSED: "true"
+  tools:
+    # 真实工具（如 filesystem / web），由 guardrail 在调用前把关
+    - filesystem
+    - web_fetch
+  policy:
+    # 任意工具调用若 guardrail 返回 deny，agent 必须停止该动作
+    require_guardrail_before_tool_call: true
+    default_decision: deny
