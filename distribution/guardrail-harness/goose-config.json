@@ -1,0 +1,18 @@
+{
+  "comment": "Goose 配置示例（示意模板）。把 AIShield guardrail 注册为 MCP 工具服务器，让每次工具调用前先过护栏。",
+  "mcpServers": {
+    "aishield-guardrail": {
+      "command": "python",
+      "args": ["eco/guardrail_harness.py"],
+      "env": {
+        "AISHIELD_FAIL_CLOSED": "true"
+      }
+    }
+  },
+  "extensions": {
+    "aishield-guardrail": {
+      "enabled": true,
+      "note": "在 agent 的 system prompt 中要求：任何工具调用前先调用 intercept，decision=deny 则中止该动作。"
+    }
+  }
+}
