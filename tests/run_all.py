@@ -37,6 +37,7 @@ def main():
         'tests.test_sandbox_rules',
         'tests.test_guardrail_harness',
         'tests.test_attestation_live',
+        'tests.test_distribution_gate',
     ]
 
     loaded = 0
