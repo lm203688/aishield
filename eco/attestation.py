@@ -166,12 +166,50 @@ def _effective_status(sub, now=None):
     return STATUS_LAPSED
 
 
+def _live_report(preflight_report):
+    """把 scanner.workspace_scan.preflight() 的输出映射成 attest_once 期望的报告形状。
+
+    preflight 的 summary 已含 overall_score / risk_level，这里补全 total_findings
+    与 badge_level，使 live agent 复扫与静态快照复扫走同一套分数→结论逻辑。
+    """
+    summary = (preflight_report or {}).get("summary", {}) or {}
+    score = summary.get("overall_score") or 0
+    items = (preflight_report or {}).get("items", []) or []
+    total_findings = sum(int(it.get("total_findings", 0) or 0) for it in items)
+    if not total_findings:
+        total_findings = len((preflight_report or {}).get("aggregate_findings", []) or [])
+    if score >= 90:
+        badge_level = "gold"
+    elif score >= 80:
+        badge_level = "silver"
+    elif score >= 70:
+        badge_level = "bronze"
+    else:
+        badge_level = "none"
+    return {
+        "overall_score": score,
+        "badge_level": badge_level,
+        "total_findings": total_findings,
+        "live": True,
+        "items_total": summary.get("items_total", len(items)),
+    }
+
+
 class AttestationService:
     """持续鉴证订阅服务。"""
 
     # ── 订阅生命周期 ──
     def subscribe(self, source_url, plan="monthly", payer_id=None, cert_id=None,
-                  attest_interval_days=DEFAULT_ATTEST_INTERVAL_DAYS):
+                  attest_interval_days=DEFAULT_ATTEST_INTERVAL_DAYS,
+                  workspace_path=None):
+        """订阅持续鉴证。
+
+        workspace_path（可选）：live agent 的工作区目录。若提供，每次复扫将直接
+        对该目录跑 scanner.workspace_scan.preflight()（重新评估已加载的 MCP/skill
+        配置），从而把"持续鉴证"接到真实运行的 agent 上——这正是 rug-pull 兜底
+        的关键：agent 中途加装恶意 MCP，下次复扫即被捕获并吊销认证。
+        不提供则回退为对 source_url 跑 scanner.engine.scan()（静态快照）。
+        """
         if not source_url:
             return {"success": False, "error": "source_url is required"}
         if plan not in SUBSCRIPTION_PLANS:
@@ -197,6 +235,7 @@ class AttestationService:
             sub = {
                 "subscription_id": sub_id,
                 "source_url": source_url,
+                "workspace_path": workspace_path or "",
                 "plan": plan,
                 "plan_label": spec["label"],
                 "payer_id": payer_id or "anonymous",
@@ -312,9 +351,16 @@ class AttestationService:
 
         # 复扫放在锁外——扫描可能耗时，不能阻塞其它订阅
         if scan_fn is None:
-            def scan_fn(url):
-                from scanner.engine import scan as _scan
-                return _scan(url)
+            ws_path = sub.get("workspace_path", "")
+            if ws_path and os.path.isdir(ws_path):
+                # live agent 模式：每个周期直接重扫其工作区（已加载的 MCP/skill）
+                def scan_fn(_url, _path=ws_path):
+                    from scanner.workspace_scan import preflight
+                    return _live_report(preflight(_path))
+            else:
+                def scan_fn(url):
+                    from scanner.engine import scan as _scan
+                    return _scan(url)
         try:
             report = scan_fn(source_url) or {}
         except Exception as exc:
