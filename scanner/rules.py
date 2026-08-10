@@ -1130,6 +1130,50 @@ def check_dependency_hygiene(files):
 SKIP_EXTENSIONS = {'.ini', '.cfg', '.env', '.lock', '.log', '.svg', '.png', '.jpg'}
 SKIP_NAMES = {'registry.yaml', 'registry.yml', 'tox.ini', '.gitignore', 'LICENSE', 'Makefile'}
 
+# ---------------------------------------------------------------------------
+# 指令性 Markdown：agent 会照着执行的载荷，不能按「文档示例」降级
+#
+# 背景：早期把所有 .md 一律降级（README 里的 curl 示例不该报 critical）。
+# 但 agent skill 生态里，SKILL.md 本身就是可执行体——LLM 读到什么就做什么。
+# 一个恶意 skill 只要把 payload 写进 Markdown 正文，就能拿到「low + 高分」放行。
+# 因此区分两类 Markdown：给人看的文档 vs 给 agent 执行的指令。
+# ---------------------------------------------------------------------------
+AGENT_INSTRUCTION_FILENAMES = {
+    'skill.md', 'agents.md', 'agent.md', 'claude.md', 'soul.md',
+    'system.md', 'prompt.md', 'prompts.md', 'instructions.md',
+}
+AGENT_INSTRUCTION_DIR_HINTS = ('/skills/', '/.claude/', '/prompts/', '/agents/')
+
+
+def is_agent_instruction_doc(filepath, content):
+    """这份 Markdown 是不是 agent 会当指令执行的载荷？
+
+    命中任一即判定为指令载荷（不降级）：
+      1. 文件名属于公认的 agent 指令文件（SKILL.md / AGENTS.md / CLAUDE.md ...）
+      2. 路径落在 skills / prompts / agents / .claude 目录下的 .md
+      3. 带 YAML frontmatter 且同时含 name 与 description（Anthropic Skill 规范）
+    """
+    path_l = (filepath or '').replace('\\', '/').lower()
+    if not (path_l.endswith('.md') or path_l.endswith('.markdown')):
+        return False
+
+    base = path_l.split('/')[-1]
+    if base in AGENT_INSTRUCTION_FILENAMES:
+        return True
+
+    probe = '/' + path_l
+    if any(hint in probe for hint in AGENT_INSTRUCTION_DIR_HINTS):
+        return True
+
+    text = content or ''
+    if text.startswith('---'):
+        end = text.find('\n---', 3)
+        if end != -1:
+            fm = text[3:end]
+            if re.search(r'^\s*name\s*:', fm, re.M) and re.search(r'^\s*description\s*:', fm, re.M):
+                return True
+    return False
+
 
 def get_all_rules(tool_type="mcp"):
     """获取适用于指定工具类型的所有规则"""
@@ -1222,6 +1266,9 @@ def analyze(files, tool_type="mcp"):
             continue
 
         is_doc = filepath.endswith('.md') or filepath.endswith('.txt')
+        # SKILL.md 这类指令载荷不算「文档」——它就是 agent 的代码
+        if is_doc and is_agent_instruction_doc(filepath, content):
+            is_doc = False
 
         for pattern, (desc, severity) in rules.items():
             try:
