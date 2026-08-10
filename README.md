@@ -9,9 +9,9 @@
   <a href="https://github.com/lm203688/aishield/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT License"></a>
   <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/Python-3.9%2B-green.svg" alt="Python 3.9+"></a>
   <a href="https://owasp.org/www-project-mcp-security-top-10/"><img src="https://img.shields.io/badge/OWASP-MCP%20Top%2010-orange.svg" alt="OWASP MCP Top 10"></a>
-  <img src="https://img.shields.io/badge/Rules-133-red.svg" alt="133 Security Rules">
+  <img src="https://img.shields.io/badge/Rules-214%2F220-blue.svg" alt="214 MCP / 220 Skill Rules">
   <img src="https://img.shields.io/badge/Dependencies-0-9cf.svg" alt="Zero Dependencies">
-  <img src="https://img.shields.io/badge/Version-v4.2.0-brightgreen.svg" alt="v4.2.0">
+  <img src="https://img.shields.io/badge/Version-v4.2.2-brightgreen.svg" alt="v4.2.2">
 </p>
 
 <p align="center">
@@ -53,6 +53,8 @@
 💳 **支付与计费** — API 按量计费、套餐管理、使用量统计，为 Agent 经济提供基础设施
 
 🏆 **安全认证徽章** — 扫描通过自动签发认证，生成可嵌入 GitHub README 的 SVG 徽章，金 / 银 / 铜三级
+
+🌐 **中立信任机构（Neutral Trust Authority）** — AIShield 不只是扫描器，更是 agent 生态的**信任层**：每个被扫资产都拿到一张机器可读、可签名、可嵌入发现格式的 [Trust Attestation（`aishield-trust/v1`）](docs/trust-attestation-spec.md) 凭证。MCP Server Card / A2A Agent Card / Google `ai-catalog` 只需在自己的 metadata 里加一个 `trust` 字段，就能零成本引用 AIShield 的「内容是否可信」裁决——而这一层目前是整条 agent 供应链最薄弱、也最被抢位的空白。AIShield 的差异化锚点：**唯一本地离线、扫内容（prompt 注入 / 工具中毒 / 供应链漂移）、绝不执行被扫配置**的信任裁决。生态占位策划见 [docs/ecosystem-positioning-2026.md](docs/ecosystem-positioning-2026.md)。
 
 ---
 
@@ -159,6 +161,34 @@ AIShield 可作为 MCP Server 直接集成到 Claude Desktop、Cursor 等支持 
 
 ---
 
+## CI 安全门禁（GitHub Action）
+
+把 AIShield 接入任何仓库的 CI：每次 push / PR 自动扫描工作区里的 MCP server、skill、prompt，**达到阈值即让构建失败**。
+
+```yaml
+# .github/workflows/aishield.yml
+name: AIShield Security Scan
+on: [push, pull_request]
+jobs:
+  aishield:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: lm203688/aishield@v4.2.2   # 发布到 Marketplace 后可用；此前用 commit/ tag 引用
+        with:
+          fail_on: high        # safe / medium / high / critical
+          tool_type: mcp       # mcp / skill / gpt / prompt
+      - name: 上传 SARIF 到 GitHub Security
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: aishield.sarif
+```
+
+差异化：默认 **no-spawn（不执行被扫配置）** + 内容/prompt 注入检测 + **中文合规（违禁词）**——占「中国合规 + 不执行」位，与 AgentAuditKit 的通用位互补。
+
+---
+
 ## API 文档
 
 服务启动后访问 `http://localhost:8450` 获取完整 API 信息。核心端点包括：
@@ -206,7 +236,7 @@ graph TB
             RP["Rug Pull 检测"]
             AS["API 安全扫描"]
             BW["违禁词检测"]
-            SC["5 维评分引擎<br/>133 条规则"]
+            SC["5 维评分引擎<br/>214/220 条规则"]
         end
 
         subgraph Eco["生态模块"]
@@ -269,7 +299,7 @@ AIShield 会根据最新扫描结果动态渲染徽章颜色和状态。
 
 ### Phase 1 — 安全扫描引擎 ✅ (当前)
 
-- [x] 133 条 OWASP MCP Top 10 对齐检测规则
+- [x] 214 MCP / 220 Skill 条 OWASP MCP Top 10 + Agentic ASI01–10 对齐检测规则
 - [x] 5 维安全评分引擎
 - [x] 中文 Prompt 注入检测（拼音 / 谐音 / 拆字）
 - [x] 零宽字符 / 隐写术 / Rug Pull 检测
