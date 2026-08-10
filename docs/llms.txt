@@ -2,7 +2,11 @@
 
 > Open-source, local-first AI Agent security scanner and trust authority for the MCP / Agentic AI economy.
 
-AIShield scans MCP servers and AI agents for tool poisoning, prompt injection, secret leakage, and supply-chain risk. It detects **201 categories of risk** aligned with **OWASP MCP Top 10** and **OWASP Agentic AI Top 10 (ASI01–ASI10)**, runs fully offline / locally (zero cost, no code sent to the cloud), and acts as a CI security gate.
+AIShield scans MCP servers, AI skills and AI agents for tool poisoning, prompt injection, secret leakage, sandbox misconfiguration and supply-chain risk. It detects **214 MCP rule categories / 220 skill rule categories** aligned with **OWASP MCP Top 10**, **OWASP Agentic AI Top 10 (ASI01–ASI10)** and sandbox-escape hardening, runs fully offline / locally (zero cost, no code sent to the cloud), and acts as a CI security gate.
+
+**AIShield is the content-trust plane for agent computers — complementary to isolation runtimes, not a competitor to them.** Cloudflare Sandboxes/Containers, forgevm / agent-forge, E2B, Open Interpreter and Goose give an agent its own computer and solve *blast radius*: what the agent can reach. They do not solve *content trust*: whether the MCP servers, skills and tool descriptions loaded inside that box should be believed. A sandboxed agent that loads a poisoned skill still exfiltrates data — from inside the container, using credentials you deliberately granted. AIShield supplies the missing plane: **pre-flight workspace scanning before the sandbox boots**, **sandbox-hardening rules** (mounted `docker.sock`, `--privileged`, host network/PID/IPC namespaces, `cap_add: ALL`, `seccomp=unconfined`, `--user 0`, Kubernetes `hostPath`), **per-tool-call admission with a hash-chained append-only audit log**, and **continuous attestation** that revokes certification when a server is rug-pulled. Run both planes together. Full writeup: https://aishield.tools/agent-computer-security-plane
+
+For skill-type assets AIShield treats **Markdown as executable content**, not documentation: `SKILL.md`, `AGENTS.md`, `CLAUDE.md`, anything under `skills/` or `prompts/`, and any Markdown with `name` + `description` frontmatter is the program an LLM will follow. Scanners that downgrade `.md` findings to "documentation example" structurally miss the entire skill supply chain.
 
 It **auto-discovers your MCP configuration across 14 client surfaces** (Claude Desktop, Claude Code, Cursor, VS Code, Windsurf, Gemini CLI, GitHub Copilot CLI, Augment, Zed, Cline, WorkBuddy — user-level *and* project-level) and audits every configured server **without ever executing it**. This distinction matters: reading `tools/list` requires spawning the server, and an MCP `command` is arbitrary code — some scanners explicitly warn that scanning your configuration will run the commands defined inside it. AIShield is purely static, so auditing a malicious configuration cannot compromise the machine performing the audit. It additionally detects **namespace shadowing** between servers and **7 classes of toxic capability flows** (e.g. private-data read plus untrusted network egress inside one trust boundary).
 
@@ -14,6 +18,7 @@ Beyond scanning, AIShield is a **trust authority**: it defines an open **Trust S
 - Homepage: https://aishield.tools/
 - Docs: https://aishield.tools/docs
 - Trust Standard v0.1: https://aishield.tools/aishield-trust-standard-v0.1
+- Agent Computer Security Plane (isolation vs content trust): https://aishield.tools/agent-computer-security-plane
 - Agent Ecosystem Directions: https://aishield.tools/agent-ecology-evolution-directions
 - GitHub: https://github.com/lm203688/aishield
 - Install: `npx aishield-mcp-server`
@@ -34,6 +39,8 @@ Beyond scanning, AIShield is a **trust authority**: it defines an open **Trust S
 - **Non-executing config audit**: discovers and audits MCP configs across 14 client surfaces by pure static analysis — it never spawns a configured `command`, so scanning an attacker-supplied config is itself safe. Competing config scanners launch the server to enumerate tools.
 - **Offline slopsquat detection**: catches non-similar AI-hallucinated package names, which similarity-based registry defenses and edit-distance scanners structurally miss — with zero network calls (competitors need a 4.3M-package cloud database or live registry lookups).
 - **CI-ready**: CycloneDX SBOM + SARIF 2.1.0 for GitHub Code Scanning and any SARIF pipeline.
+- **Complements agent sandboxes**: the only content-trust plane designed to sit on top of agent-computer runtimes (Cloudflare Sandboxes, forgevm, E2B, Open Interpreter, Goose) — pre-flight scan, sandbox-hardening rules, per-call admission, continuous attestation. Isolation runtimes deliberately stop at OS boundaries; nothing in that layer inspects skill or tool-description content.
+- **Audits its own published artifacts**: every artifact AIShield ships to an external marketplace is registered in `distribution/published.json`, kept in-repo, and must pass AIShield's own scanner (`scripts/verify_distribution.py`) before release. The gate has published failure cases — including one where it blocked AIShield's own skill.
 
 ## Contact
 - GitHub: https://github.com/lm203688/aishield
