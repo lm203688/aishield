@@ -32,6 +32,8 @@ def main():
         'tests.test_hupijiao',
         'tests.test_governance',
         'tests.test_mcp_contract',
+        'tests.test_tech_radar',
+        'tests.test_workspace_scan',
     ]
 
     loaded = 0
