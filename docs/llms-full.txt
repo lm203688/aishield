@@ -19,9 +19,30 @@ AIShield protects AI agents and the MCP (Model Context Protocol) tools they call
 
   **Design invariant — never execute the scanned config.** Enumerating a server's `tools/list` requires spawning it, and an MCP `command` is arbitrary code; some scanners state outright that scanning configurations will execute the commands defined in them. AIShield performs pure static analysis: it parses the config, infers capabilities from command/args/env shape, and never launches a process. Auditing a hostile configuration therefore cannot compromise the auditing machine. Credentials found in a config are reported as `<redacted:kind>` — the raw value is never echoed back.
 
-**Scale:** 201 detection rule categories — 110 OWASP MCP Top 10 rules, 60 OWASP Agentic AI Top 10 (ASI01–ASI10) rules, and 31 Chinese prompt-injection rules. Rule base tracks OWASP MCP Top 10 and OWASP Agentic AI Top 10.
+- **Agent-computer sandbox misconfiguration** — 11 sandbox-hardening rules covering the ways an isolated agent environment quietly hands the host back: mounted `docker.sock`, `--privileged`, host network / PID / IPC namespaces, `cap_add: ALL`, `CAP_SYS_ADMIN`, `seccomp=unconfined`, `--user 0`, Kubernetes `hostPath`. You can have a sandbox and still have no isolation.
+
+- **Poisoned skills, treated as code** — for skill-type assets, Markdown *is* the executable payload. `SKILL.md`, `AGENTS.md`, `CLAUDE.md`, files under `skills/` or `prompts/`, and any Markdown carrying `name` + `description` frontmatter are scanned as instructions, not documentation. Scanners that downgrade `.md` findings to "documentation example" structurally miss the entire skill supply chain — a malicious `SKILL.md` combining prompt injection with a `curl | bash` payload scores 98/100 under that assumption and 61/100 with critical findings once it is corrected.
+
+**Scale:** 214 MCP rule categories / 220 skill rule categories — 110 OWASP MCP Top 10 rules, 60 OWASP Agentic AI Top 10 (ASI01–ASI10) rules, 31 Chinese prompt-injection rules, 11 sandbox-hardening rules, plus rules promoted from the daily tech-radar pipeline through a six-check gate (schema, compilable regex, not overly broad, deduplicated, zero false positives on a benign corpus).
 
 **Deployment:** fully local / offline. No source code is uploaded to any cloud. Detection runs on the developer's machine or in CI.
+
+### Position in the stack: the content-trust plane for agent computers
+
+Giving an agent its own computer is now solved infrastructure — Cloudflare Sandboxes/Containers, forgevm / agent-forge, E2B, Open Interpreter and Goose all provide a shell, filesystem and network stack inside a container or micro-VM. That layer solves **blast radius** (what the agent can reach). It does not solve **content trust** (whether the MCP servers, skills and tool descriptions loaded inside that box should be believed). A sandboxed agent that loads a poisoned skill still exfiltrates data — from inside the container, using credentials that were deliberately granted to it.
+
+AIShield is the complementary plane, not a competitor to any isolation runtime. Four controls, one per lifecycle stage:
+
+1. **Pre-flight workspace scan** (`scanner/workspace_scan.py`, `scripts/scan_workspace.py`) — parse `.mcp.json`, forge / Goose / Open Interpreter configs and every skill file *before* the sandbox boots, and refuse to start on high risk. Never spawns anything.
+2. **Sandbox-hardening rules** — audit the box definition itself (see the 11 rules above).
+3. **Guardrail-as-harness** (`eco/guardrail_harness.py`) — admission check on every tool call between the model and the tools, evaluated as kill-switch → deny-list → allow-list → default-deny, with a hash-chained append-only audit log where tampering, deletion and insertion are all detectable.
+4. **Continuous attestation** (`eco/attestation.py`) — re-scan on a cycle (default 7 days), detect drift against the recorded evidence hash, revoke certification below threshold. Certification without expiry is marketing; rug-pulls happen after the audit.
+
+Full writeup: https://aishield.tools/agent-computer-security-plane
+
+### Self-audit of published artifacts
+
+Every artifact AIShield ships to an external marketplace is registered in `distribution/published.json`, keeps its source in-repo, and must pass AIShield's own scanner via `scripts/verify_distribution.py` before release (blocking on any critical/high finding or a score below 80). The gate is proven to be able to fail — `tests/test_distribution_gate.py` includes negative cases, and the first artifact it ever blocked was AIShield's own published skill, which had hardcoded an internal address.
 
 ---
 
@@ -82,13 +103,16 @@ The MCP/agent-security category is now crowded (mid-2026): open-source static sc
 | Config audit **without executing** the scanned config | Yes (pure static) | N/A | No (spawns server for `tools/list`) | N/A |
 | Namespace shadowing + toxic-flow cross-server analysis | Yes | Rare | Rare | Partial |
 | Agent-native & GEO (llms.txt / Agent Card / A2A) | Yes | Rare | Rare | No |
+| Markdown treated as executable payload for skills | Yes | Rare | No (downgraded as "docs") | N/A |
+| Sandbox-hardening rules for agent computers | Yes (11) | No | No | Partial |
+| Content-trust plane composable with agent sandboxes (Cloudflare / forgevm / E2B / Goose) | Yes | No | No | No |
 
 ---
 
 ## 6. Status & roadmap (2026-08)
 
 **Shipped in v4.2.0 (all live in code):**
-- Agentic AI Top 10 detection module (60 ASI rules on the 201-rule base).
+- Agentic AI Top 10 detection module (60 ASI rules on the 214-rule base).
 - Trust Standard productized: live cert + score API (`/api/v1/trust/*`), auto-issued certs, SVG badges, Agent Registry + Marketplace data.
 - Local-first architecture: zero third-party dependencies, rule engine fully offline; optional remote LLM for semantic analysis only.
 - SBOM (CycloneDX 1.5) + SARIF 2.1.0 export (`/api/v1/export/sbom`, `/api/v1/export/sarif`).
