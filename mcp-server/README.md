@@ -93,7 +93,7 @@ Subtotal: **60 rules**
 
 Plus 23 Chinese-language prompt-injection rules and 8 generated rules.
 
-**Total: 203 rules** (MCP type) / **209 rules** (Skill type)
+**Total: 214 rules** (MCP type) / **220 rules** (Skill type)
 
 ## License
 
