@@ -1,13 +1,13 @@
 {
   "protocolVersion": "0.3.0",
   "name": "AIShield Security Scanner",
-  "description": "Open-source, local-first AI Agent security scanner and trust authority. Scans MCP servers and agents for tool poisoning, prompt injection, secret leakage, and supply-chain risk; covers OWASP MCP Top 10 and OWASP Agentic AI Top 10 (ASI01-ASI10).",
+  "description": "Open-source, local-first AI Agent security scanner and trust authority - the content-trust plane for agent computers. Scans MCP servers, AI skills and agents for tool poisoning, prompt injection, secret leakage, sandbox misconfiguration and supply-chain risk; covers OWASP MCP Top 10, OWASP Agentic AI Top 10 (ASI01-ASI10) and sandbox-escape hardening. Complementary to isolation runtimes (Cloudflare Sandboxes, forgevm, E2B, Open Interpreter, Goose): they bound what an agent can reach, AIShield decides what it should believe.",
   "url": "https://aishield.tools/api/v1/mcp",
   "provider": {
     "organization": "AIShield Project",
     "url": "https://aishield.tools"
   },
-  "version": "4.2.0",
+  "version": "4.2.2",
   "capabilities": {
     "streaming": false,
     "pushNotifications": false,
@@ -19,7 +19,7 @@
     {
       "id": "security_scan",
       "name": "Security Scan",
-      "description": "Scan an MCP server or agent description for 201 risk categories (OWASP MCP Top 10 + Agentic AI Top 10).",
+      "description": "Scan an MCP server, AI skill or agent description against 214 MCP / 220 skill rule categories (OWASP MCP Top 10 + Agentic AI Top 10 + sandbox hardening). For skill assets, Markdown is treated as executable payload rather than documentation.",
       "tags": ["security", "audit", "mcp", "agent"],
       "examples": [
         "Scan this MCP server tool list for prompt-injection and tool-poisoning risk"
@@ -53,6 +53,27 @@
         "Find every MCP server configured on this machine and tell me which ones are risky",
         "Do any of my MCP servers shadow each other's tool names?",
         "Which configured servers combine private-data read with untrusted network egress?"
+      ]
+    },
+    {
+      "id": "agent_computer_preflight",
+      "name": "Agent Computer Pre-Flight Scan",
+      "description": "Scan an agent workspace BEFORE the sandbox boots. Parses .mcp.json, forge / agent-forge, Goose and Open Interpreter configurations plus every skill file, scores each item, and returns a boot / review / refuse verdict. Complements isolation runtimes (Cloudflare Sandboxes and Containers, forgevm, E2B, Open Interpreter, Goose) which bound blast radius but do not inspect the content an agent loads inside the box. Also checks 11 sandbox-hardening rules on the box definition itself: mounted docker.sock, --privileged, host network/PID/IPC namespaces, cap_add ALL, CAP_SYS_ADMIN, seccomp=unconfined, --user 0, Kubernetes hostPath. PURELY STATIC: never spawns a command found in the workspace, never fetches the network.",
+      "tags": ["agent-computer", "sandbox", "preflight", "workspace", "static-analysis", "local-first", "cloudflare-sandbox", "forgevm", "goose", "open-interpreter"],
+      "examples": [
+        "Is this workspace safe to boot an agent in?",
+        "Pre-flight scan the MCP servers and skills in /workspace before starting the sandbox",
+        "Does my container definition give the agent host access it should not have?"
+      ]
+    },
+    {
+      "id": "continuous_attestation",
+      "name": "Continuous Attestation",
+      "description": "Subscribe an MCP server, skill or live agent workspace to recurring re-scanning (default 7-day cycle). Detects drift against the recorded evidence hash, revokes certification when the score drops below threshold, and exposes a machine-readable answer to 'is this still trustworthy right now'. Designed for rug-pull defence: certification without expiry is marketing.",
+      "tags": ["attestation", "certification", "rug-pull", "monitoring", "trust"],
+      "examples": [
+        "Keep re-checking this MCP server every week and revoke its badge if it degrades",
+        "Is this agent still passing the security bar it was certified against?"
       ]
     },
     {
