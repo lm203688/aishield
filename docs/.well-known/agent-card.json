@@ -91,5 +91,13 @@
     "endpoint": "https://aishield.tools/api/v1/mcp"
   },
   "llms_txt": "https://aishield.tools/llms.txt",
-  "llms_full_txt": "https://aishield.tools/llms-full.txt"
+  "llms_full_txt": "https://aishield.tools/llms-full.txt",
+  "trust": {
+    "authority": "aishield",
+    "schema": "aishield-trust/v1",
+    "verdict_url": "https://aishield.tools/api/v1/trust?src=https://github.com/lm203688/aishield",
+    "attestation_url": "https://aishield.tools/api/v1/attestation/trust?src=https://github.com/lm203688/aishield",
+    "badge": "https://aishield.tools/badge/aishield",
+    "guarantee": "static-only, never executes scanned config; offline; content-aware (prompt injection / tool poisoning / supply-chain drift)"
+  }
 }
