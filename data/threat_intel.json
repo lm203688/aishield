@@ -1,6 +1,42 @@
 {
   "intel": [
     {
+      "id": "CVE-2026-73036",
+      "source": "nvd",
+      "severity": "medium",
+      "cvss": 4.4,
+      "title": "Bash-it 3.2.0 contains a terminal escape sequence injection vulnerability in the barbuk theme's Python virtualenv prompt segment that allows local attackers to inject arbitrary terminal control sequen",
+      "summary": "Bash-it 3.2.0 contains a terminal escape sequence injection vulnerability in the barbuk theme's Python virtualenv prompt segment that allows local attackers to inject arbitrary terminal control sequences by embedding escape sequences in the requires-python field of a pyproject.toml file. When a user navigates into a directory containing a maliciously crafted pyproject.toml, the unfiltered field value is read via awk and concatenated directly into PS1 through __prompt-command without stripping co",
+      "affected": "prompt injection",
+      "references": [
+        "https://github.com/Bash-it/bash-it",
+        "https://github.com/Bash-it/bash-it/commit/fab8f57818f28bfc6f2a81f86a58981c4ea72e5a",
+        "https://github.com/Bash-it/bash-it/issues/2396",
+        "https://github.com/Bash-it/bash-it/pull/2397",
+        "https://www.vulncheck.com/advisories/bash-it-barbuk-theme-terminal-escape-sequence-injection-via-pyproject-toml"
+      ],
+      "published": "2026-08-11T20:18:46.617",
+      "fetched": "2026-08-11T21:52:30.859103+00:00"
+    },
+    {
+      "id": "CVE-2026-73032",
+      "source": "nvd",
+      "severity": "critical",
+      "cvss": 9.6,
+      "title": "PapersGPT for Zotero 0.6.1 contains a remote code execution vulnerability that allows attackers to execute arbitrary JavaScript by returning malicious code from an LLM endpoint that is passed unsaniti",
+      "summary": "PapersGPT for Zotero 0.6.1 contains a remote code execution vulnerability that allows attackers to execute arbitrary JavaScript by returning malicious code from an LLM endpoint that is passed unsanitized to window.eval() in views.ts. Attackers can exploit this through prompt injection in PDFs, MITM interception of API requests, or a malicious custom LLM endpoint to execute arbitrary code in Zotero's chrome-privileged context, enabling file read/write, process execution, and access to all Zotero ",
+      "affected": "prompt injection",
+      "references": [
+        "https://github.com/papersgpt/papersgpt-for-zotero",
+        "https://github.com/papersgpt/papersgpt-for-zotero/commit/094134172ce4a344a31e4b196cc75d1806383658",
+        "https://github.com/papersgpt/papersgpt-for-zotero/issues/154",
+        "https://github.com/papersgpt/papersgpt-for-zotero/pull/155",
+        "https://www.vulncheck.com/advisories/papersgpt-for-zotero-rce-via-unsanitized-llm-response-eval"
+      ],
+      "published": "2026-08-11T20:18:46.320",
+      "fetched": "2026-08-11T21:52:30.859099+00:00"
+    },
+    {
       "id": "CVE-2026-48039",
       "source": "nvd",
       "severity": "critical",
@@ -2222,19 +2258,19 @@
       "fetched": "2026-08-04T06:34:53.913899+00:00"
     }
   ],
-  "updated": "2026-08-11T20:01:38.685560+00:00",
+  "updated": "2026-08-11T21:52:55.540381+00:00",
   "sources": [
     "osv",
     "nvd",
     "github-advisory"
   ],
   "stats": {
-    "critical": 20,
+    "medium": 43,
+    "critical": 21,
     "high": 63,
-    "medium": 42,
     "unknown": 18,
     "low": 3,
     "moderate": 1
   },
-  "total": 147
+  "total": 149
 }
