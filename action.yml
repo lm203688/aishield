@@ -1,5 +1,5 @@
 name: "AIShield MCP/Agent Security Scan"
-description: "本地优先、零出网的 AI 工具（MCP server / Agent skills / GPTs / prompts）安全扫描器：OWASP MCP Top 10 + Agentic ASI01-10 双维评分、SBOM/SARIF 导出、信任 badge。默认扫描当前仓库，绝不执行被扫配置、绝不联网抓取。"
+description: "本地优先、零出网的 MCP/Agent 扫描器，OWASP MCP Top 10 + Agentic ASI01-10 对齐，SBOM/SARIF 导出。"
 author: "AIShield"
 branding:
   icon: "shield"
