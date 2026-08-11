@@ -1,5 +1,5 @@
 === DIAGNOSTIC ===
-Time: Tue Aug 11 03:59:49 PM CST 2026
+Time: Tue Aug 11 04:53:43 PM CST 2026
 === USER ===
 root
 === GIT LOG ===
@@ -13,18 +13,11 @@ dbcf345 fix: download script from GitHub raw if git reset fails, add script vers
 # 解决 Quick Tunnel 的 error 1014 (CNAME Cross-User Banned) 问题
 #
 === API STATUS ===
-{"status": "ok", "version": "4.2", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 133, "uptime": 1786435189.7756877, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup"}OK
+{"status": "ok", "version": "4.2", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 133, "uptime": 1786438423.6969247, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup"}OK
 === CLOUDFLARED PROCESS ===
-root     2773536  0.1  1.0 1294676 21508 ?       Sl   Aug10   1:58 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
-root     2773658  0.1  1.1 1294676 23760 ?       Sl   Aug10   2:01 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
+root     2773536  0.1  1.3 1294676 26872 ?       Sl   Aug10   2:04 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
+root     2773658  0.1  1.4 1294676 29616 ?       Sl   Aug10   2:07 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
 === CLOUDFLARED LOG (last 30 lines) ===
-2026-08-10T11:13:03Z INF precheck component="Cloudflare API" details="API is reachable" run_id=9d0f5806-ada4-4f5f-8210-58610b0f99bc status=pass target=api.cloudflare.com:443
-2026-08-10T11:13:03Z INF precheck complete hard_fail=false run_id=9d0f5806-ada4-4f5f-8210-58610b0f99bc suggested_protocol=quic
-2026-08-10T11:13:19Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=2 event=0 ip=198.41.200.53
-2026-08-10T11:13:19Z INF Registered tunnel connection connIndex=2 connection=b1be4496-b401-4843-bd71-3ccaa4e4cec0 event=0 ip=198.41.200.53 location=lax01 protocol=quic
-2026-08-10T13:17:42Z ERR  error="stream 13 canceled by remote with error code 0" connIndex=3 event=1 ingressRule=0 originService=http://localhost:8450
-2026-08-10T13:17:42Z ERR Request failed error="stream 13 canceled by remote with error code 0" connIndex=3 dest=https://aishield.tools/ event=0 ip=198.41.192.67 type=http
-2026-08-10T23:12:34Z ERR failed to accept incoming stream requests error="failed to accept QUIC stream: Application error 0x0 (remote)" connIndex=3 event=0 ip=198.41.192.67
 2026-08-10T23:12:34Z ERR failed to run the datagram handler error="Application error 0x0 (remote)" connIndex=3 event=0 ip=198.41.192.67
 2026-08-10T23:12:34Z WRN failed to serve tunnel connection error="accept stream listener encountered a failure while serving" connIndex=3 event=0 ip=198.41.192.67
 2026-08-10T23:12:34Z WRN Serve tunnel error error="accept stream listener encountered a failure while serving" connIndex=3 event=0 ip=198.41.192.67
@@ -48,6 +41,13 @@ root     2773658  0.1  1.1 1294676 23760 ?       Sl   Aug10   2:01 /usr/local/bi
 2026-08-10T23:21:44Z WRN Connection terminated error="failed to dial to edge with quic: timeout: no recent network activity" connIndex=3
 2026-08-10T23:21:58Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=3 event=0 ip=198.41.192.47
 2026-08-10T23:21:58Z INF Registered tunnel connection connIndex=3 connection=c3aae302-d675-43d8-9c81-4efa1ca9107c event=0 ip=198.41.192.47 location=lax08 protocol=quic
+2026-08-11T08:50:15Z ERR failed to accept incoming stream requests error="failed to accept QUIC stream: timeout: no recent network activity" connIndex=0 event=0 ip=198.41.200.63
+2026-08-11T08:50:15Z ERR failed to run the datagram handler error="timeout: no recent network activity" connIndex=0 event=0 ip=198.41.200.63
+2026-08-11T08:50:15Z WRN failed to serve tunnel connection error="accept stream listener encountered a failure while serving" connIndex=0 event=0 ip=198.41.200.63
+2026-08-11T08:50:15Z WRN Serve tunnel error error="accept stream listener encountered a failure while serving" connIndex=0 event=0 ip=198.41.200.63
+2026-08-11T08:50:15Z INF Retrying connection in up to 1s connIndex=0 event=0 ip=198.41.200.63
+2026-08-11T08:50:16Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=0 event=0 ip=198.41.200.63
+2026-08-11T08:50:20Z INF Registered tunnel connection connIndex=0 connection=710d0dbe-d8ff-458d-80d7-55bfbd213faa event=0 ip=198.41.200.63 location=lax01 protocol=quic
 === DEPLOY LOG ===
 === AIShield Named Tunnel Deployment ===
 [18:57:04] Time: Mon Aug 10 06:57:04 PM CST 2026
@@ -355,11 +355,11 @@ cert.pem: -rw------- 1 root root 282 Jul 28 11:02 /root/.cloudflared/cert.pem
 === SYSTEMD STATUS ===
 ● cloudflared-tunnel.service - Cloudflare Named Tunnel for AIShield
      Loaded: loaded (/etc/systemd/system/cloudflared-tunnel.service; enabled; vendor preset: enabled)
-     Active: active (running) since Mon 2026-08-10 19:12:58 CST; 20h ago
+     Active: active (running) since Mon 2026-08-10 19:12:58 CST; 21h ago
    Main PID: 2773654 (start-tunnel.sh)
       Tasks: 10 (limit: 2216)
-     Memory: 21.8M
-        CPU: 2min 1.781s
+     Memory: 27.8M
+        CPU: 2min 7.415s
      CGroup: /system.slice/cloudflared-tunnel.service
              ├─2773654 /bin/bash /opt/start-tunnel.sh
              └─2773658 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
@@ -393,10 +393,10 @@ fi
 wait $CF_PID
 
 === HTTPS Test from Runner ===
-Time: Tue Aug 11 07:59:50 UTC 2026
+Time: Tue Aug 11 08:53:44 UTC 2026
 
 === curl test (aishield.tools) ===
-{"status": "ok", "version": "4.2", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 133, "uptime": 1786435190.3422132, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup"}
+{"status": "ok", "version": "4.2", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 133, "uptime": 1786438424.4326282, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup"}
 === DNS lookup ===
 172.67.188.44
 104.21.81.46
