@@ -134,7 +134,7 @@
 | 优先级 | 来源 | 事项 | 参考 |
 |--------|------|------|------|
 | P1 | S2 生态位待办 | MCP 官方 Registry 收录：向 modelcontextprotocol/registry 提交 server.json —— 生态入口即用户入口 | — |
-| P1 | S3 体系问题 | 修复自动化体系缺陷 — M3 状态新鲜度: 状态域 ['feature', 'intel'] 超过 72 小时未更新，对应环节可能已停摆 | — |
+| P1 | S3 体系问题 | 修复自动化体系缺陷 — M3 状态新鲜度: 状态域 ['distribution', 'feature', 'intel'] 超过 72 小时未更新，对应环节可能已停摆 | — |
 | P1 | S4 情报驱动 | 评审本轮 52 条新增高危漏洞的检测覆盖情况 | — |
 | P2 | S2 生态位待办 | GitHub Topics 检索曝光：补齐 GitHub topics: ai-security —— 零成本获取平台内检索流量 | — |
 | P2 | S4 情报驱动 | 补齐 OWASP LLM Top10 未覆盖类别的检测规则：LLM02, LLM03, LLM04, LLM08, LLM09, LLM10 | — |
