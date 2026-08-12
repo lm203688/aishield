@@ -36,9 +36,13 @@ from .engine import (
 )
 from .identity_scan import identity_analysis
 from .network_scan import network_analysis
+from .agentcard_scan import agentcard_analysis
+from .authentik_scan import authentik_analysis
+from .slop_scan import slop_analysis
+from .payment_scan import payment_analysis
 
 TZ = timezone(timedelta(hours=8))
-SCANNER_VERSION = "4.0-preflight.1"
+SCANNER_VERSION = "4.0-preflight.2"
 
 # 安全护栏：避免误读巨型 workspace
 MAX_FILE_BYTES = 512 * 1024          # 单文件 512KB 上限
@@ -328,7 +332,13 @@ def _local_pipeline(files, name, tool_type="mcp"):
     taint = taint_analysis(files)
     identity = identity_analysis(files)
     network = network_analysis(files)
-    extra_findings = identity.get("findings", []) + network.get("findings", [])
+    agentcard = agentcard_analysis(files)
+    authentik = authentik_analysis(files)
+    slop = slop_analysis(files)
+    payment = payment_analysis(files)
+    extra_findings = (identity.get("findings", []) + network.get("findings", [])
+                      + agentcard.get("findings", []) + authentik.get("findings", [])
+                      + slop.get("findings", []) + payment.get("findings", []))
     scores = calculate_scores(static, dependency, secrets, poisoning, taint, total_files,
                               extra_findings=extra_findings)
 
@@ -346,6 +356,14 @@ def _local_pipeline(files, name, tool_type="mcp"):
     for f in identity.get("findings", []):
         all_findings.append(f)
     for f in network.get("findings", []):
+        all_findings.append(f)
+    for f in agentcard.get("findings", []):
+        all_findings.append(f)
+    for f in authentik.get("findings", []):
+        all_findings.append(f)
+    for f in slop.get("findings", []):
+        all_findings.append(f)
+    for f in payment.get("findings", []):
         all_findings.append(f)
 
     seen = set()
@@ -369,6 +387,10 @@ def _local_pipeline(files, name, tool_type="mcp"):
         "tool_poisoning": poisoning,
         "identity_scan": identity,
         "network_scan": network,
+        "agentcard_scan": agentcard,
+        "authentik_scan": authentik,
+        "slop_scan": slop,
+        "payment_scan": payment,
         "recommendations": recommendations,
     }
 
@@ -562,7 +584,10 @@ def preflight(workspace_dir):
             "no_remote_fetch": True,
             "engines_reused": ["rules_analyze", "dependency_analysis",
                                "secrets_detection", "tool_poisoning_detection",
-                               "taint_analysis", "calculate_scores"],
+                               "taint_analysis", "calculate_scores",
+                               "identity_analysis", "network_analysis",
+                               "agentcard_analysis", "authentik_analysis",
+                               "slop_analysis", "payment_analysis"],
         },
     }
 
