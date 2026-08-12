@@ -66,10 +66,15 @@
 | 安全规则覆盖 | **214 / 220 条 (OWASP 双维对齐)** | 10-60 条 | 依赖厂商 | 有限 |
 | 中文 Prompt 检测 | **6 平台违禁词覆盖** | ❌ | 依赖厂商 | ❌ |
 | Agent 身份与信任 | **DID + 信誉 + 徽章** | ❌ | 商业附加 | ❌ |
+| Agent 身份 / 网络层扫描 | **扫身份缺陷 + 组网过宽** | ❌ | 有限 | ❌ |
 | Agent 协作与市场 | **完整生态** | ❌ | 有限 | 简单注册 |
 | 计费与经济模型 | **内置支持** | ❌ | 企业版 | ❌ |
 | 外部依赖 | **零依赖** | 有依赖 | N/A | 有依赖 |
 | MCP 集成 | **原生支持** | 部分支持 | 有限 | 部分支持 |
+
+🔍 **Agent 身份与凭证扫描（身份层 / NHI）** — 2026 年 agent 安全的主战场已从「工具执行」转移到「agent 身份可验证」（A2A 仓库 top issue 全在身份；Authentik 借 NHI 重燃；ANS/DNSid/Entra Agent ID 扎堆）。AIShield 从「只发信任证书」升级为「也扫身份缺陷」：AgentCard/agent 身份是否签名、凭证是否短期过期、授权是否过宽（`scope: "*"` 违反最小权限）、是否缺 mTLS/DID、委托是否做 scope attenuation。详见 [Agent 生态 2026 态势与卡位](docs/agent-ecosystem-2026-landscape.md)。
+
+🕸️ **Agent 网络 / Mesh 配置扫描（网络层）** — Cloudflare Mesh 把 agent 组网做成基础设施，却官方自认「缺 per-agent 身份与策略」（所有 agent 流量被当成来自一个 Worker）。AIShield 补这个缺口：扫描整账户 Mesh/VPC 绑定是否把全网暴露给所有 agent、agent 端点是否无鉴权（`auth: none`）、私有资源是否公网暴露（`public: true`）。内容可信 + 身份归因 + 组网可达性，三管齐下覆盖 agent 的「信任浅滩」。
 
 > AIShield 不只是一个扫描器 — 它是 AI Agent 安全生态的完整基础设施。
 
