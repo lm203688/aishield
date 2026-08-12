@@ -166,3 +166,4 @@
 {"ts": "2026-08-12T16:42:58.065345+00:00", "level": "RESOLVED", "title": "部署后验证恢复", "fingerprint": "deploy-verify-failed", "note": "本次部署已通过线上验证。"}
 {"ts": "2026-08-12T16:59:41.099653+00:00", "level": "P2", "title": "检测规则库更新 +1 条", "body": "情报转规则引擎本轮新增 **1** 条检测规则（总计 28 条）。\n\n- 漏洞包黑名单：20 个\n- 攻击模式规则：8 条\n- OWASP 覆盖：{\"LLM06\": 2, \"LLM01\": 1, \"LLM07\": 3, \"LLM05\": 2}\n\n> 数据飞轮闭合：情报采集 → 规则生成 → 检测能力提升 → 扫描结果更准。", "fingerprint": "rules-updated", "channels": [], "delivered": false}
 {"ts": "2026-08-12T17:47:00.069024+00:00", "level": "RESOLVED", "title": "部署后验证恢复", "fingerprint": "deploy-verify-failed", "note": "本次部署已通过线上验证。"}
+{"ts": "2026-08-12T18:42:54.857371+00:00", "level": "RESOLVED", "title": "部署后验证恢复", "fingerprint": "deploy-verify-failed", "note": "本次部署已通过线上验证。"}
