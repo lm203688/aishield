@@ -1,7 +1,15 @@
 {
-  "generated_at": "2026-08-12T15:01:12.724143+00:00",
-  "source_intel_count": 149,
+  "generated_at": "2026-08-12T16:59:40.807524+00:00",
+  "source_intel_count": 150,
   "package_blacklist": {
+    "pip:compliance-trestle": {
+      "ecosystem": "pip",
+      "package": "compliance-trestle",
+      "severity": "high",
+      "advisories": [
+        "GHSA-h47f-gmjp-m7rr"
+      ]
+    },
     "pip:pymdown-extensions": {
       "ecosystem": "pip",
       "package": "pymdown-extensions",
@@ -194,6 +202,21 @@
     }
   },
   "pattern_rules": {
+    "(?i)(requests\\.(get|post)|urllib\\.request\\.urlopen|fetch)\\s*\\(\\s*[^)]*(user|input|param|req\\.)": {
+      "description": "SSRF: 请求目标来自不可信输入",
+      "severity": "high",
+      "owasp": "LLM06",
+      "owasp_name": "过度代理权限 (Excessive Agency)",
+      "derived_from": "ssrf",
+      "intel_hits": 11,
+      "evidence": [
+        "GHSA-h47f-gmjp-m7rr",
+        "GHSA-rffm-9q57-q649",
+        "GHSA-c6xh-wv4j-ppv5",
+        "GHSA-qvv7-cg9c-w4x3",
+        "GHSA-pgwh-4jj4-qm8v"
+      ]
+    },
     "(?i)(ignore|disregard|forget)\\s+(all\\s+)?(previous|prior|above)\\s+(instruction|prompt|rule)": {
       "description": "提示注入: 覆盖历史指令",
       "severity": "critical",
@@ -268,21 +291,6 @@
         "GHSA-p7w7-4929-vpj5"
       ]
     },
-    "(?i)(requests\\.(get|post)|urllib\\.request\\.urlopen|fetch)\\s*\\(\\s*[^)]*(user|input|param|req\\.)": {
-      "description": "SSRF: 请求目标来自不可信输入",
-      "severity": "high",
-      "owasp": "LLM06",
-      "owasp_name": "过度代理权限 (Excessive Agency)",
-      "derived_from": "ssrf",
-      "intel_hits": 10,
-      "evidence": [
-        "GHSA-rffm-9q57-q649",
-        "GHSA-c6xh-wv4j-ppv5",
-        "GHSA-qvv7-cg9c-w4x3",
-        "GHSA-pgwh-4jj4-qm8v",
-        "GHSA-qq9q-xgm3-xv9g"
-      ]
-    },
     "(?i)(docker\\.sock|/proc/self/|privileged\\s*[:=]\\s*true|--cap-add\\s*=?\\s*SYS_ADMIN)": {
       "description": "沙箱逃逸: 容器高危配置",
       "severity": "critical",
@@ -315,10 +323,10 @@
     }
   },
   "owasp_distribution": {
+    "LLM06": 2,
     "LLM01": 1,
     "LLM07": 3,
-    "LLM05": 2,
-    "LLM06": 2
+    "LLM05": 2
   },
-  "total_rules": 27
+  "total_rules": 28
 }

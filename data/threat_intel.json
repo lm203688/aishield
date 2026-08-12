@@ -1,6 +1,20 @@
 {
   "intel": [
     {
+      "id": "GHSA-h47f-gmjp-m7rr",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": null,
+      "title": "compliance-trestle has an URLSecurityValidator SSRF allowlist bypass via IPv4-mapped IPv6 and 0.0.0.0",
+      "summary": "### Summary\n\n`compliance-trestle` 4.0.3 (latest) ships an `URLSecurityValidator` in `trestle/core/remote/security.py` to block SSRF to loopback / link-local / cloud-metadata endpoints from the HTTPSFetcher and SFTPFetcher remote-fetch paths. The allowlist is incomplete and can be bypassed by four equivalent address representations that resolve to the same blocked host but evade the validator's checks:\n\n- IPv4-mapped IPv6 literals (`[::ffff:169.254.169.254]`, `[::ffff:127.0.0.1]`, `[::ffff:10.0.0",
+      "affected": "pip:compliance-trestle",
+      "references": [
+        "https://github.com/advisories/GHSA-h47f-gmjp-m7rr"
+      ],
+      "published": "2026-08-12T15:21:17Z",
+      "fetched": "2026-08-12T16:59:24.958379+00:00"
+    },
+    {
       "id": "CVE-2026-73036",
       "source": "nvd",
       "severity": "medium",
@@ -2258,19 +2272,19 @@
       "fetched": "2026-08-04T06:34:53.913899+00:00"
     }
   ],
-  "updated": "2026-08-12T15:00:59.146098+00:00",
+  "updated": "2026-08-12T16:59:25.461834+00:00",
   "sources": [
     "osv",
     "nvd",
     "github-advisory"
   ],
   "stats": {
+    "high": 64,
     "medium": 43,
     "critical": 21,
-    "high": 63,
     "unknown": 18,
     "low": 3,
     "moderate": 1
   },
-  "total": 149
+  "total": 150
 }
