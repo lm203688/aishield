@@ -38,6 +38,7 @@ def main():
         'tests.test_guardrail_harness',
         'tests.test_attestation_live',
         'tests.test_distribution_gate',
+        'tests.test_trust_api',
     ]
 
     loaded = 0
