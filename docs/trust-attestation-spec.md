@@ -67,14 +67,19 @@
 
 发现方（crawler / registry / 客户端）无需连被扫服务，只查 AIShield 端点即可拿到"这个端点背后是谁、内容是否安全"的裁决——正好补上发现层缺的信任层。
 
-## 4. 公开端点（已存在，需对外标定）
+## 4. 公开端点（已实现）
 
-| 端点 | 用途 |
-|------|------|
-| `GET /api/v1/trust?src=<url>` | 返回上述 `aishield-trust.json` 裁决 |
-| `GET /api/v1/attestation/trust?src=<url>` | 持续鉴证状态 |
-| `GET /badge/{tool}` | 公开 SVG 徽章（可嵌 README / 注册表页） |
-| `GET /api/v1/attestation/plans` | 订阅计划（x402 / 虎皮椒可结算） |
+| 端点 | 方法 | 用途 |
+|------|------|------|
+| `GET /api/v1/trust?src=<url>` | GET | 返回上述 `aishield-trust.json` 裁决（核心，已被 `agent-card.json` 的 `trust` 字段引用） |
+| `GET /api/v1/trust/verify?src=<url>` | GET | 同上（`/verify` 语义别名，便于提案描述） |
+| `POST /api/v1/trust` | POST | body `{src, type}` 返回裁决 |
+| `GET /api/v1/attestation/trust?src=<url>` | GET | 持续鉴证状态 |
+| `GET /badge/{tool}` | GET | 公开 SVG 徽章（可嵌 README / 注册表页） |
+| `GET /api/v1/attestation/plans` | GET | 订阅计划（x402 / 虎皮椒可结算） |
+
+> 实现位于 `api/trust_api.py` 的 `_verify_envelope()`，由 `api/server.py` 的 `/api/v1/trust*` 路由挂载；
+> 未订阅来源返回诚实的 `risk: unknown` 裁决，不谎报。测试见 `tests/test_trust_api.py`。
 
 ## 5. 占位动作（配套 `ecosystem-positioning-2026.md` P0）
 
