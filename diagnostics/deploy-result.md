@@ -1,5 +1,5 @@
 === DIAGNOSTIC ===
-Time: Wed Aug 12 07:36:36 PM CST 2026
+Time: Wed Aug 12 08:36:41 PM CST 2026
 === USER ===
 root
 === GIT LOG ===
@@ -13,21 +13,11 @@ dbcf345 fix: download script from GitHub raw if git reset fails, add script vers
 # 解决 Quick Tunnel 的 error 1014 (CNAME Cross-User Banned) 问题
 #
 === API STATUS ===
-{"status": "ok", "version": "4.2", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 133, "uptime": 1786534596.7322042, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup"}OK
+{"status": "ok", "version": "4.2", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 133, "uptime": 1786538202.0525908, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup"}OK
 === CLOUDFLARED PROCESS ===
-root      303021  0.1  1.2 1294676 24556 ?       Sl   15:29   0:25 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
-root      303117  0.1  1.1 1294676 22944 ?       Sl   15:29   0:25 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
+root      303021  0.1  1.3 1294676 26784 ?       Sl   15:29   0:31 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
+root      303117  0.1  1.3 1294676 26472 ?       Sl   15:29   0:31 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
 === CLOUDFLARED LOG (last 30 lines) ===
-2026-08-12T11:03:47Z WRN failed to serve tunnel connection error="datagram manager encountered a failure while serving" connIndex=3 event=0 ip=198.41.200.113
-2026-08-12T11:03:47Z WRN Serve tunnel error error="datagram manager encountered a failure while serving" connIndex=3 event=0 ip=198.41.200.113
-2026-08-12T11:03:47Z INF Retrying connection in up to 1s connIndex=3 event=0 ip=198.41.200.113
-2026-08-12T11:03:48Z WRN Connection terminated error="datagram manager encountered a failure while serving" connIndex=3
-2026-08-12T11:03:58Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=3 event=0 ip=198.41.200.113
-2026-08-12T11:04:03Z WRN Failed to dial a quic connection error="failed to dial to edge with quic: timeout: no recent network activity" connIndex=3 event=0 ip=198.41.200.113
-2026-08-12T11:04:03Z INF Retrying connection in up to 4s connIndex=3 event=0 ip=198.41.200.113
-2026-08-12T11:04:07Z WRN Connection terminated error="failed to dial to edge with quic: timeout: no recent network activity" connIndex=3
-2026-08-12T11:04:13Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=3 event=0 ip=198.41.200.193
-2026-08-12T11:04:18Z WRN Failed to dial a quic connection error="failed to dial to edge with quic: timeout: no recent network activity" connIndex=3 event=0 ip=198.41.200.193
 2026-08-12T11:04:18Z INF Retrying connection in up to 8s connIndex=3 event=0 ip=198.41.200.193
 2026-08-12T11:04:26Z WRN Connection terminated error="failed to dial to edge with quic: timeout: no recent network activity" connIndex=3
 2026-08-12T11:04:28Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=3 event=0 ip=198.41.200.43
@@ -48,6 +38,16 @@ root      303117  0.1  1.1 1294676 22944 ?       Sl   15:29   0:25 /usr/local/bi
 2026-08-12T11:06:30Z WRN Connection terminated error="accept stream listener encountered a failure while serving" connIndex=1
 2026-08-12T11:09:18Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=1 event=0 ip=198.41.200.233
 2026-08-12T11:09:18Z INF Registered tunnel connection connIndex=1 connection=c746bebc-3332-4b75-9200-62c72aad87b9 event=0 ip=198.41.200.233 location=lax01 protocol=quic
+2026-08-12T12:04:06Z ERR failed to run the datagram handler error="Application error 0x0 (remote)" connIndex=0 event=0 ip=198.41.192.57
+2026-08-12T12:04:06Z ERR failed to accept incoming stream requests error="failed to accept QUIC stream: Application error 0x0 (remote)" connIndex=0 event=0 ip=198.41.192.57
+2026-08-12T12:04:06Z WRN failed to serve tunnel connection error="datagram manager encountered a failure while serving" connIndex=0 event=0 ip=198.41.192.57
+2026-08-12T12:04:06Z WRN Serve tunnel error error="datagram manager encountered a failure while serving" connIndex=0 event=0 ip=198.41.192.57
+2026-08-12T12:04:06Z INF Retrying connection in up to 1s connIndex=0 event=0 ip=198.41.192.57
+2026-08-12T12:04:06Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=0 event=0 ip=198.41.192.57
+2026-08-12T12:04:11Z WRN Failed to dial a quic connection error="failed to dial to edge with quic: timeout: no recent network activity" connIndex=0 event=0 ip=198.41.192.57
+2026-08-12T12:04:11Z INF Retrying connection in up to 4s connIndex=0 event=0 ip=198.41.192.57
+2026-08-12T12:04:11Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=0 event=0 ip=198.41.192.27
+2026-08-12T12:04:12Z INF Registered tunnel connection connIndex=0 connection=6880f9fd-4b2a-4760-84aa-4d9351466b94 event=0 ip=198.41.192.27 location=lax05 protocol=quic
 === DEPLOY LOG ===
 === AIShield Named Tunnel Deployment ===
 [15:29:33] Time: Wed Aug 12 03:29:33 PM CST 2026
@@ -188,11 +188,11 @@ cert.pem: -rw------- 1 root root 282 Jul 28 11:02 /root/.cloudflared/cert.pem
 === SYSTEMD STATUS ===
 ● cloudflared-tunnel.service - Cloudflare Named Tunnel for AIShield
      Loaded: loaded (/etc/systemd/system/cloudflared-tunnel.service; enabled; vendor preset: enabled)
-     Active: active (running) since Wed 2026-08-12 15:29:46 CST; 4h 6min ago
+     Active: active (running) since Wed 2026-08-12 15:29:46 CST; 5h 6min ago
    Main PID: 303109 (start-tunnel.sh)
       Tasks: 10 (limit: 2216)
-     Memory: 19.6M
-        CPU: 25.496s
+     Memory: 22.9M
+        CPU: 31.684s
      CGroup: /system.slice/cloudflared-tunnel.service
              ├─303109 /bin/bash /opt/start-tunnel.sh
              └─303117 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
@@ -226,10 +226,10 @@ fi
 wait $CF_PID
 
 === HTTPS Test from Runner ===
-Time: Wed Aug 12 11:36:37 UTC 2026
+Time: Wed Aug 12 12:36:42 UTC 2026
 
 === curl test (aishield.tools) ===
-{"status": "ok", "version": "4.2", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 133, "uptime": 1786534597.4666827, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup"}
+{"status": "ok", "version": "4.2", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 133, "uptime": 1786538202.5577915, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup"}
 === DNS lookup ===
 104.21.81.46
 172.67.188.44
