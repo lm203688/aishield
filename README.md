@@ -76,6 +76,14 @@
 
 🕸️ **Agent 网络 / Mesh 配置扫描（网络层）** — Cloudflare Mesh 把 agent 组网做成基础设施，却官方自认「缺 per-agent 身份与策略」（所有 agent 流量被当成来自一个 Worker）。AIShield 补这个缺口：扫描整账户 Mesh/VPC 绑定是否把全网暴露给所有 agent、agent 端点是否无鉴权（`auth: none`）、私有资源是否公网暴露（`public: true`）。内容可信 + 身份归因 + 组网可达性，三管齐下覆盖 agent 的「信任浅滩」。
 
+🔐 **Authentik / NHI service-account 扫描（身份层 · Authentik 流派）** — 扫描 Authentik 风格的 service-account 导出：`skip_authorization` 跳同意、令牌永不过期（`token_ttl: 0/never`）、scope 过宽（`"*"`）、硬编码 `client_secret`。把身份层从「只发证书」扩展到「也扫 NHI 卫生」。
+
+🪪 **A2A AgentCard 结构化校验（身份层 · A2A 流派）** — 对 `.well-known/agent.json` 做 JSON 结构化校验：未签名、缺过期、非 https、无鉴权方案（`securitySchemes`）、委托链未做 scope attenuation。直接对应 A2A #1672/#1628 的「信任浅滩」。
+
+🛡️ **AI-slop / 越狱规避检测（内容可信层）** — 识别专为绕过内容分类器而设计的 prompt/skill：指令覆盖（ignore previous instructions）、DAN 角色扮演、base64/翻译混淆、反检测自指。这是「去 AI 味」文化浪潮被武器化的一面，AIShield 做其安全/可信对冲层（与 soundshuman 风格层互补非竞品）。
+
+💰 **AP2 / x402 支付授权 scope 审计（经济层 · 支付授权）** — 扫描 agent 支付配置：`maxAmount` 无限、`auto_approve` 免确认、支付 scope 过宽、支付授权未绑 intent（cartId/orderId）。覆盖 agent 经济层的「三授权」收敛。
+
 > AIShield 不只是一个扫描器 — 它是 AI Agent 安全生态的完整基础设施。
 
 ---
