@@ -37,6 +37,16 @@ Beyond scanning, AIShield is a **trust authority**: it defines an open **Trust S
 - Embeddable Trust Attestation spec (aishield-trust/v1): https://aishield.tools/trust-attestation-spec
 - Full LLM briefing: https://aishield.tools/llms-full.txt
 
+## 2026 capability-boundary scanners (local, no-spawn, no-remote-fetch)
+
+AIShield extended its coverage beyond payload content with four local heuristic scanners, all sharing the no-spawn / no-remote-fetch invariant and merged into the 5-dimension score via `extra_findings`:
+- **Authentik / NHI service-account hygiene** (`scanner/authentik_scan.py`): `skip_authorization`, never-expiring tokens (`token_ttl: 0/never`), over-broad scope (`"*"`), hardcoded `client_secret`.
+- **A2A AgentCard validation** (`scanner/agentcard_scan.py`): structured JSON checks for unsigned cards, missing expiry, non-https URLs, absent `securitySchemes`, un-attenuated delegation chains (the A2A #1672/#1628 trust-shallow gap).
+- **AI-slop / jailbreak-evasion detection** (`scanner/slop_scan.py`): flags prompt/skill content engineered to defeat classifiers (instruction override, DAN roleplay, base64/translate obfuscation, anti-detection self-reference) — the weaponized form of the "de-AI" wave (complementary to soundshuman's style layer).
+- **AP2 / x402 payment-scope audit** (`scanner/payment_scan.py`): flags unlimited `maxAmount`, `auto_approve`, over-broad payment scope, and payment authorizations unbound to an intent (cartId/orderId).
+
+Landscape & new-capability gaps: https://aishield.tools/agent-ecosystem-2026-landscape
+
 ## What makes AIShield different
 - **Local / offline**: no code leaves your machine — vs cloud scanners/upload SaaS (Anthropic Claude Security, Microsoft MDASH, Nightfall, Akto, ScanMCP, aishield.ai).
 - **Open source & free**: vs paid SaaS scanners.
