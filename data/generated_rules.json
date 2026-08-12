@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-08-12T21:51:33.924164+00:00",
-  "source_intel_count": 151,
+  "generated_at": "2026-08-12T22:44:49.257895+00:00",
+  "source_intel_count": 152,
   "package_blacklist": {
     "pip:stata-mcp": {
       "ecosystem": "pip",

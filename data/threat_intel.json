@@ -1,6 +1,23 @@
 {
   "intel": [
     {
+      "id": "CVE-2026-73498",
+      "source": "nvd",
+      "severity": "high",
+      "cvss": 7.7,
+      "title": "MCP Atlassian is a Model Context Protocol (MCP) server for Atlassian products (Confluence and Jira). Prior to 0.22.0, confluence_upload_attachment passes its client-supplied file_path directly to open",
+      "summary": "MCP Atlassian is a Model Context Protocol (MCP) server for Atlassian products (Confluence and Jira). Prior to 0.22.0, confluence_upload_attachment passes its client-supplied file_path directly to open(file_path, \"rb\") in src/mcp_atlassian/confluence/attachments.py through _upload_attachment_direct() without calling validate_safe_path. An authenticated MCP client can read any file accessible to the server process and exfiltrate it to Confluence as an attachment. If an AI agent can be induced to c",
+      "affected": "model context protocol",
+      "references": [
+        "https://github.com/sooperset/mcp-atlassian/commit/b041733473f95119dd539542a43c280737a8e460",
+        "https://github.com/sooperset/mcp-atlassian/pull/1448",
+        "https://github.com/sooperset/mcp-atlassian/releases/tag/v0.22.0",
+        "https://github.com/sooperset/mcp-atlassian/security/advisories/GHSA-g5r6-gv6m-f5jv"
+      ],
+      "published": "2026-08-12T22:17:16.973",
+      "fetched": "2026-08-12T22:44:20.689387+00:00"
+    },
+    {
       "id": "GHSA-49m4-vp58-wgc9",
       "source": "github-advisory",
       "severity": "high",
@@ -2286,19 +2303,19 @@
       "fetched": "2026-08-04T06:34:53.913899+00:00"
     }
   ],
-  "updated": "2026-08-12T21:51:23.357754+00:00",
+  "updated": "2026-08-12T22:44:35.219392+00:00",
   "sources": [
     "osv",
     "nvd",
     "github-advisory"
   ],
   "stats": {
-    "high": 65,
+    "high": 66,
     "medium": 43,
     "critical": 21,
     "unknown": 18,
     "low": 3,
     "moderate": 1
   },
-  "total": 151
+  "total": 152
 }
