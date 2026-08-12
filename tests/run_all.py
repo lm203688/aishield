@@ -39,6 +39,7 @@ def main():
         'tests.test_attestation_live',
         'tests.test_distribution_gate',
         'tests.test_trust_api',
+        'tests.test_identity_network_scan',
     ]
 
     loaded = 0
