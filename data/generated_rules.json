@@ -1,7 +1,15 @@
 {
-  "generated_at": "2026-08-12T18:01:59.441732+00:00",
-  "source_intel_count": 150,
+  "generated_at": "2026-08-12T20:01:56.660500+00:00",
+  "source_intel_count": 151,
   "package_blacklist": {
+    "pip:stata-mcp": {
+      "ecosystem": "pip",
+      "package": "stata-mcp",
+      "severity": "high",
+      "advisories": [
+        "GHSA-49m4-vp58-wgc9"
+      ]
+    },
     "pip:compliance-trestle": {
       "ecosystem": "pip",
       "package": "compliance-trestle",
@@ -202,6 +210,21 @@
     }
   },
   "pattern_rules": {
+    "(?i)(os\\.system|subprocess\\.(call|run|Popen)|child_process\\.exec)\\s*\\(\\s*[^)]*(\\+|%|\\$\\{|f['\\\"])": {
+      "description": "命令注入: 动态拼接系统命令",
+      "severity": "critical",
+      "owasp": "LLM05",
+      "owasp_name": "不当输出处理 (Improper Output Handling)",
+      "derived_from": "command injection",
+      "intel_hits": 5,
+      "evidence": [
+        "GHSA-49m4-vp58-wgc9",
+        "GHSA-wcx4-wpfv-mc5c",
+        "CVE-2026-59800",
+        "CVE-2026-48719",
+        "CVE-2026-42853"
+      ]
+    },
     "(?i)(requests\\.(get|post)|urllib\\.request\\.urlopen|fetch)\\s*\\(\\s*[^)]*(user|input|param|req\\.)": {
       "description": "SSRF: 请求目标来自不可信输入",
       "severity": "high",
@@ -245,20 +268,6 @@
         "CVE-2026-8446",
         "GHSA-3r7g-q6cg-q2vx",
         "GHSA-8gj2-2cvc-6xx7"
-      ]
-    },
-    "(?i)(os\\.system|subprocess\\.(call|run|Popen)|child_process\\.exec)\\s*\\(\\s*[^)]*(\\+|%|\\$\\{|f['\\\"])": {
-      "description": "命令注入: 动态拼接系统命令",
-      "severity": "critical",
-      "owasp": "LLM05",
-      "owasp_name": "不当输出处理 (Improper Output Handling)",
-      "derived_from": "command injection",
-      "intel_hits": 4,
-      "evidence": [
-        "GHSA-wcx4-wpfv-mc5c",
-        "CVE-2026-59800",
-        "CVE-2026-48719",
-        "CVE-2026-42853"
       ]
     },
     "(?i)(session|token)\\s*[:=]\\s*['\\\"][^'\\\"]{0,8}['\\\"]": {
@@ -323,10 +332,10 @@
     }
   },
   "owasp_distribution": {
+    "LLM05": 2,
     "LLM06": 2,
     "LLM01": 1,
-    "LLM07": 3,
-    "LLM05": 2
+    "LLM07": 3
   },
-  "total_rules": 28
+  "total_rules": 29
 }

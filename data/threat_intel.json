@@ -1,6 +1,20 @@
 {
   "intel": [
     {
+      "id": "GHSA-49m4-vp58-wgc9",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 8.4,
+      "title": "MCP-for-Stata: Stata Command Injection via Unsanitized `package` in `ado_package_install`",
+      "summary": "## Stata Command Injection via Unsanitized `package` in `ado_package_install`\n\n### Summary\n\nThe `ado_package_install` MCP tool in `stata-mcp` concatenates user-controlled input directly into a Stata command string without any validation or sanitization. An attacker who can invoke the MCP tool or the equivalent Python API can embed newline characters in the `package` argument to inject arbitrary Stata commands. Because Stata supports a `shell` escape command, this leads to full OS-level arbitrary",
+      "affected": "pip:stata-mcp",
+      "references": [
+        "https://github.com/advisories/GHSA-49m4-vp58-wgc9"
+      ],
+      "published": "2026-08-12T19:23:38Z",
+      "fetched": "2026-08-12T20:01:38.293515+00:00"
+    },
+    {
       "id": "GHSA-h47f-gmjp-m7rr",
       "source": "github-advisory",
       "severity": "high",
@@ -2272,19 +2286,19 @@
       "fetched": "2026-08-04T06:34:53.913899+00:00"
     }
   ],
-  "updated": "2026-08-12T18:01:48.260137+00:00",
+  "updated": "2026-08-12T20:01:38.797146+00:00",
   "sources": [
     "osv",
     "nvd",
     "github-advisory"
   ],
   "stats": {
-    "high": 64,
+    "high": 65,
     "medium": 43,
     "critical": 21,
     "unknown": 18,
     "low": 3,
     "moderate": 1
   },
-  "total": 150
+  "total": 151
 }
