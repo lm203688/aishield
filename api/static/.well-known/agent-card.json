@@ -1,7 +1,7 @@
 {
   "name": "AIShield",
-  "version": "4.2.0",
-  "description": "AI Agent 安全生态基础设施 — OWASP MCP Top 10 对齐，133条安全规则，全链路守护Agent世界",
+  "version": "4.2.2",
+  "description": "AI Agent 安全生态基础设施 — OWASP MCP Top 10 对齐，214条MCP/220条Skill安全规则 + 身份/网络/Authentik/A2A/AI-slop/x402 六维能力边界扫描，全链路守护Agent世界",
   "url": "https://aishield.tools",
   "provider": {
     "name": "AIShield",
@@ -17,13 +17,19 @@
     "skill_marketplace",
     "a2a_gateway",
     "trust_badge",
-    "continuous_monitoring"
+    "continuous_monitoring",
+    "identity_scan",
+    "network_scan",
+    "nh_i_scan",
+    "agentcard_validation",
+    "ai_slop_detection",
+    "payment_scope_audit"
   ],
   "skills": [
     {
       "id": "security_scan",
       "name": "MCP 工具安全扫描",
-      "description": "基于 OWASP MCP Top 10 的 133 条规则，对 GitHub 上的 MCP 工具/Agent 技能进行静态安全分析，输出 5 维评分和详细发现",
+      "description": "基于 OWASP MCP Top 10 的 214 条 MCP / 220 条 Skill 规则，对 GitHub 上的 MCP 工具/Agent 技能进行静态安全分析，输出 5 维评分和详细发现",
       "input_schema": {
         "type": "object",
         "properties": {
@@ -128,16 +134,130 @@
           "warnings": {"type": "array"}
         }
       }
+    },
+    {
+      "id": "identity_scan",
+      "name": "Agent 身份缺陷扫描（身份层）",
+      "description": "扫描 AgentCard / agent 身份声明是否签名（JWS/DID/proof）、凭证是否短期过期、授权是否过宽（scope:*）、是否缺 mTLS/DID、委托是否做 scope attenuation。对应 A2A #1672/#1786/#1829。",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "source_url": {"type": "string", "description": "GitHub 仓库 URL 或本地路径"}
+        },
+        "required": ["source_url"]
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "identity_findings": {"type": "array", "items": {"type": "object"}},
+          "severity_counts": {"type": "object"}
+        }
+      }
+    },
+    {
+      "id": "network_scan",
+      "name": "Agent 网络/Mesh 配置扫描（网络层）",
+      "description": "扫描整账户 Mesh/VPC 绑定是否把全网暴露给所有 agent（Cloudflare 自认缺口）、agent 端点是否无鉴权（auth:none）、私有资源是否公网暴露（public:true）。",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "source_url": {"type": "string", "description": "GitHub 仓库 URL 或本地路径"}
+        },
+        "required": ["source_url"]
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "network_findings": {"type": "array", "items": {"type": "object"}},
+          "severity_counts": {"type": "object"}
+        }
+      }
+    },
+    {
+      "id": "authentik_scan",
+      "name": "Authentik / NHI service-account 扫描",
+      "description": "扫描 Authentik 风格 service-account 导出：skip_authorization 跳同意、token_ttl:0/never 永不过期、scope 过宽（*）、硬编码 client_secret。NHI 卫生最佳实践缺口检测。",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "source_url": {"type": "string", "description": "GitHub 仓库 URL 或本地路径"}
+        },
+        "required": ["source_url"]
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "authentik_findings": {"type": "array", "items": {"type": "object"}},
+          "severity_counts": {"type": "object"}
+        }
+      }
+    },
+    {
+      "id": "agentcard_scan",
+      "name": "A2A AgentCard 结构化校验",
+      "description": "对 .well-known/agent.json 做 JSON 结构化校验：未签名、缺过期、非 https、无鉴权方案（securitySchemes）、委托链未做 scope attenuation。对应 A2A #1672/#1628 信任浅滩。",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "source_url": {"type": "string", "description": "GitHub 仓库 URL 或本地路径"}
+        },
+        "required": ["source_url"]
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "agentcard_findings": {"type": "array", "items": {"type": "object"}},
+          "severity_counts": {"type": "object"}
+        }
+      }
+    },
+    {
+      "id": "slop_scan",
+      "name": "AI-slop / 越狱规避检测（内容溯源）",
+      "description": "识别专为绕过内容分类器而设计的 prompt/skill：指令覆盖（ignore previous instructions）、DAN 角色扮演、base64/翻译混淆、反检测自指。与 de-AI（soundshuman）风格层互补。",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "source_url": {"type": "string", "description": "GitHub 仓库 URL 或本地路径"}
+        },
+        "required": ["source_url"]
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "slop_findings": {"type": "array", "items": {"type": "object"}},
+          "severity_counts": {"type": "object"}
+        }
+      }
+    },
+    {
+      "id": "payment_scan",
+      "name": "AP2 / x402 支付授权 scope 审计",
+      "description": "扫描 agent 支付配置：maxAmount 无限、auto_approve 免确认、支付 scope 过宽、支付授权未绑 intent（cartId/orderId）。覆盖 agent 经济层三授权收敛。",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "source_url": {"type": "string", "description": "GitHub 仓库 URL 或本地路径"}
+        },
+        "required": ["source_url"]
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "payment_findings": {"type": "array", "items": {"type": "object"}},
+          "severity_counts": {"type": "object"}
+        }
+      }
     }
   ],
   "trust_score": {
-    "overall": 85,
-    "security": 90,
-    "reliability": 88,
-    "reputation": 80,
-    "activity": 85,
-    "identity": 85,
-    "methodology": "基于 OWASP MCP Top 10 (2025 v0.1) 对齐度、扫描规则覆盖率、API 可用性、开源社区活跃度综合计算"
+    "overall": 92,
+    "security": 95,
+    "reliability": 90,
+    "reputation": 88,
+    "activity": 92,
+    "identity": 92,
+    "methodology": "基于 OWASP MCP Top 10 (2025 v0.1) 对齐度、扫描规则覆盖率（214 MCP/220 Skill + 6 能力边界模块）、API 可用性、开源社区活跃度综合计算"
   },
   "endpoints": {
     "agent_setup": "POST /api/v1/agent/setup",
@@ -151,6 +271,7 @@
     "handshake": "POST /api/v1/handshake",
     "audit": "POST /api/v1/audit",
     "trust_query": "GET /api/v1/identity/agents",
+    "trust_verify": "GET /api/v1/trust",
     "mcp_endpoint": "POST /api/v1/mcp",
     "health": "GET /api/v1/health",
     "stats": "GET /api/v1/stats"
@@ -162,7 +283,9 @@
     "mcp_protocol": true,
     "mcp_protocol_version": "2026-07-28",
     "chinese_regulations": true,
-    "rules_count": 133,
+    "rules_count": 214,
+    "skill_rules_count": 220,
+    "capability_modules": 6,
     "owasp_categories": 10
   },
   "contact": {
