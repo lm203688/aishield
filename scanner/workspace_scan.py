@@ -10,7 +10,8 @@ Goose / Claude Desktop / Cursor 等）平台的启动前安全扫描。
   1. **绝不 spawn** 配置中出现的任何命令/URL —— 只读 + 静态解析。
   2. **不联网抓取**（除非调用方显式 enable_osv）—— 不发起 SSRF。
   3. **复用现有引擎**（rules_analyze + dependency + secrets + poisoning +
-     taint + calculate_scores），不写新的检测逻辑，零新增误报面。
+     taint + identity_scan + network_scan + calculate_scores），不写重复逻辑，
+     新增的 identity/network 模块为保守启发式，零新增误报面。
 
 用法：
     from scanner.workspace_scan import preflight
@@ -33,6 +34,8 @@ from .engine import (
     taint_analysis,
     tool_poisoning_detection,
 )
+from .identity_scan import identity_analysis
+from .network_scan import network_analysis
 
 TZ = timezone(timedelta(hours=8))
 SCANNER_VERSION = "4.0-preflight.1"
@@ -323,7 +326,11 @@ def _local_pipeline(files, name, tool_type="mcp"):
     secrets = secrets_detection(files)
     poisoning = tool_poisoning_detection(files)
     taint = taint_analysis(files)
-    scores = calculate_scores(static, dependency, secrets, poisoning, taint, total_files)
+    identity = identity_analysis(files)
+    network = network_analysis(files)
+    extra_findings = identity.get("findings", []) + network.get("findings", [])
+    scores = calculate_scores(static, dependency, secrets, poisoning, taint, total_files,
+                              extra_findings=extra_findings)
 
     all_findings = []
     for f in static.get("findings", []):
@@ -335,6 +342,10 @@ def _local_pipeline(files, name, tool_type="mcp"):
     for f in poisoning:
         all_findings.append(f)
     for f in taint:
+        all_findings.append(f)
+    for f in identity.get("findings", []):
+        all_findings.append(f)
+    for f in network.get("findings", []):
         all_findings.append(f)
 
     seen = set()
@@ -356,6 +367,8 @@ def _local_pipeline(files, name, tool_type="mcp"):
         "dependency_analysis": dependency,
         "secrets_detection": secrets,
         "tool_poisoning": poisoning,
+        "identity_scan": identity,
+        "network_scan": network,
         "recommendations": recommendations,
     }
 
