@@ -6,29 +6,14 @@
     "score": 4,
     "max_score": 4,
     "http": 200,
-    "latency": 0.386,
-    "checked_at": "2026-08-12T07:01:49.521369+00:00",
+    "latency": 0.48,
+    "checked_at": "2026-08-12T07:29:51.619002+00:00",
     "consecutive_failures": 0,
-    "last_healthy_at": "2026-08-12T07:01:49.521369+00:00",
+    "last_healthy_at": "2026-08-12T07:29:51.619002+00:00",
     "_source": "health_probe",
-    "_ts": "2026-08-12T07:01:49.521987+00:00"
+    "_ts": "2026-08-12T07:29:51.620022+00:00"
   },
   "history": [
-    {
-      "ts": "2026-08-10T21:28:57.642906+00:00",
-      "source": "health_probe",
-      "state": {
-        "healthy": true,
-        "level": "healthy",
-        "score": 4,
-        "max_score": 4,
-        "http": 200,
-        "latency": 0.381,
-        "checked_at": "2026-08-10T21:28:57.641540+00:00",
-        "consecutive_failures": 0,
-        "last_healthy_at": "2026-08-10T21:28:57.641540+00:00"
-      }
-    },
     {
       "ts": "2026-08-10T21:46:14.849760+00:00",
       "source": "health_probe",
@@ -763,8 +748,23 @@
         "consecutive_failures": 0,
         "last_healthy_at": "2026-08-12T07:01:49.521369+00:00"
       }
+    },
+    {
+      "ts": "2026-08-12T07:29:51.620048+00:00",
+      "source": "health_probe",
+      "state": {
+        "healthy": true,
+        "level": "healthy",
+        "score": 4,
+        "max_score": 4,
+        "http": 200,
+        "latency": 0.48,
+        "checked_at": "2026-08-12T07:29:51.619002+00:00",
+        "consecutive_failures": 0,
+        "last_healthy_at": "2026-08-12T07:29:51.619002+00:00"
+      }
     }
   ],
-  "updated": "2026-08-12T07:01:49.522002+00:00",
+  "updated": "2026-08-12T07:29:51.620056+00:00",
   "desc": "线上服务健康事实（由三路探测写入）"
 }
