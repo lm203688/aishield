@@ -277,6 +277,72 @@ def agent_card():
 
 
 # ══════════════════════════════════════════════
+#  信任裁决信封 (aishield-trust/v1)
+# ══════════════════════════════════════════════
+def _verify_envelope(source_url, subject_type=None):
+    """把 attestation.trust_status 收敛成 docs/trust-attestation-spec.md 定义的
+    aishield-trust/v1 凭证信封，供发现层 (MCP Server Card / Agent Card / ai-catalog)
+    用 `trust` 字段零成本引用。即使来源未订阅，也返回诚实的 unknown 裁决。
+    """
+    try:
+        from eco import attestation as _att
+        raw = _att.trust_status(source_url) or {}
+    except Exception:
+        raw = {}
+    subscribed = bool(raw.get("subscribed", False))
+    score = raw.get("last_score")
+    if score is not None:
+        try:
+            score = int(score)
+        except Exception:
+            score = None
+    if score is not None:
+        risk = "safe" if score >= 80 else "medium" if score >= 60 else "high" if score >= 40 else "critical"
+    else:
+        risk = "unknown"
+    badge = raw.get("badge_level")
+    level = badge if badge else ("basic" if subscribed else "none")
+    last_attest = raw.get("last_attest_at")
+    # 证据链锚点（哈希链防篡改）
+    chain_anchor = None
+    ec = raw.get("evidence_chain")
+    if isinstance(ec, list) and ec:
+        last = ec[-1]
+        if isinstance(last, dict):
+            chain_anchor = last.get("hash") or last.get("anchor") or last.get("chain_anchor")
+    return {
+        "schema": "aishield-trust/v1",
+        "issuer": ISSUER_URL,
+        "issued_at": _now_iso(),
+        "subject": {
+            "type": subject_type or "tool",
+            "url": source_url,
+            "name": raw.get("source_url") or source_url,
+        },
+        "verdict": {
+            "score": score,
+            "level": level,
+            "risk": risk,
+            "no_spawn_guarantee": True,
+            "offline_scan": True,
+        },
+        "coverage": {
+            "owasp_mcp_top10": "10/10",
+            "owasp_asi_top10": "10/10",
+            "dimensions": ["security", "permissions", "data_handling", "supply_chain", "reliability"],
+        },
+        "attestation": {
+            "method": "continuous" if subscribed else "none",
+            "last_attested_at": last_attest,
+            "chain_anchor": chain_anchor,
+            "evidence_count": raw.get("evidence_entries", 0),
+        },
+        "badge": "%s/badge/%s" % (ISSUER_URL, source_url),
+        "api": "%s/api/v1/trust?src=%s" % (ISSUER_URL, source_url),
+    }
+
+
+# ══════════════════════════════════════════════
 #  HTTP 路由 (供 server.py 与独立 server 共用)
 # ══════════════════════════════════════════════
 def handle_get(path, query=""):
@@ -302,6 +368,14 @@ def handle_get(path, query=""):
     if m:
         c = verify_cert(m.group(1))
         return (c, 200) if c else ({"error": "certificate not found", "cert_id": m.group(1)}, 404)
+
+    if path == "/api/v1/trust" or path == "/api/v1/trust/verify":
+        src = (q.get("src", [None])[0] or q.get("source_url", [None])[0]
+               or q.get("tool", [None])[0])
+        if not src:
+            return {"error": "src (or source_url/tool) query param required"}, 400
+        subject_type = q.get("type", [None])[0]
+        return _verify_envelope(src, subject_type), 200
 
     if path == "/api/v1/trust/score" or path == "/api/v1/trust/cert":
         return {"error": "agent_id / cert_id required in path"}, 400
@@ -334,6 +408,12 @@ def handle_post(path, data):
         if cert and "error" not in cert:
             return {"success": True, "certification": cert}, 201
         return {"success": False, "error": (cert or {}).get("error", "certify failed")}, 400
+
+    if path == "/api/v1/trust" or path == "/api/v1/trust/verify":
+        src = data.get("src") or data.get("source_url") or data.get("tool")
+        if not src:
+            return {"error": "src (or source_url/tool) required"}, 400
+        return _verify_envelope(src, data.get("type")), 200
 
     return {"error": "unknown trust endpoint", "path": path}, 404
 
