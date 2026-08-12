@@ -84,6 +84,26 @@
       "examples": [
         "What is the trust score of did:aishield:7f3a2b1c9d4e5f6a8b0c1d2e3f4a5b6c?"
       ]
+    },
+    {
+      "id": "identity_scan",
+      "name": "Agent Identity & Credential Scan",
+      "description": "Scan the agent identity layer (NHI). Verifies AgentCard / agent-identity declarations are signed (JWS/DID/proof), credentials are short-lived rather than never-expiring, authorization is least-privilege (flags scope:'*' and over-broad grants that violate scope attenuation), and mTLS/DID verification is present. This is the fastest-moving front of 2026 agent security (the top A2A issues are all identity; Authentik's NHI wave; ANS/DNSid/Entra Agent ID). AIShield both issues trust certificates AND audits identity defects.",
+      "tags": ["identity", "nhi", "agent-card", "scope-attenuation", "mtls", "did", "a2a"],
+      "examples": [
+        "Is this AgentCard signed and is its scope least-privilege?",
+        "Does this service account use a never-expiring token?"
+      ]
+    },
+    {
+      "id": "network_scan",
+      "name": "Agent Network / Mesh Config Scan",
+      "description": "Scan the agent network layer. Flags Cloudflare Mesh / VPC bindings that expose the whole account network to every agent (the gap Cloudflare itself admits: 'per-agent identity and policy evaluation are future work'), unauthenticated agent endpoints (auth: none), bind-to-all-interfaces exposure (0.0.0.0), and private/internal resources marked public:true. Answers the 'trust shallow' problem left open by A2A's signed AgentCard: content trust + identity attribution + network reachability.",
+      "tags": ["network", "mesh", "cloudflare-mesh", "vpc", "reachability", "exposure"],
+      "examples": [
+        "Does this Mesh binding expose the entire account network to every agent?",
+        "Is any private resource in this config exposed to the public internet?"
+      ]
     }
   ],
   "mcp": {
