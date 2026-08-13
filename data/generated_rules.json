@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-12T23:46:05.407277+00:00",
+  "generated_at": "2026-08-13T02:14:05.221729+00:00",
   "source_intel_count": 152,
   "package_blacklist": {
     "pip:stata-mcp": {
