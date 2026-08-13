@@ -1,7 +1,15 @@
 {
-  "generated_at": "2026-08-13T11:51:29.282153+00:00",
-  "source_intel_count": 152,
+  "generated_at": "2026-08-13T15:01:50.593376+00:00",
+  "source_intel_count": 159,
   "package_blacklist": {
+    "pip:atomic-agents-stack": {
+      "ecosystem": "pip",
+      "package": "atomic-agents-stack",
+      "severity": "high",
+      "advisories": [
+        "GHSA-rm43-82j9-r4mj"
+      ]
+    },
     "pip:stata-mcp": {
       "ecosystem": "pip",
       "package": "stata-mcp",
@@ -210,6 +218,51 @@
     }
   },
   "pattern_rules": {
+    "(?i)(\\.\\./){2,}|(%2e%2e%2f)": {
+      "description": "路径遍历: 越权访问上级目录",
+      "severity": "high",
+      "owasp": "LLM06",
+      "owasp_name": "过度代理权限 (Excessive Agency)",
+      "derived_from": "path traversal",
+      "intel_hits": 8,
+      "evidence": [
+        "GHSA-rm43-82j9-r4mj",
+        "GHSA-6hm5-jgcp-p838",
+        "GHSA-xh95-f55m-82fw",
+        "GHSA-f42x-p2mx-hm8r",
+        "CVE-2026-66004"
+      ]
+    },
+    "(?i)(ignore|disregard|forget)\\s+(all\\s+)?(previous|prior|above)\\s+(instruction|prompt|rule)": {
+      "description": "提示注入: 覆盖历史指令",
+      "severity": "critical",
+      "owasp": "LLM01",
+      "owasp_name": "提示注入 (Prompt Injection)",
+      "derived_from": "prompt injection",
+      "intel_hits": 27,
+      "evidence": [
+        "CVE-2026-21832",
+        "CVE-2026-73487",
+        "CVE-2026-73032",
+        "CVE-2026-70477",
+        "CVE-2026-70477"
+      ]
+    },
+    "(?i)(requests\\.(get|post)|urllib\\.request\\.urlopen|fetch)\\s*\\(\\s*[^)]*(user|input|param|req\\.)": {
+      "description": "SSRF: 请求目标来自不可信输入",
+      "severity": "high",
+      "owasp": "LLM06",
+      "owasp_name": "过度代理权限 (Excessive Agency)",
+      "derived_from": "ssrf",
+      "intel_hits": 12,
+      "evidence": [
+        "CVE-2026-73487",
+        "GHSA-h47f-gmjp-m7rr",
+        "GHSA-rffm-9q57-q649",
+        "GHSA-c6xh-wv4j-ppv5",
+        "GHSA-qvv7-cg9c-w4x3"
+      ]
+    },
     "(?i)(os\\.system|subprocess\\.(call|run|Popen)|child_process\\.exec)\\s*\\(\\s*[^)]*(\\+|%|\\$\\{|f['\\\"])": {
       "description": "命令注入: 动态拼接系统命令",
       "severity": "critical",
@@ -225,34 +278,19 @@
         "CVE-2026-42853"
       ]
     },
-    "(?i)(requests\\.(get|post)|urllib\\.request\\.urlopen|fetch)\\s*\\(\\s*[^)]*(user|input|param|req\\.)": {
-      "description": "SSRF: 请求目标来自不可信输入",
+    "(?i)(Access-Control-Allow-Origin['\\\"]?\\s*[:,]\\s*['\\\"]\\*|cors\\s*\\(\\s*\\)\\s*)": {
+      "description": "跨域校验缺失: 允许任意来源",
       "severity": "high",
-      "owasp": "LLM06",
-      "owasp_name": "过度代理权限 (Excessive Agency)",
-      "derived_from": "ssrf",
-      "intel_hits": 11,
+      "owasp": "LLM07",
+      "owasp_name": "系统提示泄露 (System Prompt Leakage)",
+      "derived_from": "origin",
+      "intel_hits": 13,
       "evidence": [
-        "GHSA-h47f-gmjp-m7rr",
+        "GHSA-4jjw-pwvw-q6w3",
+        "GHSA-279x-mwfv-vcqv",
+        "GHSA-3xpf-xq7r-v8c5",
         "GHSA-rffm-9q57-q649",
-        "GHSA-c6xh-wv4j-ppv5",
-        "GHSA-qvv7-cg9c-w4x3",
-        "GHSA-pgwh-4jj4-qm8v"
-      ]
-    },
-    "(?i)(ignore|disregard|forget)\\s+(all\\s+)?(previous|prior|above)\\s+(instruction|prompt|rule)": {
-      "description": "提示注入: 覆盖历史指令",
-      "severity": "critical",
-      "owasp": "LLM01",
-      "owasp_name": "提示注入 (Prompt Injection)",
-      "derived_from": "prompt injection",
-      "intel_hits": 25,
-      "evidence": [
-        "CVE-2026-73032",
-        "CVE-2026-70477",
-        "CVE-2026-70477",
-        "GHSA-5xvg-pmgg-3mxr",
-        "CVE-2026-18733"
+        "GHSA-x6vm-w76m-8j7g"
       ]
     },
     "(?i)(auth(entication)?\\s*[:=]\\s*(False|None|null|0)\\b|verify\\s*=\\s*False)": {
@@ -285,21 +323,6 @@
         "GHSA-6vh2-wg4h-4vwj"
       ]
     },
-    "(?i)(Access-Control-Allow-Origin['\\\"]?\\s*[:,]\\s*['\\\"]\\*|cors\\s*\\(\\s*\\)\\s*)": {
-      "description": "跨域校验缺失: 允许任意来源",
-      "severity": "high",
-      "owasp": "LLM07",
-      "owasp_name": "系统提示泄露 (System Prompt Leakage)",
-      "derived_from": "origin",
-      "intel_hits": 12,
-      "evidence": [
-        "GHSA-279x-mwfv-vcqv",
-        "GHSA-3xpf-xq7r-v8c5",
-        "GHSA-rffm-9q57-q649",
-        "GHSA-x6vm-w76m-8j7g",
-        "GHSA-p7w7-4929-vpj5"
-      ]
-    },
     "(?i)(docker\\.sock|/proc/self/|privileged\\s*[:=]\\s*true|--cap-add\\s*=?\\s*SYS_ADMIN)": {
       "description": "沙箱逃逸: 容器高危配置",
       "severity": "critical",
@@ -314,28 +337,13 @@
         "CVE-2024-58351",
         "GHSA-gr75-jv2w-4656"
       ]
-    },
-    "(?i)(\\.\\./){2,}|(%2e%2e%2f)": {
-      "description": "路径遍历: 越权访问上级目录",
-      "severity": "high",
-      "owasp": "LLM06",
-      "owasp_name": "过度代理权限 (Excessive Agency)",
-      "derived_from": "path traversal",
-      "intel_hits": 7,
-      "evidence": [
-        "GHSA-6hm5-jgcp-p838",
-        "GHSA-xh95-f55m-82fw",
-        "GHSA-f42x-p2mx-hm8r",
-        "CVE-2026-66004",
-        "CVE-2026-44192"
-      ]
     }
   },
   "owasp_distribution": {
-    "LLM05": 2,
     "LLM06": 2,
     "LLM01": 1,
+    "LLM05": 2,
     "LLM07": 3
   },
-  "total_rules": 29
+  "total_rules": 30
 }
