@@ -23,7 +23,18 @@
     "nh_i_scan",
     "agentcard_validation",
     "ai_slop_detection",
-    "payment_scope_audit"
+    "payment_scope_audit",
+    "tool_integrity_scan",
+    "registry_supply_scan",
+    "provenance_scan",
+    "memory_scan",
+    "antitamper_scan",
+    "least_agency_scan",
+    "scope_composition_scan",
+    "goal_hijack_scan",
+    "dark_pattern_scan",
+    "mcp_oauth_scan",
+    "computeruse_scan"
   ],
   "skills": [
     {
@@ -248,6 +259,83 @@
           "severity_counts": {"type": "object"}
         }
       }
+    },
+    {
+      "id": "tool_integrity_scan",
+      "name": "工具名 / 技能完整性扫描（ASI04 供应链）",
+      "description": "检测工具名 typosquat（与规范品牌编辑距离 ≤2，CVE-2026-30856 类）、未 pin 版本的远程 MCP（rug-pull），对齐 WeKnora / ClawHavoc 信号。",
+      "input_schema": {"type": "object", "properties": {"source_url": {"type": "string"}}, "required": ["source_url"]},
+      "output_schema": {"type": "object", "properties": {"tool_integrity_findings": {"type": "array", "items": {"type": "object"}}, "severity_counts": {"type": "object"}}}
+    },
+    {
+      "id": "registry_supply_scan",
+      "name": "注册中心供应链扫描（ASI04 供应链）",
+      "description": "检测技能名 typosquat、可疑外传、渐进式隐藏载荷（主文件把安装命令延迟到次级 .md，Zenity BlackHat 2026 信号）。",
+      "input_schema": {"type": "object", "properties": {"source_url": {"type": "string"}}, "required": ["source_url"]},
+      "output_schema": {"type": "object", "properties": {"registry_supply_findings": {"type": "array", "items": {"type": "object"}}, "severity_counts": {"type": "object"}}}
+    },
+    {
+      "id": "provenance_scan",
+      "name": "来源 / 完整性校验扫描（ASI04 供应链）",
+      "description": "检测 npx/pip 未 pin 版本、git 安装未 pin commit、锁定文件缺完整性、SBOM 未签名（SLSA 来源可信缺口）。",
+      "input_schema": {"type": "object", "properties": {"source_url": {"type": "string"}}, "required": ["source_url"]},
+      "output_schema": {"type": "object", "properties": {"provenance_findings": {"type": "array", "items": {"type": "object"}}, "severity_counts": {"type": "object"}}}
+    },
+    {
+      "id": "memory_scan",
+      "name": "记忆 / 上下文投毒扫描（ASI06）",
+      "description": "检测写入记忆的指令、持久/种子目标、记忆文件写入——RAG/长期记忆被投毒的风险。",
+      "input_schema": {"type": "object", "properties": {"source_url": {"type": "string"}}, "required": ["source_url"]},
+      "output_schema": {"type": "object", "properties": {"memory_findings": {"type": "array", "items": {"type": "object"}}, "severity_counts": {"type": "object"}}}
+    },
+    {
+      "id": "antitamper_scan",
+      "name": "失控 agent / 反篡改扫描（ASI10）",
+      "description": "检测自保护/删除后重装、禁用/替换其它组件、反分析/隐藏指令——agent 脱离治理成为 rogue agent。",
+      "input_schema": {"type": "object", "properties": {"source_url": {"type": "string"}}, "required": ["source_url"]},
+      "output_schema": {"type": "object", "properties": {"antitamper_findings": {"type": "array", "items": {"type": "object"}}, "severity_counts": {"type": "object"}}}
+    },
+    {
+      "id": "least_agency_scan",
+      "name": "工具滥用 / 最小权限扫描（ASI02）",
+      "description": "检测管道到 shell、rm -rf、sudo、chmod 777、os.system/eval、凭证与 SSH key 读取——过度授权的工具面。",
+      "input_schema": {"type": "object", "properties": {"source_url": {"type": "string"}}, "required": ["source_url"]},
+      "output_schema": {"type": "object", "properties": {"least_agency_findings": {"type": "array", "items": {"type": "object"}}, "severity_counts": {"type": "object"}}}
+    },
+    {
+      "id": "scope_composition_scan",
+      "name": "跨域组合 / 爆炸半径扫描（ASI07 / ASI08）",
+      "description": "检测凭证读取 + 外传组合（级联失败/爆炸半径）、用 agent 自身凭证转发请求的混淆副手（confused deputy）。",
+      "input_schema": {"type": "object", "properties": {"source_url": {"type": "string"}}, "required": ["source_url"]},
+      "output_schema": {"type": "object", "properties": {"scope_composition_findings": {"type": "array", "items": {"type": "object"}}, "severity_counts": {"type": "object"}}}
+    },
+    {
+      "id": "goal_hijack_scan",
+      "name": "目标劫持扫描（ASI01）",
+      "description": "检测把外部内容当指令、目标替换、持久/永久目标注入——agent 目标被劫持。",
+      "input_schema": {"type": "object", "properties": {"source_url": {"type": "string"}}, "required": ["source_url"]},
+      "output_schema": {"type": "object", "properties": {"goal_hijack_findings": {"type": "array", "items": {"type": "object"}}, "severity_counts": {"type": "object"}}}
+    },
+    {
+      "id": "dark_pattern_scan",
+      "name": "人机信任利用扫描（ASI09）",
+      "description": "检测权威冒充、压制核验、虚假保证、紧迫感——需 ≥2 个信号同时命中才报警（低误报）。",
+      "input_schema": {"type": "object", "properties": {"source_url": {"type": "string"}}, "required": ["source_url"]},
+      "output_schema": {"type": "object", "properties": {"dark_pattern_findings": {"type": "array", "items": {"type": "object"}}, "severity_counts": {"type": "object"}}}
+    },
+    {
+      "id": "mcp_oauth_scan",
+      "name": "MCP OAuth 姿态扫描（ASI03）",
+      "description": "检测无认证的远程 MCP server（CVE-2026-32211 类）、OAuth 缺 RFC 9207 issuer、长寿命/不轮换 token。GPT Action 清单按自身 auth schema 识别，不误报。",
+      "input_schema": {"type": "object", "properties": {"source_url": {"type": "string"}}, "required": ["source_url"]},
+      "output_schema": {"type": "object", "properties": {"mcp_oauth_findings": {"type": "array", "items": {"type": "object"}}, "severity_counts": {"type": "object"}}}
+    },
+    {
+      "id": "computeruse_scan",
+      "name": "计算机使用 / 内容安全平面扫描（ASI05 内容安全）",
+      "description": "检测下载并运行、关闭安全机制、忽略安全警告、操作系统特权操作、浏览器提交——agent 计算机的内容安全平面。",
+      "input_schema": {"type": "object", "properties": {"source_url": {"type": "string"}}, "required": ["source_url"]},
+      "output_schema": {"type": "object", "properties": {"computeruse_findings": {"type": "array", "items": {"type": "object"}}, "severity_counts": {"type": "object"}}}
     }
   ],
   "trust_score": {
@@ -257,7 +345,7 @@
     "reputation": 88,
     "activity": 92,
     "identity": 92,
-    "methodology": "基于 OWASP MCP Top 10 (2025 v0.1) 对齐度、扫描规则覆盖率（214 MCP/220 Skill + 6 能力边界模块）、API 可用性、开源社区活跃度综合计算"
+    "methodology": "基于 OWASP MCP Top 10 (2025 v0.1) + OWASP Agentic AI Top 10 (ASI01-ASI10) 对齐度、扫描规则覆盖率（214 MCP/220 Skill + 17 能力边界模块，含 11 个 Agentic 专项模块）、API 可用性、开源社区活跃度综合计算"
   },
   "endpoints": {
     "agent_setup": "POST /api/v1/agent/setup",
@@ -285,7 +373,7 @@
     "chinese_regulations": true,
     "rules_count": 214,
     "skill_rules_count": 220,
-    "capability_modules": 6,
+    "capability_modules": 17,
     "owasp_categories": 10
   },
   "contact": {
