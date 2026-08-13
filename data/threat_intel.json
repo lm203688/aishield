@@ -1,6 +1,23 @@
 {
   "intel": [
     {
+      "id": "CVE-2026-73506",
+      "source": "nvd",
+      "severity": "medium",
+      "cvss": 6.1,
+      "title": "Oh My Posh is the most customisable and low-latency cross platform/shell prompt renderer. Prior to 29.35.1, write(s rune) in src/terminal/writer.go emitted attacker-controlled current directory names ",
+      "summary": "Oh My Posh is the most customisable and low-latency cross platform/shell prompt renderer. Prior to 29.35.1, write(s rune) in src/terminal/writer.go emitted attacker-controlled current directory names and Git metadata, including Commit.Subject, Commit.Author.Name, Commit.Author.Email, and RawUpstreamURL, without removing C0/C1 terminal control characters such as ESC, BEL, CSI, and OSC, allowing terminal escape sequence injection during prompt rendering that could overwrite the clipboard, spoof th",
+      "affected": "prompt injection",
+      "references": [
+        "https://github.com/JanDeDobbeleer/oh-my-posh/commit/edcf3c88f3fb582e84358b385c49d33d04c04224",
+        "https://github.com/JanDeDobbeleer/oh-my-posh/pull/7711",
+        "https://github.com/JanDeDobbeleer/oh-my-posh/releases/tag/v29.35.1",
+        "https://github.com/JanDeDobbeleer/oh-my-posh/security/advisories/GHSA-fwjx-9p69-h25h"
+      ],
+      "published": "2026-08-13T15:20:17.133",
+      "fetched": "2026-08-13T16:59:01.785215+00:00"
+    },
+    {
       "id": "GHSA-rm43-82j9-r4mj",
       "source": "github-advisory",
       "severity": "high",
@@ -2403,19 +2420,19 @@
       "fetched": "2026-08-04T06:34:53.913899+00:00"
     }
   ],
-  "updated": "2026-08-13T15:01:36.650575+00:00",
+  "updated": "2026-08-13T16:59:22.456651+00:00",
   "sources": [
     "osv",
     "nvd",
     "github-advisory"
   ],
   "stats": {
+    "medium": 48,
     "high": 67,
-    "medium": 47,
     "unknown": 20,
     "critical": 21,
     "low": 3,
     "moderate": 1
   },
-  "total": 159
+  "total": 160
 }
