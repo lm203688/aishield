@@ -1,6 +1,24 @@
 {
   "intel": [
     {
+      "id": "CVE-2026-19753",
+      "source": "nvd",
+      "severity": "high",
+      "cvss": 7.3,
+      "title": "A vulnerability was detected in Model Context Protocol mcp-rdf-explorer 1.0.0. Affected is the function explore_url of the file src/mcp-rdf-explorer/server.py of the component MCP Server. Performing a",
+      "summary": "A vulnerability was detected in Model Context Protocol mcp-rdf-explorer 1.0.0. Affected is the function explore_url of the file src/mcp-rdf-explorer/server.py of the component MCP Server. Performing a manipulation of the argument url results in server-side request forgery. The attack may be initiated remotely. The exploit is now public and may be used. The vendor was contacted early about this disclosure but did not respond in any way.",
+      "affected": "model context protocol",
+      "references": [
+        "https://github.com/emekaokoye/mcp-rdf-explorer/issues/3",
+        "https://vuldb.com/cve/CVE-2026-19753",
+        "https://vuldb.com/submit/868954",
+        "https://vuldb.com/vuln/389554",
+        "https://vuldb.com/vuln/389554/cti"
+      ],
+      "published": "2026-08-13T23:17:14.440",
+      "fetched": "2026-08-13T23:45:06.266429+00:00"
+    },
+    {
       "id": "GHSA-87x5-vmc3-756j",
       "source": "github-advisory",
       "severity": "medium",
@@ -2434,19 +2452,19 @@
       "fetched": "2026-08-04T06:34:53.913899+00:00"
     }
   ],
-  "updated": "2026-08-13T22:46:24.948056+00:00",
+  "updated": "2026-08-13T23:45:21.494497+00:00",
   "sources": [
     "osv",
     "nvd",
     "github-advisory"
   ],
   "stats": {
+    "high": 68,
     "medium": 49,
-    "high": 67,
     "unknown": 20,
     "critical": 21,
     "low": 3,
     "moderate": 1
   },
-  "total": 161
+  "total": 162
 }
