@@ -1,6 +1,20 @@
 {
   "intel": [
     {
+      "id": "GHSA-87x5-vmc3-756j",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 6.5,
+      "title": "vLLM: Completion prompt lists fan out into unbounded engine requests",
+      "summary": "## Summary\n\nThe `/v1/completions` request model accepts `prompt` as a list of text prompts or a list of token-id prompts without any outer prompt-count bound. The serving path turns each element into a separate engine input, creates one engine generator per element, merges all generators, and allocates a response slot per prompt. An authenticated API client can therefore turn one request into an attacker-chosen number of backend subrequests before any aggregate request-count budget is enforced.\n",
+      "affected": "pip:vllm",
+      "references": [
+        "https://github.com/advisories/GHSA-87x5-vmc3-756j"
+      ],
+      "published": "2026-08-13T18:40:06Z",
+      "fetched": "2026-08-13T19:56:53.695615+00:00"
+    },
+    {
       "id": "CVE-2026-73506",
       "source": "nvd",
       "severity": "medium",
@@ -2420,19 +2434,19 @@
       "fetched": "2026-08-04T06:34:53.913899+00:00"
     }
   ],
-  "updated": "2026-08-13T18:01:48.699754+00:00",
+  "updated": "2026-08-13T19:56:54.198966+00:00",
   "sources": [
     "osv",
     "nvd",
     "github-advisory"
   ],
   "stats": {
-    "medium": 48,
+    "medium": 49,
     "high": 67,
     "unknown": 20,
     "critical": 21,
     "low": 3,
     "moderate": 1
   },
-  "total": 160
+  "total": 161
 }
