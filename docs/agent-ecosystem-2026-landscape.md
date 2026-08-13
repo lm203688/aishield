@@ -145,3 +145,27 @@ AIShield 最强的护城河仍是**安全层（214/220 规则）**，但我们�
 2. 认领 Glama listing。
 3. 复核 awesome-mcp-servers / Cursor / MCP Registry 上架。
 4. 在 Cloudflare Mesh / Authentik / soundshuman 社区发补位/桥接叙事。
+
+---
+
+## 7. OWASP Agentic AI Top 10 (2026) 全覆盖闭环（2026-08-13 落地）
+
+用户点名「3 个全空白 + 5 个半覆盖」域，要求全部覆盖。已实做 **11 个本地启发式扫描模块**，全部接入 `_local_pipeline`，与既有 identity / network / slop / payment / authentik / agentcard 共用 `extra_findings` 并入 5 维评分。
+
+| OWASP Agentic 域 | 覆盖状态 | 扫描模块 | 关键信号 |
+| --- | --- | --- | --- |
+| ASI01 目标劫持 / 指令覆盖 | 半覆盖 → 全覆盖 | `scanner/goal_hijack_scan.py` | 外部内容当指令、目标替换、持久/永久目标注入 |
+| ASI02 工具滥用 / 最小权限 | 半覆盖 → 全覆盖 | `scanner/least_agency_scan.py` | 管道到 shell、`rm -rf`、`sudo`、`chmod 777`、凭证/SSH key 读取 |
+| ASI03 身份 / OAuth 姿态 | 半覆盖 → 全覆盖 | `scanner/mcp_oauth_scan.py` | 无认证远程 MCP（CVE-2026-32211）、OAuth 缺 issuer、长寿命 token |
+| ASI04 供应链 / 来源可信 | 半覆盖 → 全覆盖 | `provenance_scan` + `registry_supply_scan` + `tool_integrity_scan` | 未 pin 版本、git 未 pin commit、锁文件缺完整性、技能/工具名 typosquat（CVE-2026-30856） |
+| ASI06 记忆 / 上下文投毒 | 全空白 → 覆盖 | `scanner/memory_scan.py` | 写入记忆指令、持久/种子目标、记忆文件写入 |
+| ASI07 跨 agent / 委托 | 半覆盖 → 全覆盖 | `scanner/scope_composition_scan.py` | 混淆副手转发（用 agent 自身凭证） |
+| ASI08 级联失败 / 爆炸半径 | 全空白 → 覆盖 | `scanner/scope_composition_scan.py` | 凭证读取 + 外传组合（所有已连接 server scope 并集） |
+| ASI09 人机信任利用 | 半覆盖 → 全覆盖 | `scanner/dark_pattern_scan.py` | 权威冒充、压制核验、虚假保证、紧迫感（≥2 信号才报） |
+| ASI10 失控 agent / 反篡改 | 全空白 → 覆盖 | `scanner/antitamper_scan.py` | 自保护/删除后重装、禁用其它组件、反分析/隐藏指令 |
+
+> 11 模块全部通过 `tests/test_capability_full_scan.py`（40 项：良性零误报 + 恶意仍被拦）。全量测试 **523 通过 / 0 失败 / 9 跳过**。GPT Action 清单按自身 `auth` schema 识别，避免把「公开 action 无 auth」误报为 MCP 缺口。
+
+**真实攻击信号对齐**：CVE-2026-30856（工具名碰撞/typosquat，WeKnora）、CVE-2026-32211（Azure MCP 无认证，CVSS 9.1）、ClawHavoc（1,184 个恶意 skill）、Zenity BlackHat 2026（skills.sh 1.7M 安装量 typosquat）、Canopii rug-pull 审计。
+
+**卡位含义**：aishield 现在对 OWASP Agentic AI Top 10 的覆盖从「双维对齐（MCP 214/220 + 内容/身份/网络）」补到「空白域全填」——这是相对 mcp-audit（89 SAST 规则、全离线）等竞品的差异化纵深：它们扫代码不扫 agent 行为语义（目标劫持/记忆投毒/反篡改/人机信任利用）。
