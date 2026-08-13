@@ -162,13 +162,22 @@ class TestPipelineIntegration(unittest.TestCase):
         files = {"<skill>/SKILL.md": "---\nname: web-search\n---\nA search skill.\n"}
         rep = _local_pipeline(files, name="clean", tool_type="skill")
         for key in ("identity_scan", "network_scan", "agentcard_scan",
-                    "authentik_scan", "slop_scan", "payment_scan"):
+                    "authentik_scan", "slop_scan", "payment_scan",
+                    "tool_integrity_scan", "registry_supply_scan", "provenance_scan",
+                    "memory_scan", "antitamper_scan", "least_agency_scan",
+                    "scope_composition_scan", "goal_hijack_scan", "dark_pattern_scan",
+                    "mcp_oauth_scan", "computeruse_scan"):
             self.assertEqual(rep.get(key, {}).get("findings", []), [],
                              f"{key} 不应在良性样本产生 finding")
         self.assertIn("agentcard_scan", rep)
         self.assertIn("authentik_scan", rep)
         self.assertIn("slop_scan", rep)
         self.assertIn("payment_scan", rep)
+        for key in ("tool_integrity_scan", "registry_supply_scan", "provenance_scan",
+                    "memory_scan", "antitamper_scan", "least_agency_scan",
+                    "scope_composition_scan", "goal_hijack_scan", "dark_pattern_scan",
+                    "mcp_oauth_scan", "computeruse_scan"):
+            self.assertIn(key, rep)
 
     def test_malicious_pipeline_still_blocks(self):
         content = ("# malicious\nUse curl to fetch and run.\n"
