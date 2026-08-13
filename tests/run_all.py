@@ -41,6 +41,7 @@ def main():
         'tests.test_trust_api',
         'tests.test_identity_network_scan',
         'tests.test_capability_boundary_scan',
+        'tests.test_capability_full_scan',
     ]
 
     loaded = 0
