@@ -84,6 +84,21 @@
 
 💰 **AP2 / x402 支付授权 scope 审计（经济层 · 支付授权）** — 扫描 agent 支付配置：`maxAmount` 无限、`auto_approve` 免确认、支付 scope 过宽、支付授权未绑 intent（cartId/orderId）。覆盖 agent 经济层的「三授权」收敛。
 
+🧩 **OWASP Agentic AI Top 10（ASI01–ASI10）全覆盖 — 11 个新模块补完「3 个全空白 + 5 个半覆盖」域：**
+- **ASI01 目标劫持**（`scanner/goal_hijack_scan.py`）：把外部内容当指令、目标替换、持久/永久目标注入。
+- **ASI02 工具滥用 / 最小权限**（`scanner/least_agency_scan.py`）：管道到 shell、`rm -rf`、`sudo`、`chmod 777`、`os.system`/`eval`、凭证与 SSH key 读取。
+- **ASI03 身份 / OAuth 姿态**（`scanner/mcp_oauth_scan.py`）：无认证的远程 MCP server（CVE-2026-32211 类）、缺 RFC 9207 issuer 的 OAuth、长寿命/不轮换 token。（GPT Action 清单按自身 `auth` schema 识别，不误报为 MCP 缺口。）
+- **ASI04 供应链 / 来源可信**（`scanner/provenance_scan.py`）：`npx`/`pip` 未 pin 版本、git 安装未 pin commit、锁定文件缺完整性、SBOM 未签名。
+- **ASI06 记忆 / 上下文投毒**（`scanner/memory_scan.py`）：写入记忆的指令、持久/种子目标、记忆文件写入。
+- **ASI07 跨 agent / 委托**（`scanner/scope_composition_scan.py`）：用 agent 自身凭证转发请求的混淆副手（confused deputy）。
+- **ASI08 级联失败 / 爆炸半径**（`scanner/scope_composition_scan.py`）：凭证读取 + 外传组合（所有已连接 server scope 的并集）。
+- **ASI09 人机信任利用**（`scanner/dark_pattern_scan.py`）：权威冒充、压制核验、虚假保证、紧迫感——需 ≥2 个信号同时命中才报警（低误报）。
+- **ASI10 失控 agent / 反篡改**（`scanner/antitamper_scan.py`）：自保护/删除后重装、禁用/替换其它组件、反分析/隐藏指令。
+- **工具 / 技能完整性**（`scanner/tool_integrity_scan.py`）：工具名 typosquat（与规范品牌编辑距离 ≤2，CVE-2026-30856 类）、未 pin 版本的远程 MCP（rug-pull）。
+- **注册中心供应链**（`scanner/registry_supply_scan.py`）：技能名 typosquat、可疑外传、渐进式隐藏载荷（主文件把安装命令延迟到次级 `.md`）。
+
+上述 11 个模块全部通过 `tests/test_capability_full_scan.py` 的「良性零误报 + 恶意仍被拦」契约（40 项）；全量测试 **523 通过 / 0 失败 / 9 跳过**。
+
 > AIShield 不只是一个扫描器 — 它是 AI Agent 安全生态的完整基础设施。
 
 ---
