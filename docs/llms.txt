@@ -39,11 +39,29 @@ Beyond scanning, AIShield is a **trust authority**: it defines an open **Trust S
 
 ## 2026 capability-boundary scanners (local, no-spawn, no-remote-fetch)
 
-AIShield extended its coverage beyond payload content with four local heuristic scanners, all sharing the no-spawn / no-remote-fetch invariant and merged into the 5-dimension score via `extra_findings`:
+AIShield extended its coverage beyond payload content with **17 local heuristic scanners**, all sharing the no-spawn / no-remote-fetch invariant and merged into the 5-dimension score via `extra_findings`:
+
+**Layers 1–6 (identity / network / NHI / A2A / content-evasion / payment):**
 - **Authentik / NHI service-account hygiene** (`scanner/authentik_scan.py`): `skip_authorization`, never-expiring tokens (`token_ttl: 0/never`), over-broad scope (`"*"`), hardcoded `client_secret`.
 - **A2A AgentCard validation** (`scanner/agentcard_scan.py`): structured JSON checks for unsigned cards, missing expiry, non-https URLs, absent `securitySchemes`, un-attenuated delegation chains (the A2A #1672/#1628 trust-shallow gap).
 - **AI-slop / jailbreak-evasion detection** (`scanner/slop_scan.py`): flags prompt/skill content engineered to defeat classifiers (instruction override, DAN roleplay, base64/translate obfuscation, anti-detection self-reference) — the weaponized form of the "de-AI" wave (complementary to soundshuman's style layer).
 - **AP2 / x402 payment-scope audit** (`scanner/payment_scan.py`): flags unlimited `maxAmount`, `auto_approve`, over-broad payment scope, and payment authorizations unbound to an intent (cartId/orderId).
+- (`identity_scan` / `network_scan` cover signed-AgentCard, short-lived-credential, and Mesh over-broad-reachability gaps.)
+
+**OWASP Agentic AI Top 10 (ASI01–ASI10) — 11 modules that closed the 3 blank + 5 half-covered categories:**
+- **ASI01 Goal hijack** (`scanner/goal_hijack_scan.py`): external content treated as instruction, goal substitution, persistent/permanent goal injection.
+- **ASI02 Tool misuse / least-agency** (`scanner/least_agency_scan.py`): pipe-to-shell, `rm -rf`, `sudo`, `chmod 777`, `os.system`/`eval`, credential & SSH-key reads.
+- **ASI03 Identity / OAuth posture** (`scanner/mcp_oauth_scan.py`): remote MCP server with no auth (CVE-2026-32211 class), OAuth without RFC 9207 issuer, long-lived / non-rotating tokens. *(GPT Action manifests are recognized by their own `auth` schema, not flagged as MCP gaps.)*
+- **ASI04 Supply chain / provenance** (`scanner/provenance_scan.py`): `npx`/`pip` without version pin, git installs without commit pin, lockfiles without integrity, SBOM without signature.
+- **ASI06 Memory / context poisoning** (`scanner/memory_scan.py`): instructions to write into memory, persistent/seed goals, memory-file writes.
+- **ASI07 Inter-agent / delegation** (`scanner/scope_composition_scan.py`): confused-deputy forwarding using the agent's own credentials.
+- **ASI08 Cascading failure / blast radius** (`scanner/scope_composition_scan.py`): credential-read + egress combinations (the union of every connected server's scope).
+- **ASI09 Human-agent trust exploitation** (`scanner/dark_pattern_scan.py`): authority impersonation, suppression of verification, false-assurance, urgency — fires only on ≥2 combined signals (low false positive).
+- **ASI10 Rogue agents / anti-tamper** (`scanner/antitamper_scan.py`): self-preservation / reinstall-on-delete, disable/replace other components, anti-analysis / hide-instructions.
+- **Tool / skill integrity** (`scanner/tool_integrity_scan.py`): typosquatted tool names (edit-distance ≤2 vs canonical brands, CVE-2026-30856 class), remote MCP without version pin (rug-pull).
+- **Registry supply** (`scanner/registry_supply_scan.py`): skill-name typosquat, suspicious egress, progressive hidden payloads (main file defers the install command to a secondary `.md`).
+
+All 11 Agentic modules pass a **benign-zero-false-positive** and **malicious-still-blocked** contract in `tests/test_capability_full_scan.py` (40 cases). Full suite: **523 pass / 0 fail / 9 skip**.
 
 Landscape & new-capability gaps: https://aishield.tools/agent-ecosystem-2026-landscape
 
