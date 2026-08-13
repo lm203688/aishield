@@ -34,9 +34,12 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import base64
 import datetime
+import glob
 import hashlib
 import json
+import tempfile
 import os
 import re
 import shutil
@@ -809,6 +812,122 @@ def create_github_issue(pat, sig, cat, sev):
 
 
 # ---------------------------------------------------------------------------
+# GitHub publish -- auto-commit intel report + index to public main
+# (closes the "occupation loop": a dated, continuous, machine-readable trail
+#  that proves we have tracked the ecosystem since date X)
+# ---------------------------------------------------------------------------
+def _gh_get_file(rel_path, token):
+    """Return (sha, base64_content) for a file on main, or (None, None)."""
+    url = (f"https://api.github.com/repos/{REPO}/contents/"
+           f"{rel_path.replace(os.sep, '/')}?ref=main")
+    status, body = _fetch(
+        url,
+        headers={"Authorization": f"Bearer {token}",
+                 "Accept": "application/vnd.github+json"},
+        method="GET", timeout=20)
+    if status != 200:
+        return None, None
+    try:
+        obj = json.loads(body or "{}")
+        return obj.get("sha"), (obj.get("content") or "").replace("\n", "")
+    except Exception:
+        return None, None
+
+
+def _gh_api_put(rel_path, content_str, message, token, sha=None):
+    """PUT a file to the GitHub Contents API. Curl subprocess primary (TLS
+    proxy workaround), urllib fallback when curl is absent. Writes payload to
+    a temp file to dodge the Windows ~8k command-line limit."""
+    url = (f"https://api.github.com/repos/{REPO}/contents/"
+           f"{rel_path.replace(os.sep, '/')}")
+    payload = {
+        "message": message,
+        "content": base64.b64encode(content_str.encode("utf-8")).decode("ascii"),
+        "branch": "main",
+    }
+    if sha:
+        payload["sha"] = sha
+    fd, tmp = tempfile.mkstemp(suffix=".json", prefix="ghpush_")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as fh:
+            json.dump(payload, fh)
+        if shutil.which("curl") is not None:
+            cmd = ["curl", "-sS", "--max-time", "30", "-X", "PUT", url,
+                   "-H", f"Authorization: Bearer {token}",
+                   "-H", "Accept: application/vnd.github+json",
+                   "-H", "Content-Type: application/json",
+                   "-d", f"@{tmp}"]
+            proc = subprocess.run(cmd, capture_output=True, text=True,
+                                  errors="replace", timeout=40)
+            out = proc.stdout or ""
+        else:
+            req = urllib.request.Request(
+                url, data=json.dumps(payload).encode("utf-8"), method="PUT")
+            req.add_header("Authorization", f"Bearer {token}")
+            req.add_header("Accept", "application/vnd.github+json")
+            req.add_header("Content-Type", "application/json")
+            try:
+                with urllib.request.urlopen(req, timeout=30) as resp:
+                    out = resp.read().decode("utf-8", "replace")
+            except urllib.error.HTTPError as e:
+                out = e.read().decode("utf-8", "replace")
+    finally:
+        try:
+            os.unlink(tmp)
+        except Exception:
+            pass
+    try:
+        data = json.loads(out or "{}")
+    except Exception:
+        return False, "no-json response"
+    if "commit" in data:
+        return True, data.get("commit", {}).get("sha", "")[:8]
+    return False, data.get("message", "unknown error")[:160]
+
+
+def _build_index():
+    """Rolling index of all daily radar reports -> docs/intel/index.md."""
+    files = sorted(glob.glob(os.path.join(INTEL_DIR, "*-tech-radar.md")),
+                   reverse=True)
+    lines = ["# AIShield Tech Radar — 索引 / Index", ""]
+    lines.append("_滚动索引：每日自动生成并推送到 public `main`。"
+                 "一条带日期的持续追踪记录，就是“这个方向我们从 X 月就在跟”的"
+                 "不可伪造证据 —— 生态位提前卡位的实质。_")
+    lines.append("")
+    lines.append("| 日期 | 报告 |")
+    lines.append("|---|---|")
+    for f in files:
+        base = os.path.basename(f)
+        date = base.replace("-tech-radar.md", "")
+        lines.append(f"| {date} | [{base}](./{base}) |")
+    lines.append("")
+    idx_path = os.path.join(INTEL_DIR, "index.md")
+    with open(idx_path, "w", encoding="utf-8") as fh:
+        fh.write("\n".join(lines))
+    return os.path.relpath(idx_path, ROOT).replace(os.sep, "/")
+
+
+def _publish(rel_paths, token, message):
+    """Best-effort publish of local files to public main. Returns list of
+    (rel_path, ok, info). Never raises -- publishing must not break the scan."""
+    results = []
+    for rel in rel_paths:
+        abs_p = os.path.join(ROOT, rel)
+        if not os.path.exists(abs_p):
+            results.append((rel, False, "missing local file"))
+            continue
+        content = open(abs_p, encoding="utf-8").read()
+        my_b64 = base64.b64encode(content.encode("utf-8")).decode("ascii")
+        sha, cur_b64 = _gh_get_file(rel, token)
+        if sha and cur_b64 == my_b64:
+            results.append((rel, True, "unchanged (skipped)"))
+            continue
+        ok, info = _gh_api_put(rel, content, message, token, sha)
+        results.append((rel, ok, info))
+    return results
+
+
+# ---------------------------------------------------------------------------
 # Report rendering
 # ---------------------------------------------------------------------------
 SECTION_HEADERS = {
@@ -929,6 +1048,8 @@ def main():
                     choices=["github", "arxiv", "hn", "reddit", "standards", "platforms", "all"],
                     default=["all"],
                     help="Which sources to scan")
+    ap.add_argument("--publish", action="store_true",
+                    help="Auto-commit intel report + index to public main via Contents API")
     args = ap.parse_args()
 
     dry_run = not args.live
@@ -1012,8 +1133,10 @@ def main():
     else:
         print("[issues] DRY-RUN -- no issues created")
 
-    # render report
-    report = render_report(new_signals, drafted_rules, created_issues, errors)
+    # render report -- use TODAY's full scan (valid), not the cross-run dedup
+    # delta, so the public daily trail is always a faithful snapshot of what
+    # the radar saw that day (dedup only gates issues/drafts, not the report).
+    report = render_report(valid, drafted_rules, created_issues, errors)
     report_path = os.path.join(INTEL_DIR, f"{_today_str()}-tech-radar.md")
     with open(report_path, "w", encoding="utf-8") as f:
         f.write(report)
@@ -1025,6 +1148,19 @@ def main():
     state["last_issues"] = len(created_issues)
     state["last_errors"] = len(errors)
     _save_state(state)
+
+    # ---- publish loop (occupation): push report + rolling index to main ----
+    if args.publish:
+        if not pat:
+            print("[publish] SKIPPED -- no PAT configured")
+        else:
+            idx_rel = _build_index()
+            report_rel = os.path.relpath(report_path, ROOT).replace(os.sep, "/")
+            targets = [report_rel, idx_rel]
+            print(f"[publish] pushing {len(targets)} file(s) to {REPO}@main ...")
+            for rel, ok, info in _publish(
+                    targets, pat, f"chore(radar): publish {_today_str()} tech radar"):
+                print(f"  [{'OK ' if ok else 'ERR'}] {rel} -> {info}")
 
     print(f"[done] new={len(new_signals)} drafted={len(drafted_rules)} "
           f"issues={len(created_issues)} errors={len(errors)}")
