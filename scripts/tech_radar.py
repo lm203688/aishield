@@ -13,7 +13,9 @@ Goal:
   create GitHub issue for critical signals.
 
 Design:
-  - Zero third-party deps (stdlib + urllib only) -- matches the project.
+  - Zero third-party deps (stdlib only; network goes through a curl subprocess
+    to bypass the local TLS-intercepting proxy that resets Python's urllib;
+    urllib is kept as a fallback when curl is absent).
   - Each scan source is independent: failure of one source never aborts others.
   - Idempotent: safe to re-run; uses data/state/tech_radar.json as dedupe history.
   - Dry-run by default for first run; --live to enable issue creation.
@@ -37,6 +39,8 @@ import hashlib
 import json
 import os
 import re
+import shutil
+import subprocess
 import sys
 import time
 import urllib.error
@@ -89,26 +93,55 @@ def _now_utc() -> datetime.datetime:
 def _today_str() -> str:
     return _now_utc().strftime("%Y-%m-%d")
 
-def _http_json(url, headers=None, timeout=20):
-    req = urllib.request.Request(url, method="GET")
-    req.add_header("User-Agent", "aishield-tech-radar/1.0")
-    if headers:
-        for k, v in headers.items():
-            req.add_header(k, v)
-    try:
-        with urllib.request.urlopen(req, timeout=timeout) as r:
-            return r.status, json.loads(r.read().decode("utf-8", "replace") or "{}")
-    except urllib.error.HTTPError as e:
-        return e.code, {}
-    except Exception as e:
-        return -1, {"_error": str(e)}
+def _fetch(url, headers=None, method="GET", data=None, timeout=20):
+    """Transport: curl subprocess (TLS-intercepting-proxy workaround) with an
+    urllib fallback when curl is unavailable. Returns (status, body_text).
 
-def _http_text(url, headers=None, timeout=20):
-    req = urllib.request.Request(url, method="GET")
-    req.add_header("User-Agent", "aishield-tech-radar/1.0")
-    if headers:
-        for k, v in headers.items():
-            req.add_header(k, v)
+    Why curl: this box sits behind a TLS-intercepting proxy that resets
+    Python's `urllib` handshake (SSL UNEXPECTED_EOF); `curl` uses the OS trust
+    store and succeeds. Mirrors the approach used by scripts/gh_push.py.
+    """
+    headers = dict(headers or {})
+    headers.setdefault("User-Agent", "aishield-tech-radar/1.0")
+    if shutil.which("curl") is None:
+        return _fetch_urllib(url, headers, method, data, timeout)
+    cmd = ["curl", "-sS", "--max-time", str(timeout), "-i", "-X", method.upper()]
+    for k, v in headers.items():
+        cmd += ["-H", f"{k}: {v}"]
+    if data is not None:
+        cmd += ["-d", data if isinstance(data, str) else json.dumps(data)]
+    cmd.append(url)
+    try:
+        proc = subprocess.run(cmd, capture_output=True, text=True,
+                              errors="replace", timeout=timeout + 5)
+    except Exception as e:
+        return -1, str(e)
+    out = proc.stdout or ""
+    if "\r\n\r\n" in out:
+        head, _, body = out.partition("\r\n\r\n")
+    elif "\n\n" in out:
+        head, _, body = out.partition("\n\n")
+    else:
+        head, body = "", out
+    status = -1
+    for line in head.splitlines():
+        if line.upper().startswith("HTTP/"):
+            parts = line.split()
+            if len(parts) >= 2:
+                try:
+                    status = int(parts[1])
+                except ValueError:
+                    pass
+            break
+    return status, body
+
+
+def _fetch_urllib(url, headers, method="GET", data=None, timeout=20):
+    req = urllib.request.Request(url, method=method.upper())
+    for k, v in headers.items():
+        req.add_header(k, v)
+    if data is not None:
+        req.data = data.encode("utf-8") if isinstance(data, str) else data
     try:
         with urllib.request.urlopen(req, timeout=timeout) as r:
             return r.status, r.read().decode("utf-8", "replace")
@@ -116,6 +149,18 @@ def _http_text(url, headers=None, timeout=20):
         return e.code, ""
     except Exception as e:
         return -1, str(e)
+
+
+def _http_json(url, headers=None, timeout=20):
+    status, body = _fetch(url, headers=headers, timeout=timeout)
+    try:
+        return status, json.loads(body or "{}")
+    except Exception:
+        return status, {"_error": "json parse failed", "_raw": (body or "")[:200]}
+
+
+def _http_text(url, headers=None, timeout=20):
+    return _fetch(url, headers=headers, timeout=timeout)
 
 def _pat():
     p = os.path.join(ROOT, ".workbuddy", "schedule-revert-pat.txt")
@@ -743,22 +788,24 @@ def create_github_issue(pat, sig, cat, sev):
         "body": body,
         "labels": ["tech-radar", f"severity:{sev}", f"category:{cat}"],
     }
-    req = urllib.request.Request(
+    status, body = _fetch(
         f"https://api.github.com/repos/{REPO}/issues",
+        headers={
+            "Authorization": f"Bearer {pat}",
+            "Accept": "application/vnd.github+json",
+            "Content-Type": "application/json",
+        },
         method="POST",
-        data=json.dumps(payload).encode("utf-8"),
+        data=json.dumps(payload),
+        timeout=30,
     )
-    req.add_header("Authorization", f"Bearer {pat}")
-    req.add_header("Accept", "application/vnd.github+json")
-    req.add_header("User-Agent", "aishield-tech-radar/1.0")
-    req.add_header("Content-Type", "application/json")
-    try:
-        with urllib.request.urlopen(req, timeout=30) as r:
-            data = json.loads(r.read().decode("utf-8") or "{}")
-            return data.get("html_url")
-    except Exception as e:
-        print(f"  issue creation failed: {e}", file=sys.stderr)
-        return None
+    if status == 201:
+        try:
+            return json.loads(body or "{}").get("html_url")
+        except Exception:
+            return None
+    print(f"  issue creation failed: HTTP {status}", file=sys.stderr)
+    return None
 
 
 # ---------------------------------------------------------------------------
