@@ -40,9 +40,32 @@ from .agentcard_scan import agentcard_analysis
 from .authentik_scan import authentik_analysis
 from .slop_scan import slop_analysis
 from .payment_scan import payment_analysis
+from .tool_integrity_scan import tool_integrity_analysis
+from .registry_supply_scan import registry_supply_analysis
+from .provenance_scan import provenance_analysis
+from .memory_scan import memory_analysis
+from .antitamper_scan import antitamper_analysis
+from .least_agency_scan import least_agency_analysis
+from .scope_composition_scan import scope_composition_analysis
+from .goal_hijack_scan import goal_hijack_analysis
+from .dark_pattern_scan import dark_pattern_analysis
+from .mcp_oauth_scan import mcp_oauth_analysis
+from .computeruse_scan import computeruse_analysis
 
 TZ = timezone(timedelta(hours=8))
-SCANNER_VERSION = "4.0-preflight.2"
+SCANNER_VERSION = "4.0-preflight.3"
+
+# 复用引擎清单（门禁断言 + 不变量声明共用的单一来源）
+ENGINES_REUSED = [
+    "rules_analyze", "dependency_analysis", "secrets_detection",
+    "tool_poisoning_detection", "taint_analysis", "calculate_scores",
+    "identity_analysis", "network_analysis", "agentcard_analysis",
+    "authentik_analysis", "slop_analysis", "payment_analysis",
+    "tool_integrity_analysis", "registry_supply_analysis", "provenance_analysis",
+    "memory_analysis", "antitamper_analysis", "least_agency_analysis",
+    "scope_composition_analysis", "goal_hijack_analysis", "dark_pattern_analysis",
+    "mcp_oauth_analysis", "computeruse_analysis",
+]
 
 # 安全护栏：避免误读巨型 workspace
 MAX_FILE_BYTES = 512 * 1024          # 单文件 512KB 上限
@@ -336,9 +359,26 @@ def _local_pipeline(files, name, tool_type="mcp"):
     authentik = authentik_analysis(files)
     slop = slop_analysis(files)
     payment = payment_analysis(files)
+    tool_integrity = tool_integrity_analysis(files)
+    registry_supply = registry_supply_analysis(files)
+    provenance = provenance_analysis(files)
+    memory = memory_analysis(files)
+    antitamper = antitamper_analysis(files)
+    least_agency = least_agency_analysis(files)
+    scope_composition = scope_composition_analysis(files)
+    goal_hijack = goal_hijack_analysis(files)
+    dark_pattern = dark_pattern_analysis(files)
+    mcp_oauth = mcp_oauth_analysis(files)
+    computeruse = computeruse_analysis(files)
     extra_findings = (identity.get("findings", []) + network.get("findings", [])
                       + agentcard.get("findings", []) + authentik.get("findings", [])
-                      + slop.get("findings", []) + payment.get("findings", []))
+                      + slop.get("findings", []) + payment.get("findings", [])
+                      + tool_integrity.get("findings", []) + registry_supply.get("findings", [])
+                      + provenance.get("findings", []) + memory.get("findings", [])
+                      + antitamper.get("findings", []) + least_agency.get("findings", [])
+                      + scope_composition.get("findings", []) + goal_hijack.get("findings", [])
+                      + dark_pattern.get("findings", []) + mcp_oauth.get("findings", [])
+                      + computeruse.get("findings", []))
     scores = calculate_scores(static, dependency, secrets, poisoning, taint, total_files,
                               extra_findings=extra_findings)
 
@@ -364,6 +404,28 @@ def _local_pipeline(files, name, tool_type="mcp"):
     for f in slop.get("findings", []):
         all_findings.append(f)
     for f in payment.get("findings", []):
+        all_findings.append(f)
+    for f in tool_integrity.get("findings", []):
+        all_findings.append(f)
+    for f in registry_supply.get("findings", []):
+        all_findings.append(f)
+    for f in provenance.get("findings", []):
+        all_findings.append(f)
+    for f in memory.get("findings", []):
+        all_findings.append(f)
+    for f in antitamper.get("findings", []):
+        all_findings.append(f)
+    for f in least_agency.get("findings", []):
+        all_findings.append(f)
+    for f in scope_composition.get("findings", []):
+        all_findings.append(f)
+    for f in goal_hijack.get("findings", []):
+        all_findings.append(f)
+    for f in dark_pattern.get("findings", []):
+        all_findings.append(f)
+    for f in mcp_oauth.get("findings", []):
+        all_findings.append(f)
+    for f in computeruse.get("findings", []):
         all_findings.append(f)
 
     seen = set()
@@ -391,7 +453,24 @@ def _local_pipeline(files, name, tool_type="mcp"):
         "authentik_scan": authentik,
         "slop_scan": slop,
         "payment_scan": payment,
+        "tool_integrity_scan": tool_integrity,
+        "registry_supply_scan": registry_supply,
+        "provenance_scan": provenance,
+        "memory_scan": memory,
+        "antitamper_scan": antitamper,
+        "least_agency_scan": least_agency,
+        "scope_composition_scan": scope_composition,
+        "goal_hijack_scan": goal_hijack,
+        "dark_pattern_scan": dark_pattern,
+        "mcp_oauth_scan": mcp_oauth,
+        "computeruse_scan": computeruse,
         "recommendations": recommendations,
+        # 不变量声明（与顶层报告同源，供门禁测试断言）
+        "_invariants": {
+            "no_spawn": True,
+            "no_remote_fetch": True,
+            "engines_reused": ENGINES_REUSED,
+        },
     }
 
 
@@ -582,12 +661,7 @@ def preflight(workspace_dir):
         "_invariants": {
             "no_spawn": True,
             "no_remote_fetch": True,
-            "engines_reused": ["rules_analyze", "dependency_analysis",
-                               "secrets_detection", "tool_poisoning_detection",
-                               "taint_analysis", "calculate_scores",
-                               "identity_analysis", "network_analysis",
-                               "agentcard_analysis", "authentik_analysis",
-                               "slop_analysis", "payment_analysis"],
+            "engines_reused": ENGINES_REUSED,
         },
     }
 
