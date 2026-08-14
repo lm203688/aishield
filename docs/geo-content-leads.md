@@ -28,6 +28,17 @@
 
 ---
 
+## LEAD-2026-0815-01：本地 vs 云 SaaS 品牌切割（aishield.ai 同名威胁）⭐
+
+- **角度**：搜 "AIShield" 的 agent/开发者，正撞上同名云 SaaS `aishield.ai`（LobeHub `aishield-ai/aishield`、himcp.cn，带定价/API Key/「AI 语义分析」）。我们必须用「本地、开源、代码不出机」把它和自己切开。
+- **钩子**："有两个 AIShield。一个把你的代码传到它的云里扫，一个在你自己机器上扫、代码从不离机。你搜到的那个，是前者。"
+- **关键证据**：实测 LobeHub/himcp 的 "AIShield" = aishield.ai 云 SaaS；我们的开源版在 LobeHub **缺位**；ClawHub 还有第三方 `ai-shield-audit`（laurentaia，144K 安装）占混淆名。详见 `docs/agent-ecosystem-distribution.md` §2。
+- **为何能占排名（GEO 杠杆）**："local MCP scanner / offline agent security / self-hosted MCP security" 是 2026 H2 起量词；在 aishield.ai 抢走品牌前，用「local/no-cloud」锚定 "AIShield" 的检索心智，提前 entanglement。
+- **落稿建议**：`docs/blog/` 草稿《有两个 AIShield，只有一个让你的代码不出机》或《Cloud SaaS scanned your MCP. Local AIShield didn't.》。投递：HN / r/MCP / r/LocalLLMA / X 线程。
+- **状态**：线索已建，与 `competitive-landscape.md` §7.8 联动；需同步修正 Glama 页「注册/Key/定价」措辞以免反助混淆。
+
+---
+
 ## LEAD-2026-0805-03（历史留存）："隔离 ≠ 安全" —— 内容层 vs 运行时层
 
 - **角度**：VM / sandbox 挡住内核逃逸，但挡不住一个被注入的恶意 skill 让 agent 把密钥 curl 出去。
