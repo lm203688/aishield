@@ -59,6 +59,18 @@
       "source_status": "in_repo",
       "notes": "安全基准 + 复现卡。",
       "signals": {}
+    },
+    {
+      "channel": "clawhub",
+      "name": "aishield",
+      "kind": "skill",
+      "version": "4.2.2",
+      "published_version": null,
+      "published_at": null,
+      "source_dir": "distribution/clawhub",
+      "source_status": "in_repo",
+      "notes": "认领 ClawHub 命名空间，反制第三方 clawhub/ai-shield-audit (laurentaia) 混淆名占用。需 clawhub login（够老 GitHub 账号）后 publish。",
+      "signals": {}
     }
   ]
 }
