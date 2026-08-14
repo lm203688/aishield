@@ -1,22 +1,40 @@
 {
   "name": "aishield-mcp",
-  "version": "4.2.0",
-  "description": "AIShield security scanner as an MCP server: scan MCP tools and AI agents for poisoning, injection, leakage, and supply-chain risk (OWASP MCP Top 10 + Agentic AI Top 10).",
+  "version": "4.2.2",
+  "description": "AIShield security scanner as an MCP server: scan MCP servers, AI skills and agents for poisoning, injection, leakage, and supply-chain risk (OWASP MCP Top 10 + OWASP Agentic AI Top 10).",
   "endpoint": "https://aishield.tools/api/v1/mcp",
   "transport": "streamable-http",
-  "install": "npx @aishield/mcp-server",
+  "install": "npx aishield-mcp-server",
   "tools": [
     {
-      "name": "security_scan",
-      "description": "Scan an MCP server or agent description for 141 risk categories."
+      "name": "aishield_scan",
+      "description": "Full security scan of an MCP server / AI skill / agent (GitHub URL). Returns 5-dimension score + OWASP coverage + findings."
     },
     {
-      "name": "agentic_audit",
-      "description": "Audit an agent against OWASP Agentic AI Top 10 (ASI01-ASI10)."
+      "name": "aishield_guardrail",
+      "description": "Pre-install gate: pass/block verdict before installing any third-party MCP server."
     },
     {
-      "name": "trust_score",
-      "description": "Look up an agent's AIShield Trust Score and certification level from the registry."
+      "name": "aishield_prompt_check",
+      "description": "Detect prompt injection / jailbreak / data-exfiltration in user prompts (zh + en)."
+    },
+    {
+      "name": "aishield_banned_words",
+      "description": "Chinese banned-word detection across 6 platforms (WeChat/Douyin/Xiaohongshu/Bilibili/Weibo/Kuaishou)."
+    },
+    {
+      "name": "aishield_rug_pull",
+      "description": "Detect rug-pull: security-code removal or suspicious additions across recent commits."
+    },
+    {
+      "name": "aishield_handshake",
+      "description": "MCP handshake verification: npx auto-install risk, sensitive env vars, oversized tool descriptions."
     }
-  ]
+  ],
+  "trust": {
+    "standard": "OWASP MCP Top 10 (2025 v0.1) + OWASP Agentic AI Top 10",
+    "local_first": true,
+    "open_source": "MIT",
+    "verification": "self-attested, open-source — no third-party audit claimed"
+  }
 }
