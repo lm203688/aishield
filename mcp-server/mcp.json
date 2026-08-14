@@ -42,7 +42,7 @@
   },
   "trust": {
     "standard": "OWASP MCP Top 10 (2025 v0.1) + OWASP Agentic AI Top 10 (ASI01-ASI10)",
-    "rule_categories": "214 MCP / 220 Skill",
+    "rule_categories": "227 MCP / 233 Skill",
     "local_first": true,
     "open_source": "MIT",
     "verification": "self-attested, open-source — no third-party audit claimed"
