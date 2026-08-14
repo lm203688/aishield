@@ -1,0 +1,28 @@
+{
+  "name": "dsh-aishield",
+  "version": "4.2.2",
+  "description": "Local, offline security scanner for DeepSeek Harness plugins (supply-chain / prompt-injection / over-privilege). Wraps aishield-mcp-server; your code never leaves your machine.",
+  "type": "module",
+  "main": "index.js",
+  "files": [
+    "index.js",
+    "cordis.patch.yml"
+  ],
+  "keywords": [
+    "deepseek-harness",
+    "dsh-plugin",
+    "security",
+    "supply-chain",
+    "mcp"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lm203688/aishield"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  }
+}
