@@ -1,0 +1,18 @@
+# Smithery.ai configuration
+# https://smithery.ai/docs/build/project-config/smithery-yaml
+name: "@lm203688/aishield"
+version: "4.2.2"
+description: "Local-first, zero-egress AI-tool security scanner for MCP servers, AI skills, GPTs and prompts. OWASP MCP Top 10 + Agentic ASI01-10 aligned. 227 MCP / 233 skill rules. Your code never leaves your machine."
+author:
+  name: "AIShield Team"
+  url: "https://github.com/lm203688/aishield"
+license: "MIT"
+keywords: [security, mcp, scanner, owasp, agent-security, prompt-injection, supply-chain, local-first]
+startCommand:
+  type: stdio
+  commandFunction: |-
+    (config) => ({ command: 'npx', args: ['-y', 'aishield-mcp-server'], env: {} })
+configSchema:
+  type: object
+  properties: {}
+exampleConfig: {}
