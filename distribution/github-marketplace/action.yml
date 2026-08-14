@@ -1,0 +1,45 @@
+name: "AIShield MCP/Agent Security Scan"
+description: "Local-first, zero-egress MCP/Agent scanner. OWASP MCP Top 10 + Agentic ASI01-10 aligned. SBOM/SARIF export. Your code never leaves the runner."
+author: "AIShield"
+branding:
+  icon: "shield"
+  color: "green"
+inputs:
+  source_url:
+    description: "Repo URL or local path to scan; empty = scan the CI-checked-out workspace (/github/workspace)"
+    required: false
+    default: ""
+  tool_type:
+    description: "Tool type: mcp / skill / gpt / prompt"
+    required: false
+    default: "mcp"
+  name:
+    description: "Tool name (optional, for report and badge)"
+    required: false
+    default: ""
+  enable_osv:
+    description: "Query OSV.dev for live CVEs (default off; privacy/rate-limit first)"
+    required: false
+    default: "false"
+  fail_on:
+    description: "Fail CI at this risk level: safe / medium / high / critical"
+    required: false
+    default: "high"
+outputs:
+  score:
+    description: "Overall security score (0-100)"
+  risk_level:
+    description: "Risk level safe/medium/high/critical"
+  report:
+    description: "Path to JSON scan report"
+  sarif:
+    description: "Path to SARIF file (uploadable to GitHub Security tab)"
+runs:
+  using: "docker"
+  image: "Dockerfile"
+  env:
+    INPUT_SOURCE_URL: ${{ inputs.source_url }}
+    INPUT_TOOL_TYPE: ${{ inputs.tool_type }}
+    INPUT_NAME: ${{ inputs.name }}
+    INPUT_ENABLE_OSV: ${{ inputs.enable_osv }}
+    INPUT_FAIL_ON: ${{ inputs.fail_on }}
