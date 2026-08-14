@@ -87,6 +87,13 @@
 - ✅ 准备 DeepSeek Harness 认领资产 `distribution/deepseek-harness/`（`dsh-aishield` 插件骨架 package.json/cordis.patch.yml/index.js + DSH Plugins 目录投稿草稿 + 匹配策略 README）。
 - ⏳ （建议）将 `registry/server.json` 改为 stdio-only 并提 PR——若用户给该仓写权限 PAT，我可代提。
 
+### C. 本轮（2026-08-15 第二批）已补齐的可发布资产
+- ✅ **Smithery 清单** `smithery.yaml`（仓库根）：`npx -y aishield-mcp-server` stdio 启动；登录 smithery.ai/new 连 repo 即发布。
+- ✅ **GitHub Marketplace Action 源码** `distribution/github-marketplace/`（action.yml + 自包含 action_entrypoint.py + Dockerfile + README）：已抽离 root，明确「独立仓库 `lm203688/aishield-action`、不得含 workflow」约束；`action_entrypoint.py` 加惰性克隆兜底，独立仓库可自包含运行。
+- ✅ **一站式投稿台账** `distribution/listings/SUBMIT.md`：6 个 web 表单渠道（Registry PR / LobeHub / MCP.so / PulseMCP / MCPfinder / A2A）+ 通用「本地优先」文案（区隔 aishield.ai）+ 发布状态速查表。用户登录即可复制粘贴。
+- ✅ **分发缺口周期巡检自动化**：新增 weekly 自动化，实测 aishield.tools 发现文件 drift、刷新 SUBMIT.md 状态、提醒手动发布渠道。
+- 📌 仍 100% 需用户手动的硬阻塞：Registry PR、LobeHub/Smithery/MCP.so/PulseMCP/MCPfinder 登录发布、ClawHub publish、DSH 目录投稿+npm、GitHub Marketplace 建独立仓库、aishield.tools CF Pages Retry（3 个 `cfut_` token 权限不足）。AI 已把这部分降到「复制粘贴 + 点一下」的最小摩擦。
+
 ---
 
 ## §5 本轮回测证据（可复现）
