@@ -1,6 +1,36 @@
 {
   "intel": [
     {
+      "id": "GHSA-9hgc-g3w5-67cm",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 6.6,
+      "title": "ContextForge: DNS TOCTOU race condition causes SSRF protection bypass (`/admin/gateways/test`)",
+      "summary": "## Summary\n\nThe `/admin/gateways/test` endpoint validates submitted URLs by resolving the hostname at validation time and blocking private address ranges. The HTTP client independently re-resolves DNS at connection time with no IP binding between the two operations, creating a TOCTOU window exploitable via DNS rebinding. The source code explicitly acknowledges this limitation in two separate locations.\n\n## Details\n\n`validate_gateway_test_url()` in `mcpgateway/common/validators.py` (lines 1527–17",
+      "affected": "pip:mcp-contextforge-gateway",
+      "references": [
+        "https://github.com/advisories/GHSA-9hgc-g3w5-67cm"
+      ],
+      "published": "2026-08-14T19:49:14Z",
+      "fetched": "2026-08-14T20:34:45.219356+00:00"
+    },
+    {
+      "id": "CVE-2026-73678",
+      "source": "nvd",
+      "severity": "critical",
+      "cvss": 10.0,
+      "title": "MindsDB Minds Platform version 26.1.0 and earlier contains an unauthenticated remote code execution vulnerability that allows unauthenticated attackers to execute arbitrary OS commands by submitting c",
+      "summary": "MindsDB Minds Platform version 26.1.0 and earlier contains an unauthenticated remote code execution vulnerability that allows unauthenticated attackers to execute arbitrary OS commands by submitting crafted prompts to the unprotected POST /api/v1/responses/ endpoint, which reaches the Anton agent's scratchpad tool that calls exec() on attacker-influenced Python source without sandboxing. Attackers can first configure their own LLM API key through the unauthenticated PUT /api/v1/settings/ endpoin",
+      "affected": "llm agent",
+      "references": [
+        "https://github.com/mindsdb/minds-platform",
+        "https://github.com/mindsdb/minds-platform/security/advisories/GHSA-jcxw-h8ph-pxpv",
+        "https://www.vulncheck.com/advisories/mindsdb-minds-platform-unauthenticated-rce-via-scratchpad-exec"
+      ],
+      "published": "2026-08-14T19:18:01.457",
+      "fetched": "2026-08-14T20:34:37.166137+00:00"
+    },
+    {
       "id": "CVE-2026-19753",
       "source": "nvd",
       "severity": "high",
@@ -2452,19 +2482,19 @@
       "fetched": "2026-08-04T06:34:53.913899+00:00"
     }
   ],
-  "updated": "2026-08-14T19:06:11.174098+00:00",
+  "updated": "2026-08-14T20:34:45.722636+00:00",
   "sources": [
     "osv",
     "nvd",
     "github-advisory"
   ],
   "stats": {
+    "medium": 50,
+    "critical": 22,
     "high": 68,
-    "medium": 49,
     "unknown": 20,
-    "critical": 21,
     "low": 3,
     "moderate": 1
   },
-  "total": 162
+  "total": 164
 }
