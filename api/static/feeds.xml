@@ -5,7 +5,7 @@
     <link>https://aishield.tools</link>
     <description>MCP / AI Agent 安全扫描与威胁情报</description>
     <language>zh-CN</language>
-    <lastBuildDate>Fri, 14 Aug 2026 06:18:10 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 04 Aug 2026 09:36:23 +0000</lastBuildDate>
     <item>
       <title>MCP 2026-07-28 无状态化：安全网关必须回答的 3 个问题</title>
       <link>https://lm203688.github.io/aishield/blog/blog-mcp-stateless-security-2026-08-03.html</link>
@@ -25,7 +25,7 @@
       <link>https://lm203688.github.io/aishield/blog/case-filesystem-test-2026-07-25.html</link>
       <guid isPermaLink="false">aishield-9da5bbc8e28e</guid>
       <pubDate>Sat, 25 Jul 2026 00:00:00 +0000</pubDate>
-      <description>基于 AIShield 133 条安全规则扫描，该工具存在以下问题：</description>
+      <description>基于 AIShield 227 条安全规则扫描，该工具存在以下问题：</description>
     </item>
     <item>
       <title>MCP 安全扫描周报 #30：发现 0 个高危风险</title>
