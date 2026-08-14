@@ -1,7 +1,7 @@
 {
   "name": "AIShield",
   "version": "4.2.2",
-  "description": "AI Agent 安全生态基础设施 — OWASP MCP Top 10 对齐，214条MCP/220条Skill安全规则 + 身份/网络/Authentik/A2A/AI-slop/x402 六维能力边界扫描，全链路守护Agent世界",
+  "description": "AI Agent 安全生态基础设施 — OWASP MCP Top 10 对齐，227条MCP/233条Skill安全规则 + 身份/网络/Authentik/A2A/AI-slop/x402 六维能力边界扫描，全链路守护Agent世界",
   "url": "https://aishield.tools",
   "authentication": [
     {
@@ -46,7 +46,7 @@
     {
       "id": "security_scan",
       "name": "MCP 工具安全扫描",
-      "description": "基于 OWASP MCP Top 10 的 214 条 MCP / 220 条 Skill 规则，对 GitHub 上的 MCP 工具/Agent 技能进行静态安全分析，输出 5 维评分和详细发现",
+      "description": "基于 OWASP MCP Top 10 的 227 条 MCP / 233 条 Skill 规则，对 GitHub 上的 MCP 工具/Agent 技能进行静态安全分析，输出 5 维评分和详细发现",
       "input_schema": {
         "type": "object",
         "properties": {
@@ -351,7 +351,7 @@
     "reputation": 88,
     "activity": 92,
     "identity": 92,
-    "methodology": "基于 OWASP MCP Top 10 (2025 v0.1) + OWASP Agentic AI Top 10 (ASI01-ASI10) 对齐度、扫描规则覆盖率（214 MCP/220 Skill + 17 能力边界模块，含 11 个 Agentic 专项模块）、API 可用性、开源社区活跃度综合计算"
+    "methodology": "基于 OWASP MCP Top 10 (2025 v0.1) + OWASP Agentic AI Top 10 (ASI01-ASI10) 对齐度、扫描规则覆盖率（227 MCP/233 Skill + 17 能力边界模块，含 11 个 Agentic 专项模块）、API 可用性、开源社区活跃度综合计算"
   },
   "endpoints": {
     "agent_setup": "POST /api/v1/agent/setup",
@@ -377,8 +377,8 @@
     "mcp_protocol": true,
     "mcp_protocol_version": "2026-07-28",
     "chinese_regulations": true,
-    "rules_count": 214,
-    "skill_rules_count": 220,
+    "rules_count": 227,
+    "skill_rules_count": 233,
     "capability_modules": 17,
     "owasp_categories": 10
   },
