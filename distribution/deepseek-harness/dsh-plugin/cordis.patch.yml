@@ -1,0 +1,8 @@
+# cordis.patch.yml for dsh-aishield
+# Mounts the AIShield bundle into the DSH config tree.
+# Format verified against DeepSeek Harness dev docs (2026-08-15):
+#   - a bundle is a Cordis config row + its mounted code
+#   - `name` must resolve to the npm package name (the package.json `name`)
+- insert:
+  - id: aishield
+    name: dsh-aishield
