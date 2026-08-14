@@ -16,33 +16,11 @@
         "priority": "P2"
       }
     ],
-    "checked_at": "2026-08-14T19:00:23.698207+00:00",
+    "checked_at": "2026-08-14T19:52:34.497153+00:00",
     "_source": "registry_tracker",
-    "_ts": "2026-08-14T19:00:23.698516+00:00"
+    "_ts": "2026-08-14T19:52:34.497488+00:00"
   },
   "history": [
-    {
-      "ts": "2026-08-11T10:54:14.592419+00:00",
-      "source": "registry_tracker",
-      "state": {
-        "coverage_pct": 60,
-        "listed": 3,
-        "total": 5,
-        "todos": [
-          {
-            "niche": "MCP 官方 Registry 收录",
-            "action": "向 modelcontextprotocol/registry 提交 server.json —— 生态入口即用户入口",
-            "priority": "P1"
-          },
-          {
-            "niche": "GitHub Topics 检索曝光",
-            "action": "补齐 GitHub topics: ai-security —— 零成本获取平台内检索流量",
-            "priority": "P2"
-          }
-        ],
-        "checked_at": "2026-08-11T10:54:14.592217+00:00"
-      }
-    },
     {
       "ts": "2026-08-11T11:48:21.894406+00:00",
       "source": "registry_tracker",
@@ -1120,8 +1098,30 @@
         ],
         "checked_at": "2026-08-14T19:00:23.698207+00:00"
       }
+    },
+    {
+      "ts": "2026-08-14T19:52:34.497501+00:00",
+      "source": "registry_tracker",
+      "state": {
+        "coverage_pct": 60,
+        "listed": 3,
+        "total": 5,
+        "todos": [
+          {
+            "niche": "MCP 官方 Registry 收录",
+            "action": "向 modelcontextprotocol/registry 提交 server.json —— 生态入口即用户入口",
+            "priority": "P1"
+          },
+          {
+            "niche": "GitHub Topics 检索曝光",
+            "action": "补齐 GitHub topics: ai-security —— 零成本获取平台内检索流量",
+            "priority": "P2"
+          }
+        ],
+        "checked_at": "2026-08-14T19:52:34.497153+00:00"
+      }
     }
   ],
-  "updated": "2026-08-14T19:00:23.698533+00:00",
+  "updated": "2026-08-14T19:52:34.497506+00:00",
   "desc": "MCP Registry / npm / Marketplace 上架状态"
 }
