@@ -30,6 +30,7 @@
 | **MCPfinder (mcpfind.org)** | ❌ 未做 | 提交 | 账号 | LOW | 索引 6700+ server，性价比高 |
 | **A2A Registry / AgentSpace** | ❌ 未做 | 注册 Agent Card | 调研 | LOW | Agent Card 已备（`docs/.well-known/agent-card.json`） |
 | **aishield.tools 本域发现文件** | ⚠️ **stale 4.2.0/133** | CF Pages 重建 | CF token（权限不足） | HIGH（已知） | 之前 15 文件修复未触达线上；3 个 `cfut_` token 权限都够不到该部署 |
+| **DeepSeek Harness (DSH)** | ❌ 缺位（生态首日，security 类目真空） | ① DSH Plugins 目录投稿（deepbolt.xyz）② 原生 `dsh-aishield` 插件（npm+cordis.patch.yml）③ MCP 桥接：DSH 原生支持 MCP → AIShield MCP server 零适配 | 目录投稿需账号 / 插件需 npm 发布 | **HIGH（新渠道·先发窗口）** | 首日 34k–65k★、1000+ 插件；supply-chain 风险是官方头号隐患→AIShield 本职；**无安全插件**→先发占 security 类目。dev preview+breaking changes→走 MCP 桥接最稳 |
 
 ---
 
@@ -75,6 +76,7 @@
 6. **GitHub Marketplace**：新建独立仓库 `lm203688/aishield-action`（不含 workflow），把 `action.yml`+`action_entrypoint.py` 移入，打 release 勾选 Publish + 接受 Marketplace 协议。
 7. **aishield.tools CF Pages 重建**：在 CF dashboard（61960005 账户）→ 真实托管前端的 Pages 项目 → Deployments → Retry（3 个 `cfut_` token 权限不足，无法 API 触发）。
 8. **HuggingFace**：上传 `distribution/huggingface/`。
+9. **DeepSeek Harness (DSH)**：① 在 deepbolt.xyz DSH Plugins 提交我们的 listing（草稿 `distribution/deepseek-harness/DSH-PLUGINS-LISTING.md`）；② `npm publish dsh-aishield`（需登录 npm，且等 DSH Cordis API 稳定再补 `index.js` 注册体）；③ 对外文档写清 MCP 桥接方式（DSH 原生支持 MCP，AIShield server 零适配接入）。
 
 ### B. 本轮 AI 已准备 / 可直接执行
 - ✅ 实测全平台状态，纠正「Registry 已 verified」误判（本报告）。
@@ -82,6 +84,7 @@
 - ✅ 竞争态势 `competitive-landscape.md` 新增 §8（分发版图 + aishield.ai 同名威胁）。
 - ✅ GEO 线索 `geo-content-leads.md` 新增「本地 vs 云 SaaS 品牌切割」lead。
 - ✅ 准备 ClawHub skill 骨架 `distribution/clawhub/SKILL.md`（待用户登录发布）。
+- ✅ 准备 DeepSeek Harness 认领资产 `distribution/deepseek-harness/`（`dsh-aishield` 插件骨架 package.json/cordis.patch.yml/index.js + DSH Plugins 目录投稿草稿 + 匹配策略 README）。
 - ⏳ （建议）将 `registry/server.json` 改为 stdio-only 并提 PR——若用户给该仓写权限 PAT，我可代提。
 
 ---
