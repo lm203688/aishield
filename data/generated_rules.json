@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-14T04:51:12.966042+00:00",
+  "generated_at": "2026-08-14T06:17:32.376509+00:00",
   "source_intel_count": 162,
   "package_blacklist": {
     "pip:atomic-agents-stack": {
