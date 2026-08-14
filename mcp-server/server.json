@@ -1,0 +1,22 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.lm203688/aishield",
+  "title": "AIShield Security Scanner",
+  "description": "Pre-flight security scan for any MCP server, AI skill, or agent. 214 MCP rules + 220 skill rules aligned to OWASP MCP Top 10 + OWASP Agentic AI Top 10 (ASI01–ASI10). Local-first, no code leaves your machine. Provides aishield_scan (full audit), aishield_guardrail (install any MCP safely), aishield_prompt_check (injection probe), aishield_banned_words (content gate), aishield_rug_pull (provenance drift detector), aishield_handshake (remote endpoint probe).",
+  "version": "4.2.2",
+  "websiteUrl": "https://aishield.tools",
+  "repository": {
+    "url": "https://github.com/lm203688/aishield",
+    "source": "github"
+  },
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "aishield-mcp-server",
+      "version": "4.2.2",
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ]
+}
