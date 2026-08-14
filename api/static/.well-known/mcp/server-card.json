@@ -1,10 +1,10 @@
 {
   "serverInfo": {
     "name": "AIShield",
-    "version": "4.2.0",
-    "description": "AI Agent Security Shield — OWASP MCP Top 10 aligned security scanning. 133 rules covering prompt injection, zero-width characters, Rug Pull, permission audit, and dependency monitoring. Features agent one-click onboarding, OpenAPI auto-discovery, and embeddable security badges."
+    "version": "4.2.2",
+    "description": "AI Agent Security Shield — OWASP MCP Top 10 + OWASP Agentic AI Top 10 aligned security scanning. 227 MCP rules (+233 skill rules) covering prompt injection, zero-width characters, Rug Pull, permission audit, supply-chain and agentic risk. Local-first: no code leaves your machine. Features pre-install guardrail gating, OpenAPI auto-discovery and embeddable security badges."
   },
-  "url": "https://aishield.tools/mcp",
+  "url": "https://aishield.tools/api/v1/mcp",
   "provider": {
     "name": "AIShield",
     "url": "https://github.com/lm203688/aishield"
@@ -12,22 +12,30 @@
   "license": "MIT",
   "tools": [
     {
-      "name": "security_scan",
-      "description": "Full security audit for MCP tools/agents with OWASP MCP Top 10 alignment. Returns 5-dimension scores, badge level, and detailed findings.",
+      "name": "aishield_scan",
+      "description": "Full security scan of an MCP server / AI skill / agent (GitHub URL). Returns 5-dimension score + OWASP coverage + detailed findings.",
       "inputSchema": {
         "type": "object",
         "properties": {
-          "tool_name": {"type": "string", "description": "Tool name"},
-          "description": {"type": "string", "description": "Tool description"},
-          "input_schema": {"type": "object", "description": "Tool input schema"},
-          "endpoint": {"type": "string", "description": "Tool endpoint URL"}
+          "source_url": {"type": "string", "description": "GitHub or repo URL of the MCP server / skill / agent to scan"}
         },
-        "required": ["tool_name"]
+        "required": ["source_url"]
       }
     },
     {
-      "name": "prompt_injection_check",
-      "description": "Detect prompt injection attacks in Chinese and English. Supports pinyin variants, homophone substitution, zero-width characters, and 200+ pattern matching.",
+      "name": "aishield_guardrail",
+      "description": "Pre-install gate: pass/block verdict before installing any third-party MCP server.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "source_url": {"type": "string", "description": "GitHub or repo URL of the MCP server to evaluate before install"}
+        },
+        "required": ["source_url"]
+      }
+    },
+    {
+      "name": "aishield_prompt_check",
+      "description": "Detect prompt injection / jailbreak / data-exfiltration in user prompts (zh + en).",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -37,20 +45,20 @@
       }
     },
     {
-      "name": "banned_words_check",
-      "description": "Detect banned/sensitive words for 6 Chinese platforms: WeChat, Douyin, Xiaohongshu, Bilibili, Weibo, and general content.",
+      "name": "aishield_banned_words",
+      "description": "Chinese banned-word detection across 6 platforms: WeChat, Douyin, Xiaohongshu, Bilibili, Weibo, Kuaishou.",
       "inputSchema": {
         "type": "object",
         "properties": {
           "text": {"type": "string", "description": "Text to check"},
-          "platform": {"type": "string", "enum": ["all", "wechat", "douyin", "xiaohongshu", "bilibili", "weibo"], "default": "all"}
+          "platform": {"type": "string", "enum": ["all", "wechat", "douyin", "xiaohongshu", "bilibili", "weibo", "kuaishou"], "default": "all"}
         },
         "required": ["text"]
       }
     },
     {
-      "name": "rug_pull_detect",
-      "description": "Detect if an MCP tool has suspicious recent changes like removed security code or added risky modifications (Rug Pull risk).",
+      "name": "aishield_rug_pull",
+      "description": "Detect rug-pull: security-code removal or suspicious additions across recent commits.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -60,28 +68,21 @@
       }
     },
     {
-      "name": "agent_register",
-      "description": "One-click agent onboarding. Register your agent and get API key, DID identity, and quick start guide.",
+      "name": "aishield_handshake",
+      "description": "MCP handshake verification: npx auto-install risk, sensitive env vars, oversized tool descriptions.",
       "inputSchema": {
         "type": "object",
         "properties": {
-          "agent_name": {"type": "string", "description": "Agent name"},
-          "description": {"type": "string", "description": "Agent description"},
-          "capabilities": {"type": "array", "items": {"type": "string"}, "description": "Agent capabilities list"}
-        },
-        "required": ["agent_name"]
-      }
-    },
-    {
-      "name": "dependency_monitor",
-      "description": "Monitor MCP tool dependencies for version changes and security risks.",
-      "inputSchema": {
-        "type": "object",
-        "properties": {
-          "source_url": {"type": "string", "description": "GitHub repository URL"}
+          "source_url": {"type": "string", "description": "GitHub or package URL to verify"}
         },
         "required": ["source_url"]
       }
     }
-  ]
+  ],
+  "trust": {
+    "standard": "OWASP MCP Top 10 (2025 v0.1) + OWASP Agentic AI Top 10",
+    "local_first": true,
+    "open_source": "MIT",
+    "verification": "self-attested, open-source — no third-party audit claimed"
+  }
 }
