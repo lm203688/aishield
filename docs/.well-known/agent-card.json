@@ -19,7 +19,7 @@
     {
       "id": "security_scan",
       "name": "Security Scan",
-      "description": "Scan an MCP server, AI skill or agent description against 214 MCP / 220 skill rule categories (OWASP MCP Top 10 + Agentic AI Top 10 + sandbox hardening). For skill assets, Markdown is treated as executable payload rather than documentation.",
+      "description": "Scan an MCP server, AI skill or agent description against 227 MCP / 233 skill rule categories (OWASP MCP Top 10 + Agentic AI Top 10 + sandbox hardening). For skill assets, Markdown is treated as executable payload rather than documentation.",
       "tags": ["security", "audit", "mcp", "agent"],
       "examples": [
         "Scan this MCP server tool list for prompt-injection and tool-poisoning risk"
