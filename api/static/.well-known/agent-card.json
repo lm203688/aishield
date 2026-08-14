@@ -3,6 +3,12 @@
   "version": "4.2.2",
   "description": "AI Agent 安全生态基础设施 — OWASP MCP Top 10 对齐，214条MCP/220条Skill安全规则 + 身份/网络/Authentik/A2A/AI-slop/x402 六维能力边界扫描，全链路守护Agent世界",
   "url": "https://aishield.tools",
+  "authentication": [
+    {
+      "type": "oauth2",
+      "description": "Hosted API endpoints accept an optional Bearer API key (AISHIELD_API_KEY) for higher rate limits; public scan endpoints are open. MCP server is local-first (npx aishield-mcp-server) and needs no auth."
+    }
+  ],
   "provider": {
     "name": "AIShield",
     "url": "https://github.com/lm203688/aishield"
