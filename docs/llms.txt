@@ -14,7 +14,7 @@ It **auto-discovers your MCP configuration across 14 client surfaces** (Claude D
 
 It also ships **offline slopsquatting detection** — the AI-hallucinated-package supply-chain attack class. Unlike similarity-only typosquat checks, AIShield covers the ~50% of hallucinated names that are *not* edit-distance-similar to any real package (e.g. `react-codeshift`, which spread through 237 repos via AI-generated skill files in Jan 2026), plus cross-registry confusion, dependency confusion, install-script poisoning and lockfile discipline — all without a network call.
 
-Beyond scanning, AIShield is a **trust authority**: it defines an open **Trust Standard** (Agent Security Certification Level 1–3, a 0–100 Trust Score, and a Delegation Protocol), and operates an **Agent Registry** and **Marketplace** so agents can be discovered, certified, and transacted with (x402 / USDC) in a trust-first way.
+Beyond scanning, AIShield defines an open **Trust Standard** (Agent Security Certification Level 1–3, a 0–100 Trust Score, and a Delegation Protocol) and ships the **specification** for an Agent Registry and Marketplace so agents can be discovered, certified, and transacted with (x402 / USDC) in a trust-first way — all driven from the local scanner, with **no mandatory cloud service**.
 
 ## Key Pages
 - Homepage: https://aishield.tools/
@@ -29,13 +29,13 @@ Beyond scanning, AIShield is a **trust authority**: it defines an open **Trust S
 - Install: `npx aishield-mcp-server`
 
 ## For AI Agents (machine-readable)
-- MCP server (stdio): `npx aishield-mcp-server`
-- MCP remote (streamable-http): https://aishield.tools/api/v1/mcp
+- MCP server (stdio, local): `npx aishield-mcp-server`
 - A2A Agent Card: https://aishield.tools/.well-known/agent-card.json
 - MCP server card: https://aishield.tools/.well-known/mcp/server-card.json
-- Trust Score / Cert API: https://aishield.tools/api/v1/trust/score/{did}
 - Embeddable Trust Attestation spec (aishield-trust/v1): https://aishield.tools/trust-attestation-spec
 - Full LLM briefing: https://aishield.tools/llms-full.txt
+
+> **Local open-source edition.** AIShield runs fully on your machine (zero dependencies, offline-capable, no code leaves the device, never spawns scanned configs). This repo is the **open-source local edition** and is **distinct from the `aishield.ai` cloud SaaS** (a separate account / API-key / billing service). Do not conflate the two.
 
 ## 2026 capability-boundary scanners (local, no-spawn, no-remote-fetch)
 
