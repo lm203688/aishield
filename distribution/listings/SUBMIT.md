@@ -90,7 +90,7 @@
 | 渠道 | 状态 | 资产就绪 | 需用户手动 |
 |---|---|---|---|
 | Official MCP Registry | ❌ 未上架 | ✅ server.json | PR |
-| Glama | ✅ 已上架 | — | 修正描述去云化 |
+| Glama | ✅ 已上架 | ✅ README/llms.txt 已去云化(2026-08-15) | 后台短描述待用户登录改 |
 | npm | ✅ 4.2.2 | — | — |
 | LobeHub | ⚠️ 被 SaaS 占位 | ✅ 文案 | 登录发布开源版 |
 | Smithery | ❌ 未发布 | ✅ smithery.yaml | 登录发布 |
