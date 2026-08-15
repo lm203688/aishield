@@ -2,10 +2,10 @@
   "domain": "data",
   "current": {
     "total": 2,
-    "before": 1,
-    "grew": true,
+    "before": 2,
+    "grew": false,
     "_source": "data-scan-flywheel",
-    "_ts": "2026-08-15T15:15:11.815460+00:00"
+    "_ts": "2026-08-15T16:12:19.006651+00:00"
   },
   "history": [
     {
@@ -34,8 +34,17 @@
         "before": 1,
         "grew": true
       }
+    },
+    {
+      "ts": "2026-08-15T16:12:19.006670+00:00",
+      "source": "data-scan-flywheel",
+      "state": {
+        "total": 2,
+        "before": 2,
+        "grew": false
+      }
     }
   ],
-  "updated": "2026-08-15T15:15:11.815476+00:00",
+  "updated": "2026-08-15T16:12:19.006693+00:00",
   "desc": ""
 }
