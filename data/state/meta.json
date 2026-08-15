@@ -7,26 +7,12 @@
     "problems": [
       "M3 状态新鲜度: 状态域 ['distribution', 'feature', 'intel'] 超过 72 小时未更新，对应环节可能已停摆"
     ],
-    "checked_at": "2026-08-15T22:08:25.198777+00:00",
+    "checked_at": "2026-08-15T23:09:29.999078+00:00",
     "_source": "meta_monitor",
-    "_ts": "2026-08-15T22:08:25.198948+00:00",
+    "_ts": "2026-08-15T23:09:29.999202+00:00",
     "level": "degraded"
   },
   "history": [
-    {
-      "ts": "2026-08-13T14:12:43.419765+00:00",
-      "source": "meta_monitor",
-      "state": {
-        "score": 83,
-        "passed": 5,
-        "total": 6,
-        "problems": [
-          "M3 状态新鲜度: 状态域 ['distribution', 'feature', 'intel'] 超过 72 小时未更新，对应环节可能已停摆"
-        ],
-        "checked_at": "2026-08-13T14:12:43.419591+00:00",
-        "level": "degraded"
-      }
-    },
     {
       "ts": "2026-08-13T15:45:36.827267+00:00",
       "source": "meta_monitor",
@@ -712,8 +698,22 @@
         "checked_at": "2026-08-15T22:08:25.198777+00:00",
         "level": "degraded"
       }
+    },
+    {
+      "ts": "2026-08-15T23:09:29.999209+00:00",
+      "source": "meta_monitor",
+      "state": {
+        "score": 83,
+        "passed": 5,
+        "total": 6,
+        "problems": [
+          "M3 状态新鲜度: 状态域 ['distribution', 'feature', 'intel'] 超过 72 小时未更新，对应环节可能已停摆"
+        ],
+        "checked_at": "2026-08-15T23:09:29.999078+00:00",
+        "level": "degraded"
+      }
     }
   ],
-  "updated": "2026-08-15T22:08:25.198963+00:00",
+  "updated": "2026-08-15T23:09:29.999212+00:00",
   "desc": "元监控：自动化体系自身的健康度"
 }
