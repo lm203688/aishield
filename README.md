@@ -15,7 +15,8 @@
 </p>
 
 <p align="center">
-  <a href="https://aishield.tools/pricing"><strong>🚀 免费注册 — 送 100 积分体验金</strong></a>
+  <strong>🖥️ 本地优先 · 零依赖 · 代码不出机</strong><br>
+  <sub>开源本地版 — 与同名云 SaaS <code>aishield.ai</code> 是完全不同的产品</sub>
 </p>
 
 ```
@@ -29,6 +30,10 @@
 ```
 
 ---
+
+> 🖥️ **本地优先 · 开源 · 无云**
+> AIShield 开源版**完全在你机器上运行**：零第三方依赖、可 100% 离线、代码与配置**绝不上传**云端、扫描时**绝不执行**被扫配置。
+> ⚠️ **与 `aishield.ai` 的区别**：本仓库是**本地开源版**，与同名商业云 SaaS **`aishield.ai`**（注册 / 密钥 / 计费式云端服务）是**完全不同的产品**，请勿混淆。
 
 ## 核心特性
 
@@ -105,7 +110,28 @@
 
 ## 快速开始
 
-### 1. 克隆并启动
+AIShield 是**完全本地运行**的开源工具——无需注册、无账号、代码不上传云端。推荐通过 MCP 直接接入你的客户端。
+
+### 方式一（推荐）：作为 MCP Server 接入
+
+无需安装，一行命令接入 Claude Desktop / Cursor / 任意 MCP 客户端：
+
+```json
+{
+  "mcpServers": {
+    "aishield": {
+      "command": "npx",
+      "args": ["-y", "aishield-mcp-server"]
+    }
+  }
+}
+```
+
+接入后无需任何配置，即可在对话中直接说：
+
+> “帮我扫描这个 MCP 工具是否存在 Prompt 注入风险”
+
+### 方式二：本地 API Server（可选）
 
 ```bash
 git clone https://github.com/lm203688/aishield.git
@@ -113,47 +139,15 @@ cd aishield
 python api/server.py
 ```
 
-服务启动后访问 **http://localhost:8450**，即可看到 API 信息面板。
+启动后访问 **http://localhost:8450** 查看本地 API 面板。该 server 完全在本地运行，**无需注册、无积分、无公网依赖**，所有扫描都在你的机器上完成。
 
-### 2. 注册获取 API Key（送 100 积分）
+### 获取安全徽章
 
-```bash
-curl -X POST https://aishield.tools/api/v1/account/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "Your Name",
-    "email": "your@email.com",
-    "password": "YourSecurePassword123"
-  }'
-```
-
-注册成功返回 `api_key`，后续调用需要携带 `Authorization: Bearer YOUR_API_KEY`。
-
-### 3. 首次安全扫描
-
-```bash
-curl -X POST https://aishield.tools/api/v1/audit \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "tool_name": "my-agent-tool",
-    "description": "A tool that executes user-provided code",
-    "input_schema": {"type": "object", "properties": {"code": {"type": "string"}}},
-    "endpoint": "https://example.com/api/tool"
-  }'
-```
-
-> 💡 未注册用户也可匿名免费扫描 **50 次/天**，注册后获 **100 积分**（可扫描 100 次），[查看定价](https://aishield.tools/pricing)。
-
-### 4. 获取安全徽章
-
-扫描通过后，在项目 README 中嵌入你的安全徽章：
+扫描通过后，在你的项目 README 中嵌入安全徽章（自托管你的实例后替换域名）：
 
 ```markdown
 ![AIShield Security](https://aishield.tools/badge/my-agent-tool)
 ```
-
-部署后替换 `localhost:8450` 为你的公网地址即可在 GitHub 中展示。
 
 ---
 
@@ -217,9 +211,9 @@ jobs:
 
 ---
 
-## API 文档
+## 本地 API 文档（localhost:8450）
 
-服务启动后访问 `http://localhost:8450` 获取完整 API 信息。核心端点包括：
+以下端点由本地 `python api/server.py` 提供，运行在 **localhost:8450**，**无公网依赖、无需注册**。先按上文「快速开始 · 方式二」启动本地 server，再访问对应端点。核心端点包括：
 
 ### 安全扫描
 
@@ -415,18 +409,16 @@ docker run -p 8450:8450 aishield
 
 ## 🚀 立即开始
 
-选择最适合你的方式开始使用 AIShield：
+选择最适合你的方式，全程本地运行，无需注册：
 
 | 方式 | 操作 | 适合场景 |
 |:---|:---|:---|
-| **在线体验** | 访问 [aishield.tools](https://aishield.tools) 直接扫描 | 快速体验，无需部署 |
-| **本地运行** | `git clone` + `python api/server.py` | 开发调试，自定义规则 |
-| **MCP 集成** | 配置 Claude Desktop / Cursor | 在对话中直接扫描 |
-| **API 调用** | 注册获取 API Key，集成到 CI/CD | 自动化安全审计 |
+| **MCP 集成（推荐）** | `npx -y aishield-mcp-server` 接入 Claude Desktop / Cursor | 在对话中直接扫描，代码不出机 |
+| **本地运行** | `git clone` + `python api/server.py` | 本地 API 面板，开发调试自定义规则 |
+| **CI 门禁** | GitHub Action 接入（见下） | push / PR 自动扫描，达阈值即失败 |
+| **命令行** | `python scanner/...` | 自定义脚本 / 批量扫描 |
 
-<p align="center">
-  <a href="https://aishield.tools/pricing"><strong>免费注册 — 获取 100 积分体验金 →</strong></a>
-</p>
+> 所有方式均在本地完成，没有任何数据发送到外部。本开源版与云 SaaS `aishield.ai` 无关。
 
 ---
 
