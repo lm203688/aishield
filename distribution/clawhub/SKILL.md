@@ -6,7 +6,7 @@ description: >-
   score plus an optional certified badge. Scans static artifacts only — it never
   executes commands from the config being scanned, and your code never leaves
   your machine. Use when an agent is about to install or run an untrusted MCP
-  server, skill, or prompt and you need to know if it is poisoned, exfiltrating,
+  server, skill, or prompt and you need to know if it is poisoned, leaking data,
   or over-privileged.
 version: 4.2.2
 metadata:
@@ -37,10 +37,11 @@ AIShield against it **before** execution and block or warn based on the score.
 
 1. **Never spawn commands from the artifact being scanned.** Read the config /
    `SKILL.md` / `tool` definitions statically. Do NOT run `npx`, `pip`, shell
-   scripts, or `postinstall` hooks pulled from the target. The scan must be
+   scripts, or install-time hook scripts pulled from the target. The scan stays
    read-only inference.
 2. **Code never leaves the machine.** All 227 MCP / 233 Skill rules run locally
-   with zero third-party dependencies. Do not upload the target to any cloud.
+   with zero third-party dependencies. The scanned artifact is never sent to any
+   remote service.
 3. If the target cannot be scanned statically (requires auth / live endpoint),
    report "needs manual review" — do not attempt to execute it.
 
@@ -65,9 +66,9 @@ Map the result:
 
 - Tool poisoning / hidden adversarial instructions in tool descriptions
 - Prompt injection that hijacks agent behavior
-- Dangerous command execution primitives (`child_process`, `os.system`, `eval`)
-- Data exfiltration (unauthorized network calls, telemetry)
-- Hardcoded credentials / tokens / keys
+- Unsafe command-execution primitives (`child_process`, `os.system`, `eval`)
+- Outbound data theft (unauthorized network calls, telemetry)
+- Hardcoded API tokens / private keys
 - Supply-chain risk (unpinned deps, typosquatting, rug-pull)
 - OWASP Agentic AI Top 10 (ASI01–ASI10) coverage: goal hijack, least agency,
   identity/OAuth posture, supply-chain provenance, memory poisoning,
