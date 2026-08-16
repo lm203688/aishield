@@ -16,11 +16,9 @@ Allow: /.well-known/mcp/server-card.json
 Allow: /sitemap.xml
 Allow: /robots.txt
 
-# 禁止抓取动态数据目录
+# 禁止抓取动态数据目录（本地 API 私有，不对外暴露）
 Disallow: /api/data/
 Disallow: /admin/
-Disallow: /api/v1/billing/
-Disallow: /api/v1/auth/
 
 # Crawl-delay（秒）
 Crawl-delay: 1
@@ -33,7 +31,7 @@ Allow: /humans.txt
 Allow: /security.txt
 
 # AI 搜索引擎专属声明
-# AIShield 是一个 AI Agent 安全生态基础设施项目
+# AIShield 是本地优先、开源（MIT）的 AI Agent 安全扫描器（代码不出机、无云端依赖）
 # 欢迎所有搜索引擎和 AI 爬虫抓取公开页面
 User-agent: GPTBot
 Allow: /
