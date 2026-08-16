@@ -10,29 +10,12 @@
       "LLM05": 2,
       "LLM01": 1
     },
-    "delta": 1,
-    "last_run": "2026-08-16T01:36:15.930830+00:00",
+    "delta": 0,
+    "last_run": "2026-08-16T03:03:22.911847+00:00",
     "_source": "intel_to_rules",
-    "_ts": "2026-08-16T01:36:15.931093+00:00"
+    "_ts": "2026-08-16T03:03:22.912096+00:00"
   },
   "history": [
-    {
-      "ts": "2026-08-11T13:13:13.621556+00:00",
-      "source": "intel_to_rules",
-      "state": {
-        "total": 27,
-        "package_blacklist": 19,
-        "pattern_rules": 8,
-        "owasp_distribution": {
-          "LLM07": 3,
-          "LLM05": 2,
-          "LLM01": 1,
-          "LLM06": 2
-        },
-        "delta": 0,
-        "last_run": "2026-08-11T13:13:13.621292+00:00"
-      }
-    },
     {
       "ts": "2026-08-11T15:02:17.225796+00:00",
       "source": "intel_to_rules",
@@ -865,8 +848,25 @@
         "delta": 1,
         "last_run": "2026-08-16T01:36:15.930830+00:00"
       }
+    },
+    {
+      "ts": "2026-08-16T03:03:22.912112+00:00",
+      "source": "intel_to_rules",
+      "state": {
+        "total": 31,
+        "package_blacklist": 23,
+        "pattern_rules": 8,
+        "owasp_distribution": {
+          "LLM06": 2,
+          "LLM07": 3,
+          "LLM05": 2,
+          "LLM01": 1
+        },
+        "delta": 0,
+        "last_run": "2026-08-16T03:03:22.911847+00:00"
+      }
     }
   ],
-  "updated": "2026-08-16T01:36:15.931112+00:00",
+  "updated": "2026-08-16T03:03:22.912117+00:00",
   "desc": "扫描规则库版本与来源"
 }
