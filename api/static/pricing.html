@@ -3,17 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AIShield 定价 - 积分制安全扫描 | 注册送100积分</title>
-<meta name="description" content="AIShield 积分制定价：注册送100积分，安全扫描1积分/次，Agent调用半价。1元=100积分，按量计费无浪费。MCP Server 安全扫描、Prompt注入检测、违禁词检测。">
-<meta name="keywords" content="MCP安全扫描定价,AI Agent安全API价格,AI安全工具积分制,MCP server security pricing,agent security API credits">
-<meta property="og:title" content="AIShield 积分制定价 — AI Agent 安全即服务">
-<meta property="og:description" content="注册送100积分，1元=100积分。Agent调用半价，按量计费。">
+<title>AIShield — 开源免费 · 本地优先</title>
+<meta name="description" content="AIShield 是 100% 开源、本地优先的 AI Agent 安全扫描器。零依赖、代码不出机、无注册、无 API Key、无计费。">
+<meta name="keywords" content="AIShield,开源安全工具,本地优先,AI Agent安全,免费,MCP安全扫描">
+<meta property="og:title" content="AIShield — 开源免费 · 本地优先">
+<meta property="og:description" content="100% 开源免费，本地运行，无注册、无密钥、无计费。">
 <meta property="og:url" content="https://aishield.tools/pricing">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://aishield.tools/pricing">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"SoftwareApplication","name":"AIShield","url":"https://aishield.tools","applicationCategory":"SecurityApplication","offers":[{"@type":"Offer","name":"Free Tier","price":"0","priceCurrency":"CNY","description":"50次/天匿名免费 + 注册送100积分"},{"@type":"Offer","name":"Credit Pack","price":"1","priceCurrency":"CNY","description":"100积分/元，按量计费"}]}
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"AIShield","url":"https://aishield.tools","applicationCategory":"SecurityApplication","offers":[{"@type":"Offer","name":"Open Source (Free)","price":"0","priceCurrency":"CNY","description":"100% 开源免费，本地运行，无注册、无 API Key、无计费"}]}
 </script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -34,7 +34,7 @@ h1{text-align:center;font-size:32px;font-weight:700;margin-bottom:8px}
 .card{background:var(--surface);border:1px solid rgba(255,255,255,0.06);border-radius:var(--radius);padding:28px;position:relative;transition:border-color .2s}
 .card:hover{border-color:rgba(139,92,246,0.3)}
 .card.featured{border-color:var(--brand);box-shadow:0 0 30px rgba(139,92,246,0.1)}
-.card.featured::before{content:'推荐';position:absolute;top:-1px;right:20px;background:var(--brand);color:#fff;font-size:11px;padding:3px 10px;border-radius:0 0 6px 6px}
+.card.featured::before{content:'核心';position:absolute;top:-1px;right:20px;background:var(--brand);color:#fff;font-size:11px;padding:3px 10px;border-radius:0 0 6px 6px}
 .card h3{font-size:18px;margin-bottom:4px}
 .card .price{font-size:36px;font-weight:700;margin:16px 0 4px}
 .card .price span{font-size:14px;font-weight:400;color:var(--text-muted)}
@@ -49,16 +49,10 @@ h1{text-align:center;font-size:32px;font-weight:700;margin-bottom:8px}
 .cta-secondary{background:var(--surface2);color:var(--text);border:1px solid rgba(255,255,255,0.1)}
 .section{margin-bottom:40px}
 .section h2{font-size:20px;margin-bottom:16px}
-.cost-table{width:100%;border-collapse:collapse;font-size:14px}
-.cost-table th,.cost-table td{padding:10px 16px;text-align:left;border-bottom:1px solid rgba(255,255,255,0.06)}
-.cost-table th{color:var(--text-muted);font-weight:500}
-.cost-table td{color:var(--text)}
-.cost-table .highlight{color:var(--brand2)}
 .faq{max-width:680px;margin:0 auto}
 .faq details{background:var(--surface);border:1px solid rgba(255,255,255,0.06);border-radius:8px;margin-bottom:8px;padding:16px 20px}
 .faq summary{cursor:pointer;font-weight:600;font-size:15px}
 .faq p{margin-top:10px;font-size:14px;color:var(--text-muted)}
-.agent-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.2);border-radius:20px;padding:4px 12px;font-size:12px;color:var(--green);margin-left:8px}
 footer{text-align:center;color:var(--text-muted);font-size:12px;margin-top:48px;padding-top:24px;border-top:1px solid rgba(255,255,255,0.06)}
 </style>
 </head>
@@ -68,108 +62,90 @@ footer{text-align:center;color:var(--text-muted);font-size:12px;margin-top:48px;
   <div class="logo">AIShield</div>
   <div class="nav-links">
     <a href="/">首页</a>
-    <a href="/pricing">定价</a>
-    <a href="/owasp-mcp-top10-guide/owasp-mcp-top10-guide.html">OWASP指南</a>
+    <a href="/mcp-security-guide">指南</a>
+    <a href="/owasp-mcp-top10-guide">OWASP指南</a>
     <a href="https://github.com/lm203688/aishield">GitHub</a>
   </div>
 </nav>
 
-<h1>按量计费，用多少付多少</h1>
-<p class="hero-sub">注册送 <strong>100 积分</strong>，<strong>1 元 = 100 积分</strong>，Agent 调用半价<span class="agent-badge">Agent Friendly</span></p>
+<h1>100% 开源免费 · 本地优先</h1>
+<p class="hero-sub">零依赖、<strong>代码不出机</strong>、无注册、无 API Key、无计费<span class="agent-badge" style="display:inline-flex;align-items:center;gap:6px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.2);border-radius:20px;padding:4px 12px;font-size:12px;color:var(--green);margin-left:8px">Local First</span></p>
 
 <div class="cards">
   <div class="card">
-    <h3>免费体验</h3>
-    <div class="price">0<span></span></div>
-    <div class="price-credit">50 次/天匿名访问</div>
+    <h3>本地运行</h3>
+    <div class="price">0<span> 依赖</span></div>
+    <div class="price-credit">Python 标准库即可</div>
     <ul>
-      <li>无需注册，直接调用 API</li>
-      <li>安全扫描 50 次/天</li>
-      <li>Prompt 注入检测</li>
-      <li>违禁词检测</li>
-      <li>无 API Key，无积分</li>
+      <li>零第三方依赖</li>
+      <li>代码不出机</li>
+      <li>无需联网</li>
+      <li>本地 API (localhost:8450)</li>
+      <li>本地 CLI 扫描</li>
     </ul>
-    <a href="/api/v1/audit" class="cta cta-secondary">直接试用</a>
+    <a href="https://github.com/lm203688/aishield" class="cta cta-secondary">查看源码</a>
   </div>
 
   <div class="card featured">
-    <h3>积分制</h3>
-    <div class="price">1 CNY<span>/ 100 积分</span></div>
-    <div class="price-credit">注册送 100 积分（可扫 100 次）</div>
+    <h3>开源免费</h3>
+    <div class="price">0<span> CNY</span></div>
+    <div class="price-credit">MIT License · 永久免费</div>
     <ul>
-      <li>全量 227 条规则扫描</li>
+      <li>全量 227 条规则</li>
       <li>Prompt 注入（中英文）</li>
       <li>违禁词检测（6 平台）</li>
       <li>Rug Pull 检测</li>
       <li>MCP 握手验证</li>
-      <li>批量扫描（5 积分/次）</li>
-      <li>Agent 调用半价</li>
-      <li>API Key 认证</li>
-      <li>按量计费，无浪费</li>
+      <li>批量扫描</li>
+      <li>无付费墙</li>
     </ul>
-    <a href="/api/v1/account/register" class="cta cta-primary">注册获取 API Key</a>
+    <a href="https://github.com/lm203688/aishield" class="cta cta-primary">GitHub Star</a>
   </div>
 
   <div class="card">
-    <h3>Agent 生态</h3>
-    <div class="price">0.5x<span></span></div>
-    <div class="price-credit">Agent 身份自动半价</div>
+    <h3>MCP 接入</h3>
+    <div class="price">npx<span></span></div>
+    <div class="price-credit">一行命令即用</div>
     <ul>
-      <li>Agent 注册自动识别</li>
-      <li>所有操作半价扣费</li>
-      <li>委托链安全扫描</li>
+      <li>npx -y aishield-mcp-server</li>
+      <li>Claude / Cursor 接入</li>
+      <li>Glama 一键安装</li>
       <li>A2A 协议支持</li>
       <li>Agent Card 发现</li>
-      <li>无限扩展空间</li>
-      <li>适合 CI/CD 集成</li>
+      <li>CI/CD 集成</li>
     </ul>
-    <a href="/agent.html" class="cta cta-secondary">Agent 入驻</a>
+    <a href="/mcp-security-guide" class="cta cta-secondary">使用指南</a>
   </div>
-</div>
-
-<div class="section">
-  <h2>积分消耗明细</h2>
-  <table class="cost-table">
-    <thead><tr><th>操作</th><th>人类调用</th><th>Agent 调用</th><th>人民币成本</th></tr></thead>
-    <tbody>
-      <tr><td>安全扫描 (audit)</td><td>1 积分</td><td class="highlight">0.5 积分</td><td>0.01 / 0.005 CNY</td></tr>
-      <tr><td>Prompt 注入检测</td><td>1 积分</td><td class="highlight">0.5 积分</td><td>0.01 / 0.005 CNY</td></tr>
-      <tr><td>违禁词检测</td><td>0.5 积分</td><td class="highlight">0.25 积分</td><td>0.005 / 0.0025 CNY</td></tr>
-      <tr><td>Rug Pull 检测</td><td>1 积分</td><td class="highlight">0.5 积分</td><td>0.01 / 0.005 CNY</td></tr>
-      <tr><td>MCP 握手验证</td><td>0.5 积分</td><td class="highlight">0.25 积分</td><td>0.005 / 0.0025 CNY</td></tr>
-      <tr><td>批量扫描</td><td>5 积分</td><td class="highlight">2.5 积分</td><td>0.05 / 0.025 CNY</td></tr>
-    </tbody>
-  </table>
 </div>
 
 <div class="section">
   <h2>常见问题</h2>
   <div class="faq">
     <details>
-      <summary>Agent 适合积分制还是订阅制？</summary>
-      <p>Agent 调用频率不可预测，不适合月度订阅。积分制按需消耗，Agent 自主决定何时调用、调用多少，符合 AI Agent 自主决策的特性。GitHub Actions（分钟数制）、Railway（资源额度）、Vercel（Credits）均采用类似模式。</p>
+      <summary>真的完全免费吗？</summary>
+      <p>是的。AIShield 以 MIT License 开源，永久免费。没有付费墙、没有积分、没有订阅。你克隆仓库后在自己机器上运行即可，所有数据留在本地。</p>
     </details>
     <details>
-      <summary>1 分钱一次扫描，会不会太便宜？</summary>
-      <p>现阶段 MCP 生态商业化极早期（不到 5% 的 MCP Server 有收入），核心目标是获客和生态建设。积分制降低试用门槛，让更多 Agent 和开发者接入，后续通过增值服务（委托链安全、文化完整性验证）提升客单价。</p>
+      <summary>需要注册或 API Key 吗？</summary>
+      <p>不需要。本地运行模式（python api/server.py 或 npx -y aishield-mcp-server）无需任何注册、密钥或云端账号。代码不出机。</p>
     </details>
     <details>
-      <summary>Agent 调用为什么半价？</summary>
-      <p>Agent 是 AIShield 的核心服务对象，Agent 带来的调用量远超人类。半价策略鼓励 Agent 优先选择 AIShield，形成网络效应——Agent 用得越多，生态越繁荣，人类用户也越倾向选择已被大量 Agent 验证过的安全服务。</p>
+      <summary>和 aishield.ai 是同一款产品吗？</summary>
+      <p>不是。本仓库是<strong>本地开源版</strong> AIShield；aishield.ai 是同名商业云 SaaS（注册 / 密钥 / 计费式云端服务），二者是完全不同的产品。请认准 GitHub 仓库 lm203688/aishield。</p>
     </details>
     <details>
-      <summary>积分用完了怎么办？</summary>
-      <p>1 元 = 100 积分，通过 /api/v1/account/recharge 充值。后续将接入支付宝和 Stripe，支持国际信用卡。充值无最低门槛，1 元起充。</p>
+      <summary>数据会传到云端吗？</summary>
+      <p>不会。扫描在本地执行，被扫配置不会被 spawn 执行，代码与数据均不出机。可选的远程 LLM 语义后端也由你自行配置。</p>
     </details>
     <details>
-      <summary>和竞品比价格如何？</summary>
-      <p>卖家精灵 MCP 月付 99 CNY 起仅 1000 次/月。AIShield 积分制 1 CNY = 100 次，无月费无到期，且 Agent 半价。对中小开发者和 Agent 生态来说，AIShield 成本仅为竞品的 1/10-1/50。</p>
+      <summary>如何安装？</summary>
+      <p>作为 MCP Server：<code>npx -y aishield-mcp-server</code>；本地 API：<code>python api/server.py</code>；详见 <a href="/mcp-security-guide">MCP 安全指南</a> 与 GitHub README。</p>
     </details>
   </div>
 </div>
 
 <footer>
-  <p>AIShield — AI Agent Security Infrastructure | MIT License | <a href="https://github.com/lm203688/aishield">GitHub</a></p>
+  <p>AIShield — 本地优先的 AI Agent 安全扫描器 | MIT License | <a href="https://github.com/lm203688/aishield">GitHub</a></p>
 </footer>
 </div>
 </body>
