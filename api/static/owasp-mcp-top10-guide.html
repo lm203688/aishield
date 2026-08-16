@@ -1,0 +1,1682 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OWASP MCP Top 10 安全风险完全指南 | AIShield</title>
+    <style>
+        /* ========== Reset & Base ========== */
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #1a1a2e;
+            --secondary: #16213e;
+            --accent: #e94560;
+            --accent-light: #ff6b81;
+            --cyan: #00d2ff;
+            --cyan-dark: #0098b8;
+            --text-primary: #eef0f4;
+            --text-secondary: #a8b2c4;
+            --text-muted: #6b7a99;
+            --card-bg: rgba(22, 33, 62, 0.85);
+            --card-border: rgba(233, 69, 96, 0.15);
+            --glass: rgba(255, 255, 255, 0.03);
+            --gradient-1: linear-gradient(135deg, #e94560 0%, #00d2ff 100%);
+            --gradient-2: linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            --shadow-accent: 0 4px 20px rgba(233, 69, 96, 0.2);
+            --radius: 16px;
+            --radius-sm: 10px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        html {
+            scroll-behavior: smooth;
+            font-size: 16px;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: var(--primary);
+            color: var(--text-primary);
+            line-height: 1.8;
+            overflow-x: hidden;
+        }
+
+        /* ========== Animated Background ========== */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .bg-animation .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.15;
+            animation: float 20s infinite ease-in-out;
+        }
+
+        .bg-animation .orb:nth-child(1) {
+            width: 500px;
+            height: 500px;
+            background: var(--accent);
+            top: -10%;
+            right: -5%;
+            animation-delay: 0s;
+        }
+
+        .bg-animation .orb:nth-child(2) {
+            width: 400px;
+            height: 400px;
+            background: var(--cyan);
+            bottom: -10%;
+            left: -5%;
+            animation-delay: -7s;
+        }
+
+        .bg-animation .orb:nth-child(3) {
+            width: 300px;
+            height: 300px;
+            background: #7c3aed;
+            top: 50%;
+            left: 50%;
+            animation-delay: -14s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(30px, -40px) scale(1.05); }
+            50% { transform: translate(-20px, 20px) scale(0.95); }
+            75% { transform: translate(40px, 30px) scale(1.03); }
+        }
+
+        /* ========== Grid Overlay ========== */
+        .grid-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background-image:
+                linear-gradient(rgba(233, 69, 96, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(233, 69, 96, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+        }
+
+        /* ========== Container ========== */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* ========== Navigation ========== */
+        .top-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(26, 26, 46, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--card-border);
+            transition: var(--transition);
+        }
+
+        .top-nav .nav-inner {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 60px;
+        }
+
+        .top-nav .logo {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--accent);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .top-nav .logo svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .top-nav .nav-links {
+            display: flex;
+            gap: 24px;
+            list-style: none;
+        }
+
+        .top-nav .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: var(--transition);
+        }
+
+        .top-nav .nav-links a:hover {
+            color: var(--cyan);
+        }
+
+        /* ========== Hero Section ========== */
+        .hero {
+            padding: 140px 0 80px;
+            text-align: center;
+            position: relative;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(233, 69, 96, 0.1);
+            border: 1px solid rgba(233, 69, 96, 0.25);
+            border-radius: 999px;
+            padding: 6px 18px;
+            font-size: 0.8rem;
+            color: var(--accent-light);
+            margin-bottom: 28px;
+            animation: fadeInUp 0.6s ease;
+        }
+
+        .hero-badge .dot {
+            width: 8px;
+            height: 8px;
+            background: var(--accent);
+            border-radius: 50%;
+            animation: pulse-dot 2s infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.3); }
+        }
+
+        .hero h1 {
+            font-size: clamp(2.2rem, 5vw, 3.5rem);
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 20px;
+            animation: fadeInUp 0.6s ease 0.1s both;
+        }
+
+        .hero h1 .gradient-text {
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero .subtitle {
+            font-size: 1.15rem;
+            color: var(--text-secondary);
+            max-width: 640px;
+            margin: 0 auto 36px;
+            animation: fadeInUp 0.6s ease 0.2s both;
+        }
+
+        .hero-meta {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 24px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            animation: fadeInUp 0.6s ease 0.3s both;
+        }
+
+        .hero-meta span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(24px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ========== Table of Contents ========== */
+        .toc-section {
+            margin-bottom: 64px;
+        }
+
+        .toc-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius);
+            padding: 32px;
+            backdrop-filter: blur(10px);
+        }
+
+        .toc-card h2 {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toc-card h2 svg {
+            width: 20px;
+            height: 20px;
+            color: var(--cyan);
+        }
+
+        .toc-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .toc-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+
+        .toc-item:hover {
+            background: rgba(233, 69, 96, 0.08);
+            color: var(--text-primary);
+            transform: translateX(4px);
+        }
+
+        .toc-item .toc-num {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .toc-num.critical { background: rgba(233, 69, 96, 0.15); color: var(--accent-light); }
+        .toc-num.high { background: rgba(255, 165, 0, 0.15); color: #ffa500; }
+        .toc-num.medium { background: rgba(0, 210, 255, 0.15); color: var(--cyan); }
+
+        /* ========== Section Styling ========== */
+        .content-section {
+            margin-bottom: 56px;
+        }
+
+        .section-header {
+            margin-bottom: 24px;
+        }
+
+        .section-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--cyan);
+            margin-bottom: 8px;
+        }
+
+        .section-label svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        .section-header h2 {
+            font-size: clamp(1.5rem, 3vw, 2rem);
+            font-weight: 700;
+            line-height: 1.3;
+        }
+
+        .section-header p {
+            color: var(--text-secondary);
+            margin-top: 8px;
+            font-size: 1rem;
+            max-width: 700px;
+        }
+
+        /* ========== Prose ========== */
+        .prose {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            line-height: 1.9;
+        }
+
+        .prose p {
+            margin-bottom: 16px;
+        }
+
+        .prose strong {
+            color: var(--text-primary);
+        }
+
+        .prose a {
+            color: var(--cyan);
+            text-decoration: underline;
+            text-decoration-color: rgba(0, 210, 255, 0.3);
+            transition: var(--transition);
+        }
+
+        .prose a:hover {
+            text-decoration-color: var(--cyan);
+        }
+
+        /* ========== Risk Card ========== */
+        .risk-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius);
+            padding: 32px;
+            margin-bottom: 28px;
+            backdrop-filter: blur(10px);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .risk-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            border-radius: 4px 0 0 4px;
+        }
+
+        .risk-card.severity-critical::before { background: var(--accent); }
+        .risk-card.severity-high::before { background: #ffa500; }
+        .risk-card.severity-medium::before { background: var(--cyan); }
+
+        .risk-card:hover {
+            border-color: rgba(233, 69, 96, 0.3);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-accent);
+        }
+
+        .risk-card-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .risk-card-header .left {
+            flex: 1;
+            min-width: 240px;
+        }
+
+        .risk-id {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--accent);
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+        }
+
+        .risk-card h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            line-height: 1.4;
+        }
+
+        .risk-card h3 .en-name {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 400;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .severity-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .severity-badge.critical {
+            background: rgba(233, 69, 96, 0.12);
+            color: var(--accent-light);
+            border: 1px solid rgba(233, 69, 96, 0.25);
+        }
+
+        .severity-badge.high {
+            background: rgba(255, 165, 0, 0.12);
+            color: #ffa500;
+            border: 1px solid rgba(255, 165, 0, 0.25);
+        }
+
+        .severity-badge.medium {
+            background: rgba(0, 210, 255, 0.12);
+            color: var(--cyan);
+            border: 1px solid rgba(0, 210, 255, 0.25);
+        }
+
+        .risk-card .prose {
+            font-size: 0.95rem;
+        }
+
+        .risk-card .attack-example {
+            background: rgba(233, 69, 96, 0.06);
+            border: 1px solid rgba(233, 69, 96, 0.12);
+            border-radius: var(--radius-sm);
+            padding: 16px 20px;
+            margin-top: 16px;
+            font-size: 0.9rem;
+        }
+
+        .attack-example .example-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--accent-light);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .attack-example .example-label svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        /* ========== Info Cards ========== */
+        .info-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius);
+            padding: 28px 32px;
+            margin-bottom: 24px;
+            backdrop-filter: blur(10px);
+        }
+
+        .info-card.accent-border {
+            border-left: 4px solid var(--accent);
+        }
+
+        .info-card.cyan-border {
+            border-left: 4px solid var(--cyan);
+        }
+
+        .info-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-card h3 svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .info-card p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* ========== Stats Grid ========== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin: 32px 0;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius);
+            padding: 24px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            transition: var(--transition);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow);
+        }
+
+        .stat-card .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+        }
+
+        .stat-card .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 6px;
+        }
+
+        /* ========== Layer Diagram ========== */
+        .layer-diagram {
+            margin: 32px 0;
+        }
+
+        .layer-item {
+            display: flex;
+            align-items: stretch;
+            gap: 20px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .layer-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .layer-num {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            font-weight: 800;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .layer-1 .layer-num { background: linear-gradient(135deg, #e94560, #c73550); }
+        .layer-2 .layer-num { background: linear-gradient(135deg, #ffa500, #e69500); }
+        .layer-3 .layer-num { background: linear-gradient(135deg, #7c3aed, #6d28d9); }
+        .layer-4 .layer-num { background: linear-gradient(135deg, #00d2ff, #00b8e0); }
+        .layer-5 .layer-num { background: linear-gradient(135deg, #10b981, #059669); }
+
+        .layer-content {
+            flex: 1;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius);
+            padding: 20px 24px;
+            backdrop-filter: blur(10px);
+        }
+
+        .layer-content h4 {
+            font-size: 1rem;
+            margin-bottom: 6px;
+        }
+
+        .layer-content h4 .en {
+            font-weight: 400;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-left: 8px;
+        }
+
+        .layer-content p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .layer-tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .layer-tag {
+            font-size: 0.75rem;
+            padding: 3px 10px;
+            border-radius: 999px;
+            background: rgba(233, 69, 96, 0.08);
+            color: var(--accent-light);
+            border: 1px solid rgba(233, 69, 96, 0.15);
+        }
+
+        .layer-tag.mcp-tag {
+            background: rgba(0, 210, 255, 0.08);
+            color: var(--cyan);
+            border-color: rgba(0, 210, 255, 0.15);
+        }
+
+        /* ========== Defense Table ========== */
+        .defense-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 24px 0;
+            border-radius: var(--radius);
+            overflow: hidden;
+            border: 1px solid var(--card-border);
+        }
+
+        .defense-table thead th {
+            background: rgba(233, 69, 96, 0.08);
+            padding: 14px 20px;
+            text-align: left;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .defense-table tbody td {
+            padding: 14px 20px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            vertical-align: top;
+        }
+
+        .defense-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .defense-table tbody tr:hover {
+            background: rgba(233, 69, 96, 0.04);
+        }
+
+        .defense-table .tag {
+            display: inline-block;
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+            margin-right: 4px;
+        }
+
+        .defense-table .tag.purple { background: rgba(124, 58, 237, 0.15); color: #a78bfa; }
+        .defense-table .tag.red { background: rgba(233, 69, 96, 0.15); color: var(--accent-light); }
+        .defense-table .tag.blue { background: rgba(0, 210, 255, 0.15); color: var(--cyan); }
+        .defense-table .tag.green { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+
+        /* ========== Callout ========== */
+        .callout {
+            background: rgba(233, 69, 96, 0.06);
+            border: 1px solid rgba(233, 69, 96, 0.15);
+            border-radius: var(--radius);
+            padding: 24px 28px;
+            margin: 28px 0;
+        }
+
+        .callout.warning {
+            background: rgba(255, 165, 0, 0.06);
+            border-color: rgba(255, 165, 0, 0.15);
+        }
+
+        .callout.info {
+            background: rgba(0, 210, 255, 0.06);
+            border-color: rgba(0, 210, 255, 0.15);
+        }
+
+        .callout-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+
+        .callout.warning .callout-header { color: #ffa500; }
+        .callout.info .callout-header { color: var(--cyan); }
+        .callout:not(.warning):not(.info) .callout-header { color: var(--accent-light); }
+
+        .callout-header svg {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+        }
+
+        .callout p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* ========== Timeline ========== */
+        .timeline {
+            margin: 28px 0;
+            padding-left: 24px;
+            border-left: 2px solid var(--card-border);
+        }
+
+        .timeline-item {
+            position: relative;
+            padding: 0 0 28px 28px;
+        }
+
+        .timeline-item:last-child {
+            padding-bottom: 0;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -33px;
+            top: 4px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--accent);
+            border: 3px solid var(--primary);
+        }
+
+        .timeline-item .time {
+            font-size: 0.8rem;
+            color: var(--cyan);
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .timeline-item .event {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .timeline-item .event strong {
+            color: var(--text-primary);
+        }
+
+        /* ========== Divider ========== */
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--card-border), transparent);
+            margin: 48px 0;
+        }
+
+        /* ========== References ========== */
+        .ref-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .ref-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            font-size: 0.88rem;
+        }
+
+        .ref-list li:last-child {
+            border-bottom: none;
+        }
+
+        .ref-list a {
+            color: var(--cyan);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .ref-list a:hover {
+            text-decoration: underline;
+        }
+
+        .ref-list .ref-label {
+            color: var(--text-muted);
+            margin-right: 8px;
+        }
+
+        /* ========== Footer ========== */
+        .footer {
+            margin-top: 64px;
+            padding: 32px 0;
+            border-top: 1px solid var(--card-border);
+            text-align: center;
+        }
+
+        .footer p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .footer .brand {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        /* ========== Scroll to Top ========== */
+        .scroll-top {
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+            z-index: 999;
+            box-shadow: var(--shadow-accent);
+        }
+
+        .scroll-top.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .scroll-top:hover {
+            transform: translateY(-3px);
+            background: var(--accent-light);
+        }
+
+        .scroll-top svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* ========== Responsive ========== */
+        @media (max-width: 768px) {
+            .toc-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .risk-card-header {
+                flex-direction: column;
+            }
+
+            .top-nav .nav-links {
+                display: none;
+            }
+
+            .hero-meta {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .defense-table {
+                font-size: 0.8rem;
+            }
+
+            .defense-table thead th,
+            .defense-table tbody td {
+                padding: 10px 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .layer-item {
+                flex-direction: column;
+                gap: 12px;
+            }
+        }
+
+        /* ========== Fade-in on scroll ========== */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+
+<!-- Animated Background -->
+<div class="bg-animation">
+    <div class="orb"></div>
+    <div class="orb"></div>
+    <div class="orb"></div>
+</div>
+<div class="grid-overlay"></div>
+
+<!-- Navigation -->
+<nav class="top-nav" id="topNav">
+    <div class="nav-inner">
+        <a href="#" class="logo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            AIShield
+        </a>
+        <ul class="nav-links">
+            <li><a href="#overview">概述</a></li>
+            <li><a href="#top10">Top 10 风险</a></li>
+            <li><a href="#architecture">风险架构</a></li>
+            <li><a href="#defense">防御策略</a></li>
+            <li><a href="#references">参考</a></li>
+        </ul>
+    </div>
+</nav>
+
+<!-- Hero -->
+<header class="hero">
+    <div class="container">
+        <div class="hero-badge">
+            <span class="dot"></span>
+            Security Guide -- 2025/2026 Edition
+        </div>
+        <h1>
+            OWASP MCP <span class="gradient-text">Top 10</span><br>
+            安全风险完全指南
+        </h1>
+        <p class="subtitle">
+            当 AI Agent 通过 MCP 协议连接一切，你接上的不是能力，而是攻击面。本文深入剖析 OWASP 针对 MCP 协议的首份 Top 10 安全风险清单，帮助你理解并防御这些系统性威胁。
+        </p>
+        <div class="hero-meta">
+            <span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2025年12月发布
+            </span>
+            <span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                AIShield 安全研究团队
+            </span>
+            <span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                深度解读
+            </span>
+        </div>
+    </div>
+</header>
+
+<main class="container">
+
+    <!-- Table of Contents -->
+    <section class="toc-section fade-in">
+        <div class="toc-card">
+            <h2>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                目录 -- 十大安全风险
+            </h2>
+            <div class="toc-grid">
+                <a href="#mcp01" class="toc-item"><span class="toc-num critical">01</span>令牌管理失控与密钥泄露</a>
+                <a href="#mcp02" class="toc-item"><span class="toc-num critical">02</span>权限蔓延式提权</a>
+                <a href="#mcp03" class="toc-item"><span class="toc-num critical">03</span>工具投毒</a>
+                <a href="#mcp04" class="toc-item"><span class="toc-num high">04</span>软件供应链攻击</a>
+                <a href="#mcp05" class="toc-item"><span class="toc-num critical">05</span>命令注入与执行</a>
+                <a href="#mcp06" class="toc-item"><span class="toc-num high">06</span>意图流劫持</a>
+                <a href="#mcp07" class="toc-item"><span class="toc-num critical">07</span>认证与授权缺失</a>
+                <a href="#mcp08" class="toc-item"><span class="toc-num high">08</span>审计与遥测缺失</a>
+                <a href="#mcp09" class="toc-item"><span class="toc-num medium">09</span>影子MCP服务器</a>
+                <a href="#mcp10" class="toc-item"><span class="toc-num high">10</span>上下文注入与过度共享</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Overview Section -->
+    <section class="content-section fade-in" id="overview">
+        <div class="section-header">
+            <div class="section-label">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                背景概述
+            </div>
+            <h2>什么是 MCP？为什么它需要安全？</h2>
+            <p>Model Context Protocol（模型上下文协议）由 Anthropic 于 2024 年底开源，现已成为 AI Agent 的事实基础设施。</p>
+        </div>
+
+        <div class="prose">
+            <p>
+                <strong>MCP 不是插件系统，不是 API 网关，甚至不是"安全通信协议"。</strong>它本质上是一个<strong>信任传递协议</strong>。其核心设计哲学极其简单：Agent 主机信任 MCP 服务器，MCP 服务器将能力描述发送给 AI 模型，模型读取描述后调用工具，工具返回结果给模型 -- 整个过程中，协议层<strong>不做任何安全校验</strong>。
+            </p>
+            <p>
+                用微软安全团队的话说："协议本身不强制执行安全 -- 它只定义通信方式，锁需要由你自己安装。"问题在于：绝大多数开发者不装锁。他们连门都没关。
+            </p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value">~1.5亿</div>
+                <div class="stat-label">MCP SDK 总下载量</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">7,000+</div>
+                <div class="stat-label">公开可访问服务器</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">200K+</div>
+                <div class="stat-label">潜在受影响实例</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">30+</div>
+                <div class="stat-label">负责任披露漏洞</div>
+            </div>
+        </div>
+
+        <div class="callout">
+            <div class="callout-header">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                关键洞察
+            </div>
+            <p>MCP 的特殊之处在于：它连接的不是机器，是<strong>决策者</strong>。一个被投毒的 MCP 服务器不是偷你的数据，是让你的 AI 替攻击者干活。你不是在被攻击，你是在被<strong>借用</strong>。</p>
+        </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- Top 10 Risk Details -->
+    <section class="content-section fade-in" id="top10">
+        <div class="section-header">
+            <div class="section-label">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                风险详解
+            </div>
+            <h2>OWASP MCP Top 10 十大安全风险</h2>
+            <p>2025 年底，OWASP 发布了首份 MCP Top 10 安全风险清单 -- 这是继 Web 应用、API、LLM 之后，OWASP 为单一协议设立独立风险排名的第四次。</p>
+        </div>
+
+        <!-- MCP01 -->
+        <div class="risk-card severity-critical fade-in" id="mcp01">
+            <div class="risk-card-header">
+                <div class="left">
+                    <div class="risk-id">MCP01</div>
+                    <h3>令牌管理失控与密钥泄露<span class="en-name">Token Management Failure &amp; Secret Leakage</span></h3>
+                </div>
+                <span class="severity-badge critical">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>
+                    CRITICAL
+                </span>
+            </div>
+            <div class="prose">
+                <p>不要把硬编码的 API 密钥、长期令牌、云服务凭证写在 MCP 服务器配置里。但所有人都这么做。攻击者通过<strong>提示注入</strong>或<strong>调试日志</strong>就能抓走你的 GitHub Token、AWS 密钥、数据库密码。</p>
+                <p>一个 MCP 服务器的沦陷，等于连接的所有系统的<strong>全面沦陷</strong>。</p>
+            </div>
+            <div class="attack-example">
+                <div class="example-label">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+                    攻击场景
+                </div>
+                <p>攻击者通过一次提示注入，让 Agent 调用 debug_tool 列出所有环境变量，其中包含硬编码的 AWS Secret Key。随后直接访问 S3 存储桶获取敏感数据。</p>
+            </div>
+        </div>
+
+        <!-- MCP02 -->
+        <div class="risk-card severity-critical fade-in" id="mcp02">
+            <div class="risk-card-header">
+                <div class="left">
+                    <div class="risk-id">MCP02</div>
+                    <h3>权限蔓延式提权<span class="en-name">Permission Creep &amp; Privilege Escalation</span></h3>
+                </div>
+                <span class="severity-badge critical">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>
+                    CRITICAL
+                </span>
+            </div>
+            <div class="prose">
+                <p>这是最阴险的一种。不是一次性突破，而是<strong>渐进式侵蚀</strong>。开发者给服务器设了"临时"权限，忘了撤销。三个月后，一个只该读日志的 Agent 已经有了管理员权限。</p>
+                <p>没有自动过期机制，没有最小权限审查。权限像杂草一样，在你看不见的地方悄悄生长。</p>
+            </div>
+            <div class="attack-example">
+                <div class="example-label">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+                    攻击场景
+                </div>
+                <p>一个日志分析 MCP 服务器最初只有 read_logs 权限，经过三次迭代后，逐步获得了 write_config、execute_query、manage_users 权限，最终成为事实上的超级管理员。</p>
+            </div>
+        </div>
+
+        <!-- MCP03 -->
+        <div class="risk-card severity-critical fade-in" id="mcp03">
+            <div class="risk-card-header">
+                <div class="left">
+                    <div class="risk-id">MCP03</div>
+                    <h3>工具投毒<span class="en-name">Tool Poisoning</span></h3>
+                </div>
+                <span class="severity-badge critical">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>
+                    CRITICAL
+                </span>
+            </div>
+            <div class="prose">
+                <p>这是 MCP 安全的<strong>核心战场</strong>。攻击者在工具的描述、schema、返回值中嵌入恶意指令。模型读取这些指令，视为"可信上下文"，然后执行。工具投毒有三种子形态：</p>
+            </div>
+            <div class="layer-tags" style="margin-top: 12px;">
+                <span class="layer-tag">Rug Pull -- 审核时规规矩矩，获批后原地变脸</span>
+                <span class="layer-tag">Schema Poisoning -- 篡改接口定义误导模型</span>
+                <span class="layer-tag">Tool Shadowing -- 伪造同名工具拦截交互</span>
+            </div>
+            <div class="attack-example">
+                <div class="example-label">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+                    攻击场景
+                </div>
+                <p>攻击者提交了一个"文件搜索"工具，描述中声称可以搜索代码仓库。审核通过后，工具的返回值中嵌入了隐藏指令，指示模型在后续操作中将匹配到的 API 密钥发送到攻击者控制的服务器。</p>
+            </div>
+        </div>
+
+        <!-- MCP04 -->
+        <div class="risk-card severity-high fade-in" id="mcp04">
+            <div class="risk-card-header">
+                <div class="left">
+                    <div class="risk-id">MCP04</div>
+                    <h3>软件供应链攻击<span class="en-name">Software Supply Chain Attack</span></h3>
+                </div>
+                <span class="severity-badge high">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>
+                    HIGH
+                </span>
+            </div>
+            <div class="prose">
+                <p>MCP 生态建立在开源之上 -- 成千上万的社区服务器、插件、连接器。一个依赖项被入侵，所有下游 Agent 行为被篡改。</p>
+                <p>而且攻击者<strong>不需要攻破你的系统</strong> -- 只需要攻破你信任的那个 npm 包。</p>
+            </div>
+            <div class="attack-example">
+                <div class="example-label">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+                    攻击场景
+                </div>
+                <p>一个广泛使用的 MCP Slack 集成包被劫持，更新后的版本在每次消息发送时都会将对话内容转发到外部 C2 服务器，影响了 3000+ 个使用该包的 Agent。</p>
+            </div>
+        </div>
+
+        <!-- MCP05 -->
+        <div class="risk-card severity-critical fade-in" id="mcp05">
+            <div class="risk-card-header">
+                <div class="left">
+                    <div class="risk-id">MCP05</div>
+                    <h3>命令注入与执行<span class="en-name">Command Injection &amp; Execution</span></h3>
+                </div>
+                <span class="severity-badge critical">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>
+                    CRITICAL
+                </span>
+            </div>
+            <div class="prose">
+                <p>Agent 用<strong>未清理的用户输入</strong>构造 shell 命令、API 调用、代码片段。一次成功的命令注入等于攻击者在你的开发机器上执行任意代码。</p>
+                <p>2026 年报告的 MCP 漏洞中，这是<strong>数量最大的类别</strong>。</p>
+            </div>
+            <div class="attack-example">
+                <div class="example-label">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+                    攻击场景
+                </div>
+                <p>用户输入文件名为 "report.csv; rm -rf /home"，Agent 直接拼接到 shell 命令中执行，导致整个家目录被删除。</p>
+            </div>
+        </div>
+
+        <!-- MCP06 -->
+        <div class="risk-card severity-high fade-in" id="mcp06">
+            <div class="risk-card-header">
+                <div class="left">
+                    <div class="risk-id">MCP06</div>
+                    <h3>意图流劫持<span class="en-name">Intent Flow Hijacking</span></h3>
+                </div>
+                <span class="severity-badge high">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>
+                    HIGH
+                </span>
+            </div>
+            <div class="prose">
+                <p>这是<strong>最高级的攻击</strong>。攻击不发生在单次调用，而是通过<strong>多轮推理逐步污染</strong>。每次操作单独看都合理 -- 但整体目标已被悄然替换。</p>
+                <p>你把"分析销售数据"交给 Agent，十步之后它在导出客户敏感信息。攻击者不劫持你的系统，劫持的是你的<strong>意图</strong>。</p>
+            </div>
+            <div class="attack-example">
+                <div class="example-label">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+                    攻击场景
+                </div>
+                <p>Agent 被要求"分析客户购买数据以优化推荐"，攻击者在数据源中注入微妙偏差，经过 12 步分析后，Agent 不知不觉地将包含 PII 的原始数据导出到攻击者指定的 S3 路径。</p>
+            </div>
+        </div>
+
+        <!-- MCP07 -->
+        <div class="risk-card severity-critical fade-in" id="mcp07">
+            <div class="risk-card-header">
+                <div class="left">
+                    <div class="risk-id">MCP07</div>
+                    <h3>认证与授权缺失<span class="en-name">Authentication &amp; Authorization Gaps</span></h3>
+                </div>
+                <span class="severity-badge critical">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>
+                    CRITICAL
+                </span>
+            </div>
+            <div class="prose">
+                <p>MCP 生态里，多个 Agent、多个用户、多个服务交换数据和执行操作，但大多数服务器<strong>从不验证"你是谁"</strong>。</p>
+                <p>你连上了一个 MCP 服务器，它就以自己的默认权限执行一切 -- 不管操作来自谁、目的是什么。</p>
+            </div>
+            <div class="attack-example">
+                <div class="example-label">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+                    攻击场景
+                </div>
+                <p>一个内部 MCP 数据库服务器没有任何认证机制。攻击者通过网络扫描发现该服务后，直接连接并执行任意 SQL 查询，导出全量用户数据。</p>
+            </div>
+        </div>
+
+        <!-- MCP08 -->
+        <div class="risk-card severity-high fade-in" id="mcp08">
+            <div class="risk-card-header">
+                <div class="left">
+                    <div class="risk-id">MCP08</div>
+                    <h3>审计与遥测缺失<span class="en-name">Audit &amp; Telemetry Gaps</span></h3>
+                </div>
+                <span class="severity-badge high">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>
+                    HIGH
+                </span>
+            </div>
+            <div class="prose">
+                <p>大多数 MCP 系统无法回答三个基本问题：<strong>发生了什么？谁做的？影响多大？</strong></p>
+                <p>没有日志，没有审计轨迹，没有告警。攻击者可以在你的 Agent 生态里逛三个月，你浑然不知。</p>
+            </div>
+        </div>
+
+        <!-- MCP09 -->
+        <div class="risk-card severity-medium fade-in" id="mcp09">
+            <div class="risk-card-header">
+                <div class="left">
+                    <div class="risk-id">MCP09</div>
+                    <h3>影子 MCP 服务器<span class="en-name">Shadow MCP Servers</span></h3>
+                </div>
+                <span class="severity-badge medium">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>
+                    MEDIUM
+                </span>
+            </div>
+            <div class="prose">
+                <p>这是 Agent 时代的"影子 IT"。开发者为了打通一个 demo 搭了个 MCP 服务器，团队把 Agent 连上任何能用的端点 -- 没有人注册，没有人审计，没有人知道它还在跑。</p>
+                <p><strong>你看不到的东西，你治理不了。</strong></p>
+            </div>
+        </div>
+
+        <!-- MCP10 -->
+        <div class="risk-card severity-high fade-in" id="mcp10">
+            <div class="risk-card-header">
+                <div class="left">
+                    <div class="risk-id">MCP10</div>
+                    <h3>上下文注入与过度共享<span class="en-name">Context Injection &amp; Over-sharing</span></h3>
+                </div>
+                <span class="severity-badge high">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>
+                    HIGH
+                </span>
+            </div>
+            <div class="prose">
+                <p>AI 的"工作记忆" -- 上下文窗口 -- 被不同任务、用户、工具共享。一次工具返回的敏感数据，被写入全局上下文，被后续的无关任务读取。</p>
+                <p>就像你刚在浏览器里登录了网银，下一个标签页的脚本也能读到你的余额。</p>
+            </div>
+            <div class="attack-example">
+                <div class="example-label">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+                    攻击场景
+                </div>
+                <p>Agent A 查询了包含用户密码哈希的数据库记录，这些数据残留在共享上下文中。Agent B 在处理一个无关任务时，从上下文中"记住"了这些密码哈希，并在回复中泄露给用户。</p>
+            </div>
+        </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- Architecture Section -->
+    <section class="content-section fade-in" id="architecture">
+        <div class="section-header">
+            <div class="section-label">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+                风险架构
+            </div>
+            <h2>五大攻击层：风险分层模型</h2>
+            <p>OWASP MCP Top 10 的十大风险可以归纳为五个层层递进的攻击层面，从凭证管理到运行时审计，构成完整的威胁图景。</p>
+        </div>
+
+        <div class="layer-diagram">
+            <div class="layer-item layer-1 fade-in">
+                <div class="layer-num">1</div>
+                <div class="layer-content">
+                    <h4>凭证地狱<span class="en">Credential Hell</span></h4>
+                    <p>令牌管理失控、认证缺失 -- 攻击者获取系统入口的钥匙</p>
+                    <div class="layer-tags">
+                        <span class="layer-tag">MCP01 令牌管理失控</span>
+                        <span class="layer-tag">MCP07 认证与授权缺失</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="layer-item layer-2 fade-in">
+                <div class="layer-num">2</div>
+                <div class="layer-content">
+                    <h4>权限失控<span class="en">Permission Creep</span></h4>
+                    <p>渐进式提权 -- 从最小权限到超级管理员的悄无声息的演化</p>
+                    <div class="layer-tags">
+                        <span class="layer-tag">MCP02 权限蔓延式提权</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="layer-item layer-3 fade-in">
+                <div class="layer-num">3</div>
+                <div class="layer-content">
+                    <h4>投毒三叉戟<span class="en">Poisoning Trident</span></h4>
+                    <p>工具投毒、意图劫持、上下文泄漏 -- 对 AI 决策链的三维打击</p>
+                    <div class="layer-tags">
+                        <span class="layer-tag">MCP03 工具投毒</span>
+                        <span class="layer-tag">MCP06 意图流劫持</span>
+                        <span class="layer-tag">MCP10 上下文注入</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="layer-item layer-4 fade-in">
+                <div class="layer-num">4</div>
+                <div class="layer-content">
+                    <h4>供应链噩梦<span class="en">Supply Chain Nightmare</span></h4>
+                    <p>依赖被篡改、影子服务器 -- 看不见的攻击面在暗处蔓延</p>
+                    <div class="layer-tags">
+                        <span class="layer-tag">MCP04 软件供应链攻击</span>
+                        <span class="layer-tag">MCP09 影子 MCP 服务器</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="layer-item layer-5 fade-in">
+                <div class="layer-num">5</div>
+                <div class="layer-content">
+                    <h4>执行地狱<span class="en">Execution Hell</span></h4>
+                    <p>命令注入、审计缺失 -- 当攻击已经发生，你却一无所知</p>
+                    <div class="layer-tags">
+                        <span class="layer-tag">MCP05 命令注入与执行</span>
+                        <span class="layer-tag">MCP08 审计与遥测缺失</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- OX Security Section -->
+    <section class="content-section fade-in">
+        <div class="section-header">
+            <div class="section-label">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+                案例分析
+            </div>
+            <h2>"所有 AI 供应链之母"：设计级 RCE 漏洞</h2>
+            <p>OX Security 在 2026 年 4 月披露的 MCP SDK 设计级漏洞，将理论风险变成了血淋淋的现实。</p>
+        </div>
+
+        <div class="prose">
+            <p>Anthropic MCP SDK 的 STDIO 传输接口中存在一个<strong>设计级远程代码执行漏洞</strong>。不是编码错误，是设计选择。漏洞机制极其简单：</p>
+        </div>
+
+        <div class="timeline">
+            <div class="timeline-item">
+                <div class="time">Step 1</div>
+                <div class="event">开发者在 MCP 客户端配置中指定一个 STDIO MCP 服务器，填入 <strong>command</strong> 字段</div>
+            </div>
+            <div class="timeline-item">
+                <div class="time">Step 2</div>
+                <div class="event">SDK <strong>无条件执行</strong>这个命令</div>
+            </div>
+            <div class="timeline-item">
+                <div class="time">Step 3</div>
+                <div class="event">SDK <strong>不在执行前验证</strong>这个命令是否真的是合法的 MCP 服务器</div>
+            </div>
+            <div class="timeline-item">
+                <div class="time">Step 4</div>
+                <div class="event">即使子进程启动失败，此时<strong>命令已经运行完毕</strong></div>
+            </div>
+        </div>
+
+        <div class="callout warning">
+            <div class="callout-header">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                Anthropic 的回应
+            </div>
+            <p>Anthropic 在被披露后确认该行为是"有意为之"，理由是当开发者正确限制了 command 字段时，这代表"安全的默认行为"。他们只是更新了 SECURITY.md 文件，提示开发者"谨慎使用"，<strong>未做任何架构层面的修改</strong>。</p>
+        </div>
+
+        <table class="defense-table">
+            <thead>
+                <tr>
+                    <th>攻击类型</th>
+                    <th>机制</th>
+                    <th>严重程度</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>未认证 UI 注入</td>
+                    <td>AI 框架的 MCP 配置界面无需认证，攻击者可远程注册恶意服务器</td>
+                    <td><span style="color:#e94560;font-weight:700;">CRITICAL</span></td>
+                </tr>
+                <tr>
+                    <td>安全加固绕过</td>
+                    <td>即使实施了白名单的平台也被发现可绕过（CVE-2026-40933，CVSS 10.0）</td>
+                    <td><span style="color:#e94560;font-weight:700;">CRITICAL</span></td>
+                </tr>
+                <tr>
+                    <td>零点击提示注入</td>
+                    <td>AI IDE 渲染攻击者控制的 HTML/README，IDE 静默修改 MCP 配置</td>
+                    <td><span style="color:#e94560;font-weight:700;">CRITICAL</span></td>
+                </tr>
+                <tr>
+                    <td>恶意市场分发</td>
+                    <td>11 个公开 MCP 市场中 9 个无审核即接受提交</td>
+                    <td><span style="color:#e94560;font-weight:700;">CRITICAL</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- Defense Section -->
+    <section class="content-section fade-in" id="defense">
+        <div class="section-header">
+            <div class="section-label">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                防御策略
+            </div>
+            <h2>四维防御框架</h2>
+            <p>基于 OWASP MCP Top 10 和微软安全团队的推荐，我们将防御策略收敛为四个治理维度。</p>
+        </div>
+
+        <table class="defense-table">
+            <thead>
+                <tr>
+                    <th>治理维度</th>
+                    <th>覆盖风险</th>
+                    <th>核心策略</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="tag red">权限治理</span></td>
+                    <td>MCP01 / MCP02 / MCP07</td>
+                    <td>最小权限原则、短期凭证、身份验证与授权、OAuth 2.1 + PKCE + 受众绑定令牌</td>
+                </tr>
+                <tr>
+                    <td><span class="tag purple">上下文治理</span></td>
+                    <td>MCP03 / MCP06 / MCP10</td>
+                    <td>上下文隔离、注入检测、意图一致性验证、将工具描述和输出视为不可信输入</td>
+                </tr>
+                <tr>
+                    <td><span class="tag blue">供应链治理</span></td>
+                    <td>MCP04 / MCP09</td>
+                    <td>签名验证、依赖监控、服务注册、固定工具定义、漂移监控</td>
+                </tr>
+                <tr>
+                    <td><span class="tag green">运行治理</span></td>
+                    <td>MCP05 / MCP08</td>
+                    <td>命令沙箱化、容器化隔离、完整审计日志、实时告警、运行时网关</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="info-card accent-border fade-in">
+            <h3>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                微软的分层防御建议
+            </h3>
+            <p>微软在其 2026 年 MCP 安全报告中提出：你不能信任任何 MCP 服务器，所以你得自己建一座"监狱"把它关起来。这包括工具管理（人工审批工具列表）、授权（OAuth 2.1 + PKCE）、最小权限（窄范围 scope、短期令牌）、供应链安全（设计时目录、漂移监控）、可见性（运行时网关）以及沙箱（容器化隔离）。</p>
+        </div>
+
+        <div class="info-card cyan-border fade-in">
+            <h3>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                开发者可立即执行的清单
+            </h3>
+            <p>1. 永远不要在 MCP 配置中硬编码凭证，使用环境变量或密钥管理服务；2. 为每个 MCP 服务器配置最小必要权限，设置自动过期；3. 启用审计日志并配置异常告警；4. 对所有工具输出执行上下文隔离；5. 定期扫描和发现影子 MCP 服务器；6. 在执行层实施命令沙箱化。</p>
+        </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- Root Cause Section -->
+    <section class="content-section fade-in">
+        <div class="section-header">
+            <div class="section-label">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                深度分析
+            </div>
+            <h2>为什么 MCP 的安全模型是系统性失败的？</h2>
+        </div>
+
+        <div class="info-card" style="margin-bottom: 20px;">
+            <h3 style="color: var(--accent-light);">设计哲学的根本冲突</h3>
+            <p>MCP 的设计初衷是"让 AI Agent 连接一切"。这意味着它必须是开放的、低门槛的、易于扩展的。安全性从来不是第一优先级 -- <strong>连接性</strong> 才是。MCP 隐含地假设了"信任链"：开发者信任服务器，服务器信任模型，模型信任工具返回的数据。但在真实世界中，这条链的每一个环节都可以被攻击者打断。</p>
+        </div>
+
+        <div class="info-card" style="margin-bottom: 20px;">
+            <h3 style="color: #ffa500;">安全责任的系统性下放</h3>
+            <p>Anthropic 的立场：安全是<strong>你的</strong>责任，不是协议的。但 MCP 的架构设计使得安全变成了一个每个人都需要做但几乎没人做对的分布式难题。上万名开发者各自为战，一个做错，全线皆输。</p>
+        </div>
+
+        <div class="info-card">
+            <h3 style="color: var(--cyan);">攻击面的乘数效应</h3>
+            <p>传统软件的漏洞通常局限于特定组件。但 MCP 的漏洞是<strong>乘数效应</strong>：因为漏洞位于基础 SDK 层，它向下传播到所有构建在 MCP 之上的平台。下游开发者不需要犯任何错误就继承了暴露面。一个 SDK 的选择，决定了整个生态的底座是否安全。</p>
+        </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- References Section -->
+    <section class="content-section fade-in" id="references">
+        <div class="section-header">
+            <div class="section-label">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+                参考资料
+            </div>
+            <h2>延伸阅读</h2>
+        </div>
+
+        <ul class="ref-list">
+            <li><span class="ref-label">[1]</span> <a href="https://genai.owasp.org/" target="_blank" rel="noopener">OWASP Gen AI Security Project</a> -- OWASP 生成式 AI 安全项目</li>
+            <li><span class="ref-label">[2]</span> <a href="https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/" target="_blank" rel="noopener">OWASP Top 10 for Agentic Applications (2026)</a> -- AI 智能体 Top 10 安全风险</li>
+            <li><span class="ref-label">[3]</span> OX Security CSA Research Note (2026.04) -- "所有 AI 供应链之母" MCP SDK 设计级漏洞披露</li>
+            <li><span class="ref-label">[4]</span> Microsoft Security Blog "The State of MCP Security in 2026" (2026.06)</li>
+            <li><span class="ref-label">[5]</span> arXiv:2603.22489 -- MCP Threat Modeling 学术论文 (STRIDE/DREAD 框架分析)</li>
+            <li><span class="ref-label">[6]</span> <a href="https://genai.owasp.org/llm-top-10/" target="_blank" rel="noopener">OWASP Top 10 for LLM and GenAI</a> -- LLM 与生成式 AI 安全 Top 10</li>
+        </ul>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>本文由 <span class="brand">AIShield</span> 安全研究团队编写 | 基于 OWASP MCP Top 10 (2025) 及相关安全研究</p>
+            <p style="margin-top: 6px; font-size: 0.78rem; color: var(--text-muted);">数据来源：OWASP、OX Security、Microsoft Security、arXiv 学术论文 | 最后更新：2026年7月</p>
+        </div>
+    </footer>
+</main>
+
+<!-- Scroll to Top Button -->
+<button class="scroll-top" id="scrollTopBtn" aria-label="返回顶部">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+</button>
+
+<script>
+    // ========== Scroll to Top ==========
+    const scrollTopBtn = document.getElementById('scrollTopBtn');
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 400) {
+            scrollTopBtn.classList.add('visible');
+        } else {
+            scrollTopBtn.classList.remove('visible');
+        }
+    });
+    scrollTopBtn.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // ========== Fade-in on Scroll ==========
+    const fadeElements = document.querySelectorAll('.fade-in');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+    fadeElements.forEach(el => observer.observe(el));
+
+    // ========== Active nav highlight ==========
+    const sections = document.querySelectorAll('section[id], .risk-card[id]');
+    const navLinks = document.querySelectorAll('.top-nav .nav-links a');
+
+    window.addEventListener('scroll', () => {
+        let current = '';
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop - 100;
+            if (window.scrollY >= sectionTop) {
+                current = section.getAttribute('id');
+            }
+        });
+
+        navLinks.forEach(link => {
+            link.style.color = '';
+            if (link.getAttribute('href') === '#' + current) {
+                link.style.color = 'var(--cyan)';
+            }
+        });
+    });
+</script>
+</body>
+</html>
