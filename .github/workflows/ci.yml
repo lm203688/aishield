@@ -56,6 +56,23 @@ jobs:
           exit 1
         fi
 
+  # 分发门禁：对外发布物（distribution/ 下各渠道 artifact）必须过自家扫描器，
+  # 否则阻断合并。与 gh_push.py 内门禁构成双保险，杜绝「自带洞」漏出。
+  distribution-gate:
+    name: Distribution Artifact Gate
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.13'
+
+    - name: Run distribution gate
+      run: python scripts/verify_distribution.py
+
   test:
     runs-on: ubuntu-latest
     steps:
