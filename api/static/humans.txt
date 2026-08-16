@@ -11,7 +11,7 @@ Standards: A2A Protocol
 /* PROJECT */
 Open source: Yes (MIT License)
 Repository: https://github.com/lm203688/aishield
-Version: 4.2
+Version: 4.2.2
 
 /* TECHNOLOGY */
 Language: Python
