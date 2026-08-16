@@ -93,6 +93,7 @@ class TestSitemapXml(unittest.TestCase):
         self.assertIn('https://aishield.tools/banned-words', text)
         self.assertIn('https://aishield.tools/report', text)
         self.assertIn('https://aishield.tools/tool/profile', text)
+        self.assertIn('https://aishield.tools/owasp-mcp-top10-guide', text)
         self.assertIn('https://aishield.tools/.well-known/agent-card.json', text)
 
     def test_sitemap_urls_have_loc_elements(self):
