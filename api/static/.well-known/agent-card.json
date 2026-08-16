@@ -386,8 +386,8 @@
     "github": "https://github.com/lm203688/aishield",
     "license": "MIT",
     "license_url": "https://github.com/lm203688/aishield/blob/main/LICENSE",
-    "api_docs": "https://aishield.tools/api/v1"
+    "api_docs": "https://github.com/lm203688/aishield/blob/main/README.md"
   },
-  "mcp_install": "npx @aishield/mcp-server",
+  "mcp_install": "npx -y aishield-mcp-server",
   "protocol_version": "a2a-2025-06"
 }
