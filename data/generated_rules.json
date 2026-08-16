@@ -1,7 +1,15 @@
 {
-  "generated_at": "2026-08-14T20:34:58.416793+00:00",
-  "source_intel_count": 164,
+  "generated_at": "2026-08-16T01:36:15.925958+00:00",
+  "source_intel_count": 166,
   "package_blacklist": {
+    "npm:@ooples/token-optimizer-mcp": {
+      "ecosystem": "npm",
+      "package": "@ooples/token-optimizer-mcp",
+      "severity": "high",
+      "advisories": [
+        "GHSA-49mq-fc6q-3h46"
+      ]
+    },
     "pip:atomic-agents-stack": {
       "ecosystem": "pip",
       "package": "atomic-agents-stack",
@@ -218,6 +226,51 @@
     }
   },
   "pattern_rules": {
+    "(?i)(\\.\\./){2,}|(%2e%2e%2f)": {
+      "description": "路径遍历: 越权访问上级目录",
+      "severity": "high",
+      "owasp": "LLM06",
+      "owasp_name": "过度代理权限 (Excessive Agency)",
+      "derived_from": "path traversal",
+      "intel_hits": 9,
+      "evidence": [
+        "GHSA-76pc-mqxp-3rq5",
+        "GHSA-rm43-82j9-r4mj",
+        "GHSA-6hm5-jgcp-p838",
+        "GHSA-xh95-f55m-82fw",
+        "GHSA-f42x-p2mx-hm8r"
+      ]
+    },
+    "(?i)(session|token)\\s*[:=]\\s*['\\\"][^'\\\"]{0,8}['\\\"]": {
+      "description": "会话安全: 会话标识过短或硬编码",
+      "severity": "high",
+      "owasp": "LLM07",
+      "owasp_name": "系统提示泄露 (System Prompt Leakage)",
+      "derived_from": "session",
+      "intel_hits": 20,
+      "evidence": [
+        "GHSA-76pc-mqxp-3rq5",
+        "GHSA-hqvf-45jj-mccq",
+        "GHSA-5gpj-vj23-vhhv",
+        "GHSA-3xpf-xq7r-v8c5",
+        "GHSA-p5w8-m249-4r4v"
+      ]
+    },
+    "(?i)(os\\.system|subprocess\\.(call|run|Popen)|child_process\\.exec)\\s*\\(\\s*[^)]*(\\+|%|\\$\\{|f['\\\"])": {
+      "description": "命令注入: 动态拼接系统命令",
+      "severity": "critical",
+      "owasp": "LLM05",
+      "owasp_name": "不当输出处理 (Improper Output Handling)",
+      "derived_from": "command injection",
+      "intel_hits": 6,
+      "evidence": [
+        "GHSA-49mq-fc6q-3h46",
+        "GHSA-49m4-vp58-wgc9",
+        "GHSA-wcx4-wpfv-mc5c",
+        "CVE-2026-59800",
+        "CVE-2026-48719"
+      ]
+    },
     "(?i)(requests\\.(get|post)|urllib\\.request\\.urlopen|fetch)\\s*\\(\\s*[^)]*(user|input|param|req\\.)": {
       "description": "SSRF: 请求目标来自不可信输入",
       "severity": "high",
@@ -233,21 +286,6 @@
         "GHSA-c6xh-wv4j-ppv5"
       ]
     },
-    "(?i)(\\.\\./){2,}|(%2e%2e%2f)": {
-      "description": "路径遍历: 越权访问上级目录",
-      "severity": "high",
-      "owasp": "LLM06",
-      "owasp_name": "过度代理权限 (Excessive Agency)",
-      "derived_from": "path traversal",
-      "intel_hits": 8,
-      "evidence": [
-        "GHSA-rm43-82j9-r4mj",
-        "GHSA-6hm5-jgcp-p838",
-        "GHSA-xh95-f55m-82fw",
-        "GHSA-f42x-p2mx-hm8r",
-        "CVE-2026-66004"
-      ]
-    },
     "(?i)(ignore|disregard|forget)\\s+(all\\s+)?(previous|prior|above)\\s+(instruction|prompt|rule)": {
       "description": "提示注入: 覆盖历史指令",
       "severity": "critical",
@@ -261,21 +299,6 @@
         "CVE-2026-73032",
         "CVE-2026-70477",
         "CVE-2026-70477"
-      ]
-    },
-    "(?i)(os\\.system|subprocess\\.(call|run|Popen)|child_process\\.exec)\\s*\\(\\s*[^)]*(\\+|%|\\$\\{|f['\\\"])": {
-      "description": "命令注入: 动态拼接系统命令",
-      "severity": "critical",
-      "owasp": "LLM05",
-      "owasp_name": "不当输出处理 (Improper Output Handling)",
-      "derived_from": "command injection",
-      "intel_hits": 5,
-      "evidence": [
-        "GHSA-49m4-vp58-wgc9",
-        "GHSA-wcx4-wpfv-mc5c",
-        "CVE-2026-59800",
-        "CVE-2026-48719",
-        "CVE-2026-42853"
       ]
     },
     "(?i)(Access-Control-Allow-Origin['\\\"]?\\s*[:,]\\s*['\\\"]\\*|cors\\s*\\(\\s*\\)\\s*)": {
@@ -308,21 +331,6 @@
         "GHSA-8gj2-2cvc-6xx7"
       ]
     },
-    "(?i)(session|token)\\s*[:=]\\s*['\\\"][^'\\\"]{0,8}['\\\"]": {
-      "description": "会话安全: 会话标识过短或硬编码",
-      "severity": "high",
-      "owasp": "LLM07",
-      "owasp_name": "系统提示泄露 (System Prompt Leakage)",
-      "derived_from": "session",
-      "intel_hits": 19,
-      "evidence": [
-        "GHSA-hqvf-45jj-mccq",
-        "GHSA-5gpj-vj23-vhhv",
-        "GHSA-3xpf-xq7r-v8c5",
-        "GHSA-p5w8-m249-4r4v",
-        "GHSA-6vh2-wg4h-4vwj"
-      ]
-    },
     "(?i)(docker\\.sock|/proc/self/|privileged\\s*[:=]\\s*true|--cap-add\\s*=?\\s*SYS_ADMIN)": {
       "description": "沙箱逃逸: 容器高危配置",
       "severity": "critical",
@@ -341,9 +349,9 @@
   },
   "owasp_distribution": {
     "LLM06": 2,
-    "LLM01": 1,
+    "LLM07": 3,
     "LLM05": 2,
-    "LLM07": 3
+    "LLM01": 1
   },
-  "total_rules": 30
+  "total_rules": 31
 }

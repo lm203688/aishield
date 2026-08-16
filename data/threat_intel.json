@@ -1,6 +1,34 @@
 {
   "intel": [
     {
+      "id": "GHSA-76pc-mqxp-3rq5",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 5.3,
+      "title": "Token Optimizer MCP: Unauthenticated Path Traversal in Dashboard Session Log API Endpoints",
+      "summary": "# Unauthenticated Path Traversal in Dashboard Session Log API Endpoints\n\n| Field            | Value |\n| ---------------- | ----- |\n| Repository       | ooples/token-optimizer-mcp |\n| Affected version | 5.0.1 (commit 8137147) |\n| Vulnerability    | CWE-22 — Improper Limitation of a Pathname to a Restricted Directory |\n| Severity         | Medium |\n| CVSS 3.1         | 5.3 (CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N) |\n\n\n## Summary\n\nThe dashboard HTTP server in `token-optimizer-mcp` exposes `/ap",
+      "affected": "npm:@ooples/token-optimizer-mcp",
+      "references": [
+        "https://github.com/advisories/GHSA-76pc-mqxp-3rq5"
+      ],
+      "published": "2026-08-14T21:43:54Z",
+      "fetched": "2026-08-16T01:36:02.291298+00:00"
+    },
+    {
+      "id": "GHSA-49mq-fc6q-3h46",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 8.4,
+      "title": "Token Optimizer MCP: OS command injection in smart_user via username in get-user-info",
+      "summary": "### Summary\n\n`token-optimizer-mcp` is vulnerable to OS command injection in the `smart_user` tool.\n\nThe `get-user-info` operation accepts a user-controlled `username` argument and later interpolates it into a shell command executed through `execAsync()`:\n\n```ts\ngetent passwd \"${username}\" || grep \"^${username}:\" /etc/passwd\n```\n\nAlthough the value is wrapped in double quotes, POSIX shells still evaluate command substitution such as `$(...)` and backticks inside double quotes. As a result, an MCP",
+      "affected": "npm:@ooples/token-optimizer-mcp",
+      "references": [
+        "https://github.com/advisories/GHSA-49mq-fc6q-3h46"
+      ],
+      "published": "2026-08-14T21:42:06Z",
+      "fetched": "2026-08-16T01:36:02.291353+00:00"
+    },
+    {
       "id": "GHSA-9hgc-g3w5-67cm",
       "source": "github-advisory",
       "severity": "medium",
@@ -2482,19 +2510,19 @@
       "fetched": "2026-08-04T06:34:53.913899+00:00"
     }
   ],
-  "updated": "2026-08-14T20:34:45.722636+00:00",
+  "updated": "2026-08-16T01:36:04.224785+00:00",
   "sources": [
     "osv",
     "nvd",
     "github-advisory"
   ],
   "stats": {
-    "medium": 50,
+    "medium": 51,
+    "high": 69,
     "critical": 22,
-    "high": 68,
     "unknown": 20,
     "low": 3,
     "moderate": 1
   },
-  "total": 164
+  "total": 166
 }
