@@ -1,35 +1,37 @@
 # AIShield MCP安全扫描报告
 
-生成时间: 2026-08-18 05:16:22
+生成时间: 2026-08-18 06:15:09
 扫描引擎版本: 4.1
-扫描工具总数: 57
+扫描工具总数: 64
 平均安全评分: 69.6/100
 
 ## 评分分布
 
 | 等级 | 数量 |
 |------|------|
-| gold | 13 |
-| silver | 18 |
+| gold | 15 |
+| silver | 21 |
 | bronze | 14 |
-| none | 12 |
+| none | 14 |
 
 ## OWASP MCP Top 10 覆盖率
 
-- **MCP01** 令牌管理不当: 8/57 (14%)
-- **MCP010** : 0/57 (0%)
-- **MCP02** 权限范围蔓延: 33/57 (58%)
-- **MCP03** 工具投毒: 9/57 (16%)
-- **MCP04** 供应链攻击: 20/57 (35%)
-- **MCP05** 命令注入: 17/57 (30%)
-- **MCP06** 提示注入: 39/57 (68%)
-- **MCP07** 认证不足: 3/57 (5%)
-- **MCP08** 审计缺失: 37/57 (65%)
-- **MCP09** 影子服务器: 43/57 (75%)
+- **MCP01** 令牌管理不当: 10/64 (16%)
+- **MCP010** : 0/64 (0%)
+- **MCP02** 权限范围蔓延: 36/64 (56%)
+- **MCP03** 工具投毒: 11/64 (17%)
+- **MCP04** 供应链攻击: 23/64 (36%)
+- **MCP05** 命令注入: 20/64 (31%)
+- **MCP06** 提示注入: 44/64 (69%)
+- **MCP07** 认证不足: 3/64 (5%)
+- **MCP08** 审计缺失: 40/64 (62%)
+- **MCP09** 影子服务器: 47/64 (73%)
 
 ## 高风险工具 (score < 60)
 
 - **arcadeai-labs/smithery-cli** — 36/100, 27 issues
+- **BeehiveInnovations/pal-mcp-server** — 37/100, 44 issues
+- **OpenByteInc/QuantDinger** — 39/100, 58 issues
 - **zylon-ai/private-gpt** — 40/100, 30 issues
 - **ruvnet/ruflo** — 41/100, 39 issues
 - **assafelovic/gpt-researcher** — 45/100, 42 issues
@@ -47,7 +49,6 @@
 - **upstash/context7** — 58/100, 27 issues
 - **triggerdotdev/trigger.dev** — 58/100, 24 issues
 - **activepieces/activepieces** — 59/100, 23 issues
-- **mksglu/context-mode** — 59/100, 20 issues
 
 ## 最安全工具 (score >= 85)
 
@@ -59,8 +60,10 @@
 - **Dot-Fun/fathom-mcp** — 88/100
 - **hangwin/mcp-chrome** — 93/100
 - **modelscope/FunASR** — 93/100
+- **0x4m4/hexstrike-ai** — 95/100
 - **Decodo/mcp-server** — 96/100
 - **liaokongVFX/MCP-Chinese-Getting-Started-Guide** — 96/100
 - **opensolon/solon** — 96/100
+- **MODSetter/SurfSense** — 97/100
 - **call518/MCP-OpenStack-Ops** — 98/100
 - **aeriis-kr/opendata-mcp** — 99/100
