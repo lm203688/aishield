@@ -1,6 +1,48 @@
 {
   "intel": [
     {
+      "id": "GHSA-8qf9-62x2-82pp",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 6.1,
+      "title": "chrome-devtools-mcp: validatePath() does not canonicalize symlinks before enforcing roots",
+      "summary": "### Summary\n\nI originally reported this through Google Bug Hunters. The Google Bug Hunters team said this is in OSS VRP scope but not reward-eligible due to the project tier, and asked me to file an issue or PR directly with this repository. I am reporting it privately here first because it is an unfixed security issue.\n\n`McpContext.validatePath()` enforces workspace `roots` by checking whether `path.resolve(filePath)` textually falls under one of the configured root paths. `path.resolve()` does",
+      "affected": "npm:chrome-devtools-mcp",
+      "references": [
+        "https://github.com/advisories/GHSA-8qf9-62x2-82pp"
+      ],
+      "published": "2026-08-17T21:56:12Z",
+      "fetched": "2026-08-17T22:28:11.230117+00:00"
+    },
+    {
+      "id": "GHSA-j659-8xh6-5pq5",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": null,
+      "title": "atomic-agents-stack: Parallel helper/delegate batch reserves $0 for models absent from the pricing table, bypassing the cost-cap fan-out guard",
+      "summary": "`_estimate_batch_cost` (`atomic_agents/agent.py`) looks up the per-model output price with `PRICING.get(model, {})`, returning 0.0 for any model not in the hardcoded pricing table. `_check_batch_reservation` then early-returns when the reservation is <= 0, skipping the batch reservation entirely. That reservation is the only defense against the documented fan-out race where every parallel helper/delegate reads the identical pre-batch on-disk cost total and each passes its individual check even t",
+      "affected": "pip:atomic-agents-stack",
+      "references": [
+        "https://github.com/advisories/GHSA-j659-8xh6-5pq5"
+      ],
+      "published": "2026-08-17T21:50:01Z",
+      "fetched": "2026-08-17T22:28:12.639075+00:00"
+    },
+    {
+      "id": "GHSA-xhcr-cqfr-m3hv",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": null,
+      "title": "atomic-agents-stack: HTTP MCP catalog accepts cleartext http and spawns catalog-supplied commands (MITM to RCE)",
+      "summary": "The HTTP MCP server-registry backend factory (`atomic_agents/mcp_registry/http.py`, `make_http_mcp_server_registry_backend_from_url`) accepts both `http` and `https` schemes. Catalog entries carry `command`/`args` that are type-validated but content-unrestricted, and are later spawned as local stdio subprocesses by `MCPClientPool`. Over a cleartext `http://` catalog URL, a network man-in-the-middle can rewrite the catalog response to inject an arbitrary `command`/`args` and obtain code execution",
+      "affected": "pip:atomic-agents-stack",
+      "references": [
+        "https://github.com/advisories/GHSA-xhcr-cqfr-m3hv"
+      ],
+      "published": "2026-08-17T21:49:55Z",
+      "fetched": "2026-08-17T22:28:12.639096+00:00"
+    },
+    {
       "id": "CVE-2026-75110",
       "source": "nvd",
       "severity": "critical",
@@ -2667,19 +2709,19 @@
       "fetched": "2026-08-04T06:34:53.913899+00:00"
     }
   ],
-  "updated": "2026-08-17T21:29:23.379033+00:00",
+  "updated": "2026-08-17T22:28:13.143394+00:00",
   "sources": [
     "osv",
     "nvd",
     "github-advisory"
   ],
   "stats": {
+    "medium": 53,
+    "high": 77,
     "critical": 26,
-    "high": 75,
-    "medium": 52,
     "unknown": 20,
     "low": 3,
     "moderate": 1
   },
-  "total": 177
+  "total": 180
 }
