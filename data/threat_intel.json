@@ -1,6 +1,146 @@
 {
   "intel": [
     {
+      "id": "GHSA-prg7-hcfm-mfcr",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.5,
+      "title": "sqlparse: Inefficient Regex Handling of Dollar-Quoted SQL Literals Leads to ReDoS (Denial of Service)",
+      "summary": "### Summary\n\nsqlparse contains a Regular Expression Denial of Service (ReDoS) vulnerability in its dollar-quoted SQL literal lexer. The regex pattern at `sqlparse/keywords.py:33` uses a backreference (`\\1`) to match closing dollar-quote delimiters, causing O(n²) CPU complexity when processing inputs containing many unique, unmatched dollar-quote opening sequences. An attacker who can supply arbitrary SQL text to any application using sqlparse can trigger sustained CPU exhaustion, resulting in a ",
+      "affected": "pip:sqlparse",
+      "references": [
+        "https://github.com/advisories/GHSA-prg7-hcfm-mfcr"
+      ],
+      "published": "2026-08-17T17:49:55Z",
+      "fetched": "2026-08-17T18:43:56.358514+00:00"
+    },
+    {
+      "id": "GHSA-pwgv-4x5q-6m9f",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": null,
+      "title": "sqlparse: TokenList.__init__ materializes O(subtree) value per group, causing CPU DoS before depth/token caps trigger",
+      "summary": "### Summary\n\n`sqlparse` ships hard limits (`MAX_GROUPING_DEPTH=100`, `MAX_GROUPING_TOKENS=10000`) intended to bound parsing work on attacker-supplied SQL, but the path that *reaches* those limits is itself `O(n*depth)` per token-group construction. A ~1-2 KB SQL payload (e.g. `SELECT (((((1))))) ...` with 500-2000 nesting levels, or a 200-400-level nested `CASE WHEN` chain) drives the parser to spend multiple seconds of CPU before the depth cap raises `SQLParseError`. Concretely: a 2 KB maliciou",
+      "affected": "pip:sqlparse",
+      "references": [
+        "https://github.com/advisories/GHSA-pwgv-4x5q-6m9f"
+      ],
+      "published": "2026-08-17T17:49:47Z",
+      "fetched": "2026-08-17T18:43:56.358688+00:00"
+    },
+    {
+      "id": "GHSA-v836-6xw4-9cx3",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.5,
+      "title": "vm2 has Memory Exhaustion DoS via bufferAllocLimit Bypass",
+      "summary": "### Summary:\n\nThe `bufferAllocLimit` defense (GHSA-6785-pvv7-mvg7) can be completely bypassed using `ArrayBuffer`, `SharedArrayBuffer`, or any `TypedArray` constructor. These allocate identical host-process RSS through the same V8/libuv C++ allocation path as `Buffer.alloc` but are not subject to the size cap.\n\n### Details:\n\nThe `bufferAllocLimit` option (vm2 v3.11.0+) caps `Buffer.alloc`, `Buffer.allocUnsafe`, `Buffer.allocUnsafeSlow`, and the deprecated `Buffer(N)` / `new Buffer(N)` forms. The",
+      "affected": "npm:vm2",
+      "references": [
+        "https://github.com/advisories/GHSA-v836-6xw4-9cx3"
+      ],
+      "published": "2026-08-17T17:32:57Z",
+      "fetched": "2026-08-17T18:43:55.135958+00:00"
+    },
+    {
+      "id": "GHSA-m5w8-4gq2-6f8x",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": 10.0,
+      "title": "vm2: NodeVM `builtin: ['*']` exposes `os` and `dns` — process-wide observability reads AND writes that hijack the host (sibling class of GHSA-9g8x-92q2-p28f)",
+      "summary": "# NodeVM `builtin: ['*']` exposes `os` and `dns` — process-wide observability reads AND writes that hijack the host (sibling class of GHSA-9g8x-92q2-p28f)\n\n**CWE**: CWE-200 (Exposure of Sensitive Information to an Unauthorized Actor) chained with CWE-732 (Incorrect Permission Assignment for Critical Resource) and CWE-285 (Improper Authorization) — same class the maintainer codified as Defense Invariant #13 in `lib/builtin.js` and as Category 35 / GHSA-9g8x in `docs/ATTACKS.md`.\n\n**CVSS v3.1**: `",
+      "affected": "npm:vm2",
+      "references": [
+        "https://github.com/advisories/GHSA-m5w8-4gq2-6f8x"
+      ],
+      "published": "2026-08-17T17:32:47Z",
+      "fetched": "2026-08-17T18:43:55.136154+00:00"
+    },
+    {
+      "id": "GHSA-cfcw-xp6x-25gj",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": 9.8,
+      "title": "vm2: Sandbox Breakout Using Dangerous Host Proto Mutators",
+      "summary": "### Summary\n\nVM2 suffers from a sandbox breakout vulnerability. This allows attackers to write code which can escape from the VM2 sandbox and execute arbitrary commands on the host system.\n\n### Details\n\nThe fix for https://github.com/patriksimek/vm2/security/advisories/GHSA-v6mx-mf47-r5wg is insufficient and can be bypassed by replacing `indirectcall.call(dangerousmutator, ...)` with `indirectcall.call(indirectcall, dangerousmutator, ...)` since indirect calls are not seen as dangerous.\n\n### PoC",
+      "affected": "npm:vm2",
+      "references": [
+        "https://github.com/advisories/GHSA-cfcw-xp6x-25gj"
+      ],
+      "published": "2026-08-17T17:32:41Z",
+      "fetched": "2026-08-17T18:43:55.136171+00:00"
+    },
+    {
+      "id": "GHSA-m283-3h24-438v",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": 9.9,
+      "title": "VM2 has Missing Error.cause Sanitization that Enables Sandbox Escape to RCE",
+      "summary": "**Affected:** vm2 <= 3.11.3\n**CVSS 3.1:** 9.9 HIGH (CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:H/A:H)\n**CWE:** CWE-693 (Protection Mechanism Failure)\n**Prerequisite:** Embedder exposes a host function that throws an Error with `.cause` referencing a powerful host object (e.g., `process`)\n\n## Summary\n\nI found that `handleException()` in `lib/setup-sandbox.js` recursively sanitizes sub-errors for `SuppressedError` and `AggregateError`, but completely ignores the ES2022 `Error.cause` property. When san",
+      "affected": "npm:vm2",
+      "references": [
+        "https://github.com/advisories/GHSA-m283-3h24-438v"
+      ],
+      "published": "2026-08-17T17:32:34Z",
+      "fetched": "2026-08-17T18:43:55.136208+00:00"
+    },
+    {
+      "id": "GHSA-gmc2-2x9w-cgh9",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": null,
+      "title": "vm2's bufferAllocLimit cap bypassed by Buffer.concat and Buffer.from arrayLike",
+      "summary": "## Summary\n\nvm2 bufferAllocLimit cap bypassed by Buffer.concat and Buffer.from arrayLike\n\nThe `bufferAllocLimit` option introduced in 3.11.0 (GHSA-6785-pvv7-mvg7) caps host-side Buffer allocations driven by sandbox code, the way embedders opt into `timeout`. The cap wraps `Buffer.alloc`, `Buffer.allocUnsafe`, `Buffer.allocUnsafeSlow`, and the deprecated `Buffer(N)` / `new Buffer(N)` forms. Two other API paths reach the same host C++ allocator with an attacker-controlled size and are not capped: ",
+      "affected": "npm:vm2",
+      "references": [
+        "https://github.com/advisories/GHSA-gmc2-2x9w-cgh9"
+      ],
+      "published": "2026-08-17T17:32:10Z",
+      "fetched": "2026-08-17T18:43:55.136251+00:00"
+    },
+    {
+      "id": "GHSA-f2ff-p2ww-7p4p",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": null,
+      "title": "sqlparse: Quadratic O(n²) DoS in group_comments",
+      "summary": "### Summary\nA comment-only statement (`-- c\\n`*n) may cause a Denial of Service (DoS).\n\n### Details\nLocation: [sqlparse/engine/grouping.py:331-341](https://github.com/andialbrecht/sqlparse/blob/f80af6a4007f11ada847218df8c29dc859238290/sqlparse/engine/grouping.py#L332) (`group_comments`), invoked first in `group()` at `grouping.py:439`. Reachable via `sqlparse.parse()` and `sqlparse.format(sql, strip_comments=True)`.\n\nA statement made of many single-line comments (`'-- c\\n'` repeated) lexes in O(",
+      "affected": "pip:sqlparse",
+      "references": [
+        "https://github.com/advisories/GHSA-f2ff-p2ww-7p4p"
+      ],
+      "published": "2026-08-17T17:21:00Z",
+      "fetched": "2026-08-17T18:43:56.358725+00:00"
+    },
+    {
+      "id": "GHSA-4h34-v6r8-mmjc",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 5.3,
+      "title": "Glances: as_dict_secure() Value-Level Bypass Leaks Credentials in URL Values via /api/4/config",
+      "summary": "## Summary\n\nGlances provides `as_dict_secure()` explicitly designed for unauthenticated API access, with a docstring stating it returns \"a sanitised copy of the configuration dict\" where \"Sensitive keys in remaining sections are replaced by '********'\". However, the implementation only checks KEY names against a regex pattern and never inspects VALUE content. The documented `[ip]` config section supports `public_api` (URL), `public_username` (login), and `public_password` (password). While `publ",
+      "affected": "pip:glances",
+      "references": [
+        "https://github.com/advisories/GHSA-4h34-v6r8-mmjc"
+      ],
+      "published": "2026-08-17T17:20:48Z",
+      "fetched": "2026-08-17T18:43:56.358780+00:00"
+    },
+    {
+      "id": "GHSA-73wf-9vmv-5pv9",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 8.8,
+      "title": "Glances: Incomplete fix of CVE-2026-32608: action-template sanitizer is bypassed by nested stat values (process 'cmdline') → OS command injection",
+      "summary": "## Summary\nCVE-2026-32608 (\"Command Injection via Process Names in Action Command Templates\") was fixed (commit `5680a5d`) by adding `_sanitize_mustache_dict`, which replaces the shell operators `&&`, `|`, `>>`, `>` with spaces in the values rendered into action command templates.\n\nThe sanitizer only processes **top-level string** values (`if isinstance(v, str)`). Attacker-controlled **nested** values — most notably a process's **`cmdline`, which Glances exposes as a `list`** and which is fully ",
+      "affected": "pip:glances",
+      "references": [
+        "https://github.com/advisories/GHSA-73wf-9vmv-5pv9"
+      ],
+      "published": "2026-08-17T17:20:24Z",
+      "fetched": "2026-08-17T18:43:56.358862+00:00"
+    },
+    {
       "id": "GHSA-76pc-mqxp-3rq5",
       "source": "github-advisory",
       "severity": "medium",
@@ -2510,19 +2650,19 @@
       "fetched": "2026-08-04T06:34:53.913899+00:00"
     }
   ],
-  "updated": "2026-08-17T16:31:34.286710+00:00",
+  "updated": "2026-08-17T18:43:56.862943+00:00",
   "sources": [
     "osv",
     "nvd",
     "github-advisory"
   ],
   "stats": {
-    "medium": 51,
-    "high": 69,
-    "critical": 22,
+    "high": 75,
+    "critical": 25,
+    "medium": 52,
     "unknown": 20,
     "low": 3,
     "moderate": 1
   },
-  "total": 166
+  "total": 176
 }
