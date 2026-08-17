@@ -1,6 +1,23 @@
 {
   "intel": [
     {
+      "id": "CVE-2026-75110",
+      "source": "nvd",
+      "severity": "critical",
+      "cvss": 9.8,
+      "title": "MemOS is a memory operating system for LLMs and AI agents. In deployments where authentication is enabled (AUTH_ENABLED=true) but the undocumented, defaultless INTERNAL_SERVICE_SECRET environment vari",
+      "summary": "MemOS is a memory operating system for LLMs and AI agents. In deployments where authentication is enabled (AUTH_ENABLED=true) but the undocumented, defaultless INTERNAL_SERVICE_SECRET environment variable is unset, the is_internal_request() check in src/memos/api/middleware/auth.py fails open: os.getenv(\"INTERNAL_SERVICE_SECRET\") returns None and a request omitting the X-Internal-Service header also yields None, so the comparison None == None evaluates true. The request is then treated as a trus",
+      "affected": "llm agent",
+      "references": [
+        "https://github.com/MemTensor/MemOS",
+        "https://github.com/MemTensor/MemOS/blob/main/src/memos/api/middleware/auth.py",
+        "https://github.com/MemTensor/MemOS/issues/2259",
+        "https://www.vulncheck.com/advisories/memos-authentication-bypass-via-unset-internal-service-secret"
+      ],
+      "published": "2026-08-17T21:16:50.043",
+      "fetched": "2026-08-17T21:29:14.398987+00:00"
+    },
+    {
       "id": "GHSA-prg7-hcfm-mfcr",
       "source": "github-advisory",
       "severity": "high",
@@ -2650,19 +2667,19 @@
       "fetched": "2026-08-04T06:34:53.913899+00:00"
     }
   ],
-  "updated": "2026-08-17T20:30:50.292688+00:00",
+  "updated": "2026-08-17T21:29:23.379033+00:00",
   "sources": [
     "osv",
     "nvd",
     "github-advisory"
   ],
   "stats": {
+    "critical": 26,
     "high": 75,
-    "critical": 25,
     "medium": 52,
     "unknown": 20,
     "low": 3,
     "moderate": 1
   },
-  "total": 176
+  "total": 177
 }

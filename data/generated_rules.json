@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-08-17T20:31:01.590364+00:00",
-  "source_intel_count": 176,
+  "generated_at": "2026-08-17T21:29:35.597529+00:00",
+  "source_intel_count": 177,
   "package_blacklist": {
     "pip:sqlparse": {
       "ecosystem": "pip",
@@ -256,6 +256,21 @@
     }
   },
   "pattern_rules": {
+    "(?i)(auth(entication)?\\s*[:=]\\s*(False|None|null|0)\\b|verify\\s*=\\s*False)": {
+      "description": "认证绕过: 显式关闭校验",
+      "severity": "critical",
+      "owasp": "LLM07",
+      "owasp_name": "系统提示泄露 (System Prompt Leakage)",
+      "derived_from": "authentication",
+      "intel_hits": 11,
+      "evidence": [
+        "CVE-2026-75110",
+        "CVE-2026-48039",
+        "GHSA-279x-mwfv-vcqv",
+        "CVE-2026-8446",
+        "GHSA-3r7g-q6cg-q2vx"
+      ]
+    },
     "(?i)(docker\\.sock|/proc/self/|privileged\\s*[:=]\\s*true|--cap-add\\s*=?\\s*SYS_ADMIN)": {
       "description": "沙箱逃逸: 容器高危配置",
       "severity": "critical",
@@ -360,27 +375,12 @@
         "GHSA-rffm-9q57-q649",
         "GHSA-x6vm-w76m-8j7g"
       ]
-    },
-    "(?i)(auth(entication)?\\s*[:=]\\s*(False|None|null|0)\\b|verify\\s*=\\s*False)": {
-      "description": "认证绕过: 显式关闭校验",
-      "severity": "critical",
-      "owasp": "LLM07",
-      "owasp_name": "系统提示泄露 (System Prompt Leakage)",
-      "derived_from": "authentication",
-      "intel_hits": 10,
-      "evidence": [
-        "CVE-2026-48039",
-        "GHSA-279x-mwfv-vcqv",
-        "CVE-2026-8446",
-        "GHSA-3r7g-q6cg-q2vx",
-        "GHSA-8gj2-2cvc-6xx7"
-      ]
     }
   },
   "owasp_distribution": {
+    "LLM07": 3,
     "LLM05": 2,
     "LLM06": 2,
-    "LLM07": 3,
     "LLM01": 1
   },
   "total_rules": 34
