@@ -242,6 +242,53 @@ AIShield 现有架构（133 条规则 + `scan()` API + MCP 端点 + A2A Card + A
 
 **结论**：**资源有限时优先选择 P0**。P1 虽然完全空白，但市场教育成本高、盈利路径不清晰，更适合在 P0 站稳脚跟后作为第二增长曲线。
 
+---
+
+## 方向三：Agent 通路信任层（Internet of Agents 的"中立信任中间人"）
+
+> 日期：2026-08-18 | 触发：用户要求"分析 agent 之间的连接，让项目直接成为 agent 通路的环节"
+
+### 核心判断
+
+2026 的 agent 连接拓扑已经成型：**MCP（纵向 agent↔工具）+ A2A（横向 agent↔agent）+ AGNTCY/OASF（发现+厂商身份）+ Agentic Gateway（控制面枢纽）**。但每一跳都缺同一样东西 —— **内容信任**与**中立可验证身份**：
+
+- AGNTCY 的 AI Card 有厂商签名徽章（Cisco Official/Onboarded/Federated），但无人验证 card 背后 *agent/skill 实际做什么*（prompt injection / tool poisoning）。
+- Agentic Gateway 管 authz/限流/可观测，但**不验工具调用/消息的内容信任**（SentinelMCP/cMCP 只做网络代理 + DLP）。
+- A2A 只签 AgentCard，不签消息*内容*，prompt injection 可跨 agent 传播（ASI01/ASI08）。
+- P2P Agentic Mesh 的"Agent Spoofing"威胁，需要可验证 + 可审计的 agent 身份（CoSAI 明确要求 verifiable claims + immutable log）。
+
+**缺口是"内容信任 + 中立可验证身份"，不是连接能力。** 这正是 AIShield 不做大脑、不做算力、不做网关，却必须嵌入每一跳的理由。
+
+### AIShield 的 4 个插入点（成为通路环节）
+
+1. **Discovery（卡验证）**：agent/skill 进 AGNTCY Directory / MCP Registry 前，AIShield 扫内容层，签发中立 `aishield-trust/v1` 徽章（厂商徽章说"谁发的"，我们说"内容是否安全"）。
+2. **Connection（Gateway 内容平面）**：`guardrail_harness` 包装为 Agentic Gateway 的本地内容平面模块（不抢 authz/限流活）。
+3. **Messaging（A2A 注入扫描）**：agent 间每跳消息过 `goal_hijack_scan` / `slop_scan`，阻断跨 agent 注入传播。
+4. **Identity（可验证身份）**：`attestation` 发可验证签名收据（借鉴 cMCP 的 TRACE Claim），给 mesh 提供 CoSAI 要求的 verifiable claims + immutable log。
+
+### 从新开源项目借鉴（2026-08-18 扫描）
+
+| 项目 | 可做（adopt） | 我们的差异（defend） |
+|------|--------------|---------------------|
+| **SentinelMCP**（MCP 防火墙网关，Go） | fail-closed 传输硬化 + HITL 中断/恢复 + OTel 审计 | 它是网络代理+DLP；我们是本地内容信任+信任分，互补 |
+| **cMCP**（TEE attested 审计） | 签名 TRACE Claim / 可验证审计收据（`aishield-trust/v1` 已定义 schema） | 我们 software-only，零硬件依赖 |
+| **CheckMCP**（canary 外泄检测） | canary/诱饵 token 外泄检测（运行时闭环，我方静态缺口） | 它有托管 SaaS；我们本地/离线 |
+| **MCP Core Defense**（7 阶段代理） | **DCI 描述-代码一致性**（验证 tool 描述↔代码行为，离线 AST） | AGPL+Python；我们 MIT+零依赖 |
+
+**adopt 优先级**：① DCI 描述-代码一致性 → ② 可验证签名收据 → ③ canary 外泄检测 → ④ fail-closed + HITL（网关集成时再上）。
+
+### 原则符合性核对
+
+| 原则 | 评估 | 得分 |
+|------|------|------|
+| 构建 Agent 生态 | 成为 agent 通路的信任基础设施，没有它 agent 不敢互连 | 5/5 |
+| 自动化 | 自动扫内容、自动签徽章、自动验身份 | 5/5 |
+| 生态化 | 与 MCP / A2A / AGNTCY 全兼容，中立不绑厂商 | 5/5 |
+| 盈利化 | 信任认证 + 机器可结算（x402/USDC）是高价值付费 | 5/5 |
+| **总分** | | **20/20** |
+
+**结论：这是当前最高契合度的卡位，建议与 P0（委托链路）并行推进。** 详细拓扑图、插入点代码映射、GitHub 反馈参考见 `docs/agent-mesh-trust-layer.md`。
+
 ### 卡位时机判断
 
 现在正是关键窗口期：
