@@ -761,6 +761,27 @@ class TaskRouter:
         """
         self._load()
 
+        # ── P0-3: Agent 通信安全平面 ──
+        # 每个 A2A 任务创建先过安全闸，命中威胁即拒绝。
+        try:
+            from eco import agent_security_gateway as _gw
+            _screen = _gw.screen_message(
+                sender_agent_id=(metadata or {}).get("sender_agent_id"),
+                message_type="a2a_task",
+                payload=payload,
+                task_description=task_description,
+                record=True,
+            )
+            if not _screen["allowed"]:
+                raise ValueError(
+                    "agent_security_gateway: A2A task blocked ("
+                    + "; ".join(_screen["reasons"]) + ")"
+                )
+        except ValueError:
+            raise
+        except Exception:
+            pass
+
         task_id = _generate_task_id()
 
         # 匹配Agent
