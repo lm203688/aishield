@@ -43,6 +43,7 @@ def main():
         'tests.test_capability_boundary_scan',
         'tests.test_capability_full_scan',
         'tests.test_agent_security_gateway',
+        'tests.test_trust_protocol',
     ]
 
     loaded = 0
