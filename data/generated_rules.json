@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-18T18:42:46.528401+00:00",
+  "generated_at": "2026-08-18T19:30:29.706441+00:00",
   "source_intel_count": 186,
   "package_blacklist": {
     "npm:@geolens/sdk": {
