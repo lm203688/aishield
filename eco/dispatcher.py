@@ -442,6 +442,33 @@ def dispatch_get(handler):
     return False
 
 
+    # Blackboard: 列出命名空间
+    if path == "/api/v1/blackboard/namespaces":
+        mod = _modules.get("blackboard")
+        if mod:
+            bb = mod.Blackboard()
+            handler._send_json({"success": True, "namespaces": bb.list_namespaces()})
+            return True
+
+    # Blackboard: 查询命名空间（?namespace=xxx；不带则概览）
+    if path == "/api/v1/blackboard":
+        mod = _modules.get("blackboard")
+        if mod:
+            bb = mod.Blackboard()
+            ns = qs.get("namespace", [None])[0]
+            handler._send_json({"success": True, "namespace": ns, "data": bb.query(namespace=ns)})
+            return True
+
+    # Blackboard: 安全事件流（?namespace=security_events，默认即此）
+    if path == "/api/v1/blackboard/events":
+        mod = _modules.get("blackboard")
+        if mod:
+            bb = mod.Blackboard()
+            ns = qs.get("namespace", ["security_events"])[0]
+            limit = int(qs.get("limit", [50])[0])
+            handler._send_json({"success": True, "namespace": ns, "events": bb.query_events(ns, limit)})
+            return True
+
 def dispatch_post(handler, data):
     """分发POST请求。返回True如果处理了。"""
     parsed = urlparse(handler.path)
@@ -498,6 +525,34 @@ def dispatch_post(handler, data):
                 handler._send_json({"success": True, **result})
             except ValueError as e:
                 handler._send_json({"error": str(e)}, 400)
+            return True
+
+    # Blackboard: 写入共享状态（本地优先，无需远端认证）
+    if path == "/api/v1/blackboard":
+        mod = _modules.get("blackboard")
+        if mod:
+            bb = mod.Blackboard()
+            ns = data.get("namespace")
+            key = data.get("key")
+            value = data.get("value")
+            agent_id = data.get("agent_id")
+            if not ns or not key:
+                handler._send_json({"error": "namespace 与 key 为必填"}, 400)
+                return True
+            result = bb.put(ns, key, value, agent_id=agent_id)
+            handler._send_json({"success": True, **result}, 201)
+            return True
+
+    # Blackboard: 追加事件
+    if path == "/api/v1/blackboard/events":
+        mod = _modules.get("blackboard")
+        if mod:
+            bb = mod.Blackboard()
+            ns = data.get("namespace") or "security_events"
+            event = data.get("event") or {}
+            agent_id = data.get("agent_id")
+            ev = bb.append_event(ns, event, agent_id=agent_id)
+            handler._send_json({"success": True, "event": ev}, 201)
             return True
 
     # P0-4: 认证中间件 — 对 /api/v1/* POST 端点默认启用认证
