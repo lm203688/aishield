@@ -204,6 +204,29 @@ class MessageBus:
         """
         self._load()
 
+        # ── P0-3: Agent 通信安全平面 ──
+        # 每条总线消息先过 AIShield 安全闸，命中威胁则拒绝。
+        # 闸自身异常时 fail-open（放行），绝不因安全组件故障阻断业务。
+        try:
+            from eco import agent_security_gateway as _gw
+            _screen = _gw.screen_message(
+                sender_agent_id=sender_agent_id,
+                channel=channel,
+                target_agent_id=target_agent_id,
+                message_type=message_type,
+                payload=payload,
+                record=True,
+            )
+            if not _screen["allowed"]:
+                raise ValueError(
+                    "agent_security_gateway: message blocked ("
+                    + "; ".join(_screen["reasons"]) + ")"
+                )
+        except ValueError:
+            raise
+        except Exception:
+            pass
+
         message_id = f"msg_{uuid.uuid4().hex[:16]}"
         message = {
             "message_id": message_id,
@@ -631,7 +654,7 @@ class TaskDelegation:
         _save_json(DELEGATIONS_FILE, {"delegations": self._delegations})
 
     def delegate(self, task_description, from_agent_id, to_agent_id,
-                 payload=None, deadline_seconds=None):
+                 payload=None, deadline_seconds=None, require_human_approval=False):
         """
         委派任务
 
@@ -641,13 +664,39 @@ class TaskDelegation:
             to_agent_id (str):        被委派者Agent ID
             payload (dict, opt):      任务负载
             deadline_seconds (int, opt): 截止时间（秒）
+            require_human_approval (bool, opt): 是否需要人类审批闸门
+                True 时委派先进入 awaiting_approval 状态，须经 approve_delegation
+                放行（转为 pending）后才能被接受。
 
         Returns:
             dict: {"delegation_id", "status"}
         """
         self._load()
 
+        # ── P0-3: Agent 通信安全平面 ──
+        # 委派的任务描述 / 负载先过 AIShield 安全闸，命中威胁即拒绝（fail-open 由闸保证）。
+        try:
+            from eco import agent_security_gateway as _gw
+            _screen = _gw.screen_message(
+                sender_agent_id=from_agent_id,
+                target_agent_id=to_agent_id,
+                message_type="delegation",
+                payload=payload,
+                task_description=task_description,
+                record=True,
+            )
+            if not _screen["allowed"]:
+                raise ValueError(
+                    "agent_security_gateway: delegation blocked ("
+                    + "; ".join(_screen["reasons"]) + ")"
+                )
+        except ValueError:
+            raise
+        except Exception:
+            pass
+
         delegation_id = f"dlg_{uuid.uuid4().hex[:16]}"
+        initial_status = "awaiting_approval" if require_human_approval else "pending"
         now = datetime.now(TZ)
         deadline = None
         if deadline_seconds:
@@ -659,7 +708,7 @@ class TaskDelegation:
             "from_agent_id": from_agent_id,
             "to_agent_id": to_agent_id,
             "payload": payload or {},
-            "status": "pending",
+            "status": initial_status,
             "deadline": deadline,
             "result": None,
             "reject_reason": None,
@@ -673,7 +722,49 @@ class TaskDelegation:
 
         return {
             "delegation_id": delegation_id,
+            "status": initial_status,
+        }
+
+    def approve_delegation(self, delegation_id, agent_id=None, note=None):
+        """
+        人类审批闸门：将 awaiting_approval 的委派放行（转为 pending），
+        使其可被被委派者接受。
+
+        Args:
+            delegation_id (str):  委派ID
+            agent_id (str, opt):  审批人 Agent ID（人类或其他授权主体）
+            note (str, opt):      审批备注
+
+        Returns:
+            dict: 审批结果
+        """
+        self._load()
+
+        dlg = self._delegations.get(delegation_id)
+        if not dlg:
+            raise ValueError(f"委派 '{delegation_id}' 不存在")
+        if dlg["status"] != "awaiting_approval":
+            raise ValueError(
+                f"委派状态为 '{dlg['status']}'，无法审批（仅 awaiting_approval 可审批）"
+            )
+        # 授权校验：审批人须为委派方（from_agent_id）或显式指定授权主体，
+        # 避免任意 agent 越权放行高危委派。
+        if agent_id is not None and agent_id != dlg.get("from_agent_id"):
+            raise ValueError(
+                f"Agent '{agent_id}' 无权审批此委派（仅委派方 {dlg.get('from_agent_id')} 可审批）"
+            )
+
+        dlg["status"] = "pending"
+        dlg["approved_at"] = _now_iso()
+        dlg["approved_by"] = agent_id
+        dlg["approval_note"] = note
+
+        self._save()
+
+        return {
+            "delegation_id": delegation_id,
             "status": "pending",
+            "approved_at": dlg["approved_at"],
         }
 
     def accept_delegation(self, delegation_id, agent_id):
