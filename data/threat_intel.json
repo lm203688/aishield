@@ -1,6 +1,50 @@
 {
   "intel": [
     {
+      "id": "CVE-2026-75130",
+      "source": "nvd",
+      "severity": "critical",
+      "cvss": 9.0,
+      "title": "Context7 through 2.1.2 contains a prompt injection vulnerability that allows attackers to execute malicious instructions in connected AI coding agents by injecting unsanitized content through the Cust",
+      "summary": "Context7 through 2.1.2 contains a prompt injection vulnerability that allows attackers to execute malicious instructions in connected AI coding agents by injecting unsanitized content through the Custom AI Instructions feature served via the MCP server. Attackers can poison the custom instructions to exfiltrate credentials from environment files to an attacker-controlled service and perform destructive file deletion on the victim's machine when the agent makes a routine library documentation req",
+      "affected": "prompt injection",
+      "references": [
+        "https://noma.security/blog/contextcrush-context7-the-mcp-server-vulnerability/",
+        "https://www.linkedin.com/posts/upstash_mcp-server-vulnerability-in-context-7-activity-7435686676049387520-PBVo/",
+        "https://www.vulncheck.com/advisories/context7-prompt-injection-via-custom-ai-instructions"
+      ],
+      "published": "2026-08-18T18:19:34.197",
+      "fetched": "2026-08-18T18:42:10.326659+00:00"
+    },
+    {
+      "id": "GHSA-p23g-mvhj-jh3j",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.5,
+      "title": "GeoLens: Cross-dataset authorization bypass discloses private dataset metadata, schema, sample values, table rows, and raster/vector tile data",
+      "summary": "### Summary\n\nMultiple GeoLens read/link endpoints authorized only the resource named in the\nrequest URL (a map, a VRT, a source dataset, an AI request) and failed to\nre-authorize a **second, caller-influenced dataset** that the request reached\nthrough a relationship, layer reference, mosaic source, or request body. This\n\"authorize the URL resource, read a *different* dataset un-re-authorized\"\npattern let callers read data from datasets they have no access to.\n\nThe most severe instances require *",
+      "affected": "npm:@geolens/sdk, npm:geolens-cli, npm:geolens",
+      "references": [
+        "https://github.com/advisories/GHSA-p23g-mvhj-jh3j"
+      ],
+      "published": "2026-08-18T18:00:07Z",
+      "fetched": "2026-08-18T18:42:30.477972+00:00"
+    },
+    {
+      "id": "GHSA-p23g-mvhj-jh3j",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.5,
+      "title": "GeoLens: Cross-dataset authorization bypass discloses private dataset metadata, schema, sample values, table rows, and raster/vector tile data",
+      "summary": "### Summary\n\nMultiple GeoLens read/link endpoints authorized only the resource named in the\nrequest URL (a map, a VRT, a source dataset, an AI request) and failed to\nre-authorize a **second, caller-influenced dataset** that the request reached\nthrough a relationship, layer reference, mosaic source, or request body. This\n\"authorize the URL resource, read a *different* dataset un-re-authorized\"\npattern let callers read data from datasets they have no access to.\n\nThe most severe instances require *",
+      "affected": "pip:@geolens/sdk, pip:geolens-cli, pip:geolens",
+      "references": [
+        "https://github.com/advisories/GHSA-p23g-mvhj-jh3j"
+      ],
+      "published": "2026-08-18T18:00:07Z",
+      "fetched": "2026-08-18T18:42:31.963185+00:00"
+    },
+    {
       "id": "CVE-2026-75913",
       "source": "nvd",
       "severity": "critical",
@@ -2757,19 +2801,19 @@
       "fetched": "2026-08-04T06:34:53.913899+00:00"
     }
   ],
-  "updated": "2026-08-18T17:30:37.770827+00:00",
+  "updated": "2026-08-18T18:42:32.466959+00:00",
   "sources": [
     "osv",
     "nvd",
     "github-advisory"
   ],
   "stats": {
-    "critical": 27,
-    "high": 79,
+    "critical": 28,
+    "high": 81,
     "medium": 53,
     "unknown": 20,
     "low": 3,
     "moderate": 1
   },
-  "total": 183
+  "total": 186
 }

@@ -1,7 +1,55 @@
 {
-  "generated_at": "2026-08-18T17:30:51.073336+00:00",
-  "source_intel_count": 183,
+  "generated_at": "2026-08-18T18:42:46.528401+00:00",
+  "source_intel_count": 186,
   "package_blacklist": {
+    "npm:@geolens/sdk": {
+      "ecosystem": "npm",
+      "package": "@geolens/sdk",
+      "severity": "high",
+      "advisories": [
+        "GHSA-p23g-mvhj-jh3j"
+      ]
+    },
+    "npm:geolens-cli": {
+      "ecosystem": "npm",
+      "package": "geolens-cli",
+      "severity": "high",
+      "advisories": [
+        "GHSA-p23g-mvhj-jh3j"
+      ]
+    },
+    "npm:geolens": {
+      "ecosystem": "npm",
+      "package": "geolens",
+      "severity": "high",
+      "advisories": [
+        "GHSA-p23g-mvhj-jh3j"
+      ]
+    },
+    "pip:@geolens/sdk": {
+      "ecosystem": "pip",
+      "package": "@geolens/sdk",
+      "severity": "high",
+      "advisories": [
+        "GHSA-p23g-mvhj-jh3j"
+      ]
+    },
+    "pip:geolens-cli": {
+      "ecosystem": "pip",
+      "package": "geolens-cli",
+      "severity": "high",
+      "advisories": [
+        "GHSA-p23g-mvhj-jh3j"
+      ]
+    },
+    "pip:geolens": {
+      "ecosystem": "pip",
+      "package": "geolens",
+      "severity": "high",
+      "advisories": [
+        "GHSA-p23g-mvhj-jh3j"
+      ]
+    },
     "pip:atomic-agents-stack": {
       "ecosystem": "pip",
       "package": "atomic-agents-stack",
@@ -264,13 +312,13 @@
       "owasp": "LLM01",
       "owasp_name": "提示注入 (Prompt Injection)",
       "derived_from": "prompt injection",
-      "intel_hits": 28,
+      "intel_hits": 29,
       "evidence": [
+        "CVE-2026-75130",
         "CVE-2026-75913",
         "CVE-2026-21832",
         "CVE-2026-73487",
-        "CVE-2026-73032",
-        "CVE-2026-70477"
+        "CVE-2026-73032"
       ]
     },
     "(?i)(session|token)\\s*[:=]\\s*['\\\"][^'\\\"]{0,8}['\\\"]": {
@@ -385,5 +433,5 @@
     "LLM05": 2,
     "LLM06": 2
   },
-  "total_rules": 34
+  "total_rules": 40
 }
