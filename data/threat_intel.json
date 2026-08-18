@@ -1,6 +1,54 @@
 {
   "intel": [
     {
+      "id": "CVE-2026-75913",
+      "source": "nvd",
+      "severity": "critical",
+      "cvss": 9.3,
+      "title": "CodeWhale (codewhale / codewhale-tui) versions >= 0.8.41 and < 0.8.64 contain an argument injection vulnerability in the git_show tool. The model-supplied rev parameter is passed unvalidated into the ",
+      "summary": "CodeWhale (codewhale / codewhale-tui) versions >= 0.8.41 and < 0.8.64 contain an argument injection vulnerability in the git_show tool. The model-supplied rev parameter is passed unvalidated into the git show argv without an --end-of-options sentinel, so a value beginning with --output= is interpreted as a git flag. Because the tool is registered as auto-approved and advertised as read-only, an attacker (via a malicious repository combined with prompt injection) can cause an unprompted arbitrary",
+      "affected": "prompt injection",
+      "references": [
+        "https://github.com/Hmbown/CodeWhale/commit/9a34b5034d29f05d1f28fa61b04719ca6a741020",
+        "https://github.com/Hmbown/CodeWhale/security/advisories/GHSA-7j5w-7r7x-9v27",
+        "https://www.vulncheck.com/advisories/codewhale-before-argument-injection-via-git-show"
+      ],
+      "published": "2026-08-18T16:18:23.363",
+      "fetched": "2026-08-18T16:35:05.437440+00:00"
+    },
+    {
+      "id": "CVE-2026-75858",
+      "source": "nvd",
+      "severity": "high",
+      "cvss": 7.8,
+      "title": "CodeWhale (packages codewhale / codewhale-tui) versions >= 0.8.41 and < 0.8.64 contain a remote code execution vulnerability in the rlm_eval tool. The tool's approval_requirement() returns ApprovalReq",
+      "summary": "CodeWhale (packages codewhale / codewhale-tui) versions >= 0.8.41 and < 0.8.64 contain a remote code execution vulnerability in the rlm_eval tool. The tool's approval_requirement() returns ApprovalRequirement::Auto, which the engine treats as 'never prompt,' causing arbitrary model-supplied Python code to run in a python3 interpreter without consulting the user's configured --approval-policy and without any approval prompt or audit step. An attacker can induce the agent to execute arbitrary code",
+      "affected": "prompt injection",
+      "references": [
+        "https://github.com/Hmbown/CodeWhale/commit/57f3c89471e27ac4032d9791f6885e5d4408c381",
+        "https://github.com/Hmbown/CodeWhale/security/advisories/GHSA-wrj3-vj8c-784f",
+        "https://www.vulncheck.com/advisories/codewhale-rlm-eval-before-remote-code-execution"
+      ],
+      "published": "2026-08-18T16:18:21.653",
+      "fetched": "2026-08-18T16:35:05.437437+00:00"
+    },
+    {
+      "id": "CVE-2026-75857",
+      "source": "nvd",
+      "severity": "high",
+      "cvss": 7.0,
+      "title": "CodeWhale versions >= 0.8.41 and < 0.8.64 contain a vulnerability in the exec_shell_interact (alias exec_interact) tool, whose approval_requirement returns ApprovalRequirement::Auto. This overrides th",
+      "summary": "CodeWhale versions >= 0.8.41 and < 0.8.64 contain a vulnerability in the exec_shell_interact (alias exec_interact) tool, whose approval_requirement returns ApprovalRequirement::Auto. This overrides the default Required approval for code-executing tools, so LLM-controlled stdin is written into an already-approved long-running interactive shell (e.g., a python3 -i REPL, mysql, ssh, or sudo -i session) without any approval prompt. An attacker who can inject instructions via untrusted content the ag",
+      "affected": "llm agent",
+      "references": [
+        "https://github.com/Hmbown/CodeWhale/commit/57f3c89471e27ac4032d9791f6885e5d4408c381",
+        "https://github.com/Hmbown/CodeWhale/security/advisories/GHSA-g29h-pfmp-qp9r",
+        "https://www.vulncheck.com/advisories/codewhale-before-privilege-escalation-via-exec-shell-interact"
+      ],
+      "published": "2026-08-18T16:18:21.520",
+      "fetched": "2026-08-18T16:35:17.925902+00:00"
+    },
+    {
       "id": "GHSA-8qf9-62x2-82pp",
       "source": "github-advisory",
       "severity": "medium",
@@ -2709,19 +2757,19 @@
       "fetched": "2026-08-04T06:34:53.913899+00:00"
     }
   ],
-  "updated": "2026-08-18T15:35:32.111129+00:00",
+  "updated": "2026-08-18T16:35:26.768095+00:00",
   "sources": [
     "osv",
     "nvd",
     "github-advisory"
   ],
   "stats": {
+    "critical": 27,
+    "high": 79,
     "medium": 53,
-    "high": 77,
-    "critical": 26,
     "unknown": 20,
     "low": 3,
     "moderate": 1
   },
-  "total": 180
+  "total": 183
 }

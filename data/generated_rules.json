@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-08-18T15:35:42.168345+00:00",
-  "source_intel_count": 180,
+  "generated_at": "2026-08-18T16:35:40.842089+00:00",
+  "source_intel_count": 183,
   "package_blacklist": {
     "pip:atomic-agents-stack": {
       "ecosystem": "pip",
@@ -258,6 +258,36 @@
     }
   },
   "pattern_rules": {
+    "(?i)(ignore|disregard|forget)\\s+(all\\s+)?(previous|prior|above)\\s+(instruction|prompt|rule)": {
+      "description": "提示注入: 覆盖历史指令",
+      "severity": "critical",
+      "owasp": "LLM01",
+      "owasp_name": "提示注入 (Prompt Injection)",
+      "derived_from": "prompt injection",
+      "intel_hits": 28,
+      "evidence": [
+        "CVE-2026-75913",
+        "CVE-2026-21832",
+        "CVE-2026-73487",
+        "CVE-2026-73032",
+        "CVE-2026-70477"
+      ]
+    },
+    "(?i)(session|token)\\s*[:=]\\s*['\\\"][^'\\\"]{0,8}['\\\"]": {
+      "description": "会话安全: 会话标识过短或硬编码",
+      "severity": "high",
+      "owasp": "LLM07",
+      "owasp_name": "系统提示泄露 (System Prompt Leakage)",
+      "derived_from": "session",
+      "intel_hits": 21,
+      "evidence": [
+        "CVE-2026-75857",
+        "GHSA-76pc-mqxp-3rq5",
+        "GHSA-hqvf-45jj-mccq",
+        "GHSA-5gpj-vj23-vhhv",
+        "GHSA-3xpf-xq7r-v8c5"
+      ]
+    },
     "(?i)(Access-Control-Allow-Origin['\\\"]?\\s*[:,]\\s*['\\\"]\\*|cors\\s*\\(\\s*\\)\\s*)": {
       "description": "跨域校验缺失: 允许任意来源",
       "severity": "high",
@@ -333,21 +363,6 @@
         "GHSA-f42x-p2mx-hm8r"
       ]
     },
-    "(?i)(session|token)\\s*[:=]\\s*['\\\"][^'\\\"]{0,8}['\\\"]": {
-      "description": "会话安全: 会话标识过短或硬编码",
-      "severity": "high",
-      "owasp": "LLM07",
-      "owasp_name": "系统提示泄露 (System Prompt Leakage)",
-      "derived_from": "session",
-      "intel_hits": 20,
-      "evidence": [
-        "GHSA-76pc-mqxp-3rq5",
-        "GHSA-hqvf-45jj-mccq",
-        "GHSA-5gpj-vj23-vhhv",
-        "GHSA-3xpf-xq7r-v8c5",
-        "GHSA-p5w8-m249-4r4v"
-      ]
-    },
     "(?i)(requests\\.(get|post)|urllib\\.request\\.urlopen|fetch)\\s*\\(\\s*[^)]*(user|input|param|req\\.)": {
       "description": "SSRF: 请求目标来自不可信输入",
       "severity": "high",
@@ -362,28 +377,13 @@
         "GHSA-rffm-9q57-q649",
         "GHSA-c6xh-wv4j-ppv5"
       ]
-    },
-    "(?i)(ignore|disregard|forget)\\s+(all\\s+)?(previous|prior|above)\\s+(instruction|prompt|rule)": {
-      "description": "提示注入: 覆盖历史指令",
-      "severity": "critical",
-      "owasp": "LLM01",
-      "owasp_name": "提示注入 (Prompt Injection)",
-      "derived_from": "prompt injection",
-      "intel_hits": 27,
-      "evidence": [
-        "CVE-2026-21832",
-        "CVE-2026-73487",
-        "CVE-2026-73032",
-        "CVE-2026-70477",
-        "CVE-2026-70477"
-      ]
     }
   },
   "owasp_distribution": {
+    "LLM01": 1,
     "LLM07": 3,
     "LLM05": 2,
-    "LLM06": 2,
-    "LLM01": 1
+    "LLM06": 2
   },
   "total_rules": 34
 }
