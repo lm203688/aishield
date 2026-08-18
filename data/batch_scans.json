@@ -105326,26 +105326,1420 @@
         }
       ],
       "error_details": []
+    },
+    {
+      "id": "batch_20260819_022203",
+      "source": "all",
+      "scanner_version": "4.1",
+      "scanned_at": "2026-08-19 02:22:03",
+      "total": 1,
+      "success": 1,
+      "errors": 0,
+      "results": [
+        {
+          "security_score": 0,
+          "permissions_score": 98,
+          "data_handling_score": 19,
+          "supply_chain_score": 85,
+          "reliability_score": 100,
+          "overall_score": 42,
+          "risk_level": "critical",
+          "badge_level": "none",
+          "owasp_coverage": {
+            "covered": [
+              "MCP01",
+              "MCP02",
+              "MCP06",
+              "MCP09",
+              "MCP10"
+            ],
+            "covered_count": 5,
+            "total": 10,
+            "coverage_percent": 50,
+            "categories": {
+              "MCP10": {
+                "name": "Context Injection & Over-Sharing",
+                "name_cn": "上下文注入与过度共享",
+                "rules_triggered": 15,
+                "total_rules": 7
+              },
+              "MCP09": {
+                "name": "Shadow MCP Servers",
+                "name_cn": "影子MCP服务器",
+                "rules_triggered": 16,
+                "total_rules": 6
+              },
+              "MCP06": {
+                "name": "Intent Flow Subversion / Prompt Injection",
+                "name_cn": "意图流颠覆/上下文提示注入",
+                "rules_triggered": 1,
+                "total_rules": 14
+              },
+              "MCP01": {
+                "name": "Improper Token & Secret Management",
+                "name_cn": "令牌管理不当与密钥暴露",
+                "rules_triggered": 4,
+                "total_rules": 16
+              },
+              "MCP02": {
+                "name": "Privilege Scope Creep Leading to Escalation",
+                "name_cn": "权限范围蔓延导致提权",
+                "rules_triggered": 8,
+                "total_rules": 12
+              }
+            }
+          },
+          "agentic_coverage": {
+            "covered": [
+              "ASI02",
+              "ASI09"
+            ],
+            "covered_count": 2,
+            "total": 10,
+            "coverage_percent": 20,
+            "categories": {
+              "ASI02": {
+                "name": "Tool Misuse",
+                "name_cn": "工具滥用",
+                "rules_triggered": 1,
+                "total_rules": 6
+              },
+              "ASI09": {
+                "name": "Cascading Failures & Multi-Agent Risks",
+                "name_cn": "级联失败与多智能体风险",
+                "rules_triggered": 1,
+                "total_rules": 6
+              }
+            }
+          },
+          "rules_count": 214,
+          "score_breakdown": {
+            "security_score": {
+              "base": 100,
+              "penalty": 124,
+              "contributors": [
+                {
+                  "reason": "数据库连接字符串含密码",
+                  "severity": "critical",
+                  "amount": 20,
+                  "owasp": "MCP01"
+                },
+                {
+                  "reason": "内网/元数据地址访问(SSRF)",
+                  "severity": "critical",
+                  "amount": 20,
+                  "owasp": "MCP10"
+                },
+                {
+                  "reason": "Agent自动发送邮件无确认",
+                  "severity": "critical",
+                  "amount": 20,
+                  "owasp": "ASI02"
+                },
+                {
+                  "reason": "数据库连接字符串",
+                  "severity": "critical",
+                  "amount": 20,
+                  "owasp": "MCP01"
+                },
+                {
+                  "reason": "无限重试(级联放大)",
+                  "severity": "high",
+                  "amount": 10,
+                  "owasp": "ASI09"
+                }
+              ]
+            },
+            "permissions_score": {
+              "base": 100,
+              "penalty": 2,
+              "contributors": [
+                {
+                  "reason": "完整环境变量访问",
+                  "severity": "low",
+                  "amount": 2,
+                  "owasp": "MCP02"
+                }
+              ]
+            },
+            "data_handling_score": {
+              "base": 100,
+              "penalty": 81,
+              "contributors": [
+                {
+                  "reason": "数据库连接字符串含密码",
+                  "severity": "critical",
+                  "amount": 20,
+                  "owasp": "MCP01"
+                },
+                {
+                  "reason": "内网/元数据地址访问(SSRF)",
+                  "severity": "critical",
+                  "amount": 20,
+                  "owasp": "MCP10"
+                },
+                {
+                  "reason": "数据库连接字符串",
+                  "severity": "critical",
+                  "amount": 20,
+                  "owasp": "MCP01"
+                },
+                {
+                  "reason": "可能的 typosquatting 包名: '@playwright/test' 形近官方包 'jest'",
+                  "severity": "high",
+                  "amount": 10,
+                  "owasp": "MCP04"
+                },
+                {
+                  "reason": "HTTP请求(检查目标是否为内部服务)",
+                  "severity": "medium",
+                  "amount": 5,
+                  "owasp": "MCP10"
+                }
+              ]
+            },
+            "supply_chain_score": {
+              "base": 100,
+              "penalty": 15,
+              "contributors": [
+                {
+                  "reason": "可能的 typosquatting 包名: '@playwright/test' 形近官方包 'jest'",
+                  "severity": "high",
+                  "amount": 15,
+                  "owasp": "MCP04"
+                }
+              ]
+            },
+            "reliability_score": {
+              "base": 100,
+              "penalty": 0,
+              "contributors": []
+            }
+          },
+          "top_deductions": [
+            {
+              "dimension": "security_score",
+              "reason": "数据库连接字符串含密码",
+              "severity": "critical",
+              "amount": 20,
+              "owasp": "MCP01"
+            },
+            {
+              "dimension": "security_score",
+              "reason": "内网/元数据地址访问(SSRF)",
+              "severity": "critical",
+              "amount": 20,
+              "owasp": "MCP10"
+            },
+            {
+              "dimension": "security_score",
+              "reason": "Agent自动发送邮件无确认",
+              "severity": "critical",
+              "amount": 20,
+              "owasp": "ASI02"
+            },
+            {
+              "dimension": "security_score",
+              "reason": "数据库连接字符串",
+              "severity": "critical",
+              "amount": 20,
+              "owasp": "MCP01"
+            },
+            {
+              "dimension": "data_handling_score",
+              "reason": "数据库连接字符串含密码",
+              "severity": "critical",
+              "amount": 20,
+              "owasp": "MCP01"
+            },
+            {
+              "dimension": "data_handling_score",
+              "reason": "内网/元数据地址访问(SSRF)",
+              "severity": "critical",
+              "amount": 20,
+              "owasp": "MCP10"
+            },
+            {
+              "dimension": "data_handling_score",
+              "reason": "数据库连接字符串",
+              "severity": "critical",
+              "amount": 20,
+              "owasp": "MCP01"
+            },
+            {
+              "dimension": "supply_chain_score",
+              "reason": "可能的 typosquatting 包名: '@playwright/test' 形近官方包 'jest'",
+              "severity": "high",
+              "amount": 15,
+              "owasp": "MCP04"
+            }
+          ],
+          "name": "amruthpillai/reactive-resume",
+          "source_url": "https://github.com/amruthpillai/reactive-resume",
+          "tool_type": "mcp",
+          "findings": [
+            {
+              "type": "dangerous_pattern",
+              "severity": "critical",
+              "description": "数据库连接字符串含密码",
+              "file": "vitest.setup.ts",
+              "lines": "9",
+              "evidence": "postgresql://postgres:postgres@",
+              "owasp_category": "MCP01"
+            },
+            {
+              "type": "dangerous_pattern",
+              "severity": "low",
+              "description": "完整环境变量访问",
+              "file": "vitest.setup.ts",
+              "lines": "8",
+              "evidence": "process.env",
+              "owasp_category": "MCP02"
+            },
+            {
+              "type": "dangerous_pattern",
+              "severity": "low",
+              "description": "非标准端口服务(检查是否为未授权MCP)",
+              "file": "vitest.setup.ts",
+              "lines": "8",
+              "evidence": ":3000",
+              "owasp_category": "MCP09"
+            },
+            {
+              "type": "dangerous_pattern",
+              "severity": "critical",
+              "description": "内网/元数据地址访问(SSRF)",
+              "file": "vitest.setup.ts",
+              "lines": "8",
+              "evidence": "localhost",
+              "owasp_category": "MCP10"
+            },
+            {
+              "type": "dangerous_pattern",
+              "severity": "medium",
+              "description": "远程MCP服务器URL配置",
+              "file": "server.json",
+              "lines": "8",
+              "evidence": "\"url\": \"https://",
+              "owasp_category": "MCP09"
+            },
+            {
+              "type": "dangerous_pattern",
+              "severity": "low",
+              "description": "完整环境变量访问",
+              "file": "playwright.config.ts",
+              "lines": "3",
+              "evidence": "process.env",
+              "owasp_category": "MCP02"
+            },
+            {
+              "type": "dangerous_pattern",
+              "severity": "critical",
+              "description": "内网/元数据地址访问(SSRF)",
+              "file": "playwright.config.ts",
+              "lines": "4",
+              "evidence": "localhost",
+              "owasp_category": "MCP10"
+            },
+            {
+              "type": "dangerous_pattern",
+              "severity": "high",
+              "description": "无限重试(级联放大)",
+              "file": "playwright.config.ts",
+              "lines": "11",
+              "evidence": "retries: 0",
+              "owasp_category": "ASI09"
+            },
+            {
+              "type": "dangerous_pattern",
+              "severity": "medium",
+              "description": "远程MCP服务器URL配置",
+              "file": "package.json",
+              "lines": "10",
+              "evidence": "\"url\": \"https://",
+              "owasp_category": "MCP09"
+            },
+            {
+              "type": "dangerous_pattern",
+              "severity": "low",
+              "description": "非标准端口服务(检查是否为未授权MCP)",
+              "file": "compose.yml",
+              "lines": "14",
+              "evidence": ":5432",
+              "owasp_category": "MCP09"
+            },
+            {
+              "type": "dangerous_pattern",
+              "severity": "medium",
+              "description": "HTTP请求(检查目标是否为内部服务)",
+              "file": "compose.yml",
+              "lines": "105",
+              "evidence": "fetch('http://",
+              "owasp_category": "MCP10"
+            },
+            {
+              "type": "dangerous_pattern",
+              "severity": "critical",
+              "description": "内网/元数据地址访问(SSRF)",
+              "file": "compose.yml",
+              "lines": "34",
+              "evidence": "127.0.0.1",
+              "owasp_category": "MCP10"
+            },
+            {
+              "type": "dangerous_pattern",
+              "severity": "critical",
+              "description": "数据库连接字符串含密码",
+              "file": "compose.dev.yml",
+              "lines": "16",
+              "evidence": "postgresql://postgres:postgres@",
+              "owasp_category": "MCP01"
+            },
+            {
+              "type": "dangerous_pattern",
+              "severity": "low",
+              "description": "完整环境变量访问",
+              "file": "compose.dev.yml",
+              "lines": "42",
+              "evidence": "process.env",
+              "owasp_category": "MCP02"
+            },
+            {
+              "type": "dangerous_pattern",
+              "severity": "low",
+              "description": "非标准端口服务(检查是否为未授权MCP)",
+              "file": "compose.dev.yml",
+              "lines": "15",
+              "evidence": ":3000",
+              "owasp_category": "MCP09"
+            },
+            {
+              "type": "dangerous_pattern",
+              "severity": "medium",
+              "description": "HTTP请求(检查目标是否为内部服务)",
+              "file": "compose.dev.yml",
+              "lines": "42",
+              "evidence": "fetch('http://",
+              "owasp_category": "MCP10"
+            },
+            {
+              "type": "dangerous_pattern",
+              "severity": "critical",
+              "description": "内网/元数据地址访问(SSRF)",
+              "file": "compose.dev.yml",
+              "lines": "15",
+              "evidence": "localhost",
+              "owasp_category": "MCP10"
+            },
+            {
+              "type": "dangerous_pattern",
+              "severity": "low",
+              "description": "非标准端口服务(检查是否为未授权MCP) (文档示例)",
+              "file": "README.md",
+              "lines": "167",
+              "evidence": ":3000",
+              "owasp_category": "MCP09"
+            },
+            {
+              "type": "dangerous_pattern",
+              "severity": "low",
+              "description": "内网/元数据地址访问(SSRF) (文档示例)",
+              "file": "README.md",
+              "lines": "167",
+              "evidence": "localhost",
+              "owasp_category": "MCP10"
+            },
+            {
+              "type": "dangerous_pattern",
+              "severity": "high",
+              "description": "持久化/自启动指令",
+              "file": "DESIGN.md",
+              "lines": "203",
+              "evidence": "persist",
+              "owasp_category": "MCP06"
+            },
+            {
+              "type": "dangerous_pattern",
+              "severity": "critical",
+              "description": "数据库连接字符串含密码",
+              "file": "AGENTS.md",
+              "lines": "113",
+              "evidence": "postgresql://postgres:postgres@",
+              "owasp_category": "MCP01"
+            },
+            {
+              "type": "dangerous_pattern",
+              "severity": "low",
+              "description": "完整环境变量访问",
+              "file": "AGENTS.md",
+              "lines": "115",
+              "evidence": "process.env",
+              "owasp_category": "MCP02"
+            },
+            {
+              "type": "dangerous_pattern",
+              "severity": "low",
+              "description": "非标准端口服务(检查是否为未授权MCP)",
+              "file": "AGENTS.md",
+              "lines": "113",
+              "evidence": ":5432",
+              "owasp_category": "MCP09"
+            },
+            {
+              "type": "dangerous_pattern",
+              "severity": "critical",
+              "description": "内网/元数据地址访问(SSRF)",
+              "file": "AGENTS.md",
+              "lines": "113",
+              "evidence": "localhost",
+              "owasp_category": "MCP10"
+            },
+            {
+              "type": "dangerous_pattern",
+              "severity": "critical",
+              "description": "Agent自动发送邮件无确认",
+              "file": "AGENTS.md",
+              "lines": "165",
+              "evidence": "SMTP config; without",
+              "owasp_category": "ASI02"
+            },
+            {
+              "type": "typosquatting",
+              "severity": "high",
+              "description": "可能的 typosquatting 包名: '@playwright/test' 形近官方包 'jest'",
+              "owasp_category": "MCP04",
+              "evidence": "@playwright/test ~ jest (dist=1)",
+              "file": "package.json"
+            },
+            {
+              "type": "suspected_hallucinated_package",
+              "severity": "info",
+              "description": "疑似 AI 幻觉包(slopsquatting): '@testing-library/jest-dom' 借用 'jest' 生态命名但不在可信名录，需核实其在注册表中真实存在",
+              "owasp_category": "MCP04",
+              "evidence": "@testing-library/jest-dom (anchor=jest, composite)",
+              "remediation": "安装前校验注册表存在性/包龄/下载量；使用 lockfile 与依赖白名单",
+              "file": "package.json"
+            },
+            {
+              "type": "missing_lockfile",
+              "severity": "low",
+              "description": "声明了依赖但未见 lockfile，幻觉包/漂移无法 fail-closed",
+              "file": "package.json",
+              "owasp_category": "MCP04",
+              "evidence": "21 deps, no package-lock.json/yarn.lock/pnpm-lock.yaml",
+              "remediation": "提交 lockfile 并在 CI 使用 npm ci"
+            },
+            {
+              "type": "secret_exposure",
+              "severity": "critical",
+              "description": "数据库连接字符串",
+              "file": "vitest.setup.ts",
+              "lines": "9",
+              "evidence": "postgresql://postgres:postgres@localhost:5432/postgres",
+              "owasp_category": "MCP01"
+            },
+            {
+              "type": "secret_exposure",
+              "severity": "low",
+              "description": ".env文件引用",
+              "file": "vitest.setup.ts",
+              "lines": "6",
+              "evidence": ".env",
+              "owasp_category": "MCP01"
+            },
+            {
+              "type": "secret_exposure",
+              "severity": "low",
+              "description": ".env文件引用",
+              "file": "turbo.json",
+              "lines": "94",
+              "evidence": ".env",
+              "owasp_category": "MCP01"
+            },
+            {
+              "type": "secret_exposure",
+              "severity": "low",
+              "description": ".env文件引用",
+              "file": "playwright.config.ts",
+              "lines": "3",
+              "evidence": ".env",
+              "owasp_category": "MCP01"
+            },
+            {
+              "type": "secret_exposure",
+              "severity": "low",
+              "description": ".env文件引用",
+              "file": "compose.yml",
+              "lines": "91",
+              "evidence": ".env",
+              "owasp_category": "MCP01"
+            },
+            {
+              "type": "secret_exposure",
+              "severity": "critical",
+              "description": "数据库连接字符串",
+              "file": "compose.dev.yml",
+              "lines": "16",
+              "evidence": "postgresql://postgres:postgres@postgres:5432/postgres",
+              "owasp_category": "MCP01"
+            },
+            {
+              "type": "secret_exposure",
+              "severity": "low",
+              "description": ".env文件引用",
+              "file": "compose.dev.yml",
+              "lines": "10",
+              "evidence": ".env",
+              "owasp_category": "MCP01"
+            },
+            {
+              "type": "secret_exposure",
+              "severity": "low",
+              "description": ".env文件引用",
+              "file": "README.md",
+              "lines": "207",
+              "evidence": ".env",
+              "owasp_category": "MCP01"
+            },
+            {
+              "type": "secret_exposure",
+              "severity": "critical",
+              "description": "数据库连接字符串",
+              "file": "AGENTS.md",
+              "lines": "113",
+              "evidence": "postgresql://postgres:postgres@localhost:5432/postgres`.",
+              "owasp_category": "MCP01"
+            },
+            {
+              "type": "secret_exposure",
+              "severity": "low",
+              "description": ".env文件引用",
+              "file": "AGENTS.md",
+              "lines": "35",
+              "evidence": ".env",
+              "owasp_category": "MCP01"
+            }
+          ],
+          "total_findings": 38,
+          "static_analysis": {
+            "findings": [
+              {
+                "type": "dangerous_pattern",
+                "severity": "critical",
+                "description": "数据库连接字符串含密码",
+                "file": "vitest.setup.ts",
+                "lines": "9",
+                "evidence": "postgresql://postgres:postgres@",
+                "owasp_category": "MCP01"
+              },
+              {
+                "type": "dangerous_pattern",
+                "severity": "low",
+                "description": "完整环境变量访问",
+                "file": "vitest.setup.ts",
+                "lines": "8",
+                "evidence": "process.env",
+                "owasp_category": "MCP02"
+              },
+              {
+                "type": "dangerous_pattern",
+                "severity": "low",
+                "description": "完整环境变量访问",
+                "file": "vitest.setup.ts",
+                "lines": "9",
+                "evidence": "process.env",
+                "owasp_category": "MCP02"
+              },
+              {
+                "type": "dangerous_pattern",
+                "severity": "low",
+                "description": "完整环境变量访问",
+                "file": "vitest.setup.ts",
+                "lines": "10",
+                "evidence": "process.env",
+                "owasp_category": "MCP02"
+              },
+              {
+                "type": "dangerous_pattern",
+                "severity": "low",
+                "description": "非标准端口服务(检查是否为未授权MCP)",
+                "file": "vitest.setup.ts",
+                "lines": "8",
+                "evidence": ":3000",
+                "owasp_category": "MCP09"
+              },
+              {
+                "type": "dangerous_pattern",
+                "severity": "low",
+                "description": "非标准端口服务(检查是否为未授权MCP)",
+                "file": "vitest.setup.ts",
+                "lines": "9",
+                "evidence": ":5432",
+                "owasp_category": "MCP09"
+              },
+              {
+                "type": "dangerous_pattern",
+                "severity": "critical",
+                "description": "内网/元数据地址访问(SSRF)",
+                "file": "vitest.setup.ts",
+                "lines": "8",
+                "evidence": "localhost",
+                "owasp_category": "MCP10"
+              },
+              {
+                "type": "dangerous_pattern",
+                "severity": "critical",
+                "description": "内网/元数据地址访问(SSRF)",
+                "file": "vitest.setup.ts",
+                "lines": "9",
+                "evidence": "localhost",
+                "owasp_category": "MCP10"
+              },
+              {
+                "type": "dangerous_pattern",
+                "severity": "medium",
+                "description": "远程MCP服务器URL配置",
+                "file": "server.json",
+                "lines": "8",
+                "evidence": "\"url\": \"https://",
+                "owasp_category": "MCP09"
+              },
+              {
+                "type": "dangerous_pattern",
+                "severity": "medium",
+                "description": "远程MCP服务器URL配置",
+                "file": "server.json",
+                "lines": "15",
+                "evidence": "\"url\": \"https://",
+                "owasp_category": "MCP09"
+              },
+              {
+                "type": "dangerous_pattern",
+                "severity": "low",
+                "description": "完整环境变量访问",
+                "file": "playwright.config.ts",
+                "lines": "3",
+                "evidence": "process.env",
+                "owasp_category": "MCP02"
+              },
+              {
+                "type": "dangerous_pattern",
+                "severity": "low",
+                "description": "完整环境变量访问",
+                "file": "playwright.config.ts",
+                "lines": "4",
+                "evidence": "process.env",
+                "owasp_category": "MCP02"
+              },
+              {
+                "type": "dangerous_pattern",
+                "severity": "low",
+                "description": "完整环境变量访问",
+                "file": "playwright.config.ts",
+                "lines": "5",
+                "evidence": "process.env",
+                "owasp_category": "MCP02"
+              },
+              {
+                "type": "dangerous_pattern",
+                "severity": "critical",
+                "description": "内网/元数据地址访问(SSRF)",
+                "file": "playwright.config.ts",
+                "lines": "4",
+                "evidence": "localhost",
+                "owasp_category": "MCP10"
+              },
+              {
+                "type": "dangerous_pattern",
+                "severity": "high",
+                "description": "无限重试(级联放大)",
+                "file": "playwright.config.ts",
+                "lines": "11",
+                "evidence": "retries: 0",
+                "owasp_category": "ASI09"
+              },
+              {
+                "type": "dangerous_pattern",
+                "severity": "medium",
+                "description": "远程MCP服务器URL配置",
+                "file": "package.json",
+                "lines": "10",
+                "evidence": "\"url\": \"https://",
+                "owasp_category": "MCP09"
+              },
+              {
+                "type": "dangerous_pattern",
+                "severity": "medium",
+                "description": "远程MCP服务器URL配置",
+                "file": "package.json",
+                "lines": "14",
+                "evidence": "\"url\": \"https://",
+                "owasp_category": "MCP09"
+              },
+              {
+                "type": "dangerous_pattern",
+                "severity": "low",
+                "description": "非标准端口服务(检查是否为未授权MCP)",
+                "file": "compose.yml",
+                "lines": "14",
+                "evidence": ":5432",
+                "owasp_category": "MCP09"
+              },
+              {
+                "type": "dangerous_pattern",
+                "severity": "low",
+                "description": "非标准端口服务(检查是否为未授权MCP)",
+                "file": "compose.yml",
+                "lines": "34",
+                "evidence": ":6379",
+                "owasp_category": "MCP09"
+              },
+              {
+                "type": "dangerous_pattern",
+                "severity": "low",
+                "description": "非标准端口服务(检查是否为未授权MCP)",
+                "file": "compose.yml",
+                "lines": "34",
+                "evidence": ":6379",
+                "owasp_category": "MCP09"
+              },
+              {
+                "type": "dangerous_pattern",
+                "severity": "medium",
+                "description": "HTTP请求(检查目标是否为内部服务)",
+                "file": "compose.yml",
+                "lines": "105",
+                "evidence": "fetch('http://",
+                "owasp_category": "MCP10"
+              },
+              {
+                "type": "dangerous_pattern",
+                "severity": "critical",
+                "description": "内网/元数据地址访问(SSRF)",
+                "file": "compose.yml",
+                "lines": "34",
+                "evidence": "127.0.0.1",
+                "owasp_category": "MCP10"
+              },
+              {
+                "type": "dangerous_pattern",
+                "severity": "critical",
+                "description": "内网/元数据地址访问(SSRF)",
+                "file": "compose.yml",
+                "lines": "47",
+                "evidence": "0.0.0.0",
+                "owasp_category": "MCP10"
+              },
+              {
+                "type": "dangerous_pattern",
+                "severity": "critical",
+                "description": "内网/元数据地址访问(SSRF)",
+                "file": "compose.yml",
+                "lines": "58",
+                "evidence": "localhost",
+                "owasp_category": "MCP10"
+              },
+              {
+                "type": "dangerous_pattern",
+                "severity": "critical",
+                "description": "数据库连接字符串含密码",
+                "file": "compose.dev.yml",
+                "lines": "16",
+                "evidence": "postgresql://postgres:postgres@",
+                "owasp_category": "MCP01"
+              },
+              {
+                "type": "dangerous_pattern",
+                "severity": "low",
+                "description": "完整环境变量访问",
+                "file": "compose.dev.yml",
+                "lines": "42",
+                "evidence": "process.env",
+                "owasp_category": "MCP02"
+              },
+              {
+                "type": "dangerous_pattern",
+                "severity": "low",
+                "description": "非标准端口服务(检查是否为未授权MCP)",
+                "file": "compose.dev.yml",
+                "lines": "15",
+                "evidence": ":3000",
+                "owasp_category": "MCP09"
+              },
+              {
+                "type": "dangerous_pattern",
+                "severity": "low",
+                "description": "非标准端口服务(检查是否为未授权MCP)",
+                "file": "compose.dev.yml",
+                "lines": "16",
+                "evidence": ":5432",
+                "owasp_category": "MCP09"
+              },
+              {
+                "type": "dangerous_pattern",
+                "severity": "low",
+                "description": "非标准端口服务(检查是否为未授权MCP)",
+                "file": "compose.dev.yml",
+                "lines": "17",
+                "evidence": ":8333",
+                "owasp_category": "MCP09"
+              },
+              {
+                "type": "dangerous_pattern",
+                "severity": "medium",
+                "description": "HTTP请求(检查目标是否为内部服务)",
+                "file": "compose.dev.yml",
+                "lines": "42",
+                "evidence": "fetch('http://",
+                "owasp_category": "MCP10"
+              },
+              {
+                "type": "dangerous_pattern",
+                "severity": "critical",
+                "description": "内网/元数据地址访问(SSRF)",
+                "file": "compose.dev.yml",
+                "lines": "15",
+                "evidence": "localhost",
+                "owasp_category": "MCP10"
+              },
+              {
+                "type": "dangerous_pattern",
+                "severity": "critical",
+                "description": "内网/元数据地址访问(SSRF)",
+                "file": "compose.dev.yml",
+                "lines": "21",
+                "evidence": "127.0.0.1",
+                "owasp_category": "MCP10"
+              },
+              {
+                "type": "dangerous_pattern",
+                "severity": "critical",
+                "description": "内网/元数据地址访问(SSRF)",
+                "file": "compose.dev.yml",
+                "lines": "22",
+                "evidence": "127.0.0.1",
+                "owasp_category": "MCP10"
+              },
+              {
+                "type": "dangerous_pattern",
+                "severity": "low",
+                "description": "非标准端口服务(检查是否为未授权MCP) (文档示例)",
+                "file": "README.md",
+                "lines": "167",
+                "evidence": ":3000",
+                "owasp_category": "MCP09"
+              },
+              {
+                "type": "dangerous_pattern",
+                "severity": "low",
+                "description": "内网/元数据地址访问(SSRF) (文档示例)",
+                "file": "README.md",
+                "lines": "167",
+                "evidence": "localhost",
+                "owasp_category": "MCP10"
+              },
+              {
+                "type": "dangerous_pattern",
+                "severity": "high",
+                "description": "持久化/自启动指令",
+                "file": "DESIGN.md",
+                "lines": "203",
+                "evidence": "persist",
+                "owasp_category": "MCP06"
+              },
+              {
+                "type": "dangerous_pattern",
+                "severity": "critical",
+                "description": "数据库连接字符串含密码",
+                "file": "AGENTS.md",
+                "lines": "113",
+                "evidence": "postgresql://postgres:postgres@",
+                "owasp_category": "MCP01"
+              },
+              {
+                "type": "dangerous_pattern",
+                "severity": "critical",
+                "description": "数据库连接字符串含密码",
+                "file": "AGENTS.md",
+                "lines": "124",
+                "evidence": "postgresql://postgres:postgres@",
+                "owasp_category": "MCP01"
+              },
+              {
+                "type": "dangerous_pattern",
+                "severity": "low",
+                "description": "完整环境变量访问",
+                "file": "AGENTS.md",
+                "lines": "115",
+                "evidence": "process.env",
+                "owasp_category": "MCP02"
+              },
+              {
+                "type": "dangerous_pattern",
+                "severity": "low",
+                "description": "非标准端口服务(检查是否为未授权MCP)",
+                "file": "AGENTS.md",
+                "lines": "113",
+                "evidence": ":5432",
+                "owasp_category": "MCP09"
+              },
+              {
+                "type": "dangerous_pattern",
+                "severity": "low",
+                "description": "非标准端口服务(检查是否为未授权MCP)",
+                "file": "AGENTS.md",
+                "lines": "123",
+                "evidence": ":3000",
+                "owasp_category": "MCP09"
+              },
+              {
+                "type": "dangerous_pattern",
+                "severity": "low",
+                "description": "非标准端口服务(检查是否为未授权MCP)",
+                "file": "AGENTS.md",
+                "lines": "124",
+                "evidence": ":5432",
+                "owasp_category": "MCP09"
+              },
+              {
+                "type": "dangerous_pattern",
+                "severity": "critical",
+                "description": "内网/元数据地址访问(SSRF)",
+                "file": "AGENTS.md",
+                "lines": "113",
+                "evidence": "localhost",
+                "owasp_category": "MCP10"
+              },
+              {
+                "type": "dangerous_pattern",
+                "severity": "critical",
+                "description": "内网/元数据地址访问(SSRF)",
+                "file": "AGENTS.md",
+                "lines": "123",
+                "evidence": "localhost",
+                "owasp_category": "MCP10"
+              },
+              {
+                "type": "dangerous_pattern",
+                "severity": "critical",
+                "description": "内网/元数据地址访问(SSRF)",
+                "file": "AGENTS.md",
+                "lines": "124",
+                "evidence": "localhost",
+                "owasp_category": "MCP10"
+              },
+              {
+                "type": "dangerous_pattern",
+                "severity": "critical",
+                "description": "Agent自动发送邮件无确认",
+                "file": "AGENTS.md",
+                "lines": "165",
+                "evidence": "SMTP config; without",
+                "owasp_category": "ASI02"
+              }
+            ],
+            "total_files": 20,
+            "patterns_checked": 214,
+            "owasp_coverage": {
+              "covered": [
+                "MCP01",
+                "MCP02",
+                "MCP06",
+                "MCP09",
+                "MCP10"
+              ],
+              "covered_count": 5,
+              "total": 10,
+              "coverage_percent": 50,
+              "categories": {
+                "MCP10": {
+                  "name": "Context Injection & Over-Sharing",
+                  "name_cn": "上下文注入与过度共享",
+                  "rules_triggered": 15,
+                  "total_rules": 7
+                },
+                "MCP09": {
+                  "name": "Shadow MCP Servers",
+                  "name_cn": "影子MCP服务器",
+                  "rules_triggered": 16,
+                  "total_rules": 6
+                },
+                "MCP06": {
+                  "name": "Intent Flow Subversion / Prompt Injection",
+                  "name_cn": "意图流颠覆/上下文提示注入",
+                  "rules_triggered": 1,
+                  "total_rules": 14
+                },
+                "MCP01": {
+                  "name": "Improper Token & Secret Management",
+                  "name_cn": "令牌管理不当与密钥暴露",
+                  "rules_triggered": 4,
+                  "total_rules": 16
+                },
+                "MCP02": {
+                  "name": "Privilege Scope Creep Leading to Escalation",
+                  "name_cn": "权限范围蔓延导致提权",
+                  "rules_triggered": 8,
+                  "total_rules": 12
+                }
+              }
+            },
+            "agentic_coverage": {
+              "covered": [
+                "ASI02",
+                "ASI09"
+              ],
+              "covered_count": 2,
+              "total": 10,
+              "coverage_percent": 20,
+              "categories": {
+                "ASI02": {
+                  "name": "Tool Misuse",
+                  "name_cn": "工具滥用",
+                  "rules_triggered": 1,
+                  "total_rules": 6
+                },
+                "ASI09": {
+                  "name": "Cascading Failures & Multi-Agent Risks",
+                  "name_cn": "级联失败与多智能体风险",
+                  "rules_triggered": 1,
+                  "total_rules": 6
+                }
+              }
+            }
+          },
+          "dependency_analysis": {
+            "findings": [
+              {
+                "type": "typosquatting",
+                "severity": "high",
+                "description": "可能的 typosquatting 包名: '@playwright/test' 形近官方包 'jest'",
+                "owasp_category": "MCP04",
+                "evidence": "@playwright/test ~ jest (dist=1)",
+                "file": "package.json"
+              },
+              {
+                "type": "suspected_hallucinated_package",
+                "severity": "info",
+                "description": "疑似 AI 幻觉包(slopsquatting): '@testing-library/jest-dom' 借用 'jest' 生态命名但不在可信名录，需核实其在注册表中真实存在",
+                "owasp_category": "MCP04",
+                "evidence": "@testing-library/jest-dom (anchor=jest, composite)",
+                "remediation": "安装前校验注册表存在性/包龄/下载量；使用 lockfile 与依赖白名单",
+                "file": "package.json"
+              },
+              {
+                "type": "missing_lockfile",
+                "severity": "low",
+                "description": "声明了依赖但未见 lockfile，幻觉包/漂移无法 fail-closed",
+                "file": "package.json",
+                "owasp_category": "MCP04",
+                "evidence": "21 deps, no package-lock.json/yarn.lock/pnpm-lock.yaml",
+                "remediation": "提交 lockfile 并在 CI 使用 npm ci"
+              }
+            ],
+            "dependencies": [
+              {
+                "name": "@biomejs/biome",
+                "version": "^2.5.8",
+                "source": "npm"
+              },
+              {
+                "name": "@commitlint/cli",
+                "version": "^21.2.2",
+                "source": "npm"
+              },
+              {
+                "name": "@commitlint/config-conventional",
+                "version": "^21.2.2",
+                "source": "npm"
+              },
+              {
+                "name": "@playwright/test",
+                "version": "^1.62.1",
+                "source": "npm"
+              },
+              {
+                "name": "@reactive-resume/config",
+                "version": "workspace:*",
+                "source": "npm"
+              },
+              {
+                "name": "@testing-library/dom",
+                "version": "^10.4.1",
+                "source": "npm"
+              },
+              {
+                "name": "@testing-library/jest-dom",
+                "version": "^7.0.1",
+                "source": "npm"
+              },
+              {
+                "name": "@testing-library/react",
+                "version": "^16.3.2",
+                "source": "npm"
+              },
+              {
+                "name": "@testing-library/user-event",
+                "version": "^14.6.4",
+                "source": "npm"
+              },
+              {
+                "name": "@types/node",
+                "version": "^26.2.0",
+                "source": "npm"
+              },
+              {
+                "name": "@types/pg",
+                "version": "^8.23.0",
+                "source": "npm"
+              },
+              {
+                "name": "@vitest/coverage-v8",
+                "version": "^4.1.10",
+                "source": "npm"
+              },
+              {
+                "name": "github-actionlint",
+                "version": "1.7.12",
+                "source": "npm"
+              },
+              {
+                "name": "happy-dom",
+                "version": "^20.11.2",
+                "source": "npm"
+              },
+              {
+                "name": "knip",
+                "version": "^6.32.2",
+                "source": "npm"
+              },
+              {
+                "name": "lefthook",
+                "version": "^2.1.10",
+                "source": "npm"
+              },
+              {
+                "name": "markdownlint-cli2",
+                "version": "0.23.2",
+                "source": "npm"
+              },
+              {
+                "name": "pg",
+                "version": "^8.23.0",
+                "source": "npm"
+              },
+              {
+                "name": "turbo",
+                "version": "^2.10.10",
+                "source": "npm"
+              },
+              {
+                "name": "typescript",
+                "version": "^7.0.2",
+                "source": "npm"
+              },
+              {
+                "name": "vitest",
+                "version": "^4.1.10",
+                "source": "npm"
+              }
+            ],
+            "total_dependencies": 21
+          },
+          "secrets_detection": {
+            "findings": [
+              {
+                "type": "secret_exposure",
+                "severity": "critical",
+                "description": "数据库连接字符串",
+                "file": "vitest.setup.ts",
+                "lines": "9",
+                "evidence": "postgresql://postgres:postgres@localhost:5432/postgres",
+                "owasp_category": "MCP01"
+              },
+              {
+                "type": "secret_exposure",
+                "severity": "low",
+                "description": ".env文件引用",
+                "file": "vitest.setup.ts",
+                "lines": "6",
+                "evidence": ".env",
+                "owasp_category": "MCP01"
+              },
+              {
+                "type": "secret_exposure",
+                "severity": "low",
+                "description": ".env文件引用",
+                "file": "vitest.setup.ts",
+                "lines": "8",
+                "evidence": ".env",
+                "owasp_category": "MCP01"
+              },
+              {
+                "type": "secret_exposure",
+                "severity": "low",
+                "description": ".env文件引用",
+                "file": "turbo.json",
+                "lines": "94",
+                "evidence": ".env",
+                "owasp_category": "MCP01"
+              },
+              {
+                "type": "secret_exposure",
+                "severity": "low",
+                "description": ".env文件引用",
+                "file": "playwright.config.ts",
+                "lines": "3",
+                "evidence": ".env",
+                "owasp_category": "MCP01"
+              },
+              {
+                "type": "secret_exposure",
+                "severity": "low",
+                "description": ".env文件引用",
+                "file": "playwright.config.ts",
+                "lines": "4",
+                "evidence": ".env",
+                "owasp_category": "MCP01"
+              },
+              {
+                "type": "secret_exposure",
+                "severity": "low",
+                "description": ".env文件引用",
+                "file": "compose.yml",
+                "lines": "91",
+                "evidence": ".env",
+                "owasp_category": "MCP01"
+              },
+              {
+                "type": "secret_exposure",
+                "severity": "critical",
+                "description": "数据库连接字符串",
+                "file": "compose.dev.yml",
+                "lines": "16",
+                "evidence": "postgresql://postgres:postgres@postgres:5432/postgres",
+                "owasp_category": "MCP01"
+              },
+              {
+                "type": "secret_exposure",
+                "severity": "critical",
+                "description": "数据库连接字符串",
+                "file": "compose.dev.yml",
+                "lines": "18",
+                "evidence": "redis://redis:6379",
+                "owasp_category": "MCP01"
+              },
+              {
+                "type": "secret_exposure",
+                "severity": "low",
+                "description": ".env文件引用",
+                "file": "compose.dev.yml",
+                "lines": "10",
+                "evidence": ".env",
+                "owasp_category": "MCP01"
+              },
+              {
+                "type": "secret_exposure",
+                "severity": "low",
+                "description": ".env文件引用",
+                "file": "compose.dev.yml",
+                "lines": "42",
+                "evidence": ".env",
+                "owasp_category": "MCP01"
+              },
+              {
+                "type": "secret_exposure",
+                "severity": "low",
+                "description": ".env文件引用",
+                "file": "README.md",
+                "lines": "207",
+                "evidence": ".env",
+                "owasp_category": "MCP01"
+              },
+              {
+                "type": "secret_exposure",
+                "severity": "critical",
+                "description": "数据库连接字符串",
+                "file": "AGENTS.md",
+                "lines": "113",
+                "evidence": "postgresql://postgres:postgres@localhost:5432/postgres`.",
+                "owasp_category": "MCP01"
+              },
+              {
+                "type": "secret_exposure",
+                "severity": "critical",
+                "description": "数据库连接字符串",
+                "file": "AGENTS.md",
+                "lines": "124",
+                "evidence": "postgresql://postgres:postgres@localhost:5432/postgres`)",
+                "owasp_category": "MCP01"
+              },
+              {
+                "type": "secret_exposure",
+                "severity": "low",
+                "description": ".env文件引用",
+                "file": "AGENTS.md",
+                "lines": "35",
+                "evidence": ".env",
+                "owasp_category": "MCP01"
+              },
+              {
+                "type": "secret_exposure",
+                "severity": "low",
+                "description": ".env文件引用",
+                "file": "AGENTS.md",
+                "lines": "82",
+                "evidence": ".env",
+                "owasp_category": "MCP01"
+              }
+            ]
+          },
+          "llm_analysis": {
+            "findings": [],
+            "analyzed": false,
+            "reason": "LLM not configured (set AISHIELD_LLM_URL and AISHIELD_LLM_KEY)"
+          },
+          "llm_supply_chain": {
+            "findings": [],
+            "analyzed": false
+          },
+          "osv_cve": [],
+          "commit_hash": "ebcaa472",
+          "recommendations": [
+            "审查所有网络请求目标，确保不向未授权服务器发送数据",
+            "检测到数据外传/SSRF风险，建议审查数据流向并添加URL白名单",
+            "检测到硬编码凭据，使用环境变量或密钥管理服务",
+            "安全评分较低，建议进行全面安全审查后再发布"
+          ],
+          "scanned_at": "2026-08-19 02:22:03",
+          "scanner_version": "4.0",
+          "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)",
+          "source": "github-search",
+          "directory_description": "A one-of-a-kind resume builder that keeps your privacy in mind. Completely secure, customizable, portable, open-source and free forever. Try it out today!",
+          "stars": 40984
+        }
+      ],
+      "error_details": []
     }
   ],
   "summary": {
-    "total_tools": 64,
-    "last_scan": "2026-08-18 06:15:09",
+    "total_tools": 65,
+    "last_scan": "2026-08-19 02:22:03",
     "scanner_version": "4.1",
-    "avg_score": 69.59375,
+    "avg_score": 69.16923076923077,
     "badge_distribution": {
-      "none": 14,
+      "none": 15,
       "gold": 15,
       "silver": 21,
       "bronze": 14
     },
     "risk_distribution": {
-      "critical": 34,
+      "critical": 35,
       "safe": 9,
       "medium": 11,
       "high": 10
     },
-    "owasp_coverage_avg": 4.359375
+    "owasp_coverage_avg": 4.369230769230769
   },
   "tools": [
     {
@@ -161312,6 +162706,1388 @@
       "source": "github-search",
       "directory_description": "Android Full-Stack Device Control Platform: WebRTC/H.264 remote desktop, UI/OCR/image-matching automation, one-click MITM, built-in Frida, proxy/VPN/frp/P2P networking, MCP/Agent, 160+ APIs, designed ",
       "stars": 8191
+    },
+    {
+      "security_score": 0,
+      "permissions_score": 98,
+      "data_handling_score": 19,
+      "supply_chain_score": 85,
+      "reliability_score": 100,
+      "overall_score": 42,
+      "risk_level": "critical",
+      "badge_level": "none",
+      "owasp_coverage": {
+        "covered": [
+          "MCP01",
+          "MCP02",
+          "MCP06",
+          "MCP09",
+          "MCP10"
+        ],
+        "covered_count": 5,
+        "total": 10,
+        "coverage_percent": 50,
+        "categories": {
+          "MCP10": {
+            "name": "Context Injection & Over-Sharing",
+            "name_cn": "上下文注入与过度共享",
+            "rules_triggered": 15,
+            "total_rules": 7
+          },
+          "MCP09": {
+            "name": "Shadow MCP Servers",
+            "name_cn": "影子MCP服务器",
+            "rules_triggered": 16,
+            "total_rules": 6
+          },
+          "MCP06": {
+            "name": "Intent Flow Subversion / Prompt Injection",
+            "name_cn": "意图流颠覆/上下文提示注入",
+            "rules_triggered": 1,
+            "total_rules": 14
+          },
+          "MCP01": {
+            "name": "Improper Token & Secret Management",
+            "name_cn": "令牌管理不当与密钥暴露",
+            "rules_triggered": 4,
+            "total_rules": 16
+          },
+          "MCP02": {
+            "name": "Privilege Scope Creep Leading to Escalation",
+            "name_cn": "权限范围蔓延导致提权",
+            "rules_triggered": 8,
+            "total_rules": 12
+          }
+        }
+      },
+      "agentic_coverage": {
+        "covered": [
+          "ASI02",
+          "ASI09"
+        ],
+        "covered_count": 2,
+        "total": 10,
+        "coverage_percent": 20,
+        "categories": {
+          "ASI02": {
+            "name": "Tool Misuse",
+            "name_cn": "工具滥用",
+            "rules_triggered": 1,
+            "total_rules": 6
+          },
+          "ASI09": {
+            "name": "Cascading Failures & Multi-Agent Risks",
+            "name_cn": "级联失败与多智能体风险",
+            "rules_triggered": 1,
+            "total_rules": 6
+          }
+        }
+      },
+      "rules_count": 214,
+      "score_breakdown": {
+        "security_score": {
+          "base": 100,
+          "penalty": 124,
+          "contributors": [
+            {
+              "reason": "数据库连接字符串含密码",
+              "severity": "critical",
+              "amount": 20,
+              "owasp": "MCP01"
+            },
+            {
+              "reason": "内网/元数据地址访问(SSRF)",
+              "severity": "critical",
+              "amount": 20,
+              "owasp": "MCP10"
+            },
+            {
+              "reason": "Agent自动发送邮件无确认",
+              "severity": "critical",
+              "amount": 20,
+              "owasp": "ASI02"
+            },
+            {
+              "reason": "数据库连接字符串",
+              "severity": "critical",
+              "amount": 20,
+              "owasp": "MCP01"
+            },
+            {
+              "reason": "无限重试(级联放大)",
+              "severity": "high",
+              "amount": 10,
+              "owasp": "ASI09"
+            }
+          ]
+        },
+        "permissions_score": {
+          "base": 100,
+          "penalty": 2,
+          "contributors": [
+            {
+              "reason": "完整环境变量访问",
+              "severity": "low",
+              "amount": 2,
+              "owasp": "MCP02"
+            }
+          ]
+        },
+        "data_handling_score": {
+          "base": 100,
+          "penalty": 81,
+          "contributors": [
+            {
+              "reason": "数据库连接字符串含密码",
+              "severity": "critical",
+              "amount": 20,
+              "owasp": "MCP01"
+            },
+            {
+              "reason": "内网/元数据地址访问(SSRF)",
+              "severity": "critical",
+              "amount": 20,
+              "owasp": "MCP10"
+            },
+            {
+              "reason": "数据库连接字符串",
+              "severity": "critical",
+              "amount": 20,
+              "owasp": "MCP01"
+            },
+            {
+              "reason": "可能的 typosquatting 包名: '@playwright/test' 形近官方包 'jest'",
+              "severity": "high",
+              "amount": 10,
+              "owasp": "MCP04"
+            },
+            {
+              "reason": "HTTP请求(检查目标是否为内部服务)",
+              "severity": "medium",
+              "amount": 5,
+              "owasp": "MCP10"
+            }
+          ]
+        },
+        "supply_chain_score": {
+          "base": 100,
+          "penalty": 15,
+          "contributors": [
+            {
+              "reason": "可能的 typosquatting 包名: '@playwright/test' 形近官方包 'jest'",
+              "severity": "high",
+              "amount": 15,
+              "owasp": "MCP04"
+            }
+          ]
+        },
+        "reliability_score": {
+          "base": 100,
+          "penalty": 0,
+          "contributors": []
+        }
+      },
+      "top_deductions": [
+        {
+          "dimension": "security_score",
+          "reason": "数据库连接字符串含密码",
+          "severity": "critical",
+          "amount": 20,
+          "owasp": "MCP01"
+        },
+        {
+          "dimension": "security_score",
+          "reason": "内网/元数据地址访问(SSRF)",
+          "severity": "critical",
+          "amount": 20,
+          "owasp": "MCP10"
+        },
+        {
+          "dimension": "security_score",
+          "reason": "Agent自动发送邮件无确认",
+          "severity": "critical",
+          "amount": 20,
+          "owasp": "ASI02"
+        },
+        {
+          "dimension": "security_score",
+          "reason": "数据库连接字符串",
+          "severity": "critical",
+          "amount": 20,
+          "owasp": "MCP01"
+        },
+        {
+          "dimension": "data_handling_score",
+          "reason": "数据库连接字符串含密码",
+          "severity": "critical",
+          "amount": 20,
+          "owasp": "MCP01"
+        },
+        {
+          "dimension": "data_handling_score",
+          "reason": "内网/元数据地址访问(SSRF)",
+          "severity": "critical",
+          "amount": 20,
+          "owasp": "MCP10"
+        },
+        {
+          "dimension": "data_handling_score",
+          "reason": "数据库连接字符串",
+          "severity": "critical",
+          "amount": 20,
+          "owasp": "MCP01"
+        },
+        {
+          "dimension": "supply_chain_score",
+          "reason": "可能的 typosquatting 包名: '@playwright/test' 形近官方包 'jest'",
+          "severity": "high",
+          "amount": 15,
+          "owasp": "MCP04"
+        }
+      ],
+      "name": "amruthpillai/reactive-resume",
+      "source_url": "https://github.com/amruthpillai/reactive-resume",
+      "tool_type": "mcp",
+      "findings": [
+        {
+          "type": "dangerous_pattern",
+          "severity": "critical",
+          "description": "数据库连接字符串含密码",
+          "file": "vitest.setup.ts",
+          "lines": "9",
+          "evidence": "postgresql://postgres:postgres@",
+          "owasp_category": "MCP01"
+        },
+        {
+          "type": "dangerous_pattern",
+          "severity": "low",
+          "description": "完整环境变量访问",
+          "file": "vitest.setup.ts",
+          "lines": "8",
+          "evidence": "process.env",
+          "owasp_category": "MCP02"
+        },
+        {
+          "type": "dangerous_pattern",
+          "severity": "low",
+          "description": "非标准端口服务(检查是否为未授权MCP)",
+          "file": "vitest.setup.ts",
+          "lines": "8",
+          "evidence": ":3000",
+          "owasp_category": "MCP09"
+        },
+        {
+          "type": "dangerous_pattern",
+          "severity": "critical",
+          "description": "内网/元数据地址访问(SSRF)",
+          "file": "vitest.setup.ts",
+          "lines": "8",
+          "evidence": "localhost",
+          "owasp_category": "MCP10"
+        },
+        {
+          "type": "dangerous_pattern",
+          "severity": "medium",
+          "description": "远程MCP服务器URL配置",
+          "file": "server.json",
+          "lines": "8",
+          "evidence": "\"url\": \"https://",
+          "owasp_category": "MCP09"
+        },
+        {
+          "type": "dangerous_pattern",
+          "severity": "low",
+          "description": "完整环境变量访问",
+          "file": "playwright.config.ts",
+          "lines": "3",
+          "evidence": "process.env",
+          "owasp_category": "MCP02"
+        },
+        {
+          "type": "dangerous_pattern",
+          "severity": "critical",
+          "description": "内网/元数据地址访问(SSRF)",
+          "file": "playwright.config.ts",
+          "lines": "4",
+          "evidence": "localhost",
+          "owasp_category": "MCP10"
+        },
+        {
+          "type": "dangerous_pattern",
+          "severity": "high",
+          "description": "无限重试(级联放大)",
+          "file": "playwright.config.ts",
+          "lines": "11",
+          "evidence": "retries: 0",
+          "owasp_category": "ASI09"
+        },
+        {
+          "type": "dangerous_pattern",
+          "severity": "medium",
+          "description": "远程MCP服务器URL配置",
+          "file": "package.json",
+          "lines": "10",
+          "evidence": "\"url\": \"https://",
+          "owasp_category": "MCP09"
+        },
+        {
+          "type": "dangerous_pattern",
+          "severity": "low",
+          "description": "非标准端口服务(检查是否为未授权MCP)",
+          "file": "compose.yml",
+          "lines": "14",
+          "evidence": ":5432",
+          "owasp_category": "MCP09"
+        },
+        {
+          "type": "dangerous_pattern",
+          "severity": "medium",
+          "description": "HTTP请求(检查目标是否为内部服务)",
+          "file": "compose.yml",
+          "lines": "105",
+          "evidence": "fetch('http://",
+          "owasp_category": "MCP10"
+        },
+        {
+          "type": "dangerous_pattern",
+          "severity": "critical",
+          "description": "内网/元数据地址访问(SSRF)",
+          "file": "compose.yml",
+          "lines": "34",
+          "evidence": "127.0.0.1",
+          "owasp_category": "MCP10"
+        },
+        {
+          "type": "dangerous_pattern",
+          "severity": "critical",
+          "description": "数据库连接字符串含密码",
+          "file": "compose.dev.yml",
+          "lines": "16",
+          "evidence": "postgresql://postgres:postgres@",
+          "owasp_category": "MCP01"
+        },
+        {
+          "type": "dangerous_pattern",
+          "severity": "low",
+          "description": "完整环境变量访问",
+          "file": "compose.dev.yml",
+          "lines": "42",
+          "evidence": "process.env",
+          "owasp_category": "MCP02"
+        },
+        {
+          "type": "dangerous_pattern",
+          "severity": "low",
+          "description": "非标准端口服务(检查是否为未授权MCP)",
+          "file": "compose.dev.yml",
+          "lines": "15",
+          "evidence": ":3000",
+          "owasp_category": "MCP09"
+        },
+        {
+          "type": "dangerous_pattern",
+          "severity": "medium",
+          "description": "HTTP请求(检查目标是否为内部服务)",
+          "file": "compose.dev.yml",
+          "lines": "42",
+          "evidence": "fetch('http://",
+          "owasp_category": "MCP10"
+        },
+        {
+          "type": "dangerous_pattern",
+          "severity": "critical",
+          "description": "内网/元数据地址访问(SSRF)",
+          "file": "compose.dev.yml",
+          "lines": "15",
+          "evidence": "localhost",
+          "owasp_category": "MCP10"
+        },
+        {
+          "type": "dangerous_pattern",
+          "severity": "low",
+          "description": "非标准端口服务(检查是否为未授权MCP) (文档示例)",
+          "file": "README.md",
+          "lines": "167",
+          "evidence": ":3000",
+          "owasp_category": "MCP09"
+        },
+        {
+          "type": "dangerous_pattern",
+          "severity": "low",
+          "description": "内网/元数据地址访问(SSRF) (文档示例)",
+          "file": "README.md",
+          "lines": "167",
+          "evidence": "localhost",
+          "owasp_category": "MCP10"
+        },
+        {
+          "type": "dangerous_pattern",
+          "severity": "high",
+          "description": "持久化/自启动指令",
+          "file": "DESIGN.md",
+          "lines": "203",
+          "evidence": "persist",
+          "owasp_category": "MCP06"
+        },
+        {
+          "type": "dangerous_pattern",
+          "severity": "critical",
+          "description": "数据库连接字符串含密码",
+          "file": "AGENTS.md",
+          "lines": "113",
+          "evidence": "postgresql://postgres:postgres@",
+          "owasp_category": "MCP01"
+        },
+        {
+          "type": "dangerous_pattern",
+          "severity": "low",
+          "description": "完整环境变量访问",
+          "file": "AGENTS.md",
+          "lines": "115",
+          "evidence": "process.env",
+          "owasp_category": "MCP02"
+        },
+        {
+          "type": "dangerous_pattern",
+          "severity": "low",
+          "description": "非标准端口服务(检查是否为未授权MCP)",
+          "file": "AGENTS.md",
+          "lines": "113",
+          "evidence": ":5432",
+          "owasp_category": "MCP09"
+        },
+        {
+          "type": "dangerous_pattern",
+          "severity": "critical",
+          "description": "内网/元数据地址访问(SSRF)",
+          "file": "AGENTS.md",
+          "lines": "113",
+          "evidence": "localhost",
+          "owasp_category": "MCP10"
+        },
+        {
+          "type": "dangerous_pattern",
+          "severity": "critical",
+          "description": "Agent自动发送邮件无确认",
+          "file": "AGENTS.md",
+          "lines": "165",
+          "evidence": "SMTP config; without",
+          "owasp_category": "ASI02"
+        },
+        {
+          "type": "typosquatting",
+          "severity": "high",
+          "description": "可能的 typosquatting 包名: '@playwright/test' 形近官方包 'jest'",
+          "owasp_category": "MCP04",
+          "evidence": "@playwright/test ~ jest (dist=1)",
+          "file": "package.json"
+        },
+        {
+          "type": "suspected_hallucinated_package",
+          "severity": "info",
+          "description": "疑似 AI 幻觉包(slopsquatting): '@testing-library/jest-dom' 借用 'jest' 生态命名但不在可信名录，需核实其在注册表中真实存在",
+          "owasp_category": "MCP04",
+          "evidence": "@testing-library/jest-dom (anchor=jest, composite)",
+          "remediation": "安装前校验注册表存在性/包龄/下载量；使用 lockfile 与依赖白名单",
+          "file": "package.json"
+        },
+        {
+          "type": "missing_lockfile",
+          "severity": "low",
+          "description": "声明了依赖但未见 lockfile，幻觉包/漂移无法 fail-closed",
+          "file": "package.json",
+          "owasp_category": "MCP04",
+          "evidence": "21 deps, no package-lock.json/yarn.lock/pnpm-lock.yaml",
+          "remediation": "提交 lockfile 并在 CI 使用 npm ci"
+        },
+        {
+          "type": "secret_exposure",
+          "severity": "critical",
+          "description": "数据库连接字符串",
+          "file": "vitest.setup.ts",
+          "lines": "9",
+          "evidence": "postgresql://postgres:postgres@localhost:5432/postgres",
+          "owasp_category": "MCP01"
+        },
+        {
+          "type": "secret_exposure",
+          "severity": "low",
+          "description": ".env文件引用",
+          "file": "vitest.setup.ts",
+          "lines": "6",
+          "evidence": ".env",
+          "owasp_category": "MCP01"
+        },
+        {
+          "type": "secret_exposure",
+          "severity": "low",
+          "description": ".env文件引用",
+          "file": "turbo.json",
+          "lines": "94",
+          "evidence": ".env",
+          "owasp_category": "MCP01"
+        },
+        {
+          "type": "secret_exposure",
+          "severity": "low",
+          "description": ".env文件引用",
+          "file": "playwright.config.ts",
+          "lines": "3",
+          "evidence": ".env",
+          "owasp_category": "MCP01"
+        },
+        {
+          "type": "secret_exposure",
+          "severity": "low",
+          "description": ".env文件引用",
+          "file": "compose.yml",
+          "lines": "91",
+          "evidence": ".env",
+          "owasp_category": "MCP01"
+        },
+        {
+          "type": "secret_exposure",
+          "severity": "critical",
+          "description": "数据库连接字符串",
+          "file": "compose.dev.yml",
+          "lines": "16",
+          "evidence": "postgresql://postgres:postgres@postgres:5432/postgres",
+          "owasp_category": "MCP01"
+        },
+        {
+          "type": "secret_exposure",
+          "severity": "low",
+          "description": ".env文件引用",
+          "file": "compose.dev.yml",
+          "lines": "10",
+          "evidence": ".env",
+          "owasp_category": "MCP01"
+        },
+        {
+          "type": "secret_exposure",
+          "severity": "low",
+          "description": ".env文件引用",
+          "file": "README.md",
+          "lines": "207",
+          "evidence": ".env",
+          "owasp_category": "MCP01"
+        },
+        {
+          "type": "secret_exposure",
+          "severity": "critical",
+          "description": "数据库连接字符串",
+          "file": "AGENTS.md",
+          "lines": "113",
+          "evidence": "postgresql://postgres:postgres@localhost:5432/postgres`.",
+          "owasp_category": "MCP01"
+        },
+        {
+          "type": "secret_exposure",
+          "severity": "low",
+          "description": ".env文件引用",
+          "file": "AGENTS.md",
+          "lines": "35",
+          "evidence": ".env",
+          "owasp_category": "MCP01"
+        }
+      ],
+      "total_findings": 38,
+      "static_analysis": {
+        "findings": [
+          {
+            "type": "dangerous_pattern",
+            "severity": "critical",
+            "description": "数据库连接字符串含密码",
+            "file": "vitest.setup.ts",
+            "lines": "9",
+            "evidence": "postgresql://postgres:postgres@",
+            "owasp_category": "MCP01"
+          },
+          {
+            "type": "dangerous_pattern",
+            "severity": "low",
+            "description": "完整环境变量访问",
+            "file": "vitest.setup.ts",
+            "lines": "8",
+            "evidence": "process.env",
+            "owasp_category": "MCP02"
+          },
+          {
+            "type": "dangerous_pattern",
+            "severity": "low",
+            "description": "完整环境变量访问",
+            "file": "vitest.setup.ts",
+            "lines": "9",
+            "evidence": "process.env",
+            "owasp_category": "MCP02"
+          },
+          {
+            "type": "dangerous_pattern",
+            "severity": "low",
+            "description": "完整环境变量访问",
+            "file": "vitest.setup.ts",
+            "lines": "10",
+            "evidence": "process.env",
+            "owasp_category": "MCP02"
+          },
+          {
+            "type": "dangerous_pattern",
+            "severity": "low",
+            "description": "非标准端口服务(检查是否为未授权MCP)",
+            "file": "vitest.setup.ts",
+            "lines": "8",
+            "evidence": ":3000",
+            "owasp_category": "MCP09"
+          },
+          {
+            "type": "dangerous_pattern",
+            "severity": "low",
+            "description": "非标准端口服务(检查是否为未授权MCP)",
+            "file": "vitest.setup.ts",
+            "lines": "9",
+            "evidence": ":5432",
+            "owasp_category": "MCP09"
+          },
+          {
+            "type": "dangerous_pattern",
+            "severity": "critical",
+            "description": "内网/元数据地址访问(SSRF)",
+            "file": "vitest.setup.ts",
+            "lines": "8",
+            "evidence": "localhost",
+            "owasp_category": "MCP10"
+          },
+          {
+            "type": "dangerous_pattern",
+            "severity": "critical",
+            "description": "内网/元数据地址访问(SSRF)",
+            "file": "vitest.setup.ts",
+            "lines": "9",
+            "evidence": "localhost",
+            "owasp_category": "MCP10"
+          },
+          {
+            "type": "dangerous_pattern",
+            "severity": "medium",
+            "description": "远程MCP服务器URL配置",
+            "file": "server.json",
+            "lines": "8",
+            "evidence": "\"url\": \"https://",
+            "owasp_category": "MCP09"
+          },
+          {
+            "type": "dangerous_pattern",
+            "severity": "medium",
+            "description": "远程MCP服务器URL配置",
+            "file": "server.json",
+            "lines": "15",
+            "evidence": "\"url\": \"https://",
+            "owasp_category": "MCP09"
+          },
+          {
+            "type": "dangerous_pattern",
+            "severity": "low",
+            "description": "完整环境变量访问",
+            "file": "playwright.config.ts",
+            "lines": "3",
+            "evidence": "process.env",
+            "owasp_category": "MCP02"
+          },
+          {
+            "type": "dangerous_pattern",
+            "severity": "low",
+            "description": "完整环境变量访问",
+            "file": "playwright.config.ts",
+            "lines": "4",
+            "evidence": "process.env",
+            "owasp_category": "MCP02"
+          },
+          {
+            "type": "dangerous_pattern",
+            "severity": "low",
+            "description": "完整环境变量访问",
+            "file": "playwright.config.ts",
+            "lines": "5",
+            "evidence": "process.env",
+            "owasp_category": "MCP02"
+          },
+          {
+            "type": "dangerous_pattern",
+            "severity": "critical",
+            "description": "内网/元数据地址访问(SSRF)",
+            "file": "playwright.config.ts",
+            "lines": "4",
+            "evidence": "localhost",
+            "owasp_category": "MCP10"
+          },
+          {
+            "type": "dangerous_pattern",
+            "severity": "high",
+            "description": "无限重试(级联放大)",
+            "file": "playwright.config.ts",
+            "lines": "11",
+            "evidence": "retries: 0",
+            "owasp_category": "ASI09"
+          },
+          {
+            "type": "dangerous_pattern",
+            "severity": "medium",
+            "description": "远程MCP服务器URL配置",
+            "file": "package.json",
+            "lines": "10",
+            "evidence": "\"url\": \"https://",
+            "owasp_category": "MCP09"
+          },
+          {
+            "type": "dangerous_pattern",
+            "severity": "medium",
+            "description": "远程MCP服务器URL配置",
+            "file": "package.json",
+            "lines": "14",
+            "evidence": "\"url\": \"https://",
+            "owasp_category": "MCP09"
+          },
+          {
+            "type": "dangerous_pattern",
+            "severity": "low",
+            "description": "非标准端口服务(检查是否为未授权MCP)",
+            "file": "compose.yml",
+            "lines": "14",
+            "evidence": ":5432",
+            "owasp_category": "MCP09"
+          },
+          {
+            "type": "dangerous_pattern",
+            "severity": "low",
+            "description": "非标准端口服务(检查是否为未授权MCP)",
+            "file": "compose.yml",
+            "lines": "34",
+            "evidence": ":6379",
+            "owasp_category": "MCP09"
+          },
+          {
+            "type": "dangerous_pattern",
+            "severity": "low",
+            "description": "非标准端口服务(检查是否为未授权MCP)",
+            "file": "compose.yml",
+            "lines": "34",
+            "evidence": ":6379",
+            "owasp_category": "MCP09"
+          },
+          {
+            "type": "dangerous_pattern",
+            "severity": "medium",
+            "description": "HTTP请求(检查目标是否为内部服务)",
+            "file": "compose.yml",
+            "lines": "105",
+            "evidence": "fetch('http://",
+            "owasp_category": "MCP10"
+          },
+          {
+            "type": "dangerous_pattern",
+            "severity": "critical",
+            "description": "内网/元数据地址访问(SSRF)",
+            "file": "compose.yml",
+            "lines": "34",
+            "evidence": "127.0.0.1",
+            "owasp_category": "MCP10"
+          },
+          {
+            "type": "dangerous_pattern",
+            "severity": "critical",
+            "description": "内网/元数据地址访问(SSRF)",
+            "file": "compose.yml",
+            "lines": "47",
+            "evidence": "0.0.0.0",
+            "owasp_category": "MCP10"
+          },
+          {
+            "type": "dangerous_pattern",
+            "severity": "critical",
+            "description": "内网/元数据地址访问(SSRF)",
+            "file": "compose.yml",
+            "lines": "58",
+            "evidence": "localhost",
+            "owasp_category": "MCP10"
+          },
+          {
+            "type": "dangerous_pattern",
+            "severity": "critical",
+            "description": "数据库连接字符串含密码",
+            "file": "compose.dev.yml",
+            "lines": "16",
+            "evidence": "postgresql://postgres:postgres@",
+            "owasp_category": "MCP01"
+          },
+          {
+            "type": "dangerous_pattern",
+            "severity": "low",
+            "description": "完整环境变量访问",
+            "file": "compose.dev.yml",
+            "lines": "42",
+            "evidence": "process.env",
+            "owasp_category": "MCP02"
+          },
+          {
+            "type": "dangerous_pattern",
+            "severity": "low",
+            "description": "非标准端口服务(检查是否为未授权MCP)",
+            "file": "compose.dev.yml",
+            "lines": "15",
+            "evidence": ":3000",
+            "owasp_category": "MCP09"
+          },
+          {
+            "type": "dangerous_pattern",
+            "severity": "low",
+            "description": "非标准端口服务(检查是否为未授权MCP)",
+            "file": "compose.dev.yml",
+            "lines": "16",
+            "evidence": ":5432",
+            "owasp_category": "MCP09"
+          },
+          {
+            "type": "dangerous_pattern",
+            "severity": "low",
+            "description": "非标准端口服务(检查是否为未授权MCP)",
+            "file": "compose.dev.yml",
+            "lines": "17",
+            "evidence": ":8333",
+            "owasp_category": "MCP09"
+          },
+          {
+            "type": "dangerous_pattern",
+            "severity": "medium",
+            "description": "HTTP请求(检查目标是否为内部服务)",
+            "file": "compose.dev.yml",
+            "lines": "42",
+            "evidence": "fetch('http://",
+            "owasp_category": "MCP10"
+          },
+          {
+            "type": "dangerous_pattern",
+            "severity": "critical",
+            "description": "内网/元数据地址访问(SSRF)",
+            "file": "compose.dev.yml",
+            "lines": "15",
+            "evidence": "localhost",
+            "owasp_category": "MCP10"
+          },
+          {
+            "type": "dangerous_pattern",
+            "severity": "critical",
+            "description": "内网/元数据地址访问(SSRF)",
+            "file": "compose.dev.yml",
+            "lines": "21",
+            "evidence": "127.0.0.1",
+            "owasp_category": "MCP10"
+          },
+          {
+            "type": "dangerous_pattern",
+            "severity": "critical",
+            "description": "内网/元数据地址访问(SSRF)",
+            "file": "compose.dev.yml",
+            "lines": "22",
+            "evidence": "127.0.0.1",
+            "owasp_category": "MCP10"
+          },
+          {
+            "type": "dangerous_pattern",
+            "severity": "low",
+            "description": "非标准端口服务(检查是否为未授权MCP) (文档示例)",
+            "file": "README.md",
+            "lines": "167",
+            "evidence": ":3000",
+            "owasp_category": "MCP09"
+          },
+          {
+            "type": "dangerous_pattern",
+            "severity": "low",
+            "description": "内网/元数据地址访问(SSRF) (文档示例)",
+            "file": "README.md",
+            "lines": "167",
+            "evidence": "localhost",
+            "owasp_category": "MCP10"
+          },
+          {
+            "type": "dangerous_pattern",
+            "severity": "high",
+            "description": "持久化/自启动指令",
+            "file": "DESIGN.md",
+            "lines": "203",
+            "evidence": "persist",
+            "owasp_category": "MCP06"
+          },
+          {
+            "type": "dangerous_pattern",
+            "severity": "critical",
+            "description": "数据库连接字符串含密码",
+            "file": "AGENTS.md",
+            "lines": "113",
+            "evidence": "postgresql://postgres:postgres@",
+            "owasp_category": "MCP01"
+          },
+          {
+            "type": "dangerous_pattern",
+            "severity": "critical",
+            "description": "数据库连接字符串含密码",
+            "file": "AGENTS.md",
+            "lines": "124",
+            "evidence": "postgresql://postgres:postgres@",
+            "owasp_category": "MCP01"
+          },
+          {
+            "type": "dangerous_pattern",
+            "severity": "low",
+            "description": "完整环境变量访问",
+            "file": "AGENTS.md",
+            "lines": "115",
+            "evidence": "process.env",
+            "owasp_category": "MCP02"
+          },
+          {
+            "type": "dangerous_pattern",
+            "severity": "low",
+            "description": "非标准端口服务(检查是否为未授权MCP)",
+            "file": "AGENTS.md",
+            "lines": "113",
+            "evidence": ":5432",
+            "owasp_category": "MCP09"
+          },
+          {
+            "type": "dangerous_pattern",
+            "severity": "low",
+            "description": "非标准端口服务(检查是否为未授权MCP)",
+            "file": "AGENTS.md",
+            "lines": "123",
+            "evidence": ":3000",
+            "owasp_category": "MCP09"
+          },
+          {
+            "type": "dangerous_pattern",
+            "severity": "low",
+            "description": "非标准端口服务(检查是否为未授权MCP)",
+            "file": "AGENTS.md",
+            "lines": "124",
+            "evidence": ":5432",
+            "owasp_category": "MCP09"
+          },
+          {
+            "type": "dangerous_pattern",
+            "severity": "critical",
+            "description": "内网/元数据地址访问(SSRF)",
+            "file": "AGENTS.md",
+            "lines": "113",
+            "evidence": "localhost",
+            "owasp_category": "MCP10"
+          },
+          {
+            "type": "dangerous_pattern",
+            "severity": "critical",
+            "description": "内网/元数据地址访问(SSRF)",
+            "file": "AGENTS.md",
+            "lines": "123",
+            "evidence": "localhost",
+            "owasp_category": "MCP10"
+          },
+          {
+            "type": "dangerous_pattern",
+            "severity": "critical",
+            "description": "内网/元数据地址访问(SSRF)",
+            "file": "AGENTS.md",
+            "lines": "124",
+            "evidence": "localhost",
+            "owasp_category": "MCP10"
+          },
+          {
+            "type": "dangerous_pattern",
+            "severity": "critical",
+            "description": "Agent自动发送邮件无确认",
+            "file": "AGENTS.md",
+            "lines": "165",
+            "evidence": "SMTP config; without",
+            "owasp_category": "ASI02"
+          }
+        ],
+        "total_files": 20,
+        "patterns_checked": 214,
+        "owasp_coverage": {
+          "covered": [
+            "MCP01",
+            "MCP02",
+            "MCP06",
+            "MCP09",
+            "MCP10"
+          ],
+          "covered_count": 5,
+          "total": 10,
+          "coverage_percent": 50,
+          "categories": {
+            "MCP10": {
+              "name": "Context Injection & Over-Sharing",
+              "name_cn": "上下文注入与过度共享",
+              "rules_triggered": 15,
+              "total_rules": 7
+            },
+            "MCP09": {
+              "name": "Shadow MCP Servers",
+              "name_cn": "影子MCP服务器",
+              "rules_triggered": 16,
+              "total_rules": 6
+            },
+            "MCP06": {
+              "name": "Intent Flow Subversion / Prompt Injection",
+              "name_cn": "意图流颠覆/上下文提示注入",
+              "rules_triggered": 1,
+              "total_rules": 14
+            },
+            "MCP01": {
+              "name": "Improper Token & Secret Management",
+              "name_cn": "令牌管理不当与密钥暴露",
+              "rules_triggered": 4,
+              "total_rules": 16
+            },
+            "MCP02": {
+              "name": "Privilege Scope Creep Leading to Escalation",
+              "name_cn": "权限范围蔓延导致提权",
+              "rules_triggered": 8,
+              "total_rules": 12
+            }
+          }
+        },
+        "agentic_coverage": {
+          "covered": [
+            "ASI02",
+            "ASI09"
+          ],
+          "covered_count": 2,
+          "total": 10,
+          "coverage_percent": 20,
+          "categories": {
+            "ASI02": {
+              "name": "Tool Misuse",
+              "name_cn": "工具滥用",
+              "rules_triggered": 1,
+              "total_rules": 6
+            },
+            "ASI09": {
+              "name": "Cascading Failures & Multi-Agent Risks",
+              "name_cn": "级联失败与多智能体风险",
+              "rules_triggered": 1,
+              "total_rules": 6
+            }
+          }
+        }
+      },
+      "dependency_analysis": {
+        "findings": [
+          {
+            "type": "typosquatting",
+            "severity": "high",
+            "description": "可能的 typosquatting 包名: '@playwright/test' 形近官方包 'jest'",
+            "owasp_category": "MCP04",
+            "evidence": "@playwright/test ~ jest (dist=1)",
+            "file": "package.json"
+          },
+          {
+            "type": "suspected_hallucinated_package",
+            "severity": "info",
+            "description": "疑似 AI 幻觉包(slopsquatting): '@testing-library/jest-dom' 借用 'jest' 生态命名但不在可信名录，需核实其在注册表中真实存在",
+            "owasp_category": "MCP04",
+            "evidence": "@testing-library/jest-dom (anchor=jest, composite)",
+            "remediation": "安装前校验注册表存在性/包龄/下载量；使用 lockfile 与依赖白名单",
+            "file": "package.json"
+          },
+          {
+            "type": "missing_lockfile",
+            "severity": "low",
+            "description": "声明了依赖但未见 lockfile，幻觉包/漂移无法 fail-closed",
+            "file": "package.json",
+            "owasp_category": "MCP04",
+            "evidence": "21 deps, no package-lock.json/yarn.lock/pnpm-lock.yaml",
+            "remediation": "提交 lockfile 并在 CI 使用 npm ci"
+          }
+        ],
+        "dependencies": [
+          {
+            "name": "@biomejs/biome",
+            "version": "^2.5.8",
+            "source": "npm"
+          },
+          {
+            "name": "@commitlint/cli",
+            "version": "^21.2.2",
+            "source": "npm"
+          },
+          {
+            "name": "@commitlint/config-conventional",
+            "version": "^21.2.2",
+            "source": "npm"
+          },
+          {
+            "name": "@playwright/test",
+            "version": "^1.62.1",
+            "source": "npm"
+          },
+          {
+            "name": "@reactive-resume/config",
+            "version": "workspace:*",
+            "source": "npm"
+          },
+          {
+            "name": "@testing-library/dom",
+            "version": "^10.4.1",
+            "source": "npm"
+          },
+          {
+            "name": "@testing-library/jest-dom",
+            "version": "^7.0.1",
+            "source": "npm"
+          },
+          {
+            "name": "@testing-library/react",
+            "version": "^16.3.2",
+            "source": "npm"
+          },
+          {
+            "name": "@testing-library/user-event",
+            "version": "^14.6.4",
+            "source": "npm"
+          },
+          {
+            "name": "@types/node",
+            "version": "^26.2.0",
+            "source": "npm"
+          },
+          {
+            "name": "@types/pg",
+            "version": "^8.23.0",
+            "source": "npm"
+          },
+          {
+            "name": "@vitest/coverage-v8",
+            "version": "^4.1.10",
+            "source": "npm"
+          },
+          {
+            "name": "github-actionlint",
+            "version": "1.7.12",
+            "source": "npm"
+          },
+          {
+            "name": "happy-dom",
+            "version": "^20.11.2",
+            "source": "npm"
+          },
+          {
+            "name": "knip",
+            "version": "^6.32.2",
+            "source": "npm"
+          },
+          {
+            "name": "lefthook",
+            "version": "^2.1.10",
+            "source": "npm"
+          },
+          {
+            "name": "markdownlint-cli2",
+            "version": "0.23.2",
+            "source": "npm"
+          },
+          {
+            "name": "pg",
+            "version": "^8.23.0",
+            "source": "npm"
+          },
+          {
+            "name": "turbo",
+            "version": "^2.10.10",
+            "source": "npm"
+          },
+          {
+            "name": "typescript",
+            "version": "^7.0.2",
+            "source": "npm"
+          },
+          {
+            "name": "vitest",
+            "version": "^4.1.10",
+            "source": "npm"
+          }
+        ],
+        "total_dependencies": 21
+      },
+      "secrets_detection": {
+        "findings": [
+          {
+            "type": "secret_exposure",
+            "severity": "critical",
+            "description": "数据库连接字符串",
+            "file": "vitest.setup.ts",
+            "lines": "9",
+            "evidence": "postgresql://postgres:postgres@localhost:5432/postgres",
+            "owasp_category": "MCP01"
+          },
+          {
+            "type": "secret_exposure",
+            "severity": "low",
+            "description": ".env文件引用",
+            "file": "vitest.setup.ts",
+            "lines": "6",
+            "evidence": ".env",
+            "owasp_category": "MCP01"
+          },
+          {
+            "type": "secret_exposure",
+            "severity": "low",
+            "description": ".env文件引用",
+            "file": "vitest.setup.ts",
+            "lines": "8",
+            "evidence": ".env",
+            "owasp_category": "MCP01"
+          },
+          {
+            "type": "secret_exposure",
+            "severity": "low",
+            "description": ".env文件引用",
+            "file": "turbo.json",
+            "lines": "94",
+            "evidence": ".env",
+            "owasp_category": "MCP01"
+          },
+          {
+            "type": "secret_exposure",
+            "severity": "low",
+            "description": ".env文件引用",
+            "file": "playwright.config.ts",
+            "lines": "3",
+            "evidence": ".env",
+            "owasp_category": "MCP01"
+          },
+          {
+            "type": "secret_exposure",
+            "severity": "low",
+            "description": ".env文件引用",
+            "file": "playwright.config.ts",
+            "lines": "4",
+            "evidence": ".env",
+            "owasp_category": "MCP01"
+          },
+          {
+            "type": "secret_exposure",
+            "severity": "low",
+            "description": ".env文件引用",
+            "file": "compose.yml",
+            "lines": "91",
+            "evidence": ".env",
+            "owasp_category": "MCP01"
+          },
+          {
+            "type": "secret_exposure",
+            "severity": "critical",
+            "description": "数据库连接字符串",
+            "file": "compose.dev.yml",
+            "lines": "16",
+            "evidence": "postgresql://postgres:postgres@postgres:5432/postgres",
+            "owasp_category": "MCP01"
+          },
+          {
+            "type": "secret_exposure",
+            "severity": "critical",
+            "description": "数据库连接字符串",
+            "file": "compose.dev.yml",
+            "lines": "18",
+            "evidence": "redis://redis:6379",
+            "owasp_category": "MCP01"
+          },
+          {
+            "type": "secret_exposure",
+            "severity": "low",
+            "description": ".env文件引用",
+            "file": "compose.dev.yml",
+            "lines": "10",
+            "evidence": ".env",
+            "owasp_category": "MCP01"
+          },
+          {
+            "type": "secret_exposure",
+            "severity": "low",
+            "description": ".env文件引用",
+            "file": "compose.dev.yml",
+            "lines": "42",
+            "evidence": ".env",
+            "owasp_category": "MCP01"
+          },
+          {
+            "type": "secret_exposure",
+            "severity": "low",
+            "description": ".env文件引用",
+            "file": "README.md",
+            "lines": "207",
+            "evidence": ".env",
+            "owasp_category": "MCP01"
+          },
+          {
+            "type": "secret_exposure",
+            "severity": "critical",
+            "description": "数据库连接字符串",
+            "file": "AGENTS.md",
+            "lines": "113",
+            "evidence": "postgresql://postgres:postgres@localhost:5432/postgres`.",
+            "owasp_category": "MCP01"
+          },
+          {
+            "type": "secret_exposure",
+            "severity": "critical",
+            "description": "数据库连接字符串",
+            "file": "AGENTS.md",
+            "lines": "124",
+            "evidence": "postgresql://postgres:postgres@localhost:5432/postgres`)",
+            "owasp_category": "MCP01"
+          },
+          {
+            "type": "secret_exposure",
+            "severity": "low",
+            "description": ".env文件引用",
+            "file": "AGENTS.md",
+            "lines": "35",
+            "evidence": ".env",
+            "owasp_category": "MCP01"
+          },
+          {
+            "type": "secret_exposure",
+            "severity": "low",
+            "description": ".env文件引用",
+            "file": "AGENTS.md",
+            "lines": "82",
+            "evidence": ".env",
+            "owasp_category": "MCP01"
+          }
+        ]
+      },
+      "llm_analysis": {
+        "findings": [],
+        "analyzed": false,
+        "reason": "LLM not configured (set AISHIELD_LLM_URL and AISHIELD_LLM_KEY)"
+      },
+      "llm_supply_chain": {
+        "findings": [],
+        "analyzed": false
+      },
+      "osv_cve": [],
+      "commit_hash": "ebcaa472",
+      "recommendations": [
+        "审查所有网络请求目标，确保不向未授权服务器发送数据",
+        "检测到数据外传/SSRF风险，建议审查数据流向并添加URL白名单",
+        "检测到硬编码凭据，使用环境变量或密钥管理服务",
+        "安全评分较低，建议进行全面安全审查后再发布"
+      ],
+      "scanned_at": "2026-08-19 02:22:03",
+      "scanner_version": "4.0",
+      "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)",
+      "source": "github-search",
+      "directory_description": "A one-of-a-kind resume builder that keeps your privacy in mind. Completely secure, customizable, portable, open-source and free forever. Try it out today!",
+      "stars": 40984
     }
   ]
 }

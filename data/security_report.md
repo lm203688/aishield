@@ -1,9 +1,9 @@
 # AIShield MCP安全扫描报告
 
-生成时间: 2026-08-19 01:18:14
+生成时间: 2026-08-19 02:22:03
 扫描引擎版本: 4.1
-扫描工具总数: 64
-平均安全评分: 69.6/100
+扫描工具总数: 65
+平均安全评分: 69.2/100
 
 ## 评分分布
 
@@ -12,20 +12,20 @@
 | gold | 15 |
 | silver | 21 |
 | bronze | 14 |
-| none | 14 |
+| none | 15 |
 
 ## OWASP MCP Top 10 覆盖率
 
-- **MCP01** 令牌管理不当: 10/64 (16%)
-- **MCP010** : 0/64 (0%)
-- **MCP02** 权限范围蔓延: 36/64 (56%)
-- **MCP03** 工具投毒: 11/64 (17%)
-- **MCP04** 供应链攻击: 23/64 (36%)
-- **MCP05** 命令注入: 20/64 (31%)
-- **MCP06** 提示注入: 44/64 (69%)
-- **MCP07** 认证不足: 3/64 (5%)
-- **MCP08** 审计缺失: 40/64 (62%)
-- **MCP09** 影子服务器: 47/64 (73%)
+- **MCP01** 令牌管理不当: 11/65 (17%)
+- **MCP010** : 0/65 (0%)
+- **MCP02** 权限范围蔓延: 37/65 (57%)
+- **MCP03** 工具投毒: 11/65 (17%)
+- **MCP04** 供应链攻击: 23/65 (35%)
+- **MCP05** 命令注入: 20/65 (31%)
+- **MCP06** 提示注入: 45/65 (69%)
+- **MCP07** 认证不足: 3/65 (5%)
+- **MCP08** 审计缺失: 40/65 (62%)
+- **MCP09** 影子服务器: 48/65 (74%)
 
 ## 高风险工具 (score < 60)
 
@@ -34,6 +34,7 @@
 - **OpenByteInc/QuantDinger** — 39/100, 58 issues
 - **zylon-ai/private-gpt** — 40/100, 30 issues
 - **ruvnet/ruflo** — 41/100, 39 issues
+- **amruthpillai/reactive-resume** — 42/100, 38 issues
 - **assafelovic/gpt-researcher** — 45/100, 42 issues
 - **czlonkowski/n8n-mcp** — 46/100, 23 issues
 - **sansan0/TrendRadar** — 47/100, 42 issues
@@ -48,7 +49,6 @@
 - **modelcontextprotocol/inspector** — 56/100, 38 issues
 - **upstash/context7** — 58/100, 27 issues
 - **triggerdotdev/trigger.dev** — 58/100, 24 issues
-- **activepieces/activepieces** — 59/100, 23 issues
 
 ## 最安全工具 (score >= 85)
 
