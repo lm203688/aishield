@@ -691,10 +691,12 @@ def dispatch_post(handler, data):
         mod = _modules.get("collab")
         if mod:
             delg = mod.TaskDelegation()
+            _task_key = data.get("task_key")
             result = delg.delegate(
                 task_description=data.get("task_description", ""),
                 from_agent_id=data.get("from_agent_id", ""),
                 to_agent_id=data.get("to_agent_id", ""),
+                task_key=_task_key if _task_key is not None else None,
             )
             handler._send_json({"success": True, **result})
             return True
