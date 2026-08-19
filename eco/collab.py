@@ -654,7 +654,8 @@ class TaskDelegation:
         _save_json(DELEGATIONS_FILE, {"delegations": self._delegations})
 
     def delegate(self, task_description, from_agent_id, to_agent_id,
-                 payload=None, deadline_seconds=None, require_human_approval=False):
+                 payload=None, deadline_seconds=None, require_human_approval=False,
+                 task_key=None):
         """
         委派任务
 
@@ -667,11 +668,30 @@ class TaskDelegation:
             require_human_approval (bool, opt): 是否需要人类审批闸门
                 True 时委派先进入 awaiting_approval 状态，须经 approve_delegation
                 放行（转为 pending）后才能被接受。
+            task_key (str, opt):      任务原子锁键（Cumora 式 atomic claim on
+                units of work）。若提供，则同一 from_agent_id 下已存在 active 委派
+                （awaiting_approval/pending/accepted）持有相同 task_key 时，
+                fail-closed 拒绝本次重复委派，防止多 agent 双执行同一任务。
+                默认 None = 不锁（向后兼容）。
 
         Returns:
             dict: {"delegation_id", "status"}
         """
         self._load()
+
+        # ── Cumora 式任务原子锁（atomic claim on units of work）──
+        # 同一 from_agent_id + task_key 已有 active 委派则 fail-closed 拒绝，
+        # 防止同一任务被重复委派给多个 agent 导致双执行（呼应 ASI02 least_agency）。
+        if task_key is not None:
+            for _d in self._delegations.values():
+                if (_d.get("from_agent_id") == from_agent_id
+                        and _d.get("task_key") == task_key
+                        and _d.get("status") in ("awaiting_approval", "pending", "accepted")):
+                    raise ValueError(
+                        f"task_key '{task_key}' 已被活跃委派 "
+                        f"{_d['delegation_id']} 占用（状态 {_d['status']}），"
+                        f"拒绝重复委派（防双执行）"
+                    )
 
         # ── P0-3: Agent 通信安全平面 ──
         # 委派的任务描述 / 负载先过 AIShield 安全闸，命中威胁即拒绝（fail-open 由闸保证）。
@@ -709,6 +729,7 @@ class TaskDelegation:
             "to_agent_id": to_agent_id,
             "payload": payload or {},
             "status": initial_status,
+            "task_key": task_key,
             "deadline": deadline,
             "result": None,
             "reject_reason": None,
