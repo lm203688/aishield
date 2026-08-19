@@ -44,6 +44,7 @@ def main():
         'tests.test_capability_full_scan',
         'tests.test_agent_security_gateway',
         'tests.test_trust_protocol',
+        'tests.test_claim_lock',
     ]
 
     loaded = 0
