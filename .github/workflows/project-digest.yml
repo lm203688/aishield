@@ -177,8 +177,18 @@ jobs:
       - name: Generate digest report
         id: digest
         run: |
+          # 确保前序步骤的输出文件存在
+          if [ ! -f /tmp/state_summary.json ]; then
+            echo '{"domains":{},"published_count":0,"tools_scanned":0,"feature_state":{},"meta_score":0,"meta_level":"unknown","health_level":"unknown"}' > /tmp/state_summary.json
+            echo "Warning: state_summary.json missing, using empty state"
+          fi
+          if [ ! -f /tmp/runs_summary.json ]; then
+            echo '{}' > /tmp/runs_summary.json
+            echo "Warning: runs_summary.json missing, using empty runs"
+          fi
+
           python -c "
-          import json
+          import json, os
           from datetime import datetime, timezone
 
           state = json.load(open('/tmp/state_summary.json', encoding='utf-8'))
@@ -187,17 +197,17 @@ jobs:
           now = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')
 
           # Determine overall health
-          health = state['health_level']
-          meta = state['meta_level']
-          meta_score = state['meta_score']
-          failing_workflows = [k for k, v in runs.items() if v['failure'] > 0]
+          health = state.get('health_level', 'unknown')
+          meta = state.get('meta_level', 'unknown')
+          meta_score = state.get('meta_score', 0)
+          failing_workflows = [k for k, v in runs.items() if v.get('failure', 0) > 0]
 
           if health == 'healthy' and not failing_workflows and meta in ('healthy', 'good'):
-              overall = '🟢 HEALTHY'
+              overall = 'HEALTHY'
           elif health == 'degraded' or len(failing_workflows) > 0:
-              overall = '🟡 DEGRADED'
+              overall = 'DEGRADED'
           else:
-              overall = '🔴 DOWN'
+              overall = 'DOWN'
 
           # Build markdown report
           lines = []
@@ -211,48 +221,53 @@ jobs:
           lines.append(f'|------|-----|')
           lines.append(f'| 服务健康 | {health} |')
           lines.append(f'| 自动化体系评分 | {meta_score}/100 ({meta}) |')
-          lines.append(f'| 已发布内容 | {state[\"published_count\"]} 篇 |')
-          lines.append(f'| 已扫描工具库 | {state[\"tools_scanned\"]} 个 |')
-          lines.append(f'| 需求采纳 | {state[\"feature_state\"].get(\"adopted\", 0)} 项 |')
+          lines.append(f'| 已发布内容 | {state.get(\"published_count\", 0)} 篇 |')
+          lines.append(f'| 已扫描工具库 | {state.get(\"tools_scanned\", 0)} 个 |')
+          feat = state.get('feature_state', {})
+          lines.append(f'| 需求采纳 | {feat.get(\"adopted\", 0)} 项 |')
           lines.append('')
 
-          lines.append('## 自动化任务执行状态（最近 24 小时）')
-          lines.append('')
-          lines.append('| Workflow | 成功 | 失败 | 状态 |')
-          lines.append('|----------|------|------|------|')
-          for name, stats in sorted(runs.items()):
-              s = stats['success']
-              f = stats['failure']
-              icon = '✅' if f == 0 else '❌'
-              lines.append(f'| {name} | {s} | {f} | {icon} |')
-          lines.append('')
+          if runs:
+              lines.append('## 自动化任务执行状态（最近 24 小时）')
+              lines.append('')
+              lines.append('| Workflow | 成功 | 失败 | 状态 |')
+              lines.append('|----------|------|------|------|')
+              for name, stats in sorted(runs.items()):
+                  s = stats.get('success', 0)
+                  f = stats.get('failure', 0)
+                  icon = 'PASS' if f == 0 else 'FAIL'
+                  lines.append(f'| {name} | {s} | {f} | {icon} |')
+              lines.append('')
 
           if failing_workflows:
-              lines.append('## ⚠️ 需要关注')
+              lines.append('## 需要关注')
               lines.append('')
               for wf in failing_workflows:
                   stats = runs[wf]
-                  lines.append(f'- **{wf}**: {stats[\"failure\"]} 次失败')
+                  lines.append(f'- **{wf}**: {stats.get(\"failure\", 0)} 次失败')
               lines.append('')
 
-          lines.append('## 状态域详情')
-          lines.append('')
-          for domain, data in sorted(state['domains'].items()):
-              if isinstance(data, dict) and 'error' not in data:
-                  lines.append(f'### {domain}')
-                  for k, v in data.items():
-                      if k not in ('_source', '_ts', 'checked_at'):
-                          lines.append(f'- {k}: {v}')
-                  lines.append('')
+          domains = state.get('domains', {})
+          if domains:
+              lines.append('## 状态域详情')
+              lines.append('')
+              for domain, data in sorted(domains.items()):
+                  if isinstance(data, dict) and 'error' not in data:
+                      lines.append(f'### {domain}')
+                      for k, v in data.items():
+                          if k not in ('_source', '_ts', 'checked_at'):
+                              lines.append(f'- {k}: {v}')
+                      lines.append('')
 
           report = '\n'.join(lines)
 
           with open('/tmp/digest_report.md', 'w', encoding='utf-8') as f:
               f.write(report)
 
-          # Summary for GitHub Step Summary
-          with open(os.environ.get('GITHUB_STEP_SUMMARY', '/dev/null'), 'a') as f:
-              f.write(report)
+          step_summary = os.environ.get('GITHUB_STEP_SUMMARY')
+          if step_summary:
+              with open(step_summary, 'a') as f:
+                  f.write(report)
 
           print(f'Report generated: {len(lines)} lines')
           print(f'Overall: {overall}')
@@ -316,6 +331,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          python scripts/state_bus.py set digest \
-            --json "{\"generated_at\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"overall\":\"$(python -c "import json; d=json.load(open('/tmp/state_summary.json')); print('healthy' if d['health_level']=='healthy' else 'degraded')")\"}" \
-            --source project-digest || true
+          OVERALL=$(python -c "import json; d=json.load(open('/tmp/state_summary.json')); print('healthy' if d.get('health_level','unknown')=='healthy' else 'degraded')" 2>/dev/null || echo "unknown")
+          python scripts/state_bus.py set digest "{\"generated_at\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"overall\":\"${OVERALL}\"}" --source project-digest || true
