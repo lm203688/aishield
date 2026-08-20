@@ -12,7 +12,35 @@ jobs:
   stale:
     runs-on: ubuntu-latest
     steps:
+      - name: Skip if ran recently (降频：每天实际执行一次)
+        id: freq-check
+        run: |
+          # 加速期 cron 每小时触发，但实际每天才执行一次
+          LAST_RUN=$(python3 -c "
+          import json
+          try:
+              d = json.load(open('data/state/stale.json'))
+              print(d.get('current', {}).get('last_run', ''))
+          except:
+              print('')
+          " 2>/dev/null)
+          if [ -n "$LAST_RUN" ]; then
+            LAST_EPOCH=$(date -d "$LAST_RUN" +%s 2>/dev/null || echo 0)
+            NOW_EPOCH=$(date +%s)
+            DIFF=$((NOW_EPOCH - LAST_EPOCH))
+            if [ "$DIFF" -lt 86400 ]; then
+              echo "距上次运行 ${DIFF}s < 24h，跳过"
+              echo "skip=true" >> $GITHUB_OUTPUT
+              exit 0
+            fi
+          fi
+          echo "skip=false" >> $GITHUB_OUTPUT
+
+      - uses: actions/checkout@v4
+        if: steps.freq-check.outputs.skip != 'true'
+
       - uses: actions/stale@v9
+        if: steps.freq-check.outputs.skip != 'true'
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           # Issue 配置
@@ -46,3 +74,15 @@ jobs:
         run: |
           OPEN=$(gh issue list --label stale --state open --limit 100 --json number -q 'length' 2>/dev/null || echo '?')
           echo "::notice::Stale 管理执行完成：当前 open 且带 stale 标签的 Issue 共 ${OPEN} 个"
+
+      - name: Record last run time
+        if: always()
+        run: |
+          python3 -c "
+          import json, os
+          state_dir = 'data/state'
+          os.makedirs(state_dir, exist_ok=True)
+          path = os.path.join(state_dir, 'stale.json')
+          data = {'current': {'last_run': '$(date -u +%Y-%m-%dT%H:%M:%SZ)'}}
+          with open(path, 'w') as f: json.dump(data, f)
+          " 2>/dev/null || true
