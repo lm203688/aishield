@@ -1,0 +1,223 @@
+name: AIShield Unified Security Scan
+
+# 合并自 aishield-scan.yml + security-scan.yml
+# 两个 workflow 都是安全扫描，只是目标不同：
+#   - self-scan: 扫描自身仓库（push/PR/schedule）
+#   - external-scan: 扫描外部工具（schedule/workflow_dispatch + repo_url）
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scanner/**'
+      - 'eco/**'
+      - 'api/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'scanner/**'
+      - 'eco/**'
+  schedule:
+    - cron: '0 * * * *'  # 加速期每小时（2026-08-31 回滚至 '52 4 * * 1'）
+  workflow_dispatch:
+    inputs:
+      repo_url:
+        description: 'GitHub repo URL to scan (留空则扫描自身)'
+        required: false
+        type: string
+      tool_type:
+        description: 'Tool type'
+        required: false
+        default: 'mcp'
+        type: choice
+        options:
+          - mcp
+          - skill
+          - gpt
+
+permissions:
+  contents: read
+  issues: write
+  security-events: write
+
+jobs:
+  # ── Job 1: 自扫描（自身仓库安全门禁）──────────────────────
+  self-scan:
+    name: Self-Scan (自身仓库安全门禁)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Start AIShield Server
+        run: |
+          python api/server.py &
+          sleep 3
+          curl -s http://localhost:8450/api/v1/health
+
+      - name: Scan Repository
+        run: |
+          curl -s -X POST http://localhost:8450/api/v1/audit \
+            -H "Content-Type: application/json" \
+            -d '{
+              "tool_name": "aishield-repo",
+              "tool_description": "AIShield self-scan of repository",
+              "tool_schema": {},
+              "source_url": "https://github.com/lm203688/aishield",
+              "capabilities": ["scan"]
+            }' | tee self-scan-report.json
+
+      - name: Upload Scan Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-scan-report
+          path: self-scan-report.json
+
+      - name: Check Risk Level
+        run: |
+          SCORE=$(python3 -c "
+          import sys, json
+          d = json.load(open('self-scan-report.json'))
+          r = d.get('report') or {}
+          v = r.get('overall_score', d.get('overall_score', d.get('score')))
+          if v is None:
+              sys.stderr.write('PARSE_FAIL: keys=%s report_keys=%s\n' % (list(d)[:8], list(r)[:8]))
+              sys.exit(3)
+          print(int(v))
+          ") || {
+            echo "::error::门禁自身故障——无法从 self-scan-report.json 解析分数"
+            head -c 600 self-scan-report.json || true
+            exit 1
+          }
+          echo "Self-Scan Score: $SCORE"
+          if [ "$SCORE" -lt 60 ]; then
+            echo "::error::Security score $SCORE is below threshold (60)"
+            exit 1
+          fi
+
+      - name: Alert on low score
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            let score = null;
+            try {
+              const d = JSON.parse(fs.readFileSync('self-scan-report.json','utf8'));
+              score = d.report?.overall_score ?? d.overall_score ?? d.score ?? null;
+            } catch(e) {}
+            if (score === null) { console.log('无法解析分数，跳过'); return; }
+            if (score >= 60) { console.log('安全得分正常:', score); return; }
+            const title = `🔒 安全门禁未通过：得分 ${score}/100 (run ${context.runId})`;
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner, repo: context.repo.repo, state: 'open', per_page: 100
+            });
+            if (issues.find(i => i.title === title && !i.pull_request)) { console.log('已有告警'); return; }
+            await github.rest.issues.create({
+              owner: context.repo.owner, repo: context.repo.repo, title,
+              body: `AIShield 自扫描安全得分 ${score}/100 低于阈值 60。\n运行链接: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+              labels: ['security','alert','automated']
+            });
+
+  # ── Job 2: 外部扫描（扫描指定工具）──────────────────────
+  external-scan:
+    name: External Scan (扫描外部工具)
+    runs-on: ubuntu-latest
+    if: github.event.inputs.repo_url != '' || github.event.schedule != ''
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install AIShield
+        run: pip install -e .
+
+      - name: Run Security Scan
+        env:
+          AISHIELD_API_URL: https://api.aishield.tools
+        run: |
+          REPO_URL="${{ github.event.inputs.repo_url || '' }}"
+          TOOL_TYPE="${{ github.event.inputs.tool_type || 'mcp' }}"
+          REPO_NAME="${{ github.repository }}"
+
+          if [ -z "$REPO_URL" ]; then
+            echo "No repo_url provided, skipping external scan"
+            exit 0
+          fi
+
+          echo "Scanning: $REPO_URL"
+          python -c "
+          import sys, json
+          sys.path.insert(0, '.')
+          from scanner.engine import scan
+          result = scan('$REPO_URL', '$TOOL_TYPE', '$REPO_NAME')
+          print(json.dumps(result, ensure_ascii=False, indent=2))
+          " > external-scan-report.json 2>external-scan-error.log
+
+      - name: Check if critical issues found
+        id: check
+        if: hashFiles('external-scan-report.json') != ''
+        run: |
+          CRITICAL=$(python -c "
+          import json
+          with open('external-scan-report.json') as f:
+              r = json.load(f)
+          crit = len([f for f in r.get('findings',[]) if f.get('severity')=='critical'])
+          print(crit)
+          ")
+          echo "critical_count=$CRITICAL" >> $GITHUB_OUTPUT
+
+      - name: Alert on critical findings
+        if: steps.check.outputs.critical_count != '0'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const title = `🛡️ AIShield 扫描发现严重安全问题 (run ${context.runId})`;
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner, repo: context.repo.repo, state: 'open', per_page: 100
+            });
+            if (issues.find(i => i.title === title && !i.pull_request)) { console.log('已有告警'); return; }
+            let detail = '';
+            try {
+              const r = JSON.parse(fs.readFileSync('external-scan-report.json','utf8'));
+              const crit = (r.findings||[]).filter(f=>f.severity==='critical');
+              detail = crit.map(f=>`- ${f.title||f.name||'issue'}: ${f.description||''}`).join('\n');
+            } catch(e) {}
+            await github.rest.issues.create({
+              owner: context.repo.owner, repo: context.repo.repo, title,
+              body: `AIShield 自动扫描发现严重安全问题。\n\n${detail}\n\n运行链接: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+              labels: ['security','alert','automated']
+            });
+
+      - name: Upload External Scan Report
+        if: always() && hashFiles('external-scan-report.json') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: external-scan-report
+          path: external-scan-report.json
+          retention-days: 30
+
+      - name: Comment on PR (if triggered by pull_request)
+        if: github.event_name == 'pull_request' && hashFiles('external-scan-report.json') != ''
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = JSON.parse(fs.readFileSync('external-scan-report.json', 'utf8'));
+            const score = report.overall_score || 0;
+            const badge = report.badge_level || 'none';
+            const findings = report.total_findings || 0;
+            const critical = (report.findings || []).filter(f => f.severity === 'critical').length;
+            const body = `## 🛡️ AIShield Security Scan\n**Score: ${score}/100** | Badge: ${badge} | Issues: ${findings} | Critical: ${critical}\n\n${critical > 0 ? '⚠️ Critical issues detected!' : '✅ No critical issues.'}`;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner, repo: context.repo.repo, body
+            });
