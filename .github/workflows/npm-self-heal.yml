@@ -26,7 +26,32 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Skip if ran recently (降频：每 6 小时实际执行一次)
+        id: freq-check
+        run: |
+          # 加速期 cron 每小时触发，但实际每 6 小时才执行一次
+          LAST_RUN=$(python -c "
+          import json, os
+          try:
+              d = json.load(open('data/state/npm-selfheal.json'))
+              print(d.get('current', {}).get('last_run', ''))
+          except:
+              print('')
+          " 2>/dev/null)
+          if [ -n "$LAST_RUN" ]; then
+            LAST_EPOCH=$(date -d "$LAST_RUN" +%s 2>/dev/null || echo 0)
+            NOW_EPOCH=$(date +%s)
+            DIFF=$((NOW_EPOCH - LAST_EPOCH))
+            if [ "$DIFF" -lt 21600 ]; then
+              echo "距上次运行 ${DIFF}s < 6h，跳过"
+              echo "skip=true" >> $GITHUB_OUTPUT
+              exit 0
+            fi
+          fi
+          echo "skip=false" >> $GITHUB_OUTPUT
+
       - uses: actions/setup-node@v4
+        if: steps.freq-check.outputs.skip != 'true'
         with:
           node-version: '20'
           registry-url: 'https://registry.npmjs.org'
@@ -79,3 +104,10 @@ jobs:
             -d '{"ref":"main","inputs":{"npm_tag":"latest","dry_run":false}}' \
             "https://api.github.com/repos/${{ github.repository }}/actions/workflows/publish-npm.yml/dispatches"
           echo "已触发 publish-npm"
+
+      - name: Record last run time
+        if: always()
+        run: |
+          python scripts/state_bus.py set npm-selfheal \
+            --json "{\"last_run\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}" \
+            --source npm-self-heal || true
