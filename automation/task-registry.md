@@ -1,7 +1,7 @@
 # AIShield 自动化台账
 
 > **本文件由 `scripts/gen_task_registry.py` 自动生成，请勿手工编辑。**
-> 生成时间：2026-08-05 04:15 UTC
+> 生成时间：2026-08-20 07:54 UTC
 
 历史教训：本台账曾手工声称「二十八项定时任务在跑」，而仓库实际只有十四个 workflow，其中 self-heal 因 YAML 语法错静默失效 48 天。台账一旦脱离现实，就会把「看起来很自动化」的幻觉喂给每一次决策。现改为从 workflow 真实内容派生。
 
@@ -9,8 +9,8 @@
 
 | 指标 | 数值 |
 |------|------|
-| 本仓库 workflow 总数 | 18 个任务 |
-| 其中定时驱动 | 13 个 |
+| 本仓库 workflow 总数 | 17 个任务 |
+| 其中定时驱动 | 12 个 |
 | 其中事件驱动 | 5 个 |
 | 存在断链/语法问题 | 0 个 |
 
@@ -18,19 +18,18 @@
 
 | Workflow | 名称 | 调度 | Jobs | 闭环环节 |
 |----------|------|------|------|----------|
-| `acquisition-automation.yml` | Acquisition Automation | 每小时第 0 分 UTC | 2 | 动作✓验证✓ ⚠️缺检测告警 |
-| `aishield-scan.yml` | AIShield MCP Security Scan | 每小时第 0 分 UTC | 1 | 检测✓验证✓ ⚠️缺动作告警 |
-| `channel-distribution.yml` | AIShield Channel Distribution (Content + Registry + Social) | 每小时第 0 分 UTC | 6 | 检测✓动作✓验证✓告警✓ |
-| `ci.yml` | AIShield CI/CD | 每小时第 0 分 UTC | 7 | 检测✓验证✓ ⚠️缺动作告警 |
+| `channel-distribution.yml` | AIShield Channel Distribution (Content + Registry + Social) | 每小时第 0 分 UTC | 7 | 检测✓动作✓验证✓告警✓ |
+| `ci.yml` | AIShield CI/CD | 每小时第 0 分 UTC | 8 | 检测✓验证✓ ⚠️缺动作告警 |
 | `data-scan-flywheel.yml` | AIShield Data Flywheel (Batch Scan to Self-Built Database) | 每小时第 0 分 UTC | 2 | 检测✓动作✓验证✓告警✓ |
 | `deploy-server.yml` | Deploy to Production Server | 每小时第 0 分 UTC | 2 | 检测✓动作✓验证✓告警✓ |
 | `feature-closed-loop.yml` | AIShield Intelligence-to-Feature Closed-Loop | 每小时第 0 分 UTC | 4 | 检测✓动作✓验证✓告警✓ |
 | `meta-monitor.yml` | AIShield Meta-Monitor (监控自动化体系本身) | 每小时第 0 分 UTC | 2 | 检测✓动作✓验证✓告警✓ |
 | `npm-self-heal.yml` | npm self-heal | 每小时第 0 分 UTC | 1 | 动作✓验证✓ ⚠️缺检测告警 |
-| `security-scan.yml` | Security Scan | 每小时第 0 分 UTC | 1 | 检测✓验证✓ ⚠️缺动作告警 |
+| `project-digest.yml` | AIShield Project Digest (统一迭代汇报) | 每 6 小时（第 0 分）UTC | 1 | 检测✓动作✓验证✓ ⚠️缺告警 |
 | `self-heal-closed-loop.yml` | AIShield Auto Self-Heal Closed-Loop | 每小时第 0 分 UTC | 6 | 检测✓动作✓验证✓告警✓ |
 | `stale.yml` | Stale Issues Manager | 每小时第 0 分 UTC | 1 | 验证✓ ⚠️缺检测动作告警 |
 | `threat-intel-feed.yml` | AIShield Threat-Intel Feed Update | 每小时第 0 分 UTC | 5 | 检测✓动作✓验证✓告警✓ |
+| `unified-security-scan.yml` | AIShield Unified Security Scan | 每小时第 0 分 UTC | 2 | 检测✓验证✓ ⚠️缺动作告警 |
 
 ## 事件驱动任务
 
