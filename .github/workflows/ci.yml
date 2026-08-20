@@ -212,6 +212,7 @@ jobs:
 
   notify-on-failure:
     name: Notify on CI Failure
+    needs: [workflow-lint, distribution-gate, test, security-scan, dependency-check, performance-test, docker-test]
     if: failure()
     runs-on: ubuntu-latest
     permissions:
