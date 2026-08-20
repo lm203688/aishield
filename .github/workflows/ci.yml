@@ -195,10 +195,11 @@ jobs:
     - name: Build Docker image
       run: docker build -t aishield:test .
 
-    - name: Run Docker container
+    - name: Run Docker container (API server mode)
       run: |
-        docker run -d -p 8450:8450 --name aishield-test aishield:test
-        sleep 3
+        docker run -d -p 8450:8450 --name aishield-test \
+          --entrypoint python aishield:test /app/api/server.py
+        sleep 5
 
     - name: Health check
       run: |
