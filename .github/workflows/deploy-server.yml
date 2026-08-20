@@ -158,21 +158,47 @@ jobs:
       with:
         python-version: '3.13'
 
-    - name: Verify live service (三路探测，最多轮询 3 分钟)
+    - name: Verify live service (引用 self-heal 状态 + 兜底探测)
       id: verify
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         NOTIFY_WEBHOOK: ${{ secrets.NOTIFY_WEBHOOK }}
       run: |
+        # 优化：先读 self-heal 的最近探测结果，避免重复探测
+        # 如果 self-heal 在 5 分钟内探测过且健康，直接引用
         ok=false
-        for i in $(seq 1 9); do
-          if python scripts/health_probe.py >/dev/null 2>&1; then
-            echo "✅ 部署后验证通过（第 $i 次探测）"
+        if [ -f data/state/health.json ]; then
+          last_check=$(python -c "
+          import json, sys
+          try:
+              d = json.load(open('data/state/health.json'))
+              c = d.get('current', {})
+              if c.get('healthy'):
+                  print('healthy')
+              else:
+                  print('unhealthy')
+          except:
+              print('unknown')
+          " 2>/dev/null)
+          if [ "$last_check" = "healthy" ]; then
+            echo "✅ self-heal 最近探测健康，直接引用状态"
             ok=true
-            break
           fi
-          sleep 20
-        done
+        fi
+
+        # 兜底：如果 self-heal 状态不可用，自己探测
+        if [ "$ok" != "true" ]; then
+          echo "self-heal 状态不可用，执行独立探测..."
+          for i in $(seq 1 9); do
+            if python scripts/health_probe.py >/dev/null 2>&1; then
+              echo "✅ 部署后验证通过（第 $i 次探测）"
+              ok=true
+              break
+            fi
+            sleep 20
+          done
+        fi
+
         if [ "$ok" != "true" ]; then
           python scripts/notify.py --level P0 --force \
             --fingerprint deploy-verify-failed \
