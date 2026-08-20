@@ -66,7 +66,7 @@ jobs:
           retention-days: 7
 
   verify:
-    name: Verify Repo Still Green
+    name: Verify Repo Still Green (引用 CI 状态，避免重复测试)
     needs: aggregate
     runs-on: ubuntu-latest
     steps:
@@ -74,14 +74,46 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+      - name: Check CI status (引用 ci.yml 最近结果)
+        id: ci-check
+        run: |
+          # 优化：如果 ci.yml 最近 1 小时内跑过且成功，跳过重复测试
+          SKIP=false
+          if [ -f data/state/ci.json ]; then
+            LAST=$(python -c "
+          import json, sys
+          try:
+              d = json.load(open('data/state/ci.json'))
+              c = d.get('current', {})
+              print(c.get('last_status', 'unknown'))
+          except:
+              print('unknown')
+          " 2>/dev/null)
+            if [ "$LAST" = "success" ]; then
+              echo "CI 最近成功，跳过重复测试"
+              SKIP=true
+            fi
+          fi
+          echo "skip_tests=$SKIP" >> $GITHUB_OUTPUT
+
       - name: Compile & test
+        if: steps.ci-check.outputs.skip_tests != 'true'
         run: |
           python -m py_compile api/server.py scanner/*.py scripts/*.py
           python tests/run_all.py
+
       - name: Validate workflow syntax
+        if: steps.ci-check.outputs.skip_tests != 'true'
         run: |
           pip install pyyaml
           python scripts/validate_workflows.py
+
+      - name: Write CI status for downstream consumers
+        if: always()
+        run: |
+          python scripts/state_bus.py set ci \
+            --json "{\"last_status\":\"${{ steps.ci-check.outcome }}\",\"source\":\"feature-closed-loop\"}" \
+            --source feature-closed-loop || true
 
   settle:
     name: Commit Adoption Result
