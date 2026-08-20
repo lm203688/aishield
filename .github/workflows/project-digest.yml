@@ -1,0 +1,321 @@
+name: AIShield Project Digest (统一迭代汇报)
+
+# 补位任务 N11：由 AI 汇总所有自动化任务的执行状态，生成项目迭代报告
+# 设计原则：
+#   1. 每 6 小时汇总一次，读取所有 data/state/*.json + 最近 Actions 运行结果
+#   2. 生成结构化摘要（JSON + Markdown）
+#   3. 创建/更新一个 Issue 作为项目迭代报告（唯一入口）
+#   4. 通知用户（webhook + Issue）
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # 每 6 小时
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["AIShield Meta-Monitor (监控自动化体系本身)"]
+    types: [completed]
+
+permissions:
+  contents: write
+  issues: write
+  actions: read
+
+concurrency:
+  group: project-digest
+  cancel-in-progress: false
+
+jobs:
+  digest:
+    name: Generate Project Digest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Gather state from all domains
+        id: state
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python -c "
+          import json, os, glob
+          from datetime import datetime, timezone
+
+          state_dir = 'data/state'
+          domains = {}
+          for f in sorted(glob.glob(os.path.join(state_dir, '*.json'))):
+              name = os.path.basename(f).replace('.json', '')
+              try:
+                  with open(f, encoding='utf-8') as fp:
+                      data = json.load(fp)
+                  current = data.get('current', data)
+                  domains[name] = current
+              except Exception as e:
+                  domains[name] = {'error': str(e)}
+
+          # Read published count
+          pub_path = 'data/state/published.json'
+          pub_count = 0
+          if os.path.exists(pub_path):
+              try:
+                  pub_data = json.load(open(pub_path, encoding='utf-8'))
+                  pub_count = pub_data.get('count', 0)
+              except:
+                  pass
+
+          # Read batch_scans count
+          scans_path = 'data/batch_scans.json'
+          tools_count = 0
+          if os.path.exists(scans_path):
+              try:
+                  scans_data = json.load(open(scans_path, encoding='utf-8'))
+                  tools_count = len(scans_data.get('tools', []))
+              except:
+                  pass
+
+          # Read feature state
+          feature_path = 'data/state/feature.json'
+          feature_state = {}
+          if os.path.exists(feature_path):
+              try:
+                  feature_state = json.load(open(feature_path, encoding='utf-8')).get('current', {})
+              except:
+                  pass
+
+          # Read meta state
+          meta_path = 'data/state/meta.json'
+          meta_score = 0
+          meta_level = 'unknown'
+          if os.path.exists(meta_path):
+              try:
+                  meta_data = json.load(open(meta_path, encoding='utf-8')).get('current', {})
+                  meta_score = meta_data.get('score', 0)
+                  meta_level = meta_data.get('level', 'unknown')
+              except:
+                  pass
+
+          # Read health state
+          health_path = 'data/state/health.json'
+          health_level = 'unknown'
+          if os.path.exists(health_path):
+              try:
+                  health_data = json.load(open(health_path, encoding='utf-8')).get('current', {})
+                  health_level = health_data.get('level', 'unknown')
+              except:
+                  pass
+
+          result = {
+              'domains': domains,
+              'published_count': pub_count,
+              'tools_scanned': tools_count,
+              'feature_state': feature_state,
+              'meta_score': meta_score,
+              'meta_level': meta_level,
+              'health_level': health_level,
+              'generated_at': datetime.now(timezone.utc).isoformat()
+          }
+
+          with open('/tmp/state_summary.json', 'w', encoding='utf-8') as f:
+              json.dump(result, f, ensure_ascii=False, indent=2, default=str)
+
+          print(f'State domains: {len(domains)}')
+          print(f'Published: {pub_count}')
+          print(f'Tools scanned: {tools_count}')
+          print(f'Meta score: {meta_score} ({meta_level})')
+          print(f'Health: {health_level}')
+          "
+
+      - name: Fetch recent Actions runs
+        id: runs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python -c "
+          import json, subprocess, os
+          from datetime import datetime, timezone, timedelta
+
+          since = (datetime.now(timezone.utc) - timedelta(hours=24)).isoformat()
+
+          # Get recent workflow runs
+          result = subprocess.run([
+              'gh', 'run', 'list', '--limit', '50', '--json',
+              'name,status,conclusion,createdAt,headBranch,event'
+          ], capture_output=True, text=True, env={**os.environ})
+
+          runs = json.loads(result.stdout) if result.stdout else []
+
+          # Group by workflow
+          workflow_stats = {}
+          for r in runs:
+              name = r.get('name', 'unknown')
+              conclusion = r.get('conclusion', r.get('status', 'unknown'))
+              if name not in workflow_stats:
+                  workflow_stats[name] = {'success': 0, 'failure': 0, 'other': 0, 'last_run': None}
+              if conclusion == 'success':
+                  workflow_stats[name]['success'] += 1
+              elif conclusion in ('failure', 'timed_out'):
+                  workflow_stats[name]['failure'] += 1
+              else:
+                  workflow_stats[name]['other'] += 1
+              if not workflow_stats[name]['last_run']:
+                  workflow_stats[name]['last_run'] = r.get('createdAt')
+
+          with open('/tmp/runs_summary.json', 'w', encoding='utf-8') as f:
+              json.dump(workflow_stats, f, ensure_ascii=False, indent=2, default=str)
+
+          print(f'Workflows with recent runs: {len(workflow_stats)}')
+          failing = [k for k, v in workflow_stats.items() if v['failure'] > 0]
+          if failing:
+              print(f'Failing: {failing}')
+          else:
+              print('All workflows healthy')
+          "
+
+      - name: Generate digest report
+        id: digest
+        run: |
+          python -c "
+          import json
+          from datetime import datetime, timezone
+
+          state = json.load(open('/tmp/state_summary.json', encoding='utf-8'))
+          runs = json.load(open('/tmp/runs_summary.json', encoding='utf-8'))
+
+          now = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')
+
+          # Determine overall health
+          health = state['health_level']
+          meta = state['meta_level']
+          meta_score = state['meta_score']
+          failing_workflows = [k for k, v in runs.items() if v['failure'] > 0]
+
+          if health == 'healthy' and not failing_workflows and meta in ('healthy', 'good'):
+              overall = '🟢 HEALTHY'
+          elif health == 'degraded' or len(failing_workflows) > 0:
+              overall = '🟡 DEGRADED'
+          else:
+              overall = '🔴 DOWN'
+
+          # Build markdown report
+          lines = []
+          lines.append(f'# AIShield 项目迭代报告')
+          lines.append(f'> 生成时间: {now}')
+          lines.append(f'> 总体状态: {overall}')
+          lines.append('')
+          lines.append('## 核心指标')
+          lines.append('')
+          lines.append(f'| 指标 | 值 |')
+          lines.append(f'|------|-----|')
+          lines.append(f'| 服务健康 | {health} |')
+          lines.append(f'| 自动化体系评分 | {meta_score}/100 ({meta}) |')
+          lines.append(f'| 已发布内容 | {state[\"published_count\"]} 篇 |')
+          lines.append(f'| 已扫描工具库 | {state[\"tools_scanned\"]} 个 |')
+          lines.append(f'| 需求采纳 | {state[\"feature_state\"].get(\"adopted\", 0)} 项 |')
+          lines.append('')
+
+          lines.append('## 自动化任务执行状态（最近 24 小时）')
+          lines.append('')
+          lines.append('| Workflow | 成功 | 失败 | 状态 |')
+          lines.append('|----------|------|------|------|')
+          for name, stats in sorted(runs.items()):
+              s = stats['success']
+              f = stats['failure']
+              icon = '✅' if f == 0 else '❌'
+              lines.append(f'| {name} | {s} | {f} | {icon} |')
+          lines.append('')
+
+          if failing_workflows:
+              lines.append('## ⚠️ 需要关注')
+              lines.append('')
+              for wf in failing_workflows:
+                  stats = runs[wf]
+                  lines.append(f'- **{wf}**: {stats[\"failure\"]} 次失败')
+              lines.append('')
+
+          lines.append('## 状态域详情')
+          lines.append('')
+          for domain, data in sorted(state['domains'].items()):
+              if isinstance(data, dict) and 'error' not in data:
+                  lines.append(f'### {domain}')
+                  for k, v in data.items():
+                      if k not in ('_source', '_ts', 'checked_at'):
+                          lines.append(f'- {k}: {v}')
+                  lines.append('')
+
+          report = '\n'.join(lines)
+
+          with open('/tmp/digest_report.md', 'w', encoding='utf-8') as f:
+              f.write(report)
+
+          # Summary for GitHub Step Summary
+          with open(os.environ.get('GITHUB_STEP_SUMMARY', '/dev/null'), 'a') as f:
+              f.write(report)
+
+          print(f'Report generated: {len(lines)} lines')
+          print(f'Overall: {overall}')
+          print(f'Failing workflows: {len(failing_workflows)}')
+          "
+
+      - name: Create or update digest Issue
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('/tmp/digest_report.md', 'utf8');
+            const title = '📊 AIShield 项目迭代报告 (自动更新)';
+
+            // Find existing open digest issue
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner, repo: context.repo.repo,
+              state: 'open', per_page: 50, labels: ['digest','automated']
+            });
+
+            const existing = issues.find(i => i.title === title && !i.pull_request);
+
+            if (existing) {
+              // Update existing issue
+              await github.rest.issues.update({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: existing.number,
+                body: report
+              });
+              console.log(`Updated issue #${existing.number}`);
+            } else {
+              // Create new issue
+              await github.rest.issues.create({
+                owner: context.repo.owner, repo: context.repo.repo,
+                title,
+                body: report,
+                labels: ['digest', 'automated']
+              });
+              console.log('Created new digest issue');
+            }
+
+      - name: Send webhook notification
+        if: always()
+        env:
+          NOTIFY_WEBHOOK: ${{ secrets.NOTIFY_WEBHOOK }}
+        run: |
+          if [ -n "$NOTIFY_WEBHOOK" ]; then
+            OVERALL=$(python -c "import json; d=json.load(open('/tmp/state_summary.json')); print('HEALTHY' if d['health_level']=='healthy' and d['meta_level'] in ('healthy','good') else 'DEGRADED')")
+            TOOLS=$(python -c "import json; d=json.load(open('/tmp/state_summary.json')); print(d['tools_scanned'])")
+            PUBLISHED=$(python -c "import json; d=json.load(open('/tmp/state_summary.json')); print(d['published_count'])")
+
+            curl -s -X POST "$NOTIFY_WEBHOOK" \
+              -H 'Content-Type: application/json' \
+              -d "{\"msgtype\":\"text\",\"text\":{\"content\":\"📊 [项目迭代报告] 状态: $OVERALL | 已扫描: $TOOLS 工具 | 已发布: $PUBLISHED 篇\"}}"
+          fi
+
+      - name: Record digest state
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python scripts/state_bus.py set digest \
+            --json "{\"generated_at\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"overall\":\"$(python -c "import json; d=json.load(open('/tmp/state_summary.json')); print('healthy' if d['health_level']=='healthy' else 'degraded')")\"}" \
+            --source project-digest || true
