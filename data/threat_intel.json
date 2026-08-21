@@ -1,6 +1,344 @@
 {
   "intel": [
     {
+      "id": "GHSA-8qj2-c6q4-f399",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 4.3,
+      "title": "django CMS: Missing authorization in `render_object_structure` discloses non-PageContent placeholder structure to low-privileged staff",
+      "summary": "## Summary\n\nThe django-cms frontend-editing structure endpoint\n\n```\nGET /<lang>/admin/cms/placeholder/object/<content_type_id>/structure/<object_id>/\n```\n\ndid not perform an object-level authorization check for **non-`PageContent`** objects. Any authenticated, active staff user could request the structure endpoint for a frontend-editable object (a model using `PlaceholderRelationField`) and read its placeholder/plugin structure, even without permission to change that object and without the `cms.",
+      "affected": "pip:django-cms",
+      "references": [
+        "https://github.com/advisories/GHSA-8qj2-c6q4-f399"
+      ],
+      "published": "2026-08-20T18:42:50Z",
+      "fetched": "2026-08-21T15:37:05.888416+00:00"
+    },
+    {
+      "id": "GHSA-vgxm-h9gx-h9w7",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 6.5,
+      "title": "django CMS: Structure endpoint bypasses page-view permission",
+      "summary": "### Summary\nThe structure-board endpoint (`render_object_structure`) renders a page's plugin structure without verifying that the requesting user is allowed to view the page. The edit and preview endpoints enforce this via `render_page()`, but the structure endpoint does not, allowing a low-privileged staff user to read the plugin structure of a view-restricted page.\n\n### Details\n`render_object_structure` (in `cms/views.py`) loads the `PageContent` object and renders `cms/toolbar/structure.html`",
+      "affected": "pip:django-cms",
+      "references": [
+        "https://github.com/advisories/GHSA-vgxm-h9gx-h9w7"
+      ],
+      "published": "2026-08-20T18:42:16Z",
+      "fetched": "2026-08-21T15:37:05.888557+00:00"
+    },
+    {
+      "id": "GHSA-4xfr-4p46-gc6p",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 6.5,
+      "title": "django CMS: Clipboard copy IDOR discloses unauthorized plugin content",
+      "summary": "### Summary\n  The clipboard copy paths of the `copy_plugins` admin endpoint validate only   the target (the user's own clipboard) and skip source-side authorization. A staff user can copy plugins out of a placeholder they have no permission on   into their clipboard, then read the (secret) content.\n\n  ### Details\n  In `cms/admin/placeholderadmin.py`, `_copy_plugin_to_clipboard` and   `_copy_placeholder_to_clipboard` check `has_copy_plugins_permission`, which only  evaluates `request.toolbar.clip",
+      "affected": "pip:django-cms",
+      "references": [
+        "https://github.com/advisories/GHSA-4xfr-4p46-gc6p"
+      ],
+      "published": "2026-08-20T18:42:11Z",
+      "fetched": "2026-08-21T15:37:05.888585+00:00"
+    },
+    {
+      "id": "GHSA-5p3m-vhh6-9236",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 6.3,
+      "title": "stigmem-node has blind SSRF via unvalidated webhook subscription delivery_address",
+      "summary": "### Summary\n\nStigmem allows an authenticated user to create a webhook subscription with a user-controlled `delivery_address`. That value is stored and later used directly by the subscription delivery worker as the destination of a server-side HTTP POST request.\n\nThe codebase already contains an outbound SSRF guard, `assert_safe_url()`, which blocks loopback, private, link-local, and metadata-style destinations. However, the subscription webhook delivery path does not appear to apply this guard e",
+      "affected": "pip:stigmem-node",
+      "references": [
+        "https://github.com/advisories/GHSA-5p3m-vhh6-9236"
+      ],
+      "published": "2026-08-20T18:30:50Z",
+      "fetched": "2026-08-21T15:37:05.888679+00:00"
+    },
+    {
+      "id": "GHSA-p853-83gj-wjj3",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 6.7,
+      "title": "NocoBase backup restore schema name allows command injection",
+      "summary": "### Summary\nNocoBase `@nocobase/plugin-backups` 2.0.57 restores PostgreSQL backups by interpolating the backup metadata schema name into shell command strings that are executed with Node.js `child_process.exec()`. A backup-management user who can restore an uploaded PostgreSQL backup with forced schema restore can place shell metacharacters in `_metadata.json` under `database.schema`, causing arbitrary commands to execute as the NocoBase server process during restore.\n\nThe vulnerable plugin is i",
+      "affected": "npm:@nocobase/plugin-backups",
+      "references": [
+        "https://github.com/advisories/GHSA-p853-83gj-wjj3"
+      ],
+      "published": "2026-08-20T18:30:15Z",
+      "fetched": "2026-08-21T15:37:04.526942+00:00"
+    },
+    {
+      "id": "GHSA-533j-2v4q-mw5h",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.7,
+      "title": "LangChain MongoDB has NoSQL Operator Injection in MongoDBSaver.list() leading to cross-tenant data exposure",
+      "summary": "# Executive Summary\n\nA NoSQL injection issue exists in the langgraph-checkpoint-mongodb and\nlanggraph-store-mongodb libraries. MongoDBSaver.list() and MongoDBStore.search() methods\naccept a filter parameter that is incorporated into MongoDB queries without sufficient validation.\nBecause MongoDB query operator keys (those prefixed with $) are not rejected during filter\nconstruction, a caller with control of the filter input can embed MongoDB query operators\ndirectly into the query.\n\n---\n\n## CVSS ",
+      "affected": "pip:langgraph-checkpoint-mongodb, pip:langgraph-store-mongodb",
+      "references": [
+        "https://github.com/advisories/GHSA-533j-2v4q-mw5h"
+      ],
+      "published": "2026-08-20T17:29:14Z",
+      "fetched": "2026-08-21T15:37:05.888738+00:00"
+    },
+    {
+      "id": "GHSA-89v8-rhwq-hf77",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 5.0,
+      "title": "asteval has a Sandbox Escape via BaseException Subclasses",
+      "summary": "## Summary\n\nAn attacker who can supply expressions to `asteval.Interpreter.eval()` can raise `SystemExit`,\n`KeyboardInterrupt`, `GeneratorExit`, or `BaseException` from inside the sandbox. These\nexceptions are subclasses of `BaseException` but not `Exception`, so they bypass the\n`except Exception:` safety net in both `run()` and `eval()`. The exception propagates\nverbatim to the calling application, terminating the process or disrupting signal and\ncleanup handlers.\n\nThis is distinct from prior v",
+      "affected": "pip:asteval",
+      "references": [
+        "https://github.com/advisories/GHSA-89v8-rhwq-hf77"
+      ],
+      "published": "2026-08-20T17:28:52Z",
+      "fetched": "2026-08-21T15:37:05.888840+00:00"
+    },
+    {
+      "id": "GHSA-9w56-46f6-3qhx",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 5.5,
+      "title": "asteval Sandbox Escape: arbitrary native memory read/write via numpy ctypes in default asteval Interpreter",
+      "summary": "### Summary\nWith its default configuration (numpy enabled, `import` disabled), asteval's `Interpreter` lets an attacker-controlled expression obtain a raw **arbitrary process-memory read and write** primitive, without using `import`, any `__dunder__` attribute, or `eval`/`exec`/`getattr`. Arbitrary in-process read/write is equivalent to arbitrary code execution and is a complete escape of the sandbox whose entire purpose is \"untrusted string in, no arbitrary execution out.\" Any application that ",
+      "affected": "pip:asteval",
+      "references": [
+        "https://github.com/advisories/GHSA-9w56-46f6-3qhx"
+      ],
+      "published": "2026-08-20T17:26:52Z",
+      "fetched": "2026-08-21T15:37:05.888877+00:00"
+    },
+    {
+      "id": "CVE-2026-76832",
+      "source": "nvd",
+      "severity": "high",
+      "cvss": 8.8,
+      "title": "Agno's PythonTools in libs/agno/agno/tools/python.py contains a path traversal vulnerability that allows attackers to read, write, or execute arbitrary files by supplying parent-directory traversal se",
+      "summary": "Agno's PythonTools in libs/agno/agno/tools/python.py contains a path traversal vulnerability that allows attackers to read, write, or execute arbitrary files by supplying parent-directory traversal sequences in the file_name argument passed to read_file, save_to_file, or run_python_file tool actions. Attackers can inject traversal sequences such as '../../../../../../etc/passwd' through direct tool invocation or via prompt injection embedded in agent-processed content to escape the intended base",
+      "affected": "prompt injection",
+      "references": [
+        "https://github.com/agno-agi/agno",
+        "https://github.com/agno-agi/agno/commit/710d7e7f846f93b7a3eadfd3e77075428c39e803",
+        "https://www.vulncheck.com/advisories/agno-pythontools-path-traversal-via-joinpath-file-name-argument"
+      ],
+      "published": "2026-08-19T22:17:27.960",
+      "fetched": "2026-08-21T15:36:44.133036+00:00"
+    },
+    {
+      "id": "GHSA-hjwh-xvfw-qrwj",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 5.5,
+      "title": "SearXNG Basic Authentication Credentials Exposed Through MCP Logs and JSON-RPC Error Responses",
+      "summary": "### Summary\n\nmcp-searxng version 1.11.0 exposes SearXNG Basic Authentication credentials embedded in the `SEARXNG_URL` environment variable.\n\nWhen the server starts in STDIO mode and an MCP client connects, the complete `SEARXNG_URL`, including its username and password, is sent to the client through an MCP `notifications/message` logging notification.\n\nAdditionally, when URL validation fails, the complete credential-bearing URL is included in the configuration error. This error is logged throug",
+      "affected": "npm:mcp-searxng",
+      "references": [
+        "https://github.com/advisories/GHSA-hjwh-xvfw-qrwj"
+      ],
+      "published": "2026-08-19T19:32:46Z",
+      "fetched": "2026-08-21T15:37:04.527327+00:00"
+    },
+    {
+      "id": "GHSA-wppf-h75h-6pm6",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 6.3,
+      "title": "SearXNG MCP Server: Additional hardened-mode SSRF bypasses",
+      "summary": "## Summary\n\n`mcp-searxng` has a hardened-mode URL-reading feature intended to prevent `web_url_read` from reaching private or internal network resources.\n\nPR #79 appears to address one SSRF class: hostnames that resolve to private or internal addresses under hardened mode. I tested PR #79 locally and confirmed that it blocks the DNS-resolves-to-loopback case.\n\nHowever, several other hardened-mode SSRF bypasses still appear to remain:\n\n1. Redirects from an allowed first-hop URL to a loopback/inte",
+      "affected": "npm:mcp-searxng",
+      "references": [
+        "https://github.com/advisories/GHSA-wppf-h75h-6pm6"
+      ],
+      "published": "2026-08-19T19:23:16Z",
+      "fetched": "2026-08-21T15:37:04.527433+00:00"
+    },
+    {
+      "id": "GHSA-q87f-qc2r-2gw4",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 6.5,
+      "title": "SearXNG MCP Server is Vulnerable to SSRF in web_url_read: the internal-address guard is disabled by default (MCP_HTTP_HARDEN off)",
+      "summary": "Ref: https://github.com/ihor-sokoliuk/mcp-searxng/issues/87#issuecomment-4645453694\n\n\n### Summary\nThe web_url_read tool fetches a caller-supplied URL server-side and converts it to markdown. An SSRF guard (assertUrlAllowed, which blocks private/loopback/metadata addresses) exists but runs only when MCP_HTTP_HARDEN=true, which is off by default. So in the default configuration there is no internal-address filtering, and an attacker who can influence the URL can make the server fetch internal serv",
+      "affected": "npm:mcp-searxng",
+      "references": [
+        "https://github.com/advisories/GHSA-q87f-qc2r-2gw4"
+      ],
+      "published": "2026-08-19T19:23:08Z",
+      "fetched": "2026-08-21T15:37:04.527443+00:00"
+    },
+    {
+      "id": "GHSA-w47q-945m-q9pc",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.2,
+      "title": "Document Merge Service vulnerable to RCE via SSTI (xlsx tempaltes)",
+      "summary": "### Impact\nA remote code execution (RCE) via server-side template injection (SSTI) allows for user supplied code to be executed in the server's context where it is executed as the document-merge-server user with the UID 901 thus giving an attacker considerable control over the container. The vulnerability is limited to XLSX templates, were the `xltpl` library uses a npn-sandboxed Jinja environment  for the processing of the template. \n\n### Patches\nIt has been patched in [v9.1.0](https://github.c",
+      "affected": "pip:document-merge-service",
+      "references": [
+        "https://github.com/advisories/GHSA-w47q-945m-q9pc"
+      ],
+      "published": "2026-08-19T19:17:19Z",
+      "fetched": "2026-08-21T15:37:05.888932+00:00"
+    },
+    {
+      "id": "GHSA-2xhg-73j7-rrgx",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.7,
+      "title": "Contentful MCP Server: export_space/import_space tools pass LLM-controlled `host`/`proxy` args to CMA client, redirecting server PAT to attacker-controlled endpoint",
+      "summary": "### Summary\n\n`export_space` and `import_space` tools in `@contentful/mcp-tools` accept LLM-controlled `host` and `proxy` parameters that are spread directly into the options object passed to `contentful-export` / `contentful-import`. These libraries pass the merged options — including the attacker-controlled `host` — to the Contentful Management API (CMA) SDK, which builds `baseURL` from `host` and attaches the server's CMA Personal Access Token as `Authorization: Bearer <PAT>` on every outgoing",
+      "affected": "npm:@contentful/mcp-server, npm:@contentful/mcp-tools",
+      "references": [
+        "https://github.com/advisories/GHSA-2xhg-73j7-rrgx"
+      ],
+      "published": "2026-08-19T19:17:00Z",
+      "fetched": "2026-08-21T15:37:04.527560+00:00"
+    },
+    {
+      "id": "GHSA-9gmc-jqmh-3rvm",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": null,
+      "title": "Copier has a trust-prefix bypass via path traversal that runs tasks unprompted",
+      "summary": "# Copier: trust-prefix bypass via path traversal runs tasks unprompted\n\n### Summary\n\nIn copier `>= 9.5.0, <= 9.15.1`, the `trust` setting's prefix match\n(`copier/_settings.py`) compares the template URL against a trusted prefix with\na raw `str.startswith` and **no path normalization**, while the URL *is*\nnormalized when the template is actually fetched (`Path.resolve()` for local\npaths; libcurl dot-segment removal for `https`). A template reference that\ntextually starts with a trusted prefix but",
+      "affected": "pip:copier",
+      "references": [
+        "https://github.com/advisories/GHSA-9gmc-jqmh-3rvm"
+      ],
+      "published": "2026-08-19T19:16:54Z",
+      "fetched": "2026-08-21T15:37:05.888980+00:00"
+    },
+    {
+      "id": "GHSA-rr55-jp92-8wp2",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.5,
+      "title": "claude-faf-mcp has an arbitrary local file read/write via unconfined `path` argument in FAF tools",
+      "summary": "### Summary\n`claude-faf-mcp` MCP tools accept a caller-controlled `path` argument and resolve it (`~` expansion + `path.resolve()`) straight into a filesystem read/write **without confining it to a trusted project directory**. An absolute path or `../` traversal is resolved and used as-is, so the server process can be made to read — and, via the file tools, write — files outside the intended `.faf` project context. The only remaining limit is OS file permissions.\n\n### Affected tools\nThe shared `",
+      "affected": "npm:claude-faf-mcp",
+      "references": [
+        "https://github.com/advisories/GHSA-rr55-jp92-8wp2"
+      ],
+      "published": "2026-08-19T19:15:25Z",
+      "fetched": "2026-08-21T15:37:04.527581+00:00"
+    },
+    {
+      "id": "GHSA-j4r7-8ph4-43g3",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.5,
+      "title": "faf-mcp has an arbitrary local file read/write via unconfined `path` argument in FAF tools",
+      "summary": "### Summary\n`faf-mcp` MCP tools accept a caller-controlled `path` argument and resolve it (`~` expansion + `path.resolve()`) straight into a filesystem read/write **without confining it to a trusted project directory**. An absolute path or `../` traversal is resolved and used as-is, so the server process can be made to read — and, via the file tools, write — files outside the intended `.faf` project context. The only remaining limit is OS file permissions.\n\n### Affected tools\nThe shared `getProj",
+      "affected": "npm:faf-mcp",
+      "references": [
+        "https://github.com/advisories/GHSA-j4r7-8ph4-43g3"
+      ],
+      "published": "2026-08-19T19:15:13Z",
+      "fetched": "2026-08-21T15:37:04.527599+00:00"
+    },
+    {
+      "id": "GHSA-cc2g-gq8c-r332",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.5,
+      "title": "grok-faf-mcp has an arbitrary local file read via unconfined `path` argument in FAF tools",
+      "summary": "### Summary\nSeveral `grok-faf-mcp` MCP tools accept a caller-controlled `path` argument and resolve it (`~` expansion + `path.resolve()`) straight into a filesystem read **without confining it to a trusted project directory**. An absolute path or `../` traversal is resolved and used as-is, so the server process can be made to read files outside the intended `.faf` project context. The only remaining limit is OS file permissions.\n\n### Affected tools\n`refresh_faf`, `faf_score`, `faf_get_orchestrat",
+      "affected": "npm:grok-faf-mcp",
+      "references": [
+        "https://github.com/advisories/GHSA-cc2g-gq8c-r332"
+      ],
+      "published": "2026-08-19T19:15:01Z",
+      "fetched": "2026-08-21T15:37:04.527619+00:00"
+    },
+    {
+      "id": "GHSA-jfj5-wrj9-63x4",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 5.9,
+      "title": "langgraph-api: Incomplete assistant authorization in LangGraph Server run creation",
+      "summary": "## Summary\n\nIn affected versions of `langgraph-api` (the LangGraph Server runtime), the run-creation path authorized the assistant attached to a run using a different authorization event than the rest of the assistant-handling code paths. Direct assistant reads and cron creation dispatch the `assistants.read` authorization event; run creation dispatched `assistants.search` with an incomplete value. In deployments whose custom authorization handlers register only an `assistants.read` handler (wit",
+      "affected": "pip:langgraph-api",
+      "references": [
+        "https://github.com/advisories/GHSA-jfj5-wrj9-63x4"
+      ],
+      "published": "2026-08-19T18:56:03Z",
+      "fetched": "2026-08-21T15:37:05.888993+00:00"
+    },
+    {
+      "id": "GHSA-2c9q-c2q9-qgqv",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 5.9,
+      "title": "langgraph-api: Relative webhook targets in LangGraph Server can reach in-process routes without authentication",
+      "summary": "## Summary\n\nIn affected versions of `langgraph-api` (the LangGraph Server runtime), a run or cron could be created with a relative webhook target. When the server later delivers such a webhook, it routes the request back into the same application through an in-process loopback transport that the authentication middleware treats as internal and does not authenticate. As a result, a relative webhook target could reach the server's own routes that operate on threads and runs without the authenticat",
+      "affected": "pip:langgraph-api",
+      "references": [
+        "https://github.com/advisories/GHSA-2c9q-c2q9-qgqv"
+      ],
+      "published": "2026-08-19T18:55:57Z",
+      "fetched": "2026-08-21T15:37:05.889004+00:00"
+    },
+    {
+      "id": "GHSA-wg9g-w2j2-8pgr",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.8,
+      "title": "MONAI: Unsafe deserialization in NumpyReader allows arbitrary code execution via malicious .npy files",
+      "summary": "### Summary\n\nThe `NumpyReader` class in `monai/data/image_reader.py` unconditionally uses `np.load(name, allow_pickle=True)` (line 1276), enabling arbitrary code execution when loading a crafted `.npy` or `.npz` file. This affects all MONAI versions up to and including the latest commit (5b71547). The `allow_pickle` parameter is hardcoded to `True` and cannot be overridden by the user (the docstring explicitly states kwargs are accepted \"except `allow_pickle`\").\n\n### Details\n\n**Vulnerable code**",
+      "affected": "pip:monai",
+      "references": [
+        "https://github.com/advisories/GHSA-wg9g-w2j2-8pgr"
+      ],
+      "published": "2026-08-18T20:22:42Z",
+      "fetched": "2026-08-21T15:37:05.889670+00:00"
+    },
+    {
+      "id": "GHSA-rghg-q7wp-9767",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": null,
+      "title": "MONAI vulnerable to OS command injection",
+      "summary": "### Comment from JPCERT/CC\nWe are submitting the report again as we have yet to receive\nany responses from you after submitting it on February 5 and March 11.\n\nIt would be greatly appreciated if you could send us a message\nafter confirming it so that we can follow up the case by email.\n\n### Summary\nMONAI vulnerable to OS command injection.\n\n### Details\nThis library concatenates user-controlled values (YAML's\n\"dataset_name_or_id\" or part of \"CLI/kwargs\")\nwithout quoting or validation. Since this ",
+      "affected": "pip:MONAI",
+      "references": [
+        "https://github.com/advisories/GHSA-rghg-q7wp-9767"
+      ],
+      "published": "2026-08-18T20:22:38Z",
+      "fetched": "2026-08-21T15:37:05.889687+00:00"
+    },
+    {
+      "id": "GHSA-qxq5-qhx6-94qw",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.8,
+      "title": "Incomplete Fix in MONAI: algo_from_pickle() pickle.loads() RCE still present in v1.5.2 despite GHSA-89gg-p5r5-q6r4 claiming      patch",
+      "summary": "## Summary\n\n  GHSA-89gg-p5r5-q6r4 claims the pickle deserialization vulnerability in\n  `algo_from_pickle()` was fixed in v1.5.2. However, `monai/auto3dseg/utils.py`\n  has not been modified since 2024-07-12 — 18 months before v1.5.2 was released\n  (2026-01-29). All three `pickle.loads()` calls remain unchanged. The fix was\n  never implemented.\n\n  ## Vulnerable Code\n\n  File: `monai/auto3dseg/utils.py` (last commit: 2024-07-12, unchanged in v1.5.2)\n\n  ```python\n  def algo_from_pickle(pkl_filename: ",
+      "affected": "pip:monai",
+      "references": [
+        "https://github.com/advisories/GHSA-qxq5-qhx6-94qw"
+      ],
+      "published": "2026-08-18T20:22:30Z",
+      "fetched": "2026-08-21T15:37:05.889736+00:00"
+    },
+    {
+      "id": "GHSA-c7hr-448w-65px",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 8.3,
+      "title": "MeshCentral has unsanitized data fields",
+      "summary": "### Description\n\nA rogue or compromised MeshAgent can inject arbitrary HTML/JavaScript via the osdesc (OS description) field in its coreinfo message. The server stores this value with zero HTML sanitization (meshagent.js:1903 only checks typeof == 'string'). When an admin views the\ndevice details panel, the value is rendered via addDeviceAttribute() → QH() which sets innerHTML, executing the payload in the admin's browser session. The main management UI CSP includes 'unsafe-inline' (webserver.js",
+      "affected": "npm:meshcentral",
+      "references": [
+        "https://github.com/advisories/GHSA-c7hr-448w-65px"
+      ],
+      "published": "2026-08-18T20:09:35Z",
+      "fetched": "2026-08-21T15:37:04.527638+00:00"
+    },
+    {
       "id": "CVE-2026-75130",
       "source": "nvd",
       "severity": "critical",
@@ -2801,19 +3139,19 @@
       "fetched": "2026-08-04T06:34:53.913899+00:00"
     }
   ],
-  "updated": "2026-08-18T19:30:18.430500+00:00",
+  "updated": "2026-08-21T15:37:06.392205+00:00",
   "sources": [
     "osv",
     "nvd",
     "github-advisory"
   ],
   "stats": {
+    "medium": 65,
+    "high": 93,
     "critical": 28,
-    "high": 81,
-    "medium": 53,
     "unknown": 20,
     "low": 3,
     "moderate": 1
   },
-  "total": 186
+  "total": 210
 }
