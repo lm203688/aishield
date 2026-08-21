@@ -199,11 +199,19 @@ jobs:
       run: |
         docker run -d -p 8450:8450 --name aishield-test \
           --entrypoint python aishield:test /app/api/server.py
-        sleep 5
 
-    - name: Health check
+    - name: Health check (retry up to 30s)
       run: |
-        curl -sf http://localhost:8450/api/v1/health | python -m json.tool
+        for i in $(seq 1 6); do
+          if curl -sf http://localhost:8450/api/v1/health > /tmp/health.json 2>/dev/null; then
+            python -m json.tool /tmp/health.json && echo "Health OK" && exit 0
+          fi
+          echo "Waiting for container... ($i/6)"
+          sleep 5
+        done
+        echo "Container health check failed after 30s"
+        docker logs aishield-test --tail 30 2>&1 || true
+        exit 1
 
     - name: Cleanup
       if: always()
