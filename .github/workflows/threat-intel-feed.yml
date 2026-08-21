@@ -151,6 +151,36 @@ jobs:
           print(f"全部 {len(d.get('pattern_rules') or {})} 条生成规则语法合法")
           PY
 
+      - name: Sync README rule counts before testing
+        run: |
+          python - <<'PY'
+          """情报入库后，README 的规则计数会过期，导致 test_mcp_contract 永久红灯。
+             此步骤在测试前自动同步 README 与引擎实际值。"""
+          import re, os
+          from scanner import rules as R
+
+          readme = 'mcp-server/README.md'
+          if not os.path.exists(readme):
+              print('README not found, skip sync'); exit(0)
+
+          text = open(readme, encoding='utf-8').read()
+          mcp_count = R.get_rule_count('mcp')
+          skill_count = R.get_rule_count('skill')
+
+          old = text
+          # 更新 Total 行
+          text = re.sub(
+              r'\*\*Total:\s*\d+\s*rules\*\*\s*\(MCP type\)\s*/\s*\*\*\d+\s*rules\*\*\s*\(Skill type\)',
+              f'**Total: {mcp_count} rules** (MCP type) / **{skill_count} rules** (Skill type)',
+              text
+          )
+          if text != old:
+              open(readme, 'w', encoding='utf-8').write(text)
+              print(f'Readme updated: MCP={mcp_count}, Skill={skill_count}')
+          else:
+              print('README counts already in sync')
+          PY
+
       - name: Run full test suite (引用 CI 状态，避免重复)
         run: |
           # 优化：如果 CI 最近成功，跳过重复的全量测试
@@ -209,11 +239,28 @@ jobs:
           cp /tmp/rules/generated_rules.json data/generated_rules.json 2>/dev/null || true
           cp /tmp/rules/threat_intel.json    data/threat_intel.json    2>/dev/null || true
           mkdir -p data/state && cp -r /tmp/rules/state/. data/state/ 2>/dev/null || true
+          # 同步 README 规则计数（情报入库后引擎数量变化）
+          python -c "
+          import re, os
+          from scanner import rules as R
+          readme = 'mcp-server/README.md'
+          if not os.path.exists(readme): exit(0)
+          text = open(readme, encoding='utf-8').read()
+          mcp_count = R.get_rule_count('mcp')
+          skill_count = R.get_rule_count('skill')
+          text = re.sub(
+              r'\*\*Total:\s*\d+\s*rules\*\*\s*\(MCP type\)\s*/\s*\*\*\d+\s*rules\*\*\s*\(Skill type\)',
+              f'**Total: {mcp_count} rules** (MCP type) / **{skill_count} rules** (Skill type)',
+              text
+          )
+          open(readme, 'w', encoding='utf-8').write(text)
+          print(f'README synced: MCP={mcp_count}, Skill={skill_count}')
+          "
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/threat_intel.json data/generated_rules.json data/state/ 2>/dev/null || true
+          git add data/threat_intel.json data/generated_rules.json data/state/ mcp-server/README.md 2>/dev/null || true
           if ! git diff --cached --quiet; then
-            git commit -m "auto: 威胁情报入库 + 检测规则更新（情报 ${{ needs.fetch.outputs.total }} 条 / 规则 ${{ needs.to-rules.outputs.rules }} 条）[skip ci]" || true
+            git commit -m "auto: 威胁情报入库 + 检测规则更新 + README计数同步（情报 ${{ needs.fetch.outputs.total }} 条 / 规则 ${{ needs.to-rules.outputs.rules }} 条）[skip ci]" || true
             git pull --rebase --autostash origin main || true
             git push origin main || echo "push skipped"
           else
