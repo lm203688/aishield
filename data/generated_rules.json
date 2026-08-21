@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-21T17:32:33.735315+00:00",
+  "generated_at": "2026-08-21T18:41:28.523456+00:00",
   "source_intel_count": 210,
   "package_blacklist": {
     "pip:langgraph-checkpoint-mongodb": {
