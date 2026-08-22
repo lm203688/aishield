@@ -1,0 +1,25 @@
+# AIShield Integrations - Optional Dependencies
+# ================================================
+# 核心模块无外部依赖，以下为各集成的可选依赖
+# 安装方式: pip install -r requirements-integrations.txt
+
+# Phase 1: BB Browser (可选，用于 MCP 工具增强)
+# bb-browser 通过 npm 全局安装: npm install -g bb-browser
+
+# Phase 2: Browser Use (AI 浏览器扫描)
+browser-use>=0.2.0
+
+# Phase 3: Graph DB (威胁图谱)
+neo4j>=5.0.0          # Neo4j 后端
+# arango>=3.0.0       # ArangoDB 后端 (可选)
+
+# Phase 4: Event Stream (实时事件管道)
+kafka-python>=2.0.0   # Apache Kafka (可选，无依赖时使用内存总线)
+
+# Phase 5: Scan Isolation (vCluster 隔离环境)
+# vcluster CLI: https://www.vcluster.com/docs/getting-started/setup
+# kubectl: https://kubernetes.io/docs/tasks/tools/
+
+# Phase 6: Persistent Agent (Grok Bot)
+# 无需额外依赖，使用标准库 urllib
+# API Key: https://console.x.ai/
