@@ -3,6 +3,21 @@
 > 用途：把各平台的「去哪提交 / 贴什么」固化成可直接复制的文本，降低手动发布摩擦。
 > 维护节奏：由自动化 `AIShield 多渠道分发缺口巡检` 每周核对状态并刷新本文件。
 > 最后人工核对：2026-08-15（curl/WebFetch 实测）。
+> 最后自动巡检：**2026-08-22**（curl 实测；本次纠正 2 处长期误判，见下「核验方法铁律」）。
+
+---
+
+## ⚠️ 核验方法铁律（2026-08-22 血的教训，务必遵守）
+
+历史上本台账把 Official MCP Registry 记成「未上架」长达两周，根因是**用了不存在的 API 路径**，把「端点 404」误读成「条目 404」：
+
+| ❌ 错误做法 | ✅ 正确做法 |
+|---|---|
+| `GET /v0/servers/io.github.lm203688/aishield` → 返回 `{"detail":"Endpoint not found. See /docs..."}` 404。**这是端点不存在，不是我们没上架！** | `GET /v0/servers?search=aishield&limit=10` → 返回 servers 数组，看 `_meta["io.modelcontextprotocol.registry/official"].isLatest` 为 true 的那条 |
+| `GET /api/health`、`/api/rules/stats` → 404，据此判定 aishield.tools「无后端」 | 真实后端在 **`/api/v1/*`**：`GET /api/v1/health` → 200；`POST /api/v1/mcp` (JSON-RPC `tools/list`) → 200 且返回 8 个工具 |
+| `curl -sL https://lm203688.github.io/aishield/...` 判定 GitHub Pages 内容 | github.io **301 跳到 aishield.tools**（CNAME 所致），加 `-L` 等于在测 CF Pages。要测 GH Pages 自身内容**已不可能**——它是死端表面 |
+
+**通用铁律**：404 要先分清「端点不存在」还是「资源不存在」——读 response body，不要只看 status code。任何「未上架 / 无后端 / 已失效」结论必须附可复现的 curl 命令 + body 片段。
 
 ---
 
@@ -27,12 +42,31 @@
 
 ---
 
-## 1. Official MCP Registry（HIGH · 需向 modelcontextprotocol/registry 提 PR）
+## 1. Official MCP Registry（✅ 已上架 — 2026-08-22 纠正）
 
-- **状态**：❌ 未上架（实测 404）。`registry/server.json` 已备且 **stdio-only**（已去掉指向死端 `aishield.tools/api/v1/mcp` 的 remote）。
-- **去哪**：fork `https://github.com/modelcontextprotocol/registry` → 在 `servers/` 下加 `io/github/lm203688/aishield.json`（内容同 `registry/server.json`）→ 提 PR。
-- **粘贴内容**：直接复制仓库根 `registry/server.json` 全文。
-- **注意**：人工复核数工作日；描述已本地优先，勿改成云 API 口吻。
+- **状态**：✅ **已上架且 active**。此前「未上架/404」是**核验方法错误**导致的误判，本次纠正。
+- **实测证据（2026-08-22）**：
+  ```
+  curl -sS --ssl-no-revoke --tlsv1.3 \
+    "https://registry.modelcontextprotocol.io/v0/servers?search=aishield&limit=10"
+  ```
+  返回 2 条同名条目，最新那条：
+
+  | 字段 | 值 |
+  |---|---|
+  | name | `io.github.lm203688/aishield` |
+  | title | AIShield Security Scanner |
+  | version | **4.2.2** ✅ 与基线一致 |
+  | status | **active** |
+  | isLatest | **true** |
+  | publishedAt | 2026-08-07T12:54:18Z |
+  | packages | `aishield-mcp-server` 4.2.2 · transport **stdio** ✅ |
+  | remotes | `streamable-http` → `https://aishield.tools/api/v1/mcp` |
+
+- **无需提 PR**：条目已在册（推测由 `.github/workflows/publish-mcp-registry.yml` 发布）。此前「fork + 提 PR」的指引**作废**，勿重复提交造成重复条目。
+- **⚠️ 唯一遗留缺陷**：在册条目的 `remotes` 指向 `aishield.tools/api/v1/mcp`。该端点**并未失效**（POST JSON-RPC 实测 200，返回 8 个工具、工具名正确为 `aishield_*`），但**其自报版本/规则数陈旧**（`/api/v1/health` 返回 `version: "4.2"`、`rules_count: 133`，基线应为 4.2.2 / 227）。即 agent 若走 remote 通道可用，但会读到过时元数据。
+- **⚠️ 本地 `registry/server.json` 与在册条目不一致**：本地版本已被删掉 `remotes` 段（当时误判其为死端）。既然实测 remote 活着，**是否要在下次发版时移除 remote 变成 stdio-only，是一个待用户拍板的决策**（移除 = 少一个可发现表面；保留 = 需先修后端 stale 元数据）。
+- **更新方式**：发新版本时由 `publish-mcp-registry.yml` 推送，不走 PR。
 
 ## 2. LobeHub（HIGH · 被同名云 SaaS 占位，须以开源版区隔）
 
@@ -87,11 +121,13 @@
 
 ## 发布状态速查（每周由自动化刷新）
 
+> 状态截止 **2026-08-22** 自动巡检（全部经 curl 实测）。
+
 | 渠道 | 状态 | 资产就绪 | 需用户手动 |
 |---|---|---|---|
-| Official MCP Registry | ❌ 未上架 | ✅ server.json | PR |
-| Glama | ✅ 已上架 | ✅ README/llms.txt 已去云化(2026-08-15) | 后台短描述待用户登录改 |
-| npm | ✅ 4.2.2 | — | — |
+| Official MCP Registry | ✅ **已上架 active 4.2.2**（2026-08-22 纠正误判） | ✅ 在册 | 无（remote 元数据 stale 待决策） |
+| Glama | ✅ 已上架（2026-08-22 复测 200） | ✅ README/llms.txt 已去云化(2026-08-15) | 后台短描述待用户登录改 |
+| npm | ✅ 4.2.2（2026-08-22 复测 latest=4.2.2） | — | — |
 | LobeHub | ⚠️ 被 SaaS 占位 | ✅ 文案 | 登录发布开源版 |
 | Smithery | ❌ 未发布 | ✅ smithery.yaml | 登录发布 |
 | ClawHub | ❌ 缺位+squat | ✅ SKILL.md | clawhub publish |
@@ -102,4 +138,21 @@
 | HuggingFace | ❌ | ✅ README | 上传 |
 | A2A Registry | ❌ | ✅ agent-card | 注册 |
 | DSH | ❌ | ✅ 全套 | 投稿+npm |
-| aishield.tools 本域 | ⚠️ stale 4.2.0/133 | ✅ 源码已修 | CF Retry |
+| aishield.tools 静态发现文件 | ⚠️ **stale 4.2.0/133/错工具名**（连续第 3 周未变） | ✅ main 已是 4.2.2 正确 | **CF Pages Retry** |
+| aishield.tools `/api/v1` 后端 | ⚠️ **活着但 stale**（health 报 4.2/133；工具名正确） | — | 后端重新部署 |
+| GitHub Pages（github.io） | ⛔ **死端表面**：301→aishield.tools，内容不可达 | — | 无（勿再修，见下） |
+
+### 表面拓扑（2026-08-22 实测厘清）
+
+```
+main 分支 (✅ 4.2.2 / 227 / aishield_*  ← 唯一正确的真相源)
+  │
+  ├── GitHub Pages ── pages.yml 构建成功 ──► github.io ──301(CNAME)──► aishield.tools
+  │                                                                    （自身内容永不可达 = 死端）
+  ├── Cloudflare Pages ──► aishield.tools 静态页 + .well-known/*  ⚠️ stale 4.2.0/133
+  └── 某后端 origin ─────► aishield.tools/api/v1/*                ⚠️ stale 4.2/133（但工具名对）
+```
+
+**结论**：main 是对的，两个线上表面都是旧的。`pages.yml` 修不修都不影响 aishield.tools —— 唯一解是**重建 CF Pages + 重新部署后端**。
+
+**⚠️ 附带发现（待用户拍板，本自动化未擅自改动）**：`pages.yml` 的 `3-Verify Reachable` 用 `curl -sL .../github.io/aishield/blog/` 探测，因 301 实际测的是 **CF Pages**，只要 aishield.tools 返回 200 就判绿 —— 即便内容 stale 也永远 success（78 次运行全绿）。这是一处**假绿门禁**（"恒定输出的门禁等于没门禁"）。建议改为断言内容新鲜度（抓 `.well-known/mcp/server-card.json` 断言 `version == 4.2.2`），这样 drift 会真实报红。此项属 workflow 改动，超出本自动化「只更新台账」职责，需用户授权。
