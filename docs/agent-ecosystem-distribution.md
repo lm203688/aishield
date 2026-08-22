@@ -21,7 +21,7 @@
 - 🔴 **[竞品 #1·mcp-audit]** `mcp-audit-scanner` 0.14.0（仍全离线）新增 **89 条 Semgrep SAST 规则、CVE 打标（CVE-2026-30615）、Nucleus FlexConnect 企业漏洞管理对接、Sigstore 签名校验、fleet 部署、governance policy-as-code、`watch` 实时监控**。已补上我们缺失的「企业漏洞管理闭环」，是同类最强直接竞品。注意空间内现出现 3 个同名/近名 mcp-audit（danush-aries / saagpatel / appsecsanta），用户易混淆。
 - 🔴 **[竞品 #2·Sunglasses 新晋强敌]** `sunglasses-dev/sunglasses`：MIT、**100% 本地、无云依赖、无遥测**，1049 模式 / 7653 关键词 / 17 归一化 / 23 语言、0.261ms/输入，覆盖 prompt injection + MCP 工具投毒 + 跨 agent 注入 + 凭证外泄 + 「Proof Before Action」一次性容器。直接对冲我们的「本地/不出机」楔子。
 - 🟠 **[竞品 #3·Snyk Agent Scan]** 原 MCP-Scan（2026-04 被 Snyk 收购）v0.5.12，自动发现 10+ agent 的 skill + MCP 配置；凭 Snyk 企业渠道分发。同周 `owasp-agentic-mcp` 1.0.9（OWASP Agentic AI Top10，上 Smithery）、`mcp-security-auditor` 1.0.0（MIT、SIEM 对接）也在补覆盖。LobeHub 上本地优先安全代理/防火墙集群（mcp-firewall / Steiner / Palizade / MCPVet / mcpguard / Sentinel Warden / op-injection-scanner）持续膨胀，类别噪音增大但验证「本地」是主流方向。
-- 🟠 **[渠道·Registry]** 本周实测 Official MCP Registry **仍 404（/v0 与 /v0.1 均 404）**，我们仍未上架——HIGH 缺口不变（绝不复用旧结论，每次实跑）。
+- 🟠 ~~**[渠道·Registry]** 本周实测 Official MCP Registry 仍 404（/v0 与 /v0.1 均 404），我们仍未上架——HIGH 缺口不变。~~ ⛔ **此条已被 2026-08-22 推翻**：404 来自查了**不存在的端点** `/v0/servers/{name}`，实际条目一直在册（4.2.2 active）。见「周报 2026-08-22」。
 - 🟡 **[ClawHub]** `ai-shield-audit`（laurentaia）squatting 仍在，并扩展至 ClawBox 硬件（€549，4.7★）；ClawHub 曾曝排名操纵漏洞（2026-03 披露，已修）。命名空间高风险但认领价值仍在。
 
 **行动建议（用户侧，AI 不代发/不代提）**：① 防御性抢注 npm `aishield-mcp`（空闲，阻断恶意占用，与 `aishield-mcp-server` 形成家族）；② 若 aishield.ai 域名确在出售，评估低成本回收品牌域名；③ 竞品已把「本地」做成标配并补企业漏洞管理，我们的差异化须上移到 **「内容安全平面 + 主动治理（kill switch / 持续鉴证）+ 机器可结算认证」**，而非仅「本地扫描」。
@@ -148,8 +148,8 @@
 - `WebFetch lobehub.com/en/mcp/aishield-ai-aishield` → 云 SaaS（aishield.ai，定价/Key）
 
 ### §5.1 本轮回测证据（2026-08-17，可复现）
-- `curl registry.modelcontextprotocol.io/v0/servers/io.github.lm203688/aishield` → **404**（仍未上架）
-- `curl registry.modelcontextprotocol.io/v0.1/servers/io.github.lm203688/aishield` → **404**（仍未上架；绝不复用旧结论，每次实跑）
+- ~~`curl registry.modelcontextprotocol.io/v0/servers/io.github.lm203688/aishield` → **404**（仍未上架）~~ ⛔ **无效证据**：该端点不存在（body = `Endpoint not found`），404 与上架状态无关。
+- ~~`curl registry.modelcontextprotocol.io/v0.1/servers/io.github.lm203688/aishield` → **404**~~ ⛔ **同上，无效证据**。正确查法见 §5.2。
 - `curl glama.ai/mcp/servers/lm203688/aishield` → **200**（Glama 仍 live，我们的条目）
 - `curl registry.npmjs.org/aishield-mcp-server` → **200**，latest=**4.2.2**（2026-08-07 发布）
 - `curl registry.npmjs.org/aishield-mcp` → **404**（aishield.ai 指令所引包不存在，短名空闲）
@@ -160,3 +160,25 @@
 - `WebSearch mcp-audit` → mcp-audit-scanner 0.14.0（89 SAST 规则 / Nucleus FlexConnect / Sigstore / fleet）；并现 3 个同名 fork
 - `WebSearch agent security scanner` → Sunglasses（本地优先 1049 模式）、Snyk Agent Scan v0.5.12、owasp-agentic-mcp 1.0.9、mcp-security-auditor 1.0.0
 - `WebSearch ClawHub ai-shield` → `ai-shield-audit`（laurentaia）仍在 + ClawBox 硬件；ClawHub 排名操纵漏洞（2026-03 披露已修）
+
+### §5.2 本轮回测证据（2026-08-22 自动巡检，全部可复现）
+
+> 前置：所有 curl 必带 `--ssl-no-revoke --tlsv1.3`（本机 TLS 拦截代理只放行 TLS1.3）。
+> ⚠️ curl `-o` **不能写 `/tmp`**（Git Bash 映射，报 `client returned ERROR on write`，表现为 HTTP=200 但 size=0）→ 写工作区相对路径。
+
+| 探测 | 结果 |
+|---|---|
+| `GET /v0/servers/io.github.lm203688/aishield` | 404 + body `{"detail":"Endpoint not found. See /docs..."}` → **端点不存在，非条目不存在** |
+| `GET /v0/servers?search=aishield&limit=10` | **200**，2 条同名条目；`isLatest:true` 那条 = **4.2.2 / active / publishedAt 2026-08-07 / npm stdio** ✅ 已上架 |
+| `GET aishield.tools/.well-known/mcp/server-card.json` | 200，**4.2.0 / 133 rules / `security_scan` 等错工具名** ⚠️ drift |
+| `GET aishield.tools/.well-known/agent-card.json` | 200，**4.2.0 / 133 条** ⚠️ drift |
+| `GET raw.githubusercontent.com/.../main/docs/.well-known/mcp/server-card.json` | 200，**4.2.2 / `aishield_*` 6 工具** ✅ main 正确 |
+| `GET raw.../main/api/static/.well-known/mcp/server-card.json` | 200，**4.2.2 / `aishield_*`** ✅ main 正确 |
+| `GET aishield.tools/api/health`、`/api/rules/stats` | 404（**路径前缀记错才导致「无后端」误判**） |
+| `GET aishield.tools/api/v1/health` | **200** `{"status":"ok","version":"4.2","rules_count":133}` → 后端活着但 stale |
+| `POST aishield.tools/api/v1/mcp` (`tools/list`) | **200**，返回 **8 工具**：`aishield_scan`/`aishield_guardrail`/`aishield_prompt_check`/`aishield_banned_words`/`aishield_rug_pull`/`aishield_handshake` + `agent_register`/`agent_quick_scan`（名对，描述仍写 133 rules） |
+| `GET lm203688.github.io/aishield/.well-known/mcp/server-card.json` | **301** → 跟随后 `url_effective = aishield.tools/...` → **GH Pages 内容不可达（死端）** |
+| `GET api.github.com/.../workflows/pages.yml/runs` | total **78**，最近 5 次全 `success`（→ 假绿门禁：verify 用 `-sL` 实际在测 CF Pages） |
+| `GET registry.npmjs.org/aishield-mcp-server` | 200，`dist-tags.latest = 4.2.2`，modified 2026-08-07 ✅ |
+| `GET glama.ai/mcp/servers/lm203688/aishield` | **200** ✅ 仍 live |
+| 本地 `scanner.rules.get_rule_count()` | **227** ✅ 基线确认 |
