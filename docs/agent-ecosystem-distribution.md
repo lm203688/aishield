@@ -5,11 +5,11 @@
 
 ## TL;DR（5 条关键结论）
 
-1. **官方 MCP Registry：AIShield 实际【未上架】。** `GET /v0/servers/io.github.lm203688/aishield` 与 `/v0.1/...` 均 404，API 明确承认路径正确但条目不存在。此前「已 verified」的判断是**错误/过期的**，本次纠正。这是一个 HIGH 缺口，不是「无需操作」。
+1. ~~**官方 MCP Registry：AIShield 实际【未上架】。**~~ 🔴 **2026-08-22 二次纠正：此条本身是错的 —— AIShield 实际【已上架且 active】。** 之前用的 `GET /v0/servers/{name}` 是**不存在的 API 端点**（body 明写 `"Endpoint not found. See /docs"`），把「端点 404」误读成「条目 404」。正确查法 `GET /v0/servers?search=aishield` 返回在册条目：`io.github.lm203688/aishield`，version **4.2.2**，status **active**，`isLatest: true`，publishedAt 2026-08-07。**无需提 PR，勿重复提交。** 教训：404 必须先读 body 分清「端点不存在」vs「资源不存在」。
 2. **品牌被同名云 SaaS 抢占。** 独立商业产品 **aishield.ai（owner `aishield-ai`）** 已上架 LobeHub（`aishield-ai/aishield`）、himcp.cn，带定价/API Key/「AI 语义分析」。agent 搜 "AIShield" 很可能先撞到它，而非我们的本地开源版。
 3. **LobeHub 上的 "AIShield" 不是我们。** 那是上面的云 SaaS；我们的开源版在 LobeHub **缺位**。
 4. **ClawHub 被第三方 squatting。** `clawhub/ai-shield-audit`（laurentaia，OpenClaw 审计，81/100，144K 安装）占了极易混淆的名字；我们**完全缺席** ClawHub。
-5. **我们真实已上架的只有 Glama + npm。** Glama `lm203688/aishield`（id `gso85mvobx`）已确认是我们的；npm `aishield-mcp-server` 4.2.2 已发。「利用所有平台」离完成很远。
+5. ~~**我们真实已上架的只有 Glama + npm。**~~ 🔴 **2026-08-22 更正为：Glama + npm + Official MCP Registry（三处）。** Glama `lm203688/aishield`（id `gso85mvobx`）；npm `aishield-mcp-server` 4.2.2；Registry `io.github.lm203688/aishield` 4.2.2 active。「利用所有平台」仍未完成，但起点比此前记录的更好。
 
 ---
 
@@ -28,11 +28,23 @@
 
 ---
 
-## §1 平台版图实测表（2026-08-15，2026-08-17 复核）
+## 周报 2026-08-22（自动巡检 · 两处长期误判被纠正）
+
+> 本周没有新渠道变化，但**发现台账自身有两处硬错误**，都是「404 读错含义」造成的。纠正后我们的实际分发面比记录的更好，但线上 drift 比记录的更严重。
+
+- 🟢 **[纠正 1 · Registry 其实已上架]** Official MCP Registry 条目 `io.github.lm203688/aishield` **version 4.2.2 / status active / isLatest true / publishedAt 2026-08-07**。此前两周记的「404 未上架 · HIGH 缺口」是查了**不存在的端点** `/v0/servers/{name}`（body 明写 `Endpoint not found. See /docs`）。正确查法：`/v0/servers?search=aishield`。**「提 PR」动作作废**，重复提交会造成重复条目。
+- 🔴 **[纠正 2 · aishield.tools 有活后端，且后端也 stale]** 旧判断「aishield.tools 是纯静态站、无后端、registry remote 指向死端」错误。实测 `GET /api/v1/health` → 200 `{"version":"4.2","rules_count":133}`；`POST /api/v1/mcp` (`tools/list`) → 200 返回 **8 个工具**，工具名**正确**（`aishield_*` 6 个 + `agent_register`/`agent_quick_scan`）但描述仍写 133 rules。旧探测查的 `/api/health`、`/api/rules/stats` 确实 404 —— **路径前缀记错**（真实前缀是 `/api/v1`）。→ drift 面从「1 处静态文件」扩大为「静态文件 + 后端」**2 处**。
+- 🔴 **[新发现 · pages.yml 假绿门禁]** `github.io/aishield/...` **301 跳 aishield.tools**（CNAME 所致），而 `pages.yml` 的 `3-Verify Reachable` 用 `curl -sL` 探测 → 实际在测 CF Pages，只要 aishield.tools 返 200 就判绿。**78 次运行全 success，却从未验证过 GitHub Pages 自己的产物，更未发现内容 stale。** GitHub Pages 是死端表面，修它不影响线上域名；建议把 verify 改为断言 `.well-known/mcp/server-card.json` 的 `version == 4.2.2`，让 drift 真实报红（属 workflow 改动，待用户授权）。
+- 🟢 **[无变化]** npm `aishield-mcp-server` latest = **4.2.2**（modified 2026-08-07）；Glama `lm203688/aishield` 复测 **200** 仍 live；`get_rule_count()` = **227** 基线确认。
+- ⚠️ **[drift 连续第 3 周未修]** aishield.tools 静态 `.well-known/mcp/server-card.json` + `agent-card.json` 仍 **4.2.0 / 133 rules / 错工具名**，而 main 分支 raw 实测已是 **4.2.2 / `aishield_*`**。唯一解仍是 **CF Pages 重建（用户 dashboard Retry）**。
+
+---
+
+## §1 平台版图实测表（2026-08-15，2026-08-17 复核，**2026-08-22 重大纠正**）
 
 | 平台 | 我们的状态 | 提交方式 | 门槛 | 优先级 | 备注 / 证据 |
 |---|---|---|---|---|---|
-| **Official MCP Registry** | ❌ **未上架**（404 实测） | PR 到 `modelcontextprotocol/registry` 的 `servers/` | GitHub PR（用户） | **HIGH** | `registry/server.json` 已备；但含一个指向 `aishield.tools/api/v1/mcp` 的 streamable-http remote，而 aishield.tools 是纯静态站、无此后端 → 建议改 **stdio-only** 再提。**2026-08-17 实跑复核：`/v0` 与 `/v0.1` 均 404 → 确认仍未上架（绝不复用旧结论）。** |
+| **Official MCP Registry** | ✅ **已上架 active**（2026-08-22 纠正） | 已在册，由 `publish-mcp-registry.yml` 发版推送 | 无 | done | **2026-08-22 实测 `GET /v0/servers?search=aishield`：`io.github.lm203688/aishield` version 4.2.2 / status active / isLatest true / publishedAt 2026-08-07 / npm pkg stdio ✅。** 此前「404 未上架」是查了不存在的 `/v0/servers/{name}` 端点所致的误判，已作废「提 PR」指引。遗留：在册 `remotes` 指向 `aishield.tools/api/v1/mcp`，该端点**实测活着**（POST JSON-RPC 200，8 工具，工具名正确）但自报 `4.2/133` 元数据陈旧 |
 | **Glama** | ✅ **已上架**（lm203688/aishield, gso85mvobx） | 从 GitHub repo 自动同步 | 无（已 live） | done | 页面丰富（227/233 规则、内容安全平面 thesis）；但描述偏「云 API（注册/Key/定价/8450 端口）」，**模糊了本地定位**——需修正以区隔 aishield.ai。**2026-08-17 复测 200，仍 live。** |
 | **npm `aishield-mcp-server`** | ✅ 4.2.2 已发（2026-08-07 最后发布） | npm | done | done | 包名正确；2026-08-17 复测 200，latest=4.2.2 |
 | **npm `aishield-mcp`（防御性短名）** | ⚠️ **空闲（404）· 建议抢注** | npm | 账号（用户） | **HIGH** | aishield.ai 的 LobeHub/himcp 安装指令写 `npx aishield-mcp`，但该包**实测不存在（404）**；短名仍空闲，恶意方可能抢注劫持。建议以我们名义发布 `aishield-mcp` 作为 `aishield-mcp-server` 的别名入口（AI 不代发，需用户登录） |
@@ -46,7 +58,9 @@
 | **HuggingFace** | ❌ 源在仓未发 | 上传 dataset card | 账号 | LOW | `distribution/huggingface/` 源就绪 |
 | **MCPfinder (mcpfind.org)** | ❌ 未做 | 提交 | 账号 | LOW | 索引 6700+ server，性价比高 |
 | **A2A Registry / AgentSpace** | ❌ 未做 | 注册 Agent Card | 调研 | LOW | Agent Card 已备（`docs/.well-known/agent-card.json`） |
-| **aishield.tools 本域发现文件** | ⚠️ **stale 4.2.0/133** | CF Pages 重建 | CF token（权限不足） | HIGH（已知） | 之前 15 文件修复未触达线上；3 个 `cfut_` token 权限都够不到该部署 |
+| **aishield.tools 静态发现文件** | ⚠️ **stale 4.2.0/133/错工具名**（2026-08-22 连续第 3 周未变） | CF Pages 重建 | CF token（权限不足） | HIGH（已知） | main 分支实测已是 4.2.2 + `aishield_*` 正确（raw.githubusercontent 复验），线上未跟进；3 个 `cfut_` token 权限都够不到该部署 |
+| **aishield.tools `/api/v1` 后端** | ⚠️ **活着但 stale** | 后端重新部署 | 需定位 origin | HIGH（新发现） | **2026-08-22 纠正「aishield.tools 无后端」旧判断**：`GET /api/v1/health` → 200 `{"version":"4.2","rules_count":133}`；`POST /api/v1/mcp` tools/list → 200，返回 **8 个工具**且工具名正确（`aishield_scan`/`aishield_guardrail`/`aishield_prompt_check`/`aishield_banned_words`/`aishield_rug_pull`/`aishield_handshake` + `agent_register`/`agent_quick_scan`），但描述仍写「133 rules」。旧探测查的是 `/api/health`、`/api/rules/stats`（这两个确实 404）→ 路径前缀记错导致误判 |
+| **GitHub Pages（github.io）** | ⛔ **死端表面** | — | 无（勿再修） | — | `github.io/aishield/...` **301 跳到 aishield.tools**（CNAME），GH Pages 自身内容不可达。`pages.yml` 78 次运行全 success 但 `3-Verify` 用 `curl -sL` 实际在测 CF Pages → **假绿门禁**，内容 stale 也判绿。修 GH Pages 不影响线上域名 |
 | **DeepSeek Harness (DSH)** | ❌ 缺位（生态首日，security 类目真空） | ① DSH Plugins 目录投稿（deepbolt.xyz）② 原生 `dsh-aishield` 插件（npm+cordis.patch.yml）③ MCP 桥接：DSH 原生支持 MCP → AIShield MCP server 零适配 | 目录投稿需账号 / 插件需 npm 发布 | **HIGH（新渠道·先发窗口）** | 首日 34k–65k★、1000+ 插件；supply-chain 风险是官方头号隐患→AIShield 本职；**无安全插件**→先发占 security 类目。dev preview+breaking changes→走 MCP 桥接最稳 |
 
 ---
@@ -97,7 +111,7 @@
 ## §4 行动 backlog（用户动作 vs AI 可准备）
 
 ### A. 需用户手动（账号/登录硬阻塞）
-1. **Official MCP Registry 提 PR**：以 `registry/server.json`（改 stdio-only，去掉死 remote）向 `modelcontextprotocol/registry` 提 PR。→ 用户 fork/PR 或授权我代提（需该仓写权限 PAT）。
+1. ~~**Official MCP Registry 提 PR**~~ ❌ **作废（2026-08-22）**：已实测在册且 active（4.2.2 / isLatest）。**切勿再提 PR**，会造成重复条目。改为待决策项：在册条目的 `remotes`（`aishield.tools/api/v1/mcp`）实测活着但元数据陈旧 → 选 (a) 修后端元数据后保留 remote，或 (b) 下次发版移为 stdio-only（本地 `registry/server.json` 已是此形态）。需用户拍板。
 2. **Smithery 发布**：登录 smithery.ai/new → 连 GitHub repo `lm203688/aishield` → 发布（self-hosted）。
 3. **LobeHub 认领/发布**：登录 LobeHub → 发布我们的开源 AIShield（与云 SaaS `aishield-ai` 区分，description 标 local）。
 4. **ClawHub 发布**：`clawhub login`（需够老 GitHub 账号）→ `clawhub skill publish distribution/clawhub`（本文件已备骨架）。
