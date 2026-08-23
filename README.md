@@ -489,11 +489,11 @@ docker run -p 8450:8450 aishield
 
 <!--LATEST_POSTS_START-->
 
-### 馃摪 鏈€鏂板畨鍏ㄦ礊瀵?
+### 📰 最新安全洞察
 
-- [MCP 2026-07-28 鏃犵姸鎬佸寲锛氬畨鍏ㄧ綉鍏冲繀椤诲洖绛旂殑 3 涓棶棰榏(https://lm203688.github.io/aishield/blog/blog-mcp-stateless-security-2026-08-03.html) `2026-08-03`
-- [浠?HuggingFace 琚叆渚电湅 Agent 娌欑閫冮€哥殑 4 涓繀瑕佹潯浠禲(https://lm203688.github.io/aishield/blog/blog-sandbox-escape-2026-08-03.html) `2026-08-03`
-- [娣卞叆鍒嗘瀽锛歠ilesystem-test 濡備綍淇瀹夊叏婕忔礊](https://lm203688.github.io/aishield/blog/case-filesystem-test-2026-07-25.html) `2026-07-25`
-- [MCP 瀹夊叏鎵弿鍛ㄦ姤 #30锛氬彂鐜?0 涓珮鍗遍闄(https://lm203688.github.io/aishield/blog/weekly-2026-07-25.html) `2026-07-25`
+- [MCP 2026-07-28 无状态化：安全网关必须回答的 3 个问题](https://lm203688.github.io/aishield/blog/blog-mcp-stateless-security-2026-08-03.html) `2026-08-03`
+- [从 HuggingFace 被入侵看 Agent 沙箱逃逸的 4 个必要条件](https://lm203688.github.io/aishield/blog/blog-sandbox-escape-2026-08-03.html) `2026-08-03`
+- [深入分析：filesystem-test 如何修复安全漏洞](https://lm203688.github.io/aishield/blog/case-filesystem-test-2026-07-25.html) `2026-07-25`
+- [MCP 安全扫描周报 #30：发现 0 个高危风险](https://lm203688.github.io/aishield/blog/weekly-2026-07-25.html) `2026-07-25`
 
 <!--LATEST_POSTS_END-->
