@@ -63,7 +63,7 @@ AIShield extended its coverage beyond payload content with **17 local heuristic 
 - **Tool / skill integrity** (`scanner/tool_integrity_scan.py`): typosquatted tool names (edit-distance ≤2 vs canonical brands, CVE-2026-30856 class), remote MCP without version pin (rug-pull).
 - **Registry supply** (`scanner/registry_supply_scan.py`): skill-name typosquat, suspicious egress, progressive hidden payloads (main file defers the install command to a secondary `.md`).
 
-All 11 Agentic modules pass a **benign-zero-false-positive** and **malicious-still-blocked** contract in `tests/test_capability_full_scan.py` (40 cases). Full suite: **523 pass / 0 fail / 9 skip**.
+All 11 Agentic modules pass a **benign-zero-false-positive** and **malicious-still-blocked** contract in `tests/test_capability_full_scan.py` (40 cases). Full suite: **557 pass / 0 fail / 9 skip**.
 
 Landscape & new-capability gaps: https://aishield.tools/agent-ecosystem-2026-landscape
 
@@ -79,6 +79,14 @@ Landscape & new-capability gaps: https://aishield.tools/agent-ecosystem-2026-lan
 - **Complements agent sandboxes**: the only content-trust plane designed to sit on top of agent-computer runtimes (Cloudflare Sandboxes, forgevm, E2B, Open Interpreter, Goose) — pre-flight scan, sandbox-hardening rules, per-call admission, continuous attestation. Isolation runtimes deliberately stop at OS boundaries; nothing in that layer inspects skill or tool-description content.
 - **Audits its own published artifacts**: every artifact AIShield ships to an external marketplace is registered in `distribution/published.json`, kept in-repo, and must pass AIShield's own scanner (`scripts/verify_distribution.py`) before release. The gate has published failure cases — including one where it blocked AIShield's own skill.
 - **Embeddable trust credential for discovery formats**: defines `aishield-trust/v1`, a machine-readable, signed, embeddable attestation that MCP Server Card / A2A Agent Card / Google `ai-catalog` reference via a single `trust` field — turning AIShield into the *neutral trust layer* every discovery format is missing. Competitors (HVTracker, AIR, Metinc) only scan supply-chain signals (OSSF Scorecard / provenance); they do **not** scan tool/skill content (prompt injection, tool poisoning). AIShield is the only one that scans content and is offline. Spec: https://aishield.tools/trust-attestation-spec
+
+## Human-in-the-loop observability (Whisper-style side audit)
+
+AIShield's shared blackboard (`eco/blackboard.py`) records every security-screening decision as an append-only `security_events` stream, and the observability module exposes call / cost / risk telemetry. Together they give a human operator a **Whisper room** into agent traffic — the ability to silently observe, audit and intervene in multi-agent conversations without being a participant. This is the security-native answer to "human-in-the-loop for agent teams": not a chat pane, but a verifiable audit trail of *why* each tool call or message was allowed or blocked. It pairs with the human-approval gate (`require_human_approval` on `TaskDelegation`) and the task atomic-lock (`task_key`) that stops two agents from double-executing one unit of work.
+
+## The content-trust layer for BYOA agent teams
+
+The 2026 agent economy is moving to **bring-your-own-agent (BYOA)** teams — collaboration hubs where humans and AI agents share a roster, DMs and group chats, and each member brings their own local-first agents (e.g. Cumora-style agent platforms). AIShield is the natural **content-trust layer for those teams**: it scans every MCP server, skill and agent identity a member brings in, screens inter-agent messages for prompt injection / goal hijack, and issues verifiable attestation receipts — all locally, with no code leaving the device and no mandatory cloud. A BYOA platform gains enterprise-grade agent security by embedding AIShield as its trust plane, without building one itself.
 
 ## Contact
 - GitHub: https://github.com/lm203688/aishield
