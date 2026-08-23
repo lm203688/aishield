@@ -1,8 +1,8 @@
 <h1 align="center">AIShield</h1>
 
 <p align="center">
-  <strong>AI Agent 安全生态基础设施</strong><br>
-  <sub>让任何 Agent 可以安全地发现、验证、委托、支付另一个 Agent</sub>
+  <strong>AI Agent 瀹夊叏鐢熸€佸熀纭€璁炬柦</strong><br>
+  <sub>璁╀换浣?Agent 鍙互瀹夊叏鍦板彂鐜般€侀獙璇併€佸鎵樸€佹敮浠樺彟涓€涓?Agent</sub>
 </p>
 
 <p align="center">
@@ -15,106 +15,117 @@
 </p>
 
 <p align="center">
-  <strong>🖥️ 本地优先 · 零依赖 · 代码不出机</strong><br>
-  <sub>开源本地版 — 与同名云 SaaS <code>aishield.ai</code> 是完全不同的产品</sub>
+  <strong>馃枼锔?鏈湴浼樺厛 路 闆朵緷璧?路 浠ｇ爜涓嶅嚭鏈?/strong><br>
+  <sub>寮€婧愭湰鍦扮増 鈥?涓庡悓鍚嶄簯 SaaS <code>aishield.ai</code> 鏄畬鍏ㄤ笉鍚岀殑浜у搧</sub>
 </p>
 
 ```
-   ██████╗██╗   ██╗██████╗ ███████╗██████╗ ███████╗███████╗ ██████╗
-  ██╔════╝╚██╗ ██╔╝██╔══██╗██╔════╝██╔══██╗██╔════╝██╔════╝██╔════╝
-  ██║      ╚████╔╝ ██████╔╝█████╗  ██████╔╝███████╗█████╗  ██║
-  ██║       ╚██╔╝  ██╔══██╗██╔══╝  ██╔══██╗╚════██║██╔══╝  ██║
-  ╚██████╗   ██║   ██████╔╝███████╗██║  ██║███████║███████╗╚██████╗
-   ╚═════╝   ╚═╝   ╚═════╝ ╚══════╝╚═╝  ╚═╝╚══════╝╚══════╝ ╚═════╝
-              Security · Identity · Collaboration · Trust
+   鈻堚枅鈻堚枅鈻堚枅鈺椻枅鈻堚晽   鈻堚枅鈺椻枅鈻堚枅鈻堚枅鈻堚晽 鈻堚枅鈻堚枅鈻堚枅鈻堚晽鈻堚枅鈻堚枅鈻堚枅鈺?鈻堚枅鈻堚枅鈻堚枅鈻堚晽鈻堚枅鈻堚枅鈻堚枅鈻堚晽 鈻堚枅鈻堚枅鈻堚枅鈺?
+  鈻堚枅鈺斺晲鈺愨晲鈺愨暆鈺氣枅鈻堚晽 鈻堚枅鈺斺暆鈻堚枅鈺斺晲鈺愨枅鈻堚晽鈻堚枅鈺斺晲鈺愨晲鈺愨暆鈻堚枅鈺斺晲鈺愨枅鈻堚晽鈻堚枅鈺斺晲鈺愨晲鈺愨暆鈻堚枅鈺斺晲鈺愨晲鈺愨暆鈻堚枅鈺斺晲鈺愨晲鈺愨暆
+  鈻堚枅鈺?     鈺氣枅鈻堚枅鈻堚晹鈺?鈻堚枅鈻堚枅鈻堚枅鈺斺暆鈻堚枅鈻堚枅鈻堚晽  鈻堚枅鈻堚枅鈻堚枅鈺斺暆鈻堚枅鈻堚枅鈻堚枅鈻堚晽鈻堚枅鈻堚枅鈻堚晽  鈻堚枅鈺?
+  鈻堚枅鈺?      鈺氣枅鈻堚晹鈺? 鈻堚枅鈺斺晲鈺愨枅鈻堚晽鈻堚枅鈺斺晲鈺愨暆  鈻堚枅鈺斺晲鈺愨枅鈻堚晽鈺氣晲鈺愨晲鈺愨枅鈻堚晳鈻堚枅鈺斺晲鈺愨暆  鈻堚枅鈺?
+  鈺氣枅鈻堚枅鈻堚枅鈻堚晽   鈻堚枅鈺?  鈻堚枅鈻堚枅鈻堚枅鈺斺暆鈻堚枅鈻堚枅鈻堚枅鈻堚晽鈻堚枅鈺? 鈻堚枅鈺戔枅鈻堚枅鈻堚枅鈻堚枅鈺戔枅鈻堚枅鈻堚枅鈻堚枅鈺椻暁鈻堚枅鈻堚枅鈻堚枅鈺?
+   鈺氣晲鈺愨晲鈺愨晲鈺?  鈺氣晲鈺?  鈺氣晲鈺愨晲鈺愨晲鈺?鈺氣晲鈺愨晲鈺愨晲鈺愨暆鈺氣晲鈺? 鈺氣晲鈺濃暁鈺愨晲鈺愨晲鈺愨晲鈺濃暁鈺愨晲鈺愨晲鈺愨晲鈺?鈺氣晲鈺愨晲鈺愨晲鈺?
+              Security 路 Identity 路 Collaboration 路 Trust
 ```
 
 ---
 
-> 🖥️ **本地优先 · 开源 · 无云**
-> AIShield 开源版**完全在你机器上运行**：零第三方依赖、可 100% 离线、代码与配置**绝不上传**云端、扫描时**绝不执行**被扫配置。
-> ⚠️ **与 `aishield.ai` 的区别**：本仓库是**本地开源版**，与同名商业云 SaaS **`aishield.ai`**（注册 / 密钥 / 计费式云端服务）是**完全不同的产品**，请勿混淆。
+> 馃枼锔?**鏈湴浼樺厛 路 寮€婧?路 鏃犱簯**
+> AIShield 寮€婧愮増**瀹屽叏鍦ㄤ綘鏈哄櫒涓婅繍琛?*锛氶浂绗笁鏂逛緷璧栥€佸彲 100% 绂荤嚎銆佷唬鐮佷笌閰嶇疆**缁濅笉涓婁紶**浜戠銆佹壂鎻忔椂**缁濅笉鎵ц**琚壂閰嶇疆銆?
+> 鈿狅笍 **涓?`aishield.ai` 鐨勫尯鍒?*锛氭湰浠撳簱鏄?*鏈湴寮€婧愮増**锛屼笌鍚屽悕鍟嗕笟浜?SaaS **`aishield.ai`**锛堟敞鍐?/ 瀵嗛挜 / 璁¤垂寮忎簯绔湇鍔★級鏄?*瀹屽叏涓嶅悓鐨勪骇鍝?*锛岃鍕挎贩娣嗐€?
 
-## 核心特性
+## 鏍稿績鐗规€?
 
-🛡️ **227 条 MCP 规则 / 233 条 Skill 规则** — 对齐 OWASP MCP Top 10 (2025 v0.1) 与 OWASP Agentic AI Top 10 (ASI01–ASI10)，覆盖 Prompt 注入、越权访问、数据泄露、协议攻击、供应链风险、沙箱逃逸 6 大维度
+馃洝锔?**227 鏉?MCP 瑙勫垯 / 233 鏉?Skill 瑙勫垯** 鈥?瀵归綈 OWASP MCP Top 10 (2025 v0.1) 涓?OWASP Agentic AI Top 10 (ASI01鈥揂SI10)锛岃鐩?Prompt 娉ㄥ叆銆佽秺鏉冭闂€佹暟鎹硠闇层€佸崗璁敾鍑汇€佷緵搴旈摼椋庨櫓銆佹矙绠遍€冮€?6 澶х淮搴?
 
-🧰 **Agent 计算机的内容安全平面** — Cloudflare Sandboxes、forgevm、E2B、Open Interpreter、Goose 这类运行时管的是**爆炸半径**（agent 能碰到什么），AIShield 管的是**内容可信**（agent 读进来的 MCP server、skill、工具描述该不该信）。两者互补：启动前工作区预扫 → 沙箱硬化规则 → 每次调用准入 → 持续鉴证。详见 [Agent 计算机的两个安全平面](docs/agent-computer-security-plane.md)
+馃О **Agent 璁＄畻鏈虹殑鍐呭瀹夊叏骞抽潰** 鈥?Cloudflare Sandboxes銆乫orgevm銆丒2B銆丱pen Interpreter銆丟oose 杩欑被杩愯鏃剁鐨勬槸**鐖嗙偢鍗婂緞**锛坅gent 鑳界鍒颁粈涔堬級锛孉IShield 绠＄殑鏄?*鍐呭鍙俊**锛坅gent 璇昏繘鏉ョ殑 MCP server銆乻kill銆佸伐鍏锋弿杩拌涓嶈淇★級銆備袱鑰呬簰琛ワ細鍚姩鍓嶅伐浣滃尯棰勬壂 鈫?娌欑纭寲瑙勫垯 鈫?姣忔璋冪敤鍑嗗叆 鈫?鎸佺画閴磋瘉銆傝瑙?[Agent 璁＄畻鏈虹殑涓や釜瀹夊叏骞抽潰](docs/agent-computer-security-plane.md)
 
-📄 **Markdown 按可执行体扫描** — 对 Skill 类资产，`SKILL.md` 本身就是程序。把 `.md` 一律当「文档示例」降级的扫描器，会整条漏掉 skill 供应链
+馃搫 **Markdown 鎸夊彲鎵ц浣撴壂鎻?* 鈥?瀵?Skill 绫昏祫浜э紝`SKILL.md` 鏈韩灏辨槸绋嬪簭銆傛妸 `.md` 涓€寰嬪綋銆屾枃妗ｇず渚嬨€嶉檷绾х殑鎵弿鍣紝浼氭暣鏉℃紡鎺?skill 渚涘簲閾?
 
-🧠 **智能 Prompt 注入检测** — 原生支持中文检测，识别拼音变体、谐音替换、拆字攻击等本土化绕过手法
+馃 **鏅鸿兘 Prompt 娉ㄥ叆妫€娴?* 鈥?鍘熺敓鏀寔涓枃妫€娴嬶紝璇嗗埆鎷奸煶鍙樹綋銆佽皭闊虫浛鎹€佹媶瀛楁敾鍑荤瓑鏈湡鍖栫粫杩囨墜娉?
 
-🪪 **Agent 身份系统** — DID 去中心化身份生成、多级信誉评分、API Key 生命周期管理、完整审计日志链
+馃 **Agent 韬唤绯荤粺** 鈥?DID 鍘讳腑蹇冨寲韬唤鐢熸垚銆佸绾т俊瑾夎瘎鍒嗐€丄PI Key 鐢熷懡鍛ㄦ湡绠＄悊銆佸畬鏁村璁℃棩蹇楅摼
 
-🤝 **Agent 协作通信** — 内置发布/订阅消息总线、协作会话管理、跨 Agent 任务委托，让 Agent 之间安全对话
+馃 **Agent 鍗忎綔閫氫俊** 鈥?鍐呯疆鍙戝竷/璁㈤槄娑堟伅鎬荤嚎銆佸崗浣滀細璇濈鐞嗐€佽法 Agent 浠诲姟濮旀墭锛岃 Agent 涔嬮棿瀹夊叏瀵硅瘽
 
-📦 **安全沙箱执行** — 代码预检查拦截危险模式，支持 Python / JavaScript / Shell 多语言隔离执行，结果自动安全审查
+馃摝 **瀹夊叏娌欑鎵ц** 鈥?浠ｇ爜棰勬鏌ユ嫤鎴嵄闄╂ā寮忥紝鏀寔 Python / JavaScript / Shell 澶氳瑷€闅旂鎵ц锛岀粨鏋滆嚜鍔ㄥ畨鍏ㄥ鏌?
 
-🏪 **技能市场** — 技能发布、搜索与调用一体化，内置评分系统，支持 HTTP RPC 真实调用验证
+馃彧 **鎶€鑳藉競鍦?* 鈥?鎶€鑳藉彂甯冦€佹悳绱笌璋冪敤涓€浣撳寲锛屽唴缃瘎鍒嗙郴缁燂紝鏀寔 HTTP RPC 鐪熷疄璋冪敤楠岃瘉
 
-🔗 **A2A 协议网关** — 兼容 Google A2A 协议，Agent Card 注册与发现，智能任务路由与跨 Agent 调度
+馃敆 **A2A 鍗忚缃戝叧** 鈥?鍏煎 Google A2A 鍗忚锛孉gent Card 娉ㄥ唽涓庡彂鐜帮紝鏅鸿兘浠诲姟璺敱涓庤法 Agent 璋冨害
 
-💳 **支付与计费** — API 按量计费、套餐管理、使用量统计，为 Agent 经济提供基础设施
+馃攲 **6 澶у閮ㄩ」鐩泦鎴愭ā鍧?* 鈥?鍗虫彃鍗崇敤鐨勫畨鍏ㄥ寮哄浠讹細
 
-🏆 **安全认证徽章** — 扫描通过自动签发认证，生成可嵌入 GitHub README 的 SVG 徽章，金 / 银 / 铜三级
+| 妯″潡 | 鍔熻兘 | 渚濊禆 |
+|:---|:---|:---|
+| BB Browser | 36 骞冲彴 103 鍛戒护濞佽儊鎯呮姤閲囬泦閫傞厤鍣?| 闆朵緷璧?|
+| Browser Use | AI 椹卞姩娴忚鍣ㄥ畨鍏ㄦ壂鎻忥紙XSS/SQLi/CSRF/Recon锛?| `browser-use` |
+| Graph DB | Neo4j/FalkorDB/ArangoDB 濞佽儊鍥捐氨锛屾敾鍑婚摼鏌ヨ | `neo4j` |
+| Event Stream | Kafka/鍐呭瓨浜嬩欢鎬荤嚎锛孎link 椋庢牸瑙勫垯寮曟搸 | `kafka-python`锛堝彲閫夛級 |
+| Scan Isolation | vCluster 闅旂鎵弿鐜绠＄悊 | vCluster CLI |
+| Persistent Agent | Grok Bot 鎸佷箙鍖栧畨鍏ㄧ洃鎺т唬鐞?| xAI API Key |
 
-🌐 **中立信任机构（Neutral Trust Authority）** — AIShield 不只是扫描器，更是 agent 生态的**信任层**：每个被扫资产都拿到一张机器可读、可签名、可嵌入发现格式的 [Trust Attestation（`aishield-trust/v1`）](docs/trust-attestation-spec.md) 凭证。MCP Server Card / A2A Agent Card / Google `ai-catalog` 只需在自己的 metadata 里加一个 `trust` 字段，就能零成本引用 AIShield 的「内容是否可信」裁决——而这一层目前是整条 agent 供应链最薄弱、也最被抢位的空白。AIShield 的差异化锚点：**唯一本地离线、扫内容（prompt 注入 / 工具中毒 / 供应链漂移）、绝不执行被扫配置**的信任裁决。生态占位策划见 [docs/ecosystem-positioning-2026.md](docs/ecosystem-positioning-2026.md)。
+馃挸 **鏀粯涓庤璐?* 鈥?API 鎸夐噺璁¤垂銆佸椁愮鐞嗐€佷娇鐢ㄩ噺缁熻锛屼负 Agent 缁忔祹鎻愪緵鍩虹璁炬柦
+
+馃弳 **瀹夊叏璁よ瘉寰界珷** 鈥?鎵弿閫氳繃鑷姩绛惧彂璁よ瘉锛岀敓鎴愬彲宓屽叆 GitHub README 鐨?SVG 寰界珷锛岄噾 / 閾?/ 閾滀笁绾?
+
+馃寪 **涓珛淇′换鏈烘瀯锛圢eutral Trust Authority锛?* 鈥?AIShield 涓嶅彧鏄壂鎻忓櫒锛屾洿鏄?agent 鐢熸€佺殑**淇′换灞?*锛氭瘡涓鎵祫浜ч兘鎷垮埌涓€寮犳満鍣ㄥ彲璇汇€佸彲绛惧悕銆佸彲宓屽叆鍙戠幇鏍煎紡鐨?[Trust Attestation锛坄aishield-trust/v1`锛塢(docs/trust-attestation-spec.md) 鍑瘉銆侻CP Server Card / A2A Agent Card / Google `ai-catalog` 鍙渶鍦ㄨ嚜宸辩殑 metadata 閲屽姞涓€涓?`trust` 瀛楁锛屽氨鑳介浂鎴愭湰寮曠敤 AIShield 鐨勩€屽唴瀹规槸鍚﹀彲淇°€嶈鍐斥€斺€旇€岃繖涓€灞傜洰鍓嶆槸鏁存潯 agent 渚涘簲閾炬渶钖勫急銆佷篃鏈€琚姠浣嶇殑绌虹櫧銆侫IShield 鐨勫樊寮傚寲閿氱偣锛?*鍞竴鏈湴绂荤嚎銆佹壂鍐呭锛坧rompt 娉ㄥ叆 / 宸ュ叿涓瘨 / 渚涘簲閾炬紓绉伙級銆佺粷涓嶆墽琛岃鎵厤缃?*鐨勪俊浠昏鍐炽€傜敓鎬佸崰浣嶇瓥鍒掕 [docs/ecosystem-positioning-2026.md](docs/ecosystem-positioning-2026.md)銆?
 
 ---
 
-## 为什么选择 AIShield
+## 涓轰粈涔堥€夋嫨 AIShield
 
-| | AIShield | 纯扫描工具 | 闭源商业方案 | 无交易的平台 |
+| | AIShield | 绾壂鎻忓伐鍏?| 闂簮鍟嗕笟鏂规 | 鏃犱氦鏄撶殑骞冲彴 |
 |:---|:---:|:---:|:---:|:---:|
-| 开源透明 | **MIT 全开源** | 部分开源 | ❌ 黑盒 | 部分开源 |
-| 安全规则覆盖 | **227 / 233 条 (OWASP 双维对齐)** | 10-60 条 | 依赖厂商 | 有限 |
-| 中文 Prompt 检测 | **6 平台违禁词覆盖** | ❌ | 依赖厂商 | ❌ |
-| Agent 身份与信任 | **DID + 信誉 + 徽章** | ❌ | 商业附加 | ❌ |
-| Agent 身份 / 网络层扫描 | **扫身份缺陷 + 组网过宽** | ❌ | 有限 | ❌ |
-| Agent 协作与市场 | **完整生态** | ❌ | 有限 | 简单注册 |
-| 计费与经济模型 | **内置支持** | ❌ | 企业版 | ❌ |
-| 外部依赖 | **零依赖** | 有依赖 | N/A | 有依赖 |
-| MCP 集成 | **原生支持** | 部分支持 | 有限 | 部分支持 |
+| 寮€婧愰€忔槑 | **MIT 鍏ㄥ紑婧?* | 閮ㄥ垎寮€婧?| 鉂?榛戠洅 | 閮ㄥ垎寮€婧?|
+| 瀹夊叏瑙勫垯瑕嗙洊 | **227 / 233 鏉?(OWASP 鍙岀淮瀵归綈)** | 10-60 鏉?| 渚濊禆鍘傚晢 | 鏈夐檺 |
+| 涓枃 Prompt 妫€娴?| **6 骞冲彴杩濈璇嶈鐩?* | 鉂?| 渚濊禆鍘傚晢 | 鉂?|
+| Agent 韬唤涓庝俊浠?| **DID + 淇¤獕 + 寰界珷** | 鉂?| 鍟嗕笟闄勫姞 | 鉂?|
+| Agent 韬唤 / 缃戠粶灞傛壂鎻?| **鎵韩浠界己闄?+ 缁勭綉杩囧** | 鉂?| 鏈夐檺 | 鉂?|
+| Agent 鍗忎綔涓庡競鍦?| **瀹屾暣鐢熸€?* | 鉂?| 鏈夐檺 | 绠€鍗曟敞鍐?|
+| 璁¤垂涓庣粡娴庢ā鍨?| **鍐呯疆鏀寔** | 鉂?| 浼佷笟鐗?| 鉂?|
+| 澶栭儴渚濊禆 | **闆朵緷璧?* | 鏈変緷璧?| N/A | 鏈変緷璧?|
+| MCP 闆嗘垚 | **鍘熺敓鏀寔** | 閮ㄥ垎鏀寔 | 鏈夐檺 | 閮ㄥ垎鏀寔 |
 
-🔍 **Agent 身份与凭证扫描（身份层 / NHI）** — 2026 年 agent 安全的主战场已从「工具执行」转移到「agent 身份可验证」（A2A 仓库 top issue 全在身份；Authentik 借 NHI 重燃；ANS/DNSid/Entra Agent ID 扎堆）。AIShield 从「只发信任证书」升级为「也扫身份缺陷」：AgentCard/agent 身份是否签名、凭证是否短期过期、授权是否过宽（`scope: "*"` 违反最小权限）、是否缺 mTLS/DID、委托是否做 scope attenuation。详见 [Agent 生态 2026 态势与卡位](docs/agent-ecosystem-2026-landscape.md)。
+馃攳 **Agent 韬唤涓庡嚟璇佹壂鎻忥紙韬唤灞?/ NHI锛?* 鈥?2026 骞?agent 瀹夊叏鐨勪富鎴樺満宸蹭粠銆屽伐鍏锋墽琛屻€嶈浆绉诲埌銆宎gent 韬唤鍙獙璇併€嶏紙A2A 浠撳簱 top issue 鍏ㄥ湪韬唤锛汚uthentik 鍊?NHI 閲嶇噧锛汚NS/DNSid/Entra Agent ID 鎵庡爢锛夈€侫IShield 浠庛€屽彧鍙戜俊浠昏瘉涔︺€嶅崌绾т负銆屼篃鎵韩浠界己闄枫€嶏細AgentCard/agent 韬唤鏄惁绛惧悕銆佸嚟璇佹槸鍚︾煭鏈熻繃鏈熴€佹巿鏉冩槸鍚﹁繃瀹斤紙`scope: "*"` 杩濆弽鏈€灏忔潈闄愶級銆佹槸鍚︾己 mTLS/DID銆佸鎵樻槸鍚﹀仛 scope attenuation銆傝瑙?[Agent 鐢熸€?2026 鎬佸娍涓庡崱浣峕(docs/agent-ecosystem-2026-landscape.md)銆?
 
-🕸️ **Agent 网络 / Mesh 配置扫描（网络层）** — Cloudflare Mesh 把 agent 组网做成基础设施，却官方自认「缺 per-agent 身份与策略」（所有 agent 流量被当成来自一个 Worker）。AIShield 补这个缺口：扫描整账户 Mesh/VPC 绑定是否把全网暴露给所有 agent、agent 端点是否无鉴权（`auth: none`）、私有资源是否公网暴露（`public: true`）。内容可信 + 身份归因 + 组网可达性，三管齐下覆盖 agent 的「信任浅滩」。
+馃暩锔?**Agent 缃戠粶 / Mesh 閰嶇疆鎵弿锛堢綉缁滃眰锛?* 鈥?Cloudflare Mesh 鎶?agent 缁勭綉鍋氭垚鍩虹璁炬柦锛屽嵈瀹樻柟鑷銆岀己 per-agent 韬唤涓庣瓥鐣ャ€嶏紙鎵€鏈?agent 娴侀噺琚綋鎴愭潵鑷竴涓?Worker锛夈€侫IShield 琛ヨ繖涓己鍙ｏ細鎵弿鏁磋处鎴?Mesh/VPC 缁戝畾鏄惁鎶婂叏缃戞毚闇茬粰鎵€鏈?agent銆乤gent 绔偣鏄惁鏃犻壌鏉冿紙`auth: none`锛夈€佺鏈夎祫婧愭槸鍚﹀叕缃戞毚闇诧紙`public: true`锛夈€傚唴瀹瑰彲淇?+ 韬唤褰掑洜 + 缁勭綉鍙揪鎬э紝涓夌榻愪笅瑕嗙洊 agent 鐨勩€屼俊浠绘祬婊┿€嶃€?
 
-🔐 **Authentik / NHI service-account 扫描（身份层 · Authentik 流派）** — 扫描 Authentik 风格的 service-account 导出：`skip_authorization` 跳同意、令牌永不过期（`token_ttl: 0/never`）、scope 过宽（`"*"`）、硬编码 `client_secret`。把身份层从「只发证书」扩展到「也扫 NHI 卫生」。
+馃攼 **Authentik / NHI service-account 鎵弿锛堣韩浠藉眰 路 Authentik 娴佹淳锛?* 鈥?鎵弿 Authentik 椋庢牸鐨?service-account 瀵煎嚭锛歚skip_authorization` 璺冲悓鎰忋€佷护鐗屾案涓嶈繃鏈燂紙`token_ttl: 0/never`锛夈€乻cope 杩囧锛坄"*"`锛夈€佺‖缂栫爜 `client_secret`銆傛妸韬唤灞備粠銆屽彧鍙戣瘉涔︺€嶆墿灞曞埌銆屼篃鎵?NHI 鍗敓銆嶃€?
 
-🪪 **A2A AgentCard 结构化校验（身份层 · A2A 流派）** — 对 `.well-known/agent.json` 做 JSON 结构化校验：未签名、缺过期、非 https、无鉴权方案（`securitySchemes`）、委托链未做 scope attenuation。直接对应 A2A #1672/#1628 的「信任浅滩」。
+馃 **A2A AgentCard 缁撴瀯鍖栨牎楠岋紙韬唤灞?路 A2A 娴佹淳锛?* 鈥?瀵?`.well-known/agent.json` 鍋?JSON 缁撴瀯鍖栨牎楠岋細鏈鍚嶃€佺己杩囨湡銆侀潪 https銆佹棤閴存潈鏂规锛坄securitySchemes`锛夈€佸鎵橀摼鏈仛 scope attenuation銆傜洿鎺ュ搴?A2A #1672/#1628 鐨勩€屼俊浠绘祬婊┿€嶃€?
 
-🛡️ **AI-slop / 越狱规避检测（内容可信层）** — 识别专为绕过内容分类器而设计的 prompt/skill：指令覆盖（ignore previous instructions）、DAN 角色扮演、base64/翻译混淆、反检测自指。这是「去 AI 味」文化浪潮被武器化的一面，AIShield 做其安全/可信对冲层（与 soundshuman 风格层互补非竞品）。
+馃洝锔?**AI-slop / 瓒婄嫳瑙勯伩妫€娴嬶紙鍐呭鍙俊灞傦級** 鈥?璇嗗埆涓撲负缁曡繃鍐呭鍒嗙被鍣ㄨ€岃璁＄殑 prompt/skill锛氭寚浠よ鐩栵紙ignore previous instructions锛夈€丏AN 瑙掕壊鎵紨銆乥ase64/缈昏瘧娣锋穯銆佸弽妫€娴嬭嚜鎸囥€傝繖鏄€屽幓 AI 鍛炽€嶆枃鍖栨氮娼姝﹀櫒鍖栫殑涓€闈紝AIShield 鍋氬叾瀹夊叏/鍙俊瀵瑰啿灞傦紙涓?soundshuman 椋庢牸灞備簰琛ラ潪绔炲搧锛夈€?
 
-💰 **AP2 / x402 支付授权 scope 审计（经济层 · 支付授权）** — 扫描 agent 支付配置：`maxAmount` 无限、`auto_approve` 免确认、支付 scope 过宽、支付授权未绑 intent（cartId/orderId）。覆盖 agent 经济层的「三授权」收敛。
+馃挵 **AP2 / x402 鏀粯鎺堟潈 scope 瀹¤锛堢粡娴庡眰 路 鏀粯鎺堟潈锛?* 鈥?鎵弿 agent 鏀粯閰嶇疆锛歚maxAmount` 鏃犻檺銆乣auto_approve` 鍏嶇‘璁ゃ€佹敮浠?scope 杩囧銆佹敮浠樻巿鏉冩湭缁?intent锛坈artId/orderId锛夈€傝鐩?agent 缁忔祹灞傜殑銆屼笁鎺堟潈銆嶆敹鏁涖€?
 
-🧩 **OWASP Agentic AI Top 10（ASI01–ASI10）全覆盖 — 11 个新模块补完「3 个全空白 + 5 个半覆盖」域：**
-- **ASI01 目标劫持**（`scanner/goal_hijack_scan.py`）：把外部内容当指令、目标替换、持久/永久目标注入。
-- **ASI02 工具滥用 / 最小权限**（`scanner/least_agency_scan.py`）：管道到 shell、`rm -rf`、`sudo`、`chmod 777`、`os.system`/`eval`、凭证与 SSH key 读取。
-- **ASI03 身份 / OAuth 姿态**（`scanner/mcp_oauth_scan.py`）：无认证的远程 MCP server（CVE-2026-32211 类）、缺 RFC 9207 issuer 的 OAuth、长寿命/不轮换 token。（GPT Action 清单按自身 `auth` schema 识别，不误报为 MCP 缺口。）
-- **ASI04 供应链 / 来源可信**（`scanner/provenance_scan.py`）：`npx`/`pip` 未 pin 版本、git 安装未 pin commit、锁定文件缺完整性、SBOM 未签名。
-- **ASI06 记忆 / 上下文投毒**（`scanner/memory_scan.py`）：写入记忆的指令、持久/种子目标、记忆文件写入。
-- **ASI07 跨 agent / 委托**（`scanner/scope_composition_scan.py`）：用 agent 自身凭证转发请求的混淆副手（confused deputy）。
-- **ASI08 级联失败 / 爆炸半径**（`scanner/scope_composition_scan.py`）：凭证读取 + 外传组合（所有已连接 server scope 的并集）。
-- **ASI09 人机信任利用**（`scanner/dark_pattern_scan.py`）：权威冒充、压制核验、虚假保证、紧迫感——需 ≥2 个信号同时命中才报警（低误报）。
-- **ASI10 失控 agent / 反篡改**（`scanner/antitamper_scan.py`）：自保护/删除后重装、禁用/替换其它组件、反分析/隐藏指令。
-- **工具 / 技能完整性**（`scanner/tool_integrity_scan.py`）：工具名 typosquat（与规范品牌编辑距离 ≤2，CVE-2026-30856 类）、未 pin 版本的远程 MCP（rug-pull）。
-- **注册中心供应链**（`scanner/registry_supply_scan.py`）：技能名 typosquat、可疑外传、渐进式隐藏载荷（主文件把安装命令延迟到次级 `.md`）。
+馃З **OWASP Agentic AI Top 10锛圓SI01鈥揂SI10锛夊叏瑕嗙洊 鈥?11 涓柊妯″潡琛ュ畬銆? 涓叏绌虹櫧 + 5 涓崐瑕嗙洊銆嶅煙锛?*
+- **ASI01 鐩爣鍔寔**锛坄scanner/goal_hijack_scan.py`锛夛細鎶婂閮ㄥ唴瀹瑰綋鎸囦护銆佺洰鏍囨浛鎹€佹寔涔?姘镐箙鐩爣娉ㄥ叆銆?
+- **ASI02 宸ュ叿婊ョ敤 / 鏈€灏忔潈闄?*锛坄scanner/least_agency_scan.py`锛夛細绠￠亾鍒?shell銆乣rm -rf`銆乣sudo`銆乣chmod 777`銆乣os.system`/`eval`銆佸嚟璇佷笌 SSH key 璇诲彇銆?
+- **ASI03 韬唤 / OAuth 濮挎€?*锛坄scanner/mcp_oauth_scan.py`锛夛細鏃犺璇佺殑杩滅▼ MCP server锛圕VE-2026-32211 绫伙級銆佺己 RFC 9207 issuer 鐨?OAuth銆侀暱瀵垮懡/涓嶈疆鎹?token銆傦紙GPT Action 娓呭崟鎸夎嚜韬?`auth` schema 璇嗗埆锛屼笉璇姤涓?MCP 缂哄彛銆傦級
+- **ASI04 渚涘簲閾?/ 鏉ユ簮鍙俊**锛坄scanner/provenance_scan.py`锛夛細`npx`/`pip` 鏈?pin 鐗堟湰銆乬it 瀹夎鏈?pin commit銆侀攣瀹氭枃浠剁己瀹屾暣鎬с€丼BOM 鏈鍚嶃€?
+- **ASI06 璁板繂 / 涓婁笅鏂囨姇姣?*锛坄scanner/memory_scan.py`锛夛細鍐欏叆璁板繂鐨勬寚浠ゃ€佹寔涔?绉嶅瓙鐩爣銆佽蹇嗘枃浠跺啓鍏ャ€?
+- **ASI07 璺?agent / 濮旀墭**锛坄scanner/scope_composition_scan.py`锛夛細鐢?agent 鑷韩鍑瘉杞彂璇锋眰鐨勬贩娣嗗壇鎵嬶紙confused deputy锛夈€?
+- **ASI08 绾ц仈澶辫触 / 鐖嗙偢鍗婂緞**锛坄scanner/scope_composition_scan.py`锛夛細鍑瘉璇诲彇 + 澶栦紶缁勫悎锛堟墍鏈夊凡杩炴帴 server scope 鐨勫苟闆嗭級銆?
+- **ASI09 浜烘満淇′换鍒╃敤**锛坄scanner/dark_pattern_scan.py`锛夛細鏉冨▉鍐掑厖銆佸帇鍒舵牳楠屻€佽櫄鍋囦繚璇併€佺揣杩劅鈥斺€旈渶 鈮? 涓俊鍙峰悓鏃跺懡涓墠鎶ヨ锛堜綆璇姤锛夈€?
+- **ASI10 澶辨帶 agent / 鍙嶇鏀?*锛坄scanner/antitamper_scan.py`锛夛細鑷繚鎶?鍒犻櫎鍚庨噸瑁呫€佺鐢?鏇挎崲鍏跺畠缁勪欢銆佸弽鍒嗘瀽/闅愯棌鎸囦护銆?
+- **宸ュ叿 / 鎶€鑳藉畬鏁存€?*锛坄scanner/tool_integrity_scan.py`锛夛細宸ュ叿鍚?typosquat锛堜笌瑙勮寖鍝佺墝缂栬緫璺濈 鈮?锛孋VE-2026-30856 绫伙級銆佹湭 pin 鐗堟湰鐨勮繙绋?MCP锛坮ug-pull锛夈€?
+- **娉ㄥ唽涓績渚涘簲閾?*锛坄scanner/registry_supply_scan.py`锛夛細鎶€鑳藉悕 typosquat銆佸彲鐤戝浼犮€佹笎杩涘紡闅愯棌杞借嵎锛堜富鏂囦欢鎶婂畨瑁呭懡浠ゅ欢杩熷埌娆＄骇 `.md`锛夈€?
 
-上述 11 个模块全部通过 `tests/test_capability_full_scan.py` 的「良性零误报 + 恶意仍被拦」契约（40 项）；全量测试 **523 通过 / 0 失败 / 9 跳过**。
+涓婅堪 11 涓ā鍧楀叏閮ㄩ€氳繃 `tests/test_capability_full_scan.py` 鐨勩€岃壇鎬ч浂璇姤 + 鎭舵剰浠嶈鎷︺€嶅绾︼紙40 椤癸級锛涘叏閲忔祴璇?**523 閫氳繃 / 0 澶辫触 / 9 璺宠繃**銆?
 
-> AIShield 不只是一个扫描器 — 它是 AI Agent 安全生态的完整基础设施。
+> AIShield 涓嶅彧鏄竴涓壂鎻忓櫒 鈥?瀹冩槸 AI Agent 瀹夊叏鐢熸€佺殑瀹屾暣鍩虹璁炬柦銆?
 
 ---
 
-## 快速开始
+## 蹇€熷紑濮?
 
-AIShield 是**完全本地运行**的开源工具——无需注册、无账号、代码不上传云端。推荐通过 MCP 直接接入你的客户端。
+AIShield 鏄?*瀹屽叏鏈湴杩愯**鐨勫紑婧愬伐鍏封€斺€旀棤闇€娉ㄥ唽銆佹棤璐﹀彿銆佷唬鐮佷笉涓婁紶浜戠銆傛帹鑽愰€氳繃 MCP 鐩存帴鎺ュ叆浣犵殑瀹㈡埛绔€?
 
-### 方式一（推荐）：作为 MCP Server 接入
+### 鏂瑰紡涓€锛堟帹鑽愶級锛氫綔涓?MCP Server 鎺ュ叆
 
-无需安装，一行命令接入 Claude Desktop / Cursor / 任意 MCP 客户端：
+鏃犻渶瀹夎锛屼竴琛屽懡浠ゆ帴鍏?Claude Desktop / Cursor / 浠绘剰 MCP 瀹㈡埛绔細
 
 ```json
 {
@@ -127,11 +138,11 @@ AIShield 是**完全本地运行**的开源工具——无需注册、无账号�
 }
 ```
 
-接入后无需任何配置，即可在对话中直接说：
+鎺ュ叆鍚庢棤闇€浠讳綍閰嶇疆锛屽嵆鍙湪瀵硅瘽涓洿鎺ヨ锛?
 
-> “帮我扫描这个 MCP 工具是否存在 Prompt 注入风险”
+> 鈥滃府鎴戞壂鎻忚繖涓?MCP 宸ュ叿鏄惁瀛樺湪 Prompt 娉ㄥ叆椋庨櫓鈥?
 
-### 方式二：本地 API Server（可选）
+### 鏂瑰紡浜岋細鏈湴 API Server锛堝彲閫夛級
 
 ```bash
 git clone https://github.com/lm203688/aishield.git
@@ -139,11 +150,11 @@ cd aishield
 python api/server.py
 ```
 
-启动后访问 **http://localhost:8450** 查看本地 API 面板。该 server 完全在本地运行，**无需注册、无积分、无公网依赖**，所有扫描都在你的机器上完成。
+鍚姩鍚庤闂?**http://localhost:8450** 鏌ョ湅鏈湴 API 闈㈡澘銆傝 server 瀹屽叏鍦ㄦ湰鍦拌繍琛岋紝**鏃犻渶娉ㄥ唽銆佹棤绉垎銆佹棤鍏綉渚濊禆**锛屾墍鏈夋壂鎻忛兘鍦ㄤ綘鐨勬満鍣ㄤ笂瀹屾垚銆?
 
-### 获取安全徽章
+### 鑾峰彇瀹夊叏寰界珷
 
-扫描通过后，在你的项目 README 中嵌入安全徽章（自托管你的实例后替换域名）：
+鎵弿閫氳繃鍚庯紝鍦ㄤ綘鐨勯」鐩?README 涓祵鍏ュ畨鍏ㄥ窘绔狅紙鑷墭绠′綘鐨勫疄渚嬪悗鏇挎崲鍩熷悕锛夛細
 
 ```markdown
 ![AIShield Security](https://aishield.tools/badge/my-agent-tool)
@@ -151,13 +162,13 @@ python api/server.py
 
 ---
 
-## MCP 集成
+## MCP 闆嗘垚
 
-AIShield 可作为 MCP Server 直接集成到 Claude Desktop、Cursor 等支持 MCP 的客户端中。
+AIShield 鍙綔涓?MCP Server 鐩存帴闆嗘垚鍒?Claude Desktop銆丆ursor 绛夋敮鎸?MCP 鐨勫鎴风涓€?
 
 ### Claude Desktop
 
-在 Claude Desktop 配置文件中添加：
+鍦?Claude Desktop 閰嶇疆鏂囦欢涓坊鍔狅細
 
 ```json
 {
@@ -171,21 +182,21 @@ AIShield 可作为 MCP Server 直接集成到 Claude Desktop、Cursor 等支持 
 }
 ```
 
-### Cursor / 其他 MCP 客户端
+### Cursor / 鍏朵粬 MCP 瀹㈡埛绔?
 
-同样在 MCP 配置中添加以上内容，即可在对话中直接调用 AIShield 的全部安全扫描能力。
+鍚屾牱鍦?MCP 閰嶇疆涓坊鍔犱互涓婂唴瀹癸紝鍗冲彲鍦ㄥ璇濅腑鐩存帴璋冪敤 AIShield 鐨勫叏閮ㄥ畨鍏ㄦ壂鎻忚兘鍔涖€?
 
-集成后你可以直接在对话中说：
+闆嗘垚鍚庝綘鍙互鐩存帴鍦ㄥ璇濅腑璇达細
 
-> "帮我扫描这个 MCP 工具是否存在 Prompt 注入风险"
+> "甯垜鎵弿杩欎釜 MCP 宸ュ叿鏄惁瀛樺湪 Prompt 娉ㄥ叆椋庨櫓"
 
-> "检查这段文本是否包含违禁词"
+> "妫€鏌ヨ繖娈垫枃鏈槸鍚﹀寘鍚繚绂佽瘝"
 
 ---
 
-## CI 安全门禁（GitHub Action）
+## CI 瀹夊叏闂ㄧ锛圙itHub Action锛?
 
-把 AIShield 接入任何仓库的 CI：每次 push / PR 自动扫描工作区里的 MCP server、skill、prompt，**达到阈值即让构建失败**。
+鎶?AIShield 鎺ュ叆浠讳綍浠撳簱鐨?CI锛氭瘡娆?push / PR 鑷姩鎵弿宸ヤ綔鍖洪噷鐨?MCP server銆乻kill銆乸rompt锛?*杈惧埌闃堝€煎嵆璁╂瀯寤哄け璐?*銆?
 
 ```yaml
 # .github/workflows/aishield.yml
@@ -196,80 +207,121 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: lm203688/aishield@v4.2.2   # 发布到 Marketplace 后可用；此前用 commit/ tag 引用
+      - uses: lm203688/aishield@v4.2.2   # 鍙戝竷鍒?Marketplace 鍚庡彲鐢紱姝ゅ墠鐢?commit/ tag 寮曠敤
         with:
           fail_on: high        # safe / medium / high / critical
           tool_type: mcp       # mcp / skill / gpt / prompt
-      - name: 上传 SARIF 到 GitHub Security
+      - name: 涓婁紶 SARIF 鍒?GitHub Security
         if: always()
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: aishield.sarif
 ```
 
-差异化：默认 **no-spawn（不执行被扫配置）** + 内容/prompt 注入检测 + **中文合规（违禁词）**——占「中国合规 + 不执行」位，与 AgentAuditKit 的通用位互补。
+宸紓鍖栵細榛樿 **no-spawn锛堜笉鎵ц琚壂閰嶇疆锛?* + 鍐呭/prompt 娉ㄥ叆妫€娴?+ **涓枃鍚堣锛堣繚绂佽瘝锛?*鈥斺€斿崰銆屼腑鍥藉悎瑙?+ 涓嶆墽琛屻€嶄綅锛屼笌 AgentAuditKit 鐨勯€氱敤浣嶄簰琛ャ€?
 
 ---
 
-## 本地 API 文档（localhost:8450）
+## 澶栭儴椤圭洰闆嗘垚
 
-以下端点由本地 `python api/server.py` 提供，运行在 **localhost:8450**，**无公网依赖、无需注册**。先按上文「快速开始 · 方式二」启动本地 server，再访问对应端点。核心端点包括：
+AIShield 鍐呯疆 6 涓嵆鎻掑嵆鐢ㄧ殑闆嗘垚妯″潡锛屾彁鍗囧畨鍏ㄦ壂鎻忓拰濞佽儊鎯呮姤鑳藉姏銆傛墍鏈夋ā鍧楅浂渚濊禆鍗冲彲杩愯锛屽閮ㄤ緷璧栦负鍙€夊寮恒€?
 
-### 安全扫描
+### 蹇€熶娇鐢?
 
-| 方法 | 端点 | 描述 |
-|:---|:---|:---|
-| `POST` | `/api/v1/audit` | 完整安全扫描（含 5 维评分） |
-| `POST` | `/api/v1/prompt-check` | Prompt 注入检测 |
-| `POST` | `/api/v1/banned-words` | 违禁词检测（6 平台） |
-| `POST` | `/api/v1/scan/api` | OpenAPI / Swagger 安全扫描 |
-| `GET` | `/api/v1/health` | 服务健康检查 |
-| `GET` | `/api/v1/stats` | 扫描统计数据 |
+```python
+from scanner.integrations import EventPipeline, VClusterManager, PersistentAgent
 
-### Agent 生态
+# 瀹炴椂浜嬩欢绠￠亾
+pipeline = EventPipeline()
+pipeline.publish_vulnerability("CVE-2026-12345", "critical", "https://target.com")
 
-| 方法 | 端点 | 描述 |
-|:---|:---|:---|
-| `GET` | `/api/v1/identity/agents` | Agent 列表 |
-| `POST` | `/api/v1/collab/publish` | 发布协作消息 |
-| `POST` | `/api/v1/skills/publish` | 发布技能 |
-| `POST` | `/api/v1/sandbox/execute` | 沙箱安全执行 |
-| `GET` | `/api/v1/proxy/tools` | 可代理工具列表 |
-| `POST` | `/api/v1/proxy/call` | 代理调用认证工具 |
+# 闅旂鎵弿鐜
+manager = VClusterManager()
+env = manager.create_scan_env("target-scan-001")
+
+# 鎸佷箙鍖栧畨鍏ㄤ唬鐞?
+agent = PersistentAgent(api_key="your-xai-key")
+agent.analyze_threat({"cve_id": "CVE-2026-12345", "severity": "critical"})
+```
+
+### 瀹夎鍙€変緷璧?
+
+```bash
+pip install -r requirements-integrations.txt
+```
+
+璇﹁ [requirements-integrations.txt](./requirements-integrations.txt) 鍜?[scanner/integrations/](./scanner/integrations/) 鐩綍銆?
 
 ---
 
-## 项目架构
+## 鏈湴 API 鏂囨。锛坙ocalhost:8450锛?
+
+浠ヤ笅绔偣鐢辨湰鍦?`python api/server.py` 鎻愪緵锛岃繍琛屽湪 **localhost:8450**锛?*鏃犲叕缃戜緷璧栥€佹棤闇€娉ㄥ唽**銆傚厛鎸変笂鏂囥€屽揩閫熷紑濮?路 鏂瑰紡浜屻€嶅惎鍔ㄦ湰鍦?server锛屽啀璁块棶瀵瑰簲绔偣銆傛牳蹇冪鐐瑰寘鎷細
+
+### 瀹夊叏鎵弿
+
+| 鏂规硶 | 绔偣 | 鎻忚堪 |
+|:---|:---|:---|
+| `POST` | `/api/v1/audit` | 瀹屾暣瀹夊叏鎵弿锛堝惈 5 缁磋瘎鍒嗭級 |
+| `POST` | `/api/v1/prompt-check` | Prompt 娉ㄥ叆妫€娴?|
+| `POST` | `/api/v1/banned-words` | 杩濈璇嶆娴嬶紙6 骞冲彴锛?|
+| `POST` | `/api/v1/scan/api` | OpenAPI / Swagger 瀹夊叏鎵弿 |
+| `GET` | `/api/v1/health` | 鏈嶅姟鍋ュ悍妫€鏌?|
+| `GET` | `/api/v1/stats` | 鎵弿缁熻鏁版嵁 |
+
+### Agent 鐢熸€?
+
+| 鏂规硶 | 绔偣 | 鎻忚堪 |
+|:---|:---|:---|
+| `GET` | `/api/v1/identity/agents` | Agent 鍒楄〃 |
+| `POST` | `/api/v1/collab/publish` | 鍙戝竷鍗忎綔娑堟伅 |
+| `POST` | `/api/v1/skills/publish` | 鍙戝竷鎶€鑳?|
+| `POST` | `/api/v1/sandbox/execute` | 娌欑瀹夊叏鎵ц |
+| `GET` | `/api/v1/proxy/tools` | 鍙唬鐞嗗伐鍏峰垪琛?|
+| `POST` | `/api/v1/proxy/call` | 浠ｇ悊璋冪敤璁よ瘉宸ュ叿 |
+
+---
+
+## 椤圭洰鏋舵瀯
 
 ```mermaid
 graph TB
-    subgraph Clients["客户端"]
-        MCP["MCP 客户端<br/>(Claude / Cursor)"]
-        SDK["HTTP 客户端 / SDK"]
+    subgraph Clients["瀹㈡埛绔?]
+        MCP["MCP 瀹㈡埛绔?br/>(Claude / Cursor)"]
+        SDK["HTTP 瀹㈡埛绔?/ SDK"]
     end
 
     subgraph Server["AIShield Server (Port 8450)"]
-        API["REST API<br/>ThreadingMixIn 并发"]
+        API["REST API<br/>ThreadingMixIn 骞跺彂"]
         MCPE["MCP Endpoint<br/>StreamableHTTP"]
 
-        subgraph Scanner["安全扫描引擎"]
-            PE["Prompt 注入检测"]
-            MW["零宽字符检测"]
-            RP["Rug Pull 检测"]
-            AS["API 安全扫描"]
-            BW["违禁词检测"]
-            SC["5 维评分引擎<br/>227/233 条规则"]
+        subgraph Scanner["瀹夊叏鎵弿寮曟搸"]
+            PE["Prompt 娉ㄥ叆妫€娴?]
+            MW["闆跺瀛楃妫€娴?]
+            RP["Rug Pull 妫€娴?]
+            AS["API 瀹夊叏鎵弿"]
+            BW["杩濈璇嶆娴?]
+            SC["5 缁磋瘎鍒嗗紩鎿?br/>227/233 鏉¤鍒?]
         end
 
-        subgraph Eco["生态模块"]
-            ID["Agent DID<br/>身份系统"]
-            RP2["信誉评分"]
-            CO["协作通信总线"]
-            SB["安全沙箱"]
-            MK["技能市场"]
-            A2A["A2A 协议网关"]
-            PAY["支付与计费"]
-            BD["认证徽章"]
+        subgraph Eco["鐢熸€佹ā鍧?]
+            ID["Agent DID<br/>韬唤绯荤粺"]
+            RP2["淇¤獕璇勫垎"]
+            CO["鍗忎綔閫氫俊鎬荤嚎"]
+            SB["瀹夊叏娌欑"]
+            MK["鎶€鑳藉競鍦?]
+            A2A["A2A 鍗忚缃戝叧"]
+            PAY["鏀粯涓庤璐?]
+            BD["璁よ瘉寰界珷"]
+        end
+
+        subgraph Integrations["澶栭儴椤圭洰闆嗘垚"]
+            BB["BB Browser<br/>濞佽儊鎯呮姤閲囬泦"]
+            BU["Browser Use<br/>AI 娴忚鍣ㄦ壂鎻?]
+            GDB["Graph DB<br/>濞佽儊鍥捐氨"]
+            ES["Event Stream<br/>瀹炴椂浜嬩欢绠￠亾"]
+            VC["vCluster<br/>闅旂鎵弿鐜"]
+            GA["Grok Agent<br/>鎸佷箙鍖栫洃鎺?]
         end
     end
 
@@ -282,99 +334,99 @@ graph TB
     SC --> BD
 ```
 
-**技术特点：**
+**鎶€鏈壒鐐癸細**
 
-- **零依赖架构** — 纯 Python 标准库实现，无需 pip install 任何第三方包
-- **ThreadingMixIn 并发** — 内置线程池处理，支持多请求并行
-- **JSON 文件存储** — 轻量持久化，线程安全，开箱即用
-- **OWASP API Security 映射** — 9 大安全类别全覆盖
-- **中文违禁词引擎** — 覆盖微信、抖音、小红书、B 站、微博 6 大平台
+- **闆朵緷璧栨灦鏋?* 鈥?绾?Python 鏍囧噯搴撳疄鐜帮紝鏃犻渶 pip install 浠讳綍绗笁鏂瑰寘
+- **ThreadingMixIn 骞跺彂** 鈥?鍐呯疆绾跨▼姹犲鐞嗭紝鏀寔澶氳姹傚苟琛?
+- **JSON 鏂囦欢瀛樺偍** 鈥?杞婚噺鎸佷箙鍖栵紝绾跨▼瀹夊叏锛屽紑绠卞嵆鐢?
+- **OWASP API Security 鏄犲皠** 鈥?9 澶у畨鍏ㄧ被鍒叏瑕嗙洊
+- **涓枃杩濈璇嶅紩鎿?* 鈥?瑕嗙洊寰俊銆佹姈闊炽€佸皬绾功銆丅 绔欍€佸井鍗?6 澶у钩鍙?
 
 ---
 
-## 安全认证徽章
+## 瀹夊叏璁よ瘉寰界珷
 
-AIShield 为通过安全扫描的工具自动签发可嵌入的 SVG 徽章，让你的项目安全状态一目了然。
+AIShield 涓洪€氳繃瀹夊叏鎵弿鐨勫伐鍏疯嚜鍔ㄧ鍙戝彲宓屽叆鐨?SVG 寰界珷锛岃浣犵殑椤圭洰瀹夊叏鐘舵€佷竴鐩簡鐒躲€?
 
-### 徽章等级
+### 寰界珷绛夌骇
 
-| 等级 | 条件 | 徽章样式 |
+| 绛夌骇 | 鏉′欢 | 寰界珷鏍峰紡 |
 |:---|:---|:---|
-| 🥇 Gold | 总分 >= 90 | 金色边框 + 盾牌 |
-| 🥈 Silver | 总分 >= 70 | 银色边框 + 盾牌 |
-| 🥉 Bronze | 总分 >= 50 | 铜色边框 + 盾牌 |
+| 馃 Gold | 鎬诲垎 >= 90 | 閲戣壊杈规 + 鐩剧墝 |
+| 馃 Silver | 鎬诲垎 >= 70 | 閾惰壊杈规 + 鐩剧墝 |
+| 馃 Bronze | 鎬诲垎 >= 50 | 閾滆壊杈规 + 鐩剧墝 |
 
-### 在你的项目中使用
+### 鍦ㄤ綘鐨勯」鐩腑浣跨敤
 
-在你的 `README.md` 中添加以下代码：
+鍦ㄤ綘鐨?`README.md` 涓坊鍔犱互涓嬩唬鐮侊細
 
 ```markdown
 <!-- AIShield Security Badge -->
 ![AIShield Verified](https://your-aishield-domain.com/badge/your-tool-name)
 ```
 
-AIShield 会根据最新扫描结果动态渲染徽章颜色和状态。
+AIShield 浼氭牴鎹渶鏂版壂鎻忕粨鏋滃姩鎬佹覆鏌撳窘绔犻鑹插拰鐘舵€併€?
 
 ---
 
-## 路线图
+## 璺嚎鍥?
 
-### Phase 1 — 安全扫描引擎 ✅ (当前)
+### Phase 1 鈥?瀹夊叏鎵弿寮曟搸 鉁?(褰撳墠)
 
-- [x] 227 MCP / 233 Skill 条 OWASP MCP Top 10 + Agentic ASI01–10 对齐检测规则
-- [x] 5 维安全评分引擎
-- [x] 中文 Prompt 注入检测（拼音 / 谐音 / 拆字）
-- [x] 零宽字符 / 隐写术 / Rug Pull 检测
-- [x] 违禁词检测（6 大中文平台）
-- [x] MCP Server 模式 + StreamableHTTP
-- [x] 代理调用网关
+- [x] 227 MCP / 233 Skill 鏉?OWASP MCP Top 10 + Agentic ASI01鈥?0 瀵归綈妫€娴嬭鍒?
+- [x] 5 缁村畨鍏ㄨ瘎鍒嗗紩鎿?
+- [x] 涓枃 Prompt 娉ㄥ叆妫€娴嬶紙鎷奸煶 / 璋愰煶 / 鎷嗗瓧锛?
+- [x] 闆跺瀛楃 / 闅愬啓鏈?/ Rug Pull 妫€娴?
+- [x] 杩濈璇嶆娴嬶紙6 澶т腑鏂囧钩鍙帮級
+- [x] MCP Server 妯″紡 + StreamableHTTP
+- [x] 浠ｇ悊璋冪敤缃戝叧
 
-### Phase 2 — 信任生态
+### Phase 2 鈥?淇′换鐢熸€?
 
-- [ ] Agent DID 身份注册与跨链验证
-- [ ] 多级信誉系统上线
-- [ ] 安全徽章签发平台
-- [ ] 技能市场 Beta
-- [ ] A2A 协议网关完善
-- [ ] 按量计费与配额管理
+- [ ] Agent DID 韬唤娉ㄥ唽涓庤法閾鹃獙璇?
+- [ ] 澶氱骇淇¤獕绯荤粺涓婄嚎
+- [ ] 瀹夊叏寰界珷绛惧彂骞冲彴
+- [ ] 鎶€鑳藉競鍦?Beta
+- [ ] A2A 鍗忚缃戝叧瀹屽杽
+- [ ] 鎸夐噺璁¤垂涓庨厤棰濈鐞?
 
-### Phase 3 — 规模化治理
+### Phase 3 鈥?瑙勬ā鍖栨不鐞?
 
-- [ ] 多租户支持与企业 SSO
-- [ ] 社区贡献规则市场
-- [ ] AI 驱动的规则自动生成
-- [ ] Web Dashboard 可视化管理
-- [ ] 国际化 (i18n) 多语言支持
-- [ ] SLA 监控与告警
+- [ ] 澶氱鎴锋敮鎸佷笌浼佷笟 SSO
+- [ ] 绀惧尯璐＄尞瑙勫垯甯傚満
+- [ ] AI 椹卞姩鐨勮鍒欒嚜鍔ㄧ敓鎴?
+- [ ] Web Dashboard 鍙鍖栫鐞?
+- [ ] 鍥介檯鍖?(i18n) 澶氳瑷€鏀寔
+- [ ] SLA 鐩戞帶涓庡憡璀?
 
 ---
 
-## 贡献指南
+## 璐＄尞鎸囧崡
 
-我们欢迎任何形式的贡献，包括但不限于：新检测规则、Bug 修复、文档改进、功能建议。
+鎴戜滑娆㈣繋浠讳綍褰㈠紡鐨勮础鐚紝鍖呮嫭浣嗕笉闄愪簬锛氭柊妫€娴嬭鍒欍€丅ug 淇銆佹枃妗ｆ敼杩涖€佸姛鑳藉缓璁€?
 
-### 参与步骤
+### 鍙備笌姝ラ
 
-1. **Fork** 本仓库
-2. 创建特性分支：`git checkout -b feature/your-feature-name`
-3. 提交变更：`git commit -m 'feat: add xxx feature'`
-4. 推送分支：`git push origin feature/your-feature-name`
-5. 提交 **Pull Request**
+1. **Fork** 鏈粨搴?
+2. 鍒涘缓鐗规€у垎鏀細`git checkout -b feature/your-feature-name`
+3. 鎻愪氦鍙樻洿锛歚git commit -m 'feat: add xxx feature'`
+4. 鎺ㄩ€佸垎鏀細`git push origin feature/your-feature-name`
+5. 鎻愪氦 **Pull Request**
 
-### 提交规范
+### 鎻愪氦瑙勮寖
 
-使用 [Conventional Commits](https://www.conventionalcommits.org/) 格式：
+浣跨敤 [Conventional Commits](https://www.conventionalcommits.org/) 鏍煎紡锛?
 
-- `feat:` 新功能
-- `fix:` Bug 修复
-- `docs:` 文档变更
-- `refactor:` 代码重构
-- `test:` 测试相关
-- `chore:` 构建 / 工具链变更
+- `feat:` 鏂板姛鑳?
+- `fix:` Bug 淇
+- `docs:` 鏂囨。鍙樻洿
+- `refactor:` 浠ｇ爜閲嶆瀯
+- `test:` 娴嬭瘯鐩稿叧
+- `chore:` 鏋勫缓 / 宸ュ叿閾惧彉鏇?
 
-### 贡献检测规则
+### 璐＄尞妫€娴嬭鍒?
 
-在 `scanner/rules.py` 中添加新规则，确保与 OWASP MCP Top 10 分类对齐。提交 PR 前运行测试：
+鍦?`scanner/rules.py` 涓坊鍔犳柊瑙勫垯锛岀‘淇濅笌 OWASP MCP Top 10 鍒嗙被瀵归綈銆傛彁浜?PR 鍓嶈繍琛屾祴璇曪細
 
 ```bash
 python tests/quick_test.py
@@ -382,66 +434,66 @@ python tests/quick_test.py
 
 ---
 
-## 部署
+## 閮ㄧ讲
 
-AIShield 支持多种部署方式：
+AIShield 鏀寔澶氱閮ㄧ讲鏂瑰紡锛?
 
-**直接运行：**
+**鐩存帴杩愯锛?*
 
 ```bash
 python api/server.py
 ```
 
-**Docker：**
+**Docker锛?*
 
 ```bash
 docker build -t aishield .
 docker run -p 8450:8450 aishield
 ```
 
-**Railway / Render：**
+**Railway / Render锛?*
 
-项目内置 `railway.json`、`render.yaml` 和 `Procfile`，可直接一键部署。
+椤圭洰鍐呯疆 `railway.json`銆乣render.yaml` 鍜?`Procfile`锛屽彲鐩存帴涓€閿儴缃层€?
 
-详见 [DEPLOY.md](./DEPLOY.md)。
+璇﹁ [DEPLOY.md](./DEPLOY.md)銆?
 
 ---
 
-## 🚀 立即开始
+## 馃殌 绔嬪嵆寮€濮?
 
-选择最适合你的方式，全程本地运行，无需注册：
+閫夋嫨鏈€閫傚悎浣犵殑鏂瑰紡锛屽叏绋嬫湰鍦拌繍琛岋紝鏃犻渶娉ㄥ唽锛?
 
-| 方式 | 操作 | 适合场景 |
+| 鏂瑰紡 | 鎿嶄綔 | 閫傚悎鍦烘櫙 |
 |:---|:---|:---|
-| **MCP 集成（推荐）** | `npx -y aishield-mcp-server` 接入 Claude Desktop / Cursor | 在对话中直接扫描，代码不出机 |
-| **本地运行** | `git clone` + `python api/server.py` | 本地 API 面板，开发调试自定义规则 |
-| **CI 门禁** | GitHub Action 接入（见下） | push / PR 自动扫描，达阈值即失败 |
-| **命令行** | `python scanner/...` | 自定义脚本 / 批量扫描 |
+| **MCP 闆嗘垚锛堟帹鑽愶級** | `npx -y aishield-mcp-server` 鎺ュ叆 Claude Desktop / Cursor | 鍦ㄥ璇濅腑鐩存帴鎵弿锛屼唬鐮佷笉鍑烘満 |
+| **鏈湴杩愯** | `git clone` + `python api/server.py` | 鏈湴 API 闈㈡澘锛屽紑鍙戣皟璇曡嚜瀹氫箟瑙勫垯 |
+| **CI 闂ㄧ** | GitHub Action 鎺ュ叆锛堣涓嬶級 | push / PR 鑷姩鎵弿锛岃揪闃堝€煎嵆澶辫触 |
+| **鍛戒护琛?* | `python scanner/...` | 鑷畾涔夎剼鏈?/ 鎵归噺鎵弿 |
 
-> 所有方式均在本地完成，没有任何数据发送到外部。本开源版与云 SaaS `aishield.ai` 无关。
-
----
-
-## 致谢
-
-- [OWASP MCP Security Top 10](https://owasp.org/www-project-mcp-security-top-10/) — 安全标准与规则体系
-- [Google A2A Protocol](https://github.com/google/A2A) — Agent-to-Agent 通信协议参考
-- [MCP Community](https://modelcontextprotocol.io/) — Model Context Protocol 社区生态
-- 所有为 AIShield 贡献代码和规则的 [Contributors](https://github.com/lm203688/aishield/graphs/contributors)
+> 鎵€鏈夋柟寮忓潎鍦ㄦ湰鍦板畬鎴愶紝娌℃湁浠讳綍鏁版嵁鍙戦€佸埌澶栭儴銆傛湰寮€婧愮増涓庝簯 SaaS `aishield.ai` 鏃犲叧銆?
 
 ---
 
-## 许可证
+## 鑷磋阿
 
-[MIT License](./LICENSE) © 2025 AIShield Contributors
+- [OWASP MCP Security Top 10](https://owasp.org/www-project-mcp-security-top-10/) 鈥?瀹夊叏鏍囧噯涓庤鍒欎綋绯?
+- [Google A2A Protocol](https://github.com/google/A2A) 鈥?Agent-to-Agent 閫氫俊鍗忚鍙傝€?
+- [MCP Community](https://modelcontextprotocol.io/) 鈥?Model Context Protocol 绀惧尯鐢熸€?
+- 鎵€鏈変负 AIShield 璐＄尞浠ｇ爜鍜岃鍒欑殑 [Contributors](https://github.com/lm203688/aishield/graphs/contributors)
+
+---
+
+## 璁稿彲璇?
+
+[MIT License](./LICENSE) 漏 2025 AIShield Contributors
 
 <!--LATEST_POSTS_START-->
 
-### 📰 最新安全洞察
+### 馃摪 鏈€鏂板畨鍏ㄦ礊瀵?
 
-- [MCP 2026-07-28 无状态化：安全网关必须回答的 3 个问题](https://lm203688.github.io/aishield/blog/blog-mcp-stateless-security-2026-08-03.html) `2026-08-03`
-- [从 HuggingFace 被入侵看 Agent 沙箱逃逸的 4 个必要条件](https://lm203688.github.io/aishield/blog/blog-sandbox-escape-2026-08-03.html) `2026-08-03`
-- [深入分析：filesystem-test 如何修复安全漏洞](https://lm203688.github.io/aishield/blog/case-filesystem-test-2026-07-25.html) `2026-07-25`
-- [MCP 安全扫描周报 #30：发现 0 个高危风险](https://lm203688.github.io/aishield/blog/weekly-2026-07-25.html) `2026-07-25`
+- [MCP 2026-07-28 鏃犵姸鎬佸寲锛氬畨鍏ㄧ綉鍏冲繀椤诲洖绛旂殑 3 涓棶棰榏(https://lm203688.github.io/aishield/blog/blog-mcp-stateless-security-2026-08-03.html) `2026-08-03`
+- [浠?HuggingFace 琚叆渚电湅 Agent 娌欑閫冮€哥殑 4 涓繀瑕佹潯浠禲(https://lm203688.github.io/aishield/blog/blog-sandbox-escape-2026-08-03.html) `2026-08-03`
+- [娣卞叆鍒嗘瀽锛歠ilesystem-test 濡備綍淇瀹夊叏婕忔礊](https://lm203688.github.io/aishield/blog/case-filesystem-test-2026-07-25.html) `2026-07-25`
+- [MCP 瀹夊叏鎵弿鍛ㄦ姤 #30锛氬彂鐜?0 涓珮鍗遍闄(https://lm203688.github.io/aishield/blog/weekly-2026-07-25.html) `2026-07-25`
 
 <!--LATEST_POSTS_END-->
