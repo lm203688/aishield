@@ -1,25 +1,24 @@
 # AIShield Integrations - Optional Dependencies
 # ================================================
-# 核心模块无外部依赖，以下为各集成的可选依赖
-# 安装方式: pip install -r requirements-integrations.txt
+# 鏍稿績妯″潡鏃犲閮ㄤ緷璧栵紝浠ヤ笅涓哄悇闆嗘垚鐨勫彲閫変緷璧?# 瀹夎鏂瑰紡: pip install -r requirements-integrations.txt
 
-# Phase 1: BB Browser (可选，用于 MCP 工具增强)
-# bb-browser 通过 npm 全局安装: npm install -g bb-browser
+# Phase 1: BB Browser (鍙€夛紝鐢ㄤ簬 MCP 宸ュ叿澧炲己)
+# bb-browser 閫氳繃 npm 鍏ㄥ眬瀹夎: npm install -g bb-browser
 
-# Phase 2: Browser Use (AI 浏览器扫描)
+# Phase 2: Browser Use (AI 娴忚鍣ㄦ壂鎻?
 browser-use>=0.2.0
 
-# Phase 3: Graph DB (威胁图谱)
-neo4j>=5.0.0          # Neo4j 后端
-# arango>=3.0.0       # ArangoDB 后端 (可选)
+# Phase 3: Graph DB (濞佽儊鍥捐氨)
+neo4j>=5.0.0          # Neo4j 鍚庣
+# arango>=3.0.0       # ArangoDB 鍚庣 (鍙€?
 
-# Phase 4: Event Stream (实时事件管道)
-kafka-python>=2.0.0   # Apache Kafka (可选，无依赖时使用内存总线)
+# Phase 4: Event Stream (瀹炴椂浜嬩欢绠￠亾)
+kafka-python>=2.0.0   # Apache Kafka (鍙€夛紝鏃犱緷璧栨椂浣跨敤鍐呭瓨鎬荤嚎)
 
-# Phase 5: Scan Isolation (vCluster 隔离环境)
+# Phase 5: Scan Isolation (vCluster 闅旂鐜)
 # vcluster CLI: https://www.vcluster.com/docs/getting-started/setup
 # kubectl: https://kubernetes.io/docs/tasks/tools/
 
 # Phase 6: Persistent Agent (Grok Bot)
-# 无需额外依赖，使用标准库 urllib
+# 鏃犻渶棰濆渚濊禆锛屼娇鐢ㄦ爣鍑嗗簱 urllib
 # API Key: https://console.x.ai/

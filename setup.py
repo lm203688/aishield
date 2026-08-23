@@ -14,6 +14,16 @@ setup(
     license="MIT",
     packages=find_packages(exclude=["tests*", "mcp-server*", "node_modules*", "*.zip"]),
     python_requires=">=3.9",
+    extras_require={
+        "browser-use": ["browser-use>=0.2.0"],
+        "graph-db": ["neo4j>=5.0.0"],
+        "kafka": ["kafka-python>=2.0.0"],
+        "all": [
+            "browser-use>=0.2.0",
+            "neo4j>=5.0.0",
+            "kafka-python>=2.0.0",
+        ],
+    },
     entry_points={
         "console_scripts": [
             "aishield=api.server:main",
