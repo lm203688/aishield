@@ -1,8 +1,8 @@
 {
   "domain": "registry",
   "current": {
-    "coverage_pct": 60,
-    "listed": 3,
+    "coverage_pct": 20,
+    "listed": 1,
     "total": 5,
     "todos": [
       {
@@ -14,35 +14,23 @@
         "niche": "GitHub Topics 检索曝光",
         "action": "补齐 GitHub topics: ai-security —— 零成本获取平台内检索流量",
         "priority": "P2"
+      },
+      {
+        "niche": "内容站 GitHub Pages",
+        "action": "在仓库 Settings → Pages 开启 GitHub Pages（Source: main /docs）",
+        "priority": "P1"
+      },
+      {
+        "niche": "被调用的安全数据源 API",
+        "action": "触发自愈闭环恢复服务",
+        "priority": "P0"
       }
     ],
-    "checked_at": "2026-08-24T08:53:38.324304+00:00",
+    "checked_at": "2026-08-24T09:53:23.528143+00:00",
     "_source": "registry_tracker",
-    "_ts": "2026-08-24T08:53:38.324679+00:00"
+    "_ts": "2026-08-24T09:53:23.528461+00:00"
   },
   "history": [
-    {
-      "ts": "2026-08-22T02:58:08.564810+00:00",
-      "source": "registry_tracker",
-      "state": {
-        "coverage_pct": 60,
-        "listed": 3,
-        "total": 5,
-        "todos": [
-          {
-            "niche": "MCP 官方 Registry 收录",
-            "action": "向 modelcontextprotocol/registry 提交 server.json —— 生态入口即用户入口",
-            "priority": "P1"
-          },
-          {
-            "niche": "GitHub Topics 检索曝光",
-            "action": "补齐 GitHub topics: ai-security —— 零成本获取平台内检索流量",
-            "priority": "P2"
-          }
-        ],
-        "checked_at": "2026-08-22T02:58:08.564450+00:00"
-      }
-    },
     {
       "ts": "2026-08-22T03:50:06.260131+00:00",
       "source": "registry_tracker",
@@ -1120,8 +1108,40 @@
         ],
         "checked_at": "2026-08-24T08:53:38.324304+00:00"
       }
+    },
+    {
+      "ts": "2026-08-24T09:53:23.528473+00:00",
+      "source": "registry_tracker",
+      "state": {
+        "coverage_pct": 20,
+        "listed": 1,
+        "total": 5,
+        "todos": [
+          {
+            "niche": "MCP 官方 Registry 收录",
+            "action": "向 modelcontextprotocol/registry 提交 server.json —— 生态入口即用户入口",
+            "priority": "P1"
+          },
+          {
+            "niche": "GitHub Topics 检索曝光",
+            "action": "补齐 GitHub topics: ai-security —— 零成本获取平台内检索流量",
+            "priority": "P2"
+          },
+          {
+            "niche": "内容站 GitHub Pages",
+            "action": "在仓库 Settings → Pages 开启 GitHub Pages（Source: main /docs）",
+            "priority": "P1"
+          },
+          {
+            "niche": "被调用的安全数据源 API",
+            "action": "触发自愈闭环恢复服务",
+            "priority": "P0"
+          }
+        ],
+        "checked_at": "2026-08-24T09:53:23.528143+00:00"
+      }
     }
   ],
-  "updated": "2026-08-24T08:53:38.324698+00:00",
+  "updated": "2026-08-24T09:53:23.528477+00:00",
   "desc": "MCP Registry / npm / Marketplace 上架状态"
 }
