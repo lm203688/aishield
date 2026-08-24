@@ -1,6 +1,24 @@
 {
   "intel": [
     {
+      "id": "CVE-2026-76072",
+      "source": "nvd",
+      "severity": "high",
+      "cvss": 7.4,
+      "title": "The Continue CLI applies an incomplete denylist as its only barrier to destructive shell commands when running unattended. In headless mode and auto mode the default policy in extensions/cli/src/permi",
+      "summary": "The Continue CLI applies an incomplete denylist as its only barrier to destructive shell commands when running unattended. In headless mode and auto mode the default policy in extensions/cli/src/permissions/defaultPolicies.ts grants the Bash tool the allow permission, and permissionChecker.ts hard-blocks a command only when the terminal-security evaluator returns a disabled verdict, so isCriticalCommand in packages/terminal-security/src/evaluateTerminalCommandSecurity.ts is the sole control. Its",
+      "affected": "prompt injection",
+      "references": [
+        "https://github.com/continuedev/continue",
+        "https://github.com/continuedev/continue/blob/main/packages/terminal-security/src/evaluateTerminalCommandSecurity.ts",
+        "https://github.com/continuedev/continue/issues/13001",
+        "https://www.npmjs.com/package/@continuedev/cli",
+        "https://www.vulncheck.com/advisories/continue-cli-through-incomplete-destructive-command-denylist-in-headless-and-auto-mode"
+      ],
+      "published": "2026-08-24T18:17:21.233",
+      "fetched": "2026-08-24T18:44:57.157120+00:00"
+    },
+    {
       "id": "GHSA-x2rj-828p-hx9m",
       "source": "github-advisory",
       "severity": "critical",
@@ -3153,19 +3171,19 @@
       "fetched": "2026-08-04T06:34:53.913899+00:00"
     }
   ],
-  "updated": "2026-08-24T17:33:52.156258+00:00",
+  "updated": "2026-08-24T18:45:25.338905+00:00",
   "sources": [
     "osv",
     "nvd",
     "github-advisory"
   ],
   "stats": {
+    "high": 94,
     "critical": 29,
     "medium": 65,
-    "high": 93,
     "unknown": 20,
     "low": 3,
     "moderate": 1
   },
-  "total": 211
+  "total": 212
 }

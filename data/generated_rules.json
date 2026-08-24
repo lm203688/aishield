@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-08-24T17:34:06.159153+00:00",
-  "source_intel_count": 211,
+  "generated_at": "2026-08-24T18:45:42.462787+00:00",
+  "source_intel_count": 212,
   "package_blacklist": {
     "pip:xinference": {
       "ecosystem": "pip",
