@@ -1,0 +1,131 @@
+name: AIShield Rule Auto-Promoter
+
+# 情报→规则的"最后一公里"：Tech Radar 每日起草候选到 scanner/_proposed/，
+# 但 promote_rule.py 一直是手动动作，候选只进不出（2026-08-24 审计时已积压 43 条）。
+# 本任务每日自动执行：六道闸门校验 → 批量晋升 → 全量测试 → 绿了入库 / 红了自动回滚并告警。
+#
+# 六道闸门（promote_rule.py 内置）：schema / 无 TODO / 正则可编译 / 不过宽 /
+# 不与现网规则重复 / 良性语料零误报。
+# 晋升落点 data/radar_rules.json 与 intel 再生的 generated_rules.json 相互独立，
+# 威胁情报流水线不会抹掉雷达晋升的规则。
+
+on:
+  schedule:
+    - cron: '40 3 * * *'   # 每日 03:40 UTC —— Tech Radar(02:00) 起草之后
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: rule-promoter
+  cancel-in-progress: false
+
+jobs:
+  promote:
+    name: Promote Passing Candidates
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Gate report (--check，blocked 属正常待作者补全，不失败)
+        run: python scripts/promote_rule.py --check || true
+
+      - name: Promote all passing candidates
+        id: promo
+        run: |
+          python scripts/promote_rule.py --promote-all | tee /tmp/promo.log
+          N=$(grep -Eo '^promoted [0-9]+' /tmp/promo.log | grep -Eo '[0-9]+' | tail -1)
+          echo "promoted=${N:-0}" >> "$GITHUB_OUTPUT"
+          echo "本轮晋升规则数: ${N:-0}"
+
+      - name: Full test suite（晋升必须保持全绿）
+        id: test
+        run: |
+          if ! python tests/run_all.py; then
+            echo "PROMO_TESTS=red" >> "$GITHUB_ENV"
+            exit 1
+          fi
+          echo "PROMO_TESTS=green" >> "$GITHUB_ENV"
+
+      - name: Rollback promotion on red test
+        if: failure()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NOTIFY_WEBHOOK: ${{ secrets.NOTIFY_WEBHOOK }}
+        run: |
+          # 安全阀：测试红了 = 本轮晋升引入回归。整体回退到晋升前状态，
+          # 归档文件退回候选目录等待人工诊断，并发出 P1 告警附日志样本。
+          git checkout -- data/radar_rules.json mcp-server/README.md 2>/dev/null || true
+          if [ -d scanner/_proposed/promoted ]; then
+            find scanner/_proposed/promoted -name '*.json' -exec mv {} scanner/_proposed/ \; 2>/dev/null || true
+          fi
+          {
+            printf '%s\n' "规则自动晋升后全量测试转红，已自动回滚 data/radar_rules.json 并退回候选。"
+            printf '%s\n' ""
+            printf '%s\n' "- 本轮晋升数: ${{ steps.promo.outputs.promoted }}"
+            printf '%s\n' "- 测试结果: ${{ steps.test.outcome }}"
+            printf '%s\n' "- 运行链接: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          } > /tmp/body.md
+          python scripts/notify.py --level P1 \
+            --fingerprint rule-promotion-failed \
+            --title "规则自动晋升被测试闸门回滚" \
+            --body "$(cat /tmp/body.md)"
+          exit 1
+
+      - name: Commit promoted rules
+        if: success()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          # 心跳：rules 域每周期刷新（数值不变则不刷 history）
+          RADAR_N=$(python -c "import json;print(len(json.load(open('data/radar_rules.json')).get('rules',{})))" 2>/dev/null || echo 0)
+          python scripts/state_bus.py set rules "{\"radar_rules\":$RADAR_N,\"last_promoted\":${{ steps.promo.outputs.promoted }}}" --source rule-promoter || true
+          git add data/radar_rules.json scanner/_proposed/ mcp-server/README.md data/state/ 2>/dev/null || true
+          if ! git diff --cached --quiet; then
+            git commit -m "auto: 规则闸门自动晋升 ${{ steps.promo.outputs.promoted }} 条 [skip ci]" || true
+            git pull --rebase --autostash origin main || true
+            git push origin main || echo "push skipped"
+          else
+            echo "本周期无可晋升候选或无实际变化"
+          fi
+
+      - name: Clear alarm on green promotion
+        if: success()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NOTIFY_WEBHOOK: ${{ secrets.NOTIFY_WEBHOOK }}
+        run: |
+          python scripts/notify.py --resolve \
+            --fingerprint rule-promotion-failed \
+            --title "规则晋升恢复" \
+            --body "晋升后全量测试通过。" || true
+
+  alert:
+    name: Alert on Loop Failure
+    needs: promote
+    if: always() && needs.promote.result == 'failure'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Escalate through notification bus
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NOTIFY_WEBHOOK: ${{ secrets.NOTIFY_WEBHOOK }}
+        run: |
+          # promote job 内部已发 P1（rule-promotion-failed），此处兜底：
+          # 任务本身崩溃（而非测试红）时也要有人知道。
+          python scripts/notify.py --level P1 \
+            --fingerprint rule-promoter-crashed \
+            --title "规则晋升任务执行失败" \
+            --body "promote job 结果: ${{ needs.promote.result }}。运行链接: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
