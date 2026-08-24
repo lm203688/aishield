@@ -1,5 +1,5 @@
 === DIAGNOSTIC ===
-Time: Tue Aug 25 02:03:16 AM CST 2026
+Time: Tue Aug 25 02:19:46 AM CST 2026
 === USER ===
 root
 === GIT LOG ===
@@ -13,16 +13,12 @@ dbcf3459 fix: download script from GitHub raw if git reset fails, add script ver
 # 解决 Quick Tunnel 的 error 1014 (CNAME Cross-User Banned) 问题
 #
 === API STATUS ===
-{"status": "ok", "version": "4.2", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 133, "uptime": 1787594596.1122136, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup"}OK
+{"status": "ok", "version": "4.2", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 133, "uptime": 1787595586.3400936, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup"}OK
 === CLOUDFLARED PROCESS ===
-root     3624021  0.9  1.8 1294676 37232 ?       Sl   02:03   0:00 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
-root     3624040  1.0  1.8 1294676 36808 ?       Sl   02:03   0:00 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
-root     3624297  1.5  1.9 1294676 38664 ?       Sl   02:03   0:00 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
+root     3624021  0.1  1.6 1294676 32640 ?       Sl   02:03   0:01 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
+root     3624040  0.1  1.5 1294676 31768 ?       Sl   02:03   0:01 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
+root     3624297  0.1  1.6 1294676 33288 ?       Sl   02:03   0:01 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
 === CLOUDFLARED LOG (last 30 lines) ===
-2026-08-24T18:03:05Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=1 event=0 ip=198.41.192.7
-2026-08-24T18:03:06Z INF Registered tunnel connection connIndex=1 connection=0259e32d-9d6d-4cff-85e8-fd119f8f3f10 event=0 ip=198.41.192.7 locat2026-08-24T18:03:06Z INF2026-08-24T18:03:06Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=2 event=0 ip=198.41.192.47
-2026-08-24T18:03:07Z INF Registered tunnel connection connIndex=2 connection=ba03f220-89e1-4925-a8ca-16a26b06c912 event=0 ip=198.41.192.47 locatio2026-08-24T18:03:10Z WRN Failed to dial a quic connection error="failed to dial to edge with quic: timeout: no recent network activity" connIndex=1 event=0 ip=198.41.200.73
-2026-08-24T18:03:10Z INF Retrying connection in up to 2s connIndex=1 event=0 ip=198.41.200.73
 2026-08-24T18:03:10Z WRN Connection terminated error="failed to 2026-08-24T18:03:11Z INF +-------------------------------------------------------------------------------------+
 2026-08-24T18:03:11Z INF |                               CONNECTIVITY PRE-CHECKS                               |
 2026-08-24T18:03:11Z INF +-------------------------------------------------------------------------------------+
@@ -49,6 +45,10 @@ alse run_id=39f54667-5af8-4be8-a942-92301118f565 suggested_protocol=quic
 2026-08-24T18:03:12Z WRN Failed to dial a quic connection error="failed to dial to edge with quic: timeout: no recent network activity" connIndex=3 event=0 ip=198.41.200.193
 2026-08-24T18:03:12Z INF Retrying connection in up to 2s connIndex=3 event=0 ip=198.41.200.193
 2026-08-24T18:03:12Z WRN Connection terminated error="failed to dial to edge with quic: timeout: no recent network activity" connIndex=3
+2026-08-24T18:03:20Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=1 event=0 ip=198.41.200.113
+2026-08-24T18:03:20Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=3 event=0 ip=198.41.200.13
+2026-08-24T18:03:20Z INF Registered tunnel connection connIndex=3 connection=0a87d12c-5457-4f76-bf52-3e0a4aad08c5 event=0 ip=198.41.200.13 location=lax01 protocol=quic
+2026-08-24T18:03:20Z INF Registered tunnel connection connIndex=1 connection=5cd22252-6959-4d2f-812e-20ee57018494 event=0 ip=198.41.200.113 location=lax01 protocol=quic
 === DEPLOY LOG ===
 === AIShield Named Tunnel Deployment ===
 [02:02:56] Time: Tue Aug 25 02:02:56 AM CST 2026
@@ -218,11 +218,11 @@ cert.pem: -rw------- 1 root root 282 Jul 28 11:02 /root/.cloudflared/cert.pem
 === SYSTEMD STATUS ===
 ● cloudflared-tunnel.service - Cloudflare Named Tunnel for AIShield
      Loaded: loaded (/etc/systemd/system/cloudflared-tunnel.service; enabled; vendor preset: enabled)
-     Active: active (running) since Tue 2026-08-25 02:03:07 CST; 8s ago
+     Active: active (running) since Tue 2026-08-25 02:03:07 CST; 16min ago
    Main PID: 3624293 (start-tunnel.sh)
-      Tasks: 8 (limit: 2216)
-     Memory: 20.8M
-        CPU: 149ms
+      Tasks: 9 (limit: 2216)
+     Memory: 19.0M
+        CPU: 1.714s
      CGroup: /system.slice/cloudflared-tunnel.service
              ├─3624293 /bin/bash /opt/start-tunnel.sh
              └─3624297 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
@@ -256,12 +256,12 @@ fi
 wait $CF_PID
 
 === HTTPS Test from Runner ===
-Time: Mon Aug 24 18:03:16 UTC 2026
+Time: Mon Aug 24 18:19:46 UTC 2026
 
 === curl test (aishield.tools) ===
-{"status": "ok", "version": "4.2", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 133, "uptime": 1787594597.528955, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup"}
+{"status": "ok", "version": "4.2", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 133, "uptime": 1787595587.5550225, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup"}
 === DNS lookup ===
-104.21.81.46
 172.67.188.44
+104.21.81.46
 
 === DNS CNAME check ===
