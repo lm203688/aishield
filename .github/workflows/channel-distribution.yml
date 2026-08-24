@@ -273,6 +273,25 @@ jobs:
             --title "内容分发恢复正常" \
             --body "分发链路验证通过，内容已抵达零凭据渠道。"
 
+      - name: Heartbeat & commit state bus (distribution)
+        # 【2026-08-24 补】闭环在跑但状态域停更（08-08 起）导致元监控 M3 永远报
+        # "环节停摆"。改为每周期必回写心跳：updated 刷新、内容无变化则不刷 history。
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python scripts/state_bus.py set distribution \
+            "{\"published_total\":${{ needs.publish.outputs.published || 0 }},\"last_run\":\"publish=${{ needs.publish.result }}/registry=${{ needs.registry.result }}/assert=${{ steps.assert.outcome }}\"}" \
+            --source channel-distribution || true
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/state/ 2>/dev/null || true
+          if ! git diff --cached --quiet; then
+            git commit -m "auto: distribution 状态域心跳 [skip ci]" || true
+            git pull --rebase --autostash origin main || true
+            git push origin main || echo "push skipped"
+          fi
+
   # ── 合并自 acquisition-automation.yml：获客监控 ──────────────────
   # 原 acquisition-automation 的 content-pipeline job 与本 workflow 的 content job
   # 100% 重复（都跑 content_pipeline.py --all），已删除。仅保留 acquisition-monitor。
@@ -303,17 +322,27 @@ jobs:
 
       - name: Notify on Alerts
         if: steps.alerts.outputs.ALERTS_FOUND == 'true'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const title = `📉 获客指标告警 (run ${context.runId})`;
-            const { data: issues } = await github.rest.issues.listForRepo({
-              owner: context.repo.owner, repo: context.repo.repo, state: 'open', per_page: 100
-            });
-            if (issues.find(i => i.title === title && !i.pull_request)) { console.log('已有告警'); return; }
-            await github.rest.issues.create({
-              owner: context.repo.owner, repo: context.repo.repo, title,
-              body: `获客指标触发告警阈值，请查看 acquisition_report.json。\n运行链接: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
-              labels: ['acquisition','alert','automated']
-            });
-            console.log('已创建获客指标告警 issue');
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NOTIFY_WEBHOOK: ${{ secrets.NOTIFY_WEBHOOK }}
+        run: |
+          # 【2026-08-24 修复】原实现把 runId 拼进 Issue 标题做去重，
+          # 每次运行标题必不同 -> 去重永不命中 -> 每小时灌一个新 Issue（#624 起 20+）。
+          # 现走通知总线：P2 级只落盘 + 可选 webhook，不建 Issue（业务指标噪音
+          # 按 2026-08-23 决策归入周度 digest）；指纹恒定，冷却期内不重复。
+          BODY=$(python scripts/acquisition_monitor.py 2>&1 | tail -40)
+          python scripts/notify.py --level P2 \
+            --fingerprint acquisition-metrics \
+            --title "获客指标低于阈值" \
+            --body "$BODY"
+
+      - name: Resolve alert when recovered
+        if: steps.alerts.outputs.ALERTS_FOUND != 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NOTIFY_WEBHOOK: ${{ secrets.NOTIFY_WEBHOOK }}
+        run: |
+          python scripts/notify.py --resolve \
+            --fingerprint acquisition-metrics \
+            --title "获客指标恢复" \
+            --body "获客监控阈值全部通过。"
