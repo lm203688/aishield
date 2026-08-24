@@ -138,3 +138,21 @@
 
 **最后更新**: 2026-08-24
 **下次评审**: 2026-09-07（双周节奏；Phase 2 收尾项见上）
+
+<!--AUTO_ADOPTED_START-->
+
+## 自动采纳项（迭代闭环产出）
+
+> 由 feedback_aggregator 于 2026-08-24 自动聚合四路输入生成，每轮覆盖更新。勾选即视为已处理。
+
+| 优先级 | 来源 | 事项 | 参考 |
+|--------|------|------|------|
+| P0 | S2 生态位待办 | 被调用的安全数据源 API：触发自愈闭环恢复服务 | — |
+| P1 | S2 生态位待办 | MCP 官方 Registry 收录：向 modelcontextprotocol/registry 提交 server.json —— 生态入口即用户入口 | — |
+| P1 | S2 生态位待办 | 内容站 GitHub Pages：在仓库 Settings → Pages 开启 GitHub Pages（Source: main /docs） | — |
+| P1 | S3 体系问题 | 修复自动化体系缺陷 — M3 状态新鲜度: 状态域 ['feature'] 超过 72 小时未更新，对应环节可能已停摆 | — |
+| P2 | S1 用户反馈 | 📊 AIShield 项目迭代报告 (自动更新) | [链接](https://github.com/lm203688/aishield/issues/554) |
+| P2 | S2 生态位待办 | GitHub Topics 检索曝光：补齐 GitHub topics: ai-security —— 零成本获取平台内检索流量 | — |
+| P2 | S4 情报驱动 | 补齐 OWASP LLM Top10 未覆盖类别的检测规则：LLM02, LLM03, LLM04, LLM08, LLM09, LLM10 | — |
+
+<!--AUTO_ADOPTED_END-->
