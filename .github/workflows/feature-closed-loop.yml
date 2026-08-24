@@ -55,6 +55,10 @@ jobs:
           echo "count=$COUNT" >> $GITHUB_OUTPUT
           echo "p0p1=$P0P1" >> $GITHUB_OUTPUT
           echo "聚合结果: total=$COUNT p0p1=$P0P1"
+          # 【2026-08-24 补】feature 状态域自 08-04 停更（无新反馈可采纳时不落盘），
+          # 元监控 M3 误判"停摆"。每周期必写心跳：updated 刷新，数值不变则不刷 history。
+          python scripts/state_bus.py set feature "{\"adopted\":$COUNT,\"p1_count\":$P0P1}" \
+            --source feature-closed-loop || true
 
       - name: Upload aggregation artifacts
         uses: actions/upload-artifact@v4
