@@ -164,25 +164,18 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         NOTIFY_WEBHOOK: ${{ secrets.NOTIFY_WEBHOOK }}
       run: |
-        # 优化：先读 self-heal 的最近探测结果，避免重复探测
-        # 如果 self-heal 在 5 分钟内探测过且健康，直接引用
+        # 【2026-08-24 修复】原实现把多行 python -c 内联在 YAML 缩进里，
+        # import 行继承前导空格 -> IndentationError（stderr 又被 2>/dev/null 吞掉）
+        # -> 赋值语句退出码 1 -> bash -e 立即静默终止，验证门从未真正执行过。
+        # 现改为单行表达式 + `|| echo unknown` 兜底，任何异常都走独立探测路径。
         ok=false
         if [ -f data/state/health.json ]; then
-          last_check=$(python -c "
-          import json, sys
-          try:
-              d = json.load(open('data/state/health.json'))
-              c = d.get('current', {})
-              if c.get('healthy'):
-                  print('healthy')
-              else:
-                  print('unhealthy')
-          except:
-              print('unknown')
-          " 2>/dev/null)
+          last_check=$(python -c "import json,datetime;d=json.load(open('data/state/health.json'));c=d.get('current',{});ts=c.get('checked_at');age=(datetime.datetime.now(datetime.timezone.utc)-datetime.datetime.fromisoformat(ts)).total_seconds() if ts else 9e9;print('healthy' if c.get('healthy') and age<5400 else 'stale')" 2>/dev/null || echo unknown)
           if [ "$last_check" = "healthy" ]; then
-            echo "✅ self-heal 最近探测健康，直接引用状态"
+            echo "✅ self-heal 探测健康且 <90min，直接引用状态"
             ok=true
+          else
+            echo "self-heal 状态为 $last_check，执行独立探测..."
           fi
         fi
 
@@ -208,6 +201,12 @@ jobs:
         fi
         python scripts/notify.py --resolve --fingerprint deploy-verify-failed \
           --title "部署后验证恢复" --body "本次部署已通过线上验证。" || true
+
+        # 软诊断（不阻断）：线上自报版本与仓库不一致 = 部署未生效的早期信号
+        live_ver=$(curl -sk --max-time 15 https://aishield.tools/api/v1/health 2>/dev/null | python -c "import json,sys;print(json.load(sys.stdin).get('version',''))" 2>/dev/null || true)
+        if [ -n "$live_ver" ]; then
+          echo "线上服务自报版本: $live_ver（若与仓库 VERSION 长期不一致，说明部署未真正生效）"
+        fi
 
     - name: Record deploy state
       if: always()
