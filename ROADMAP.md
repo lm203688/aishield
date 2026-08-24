@@ -1,152 +1,140 @@
-# AIShield 璺嚎鍥?
+# AIShield 路线图
 
-> 鍩轰簬绔炲搧鐢熸€佹壂鎻忓拰 Agent 钀ラ攢浣撶郴鐮旂┒鍒跺畾鐨勮凯浠ｈ鍒?
+> 基于竞品生态扫描和 Agent 营销体系研究制定的迭代计划
 
-## Phase 1: 鍩虹璁炬柦瀹屽杽锛堝凡瀹屾垚锛?
+## Phase 1: 基础设施完善（已完成）
 
-- [x] OWASP MCP Top 10 瀵归綈鐨?133 鏉″畨鍏ㄨ鍒?
-- [x] MCP StreamableHTTP 绔偣锛圝SON-RPC 2.0锛?
-- [x] A2A Agent Card 鑷姩鍙戠幇
-- [x] Agent-First 涓€閿叆椹伙紙娉ㄥ唽 + API Key + 蹇€熸寚寮曪級
-- [x] OpenAPI 3.0.3 瑙勮寖锛坄/openapi.json`锛?
-- [x] 缁撴瀯鍖栭敊璇爜锛坄error_code` + `error_id`锛?
-- [x] 璐︽埛绯荤粺锛堟敞鍐?鐧诲綍/浣欓/鍏呭€硷級
-- [x] DID + 淇¤獕绯荤粺
-- [x] 鎶€鑳藉競鍦?+ 娌欑
-- [x] GEO 浼樺寲锛坰itemap, robots, agent-card, feeds锛?
-- [x] CI/CD 娴佹按绾?
-- [x] GitHub Issue 妯℃澘 + 鑷姩鏍囩 + Stale Bot
+- [x] OWASP MCP Top 10 对齐的 133 条安全规则
+- [x] MCP StreamableHTTP 端点（JSON-RPC 2.0）
+- [x] A2A Agent Card 自动发现
+- [x] Agent-First 一键入驻（注册 + API Key + 快速指引）
+- [x] OpenAPI 3.0.3 规范（`/openapi.json`）
+- [x] 结构化错误码（`error_code` + `error_id`）
+- [x] 账户系统（注册/登录/余额/充值）
+- [x] DID + 信誉系统
+- [x] 技能市场 + 沙箱
+- [x] GEO 优化（sitemap, robots, agent-card, feeds）
+- [x] CI/CD 流水线
+- [x] GitHub Issue 模板 + 自动标签 + Stale Bot
 - [x] CONTRIBUTING.md
 
-## Phase 1.5: 澶栭儴椤圭洰闆嗘垚锛堝凡瀹屾垚锛?
+## Phase 1.5: 外部项目集成（已完成）
 
-- [x] BB Browser 閫傞厤鍣?鈥?36 骞冲彴 103 鍛戒护濞佽儊鎯呮姤閲囬泦
-- [x] Browser Use AI 娴忚鍣ㄦ壂鎻?鈥?XSS/SQLi/CSRF/Recon 妯℃澘
-- [x] Graph DB 濞佽儊鍥捐氨 鈥?Neo4j/FalkorDB/ArangoDB 澶氬悗绔?
-- [x] Kafka/Flink 浜嬩欢绠￠亾 鈥?瀹炴椂浜嬩欢娴佸鐞?
-- [x] vCluster 闅旂鎵弿鐜 鈥?涓€閿垱寤?閿€姣?
-- [x] Grok Bot 鎸佷箙鍖栦唬鐞?鈥?AI 椹卞姩瀹夊叏鐩戞帶
-- [x] 闆嗘垚妯″潡鍖?+ 鍙€変緷璧栨竻鍗?
+- [x] BB Browser 适配器 — 36 平台 103 命令威胁情报采集
+- [x] Browser Use AI 浏览器扫描 — XSS/SQLi/CSRF/Recon 模板
+- [x] Graph DB 威胁图谱 — Neo4j/FalkorDB/ArangoDB 多后端
+- [x] Kafka/Flink 事件管道 — 实时事件流处理
+- [x] vCluster 隔离扫描环境 — 一键创建/销毁
+- [x] Grok Bot 持久化代理 — AI 驱动安全监控
+- [x] 集成模块包 + 可选依赖清单
 
-## Phase 2: 鍘熺敓鍒嗗彂涓庣敓鎬佸崱浣嶏紙0-3 涓湀锛?
+## Phase 2: 原生分发与生态卡位（0-3 个月）
 
-### MCP 鐢熸€?
-- [x] 鍚?awesome-mcp-servers 鎻愪氦 PR 涓婃灦锛圥R #2锛岀瓑寰呭悎骞讹級
-- [x] 鍙戝竷 MCP Server 鍒?Smithery.ai 鐩綍锛坙m203688/aishield锛?
-- [x] 鎻愪氦 Cursor Directory锛堢瓑寰呭畨鍏ㄦ壂鎻忥級
-- [x] 閰嶇疆 Glama.ai Topics锛堢瓑寰呯埇铏储寮曪級
-- [ ] 鍙戝竷 `aishield-mcp-server` npm 鍖咃紙鏈湴 stdio wrapper锛?
-- [ ] 鐢宠 Claude Desktop 瀹樻柟鎺ㄨ崘
-- [ ] 鐢宠 VS Code Copilot MCP 闆嗘垚
+### MCP 生态
+- [x] 向 awesome-mcp-servers 提交 PR 上架（PR #10694，已附 Glama 评估）
+- [x] 发布 MCP Server 到 Smithery.ai 目录（`smithery.yaml` 已备，实际 listing 待完成）
+- [x] 提交 Cursor Directory（等待安全扫描）
+- [x] 配置 Glama.ai Topics（已索引：glama.ai/mcp/servers/lm203688/aishield）
+- [x] 发布 `aishield-mcp-server` npm 包（**4.2.2 已上线**，2026-08 实测可安装）
+- [x] 上架官方 MCP Registry（`io.github.lm203688/aishield` 4.2.2 active/isLatest，由 `publish-mcp-registry.yml` 发版推送）
+- [ ] 申请 Claude Desktop 官方推荐
+- [ ] 申请 VS Code Copilot MCP 集成
 
-### GitHub 鐢熸€?
-- [ ] 鍙戝竷 GitHub Action锛坄aishield-security-scan`锛夊埌 Marketplace
-- [ ] 鏀寔 PR 璇勮鑷姩鏍囨敞瀹夊叏椋庨櫓
-- [ ] 鏀寔 SARIF 鏍煎紡杈撳嚭锛堜笌 GitHub Advanced Security 鍏煎锛?
-- [ ] 鐢宠 GitHub Sponsors
+### GitHub 生态
+- [ ] 发布 GitHub Action（`aishield-security-scan`）到 Marketplace（物料在 `distribution/github-marketplace/`，须建独立仓）
+- [ ] 支持 PR 评论自动标注安全风险
+- [x] 支持 SARIF 格式输出（`aishield.sarif` + CI 上传 GitHub Security）
+- [ ] 申请 GitHub Sponsors
 
-### A2A 鐢熸€?
-- [ ] 瀹屽杽 A2A Agent Card锛堝鍔犳洿澶氭妧鑳芥弿杩帮級
-- [ ] 瀹炵幇 A2A Task 璺敱锛坄POST /api/v1/a2a/task`锛?
-- [ ] 鎺ュ叆 Google A2A 娴嬭瘯濂椾欢
+### A2A 生态
+- [ ] 完善 A2A Agent Card（增加更多技能描述）
+- [ ] 实现 A2A Task 路由（`POST /api/v1/a2a/task`）
+- [ ] 接入 Google A2A 测试套件
 
-### 鍐呭钀ラ攢
-- [ ] 寤虹珛鍗氬锛坅ishield.tools/blog锛?
-- [ ] 姣忓懆鍙戝竷 1 绡?AI Agent 瀹夊叏鍒嗘瀽鏂囩珷
-- [ ] 鍙戝竷銆奜WASP MCP Top 10 涓枃瑙ｈ銆嬬郴鍒?
-- [ ] 鍦?Reddit r/LocalLLaMA銆丠acker News 鍙戝竷浜у搧
+### 内容营销
+- [ ] 建立博客（aishield.tools/blog）
+- [ ] 每周发布 1 篇 AI Agent 安全分析文章
+- [ ] 发布《OWASP MCP Top 10 中文解读》系列
+- [ ] 在 Reddit r/LocalLLaMA、Hacker News 发布产品
 
-## Phase 3: 绀惧尯椋炶疆锛?-6 涓湀锛?
+## Phase 3: 社区飞轮（3-6 个月）
 
-### 绀惧尯寤鸿
-- [ ] 寤虹珛 Discord 绀惧尯
-- [ ] 寤虹珛 GitHub Discussions
-- [ ] 姣忔湀绀惧尯鏇存柊锛圱his Month in AIShield锛?
-- [ ] 寮€婧愮淮鎶よ€呰鍒掞紙鍏嶈垂 Pro 濂楅锛?
-- [ ] 瀹夊叏瑙勫垯璐＄尞鑰呯讲鍚嶆満鍒?
+### 社区建设
+- [ ] 建立 Discord 社区
+- [ ] 建立 GitHub Discussions
+- [ ] 每月社区更新（This Month in AIShield）
+- [ ] 开源维护者计划（免费 Pro 套餐）
+- [ ] 安全规则贡献者署名机制
 
-### 鏁版嵁椹卞姩杩唬
-- [ ] 闆嗘垚 Sentry锛堥敊璇洃鎺э級
-- [ ] 闆嗘垚 Plausible锛堢綉绔欏垎鏋愶級
-- [ ] 璁捐 Telemetry 鏂规锛堝垎绾ф帶鍒躲€侀€忔槑鍖栥€佸尶鍚嶅寲锛?
-- [ ] 寤虹珛鍔熻兘浣跨敤棰戠巼鐪嬫澘
+### 数据驱动迭代
+- [ ] 集成 Sentry（错误监控）
+- [ ] 集成 Plausible（网站分析）
+- [ ] 设计 Telemetry 方案（分级控制、透明化、匿名化）
+- [ ] 建立功能使用频率看板
 
-### 瑙勫垯搴撳闀?
-- [ ] 寮€鏀捐鍒欒础鐚帴鍙?
-- [ ] 寤虹珛瑙勫垯璇勫娴佺▼
-- [ ] 鐩爣锛氳鍒欏簱浠?133 鏉″闀垮埌 500 鏉?
-- [ ] 寮曞叆绀惧尯 CVE 妗堜緥搴?
+### 规则库增长
+- [ ] 开放规则贡献接口
+- [ ] 建立规则评审流程
+- [ ] 目标：规则库从 133 条增长到 500 条
+- [ ] 引入社区 CVE 案例库
 
-## Phase 4: 鍟嗕笟鍖栦笌淇′换灞傦紙6-12 涓湀锛?
+## Phase 4: 商业化与信任层（6-12 个月）
 
-### 浼佷笟鍔熻兘
-- [ ] 绉佹湁鍖栭儴缃叉柟妗?
-- [ ] SSO / SAML 闆嗘垚
-- [ ] 瀹¤鏃ュ織涓庡悎瑙勬姤鍛?
-- [ ] SLA 淇濋殰
+### 企业功能
+- [ ] 私有化部署方案
+- [ ] SSO / SAML 集成
+- [ ] 审计日志与合规报告
+- [ ] SLA 保障
 
-### 淇′换鍩虹璁炬柦
-- [ ] Agent 淇¤獕璇勫垎鍏紑鏌ヨ API
-- [ ] Agent 闂翠氦鏄撴媴淇濓紙escrow锛?
-- [ ] 閾句笂淇¤獕瀛樿瘉锛堝彲閫夛級
-- [ ] 涓庝富娴?Agent 妗嗘灦锛圠angChain, AutoGPT, CrewAI锛夋繁搴﹂泦鎴?
+### 信任基础设施
+- [ ] Agent 信誉评分公开查询 API
+- [ ] Agent 间交易担保（escrow）
+- [ ] 链上信誉存证（可选）
+- [ ] 与主流 Agent 框架（LangChain, AutoGPT, CrewAI）深度集成
 
-### 鍥介檯鍖?
-- [ ] 鑻辨枃鏂囨。瀹屽杽
-- [ ] 鏃ユ枃銆侀煩鏂囩ぞ鍖烘嫇灞?
-- [ ] 鍙傚姞鍥介檯瀹夊叏浼氳锛圔lack Hat, DEF CON, OWASP锛?
+### 国际化
+- [ ] 英文文档完善
+- [ ] 日文、韩文社区拓展
+- [ ] 参加国际安全会议（Black Hat, DEF CON, OWASP）
 
-## 鑷姩杩唬浣撶郴锛堝凡閮ㄧ讲杩愯锛?
+## 自动迭代体系（已部署运行）
 
-鍩轰簬涓夊眰闂幆 脳 鎯呮姤鐭╅樀 脳 涓氬姟椋炶疆锛岃椤圭洰鍦ㄦ棤浜哄共棰勪笅鎸佺画杩涘寲銆?
+基于三层闭环 × 情报矩阵 × 业务飞轮，让项目在无人干预下持续进化。
 
-| 灞傜骇 | 棰戠巼 | 璇存槑 | 鐘舵€?|
+| 层级 | 频率 | 说明 | 状态 |
 |------|------|------|------|
-| L1 鏈綋鐜扮姸 + L3 鎺ㄥ箍 | 姣忔棩 02:00 | API 鍋ュ悍銆乻tar 鏁般€丳R 鐘舵€併€佸钩鍙版敹褰?| 鉁?杩愯涓?|
-| L2 澶栭儴鎯呮姤 + 瓒嬪娍鍒ゆ柇 | 姣忓懆涓€ 02:00 | HuggingFace銆佺珵鍝併€佸崥涓汇€乤rXiv銆? 缁村姩鎬佸彂鐜?| 鉁?杩愯涓?|
-| 涓夊眰鑱斿姩 + 椋炶疆璇婃柇 + 浜у搧涓婃柊 | 姣忔湀 1 鏃?03:00 | 椋炶疆 ROI銆佸師鍒欑鍚堟€ф牳瀵广€佺爺鍙戝缓璁?| 鉁?杩愯涓?|
-| 鎴樼暐澶嶇洏 | 姣忓搴﹂鏃?03:00 | 鏂瑰悜鏍″噯銆丳ivot 鍒ゆ柇銆丱KR 鍒跺畾 | 鉁?杩愯涓?|
+| L1 本体现状 + L3 推广 | 每日 02:00 | API 健康、star 数、PR 状态、平台收录 | ✅ 运行中 |
+| L2 外部情报 + 趋势判断 | 每周一 02:00 | HuggingFace、竞品、博主、arXiv、6 维动态发现 | ✅ 运行中 |
+| 三层联动 + 飞轮诊断 + 产品上新 | 每月 1 日 03:00 | 飞轮 ROI、原则符合性核对、研发建议 | ✅ 运行中 |
+| 战略复盘 | 每季度首日 03:00 | 方向校准、Pivot 判断、OKR 制定 | ✅ 运行中 |
 
-**鏍稿績鍘熷垯**锛氭瀯寤?Agent 鐢熸€侊紙鏍稿績鐩爣锛墊 鑷姩鍖?| 鐢熸€佸寲 | 鐩堝埄鍖?
+**审计与修复记录**
+- 2026-08-24：全链路审计（18 workflow / 13 定时任务）后修复四处闭环断点——① deploy-server 验证门因内联 Python 缩进缺陷从未真正执行；② 获客告警把 runId 拼进 Issue 标题导致去重失效、每小时灌新 Issue；③ 规则晋升一直靠手动，43 条候选积压在 `scanner/_proposed/`，新增 `rule-promoter.yml` 每日自动晋升+测试回滚安全阀；④ distribution/intel/feature 三个状态域停更导致元监控 M3 永久误报，已在各流水线补心跳回写。
 
-## 绔炲搧鐩戞帶娓呭崟
+**核心原则**：构建 Agent 生态（核心目标）| 自动化 | 生态化 | 盈利化
 
-| 绔炲搧 | 鐩戞帶閲嶇偣 | 棰戠巼 |
+## 竞品监控清单
+
+| 竞品 | 监控重点 | 频率 |
 |---|---|---|
-| Guardrails AI | Hub 鏂伴獙璇佸櫒銆佷紒涓氬鎴锋渚?| 姣忓懆 |
-| MEDUSA | 鏂板瑙勫垯绫诲瀷銆丼tar 澧為暱 | 姣忓懆 |
-| Agentic Security | 妯＄硦娴嬭瘯鏂拌兘鍔涖€丆I 闆嗘垚 | 姣忔湀 |
-| Palo Alto AIRS | 浜у搧鏇存柊銆佸畾浠风瓥鐣?| 姣忔湀 |
-| Anthropic MCP | 鍗忚鏇存柊銆佸畨鍏ㄦ寚鍗?| 瀹炴椂 |
+| Guardrails AI | Hub 新验证器、企业客户案例 | 每周 |
+| MEDUSA | 新增规则类型、Star 增长 | 每周 |
+| Agentic Security | 模糊测试新能力、CI 集成 | 每月 |
+| Palo Alto AIRS | 产品更新、定价策略 | 每月 |
+| Anthropic MCP | 协议更新、安全指南 | 实时 |
 
-## 鎴愬姛鎸囨爣
+## 成功指标
 
-| 鎸囨爣 | 3 涓湀鐩爣 | 6 涓湀鐩爣 | 12 涓湀鐩爣 |
+| 指标 | 3 个月目标 | 6 个月目标 | 12 个月目标 |
 |---|---|---|---|
 | GitHub Stars | 500 | 2,000 | 10,000 |
-| MCP Server 璋冪敤閲?| 1,000/鏈?| 10,000/鏈?| 100,000/鏈?|
-| 娉ㄥ唽 Agent 鏁?| 100 | 1,000 | 10,000 |
-| 瀹夊叏瑙勫垯鏁?| 200 | 500 | 1,000 |
-| 鍗氬鏂囩珷鏁?| 12 | 24 | 50 |
-| 绀惧尯鎴愬憳鏁?| 50 | 200 | 1,000 |
+| MCP Server 调用量 | 1,000/月 | 10,000/月 | 100,000/月 |
+| 注册 Agent 数 | 100 | 1,000 | 10,000 |
+| 安全规则数 | 200 | 500 | 1,000 |
+| 博客文章数 | 12 | 24 | 50 |
+| 社区成员数 | 50 | 200 | 1,000 |
 
 ---
 
-**鏈€鍚庢洿鏂?*: 2026-07-23
-**涓嬫璇勫**: 2026-08-23锛堥鏈堣嚜鍔ㄨ凯浠ｈ繍琛屽悗澶嶇洏锛
-
-<!--AUTO_ADOPTED_START-->
-
-## 自动采纳项（迭代闭环产出）
-
-> 由 feedback_aggregator 于 2026-08-24 自动聚合四路输入生成，每轮覆盖更新。勾选即视为已处理。
-
-| 优先级 | 来源 | 事项 | 参考 |
-|--------|------|------|------|
-| P1 | S2 生态位待办 | MCP 官方 Registry 收录：向 modelcontextprotocol/registry 提交 server.json —— 生态入口即用户入口 | — |
-| P1 | S3 体系问题 | 修复自动化体系缺陷 — M3 状态新鲜度: 状态域 ['distribution', 'feature', 'intel'] 超过 72 小时未更新，对应环节可能已停摆 | — |
-| P1 | S4 情报驱动 | 评审本轮 52 条新增高危漏洞的检测覆盖情况 | — |
-| P2 | S2 生态位待办 | GitHub Topics 检索曝光：补齐 GitHub topics: ai-security —— 零成本获取平台内检索流量 | — |
-| P2 | S4 情报驱动 | 补齐 OWASP LLM Top10 未覆盖类别的检测规则：LLM02, LLM03, LLM04, LLM08, LLM09, LLM10 | — |
-
-<!--AUTO_ADOPTED_END-->
+**最后更新**: 2026-08-24
+**下次评审**: 2026-09-07（双周节奏；Phase 2 收尾项见上）
