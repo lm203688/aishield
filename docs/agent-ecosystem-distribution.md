@@ -40,16 +40,32 @@
 
 ---
 
-## §1 平台版图实测表（2026-08-15，2026-08-17 复核，**2026-08-22 重大纠正**）
+## 周报 2026-08-24（自动巡检 · 生态结构性升温，2 项重大威胁）
+
+> 本周最大变化：**「本地/离线扫描」赛道被 NVIDIA / Cisco / Microsoft 等巨头涌入**，且**我们的直接竞品 `agent-security-scanner-mcp` 已上架 Official MCP Registry**——我们与直接竞品开始共占 agent 原生发现面。
+
+- 🔴 **[重大·Registry 直接竞品]** Official MCP Registry 实测新增直接竞品条目：`io.github.sinewaveai/agent-security-scanner-mcp` 已上架至 **2.0.1 active**（此前仅作 R&D 参考，未确认在册）；同台还有 `io.github.archonics/mcp-audit` 0.1.4、`io.github.CSOAI-ORG/agent-prompt-injection-firewall-mcp` 1.0.13 等。→ agent 原生发现面不再是我们的独占展示位，listing 文案须强化「aishield」干净品牌锚点 + 内容安全平面差异。
+- 🔴 **[重大·本地楔子被巨头吸收]** 新晋/重量级本地离线竞品集中出现，直接抹平「local/no-cloud」单点差异：NVIDIA SkillSpector（64 模式/16 类、SARIF、OSV.dev 离线 fallback）、Cisco AI Agent Security Scanner（VS Code 扩展、本地优先、SHA-256+HMAC Watchdog）、Mitiga Skillgate（80+ 规则、OWASP Agentic+MITRE ATLAS、no code executed）、Microsoft Agent Governance Toolkit/ACS/ASSERT、QSAG-Core、Nox-HQ/nox、SkillShield。→ 差异必须从「本地扫描」上移到 **内容安全平面 + 主动治理（kill switch/持续鉴证）+ 机器可结算认证（x402）**，并借巨头涌入做 GEO/agent-native 露出（竞品越多，「agent security scanner」搜索越混乱，越利于干净品牌）。
+- 🟠 **[品牌·aishield.ai]** LobeHub 条目升至 **v2.1.0**，仍标「Local Service / 仅本地运行」、`npx aishield-mcp`（该包仍 404）安装指令失效；`aishield.ai` 首页**仍为「Premium Domain For Sale」（Atom）**，品牌动荡延续。**himcp.cn 本周实测 Not Found**（2026-08-17 曾上架）→ 疑似渠道收缩，待用户核实。
+- 🟠 **[品牌·ClawHub squat 蔓延]** `ai-shield-audit`（laurentaia）squatting 仍在并扩张至 **claudemarket.ai + clawbox.com（4.7★，€549 硬件，「private fast no cloud」）**；ClawHub 平台 2026-06-22 曝 **@openclaw/@clawhub scope squatting（23 个代码执行插件）**，命名空间无保留机制 → 认领 `aishield` 价值更高但风险更大。`mcp-audit` 同名现 3+ 分支 → 我们的「aishield」干净品牌成资产。
+- 🟡 **[无变化]** Official MCP Registry 我们仍 4.2.2 active/isLatest（`/v0/servers?search=aishield` 复测）；npm `aishield-mcp-server` latest **4.2.2**（modified 2026-08-07，curl 被代理 reset 故走 WebFetch 确认）；Glama 复测 200 仍 live。
+- ⚠️ **[drift·npm README]** npm 已发布 README 写「**201 local rules / 201(MCP)·207(Skill)**」，但 `get_rule_count()` 真相 = **227 MCP / 233 Skill**（基线）。公开面规则数低估 ~26/26 → 建议发版时同步 npm README 数字（AI 不代改，待用户/发版）。
+- ℹ️ **[新发现·第三方索引]** `mcptoplist.com` 已索引我们：`io.github.lm203688/aishield` 排 #7,715/100,474（Listed on 2 registries: Official MCP + Glama）；同 org 还列 ATEX AI Gateway / RoboParts / SwarmLabs MCP Server 等 7 个 server → 新增可见性面（作监控项，无需动作）。
+
+**行动建议（用户侧，AI 不代发/不代提）**：① 借巨头涌入做 GEO/agent-native 露出，把「aishield = 本地 + 内容安全平面 + 机器可结算认证」打为干净锚点；② 防御性抢注 npm `aishield-mcp`（仍空闲）阻断劫持；③ 评估回收 `aishield.ai` 域名（仍 for sale）；④ ClawHub 以 `aishield` 认领（高风险命名空间，须走 VirusTotal + 老账号）；⑤ 发版时同步 npm README 规则数到 227/233。
+
+---
+
+## §1 平台版图实测表（2026-08-15，2026-08-17 复核，**2026-08-22 重大纠正**，**2026-08-24 重大威胁补充**）
 
 | 平台 | 我们的状态 | 提交方式 | 门槛 | 优先级 | 备注 / 证据 |
 |---|---|---|---|---|---|
-| **Official MCP Registry** | ✅ **已上架 active**（2026-08-22 纠正） | 已在册，由 `publish-mcp-registry.yml` 发版推送 | 无 | done | **2026-08-22 实测 `GET /v0/servers?search=aishield`：`io.github.lm203688/aishield` version 4.2.2 / status active / isLatest true / publishedAt 2026-08-07 / npm pkg stdio ✅。** 此前「404 未上架」是查了不存在的 `/v0/servers/{name}` 端点所致的误判，已作废「提 PR」指引。遗留：在册 `remotes` 指向 `aishield.tools/api/v1/mcp`，该端点**实测活着**（POST JSON-RPC 200，8 工具，工具名正确）但自报 `4.2/133` 元数据陈旧 |
+| **Official MCP Registry** | ✅ **已上架 active**（2026-08-22 纠正） | 已在册，由 `publish-mcp-registry.yml` 发版推送 | 无 | done | **2026-08-22 实测 `GET /v0/servers?search=aishield`：`io.github.lm203688/aishield` version 4.2.2 / status active / isLatest true / publishedAt 2026-08-07 / npm pkg stdio ✅；2026-08-24 复测同态。** 此前「404 未上架」是查了不存在的 `/v0/servers/{name}` 端点所致的误判，已作废「提 PR」指引。遗留：在册 `remotes` 指向 `aishield.tools/api/v1/mcp`，该端点**实测活着**（POST JSON-RPC 200，8 工具，工具名正确）但自报 `4.2/133` 元数据陈旧。🔴 **2026-08-24 新威胁：直接竞品已上 Registry** — `io.github.sinewaveai/agent-security-scanner-mcp` 在册至 **2.0.1 active**；同台另有 `io.github.archonics/mcp-audit` 0.1.4、`io.github.CSOAI-ORG/agent-prompt-injection-firewall-mcp` 1.0.13 等。我们与直接竞品共占 agent 原生发现面，listing 文案须强化「aishield」干净锚点 |
 | **Glama** | ✅ **已上架**（lm203688/aishield, gso85mvobx） | 从 GitHub repo 自动同步 | 无（已 live） | done | 页面丰富（227/233 规则、内容安全平面 thesis）；但描述偏「云 API（注册/Key/定价/8450 端口）」，**模糊了本地定位**——需修正以区隔 aishield.ai。**2026-08-17 复测 200，仍 live。** |
 | **npm `aishield-mcp-server`** | ✅ 4.2.2 已发（2026-08-07 最后发布） | npm | done | done | 包名正确；2026-08-17 复测 200，latest=4.2.2 |
 | **npm `aishield-mcp`（防御性短名）** | ⚠️ **空闲（404）· 建议抢注** | npm | 账号（用户） | **HIGH** | aishield.ai 的 LobeHub/himcp 安装指令写 `npx aishield-mcp`，但该包**实测不存在（404）**；短名仍空闲，恶意方可能抢注劫持。建议以我们名义发布 `aishield-mcp` 作为 `aishield-mcp-server` 的别名入口（AI 不代发，需用户登录） |
 | **PyPI `aishield`（aishield.ai 占用）** | ⚠️ 被 aishield.ai 占用 | PyPI | — | LOW | aishield.ai 指令 `pip install aishield` 指向的包存在；我们无 PyPI 同名资产，暂不构成直接劫持但增加混淆 |
-| **LobeHub** | ⚠️ 被云 SaaS 占位；我们缺位 | 网页提交 | 账号 | **HIGH** | 搜 "AIShield" 命中 `aishield-ai/aishield`（云 SaaS）；**2026-08-17 新发现：该条目被标为「Local Service / 仅在客户端本地设备运行」，公然蹭「本地」叙事**，而其安装指令 `npx aishield-mcp` 指向的包实际不存在（404）。我们的开源版未单独上架 → 品牌认知被持续稀释 |
+| **LobeHub** | ⚠️ 被云 SaaS 占位；我们缺位 | 网页提交 | 账号 | **HIGH** | 搜 "AIShield" 命中 `aishield-ai/aishield`（云 SaaS）；**2026-08-17 新发现：该条目被标为「Local Service / 仅在客户端本地设备运行」，公然蹭「本地」叙事**，而其安装指令 `npx aishield-mcp` 指向的包实际不存在（404）。我们的开源版未单独上架 → 品牌认知被持续稀释。🔴 **2026-08-24：aishield.ai 的 LobeHub 条目升至 `AIShield 2.1.0`**，仍标「Local Service / 仅本地运行」、安装指令仍写 `npx aishield-mcp`（该包仍 404）；**himcp.cn 本周实测 Not Found**（2026-08-17 曾在上架）→ 疑似渠道收缩或 URL 变更，待用户核实 |
 | **Smithery** | ❌ 未发布 | 网页 dashboard（GitHub 登录，连 repo） | 账号 | **HIGH** | stdio-only → 走「self-hosted」列出（非 one-click）；需有人在 smithery.ai/new 发布。server-card.json 已就位可被扫 |
 | **ClawHub** | ❌ 缺位 + 第三方 squat | `clawhub skill publish` | GitHub 登录（需够老账号） | **HIGH** | `ai-shield-audit`（laurentaia）已占混淆名；我们须以 `aishield` 认领命名空间 |
 | **MCP.so** | ❌ 未找到 | 网页表单 / GitHub Issue | 账号 | MED | 搜索无命中 |
@@ -62,6 +78,8 @@
 | **aishield.tools `/api/v1` 后端** | ⚠️ **活着但 stale** | 后端重新部署 | 需定位 origin | HIGH（新发现） | **2026-08-22 纠正「aishield.tools 无后端」旧判断**：`GET /api/v1/health` → 200 `{"version":"4.2","rules_count":133}`；`POST /api/v1/mcp` tools/list → 200，返回 **8 个工具**且工具名正确（`aishield_scan`/`aishield_guardrail`/`aishield_prompt_check`/`aishield_banned_words`/`aishield_rug_pull`/`aishield_handshake` + `agent_register`/`agent_quick_scan`），但描述仍写「133 rules」。旧探测查的是 `/api/health`、`/api/rules/stats`（这两个确实 404）→ 路径前缀记错导致误判 |
 | **GitHub Pages（github.io）** | ⛔ **死端表面** | — | 无（勿再修） | — | `github.io/aishield/...` **301 跳到 aishield.tools**（CNAME），GH Pages 自身内容不可达。`pages.yml` 78 次运行全 success 但 `3-Verify` 用 `curl -sL` 实际在测 CF Pages → **假绿门禁**，内容 stale 也判绿。修 GH Pages 不影响线上域名 |
 | **DeepSeek Harness (DSH)** | ❌ 缺位（生态首日，security 类目真空） | ① DSH Plugins 目录投稿（deepbolt.xyz）② 原生 `dsh-aishield` 插件（npm+cordis.patch.yml）③ MCP 桥接：DSH 原生支持 MCP → AIShield MCP server 零适配 | 目录投稿需账号 / 插件需 npm 发布 | **HIGH（新渠道·先发窗口）** | 首日 34k–65k★、1000+ 插件；supply-chain 风险是官方头号隐患→AIShield 本职；**无安全插件**→先发占 security 类目。dev preview+breaking changes→走 MCP 桥接最稳 |
+| **mcptoplist.com（第三方索引）** | ℹ️ 已被索引（无需动作） | 自动抓取 | — | LOW（监控项） | **2026-08-24 新发现**：`io.github.lm203688/aishield` 排 #7,715 / 100,474，标注「Listed on 2 registries: Official MCP + Glama」；同 org 还列 ATEX AI Gateway / RoboParts / SwarmLabs MCP Server 等 7 个 server。新增可见性面，作监控项即可 |
+| **npm README 规则数 drift** | ⚠️ 公开面低估 | — | 发版同步 | LOW | **2026-08-24 发现**：已发布 npm README 写「**201 local rules / 201(MCP)·207(Skill)**」，但 `get_rule_count()` 真相 = **227 MCP / 233 Skill**（基线）。公开面规则数低估 ~26/26 → 建议下次发版同步 npm README 数字（AI 不代改） |
 
 ---
 
@@ -74,21 +92,32 @@
 - **我们的错位武器**：不是功能多少，是**部署模型**。Glama/llms.txt/README 的文案必须把「local / no-cloud / your code never leaves your machine」打到最前，把云 Trust API 降为「可选」。否则我们自己 Glama 页（写着注册/Key/定价）也在帮 aishield.ai 混淆认知。
 - 🔴 **2026-08-17 升级**：aishield.ai 在 LobeHub 把其 MCP server 标为 **「Local Service / 仅在客户端本地设备运行」**，直接蹭我们的「本地优先」叙事（其实后端语义分析仍走 `aishield.ai/api/v1` 云调用）。其 LobeHub/himcp 安装指令写 `npx aishield-mcp` / `npx aishield-guardrail` / `pip install aishield`，但**实测 npm `aishield-mcp`、`aishield-guardrail` 均 404 不存在**、仅 PyPI `aishield` 存在 → 安装指令失效，且 `aishield-mcp` 短名**仍空闲**（防御性抢注机会，见 §1）。
 - 🔴 **2026-08-17 新信号**：直接访问 `aishield.ai` 首页返回「Premium Domain For Sale」（Atom 域名出售页）。品牌或处于出售/动荡期；但其 marketplace 列表仍指向在线 API，产品应仍在运行。若域名确在出售，**回收 `aishield.ai` 品牌域名是低成本消除同名混淆的潜在杠杆**——需用户评估（AI 不代购）。
+- 🔴 **2026-08-24 跟踪**：`aishield.ai` 首页**仍为「Premium Domain For Sale」（Atom）**，品牌动荡延续。其 LobeHub 条目升至 **`AIShield 2.1.0`**，仍标「Local Service / 仅客户端本地设备运行」、`npx aishield-mcp` 安装指令（该 npm 包仍 404 不存在）。**himcp.cn 本周实测 Not Found**（2026-08-17 曾上架）→ 疑似渠道收缩或 URL 变更。净判断：无干净新扩张，但「本地叙事劫持 + 域名待售」的混淆组合仍在持续，回收 `aishield.ai` 域名仍是低成本消除同名混淆的杠杆（待用户评估，AI 不代购）。
 
 ### 2.2 ClawHub `ai-shield-audit` squatting
 - `clawhub/ai-shield-audit`（laurentaia）OpenClaw 安全审计，81/100、社区验证、144K 安装。
 - 名字与 "AIShield" 高度混淆，且做的是**同一件事（审计 agent 配置）**——是直接的认知劫持。
 - **动作**：尽快以 `aishield` 名义在 ClawHub 发布我们的 skill（见 §4），抢回命名空间。
 - 🟡 **2026-08-17 跟踪**：该 squatting 条目已扩展至 ClawBox 硬件商店（€549 设备，4.7★，标榜「private, fast, no cloud」），认知劫持从软件蔓延到硬件。ClawHub 平台本身 2026-03 曾被曝**排名操纵漏洞**（攻击者可将恶意 skill 推到类目 #1，6 天 3900 次执行，已负责任披露并修复）——命名空间高风险但认领价值仍在；发布前须走 VirusTotal 扫描 + 老账号。
+- 🔴 **2026-08-24 跟踪**：该 squatting 仍在并**进一步蔓延至 claudemarket.ai + clawbox.com（4.7★，€549 硬件，「private fast no cloud」）**，且 ClawHub 平台 2026-06-22 被曝 **@openclaw/@clawhub scope squatting（23 个代码执行插件归无关方所有）**——命名空间无保留机制，认知劫持风险从「单条目」升级为「平台级」。同期 `mcp-audit` 同名现 3+ 分支（Adam Dudley / apisec-inc / velox / archonics / specularis）→ 我们的「aishield」干净品牌反成资产，认领 `aishield` 价值更高但发布前须走 VirusTotal + 老账号。
 
 ### 2.3 竞品功能升级威胁（内容安全平面被追平）
 > 本周最大结构性风险：直接竞品把「本地/离线」做成标配，并补上我们缺失的**企业漏洞管理闭环**，我们的「本地扫描」单点差异化正在被抹平。
+
+🔴 **2026-08-24 升级：本地/离线赛道被巨头涌入** — 本周确认 NVIDIA / Cisco / Microsoft 等巨头级玩家携「本地、开源、离线」扫描器入场，我们的「local/no-cloud」单点楔子被系统性抹平（详见下方新条目）。差异化必须从「本地扫描」上移到 **内容安全平面 + 主动治理（kill switch / 持续鉴证 attestation）+ 机器可结算认证（x402/支付）**，并借巨头涌入带来的搜索混乱做 GEO/agent-native 露出，把「aishield」立为干净品牌锚点。
 
 - 🔴 **mcp-audit (mcp-audit-scanner) 0.14.0** — 仍全离线（契合我们楔子），但已加 **89 条 Semgrep SAST 规则 + CVE 打标（CVE-2026-30615）+ Nucleus FlexConnect 企业漏洞管理对接 + Sigstore 签名校验 + fleet 部署 + governance policy-as-code + `watch` 实时监控**。这是**已补企业闭环的最强直接竞品**。空间内现同时存在 3 个同名/近名 mcp-audit（danush-aries / saagpatel / appsecsanta），用户易混淆，反而凸显「aishield」品牌需要更干净的认知锚点。
 - 🔴 **Sunglasses (sunglasses-dev)** — 新晋强敌：MIT、**100% 本地、无云、无遥测**，1049 模式 / 7653 关键词 / 17 归一化 / 23 语言、0.261ms/输入，覆盖 prompt injection + MCP 工具投毒 + 跨 agent 注入 + 凭证外泄 + 「Proof Before Action」一次性容器。直接对冲「本地/不出机」楔子，且性能/覆盖数字更唬人。
 - 🟠 **Snyk Agent Scan（原 MCP-Scan，2026-04 被 Snyk 收购）** v0.5.12 — 自动发现 10+ agent 的 skill + MCP 配置，凭 Snyk 企业渠道分发，是「主流化」威胁。
 - 🟠 **owasp-agentic-mcp 1.0.9**（OWASP Agentic AI Top10，上 Smithery）、**mcp-security-auditor 1.0.0**（MIT、SIEM 对接 CEF/LEEF/Splunk）——补 OWASP Agentic / 企业 SIEM 覆盖，与我们 Agentic 11 模块正面重叠。
 - **启示**：我们的护城河必须从「本地扫描」上移到 **内容安全平面 + 主动治理（kill switch / 持续鉴证 attestation）+ 机器可结算认证（x402/支付）** 这三件竞品没做或没做透的事上。详见周报 2026-08-17 行动建议。
+
+#### 2026-08-24 新增竞品（巨头级本地/离线玩家集中入场）
+- 🔴 **NVIDIA SkillSpector（2026-06-17，Apache 2.0）** — 技能级安全扫描器，64 模式 / 16 类（prompt injection、数据外泄、提权、供应链、过度 agency、AST 危险代码、taint、YARA、2 个 MCP 专属类），SARIF 报告，OSV.dev 实时 CVE 查（离线 fallback），输入支持 git/URL/zip/目录/单文件；兼容 Claude Code/Codex/Gemini CLI。**巨头背书 + 开源**，直接对冲「本地扫描」楔子。
+- 🔴 **Cisco AI Agent Security Scanner（2026-04-21，VS Code 扩展，免费）** — 本地优先、源码不出机；Watchdog 用 SHA-256 + HMAC 实时监测 MCP/agent 配置篡改（hook 注入、shell alias 注入、MCP 配置篡改）；Project CodeGuard 20 条安全规则内嵌进 agent 上下文；覆盖 Cursor/VS Code/Windsurf/Antigravity。
+- 🔴 **Mitiga Skillgate（skillgate.mitiga.ai，免费）** — 扫 skills/hooks/CLAUDE.md/AGENTS.md/MCP 配置，80+ 规则 / 6 技术族，OWASP Agentic AI Top10 + MITRE ATT&CK/ATLAS，LLM-as-judge，声称「no code executed」；基于 50,000+ 指令文件研究（License to Skill 系列）。
+- 🟠 **Microsoft Agent Governance Toolkit / ACS / ASSERT** — runtime 控制 + 策略评估（与 SkillSpector 互补）；**QSAG-Core**（Neoxyber，MIT，OWASP Agentic 2026，纯模式匹配无 ML/云）；**Nox-HQ/nox**（OWASP MCP Top10 映射 + offline zero-network）；**SkillShield**（skillshield.dev，ClawHub skills + MCP 预装扫描，33,746 已扫 / 533 拦截 / 99.8%）—— 均与「本地/离线/预装扫描」重叠，进一步稀释「本地」差异。
+- 🟠 **agent-security-scanner-mcp（sinewaveai）已上 Official MCP Registry 2.0.1** — 见 §1 Registry 行；这是与我们共占 agent 原生发现面的直接竞品，须靠「aishield」干净品牌 + 内容安全平面差异区隔。
 
 ---
 
@@ -182,3 +211,20 @@
 | `GET registry.npmjs.org/aishield-mcp-server` | 200，`dist-tags.latest = 4.2.2`，modified 2026-08-07 ✅ |
 | `GET glama.ai/mcp/servers/lm203688/aishield` | **200** ✅ 仍 live |
 | 本地 `scanner.rules.get_rule_count()` | **227** ✅ 基线确认 |
+
+### §5.3 本轮回测证据（2026-08-24，全部可复现）
+
+| 探测 | 结果 |
+|---|---|
+| `GET /v0/servers?search=aishield&limit=10` | **200**，2 条（4.2.1 + 4.2.2），`isLatest:true` = **4.2.2 / active / isLatest true / publishedAt 2026-08-07** ✅ 我们仍已上架（与 08-22 同态） |
+| `GET /v0/servers?search=agent-security-scanner` | **200**，count=3；`io.github.sinewaveai/agent-security-scanner-mcp` 版本 **2.0.1 / active** 🔴 直接竞品已上 Registry |
+| `GET /v0/servers?search=mcp-audit` | **200**，count=5；含 `io.github.archonics/mcp-audit` 0.1.4 active、`specularis-mcp-audit`、`mcp-audit-proxy`（Adam Dudley 的 mcp-audit-scanner 不在 Registry） |
+| `GET /v0/servers?search=sunglasses` | count=0（Sunglasses 仍未上 Registry） |
+| `GET /v0/servers?search=skillspector` 与 `mcp-audit-scanner` | count=0（NVIDIA SkillSpector / Adam Dudley mcp-audit-scanner 尚未入 Registry） |
+| `WebFetch registry.npmjs.org/aishield-mcp-server` | `dist-tags.latest = 4.2.2`，modified 2026-08-07 ✅（curl 被代理 reset 故走 WebFetch）；README 写「201 local rules / 201(MCP)·207(Skill)」⚠️ 低估真实 227/233 |
+| `WebFetch aishield.ai` | 「Premium Domain For Sale」（Atom）🔴 品牌动荡延续 |
+| `WebFetch lobehub.com/mcp/aishield-ai-aishield` | `AIShield 2.1.0`，标「Local Service / 仅本地运行」，`npx aishield-mcp` 安装指令（包仍 404） |
+| `WebFetch himcp.cn/mcp/aishield-ai/aishield` | **Not Found** 🟠 2026-08-17 曾上架，本周疑似渠道收缩 |
+| `WebSearch clawhub ai-shield-audit laurentaia` | squatting 仍在，并扩张至 clawskills.sh / clawbox.com（4.7★,€549）/ claudemarket.ai / toolify；版本 1.0.0，Updated 5/17/2026 |
+| `WebSearch "aishield" + MCP security / prompt injection 2026` | 新晋巨头级本地竞品：NVIDIA SkillSpector、Cisco AI Agent Security Scanner、Mitiga Skillgate、Microsoft ACS/ASSERT、QSAG-Core、Nox-HQ/nox、SkillShield（详见 §2.3） |
+| `WebSearch mcptoplist aishield` | `io.github.lm203688/aishield` #7,715/100,474（Listed on Official MCP + Glama）；同 org 7 server ℹ️ 新索引面 |
