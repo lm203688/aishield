@@ -256,6 +256,11 @@ jobs:
           open(readme, 'w', encoding='utf-8').write(text)
           print(f'README synced: MCP={mcp_count}, Skill={skill_count}')
           "
+          # 【2026-08-24 补】intel 状态域自 08-04 停更（采集无新增时不落盘），
+          # 元监控 M3 误判"停摆"。每周期必写心跳：updated 刷新，数值不变则不刷 history。
+          python scripts/state_bus.py set intel \
+            "{\"intel_total\":${{ needs.fetch.outputs.total }},\"high_new\":${{ needs.fetch.outputs.high }}}" \
+            --source threat-intel-feed || true
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add data/threat_intel.json data/generated_rules.json data/state/ mcp-server/README.md 2>/dev/null || true
