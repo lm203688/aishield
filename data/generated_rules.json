@@ -1,7 +1,16 @@
 {
-  "generated_at": "2026-08-25T18:43:43.791677+00:00",
-  "source_intel_count": 251,
+  "generated_at": "2026-08-25T19:35:17.906249+00:00",
+  "source_intel_count": 254,
   "package_blacklist": {
+    "pip:chainlit": {
+      "ecosystem": "pip",
+      "package": "chainlit",
+      "severity": "critical",
+      "advisories": [
+        "GHSA-hvfh-5mj3-5f3j",
+        "GHSA-w3fx-mc44-mf6j"
+      ]
+    },
     "npm:@arikusi/deepseek-mcp-server": {
       "ecosystem": "npm",
       "package": "@arikusi/deepseek-mcp-server",
@@ -547,19 +556,34 @@
     }
   },
   "pattern_rules": {
+    "(?i)(requests\\.(get|post)|urllib\\.request\\.urlopen|fetch)\\s*\\(\\s*[^)]*(user|input|param|req\\.)": {
+      "description": "SSRF: 请求目标来自不可信输入",
+      "severity": "high",
+      "owasp": "LLM06",
+      "owasp_name": "过度代理权限 (Excessive Agency)",
+      "derived_from": "ssrf",
+      "intel_hits": 24,
+      "evidence": [
+        "GHSA-hvfh-5mj3-5f3j",
+        "GHSA-ppx3-28rw-8fpf",
+        "GHSA-9qhg-99ww-9mqc",
+        "GHSA-rg5q-pp8p-f7jm",
+        "GHSA-vg6p-v9vm-6fgj"
+      ]
+    },
     "(?i)(session|token)\\s*[:=]\\s*['\\\"][^'\\\"]{0,8}['\\\"]": {
       "description": "会话安全: 会话标识过短或硬编码",
       "severity": "high",
       "owasp": "LLM07",
       "owasp_name": "系统提示泄露 (System Prompt Leakage)",
       "derived_from": "session",
-      "intel_hits": 26,
+      "intel_hits": 28,
       "evidence": [
+        "GHSA-hvfh-5mj3-5f3j",
+        "GHSA-w3fx-mc44-mf6j",
         "GHSA-72f3-6w86-7rv3",
         "GHSA-fh3r-g96v-f578",
-        "GHSA-2jgc-f764-c5r2",
-        "GHSA-wv94-5qcp-6m36",
-        "GHSA-c7hr-448w-65px"
+        "GHSA-2jgc-f764-c5r2"
       ]
     },
     "(?i)(auth(entication)?\\s*[:=]\\s*(False|None|null|0)\\b|verify\\s*=\\s*False)": {
@@ -568,13 +592,28 @@
       "owasp": "LLM07",
       "owasp_name": "系统提示泄露 (System Prompt Leakage)",
       "derived_from": "authentication",
-      "intel_hits": 24,
+      "intel_hits": 26,
       "evidence": [
+        "GHSA-hvfh-5mj3-5f3j",
+        "GHSA-w3fx-mc44-mf6j",
         "GHSA-72f3-6w86-7rv3",
         "GHSA-fh3r-g96v-f578",
-        "GHSA-m2pc-3q4q-w6jr",
-        "GHSA-8vh3-g2qg-2h2c",
-        "GHSA-gfq8-hmph-9gjv"
+        "GHSA-m2pc-3q4q-w6jr"
+      ]
+    },
+    "(?i)(os\\.system|subprocess\\.(call|run|Popen)|child_process\\.exec)\\s*\\(\\s*[^)]*(\\+|%|\\$\\{|f['\\\"])": {
+      "description": "命令注入: 动态拼接系统命令",
+      "severity": "critical",
+      "owasp": "LLM05",
+      "owasp_name": "不当输出处理 (Improper Output Handling)",
+      "derived_from": "command injection",
+      "intel_hits": 10,
+      "evidence": [
+        "GHSA-w3fx-mc44-mf6j",
+        "GHSA-p853-83gj-wjj3",
+        "GHSA-rghg-q7wp-9767",
+        "GHSA-73wf-9vmv-5pv9",
+        "GHSA-49mq-fc6q-3h46"
       ]
     },
     "(?i)(\\.\\./){2,}|(%2e%2e%2f)": {
@@ -622,36 +661,6 @@
         "GHSA-8qf9-62x2-82pp"
       ]
     },
-    "(?i)(requests\\.(get|post)|urllib\\.request\\.urlopen|fetch)\\s*\\(\\s*[^)]*(user|input|param|req\\.)": {
-      "description": "SSRF: 请求目标来自不可信输入",
-      "severity": "high",
-      "owasp": "LLM06",
-      "owasp_name": "过度代理权限 (Excessive Agency)",
-      "derived_from": "ssrf",
-      "intel_hits": 23,
-      "evidence": [
-        "GHSA-ppx3-28rw-8fpf",
-        "GHSA-9qhg-99ww-9mqc",
-        "GHSA-rg5q-pp8p-f7jm",
-        "GHSA-vg6p-v9vm-6fgj",
-        "GHSA-x44h-65qv-cw74"
-      ]
-    },
-    "(?i)(os\\.system|subprocess\\.(call|run|Popen)|child_process\\.exec)\\s*\\(\\s*[^)]*(\\+|%|\\$\\{|f['\\\"])": {
-      "description": "命令注入: 动态拼接系统命令",
-      "severity": "critical",
-      "owasp": "LLM05",
-      "owasp_name": "不当输出处理 (Improper Output Handling)",
-      "derived_from": "command injection",
-      "intel_hits": 9,
-      "evidence": [
-        "GHSA-p853-83gj-wjj3",
-        "GHSA-rghg-q7wp-9767",
-        "GHSA-73wf-9vmv-5pv9",
-        "GHSA-49mq-fc6q-3h46",
-        "GHSA-49m4-vp58-wgc9"
-      ]
-    },
     "(?i)(docker\\.sock|/proc/self/|privileged\\s*[:=]\\s*true|--cap-add\\s*=?\\s*SYS_ADMIN)": {
       "description": "沙箱逃逸: 容器高危配置",
       "severity": "critical",
@@ -681,10 +690,10 @@
     }
   },
   "owasp_distribution": {
-    "LLM07": 3,
     "LLM06": 2,
-    "LLM01": 1,
-    "LLM05": 3
+    "LLM07": 3,
+    "LLM05": 3,
+    "LLM01": 1
   },
-  "total_rules": 69
+  "total_rules": 70
 }

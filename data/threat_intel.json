@@ -1,6 +1,49 @@
 {
   "intel": [
     {
+      "id": "GHSA-hvfh-5mj3-5f3j",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.2,
+      "title": "Chainlist has SSRF via MCP SSE and streamable-http transports that allows unauthenticated internal network access",
+      "summary": "### Am I affected?\n\nOnly if your deployment sets `features.mcp.enabled = true` in `.chainlit/config.toml`. **MCP has been disabled by default since v2.7.0**, so most Chainlit deployments are not affected. No authentication is required: `/mcp` is reachable by any client that can open a session.\n\n### Summary\n\nWhen MCP is enabled (`features.mcp.enabled = true`), the `POST /mcp` endpoint for `sse` and `streamable-http` transports accepts a user-controlled `url` and optional `headers` dictionary with",
+      "affected": "pip:chainlit",
+      "references": [
+        "https://github.com/advisories/GHSA-hvfh-5mj3-5f3j"
+      ],
+      "published": "2026-08-25T19:21:40Z",
+      "fetched": "2026-08-25T19:35:02.757124+00:00"
+    },
+    {
+      "id": "GHSA-w3fx-mc44-mf6j",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": 9.8,
+      "title": "Chainlit has command injection via MCP stdio transport that allows unauthenticated remote code execution",
+      "summary": "### Am I affected?\n\nOnly if your deployment sets `features.mcp.enabled = true` in `.chainlit/config.toml`. **MCP has been disabled by default since v2.7.0**, so most Chainlit deployments are not affected. No authentication is required: `/mcp` is reachable by any client that can open a session.\n\n### Summary\n\nWhen MCP is enabled (`features.mcp.enabled = true`), the `POST /mcp` endpoint for `stdio` transport accepts a user-controlled `fullCommand` string. The `validate_mcp_command()` function check",
+      "affected": "pip:chainlit",
+      "references": [
+        "https://github.com/advisories/GHSA-w3fx-mc44-mf6j"
+      ],
+      "published": "2026-08-25T19:19:28Z",
+      "fetched": "2026-08-25T19:35:02.757188+00:00"
+    },
+    {
+      "id": "CVE-2026-78379",
+      "source": "nvd",
+      "severity": "high",
+      "cvss": 8.1,
+      "title": "Improper neutralization of input used for LLM prompting in the python_repl tool in Amazon Strands Agents Tools before 0.8.5 might allow remote actors to execute arbitrary Python code on the agent's ho",
+      "summary": "Improper neutralization of input used for LLM prompting in the python_repl tool in Amazon Strands Agents Tools before 0.8.5 might allow remote actors to execute arbitrary Python code on the agent's host by bypassing the human consent gate, via a crafted prompt that forwards non_interactive_mode as a keyword argument through the batch tool. To remediate this issue, users should upgrade to version 0.8.5 or later.",
+      "affected": "llm agent",
+      "references": [
+        "https://aws.amazon.com/security/security-bulletins/2026-089-aws/",
+        "https://pypi.org/project/strands-agents-tools/0.8.5/"
+      ],
+      "published": "2026-08-25T19:16:54.467",
+      "fetched": "2026-08-25T19:34:54.664203+00:00"
+    },
+    {
       "id": "GHSA-72f3-6w86-7rv3",
       "source": "github-advisory",
       "severity": "medium",
@@ -3724,19 +3767,19 @@
       "fetched": "2026-08-04T06:34:53.913899+00:00"
     }
   ],
-  "updated": "2026-08-25T18:43:26.451218+00:00",
+  "updated": "2026-08-25T19:35:03.260605+00:00",
   "sources": [
     "osv",
     "nvd",
     "github-advisory"
   ],
   "stats": {
+    "high": 123,
+    "critical": 33,
     "medium": 73,
-    "high": 121,
     "unknown": 21,
-    "critical": 32,
     "low": 3,
     "moderate": 1
   },
-  "total": 251
+  "total": 254
 }
