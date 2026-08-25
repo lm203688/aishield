@@ -63,6 +63,15 @@ AIShield extended its coverage beyond payload content with **17 local heuristic 
 - **Tool / skill integrity** (`scanner/tool_integrity_scan.py`): typosquatted tool names (edit-distance ≤2 vs canonical brands, CVE-2026-30856 class), remote MCP without version pin (rug-pull).
 - **Registry supply** (`scanner/registry_supply_scan.py`): skill-name typosquat, suspicious egress, progressive hidden payloads (main file defers the install command to a secondary `.md`).
 
+- **11 OWASP Agentic AI Top 10 modules** (ASI01–ASI10 + tool-integrity + registry-supply): every Agentic category now covered by a dedicated zero-dependency scanner.
+- **Attack Replay (ChronosFix-inspired)** (`eco/replay.py`): snapshot past attack payloads with verdict + evidence; replay them against the current rule set to detect regression — a payload previously blocked that the weakened rules now allow. Enables "has our defense degraded since last attestation?" audits.
+- **Vertical-domain semantic risk scan** (`scanner/vertical_risk.py`): domain-specific screening for finance (fraud inducement / unlicensed wealth management), medical (unlicensed diagnosis / false cure), and government (sensitive topics / unauthorized disclosure) — borrowed from FinFlux's vertical semantic-admission pattern. Complements the generic OWASP rule set by catching semantically dangerous output that is technically rule-compliant.
+- **AIP protocol compatibility** (`aip_protocol_version: 1.0.0`): agent-card declares AIP-AC/v1 + A2A + AGNTCY + OASF compatibility fields, making AIShield a protocol-agnostic content-trust layer that any agent interconnect can embed.
+- **Three-scenario interactive Demo** (`demo/run_demo.py` + `demo/index.html`): live, reproducible transcripts of (1) security gate blocking an attack, (2) attestation drift detection + certification revoke, (3) task atomic-lock preventing double execution. Terminal-animation UI for evaluators.
+- **Project-level SBOM** (`scripts/gen_project_sbom.py`): CycloneDX-formatted CycloneDX SBOM (`docs/project-sbom.cyclonedx.json`) of the AIShield Python package, for compliance / supply-chain auditors.
+- **Rule-as-PR automation** (`scripts/propose_rule_pr.py`): auto-opens draft GitHub PRs from `scanner/_proposed/PROPOSED_*.py` (default dry-run; `--live` to create).
+- **Minimal Agent Dashboard** (`docs/dashboard.html`): static control-plane UI reading blackboard + trust scores.
+
 All 11 Agentic modules pass a **benign-zero-false-positive** and **malicious-still-blocked** contract in `tests/test_capability_full_scan.py` (40 cases). Full suite: **557 pass / 0 fail / 9 skip**.
 
 Landscape & new-capability gaps: https://aishield.tools/agent-ecosystem-2026-landscape
