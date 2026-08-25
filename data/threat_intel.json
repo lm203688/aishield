@@ -1,6 +1,118 @@
 {
   "intel": [
     {
+      "id": "GHSA-m9mq-7m7q-xc6p",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": null,
+      "title": "browse-mcp has an arbitrary file write via unconfined download and state paths",
+      "summary": "### Impact\n`browser_download` wrote a fetched file to `join(save_dir, filename)` with no validation of `save_dir`, and `browser_save_state` / `browser_load_state` honored an explicit `path` unchanged. The MCP caller controls these arguments (a malicious MCP client, or an autonomous agent steered by indirect prompt injection on a visited page), so an attacker could supply an arbitrary `save_dir` (or state `path`) together with a URL whose response body became the file contents, writing attacker-c",
+      "affected": "npm:browse-mcp",
+      "references": [
+        "https://github.com/advisories/GHSA-m9mq-7m7q-xc6p"
+      ],
+      "published": "2026-08-25T16:28:32Z",
+      "fetched": "2026-08-25T16:40:52.431376+00:00"
+    },
+    {
+      "id": "GHSA-q27q-98j4-9pfv",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 8.8,
+      "title": "qwed Vulnerable to Authenticated Remote Code Execution via Unsafe SymPy `parse_expr()`",
+      "summary": "### Summary\n\nThe `qwed` package (version 5.1.1) passes attacker-controlled input directly to SymPy's `parse_expr()` function without a restricted namespace. Because `parse_expr()` internally calls Python's `eval()`, any authenticated tenant can execute arbitrary Python code inside the API server process. The attack requires only a standard user account, which is freely obtainable through the default-enabled `/auth/signup` endpoint. Successful exploitation gives the attacker full read/write acces",
+      "affected": "pip:qwed",
+      "references": [
+        "https://github.com/advisories/GHSA-q27q-98j4-9pfv"
+      ],
+      "published": "2026-08-25T16:25:19Z",
+      "fetched": "2026-08-25T16:40:53.550404+00:00"
+    },
+    {
+      "id": "GHSA-hq3h-g68c-hp78",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.5,
+      "title": "urllib's cross-origin redirects preserve credential-bearing request headers, leading to potential credential leakage",
+      "summary": "## Summary\n\nurllib supports redirect-following through `followRedirect`, which is expected behavior for an HTTP client. The issue is that, when following a redirect to a **different origin**, urllib preserves the caller-supplied request headers verbatim, including credential-bearing headers such as `Authorization`, `Cookie`, `Proxy-Authorization`, and custom auth headers (`x-api-key`, `x-auth-token`, `x-access-token`).\n\nIf the redirect target is attacker-controlled or outside the trust boundary ",
+      "affected": "npm:urllib, npm:urllib",
+      "references": [
+        "https://github.com/advisories/GHSA-hq3h-g68c-hp78"
+      ],
+      "published": "2026-08-25T16:19:32Z",
+      "fetched": "2026-08-25T16:40:52.431474+00:00"
+    },
+    {
+      "id": "GHSA-8vh3-g2qg-2h2c",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": 9.1,
+      "title": "nextcloud-mcp-server: Unauthenticated `POST /webhooks/nextcloud` allows arbitrary vector data deletion when `WEBHOOK_SECRET` is unset ( default )",
+      "summary": "## Summary\nThe `POST /webhooks/nextcloud` endpoint has no authentication by default: `WEBHOOK_SECRET` defaults to `None` and is never required by startup validation. When unset, the receiver accepts any unauthenticated POST. The `user_id` is taken directly from the attacker-supplied payload and passed to Qdrant, allowing an unauthenticated attacker to delete or corrupt vector embeddings for any user.\n\n## Details\n**Vulnerable file:** `nextcloud_mcp_server/vector/webhook_receiver.py`, function `ha",
+      "affected": "pip:nextcloud-mcp-server",
+      "references": [
+        "https://github.com/advisories/GHSA-8vh3-g2qg-2h2c"
+      ],
+      "published": "2026-08-25T16:04:15Z",
+      "fetched": "2026-08-25T16:40:53.550470+00:00"
+    },
+    {
+      "id": "GHSA-8qx3-8gm5-9cj2",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": null,
+      "title": "pickem vulnerable to terminal escape-sequence injection via unsanitized item text",
+      "summary": "### Impact\npickem rendered item text (label, description, group, meta, name) to the terminal with no control-character sanitization. `chrome.row` only stripped ANSI from the **active** row; inactive rows, the public `createFormatter`, and selection-summary lines printed labels **raw**, and the ANSI strip missed bare C0 controls anyway.\n\nBecause item text is frequently attacker-controllable (git branch names, PR/issue titles, filenames, npm/API results), a malicious label was a terminal write pri",
+      "affected": "npm:pickem",
+      "references": [
+        "https://github.com/advisories/GHSA-8qx3-8gm5-9cj2"
+      ],
+      "published": "2026-08-25T15:59:11Z",
+      "fetched": "2026-08-25T16:40:52.431491+00:00"
+    },
+    {
+      "id": "GHSA-8cp3-qxj6-px34",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.1,
+      "title": "utcp-http has an OAuth2 `tokenUrl` Trust Boundary Bypass in OpenAPI Conversion",
+      "summary": "### Summary\n\nThe `utcp-http` library (<= 1.1.3) unconditionally trusts the `tokenUrl` field embedded in remote OpenAPI security schemes. When a victim registers an attacker-controlled OpenAPI spec and invokes any generated OAuth2-protected tool, the library POSTs the victim's `client_id` and `client_secret` to the attacker-supplied token endpoint without any URL validation. The same `ensure_secure_url()` guard applied to discovery URLs and tool invocation URLs is absent for the OAuth2 token endp",
+      "affected": "pip:utcp-http",
+      "references": [
+        "https://github.com/advisories/GHSA-8cp3-qxj6-px34"
+      ],
+      "published": "2026-08-25T15:57:03Z",
+      "fetched": "2026-08-25T16:40:53.550699+00:00"
+    },
+    {
+      "id": "GHSA-ppx3-28rw-8fpf",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 4.7,
+      "title": "utcp-gql SSRF: CVE-2026-44661 fix not applied to the GraphQL and WebSocket plugins",
+      "summary": "### Summary\n\nThe fix for CVE-2026-44661 (commit `5b16e43`) added the `ensure_secure_url()` / `is_secure_url()` helpers and wired them into the three HTTP-family plugins, but it did not reach the GraphQL or WebSocket plugins. The GraphQL plugin (`utcp-gql`) still uses the `startswith` prefix check that the fix explicitly replaced, so `http://127.0.0.1.attacker.example` and `http://localhost.evil.com` pass it. The WebSocket plugin (`utcp-websocket`) performs no URL validation at all, even though i",
+      "affected": "pip:utcp-gql, pip:utcp-websocket",
+      "references": [
+        "https://github.com/advisories/GHSA-ppx3-28rw-8fpf"
+      ],
+      "published": "2026-08-25T15:52:30Z",
+      "fetched": "2026-08-25T16:40:53.550760+00:00"
+    },
+    {
+      "id": "GHSA-9qhg-99ww-9mqc",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 8.2,
+      "title": "utcp-http SSRF: HTTP tool invocation follows redirects without re-validating the target",
+      "summary": "## Summary\n\n`HttpCommunicationProtocol.call_tool` validates only the pre-redirect tool URL, then issues the request with redirects enabled and never re-checks where it lands. A tool whose endpoint is an attacker-controlled public URL can therefore `302`-redirect the UTCP client into an internal service including the cloud metadata endpoint and the response body is returned to the tool caller. This is a working SSRF + internal-data-exfiltration primitive.\n\nThis is the redirect invariant of the SS",
+      "affected": "pip:utcp-http",
+      "references": [
+        "https://github.com/advisories/GHSA-9qhg-99ww-9mqc"
+      ],
+      "published": "2026-08-25T15:48:51Z",
+      "fetched": "2026-08-25T16:40:53.550814+00:00"
+    },
+    {
       "id": "GHSA-mw6r-2hvm-4rp2",
       "source": "github-advisory",
       "severity": "critical",
@@ -3465,19 +3577,19 @@
       "fetched": "2026-08-04T06:34:53.913899+00:00"
     }
   ],
-  "updated": "2026-08-25T15:46:18.275122+00:00",
+  "updated": "2026-08-25T16:40:54.054412+00:00",
   "sources": [
     "osv",
     "nvd",
     "github-advisory"
   ],
   "stats": {
-    "critical": 31,
-    "high": 109,
-    "medium": 69,
+    "high": 115,
+    "critical": 32,
+    "medium": 70,
     "unknown": 20,
     "low": 3,
     "moderate": 1
   },
-  "total": 233
+  "total": 241
 }
