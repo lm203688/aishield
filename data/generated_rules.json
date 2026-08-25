@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-08-25T20:33:22.148473+00:00",
-  "source_intel_count": 254,
+  "generated_at": "2026-08-25T21:32:20.522267+00:00",
+  "source_intel_count": 255,
   "package_blacklist": {
     "pip:chainlit": {
       "ecosystem": "pip",

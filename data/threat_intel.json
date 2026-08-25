@@ -1,6 +1,22 @@
 {
   "intel": [
     {
+      "id": "CVE-2026-53965",
+      "source": "nvd",
+      "severity": "unknown",
+      "cvss": null,
+      "title": "The MCP PHP SDK (Composer package mcp/sdk) is the official Model Context Protocol SDK for PHP. In versions 0.5.0 through 0.7.0, the HTTP client transport reads a Server-Sent Events response stream inc",
+      "summary": "The MCP PHP SDK (Composer package mcp/sdk) is the official Model Context Protocol SDK for PHP. In versions 0.5.0 through 0.7.0, the HTTP client transport reads a Server-Sent Events response stream incrementally and appends each chunk to an in-memory buffer with no upper bound. The buffer is only flushed when an SSE event delimiter, a double newline, is found, so a remote MCP server that streams response bytes without ever sending the delimiter causes the buffer to grow without limit. A malicious",
+      "affected": "model context protocol",
+      "references": [
+        "https://github.com/modelcontextprotocol/php-sdk/commit/055593f2592e1d7f5f48587c999ca7068a3be90d",
+        "https://github.com/modelcontextprotocol/php-sdk/releases/tag/v0.7.1",
+        "https://github.com/modelcontextprotocol/php-sdk/security/advisories/GHSA-7m52-jw36-44r3"
+      ],
+      "published": "2026-08-25T21:17:01.597",
+      "fetched": "2026-08-25T21:31:55.859159+00:00"
+    },
+    {
       "id": "GHSA-hvfh-5mj3-5f3j",
       "source": "github-advisory",
       "severity": "high",
@@ -3767,19 +3783,19 @@
       "fetched": "2026-08-04T06:34:53.913899+00:00"
     }
   ],
-  "updated": "2026-08-25T20:33:02.050758+00:00",
+  "updated": "2026-08-25T21:32:10.276096+00:00",
   "sources": [
     "osv",
     "nvd",
     "github-advisory"
   ],
   "stats": {
+    "unknown": 22,
     "high": 123,
     "critical": 33,
     "medium": 73,
-    "unknown": 21,
     "low": 3,
     "moderate": 1
   },
-  "total": 254
+  "total": 255
 }
