@@ -1,7 +1,29 @@
 {
-  "generated_at": "2026-08-25T13:53:42.406308+00:00",
-  "source_intel_count": 212,
+  "generated_at": "2026-08-25T14:50:32.710055+00:00",
+  "source_intel_count": 222,
   "package_blacklist": {
+    "pip:praisonaiagents": {
+      "ecosystem": "pip",
+      "package": "praisonaiagents",
+      "severity": "high",
+      "advisories": [
+        "GHSA-vg6p-v9vm-6fgj",
+        "GHSA-x44h-65qv-cw74",
+        "GHSA-7g3p-92qq-8wvh",
+        "GHSA-8hjw-25cg-g52h",
+        "GHSA-hxmv-c4g6-5fqc",
+        "GHSA-5r34-2g38-6569"
+      ]
+    },
+    "pip:PraisonAI": {
+      "ecosystem": "pip",
+      "package": "PraisonAI",
+      "severity": "high",
+      "advisories": [
+        "GHSA-7ww9-85pg-cv4x",
+        "GHSA-hxmv-c4g6-5fqc"
+      ]
+    },
     "pip:xinference": {
       "ecosystem": "pip",
       "package": "xinference",
@@ -411,34 +433,79 @@
     }
   },
   "pattern_rules": {
-    "(?i)(auth(entication)?\\s*[:=]\\s*(False|None|null|0)\\b|verify\\s*=\\s*False)": {
-      "description": "认证绕过: 显式关闭校验",
-      "severity": "critical",
-      "owasp": "LLM07",
-      "owasp_name": "系统提示泄露 (System Prompt Leakage)",
-      "derived_from": "authentication",
-      "intel_hits": 14,
-      "evidence": [
-        "GHSA-x2rj-828p-hx9m",
-        "GHSA-hjwh-xvfw-qrwj",
-        "GHSA-2c9q-c2q9-qgqv",
-        "CVE-2026-75110",
-        "CVE-2026-48039"
-      ]
-    },
     "(?i)(requests\\.(get|post)|urllib\\.request\\.urlopen|fetch)\\s*\\(\\s*[^)]*(user|input|param|req\\.)": {
       "description": "SSRF: 请求目标来自不可信输入",
       "severity": "high",
       "owasp": "LLM06",
       "owasp_name": "过度代理权限 (Excessive Agency)",
       "derived_from": "ssrf",
+      "intel_hits": 20,
+      "evidence": [
+        "GHSA-vg6p-v9vm-6fgj",
+        "GHSA-x44h-65qv-cw74",
+        "GHSA-8hjw-25cg-g52h",
+        "GHSA-5r34-2g38-6569",
+        "GHSA-5p3m-vhh6-9236"
+      ]
+    },
+    "(?i)(auth(entication)?\\s*[:=]\\s*(False|None|null|0)\\b|verify\\s*=\\s*False)": {
+      "description": "认证绕过: 显式关闭校验",
+      "severity": "critical",
+      "owasp": "LLM07",
+      "owasp_name": "系统提示泄露 (System Prompt Leakage)",
+      "derived_from": "authentication",
       "intel_hits": 16,
       "evidence": [
-        "GHSA-5p3m-vhh6-9236",
-        "GHSA-wppf-h75h-6pm6",
-        "GHSA-q87f-qc2r-2gw4",
-        "GHSA-9hgc-g3w5-67cm",
-        "CVE-2026-73487"
+        "GHSA-7ww9-85pg-cv4x",
+        "GHSA-wv94-5qcp-6m36",
+        "GHSA-x2rj-828p-hx9m",
+        "GHSA-hjwh-xvfw-qrwj",
+        "GHSA-2c9q-c2q9-qgqv"
+      ]
+    },
+    "(?i)(session|token)\\s*[:=]\\s*['\\\"][^'\\\"]{0,8}['\\\"]": {
+      "description": "会话安全: 会话标识过短或硬编码",
+      "severity": "high",
+      "owasp": "LLM07",
+      "owasp_name": "系统提示泄露 (System Prompt Leakage)",
+      "derived_from": "session",
+      "intel_hits": 23,
+      "evidence": [
+        "GHSA-wv94-5qcp-6m36",
+        "GHSA-c7hr-448w-65px",
+        "CVE-2026-75857",
+        "GHSA-76pc-mqxp-3rq5",
+        "GHSA-hqvf-45jj-mccq"
+      ]
+    },
+    "(?i)(Access-Control-Allow-Origin['\\\"]?\\s*[:,]\\s*['\\\"]\\*|cors\\s*\\(\\s*\\)\\s*)": {
+      "description": "跨域校验缺失: 允许任意来源",
+      "severity": "high",
+      "owasp": "LLM07",
+      "owasp_name": "系统提示泄露 (System Prompt Leakage)",
+      "derived_from": "origin",
+      "intel_hits": 15,
+      "evidence": [
+        "GHSA-wj6g-v78p-6fx3",
+        "GHSA-8qf9-62x2-82pp",
+        "GHSA-4jjw-pwvw-q6w3",
+        "GHSA-279x-mwfv-vcqv",
+        "GHSA-3xpf-xq7r-v8c5"
+      ]
+    },
+    "(?i)(ignore|disregard|forget)\\s+(all\\s+)?(previous|prior|above)\\s+(instruction|prompt|rule)": {
+      "description": "提示注入: 覆盖历史指令",
+      "severity": "critical",
+      "owasp": "LLM01",
+      "owasp_name": "提示注入 (Prompt Injection)",
+      "derived_from": "prompt injection",
+      "intel_hits": 31,
+      "evidence": [
+        "GHSA-5r34-2g38-6569",
+        "CVE-2026-76832",
+        "CVE-2026-75130",
+        "CVE-2026-75913",
+        "CVE-2026-21832"
       ]
     },
     "(?i)(os\\.system|subprocess\\.(call|run|Popen)|child_process\\.exec)\\s*\\(\\s*[^)]*(\\+|%|\\$\\{|f['\\\"])": {
@@ -471,21 +538,6 @@
         "GHSA-wg86-r78f-74mp"
       ]
     },
-    "(?i)(ignore|disregard|forget)\\s+(all\\s+)?(previous|prior|above)\\s+(instruction|prompt|rule)": {
-      "description": "提示注入: 覆盖历史指令",
-      "severity": "critical",
-      "owasp": "LLM01",
-      "owasp_name": "提示注入 (Prompt Injection)",
-      "derived_from": "prompt injection",
-      "intel_hits": 30,
-      "evidence": [
-        "CVE-2026-76832",
-        "CVE-2026-75130",
-        "CVE-2026-75913",
-        "CVE-2026-21832",
-        "CVE-2026-73487"
-      ]
-    },
     "(?i)(\\.\\./){2,}|(%2e%2e%2f)": {
       "description": "路径遍历: 越权访问上级目录",
       "severity": "high",
@@ -512,43 +564,13 @@
         "GHSA-wg9g-w2j2-8pgr",
         "GHSA-qxq5-qhx6-94qw"
       ]
-    },
-    "(?i)(session|token)\\s*[:=]\\s*['\\\"][^'\\\"]{0,8}['\\\"]": {
-      "description": "会话安全: 会话标识过短或硬编码",
-      "severity": "high",
-      "owasp": "LLM07",
-      "owasp_name": "系统提示泄露 (System Prompt Leakage)",
-      "derived_from": "session",
-      "intel_hits": 22,
-      "evidence": [
-        "GHSA-c7hr-448w-65px",
-        "CVE-2026-75857",
-        "GHSA-76pc-mqxp-3rq5",
-        "GHSA-hqvf-45jj-mccq",
-        "GHSA-5gpj-vj23-vhhv"
-      ]
-    },
-    "(?i)(Access-Control-Allow-Origin['\\\"]?\\s*[:,]\\s*['\\\"]\\*|cors\\s*\\(\\s*\\)\\s*)": {
-      "description": "跨域校验缺失: 允许任意来源",
-      "severity": "high",
-      "owasp": "LLM07",
-      "owasp_name": "系统提示泄露 (System Prompt Leakage)",
-      "derived_from": "origin",
-      "intel_hits": 14,
-      "evidence": [
-        "GHSA-8qf9-62x2-82pp",
-        "GHSA-4jjw-pwvw-q6w3",
-        "GHSA-279x-mwfv-vcqv",
-        "GHSA-3xpf-xq7r-v8c5",
-        "GHSA-rffm-9q57-q649"
-      ]
     }
   },
   "owasp_distribution": {
-    "LLM07": 3,
     "LLM06": 2,
-    "LLM05": 3,
-    "LLM01": 1
+    "LLM07": 3,
+    "LLM01": 1,
+    "LLM05": 3
   },
-  "total_rules": 54
+  "total_rules": 56
 }

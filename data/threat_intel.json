@@ -1,6 +1,146 @@
 {
   "intel": [
     {
+      "id": "GHSA-cfxv-8fw8-rwpv",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 6.1,
+      "title": "praisonaiagents: ast_grep_rewrite rewrites arbitrary files without the @require_approval gate enforced on every sibling mutation tool",
+      "summary": "**Target:** PraisonAI (`MervinPraison/PraisonAI`)\n**Affected component:** `praisonaiagents/tools/ast_grep_tool.py` — `ast_grep_rewrite`\n**Affected versions:** master at `ce97667156a116c50b4a3d1aa21e09f048903fda`; reproduced against the current `praisonaiagents` PyPI release (`praisonaiagents` <= 1.6.52).\n\n## Summary\n\nTools in `praisonaiagents/tools/` that modify on-disk state or run code are uniformly wrapped with `@require_approval`, which routes the call through an interactive approval flow be",
+      "affected": "pip:praisonaiagents",
+      "references": [
+        "https://github.com/advisories/GHSA-cfxv-8fw8-rwpv"
+      ],
+      "published": "2026-08-25T14:46:13Z",
+      "fetched": "2026-08-25T14:50:18.057202+00:00"
+    },
+    {
+      "id": "GHSA-vg6p-v9vm-6fgj",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.5,
+      "title": "praisonaiagents vulnerable to SSRF in web_crawl tool via redirect-following and DNS rebinding (validate-then-fetch gap)",
+      "summary": "The web_crawl tool performs its SSRF check only on the initial URL: it resolves the hostname once\nwith socket.gethostbyname and rejects private/loopback/link-local results. It then passes the URL to\na fetcher that uses httpx.Client(follow_redirects=True) - or urllib.request.urlopen when httpx is\nabsent, which also follows redirects - and re-resolves the hostname at connect time, with no further\nvalidation. This validate-here/fetch-there gap is bypassable two independent ways: HTTP redirects and\n",
+      "affected": "pip:praisonaiagents",
+      "references": [
+        "https://github.com/advisories/GHSA-vg6p-v9vm-6fgj"
+      ],
+      "published": "2026-08-25T14:43:19Z",
+      "fetched": "2026-08-25T14:50:18.057246+00:00"
+    },
+    {
+      "id": "GHSA-7ww9-85pg-cv4x",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 8.6,
+      "title": "PraisonAI serve agents --api-key is ignored, allowing unauthenticated remote agent execution",
+      "summary": "### Summary\n\n  PraisonAI's `praisonai serve agents` command exposes `--api-key` as the documented\n  authentication control for production/external deployments, but the configured key is not\n  enforced on the public agent invocation compatibility endpoints.\n\n  An operator can start the server with `--api-key` and bind it to `0.0.0.0`, but any network-\n  reachable caller can still invoke agents through `POST /agents` or `POST /agents/\n  {agent_name}` without `Authorization`, `X-API-Key`, a query t",
+      "affected": "pip:PraisonAI",
+      "references": [
+        "https://github.com/advisories/GHSA-7ww9-85pg-cv4x"
+      ],
+      "published": "2026-08-25T14:42:25Z",
+      "fetched": "2026-08-25T14:50:18.057263+00:00"
+    },
+    {
+      "id": "GHSA-x44h-65qv-cw74",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 8.5,
+      "title": "praisonaiagents has an SSRF protection bypass in `spider_tools._host_is_blocked()` via DNS-resolved hostnames (`127.0.0.1.nip.io`)",
+      "summary": "### Summary\n\n`praisonaiagents/tools/spider_tools.py` contains an SSRF protection bypass. The function\n`_host_is_blocked()` validates URLs against a list of blocked IP literals and hostname\naliases, but **never performs DNS resolution**. Any hostname that resolves to a private or\nloopback IP address — including public wildcard DNS services like `127.0.0.1.nip.io` —\nbypasses the protection entirely.\n\nThis has been **confirmed with a live exploit**: `scrape_page(\"http://127.0.0.1.nip.io:PORT/secret",
+      "affected": "pip:praisonaiagents",
+      "references": [
+        "https://github.com/advisories/GHSA-x44h-65qv-cw74"
+      ],
+      "published": "2026-08-25T14:37:26Z",
+      "fetched": "2026-08-25T14:50:18.057317+00:00"
+    },
+    {
+      "id": "GHSA-wv94-5qcp-6m36",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 6.5,
+      "title": "PraisonAI MCP HTTP server has unauthenticated unbounded session accumulation (memory exhaustion; session TTL never enforced)",
+      "summary": "### Summary\n\nThe PraisonAI MCP HTTP-stream server creates a new in-memory session on every initialize request and never removes it. The cleanup routine that would expire sessions (_cleanup_sessions) is defined but never called anywhere in the codebase, and the configured session TTL is never enforced. There is no cap on the number of sessions. Because initialize requires no authentication and the server keeps every session dictionary forever, an attacker who can reach the endpoint (directly when",
+      "affected": "pip:PraisonAI",
+      "references": [
+        "https://github.com/advisories/GHSA-wv94-5qcp-6m36"
+      ],
+      "published": "2026-08-25T14:34:28Z",
+      "fetched": "2026-08-25T14:50:18.057360+00:00"
+    },
+    {
+      "id": "GHSA-7g3p-92qq-8wvh",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 8.2,
+      "title": "praisonaiagents: AgentServer declares auth_token but never enforces it on any route",
+      "summary": "**Researcher:** Kai Aizen — SnailSploit (@SnailSploit), Adversarial & Offensive Security Research\n**Target:** https://github.com/MervinPraison/PraisonAI\n\n---\n\n**Package:** `praisonaiagents` on PyPI\n**Affected version (empirically tested):** 1.6.48\n**Component:** `praisonaiagents.server.AgentServer` (the bundled HTTP / SSE server)\n\n---\n\n## TL;DR\n\n`AgentServer.ServerConfig` advertises an `auth_token: Optional[str] = None` field that operators set when they want to lock down the server. The `GET /i",
+      "affected": "pip:praisonaiagents",
+      "references": [
+        "https://github.com/advisories/GHSA-7g3p-92qq-8wvh"
+      ],
+      "published": "2026-08-25T14:31:52Z",
+      "fetched": "2026-08-25T14:50:18.057461+00:00"
+    },
+    {
+      "id": "GHSA-wj6g-v78p-6fx3",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 6.9,
+      "title": "PraisonAI has an origin validation bypass in MCP HTTP Stream transport that allows browser-mediated unauthenticated tool execution on local MCP server",
+      "summary": "### Summary\n\nPraisonAI's MCP HTTP Stream transport uses an unsafe prefix match when validating the `Origin` header. The default localhost allowlist includes origins such as `http://localhost`, and the validation accepts any origin that starts with an allowed value.\n\nAs a result, an attacker-controlled origin such as `http://localhost.evil.example` passes the localhost origin check.\n\nWhen the MCP HTTP Stream server is started without an API key, which is the CLI default, this allows a malicious w",
+      "affected": "pip:PraisonAI",
+      "references": [
+        "https://github.com/advisories/GHSA-wj6g-v78p-6fx3"
+      ],
+      "published": "2026-08-25T14:26:26Z",
+      "fetched": "2026-08-25T14:50:18.057474+00:00"
+    },
+    {
+      "id": "GHSA-8hjw-25cg-g52h",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": null,
+      "title": "praisonaiagents has a `web_crawl` SSRF protection bypass via unchecked redirect targets",
+      "summary": "## Summary\n\n`praisonaiagents.tools.web_crawl_tools.web_crawl()` validates the initial URL and blocks direct loopback/private destinations by default, but the default httpx fallback still uses `httpx.Client(follow_redirects=True)` and does not revalidate redirect targets.\n\nAn attacker-controlled public URL can pass the initial host check, redirect to loopback/private/cloud metadata infrastructure, and have the redirected response body returned by `web_crawl()`.\n\nThis appears to be an incomplete f",
+      "affected": "pip:praisonaiagents",
+      "references": [
+        "https://github.com/advisories/GHSA-8hjw-25cg-g52h"
+      ],
+      "published": "2026-08-25T14:18:40Z",
+      "fetched": "2026-08-25T14:50:18.057487+00:00"
+    },
+    {
+      "id": "GHSA-hxmv-c4g6-5fqc",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.8,
+      "title": "PraisonAI workflow include bypasses tools.py autoload opt-in and executes included recipe code",
+      "summary": "## Summary\n\nPraisonAI's workflow include implementation implicitly imports and executes an included recipe's `tools.py` file even when the documented `tools.py` autoload opt-in is unset.\n\nThis bypasses the hardening added for the prior automatic `tools.py` RCE advisory family. A workflow that includes an untrusted local recipe can execute arbitrary Python module-level code before any model call or child workflow execution.\n\nThe same sink is reachable through the higher-level `praisonai.recipe.ru",
+      "affected": "pip:praisonaiagents, pip:PraisonAI",
+      "references": [
+        "https://github.com/advisories/GHSA-hxmv-c4g6-5fqc"
+      ],
+      "published": "2026-08-25T14:15:27Z",
+      "fetched": "2026-08-25T14:50:18.057511+00:00"
+    },
+    {
+      "id": "GHSA-5r34-2g38-6569",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.5,
+      "title": "praisonaiagents web_crawl vulnerable to SSRF via redirect-following",
+      "summary": "### Summary\n`web_crawl` (an exported, model-callable tool) validates only the INITIAL URL's resolved IP against a private/loopback blocklist, then fetches with `httpx.Client(follow_redirects=True)` and never re-validates redirect targets. \n\nAn attacker who controls the agent's crawl target (a malicious task, or prompt injection inside any page the agent already crawls) supplies a public URL that HTTP 302-redirects to an internal address. httpx follows the redirect, fetches the internal resource ",
+      "affected": "pip:praisonaiagents",
+      "references": [
+        "https://github.com/advisories/GHSA-5r34-2g38-6569"
+      ],
+      "published": "2026-08-25T14:05:38Z",
+      "fetched": "2026-08-25T14:50:18.057519+00:00"
+    },
+    {
       "id": "CVE-2026-76072",
       "source": "nvd",
       "severity": "high",
@@ -3171,19 +3311,19 @@
       "fetched": "2026-08-04T06:34:53.913899+00:00"
     }
   ],
-  "updated": "2026-08-25T13:53:30.107891+00:00",
+  "updated": "2026-08-25T14:50:18.561093+00:00",
   "sources": [
     "osv",
     "nvd",
     "github-advisory"
   ],
   "stats": {
-    "high": 94,
+    "medium": 68,
+    "high": 101,
     "critical": 29,
-    "medium": 65,
     "unknown": 20,
     "low": 3,
     "moderate": 1
   },
-  "total": 212
+  "total": 222
 }
