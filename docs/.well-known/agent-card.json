@@ -8,6 +8,14 @@
     "url": "https://aishield.tools"
   },
   "version": "4.2.2",
+  "aip_protocol_version": "1.0.0",
+  "agent_interconnect": {
+    "schema": "AIP-AC/v1",
+    "trust_layer": "aishield-trust/v1",
+    "discovery_url": "https://aishield.tools/api/v1/registry/search?q=aishield",
+    "compatible_with": ["AIP", "AGNTCY", "OASF", "A2A"],
+    "note": "AIShield is a protocol-agnostic content-trust layer that sits on top of any agent interconnect protocol"
+  },
   "capabilities": {
     "streaming": false,
     "pushNotifications": false,
@@ -103,6 +111,26 @@
       "examples": [
         "Does this Mesh binding expose the entire account network to every agent?",
         "Is any private resource in this config exposed to the public internet?"
+      ]
+    },
+    {
+      "id": "attack_replay",
+      "name": "Attack Replay & Regression Detection",
+      "description": "Snapshot and replay past attack payloads against the current rule set. Detects rule-regression: a payload that was previously blocked but is now allowed because rules were weakened or a pattern was missed. Each snapshot stores payload hash + verdict + evidence, enabling 'has our defense regressed since last check' audits. Borrowed from the ChronosFix 'fault time machine' pattern in agent infra competitions.",
+      "tags": ["attack-replay", "regression", "chronos-fix", "snapshot", "defense-hardening"],
+      "examples": [
+        "Replay all attacks blocked last month and tell me which ones our current rules would still catch",
+        "Has our rule set regressed since the last attestation cycle?"
+      ]
+    },
+    {
+      "id": "vertical_risk_scan",
+      "name": "Vertical-Domain Semantic Risk Scan",
+      "description": "Domain-specific semantic risk screening for high-sensitivity verticals: finance (fraud inducement / unlicensed wealth management / pump-and-dump), medical (unlicensed diagnosis / false cure claims), and government/public-sector (sensitive topics / unauthorized disclosure). Sits on top of the generic OWASP rule set to catch agent output that is technically compliant but semantically dangerous in its context. Borrowed from the FinFlux 'financial semantic admission' pattern.",
+      "tags": ["vertical-risk", "semantic-admission", "finance", "medical", "gov", "finflux"],
+      "examples": [
+        "Scan this agent's financial advice output for fraud inducement language",
+        "Does this medical summary contain false-cure claims or unauthorized diagnoses?"
       ]
     }
   ],
