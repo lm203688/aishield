@@ -1,38 +1,21 @@
 {
   "domain": "rules",
   "current": {
-    "total": 56,
-    "package_blacklist": 47,
+    "total": 57,
+    "package_blacklist": 48,
     "pattern_rules": 9,
     "owasp_distribution": {
-      "LLM06": 2,
       "LLM07": 3,
+      "LLM06": 2,
       "LLM01": 1,
       "LLM05": 3
     },
-    "delta": 2,
-    "last_run": "2026-08-25T14:50:32.714901+00:00",
+    "delta": 1,
+    "last_run": "2026-08-25T15:46:34.404649+00:00",
     "_source": "intel_to_rules",
-    "_ts": "2026-08-25T14:50:32.715139+00:00"
+    "_ts": "2026-08-25T15:46:34.404844+00:00"
   },
   "history": [
-    {
-      "ts": "2026-08-23T07:36:21.561850+00:00",
-      "source": "intel_to_rules",
-      "state": {
-        "total": 54,
-        "package_blacklist": 45,
-        "pattern_rules": 9,
-        "owasp_distribution": {
-          "LLM07": 3,
-          "LLM06": 2,
-          "LLM05": 3,
-          "LLM01": 1
-        },
-        "delta": 0,
-        "last_run": "2026-08-23T07:36:21.561604+00:00"
-      }
-    },
     {
       "ts": "2026-08-23T08:34:39.539907+00:00",
       "source": "intel_to_rules",
@@ -865,8 +848,25 @@
         "delta": 2,
         "last_run": "2026-08-25T14:50:32.714901+00:00"
       }
+    },
+    {
+      "ts": "2026-08-25T15:46:34.404852+00:00",
+      "source": "intel_to_rules",
+      "state": {
+        "total": 57,
+        "package_blacklist": 48,
+        "pattern_rules": 9,
+        "owasp_distribution": {
+          "LLM07": 3,
+          "LLM06": 2,
+          "LLM01": 1,
+          "LLM05": 3
+        },
+        "delta": 1,
+        "last_run": "2026-08-25T15:46:34.404649+00:00"
+      }
     }
   ],
-  "updated": "2026-08-25T14:50:32.715155+00:00",
+  "updated": "2026-08-25T15:46:34.404855+00:00",
   "desc": "扫描规则库版本与来源"
 }

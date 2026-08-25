@@ -1,27 +1,44 @@
 {
-  "generated_at": "2026-08-25T14:50:32.710055+00:00",
-  "source_intel_count": 222,
+  "generated_at": "2026-08-25T15:46:34.401553+00:00",
+  "source_intel_count": 233,
   "package_blacklist": {
+    "pip:qwed-mcp": {
+      "ecosystem": "pip",
+      "package": "qwed-mcp",
+      "severity": "critical",
+      "advisories": [
+        "GHSA-mw6r-2hvm-4rp2"
+      ]
+    },
+    "pip:PraisonAI": {
+      "ecosystem": "pip",
+      "package": "PraisonAI",
+      "severity": "critical",
+      "advisories": [
+        "GHSA-6g6r-q6gw-w8fg",
+        "GHSA-pvph-5j39-v8qc",
+        "GHSA-gfq8-hmph-9gjv",
+        "GHSA-2jgc-f764-c5r2",
+        "GHSA-pvxx-r596-f5qj",
+        "GHSA-rg5q-pp8p-f7jm",
+        "GHSA-r7v3-x45f-g7hp",
+        "GHSA-ch89-h4r2-c8f8",
+        "GHSA-7ww9-85pg-cv4x",
+        "GHSA-hxmv-c4g6-5fqc"
+      ]
+    },
     "pip:praisonaiagents": {
       "ecosystem": "pip",
       "package": "praisonaiagents",
       "severity": "high",
       "advisories": [
+        "GHSA-gxmw-5f7x-6g22",
         "GHSA-vg6p-v9vm-6fgj",
         "GHSA-x44h-65qv-cw74",
         "GHSA-7g3p-92qq-8wvh",
         "GHSA-8hjw-25cg-g52h",
         "GHSA-hxmv-c4g6-5fqc",
         "GHSA-5r34-2g38-6569"
-      ]
-    },
-    "pip:PraisonAI": {
-      "ecosystem": "pip",
-      "package": "PraisonAI",
-      "severity": "high",
-      "advisories": [
-        "GHSA-7ww9-85pg-cv4x",
-        "GHSA-hxmv-c4g6-5fqc"
       ]
     },
     "pip:xinference": {
@@ -433,19 +450,19 @@
     }
   },
   "pattern_rules": {
-    "(?i)(requests\\.(get|post)|urllib\\.request\\.urlopen|fetch)\\s*\\(\\s*[^)]*(user|input|param|req\\.)": {
-      "description": "SSRF: 请求目标来自不可信输入",
+    "(?i)(Access-Control-Allow-Origin['\\\"]?\\s*[:,]\\s*['\\\"]\\*|cors\\s*\\(\\s*\\)\\s*)": {
+      "description": "跨域校验缺失: 允许任意来源",
       "severity": "high",
-      "owasp": "LLM06",
-      "owasp_name": "过度代理权限 (Excessive Agency)",
-      "derived_from": "ssrf",
-      "intel_hits": 20,
+      "owasp": "LLM07",
+      "owasp_name": "系统提示泄露 (System Prompt Leakage)",
+      "derived_from": "origin",
+      "intel_hits": 17,
       "evidence": [
-        "GHSA-vg6p-v9vm-6fgj",
-        "GHSA-x44h-65qv-cw74",
-        "GHSA-8hjw-25cg-g52h",
-        "GHSA-5r34-2g38-6569",
-        "GHSA-5p3m-vhh6-9236"
+        "GHSA-6g6r-q6gw-w8fg",
+        "GHSA-pvph-5j39-v8qc",
+        "GHSA-wj6g-v78p-6fx3",
+        "GHSA-8qf9-62x2-82pp",
+        "GHSA-4jjw-pwvw-q6w3"
       ]
     },
     "(?i)(auth(entication)?\\s*[:=]\\s*(False|None|null|0)\\b|verify\\s*=\\s*False)": {
@@ -454,13 +471,13 @@
       "owasp": "LLM07",
       "owasp_name": "系统提示泄露 (System Prompt Leakage)",
       "derived_from": "authentication",
-      "intel_hits": 16,
+      "intel_hits": 20,
       "evidence": [
-        "GHSA-7ww9-85pg-cv4x",
-        "GHSA-wv94-5qcp-6m36",
-        "GHSA-x2rj-828p-hx9m",
-        "GHSA-hjwh-xvfw-qrwj",
-        "GHSA-2c9q-c2q9-qgqv"
+        "GHSA-gfq8-hmph-9gjv",
+        "GHSA-2jgc-f764-c5r2",
+        "GHSA-pvxx-r596-f5qj",
+        "GHSA-r7v3-x45f-g7hp",
+        "GHSA-7ww9-85pg-cv4x"
       ]
     },
     "(?i)(session|token)\\s*[:=]\\s*['\\\"][^'\\\"]{0,8}['\\\"]": {
@@ -469,28 +486,43 @@
       "owasp": "LLM07",
       "owasp_name": "系统提示泄露 (System Prompt Leakage)",
       "derived_from": "session",
-      "intel_hits": 23,
+      "intel_hits": 24,
       "evidence": [
+        "GHSA-2jgc-f764-c5r2",
         "GHSA-wv94-5qcp-6m36",
         "GHSA-c7hr-448w-65px",
         "CVE-2026-75857",
-        "GHSA-76pc-mqxp-3rq5",
-        "GHSA-hqvf-45jj-mccq"
+        "GHSA-76pc-mqxp-3rq5"
       ]
     },
-    "(?i)(Access-Control-Allow-Origin['\\\"]?\\s*[:,]\\s*['\\\"]\\*|cors\\s*\\(\\s*\\)\\s*)": {
-      "description": "跨域校验缺失: 允许任意来源",
+    "(?i)(\\.\\./){2,}|(%2e%2e%2f)": {
+      "description": "路径遍历: 越权访问上级目录",
       "severity": "high",
-      "owasp": "LLM07",
-      "owasp_name": "系统提示泄露 (System Prompt Leakage)",
-      "derived_from": "origin",
-      "intel_hits": 15,
+      "owasp": "LLM06",
+      "owasp_name": "过度代理权限 (Excessive Agency)",
+      "derived_from": "path traversal",
+      "intel_hits": 13,
       "evidence": [
-        "GHSA-wj6g-v78p-6fx3",
-        "GHSA-8qf9-62x2-82pp",
-        "GHSA-4jjw-pwvw-q6w3",
-        "GHSA-279x-mwfv-vcqv",
-        "GHSA-3xpf-xq7r-v8c5"
+        "GHSA-gxmw-5f7x-6g22",
+        "GHSA-ch89-h4r2-c8f8",
+        "CVE-2026-76832",
+        "GHSA-9gmc-jqmh-3rvm",
+        "GHSA-76pc-mqxp-3rq5"
+      ]
+    },
+    "(?i)(requests\\.(get|post)|urllib\\.request\\.urlopen|fetch)\\s*\\(\\s*[^)]*(user|input|param|req\\.)": {
+      "description": "SSRF: 请求目标来自不可信输入",
+      "severity": "high",
+      "owasp": "LLM06",
+      "owasp_name": "过度代理权限 (Excessive Agency)",
+      "derived_from": "ssrf",
+      "intel_hits": 21,
+      "evidence": [
+        "GHSA-rg5q-pp8p-f7jm",
+        "GHSA-vg6p-v9vm-6fgj",
+        "GHSA-x44h-65qv-cw74",
+        "GHSA-8hjw-25cg-g52h",
+        "GHSA-5r34-2g38-6569"
       ]
     },
     "(?i)(ignore|disregard|forget)\\s+(all\\s+)?(previous|prior|above)\\s+(instruction|prompt|rule)": {
@@ -538,21 +570,6 @@
         "GHSA-wg86-r78f-74mp"
       ]
     },
-    "(?i)(\\.\\./){2,}|(%2e%2e%2f)": {
-      "description": "路径遍历: 越权访问上级目录",
-      "severity": "high",
-      "owasp": "LLM06",
-      "owasp_name": "过度代理权限 (Excessive Agency)",
-      "derived_from": "path traversal",
-      "intel_hits": 11,
-      "evidence": [
-        "CVE-2026-76832",
-        "GHSA-9gmc-jqmh-3rvm",
-        "GHSA-76pc-mqxp-3rq5",
-        "GHSA-rm43-82j9-r4mj",
-        "GHSA-6hm5-jgcp-p838"
-      ]
-    },
     "(?i)(pickle\\.loads|yaml\\.load\\s*\\((?![^)]*Loader)|node-serialize)": {
       "description": "不安全反序列化",
       "severity": "critical",
@@ -567,10 +584,10 @@
     }
   },
   "owasp_distribution": {
-    "LLM06": 2,
     "LLM07": 3,
+    "LLM06": 2,
     "LLM01": 1,
     "LLM05": 3
   },
-  "total_rules": 56
+  "total_rules": 57
 }

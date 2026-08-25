@@ -1,6 +1,160 @@
 {
   "intel": [
     {
+      "id": "GHSA-mw6r-2hvm-4rp2",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": 9.8,
+      "title": "qwed-mcp has Unsafe SymPy `parse_expr()` Remote Code Execution via Unsanitized Math Expression Input",
+      "summary": "### Summary\n\n`verify_math_expression()` in `qwed-mcp` v0.2.0 passes attacker-controlled strings directly to SymPy's `parse_expr()` without restricting `global_dict` or validating the expression's AST. Because `parse_expr()` internally calls `eval()` and Python automatically injects the current module's `__builtins__` when no explicit restriction is set, an attacker can embed arbitrary Python expressions — including `__import__('os').system(...)` — to execute OS commands in the context of the run",
+      "affected": "pip:qwed-mcp",
+      "references": [
+        "https://github.com/advisories/GHSA-mw6r-2hvm-4rp2"
+      ],
+      "published": "2026-08-25T15:26:43Z",
+      "fetched": "2026-08-25T15:46:17.771230+00:00"
+    },
+    {
+      "id": "GHSA-6g6r-q6gw-w8fg",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": 9.1,
+      "title": "PraisonAI has a Browser Server WebSocket origin validation bypass via unanchored regex (patch bypass of CVE-2026-40289 / GHSA-8x8f-54wf-vv92)",
+      "summary": "### Summary\n\n`praisonai/browser/server.py` validates incoming WebSocket connections using a Chrome\nextension Origin check. The regex `chrome-extension://[a-z0-9]{32}` is applied with\n`re.match()`, which **only anchors at the start of the string, not the end**. Any Origin\nheader with more than 32 alphanumeric characters after `chrome-extension://` — including\nnon-alphanumeric trailing characters — passes the check.\n\nThis is a **patch bypass** of GHSA-8x8f-54wf-vv92. That advisory triggered the ad",
+      "affected": "pip:PraisonAI",
+      "references": [
+        "https://github.com/advisories/GHSA-6g6r-q6gw-w8fg"
+      ],
+      "published": "2026-08-25T15:22:16Z",
+      "fetched": "2026-08-25T15:46:17.771297+00:00"
+    },
+    {
+      "id": "GHSA-pvph-5j39-v8qc",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.6,
+      "title": "PraisonAI: Origin-validation bypass (startswith prefix match) enables unauthenticated cross-site request forgery against the PraisonAI MCP HTTP server",
+      "summary": "### Summary\n\nThe PraisonAI MCP server exposes an HTTP-stream transport (praisonai mcp serve --transport http-stream) that binds to localhost and, by default, has no API key. Its only access control for browser-originated requests is an Origin allowlist, which the code implements as required by the MCP 2025-11-25 security guidance. The allowlist check uses a prefix match (request_origin.startswith(allowed)), so any Origin whose string begins with http://localhost or http://127.0.0.1 is accepted, ",
+      "affected": "pip:PraisonAI",
+      "references": [
+        "https://github.com/advisories/GHSA-pvph-5j39-v8qc"
+      ],
+      "published": "2026-08-25T15:18:20Z",
+      "fetched": "2026-08-25T15:46:17.771311+00:00"
+    },
+    {
+      "id": "GHSA-gfq8-hmph-9gjv",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 8.2,
+      "title": "PraisonAI: Authentication fail-open in Recipe server allows unauthenticated access when API key or JWT auth is configured without a secret",
+      "summary": "### Summary\n\nThe PraisonAI Recipe HTTP server silently allows unauthenticated requests when `auth` is configured as `api-key` or `jwt` but the corresponding secret is missing.\n\nThis creates an authentication fail-open condition. An operator can start the Recipe server with authentication enabled, including on a non-localhost interface, but the server still accepts unauthenticated requests if no API key or JWT secret is provided.\n\nThe issue is especially risky because the CLI safety check for non",
+      "affected": "pip:PraisonAI",
+      "references": [
+        "https://github.com/advisories/GHSA-gfq8-hmph-9gjv"
+      ],
+      "published": "2026-08-25T15:15:54Z",
+      "fetched": "2026-08-25T15:46:17.771331+00:00"
+    },
+    {
+      "id": "GHSA-2jgc-f764-c5r2",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 8.6,
+      "title": "PraisonAI: [Auth Bypass] PraisonAI async Jobs API (`/api/v1/runs`) has no authentication — unauthenticated job execution, result theft, cancel and delete",
+      "summary": "### Summary\nPraisonAI's async **Jobs API** (the FastAPI service in `praisonai/jobs/`) installs its router with no authentication middleware, no router-level dependency, and no per-route auth check. Any caller who can reach the jobs server can submit agent jobs (executed against the operator's configured LLM credentials), list every job in the shared store, read other jobs' results, cancel running jobs, and delete terminal jobs — with no token, cookie, session, or per-job ownership value.\n \nThe s",
+      "affected": "pip:PraisonAI",
+      "references": [
+        "https://github.com/advisories/GHSA-2jgc-f764-c5r2"
+      ],
+      "published": "2026-08-25T15:14:27Z",
+      "fetched": "2026-08-25T15:46:17.771393+00:00"
+    },
+    {
+      "id": "GHSA-gxmw-5f7x-6g22",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.1,
+      "title": "praisonaiagents vulnerable to arbitrary file write via unsanitized `user_id` in `FileMemory.__init__()` — path traversal to any writable location",
+      "summary": "### Summary\n\n`praisonaiagents/memory/file_memory.py::FileMemory.__init__()` constructs all\nmemory file paths by directly joining the `user_id` parameter to a base path:\n\n```python\nself.user_path = self.base_path / user_id      # LINE 145 — no sanitization\n```\n\nNo validation or normalization is applied to `user_id` before the path join.\nAn attacker who can supply a `user_id` containing `../` sequences can write\narbitrary JSON files (memory content) to **any writable location on the filesystem**.\n",
+      "affected": "pip:praisonaiagents",
+      "references": [
+        "https://github.com/advisories/GHSA-gxmw-5f7x-6g22"
+      ],
+      "published": "2026-08-25T15:09:54Z",
+      "fetched": "2026-08-25T15:46:17.771455+00:00"
+    },
+    {
+      "id": "GHSA-pvxx-r596-f5qj",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": null,
+      "title": "PraisonAI: `--api-key` flag on `praisonai serve` is not properly enforced",
+      "summary": "## Summary\n\n`praisonai serve agents` and `praisonai serve unified` both accept `--api-key` for authentication. The flag is parsed but never wired into the FastAPI app — no middleware, no header check, nothing. The server runs wide open regardless of what key you set. Tested on 4.6.50 from PyPI.\n\n## Affected versions\n\n- Confirmed on **4.6.50** (current PyPI, 2026-06-02)\n- Likely since **4.6.34** when the serve subsystem shipped\n- File: `src/praisonai/praisonai/cli/features/serve.py`\n\n## What happ",
+      "affected": "pip:PraisonAI",
+      "references": [
+        "https://github.com/advisories/GHSA-pvxx-r596-f5qj"
+      ],
+      "published": "2026-08-25T15:06:09Z",
+      "fetched": "2026-08-25T15:46:17.771496+00:00"
+    },
+    {
+      "id": "GHSA-hmfx-4v44-9qw9",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 6.8,
+      "title": "PraisonAI vulnerable to Server-Side Request Forgery via DNS rebinding bypass in webhook_url validation",
+      "summary": "### Summary\nThe `webhook_url` field in the Jobs API silently passes validation when DNS resolution fails (`socket.gaierror`), enabling DNS rebinding attacks. An attacker's domain can initially resolve to a public IP (passing validation) then switch to an internal IP before the server makes the HTTP request.\n\n### Details\nThe validator catches `socket.gaierror` and silently allows the URL:\n\n```python\n# src/praisonai/praisonai/jobs/models.py:55\ntry:\n    ip = socket.gethostbyname(hostname)\n    ip_ob",
+      "affected": "pip:PraisonAI",
+      "references": [
+        "https://github.com/advisories/GHSA-hmfx-4v44-9qw9"
+      ],
+      "published": "2026-08-25T15:02:04Z",
+      "fetched": "2026-08-25T15:46:17.771515+00:00"
+    },
+    {
+      "id": "GHSA-rg5q-pp8p-f7jm",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.1,
+      "title": "PraisonAI: Webhook SSRF via DNS fail-open in `JobSubmitRequest.validate_webhook_url()` — bypass of CVE-2026-40114",
+      "summary": "### Summary\n\n`praisonai/jobs/models.py::JobSubmitRequest.validate_webhook_url()` validates webhook\nURLs by resolving the hostname and checking whether the IP is private. When DNS\nresolution fails (`socket.gaierror`), the validator **silently passes** the URL via\n`except socket.gaierror: pass`. Additionally, even when DNS succeeds at validation time,\nthe webhook is fired much later by `JobExecutor._send_webhook()`, which calls\n`httpx.AsyncClient().post(job.webhook_url)` — performing a **fresh, in",
+      "affected": "pip:PraisonAI",
+      "references": [
+        "https://github.com/advisories/GHSA-rg5q-pp8p-f7jm"
+      ],
+      "published": "2026-08-25T14:59:44Z",
+      "fetched": "2026-08-25T15:46:17.771571+00:00"
+    },
+    {
+      "id": "GHSA-r7v3-x45f-g7hp",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.3,
+      "title": "PraisonAI: [Auth Bypass] `praisonai serve agents --api-key` is silently ignored — agent-invocation routes (`POST /agents`, `POST /agents/{agent_name}`) run unauthenticated",
+      "summary": "### Summary\n`praisonai serve agents` exposes HTTP routes that invoke registered agents. The CLI advertises `--api-key` with help text \"API key for authentication\", parses it, and forwards it into `ServeHandler`. But `_create_agents_app()` **never reads `config[\"api_key\"]` again** and installs no auth dependency or middleware on its direct routes. The configured key is a no-op flag.\n \nAs a result, an unauthenticated network caller can invoke exposed agents (`POST /agents` and `POST /agents/{agent",
+      "affected": "pip:PraisonAI",
+      "references": [
+        "https://github.com/advisories/GHSA-r7v3-x45f-g7hp"
+      ],
+      "published": "2026-08-25T14:56:59Z",
+      "fetched": "2026-08-25T15:46:17.771630+00:00"
+    },
+    {
+      "id": "GHSA-ch89-h4r2-c8f8",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.1,
+      "title": "PraisonAI: [Path Traversal] agent tools escape the configured workspace via symlinks",
+      "summary": "### Summary\nPraisonAI's `praisonai.code` tool wrappers (exported as `CODE_TOOLS` for agents) expose a `workspace` setting that the module itself treats as a path-traversal **security boundary** — `read_file`, `write_file`, `apply_diff`, and `search_replace` explicitly call `is_path_within_directory()` and return `\"… is outside the workspace\"` on violations. That boundary is enforced **unsoundly and inconsistently**:\n \n1. The containment helper uses `os.path.abspath()`, not `realpath()`/`Path.res",
+      "affected": "pip:PraisonAI",
+      "references": [
+        "https://github.com/advisories/GHSA-ch89-h4r2-c8f8"
+      ],
+      "published": "2026-08-25T14:54:56Z",
+      "fetched": "2026-08-25T15:46:17.771681+00:00"
+    },
+    {
       "id": "GHSA-cfxv-8fw8-rwpv",
       "source": "github-advisory",
       "severity": "medium",
@@ -3311,19 +3465,19 @@
       "fetched": "2026-08-04T06:34:53.913899+00:00"
     }
   ],
-  "updated": "2026-08-25T14:50:18.561093+00:00",
+  "updated": "2026-08-25T15:46:18.275122+00:00",
   "sources": [
     "osv",
     "nvd",
     "github-advisory"
   ],
   "stats": {
-    "medium": 68,
-    "high": 101,
-    "critical": 29,
+    "critical": 31,
+    "high": 109,
+    "medium": 69,
     "unknown": 20,
     "low": 3,
     "moderate": 1
   },
-  "total": 222
+  "total": 233
 }
