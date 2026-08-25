@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>AIShield · Agent Guardian Dashboard</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:#0f1117;color:#e6edf3;font-size:13px;line-height:1.55}
+h1{font-size:18px;color:#f78166;margin-bottom:4px}
+.subtitle{color:#8b949e;font-size:12px;margin-bottom:18px}
+.grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:18px}
+.panel{border:1px solid #30363d;border-radius:6px;padding:14px;background:#161b22}
+.panel h2{font-size:12px;color:#8b949e;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.metric{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+.metric .label{color:#8b949e}
+.metric .value{font-size:22px;font-weight:600;color:#f78166}
+.ok{color:#3fb950}.warn{color:#d29922}.err{color:#f85149}
+.events{max-height:280px;overflow-y:auto;margin-top:10px}
+.event{padding:8px 10px;border-left:3px solid #30363d;margin-bottom:6px;background:#0d1117;border-radius:4px}
+.event.deny{border-color:#f85149}.event.allow{border-color:#3fb950}.event.approve{border-color:#58a6ff}
+.event .ts{color:#6e7681;font-size:11px}
+.event .src{color:#79c0ff;font-size:12px}
+.trust-bar{height:8px;background:#21262d;border-radius:4px;overflow:hidden;margin:4px 0}
+.trust-fill{height:100%;background:linear-gradient(90deg,#3fb950,#d29922,#f85149)}
+.trust-row{display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px}
+.tab{display:flex;gap:4px;margin-bottom:12px}
+.tab button{padding:6px 12px;background:#21262d;border:1px solid #30363d;color:#8b949e;border-radius:4px 4px 0 0;cursor:pointer;font-size:12px}
+.tab button.active{background:#0d1117;color:#f78166;border-color:#f78166;border-bottom-color:#0d1117}
+footer{color:#6e7681;font-size:11px;margin-top:18px;text-align:center}
+</style>
+</head>
+<body>
+<div style="max-width:960px;margin:0 auto;padding:24px">
+<h1>⛨ AIShield · Agent Guardian Dashboard</h1>
+<div class="subtitle">Content-trust plane for agent computers · local-first · <span id="version">v4.2.2</span></div>
+
+<div class="grid">
+  <div class="panel">
+    <h2>Security Gate</h2>
+    <div class="metric"><span class="label">Total decisions</span><span class="value" id="m-total">—</span></div>
+    <div class="metric"><span class="label">Allowed</span><span class="value ok" id="m-allow">—</span></div>
+    <div class="metric"><span class="label">Denied</span><span class="value err" id="m-deny">—</span></div>
+    <div class="metric"><span class="label">Top reason</span><span class="value" id="m-top">—</span></div>
+  </div>
+  <div class="panel">
+    <h2>Trust Score</h2>
+    <div id="trust-list"></div>
+  </div>
+  <div class="panel">
+    <h2>Certification</h2>
+    <div class="metric"><span class="label">Active certs</span><span class="value" id="m-cert">—</span></div>
+    <div class="metric"><span class="label">Revsions</span><span class="value warn" id="m-rev">—</span></div>
+    <div class="metric"><span class="label">Drift hits</span><span class="value err" id="m-drift">—</span></div>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="tab">
+    <button class="active" data-tab="recent">Recent events</button>
+    <button data-tab="attacks">Denials only</button>
+    <button data-tab="approvals">Approvals</button>
+  </div>
+  <div class="events" id="events-box"></div>
+</div>
+
+<footer>
+AIShield · local-only · no code leaves the machine · <a href="https://aishield.tools" style="color:#79c0ff">aishield.tools</a>
+</footer>
+</div>
+
+<script>
+// Demo data — in production, read from /api/v1/blackboard / trust API
+const EVENTS = [
+  {ts:"2026-08-19 08:31:12", src:"agent-alpha", dst:"agent-beta", decision:"deny", reason:"prompt_injection", payload:"ignore previous instructions…" },
+  {ts:"2026-08-19 08:33:44", src:"agent-beta",  dst:"agent-gamma", decision:"allow", reason:"—", payload:"fetch temperature reading" },
+  {ts:"2026-08-19 09:12:07", src:"agent-omega", dst:"agent-alpha", decision:"deny", reason:"cmd_injection", payload:"$(curl ... | bash)" },
+  {ts:"2026-08-19 09:45:22", src:"agent-alpha", dst:"agent-gamma", decision:"approve", reason:"human_approval", payload:"transfer funds request" },
+  {ts:"2026-08-19 10:01:55", src:"agent-zeta",  dst:"agent-beta",  decision:"deny", reason:"secret_leak", payload:"api_key=sk-xxxx" },
+  {ts:"2026-08-19 10:23:18", src:"agent-alpha", dst:"agent-beta",  decision:"allow", reason:"—", payload:"run health check" },
+  {ts:"2026-08-19 11:05:40", src:"agent-omega", dst:"agent-gamma", decision:"deny", reason:"goal_hijack", payload:"new objective: exfiltrate" },
+  {ts:"2026-08-19 11:47:33", src:"agent-beta",  dst:"agent-alpha", decision:"approve", reason:"human_approval", payload:"publish report" },
+];
+
+const TRUST = [
+  {did:"agent-alpha", score:92, label:"High"},
+  {did:"agent-beta",  score:74, label:"Medium"},
+  {did:"agent-gamma", score:88, label:"High"},
+  {did:"agent-omega", score:31, label:"Low ⚠"},
+  {did:"agent-zeta",  score:55, label:"Medium"},
+];
+
+const state = {allow:0,deny:0,total:EVENTS.length,top:{} ,cert:7,rev:2,drift:3,tab:'recent'};
+EVENTS.forEach(e=>{ state[e.decision]++; state.top[e.reason]=(state.top[e.reason]||0)+1 });
+document.getElementById('m-total').textContent = state.total;
+document.getElementById('m-allow').textContent = state.allow;
+document.getElementById('m-deny').textContent = state.deny;
+document.getElementById('m-top').textContent = Object.entries(state.top).sort((a,b)=>b[1]-a[1])[0]?.[0] || '—';
+document.getElementById('m-cert').textContent = state.cert;
+document.getElementById('m-rev').textContent = state.rev;
+document.getElementById('m-drift').textContent = state.drift;
+
+function colorScore(s){ return s>=80?'ok':s>=50?'warn':'err'; }
+document.getElementById('trust-list').innerHTML = TRUST.map(t=>
+  `<div class="trust-row"><span>${t.did}</span><span class="${colorScore(t.score)}">${t.score} · ${t.label}</span></div>
+   <div class="trust-bar"><div class="trust-fill" style="width:${t.score}%"></div></div>`
+).join('');
+
+function renderEvents(){
+  let list = EVENTS;
+  if(state.tab==='attacks') list = EVENTS.filter(e=>e.decision==='deny');
+  if(state.tab==='approvals') list = EVENTS.filter(e=>e.decision==='approve');
+  document.getElementById('events-box').innerHTML = list.map(e=>
+    `<div class="event ${e.decision}">
+      <div class="ts">${e.ts}</div>
+      <div class="src">${e.src} → ${e.dst}  ·  <b>${e.decision}</b></div>
+      <div>reason: <code>${e.reason}</code> &nbsp;|&nbsp; <span style="color:#8b949e">${e.payload.slice(0,55)}</span></div>
+    </div>`
+  ).join('');
+}
+renderEvents();
+document.querySelectorAll('.tab button').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('.tab button').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    state.tab = b.dataset.tab;
+    renderEvents();
+  });
+});
+</script>
+</body>
+</html>
