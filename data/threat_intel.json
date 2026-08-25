@@ -1,6 +1,41 @@
 {
   "intel": [
     {
+      "id": "CVE-2026-55585",
+      "source": "nvd",
+      "severity": "high",
+      "cvss": 8.8,
+      "title": "QWED is open-source AI verification infrastructure for deterministic verification of LLM outputs, tool calls, code, schemas, and agent state before production execution. Prior to 5.1.2, the qwed packa",
+      "summary": "QWED is open-source AI verification infrastructure for deterministic verification of LLM outputs, tool calls, code, schemas, and agent state before production execution. Prior to 5.1.2, the qwed package passes caller-controlled math expressions directly to SymPy parse_expr() without restricted global_dict and local_dict namespaces, allowing Python eval() to resolve builtins and execute arbitrary Python code in the API server process. In src/qwed_new/api/main.py, POST /verify/math is protected by",
+      "affected": "llm agent",
+      "references": [
+        "https://github.com/QWED-AI/qwed-verification/commit/6066b68c0c4f4cc2c3771824822aaa864d082ef8",
+        "https://github.com/QWED-AI/qwed-verification/commit/dc9d4db72ca4b4ae3f96d0e6a0c27a9e38a06f61",
+        "https://github.com/QWED-AI/qwed-verification/pull/200",
+        "https://github.com/QWED-AI/qwed-verification/security/advisories/GHSA-q27q-98j4-9pfv"
+      ],
+      "published": "2026-08-25T17:17:32.903",
+      "fetched": "2026-08-25T17:34:43.126115+00:00"
+    },
+    {
+      "id": "CVE-2026-55557",
+      "source": "nvd",
+      "severity": "unknown",
+      "cvss": null,
+      "title": "browse-mcp is a Playwright-based headless-browser MCP server for MCP-capable agents. Prior to 0.8.2, browser_download writes a fetched response body to join(save_dir, filename) without validating the ",
+      "summary": "browse-mcp is a Playwright-based headless-browser MCP server for MCP-capable agents. Prior to 0.8.2, browser_download writes a fetched response body to join(save_dir, filename) without validating the caller-controlled save_dir, while browser_save_state and browser_load_state honor a caller-controlled path unchanged. A malicious MCP client, or an autonomous agent steered by indirect prompt injection on a visited page, can choose an arbitrary save_dir or state path and a URL whose response body be",
+      "affected": "prompt injection",
+      "references": [
+        "https://github.com/That1Drifter/browse-mcp/blob/v0.8.2/CHANGELOG.md#082---2026-06-13",
+        "https://github.com/That1Drifter/browse-mcp/commit/5352a4a56f626254b445bfa07e4bb48c5aad15c1",
+        "https://github.com/That1Drifter/browse-mcp/pull/58",
+        "https://github.com/That1Drifter/browse-mcp/releases/tag/v0.8.2",
+        "https://github.com/That1Drifter/browse-mcp/security/advisories/GHSA-m9mq-7m7q-xc6p"
+      ],
+      "published": "2026-08-25T17:17:32.357",
+      "fetched": "2026-08-25T17:34:29.052654+00:00"
+    },
+    {
       "id": "GHSA-m9mq-7m7q-xc6p",
       "source": "github-advisory",
       "severity": "high",
@@ -3577,19 +3612,19 @@
       "fetched": "2026-08-04T06:34:53.913899+00:00"
     }
   ],
-  "updated": "2026-08-25T16:40:54.054412+00:00",
+  "updated": "2026-08-25T17:34:51.519819+00:00",
   "sources": [
     "osv",
     "nvd",
     "github-advisory"
   ],
   "stats": {
-    "high": 115,
+    "high": 116,
+    "unknown": 21,
     "critical": 32,
     "medium": 70,
-    "unknown": 20,
     "low": 3,
     "moderate": 1
   },
-  "total": 241
+  "total": 243
 }

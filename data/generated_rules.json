@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-08-25T16:41:06.787068+00:00",
-  "source_intel_count": 241,
+  "generated_at": "2026-08-25T17:35:06.901610+00:00",
+  "source_intel_count": 243,
   "package_blacklist": {
     "npm:browse-mcp": {
       "ecosystem": "npm",
@@ -505,13 +505,13 @@
       "owasp": "LLM01",
       "owasp_name": "提示注入 (Prompt Injection)",
       "derived_from": "prompt injection",
-      "intel_hits": 32,
+      "intel_hits": 33,
       "evidence": [
+        "CVE-2026-55557",
         "GHSA-m9mq-7m7q-xc6p",
         "GHSA-5r34-2g38-6569",
         "CVE-2026-76832",
-        "CVE-2026-75130",
-        "CVE-2026-75913"
+        "CVE-2026-75130"
       ]
     },
     "(?i)(Access-Control-Allow-Origin['\\\"]?\\s*[:,]\\s*['\\\"]\\*|cors\\s*\\(\\s*\\)\\s*)": {
