@@ -45,6 +45,8 @@ def main():
         'tests.test_agent_security_gateway',
         'tests.test_trust_protocol',
         'tests.test_claim_lock',
+        'tests.test_replay',
+        'tests.test_vertical_risk',
     ]
 
     loaded = 0
