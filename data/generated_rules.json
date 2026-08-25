@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-25T19:35:17.906249+00:00",
+  "generated_at": "2026-08-25T20:33:22.148473+00:00",
   "source_intel_count": 254,
   "package_blacklist": {
     "pip:chainlit": {
