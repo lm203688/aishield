@@ -2388,7 +2388,8 @@ def main():
             from eco import agent_gateway
             from eco import observability
             from eco import blackboard, agent_security_gateway
-            from eco import trust_protocol
+            from eco import trust_protocol, replay
+            from scanner import vertical_risk
             _eco_init({
                 "identity": identity,
                 "payment": payment,
@@ -2405,8 +2406,10 @@ def main():
                 "blackboard": blackboard,
                 "agent_security_gateway": agent_security_gateway,
                 "trust_protocol": trust_protocol,
+                "replay": replay,
+                "vertical_risk": vertical_risk,
             })
-            print("  Eco modules: identity, payment, badge, marketplace, a2a, collab, sandbox, skill_market, auth_provider, account, agent_gateway, observability, blackboard, agent_security_gateway, trust_protocol")
+            print("  Eco modules: identity, payment, badge, marketplace, a2a, collab, sandbox, skill_market, auth_provider, account, agent_gateway, observability, blackboard, agent_security_gateway, trust_protocol, replay, vertical_risk")
         except Exception as e:
             print(f"  Eco modules: init failed ({e})")
     else:
