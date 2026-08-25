@@ -1,0 +1,1420 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "serialNumber": "urn:uuid:02e4782e-9d4f-442c-9137-b0ddc0e43ce3",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2026-08-25T09:37:32.619114+08:00",
+    "authors": [
+      {
+        "name": "AIShield Project"
+      }
+    ],
+    "component": {
+      "type": "application",
+      "name": "aishield",
+      "version": "4.2.2",
+      "description": "Local-first open-source AI Agent security scanner (MCP/Skill/Agent).",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/lm203688/aishield"
+        },
+        {
+          "type": "website",
+          "url": "https://aishield.tools"
+        }
+      ]
+    },
+    "tools": [
+      {
+        "vendor": "AIShield",
+        "name": "gen_project_sbom",
+        "version": "4.2.2"
+      }
+    ]
+  },
+  "components": [
+    {
+      "type": "library",
+      "name": "eco/a2a_gateway.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-eco/a2a_gateway.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "eco/account.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-eco/account.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "eco/agent_gateway.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-eco/agent_gateway.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "eco/agent_security_gateway.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-eco/agent_security_gateway.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "eco/attestation.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-eco/attestation.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "eco/auth_provider.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-eco/auth_provider.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "eco/badge.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-eco/badge.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "eco/blackboard.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-eco/blackboard.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "eco/collab.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-eco/collab.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "eco/credentials.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-eco/credentials.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "eco/dispatcher.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-eco/dispatcher.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "eco/guardrail_harness.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-eco/guardrail_harness.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "eco/hupijiao.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-eco/hupijiao.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "eco/identity.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-eco/identity.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "eco/marketplace.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-eco/marketplace.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "eco/monetization.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-eco/monetization.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "eco/observability.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-eco/observability.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "eco/payment.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-eco/payment.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "eco/replay.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-eco/replay.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "eco/runtime_governance.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-eco/runtime_governance.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "eco/sandbox.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-eco/sandbox.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "eco/skill_market.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-eco/skill_market.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "eco/spend_cap.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-eco/spend_cap.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "eco/trust_protocol.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-eco/trust_protocol.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "eco/x402.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-eco/x402.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "scanner/agentcard_scan.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-scanner/agentcard_scan.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "scanner/antitamper_scan.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-scanner/antitamper_scan.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "scanner/api_scanner.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-scanner/api_scanner.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "scanner/attack_path.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-scanner/attack_path.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "scanner/authentik_scan.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-scanner/authentik_scan.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "scanner/batch_scanner.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-scanner/batch_scanner.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "scanner/client_discovery.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-scanner/client_discovery.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "scanner/computeruse_scan.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-scanner/computeruse_scan.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "scanner/dark_pattern_scan.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-scanner/dark_pattern_scan.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "scanner/engine.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-scanner/engine.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "scanner/exporters.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-scanner/exporters.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "scanner/fleet.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-scanner/fleet.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "scanner/goal_hijack_scan.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-scanner/goal_hijack_scan.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "scanner/handshake.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-scanner/handshake.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "scanner/identity_scan.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-scanner/identity_scan.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "scanner/least_agency_scan.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-scanner/least_agency_scan.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "scanner/live_probe.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-scanner/live_probe.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "scanner/llm_analyzer.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-scanner/llm_analyzer.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "scanner/mcp_oauth_scan.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-scanner/mcp_oauth_scan.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "scanner/memory_scan.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-scanner/memory_scan.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "scanner/monitor.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-scanner/monitor.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "scanner/network_scan.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-scanner/network_scan.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "scanner/osv.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-scanner/osv.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "scanner/payment_scan.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-scanner/payment_scan.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "scanner/policy.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-scanner/policy.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "scanner/provenance_scan.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-scanner/provenance_scan.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "scanner/registry_discovery.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-scanner/registry_discovery.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "scanner/registry_supply_scan.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-scanner/registry_supply_scan.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "scanner/rug_pull.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-scanner/rug_pull.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "scanner/rules.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-scanner/rules.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "scanner/sbom.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-scanner/sbom.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "scanner/scope_composition_scan.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-scanner/scope_composition_scan.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "scanner/slop_scan.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-scanner/slop_scan.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "scanner/telemetry.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-scanner/telemetry.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "scanner/tool_integrity_scan.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-scanner/tool_integrity_scan.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "scanner/vertical_risk.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-scanner/vertical_risk.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "scanner/workspace_scan.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-scanner/workspace_scan.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "scanner/integrations/bb_browser.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-scanner/integrations/bb_browser.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "scanner/integrations/browser_use.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-scanner/integrations/browser_use.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "scanner/integrations/event_stream.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-scanner/integrations/event_stream.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "scanner/integrations/graph_db.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-scanner/integrations/graph_db.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "scanner/integrations/persistent_agent.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-scanner/integrations/persistent_agent.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "scanner/integrations/scan_isolation.py",
+      "version": "4.2.2",
+      "bom-ref": "comp-scanner/integrations/scan_isolation.py",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "framework",
+      "name": "Python standard library",
+      "version": "3",
+      "bom-ref": "comp-python-stdlib",
+      "scope": "required",
+      "description": "AIShield 仅依赖 Python 标准库，无任何第三方包（零供应链面）。"
+    }
+  ],
+  "dependencies": [
+    {
+      "ref": "comp-python-stdlib",
+      "dependsOn": []
+    },
+    {
+      "ref": "comp-eco/a2a_gateway.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-eco/account.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-eco/agent_gateway.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-eco/agent_security_gateway.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-eco/attestation.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-eco/auth_provider.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-eco/badge.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-eco/blackboard.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-eco/collab.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-eco/credentials.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-eco/dispatcher.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-eco/guardrail_harness.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-eco/hupijiao.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-eco/identity.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-eco/marketplace.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-eco/monetization.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-eco/observability.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-eco/payment.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-eco/replay.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-eco/runtime_governance.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-eco/sandbox.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-eco/skill_market.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-eco/spend_cap.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-eco/trust_protocol.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-eco/x402.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-scanner/agentcard_scan.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-scanner/antitamper_scan.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-scanner/api_scanner.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-scanner/attack_path.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-scanner/authentik_scan.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-scanner/batch_scanner.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-scanner/client_discovery.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-scanner/computeruse_scan.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-scanner/dark_pattern_scan.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-scanner/engine.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-scanner/exporters.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-scanner/fleet.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-scanner/goal_hijack_scan.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-scanner/handshake.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-scanner/identity_scan.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-scanner/least_agency_scan.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-scanner/live_probe.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-scanner/llm_analyzer.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-scanner/mcp_oauth_scan.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-scanner/memory_scan.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-scanner/monitor.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-scanner/network_scan.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-scanner/osv.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-scanner/payment_scan.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-scanner/policy.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-scanner/provenance_scan.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-scanner/registry_discovery.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-scanner/registry_supply_scan.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-scanner/rug_pull.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-scanner/rules.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-scanner/sbom.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-scanner/scope_composition_scan.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-scanner/slop_scan.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-scanner/telemetry.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-scanner/tool_integrity_scan.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-scanner/vertical_risk.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-scanner/workspace_scan.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-scanner/integrations/bb_browser.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-scanner/integrations/browser_use.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-scanner/integrations/event_stream.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-scanner/integrations/graph_db.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-scanner/integrations/persistent_agent.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    },
+    {
+      "ref": "comp-scanner/integrations/scan_isolation.py",
+      "dependsOn": [
+        "comp-python-stdlib"
+      ]
+    }
+  ]
+}
