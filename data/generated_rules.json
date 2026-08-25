@@ -1,7 +1,55 @@
 {
-  "generated_at": "2026-08-25T17:35:06.901610+00:00",
-  "source_intel_count": 243,
+  "generated_at": "2026-08-25T18:43:43.791677+00:00",
+  "source_intel_count": 251,
   "package_blacklist": {
+    "npm:@arikusi/deepseek-mcp-server": {
+      "ecosystem": "npm",
+      "package": "@arikusi/deepseek-mcp-server",
+      "severity": "high",
+      "advisories": [
+        "GHSA-fh3r-g96v-f578"
+      ]
+    },
+    "npm:consciousness-explorer": {
+      "ecosystem": "npm",
+      "package": "consciousness-explorer",
+      "severity": "high",
+      "advisories": [
+        "GHSA-xc9g-j69q-37xw"
+      ]
+    },
+    "npm:sublinear-time-solver": {
+      "ecosystem": "npm",
+      "package": "sublinear-time-solver",
+      "severity": "high",
+      "advisories": [
+        "GHSA-xc9g-j69q-37xw"
+      ]
+    },
+    "npm:whistle": {
+      "ecosystem": "npm",
+      "package": "whistle",
+      "severity": "high",
+      "advisories": [
+        "GHSA-3vfr-4gwf-qxfp"
+      ]
+    },
+    "pip:eml_parser": {
+      "ecosystem": "pip",
+      "package": "eml_parser",
+      "severity": "high",
+      "advisories": [
+        "GHSA-g7gc-gmgp-wgqg"
+      ]
+    },
+    "pip:mcp-contextforge-gateway": {
+      "ecosystem": "pip",
+      "package": "mcp-contextforge-gateway",
+      "severity": "high",
+      "advisories": [
+        "GHSA-vwf3-4xxj-qg6h"
+      ]
+    },
     "npm:browse-mcp": {
       "ecosystem": "npm",
       "package": "browse-mcp",
@@ -499,6 +547,51 @@
     }
   },
   "pattern_rules": {
+    "(?i)(session|token)\\s*[:=]\\s*['\\\"][^'\\\"]{0,8}['\\\"]": {
+      "description": "会话安全: 会话标识过短或硬编码",
+      "severity": "high",
+      "owasp": "LLM07",
+      "owasp_name": "系统提示泄露 (System Prompt Leakage)",
+      "derived_from": "session",
+      "intel_hits": 26,
+      "evidence": [
+        "GHSA-72f3-6w86-7rv3",
+        "GHSA-fh3r-g96v-f578",
+        "GHSA-2jgc-f764-c5r2",
+        "GHSA-wv94-5qcp-6m36",
+        "GHSA-c7hr-448w-65px"
+      ]
+    },
+    "(?i)(auth(entication)?\\s*[:=]\\s*(False|None|null|0)\\b|verify\\s*=\\s*False)": {
+      "description": "认证绕过: 显式关闭校验",
+      "severity": "critical",
+      "owasp": "LLM07",
+      "owasp_name": "系统提示泄露 (System Prompt Leakage)",
+      "derived_from": "authentication",
+      "intel_hits": 24,
+      "evidence": [
+        "GHSA-72f3-6w86-7rv3",
+        "GHSA-fh3r-g96v-f578",
+        "GHSA-m2pc-3q4q-w6jr",
+        "GHSA-8vh3-g2qg-2h2c",
+        "GHSA-gfq8-hmph-9gjv"
+      ]
+    },
+    "(?i)(\\.\\./){2,}|(%2e%2e%2f)": {
+      "description": "路径遍历: 越权访问上级目录",
+      "severity": "high",
+      "owasp": "LLM06",
+      "owasp_name": "过度代理权限 (Excessive Agency)",
+      "derived_from": "path traversal",
+      "intel_hits": 15,
+      "evidence": [
+        "GHSA-xc9g-j69q-37xw",
+        "GHSA-3vfr-4gwf-qxfp",
+        "GHSA-gxmw-5f7x-6g22",
+        "GHSA-ch89-h4r2-c8f8",
+        "CVE-2026-76832"
+      ]
+    },
     "(?i)(ignore|disregard|forget)\\s+(all\\s+)?(previous|prior|above)\\s+(instruction|prompt|rule)": {
       "description": "提示注入: 覆盖历史指令",
       "severity": "critical",
@@ -529,21 +622,6 @@
         "GHSA-8qf9-62x2-82pp"
       ]
     },
-    "(?i)(auth(entication)?\\s*[:=]\\s*(False|None|null|0)\\b|verify\\s*=\\s*False)": {
-      "description": "认证绕过: 显式关闭校验",
-      "severity": "critical",
-      "owasp": "LLM07",
-      "owasp_name": "系统提示泄露 (System Prompt Leakage)",
-      "derived_from": "authentication",
-      "intel_hits": 21,
-      "evidence": [
-        "GHSA-8vh3-g2qg-2h2c",
-        "GHSA-gfq8-hmph-9gjv",
-        "GHSA-2jgc-f764-c5r2",
-        "GHSA-pvxx-r596-f5qj",
-        "GHSA-r7v3-x45f-g7hp"
-      ]
-    },
     "(?i)(requests\\.(get|post)|urllib\\.request\\.urlopen|fetch)\\s*\\(\\s*[^)]*(user|input|param|req\\.)": {
       "description": "SSRF: 请求目标来自不可信输入",
       "severity": "high",
@@ -557,36 +635,6 @@
         "GHSA-rg5q-pp8p-f7jm",
         "GHSA-vg6p-v9vm-6fgj",
         "GHSA-x44h-65qv-cw74"
-      ]
-    },
-    "(?i)(session|token)\\s*[:=]\\s*['\\\"][^'\\\"]{0,8}['\\\"]": {
-      "description": "会话安全: 会话标识过短或硬编码",
-      "severity": "high",
-      "owasp": "LLM07",
-      "owasp_name": "系统提示泄露 (System Prompt Leakage)",
-      "derived_from": "session",
-      "intel_hits": 24,
-      "evidence": [
-        "GHSA-2jgc-f764-c5r2",
-        "GHSA-wv94-5qcp-6m36",
-        "GHSA-c7hr-448w-65px",
-        "CVE-2026-75857",
-        "GHSA-76pc-mqxp-3rq5"
-      ]
-    },
-    "(?i)(\\.\\./){2,}|(%2e%2e%2f)": {
-      "description": "路径遍历: 越权访问上级目录",
-      "severity": "high",
-      "owasp": "LLM06",
-      "owasp_name": "过度代理权限 (Excessive Agency)",
-      "derived_from": "path traversal",
-      "intel_hits": 13,
-      "evidence": [
-        "GHSA-gxmw-5f7x-6g22",
-        "GHSA-ch89-h4r2-c8f8",
-        "CVE-2026-76832",
-        "GHSA-9gmc-jqmh-3rvm",
-        "GHSA-76pc-mqxp-3rq5"
       ]
     },
     "(?i)(os\\.system|subprocess\\.(call|run|Popen)|child_process\\.exec)\\s*\\(\\s*[^)]*(\\+|%|\\$\\{|f['\\\"])": {
@@ -633,10 +681,10 @@
     }
   },
   "owasp_distribution": {
-    "LLM01": 1,
     "LLM07": 3,
     "LLM06": 2,
+    "LLM01": 1,
     "LLM05": 3
   },
-  "total_rules": 63
+  "total_rules": 69
 }

@@ -1,6 +1,118 @@
 {
   "intel": [
     {
+      "id": "GHSA-72f3-6w86-7rv3",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 5.3,
+      "title": "@arikusi/deepseek-mcp-server: Missing Authentication on Self-Hosted HTTP MCP Endpoint",
+      "summary": "## Summary\nThe self-hosted HTTP transport of `@arikusi/deepseek-mcp-server` exposes `POST /mcp` without any authentication: `createMcpExpressApp` is called without an `authProvider` and no middleware guards the route, so any network-reachable client can issue an unauthenticated `initialize` request and obtain a valid MCP session identifier. In reproduced testing against commit `5e1302171e99`, an unauthenticated client was able to initialize a session, enumerate tools, and invoke the local `deeps",
+      "affected": "npm:@arikusi/deepseek-mcp-server",
+      "references": [
+        "https://github.com/advisories/GHSA-72f3-6w86-7rv3"
+      ],
+      "published": "2026-08-25T18:38:30Z",
+      "fetched": "2026-08-25T18:43:24.464330+00:00"
+    },
+    {
+      "id": "GHSA-fh3r-g96v-f578",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 8.6,
+      "title": "@arikusi/deepseek-mcp-server has an Authorization Bypass Through User-Controlled Key",
+      "summary": "# Cross-Session Data Exposure via Caller-Controlled `session_id`\n\nProject / Repository: `arikusi/deepseek-mcp-server`  \nAffected version / commit tested: `1.6.0` / `04f28be2c6e99d3d4e443a6ae37cc35f0a71554a`  \nVulnerability type: Authorization bypass / cross-session data exposure \nAuthentication required: No\n\n## Summary\nThe process-global `SessionStore` accepts caller-supplied `session_id` values without binding them to any authenticated principal or transport session. An attacker can enumerate a",
+      "affected": "npm:@arikusi/deepseek-mcp-server",
+      "references": [
+        "https://github.com/advisories/GHSA-fh3r-g96v-f578"
+      ],
+      "published": "2026-08-25T18:37:27Z",
+      "fetched": "2026-08-25T18:43:24.464362+00:00"
+    },
+    {
+      "id": "GHSA-xc9g-j69q-37xw",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.1,
+      "title": "consciousness-explorer / sublinear-time-solver MCP export_state has an arbitrary file write",
+      "summary": "### Impact\nAn arbitrary file write vulnerability (CWE-73, External Control of File Name or Path) exists in the `consciousness-explorer` component of `sublinear-time-solver`. The MCP `export_state` (and `import_state`) tool accepted a user-supplied `filepath` argument and passed it directly to `fs.writeFileSync` / `fs.readFileSync` without constraining the destination or rejecting path traversal. An attacker able to invoke the MCP tool could write or overwrite any file accessible to the server pr",
+      "affected": "npm:consciousness-explorer, npm:sublinear-time-solver",
+      "references": [
+        "https://github.com/advisories/GHSA-xc9g-j69q-37xw"
+      ],
+      "published": "2026-08-25T18:35:32Z",
+      "fetched": "2026-08-25T18:43:24.464376+00:00"
+    },
+    {
+      "id": "GHSA-3vfr-4gwf-qxfp",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": null,
+      "title": "Whistle vulnerable to path traversal",
+      "summary": "This bug was found by nova, which is an automated tool from group of Song Wu, intern, Zhejiang University; BoWang, independent researcher; Xingwei Lin, Zhejiang University.\n\n**Vulnerability detail**:\n\nIn service.js, inside \n`app.get('/cgi-bin/temp/get', ...):\nvar filename = req.query.filename;\nif (TEMP_FILE_RE.test(filename)) {\n  filename = path.join(TEMP_FILES_PATH, filename);\n}\ngetFile(filename, ...);`\n\n\nOnly when filename matches the temp/<hash> pattern does it get joined to the safe director",
+      "affected": "npm:whistle",
+      "references": [
+        "https://github.com/advisories/GHSA-3vfr-4gwf-qxfp"
+      ],
+      "published": "2026-08-25T18:32:06Z",
+      "fetched": "2026-08-25T18:43:24.464385+00:00"
+    },
+    {
+      "id": "GHSA-g7gc-gmgp-wgqg",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.5,
+      "title": "eml_parser vulnerable to DoS via deeply nested parens in Received headers",
+      "summary": "### Summary\n\n`eml_parser` strips parenthesised CFWS comments from `Received:` headers using a regex-based fix-point loop. The loop has quadratic time complexity in the number of nested parens. A single `Received:` header containing 5,000 nested parens causes ~1.3 seconds of CPU saturation per parsed message; runtime quadruples per doubling of nesting depth.\n\n### Impact\n\nThis represents a CPU exhaustion DoS in any pipeline that processes attacker-supplied EML files. An attacker can create relativ",
+      "affected": "pip:eml_parser",
+      "references": [
+        "https://github.com/advisories/GHSA-g7gc-gmgp-wgqg"
+      ],
+      "published": "2026-08-25T18:27:18Z",
+      "fetched": "2026-08-25T18:43:25.947934+00:00"
+    },
+    {
+      "id": "GHSA-fxgq-9m89-cxj9",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 6.5,
+      "title": "eml_parser has a URL extraction bypass via HTML entities in URLs",
+      "summary": "## Summary\n\n`eml_parser` performs certain validations on potential URL strings to discard bogus values. In versions prior to `3.0.2`, this validation was performed before unescaping any HTML entities that might occur in the string. This caused the library to wrongfully reject valid URLs that use HTML entities for the `:`, `/`, or `.` characters. These URLs would then not be included in the list of extracted URLs. Similarly, the host parts of such URLs would not be extracted.\n\nFor example, neithe",
+      "affected": "pip:eml_parser",
+      "references": [
+        "https://github.com/advisories/GHSA-fxgq-9m89-cxj9"
+      ],
+      "published": "2026-08-25T18:23:16Z",
+      "fetched": "2026-08-25T18:43:25.947979+00:00"
+    },
+    {
+      "id": "GHSA-vwf3-4xxj-qg6h",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": null,
+      "title": "mcp-contextforge-gateway has Server-Side Template Injection (SSTI) leading to Remote Code Execution in `PromptService._render_template` via unsandboxed Jinja2 Environment",
+      "summary": "### Summary\n\n`mcpgateway.services.prompt_service.PromptService` renders user-supplied prompt templates using Jinja2's plain `Environment()` rather than `SandboxedEnvironment`. An authenticated user with permission to register or update prompt templates can store a malicious template that, on subsequent rendering, executes arbitrary Python code on the gateway host with the privileges of the gateway process. This is a Server-Side Template Injection (SSTI) vulnerability leading to Remote Code Execu",
+      "affected": "pip:mcp-contextforge-gateway",
+      "references": [
+        "https://github.com/advisories/GHSA-vwf3-4xxj-qg6h"
+      ],
+      "published": "2026-08-25T17:42:11Z",
+      "fetched": "2026-08-25T18:43:25.948024+00:00"
+    },
+    {
+      "id": "GHSA-m2pc-3q4q-w6jr",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 5.3,
+      "title": "reachy_mini Allows Unrestricted Upload of File with Dangerous Type",
+      "summary": "## Summary\n\nThe Reachy Mini daemon exposes the “/api/media/sounds/upload” endpoint without authentication and file validation mechanisms.  \nAn attacker can use this endpoint to upload malicious files into the file system that will propagate in future attacks.\n\n## Compromise Chain: Unauthenticated to Full Root Access\n\nThis issue is part of a full compromise chain allowing an unauthenticated user to gain root access on the Reachy’s operating system:\n\n1. Unrestricted File Upload in Media Sounds Upl",
+      "affected": "pip:reachy-mini",
+      "references": [
+        "https://github.com/advisories/GHSA-m2pc-3q4q-w6jr"
+      ],
+      "published": "2026-08-25T17:38:43Z",
+      "fetched": "2026-08-25T18:43:25.948064+00:00"
+    },
+    {
       "id": "CVE-2026-55585",
       "source": "nvd",
       "severity": "high",
@@ -3612,19 +3724,19 @@
       "fetched": "2026-08-04T06:34:53.913899+00:00"
     }
   ],
-  "updated": "2026-08-25T17:34:51.519819+00:00",
+  "updated": "2026-08-25T18:43:26.451218+00:00",
   "sources": [
     "osv",
     "nvd",
     "github-advisory"
   ],
   "stats": {
-    "high": 116,
+    "medium": 73,
+    "high": 121,
     "unknown": 21,
     "critical": 32,
-    "medium": 70,
     "low": 3,
     "moderate": 1
   },
-  "total": 243
+  "total": 251
 }
