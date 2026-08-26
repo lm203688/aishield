@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-08-26T14:55:38.354249+00:00",
-  "source_intel_count": 257,
+  "generated_at": "2026-08-26T16:21:13.094741+00:00",
+  "source_intel_count": 259,
   "package_blacklist": {
     "pip:pantheon-agents": {
       "ecosystem": "pip",

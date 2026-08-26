@@ -1,6 +1,38 @@
 {
   "intel": [
     {
+      "id": "CVE-2026-75062",
+      "source": "nvd",
+      "severity": "unknown",
+      "cvss": null,
+      "title": "Improper Neutralization of Directives in Dynamically Evaluated Code ('Eval Injection') in the default lf.query Python protocol in Google langfun versions prior to 0.1.2 allows remote unauthenticated a",
+      "summary": "Improper Neutralization of Directives in Dynamically Evaluated Code ('Eval Injection') in the default lf.query Python protocol in Google langfun versions prior to 0.1.2 allows remote unauthenticated attackers to execute arbitrary Python code in the context of the host application via crafted prompt inputs that cause the model to generate executable Python expressions evaluated without a sandbox.",
+      "affected": "prompt injection",
+      "references": [
+        "https://github.com/google/langfun",
+        "https://github.com/google/langfun/issues/725",
+        "https://github.com/google/langfun/issues/725"
+      ],
+      "published": "2026-08-26T15:16:55.853",
+      "fetched": "2026-08-26T16:20:40.105317+00:00"
+    },
+    {
+      "id": "CVE-2026-75062",
+      "source": "nvd",
+      "severity": "unknown",
+      "cvss": null,
+      "title": "Improper Neutralization of Directives in Dynamically Evaluated Code ('Eval Injection') in the default lf.query Python protocol in Google langfun versions prior to 0.1.2 allows remote unauthenticated a",
+      "summary": "Improper Neutralization of Directives in Dynamically Evaluated Code ('Eval Injection') in the default lf.query Python protocol in Google langfun versions prior to 0.1.2 allows remote unauthenticated attackers to execute arbitrary Python code in the context of the host application via crafted prompt inputs that cause the model to generate executable Python expressions evaluated without a sandbox.",
+      "affected": "model context protocol",
+      "references": [
+        "https://github.com/google/langfun",
+        "https://github.com/google/langfun/issues/725",
+        "https://github.com/google/langfun/issues/725"
+      ],
+      "published": "2026-08-26T15:16:55.853",
+      "fetched": "2026-08-26T16:20:46.191260+00:00"
+    },
+    {
       "id": "GHSA-93qj-5q5v-3c2h",
       "source": "github-advisory",
       "severity": "critical",
@@ -3811,19 +3843,19 @@
       "fetched": "2026-08-04T06:34:53.913899+00:00"
     }
   ],
-  "updated": "2026-08-26T14:55:25.346666+00:00",
+  "updated": "2026-08-26T16:21:00.622292+00:00",
   "sources": [
     "osv",
     "nvd",
     "github-advisory"
   ],
   "stats": {
+    "unknown": 24,
     "critical": 34,
     "low": 4,
-    "unknown": 22,
     "high": 123,
     "medium": 73,
     "moderate": 1
   },
-  "total": 257
+  "total": 259
 }
