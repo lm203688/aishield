@@ -149,6 +149,7 @@
 |--------|------|------|------|
 | P1 | S2 生态位待办 | MCP 官方 Registry 收录：向 modelcontextprotocol/registry 提交 server.json —— 生态入口即用户入口 | — |
 | P1 | S3 体系问题 | 修复自动化体系缺陷 — M3 状态新鲜度: 状态域 ['feature'] 超过 72 小时未更新，对应环节可能已停摆 | — |
+| P1 | S4 情报驱动 | 评审本轮 1 条新增高危漏洞的检测覆盖情况 | — |
 | P2 | S1 用户反馈 | [P0] 被调用的安全数据源 API：触发自愈闭环恢复服务 | [链接](https://github.com/lm203688/aishield/issues/656) |
 | P2 | S1 用户反馈 | 📊 AIShield 项目迭代报告 (自动更新) | [链接](https://github.com/lm203688/aishield/issues/554) |
 | P2 | S2 生态位待办 | GitHub Topics 检索曝光：补齐 GitHub topics: ai-security —— 零成本获取平台内检索流量 | — |
