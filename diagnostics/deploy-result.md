@@ -1,5 +1,5 @@
 === DIAGNOSTIC ===
-Time: Thu Aug 27 02:31:31 AM CST 2026
+Time: Thu Aug 27 05:20:04 AM CST 2026
 === USER ===
 root
 === GIT LOG ===
@@ -13,34 +13,11 @@ dbcf3459 fix: download script from GitHub raw if git reset fails, add script ver
 # 解决 Quick Tunnel 的 error 1014 (CNAME Cross-User Banned) 问题
 #
 === API STATUS ===
-{"status": "ok", "version": "4.2", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 133, "uptime": 1787769091.860338, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup"}OK
+{"status": "ok", "version": "4.2", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 133, "uptime": 1787779204.939141, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup"}OK
 === CLOUDFLARED PROCESS ===
-root     1318905  0.1  1.7 1294676 34936 ?       Sl   02:04   0:03 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
-root     1319042  0.1  1.6 1294676 34072 ?       Sl   02:04   0:03 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
+root     1318905  0.1  1.7 1294676 35328 ?       Sl   02:04   0:19 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
+root     1319042  0.1  1.7 1294676 35628 ?       Sl   02:04   0:20 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
 === CLOUDFLARED LOG (last 30 lines) ===
-2026-08-26T18:04:43Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=2 event=0 ip=198.41.200.73
-2026-08-26T18:04:44Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=3 event=0 ip=198.41.192.107
-2026-08-26T18:04:45Z INF Registered tunnel connection connIndex=3 connection=b8618478-6fcc-480a-9399-f9afc2f30da5 event=0 ip=198.41.192.107 location=lax10 protocol=quic
-2026-08-26T18:04:48Z WRN Failed to dial a quic connection error="failed to dial to edge with quic: timeout: no recent network activity" connIndex=2 event=0 ip=198.41.200.73
-2026-08-26T18:04:48Z INF Retrying connection in up to 2s connIndex=2 event=0 ip=198.41.200.73
-2026-08-26T18:04:48Z INF +-------------------------------------------------------------------------------------+
-2026-08-26T18:04:48Z INF |                               CONNECTIVITY PRE-CHECKS                               |
-2026-08-26T18:04:48Z INF +-------------------------------------------------------------------------------------+
-2026-08-26T18:04:48Z INF |  COMPONENT         TARGET                     STATUS  DETAILS                       |
-2026-08-26T18:04:48Z INF |  DNS Resolution    region1.v2.argotunnel.com  PASS    DNS Resolved successfully     |
-2026-08-26T18:04:48Z INF |  DNS Resolution    region2.v2.argotunnel.com  PASS    DNS Resolved successfully     |
-2026-08-26T18:04:48Z INF |  UDP Connectivity  region1.v2.argotunnel.com  PASS    QUIC connection successful    |
-2026-08-26T18:04:48Z INF |  UDP Connectivity  region2.v2.argotunnel.com  PASS    QUIC connection successful    |
-2026-08-26T18:04:48Z INF |  TCP Connectivity  region1.v2.argotunnel.com  PASS    HTTP/2 connection successful  |
-2026-08-26T18:04:48Z INF |  TCP Connectivity  region2.v2.argotunnel.com  PASS    HTTP/2 connection successful  |
-2026-08-26T18:04:48Z INF |  Cloudflare API    api.cloudflare.com:443     PASS    API is reachable              |
-2026-08-26T18:04:48Z INF |                                                                                     |
-2026-08-26T18:04:48Z INF |  SUMMARY: Environment is healthy. cloudflared will use 'quic' as primary protocol.  |
-2026-08-26T18:04:48Z INF +-------------------------------------------------------------------------------------+
-2026-08-26T18:04:48Z INF precheck component="DNS Resolution" details="DNS Resolved successfully" run_id=322949c6-0cd2-4d3c-8ce3-9fb2937aecee status=pass target=region1.v2.argotunnel.com
-2026-08-26T18:04:48Z INF precheck component="DNS Resolution" details="DNS Resolved successfully" run_id=322949c6-0cd2-4d3c-8ce3-9fb2937aecee status=pass target=region2.v2.argotunnel.com
-2026-08-26T18:04:48Z INF precheck component="UDP Connectivity" details="QUIC connection successful" run_id=322949c6-0cd2-4d3c-8ce3-9fb2937aecee status=pass target=region1.v2.argotunnel.com
-2026-08-26T18:04:48Z INF precheck component="UDP Connectivity" details="QUIC connection successful" run_id=322949c6-0cd2-4d3c-8ce3-9fb2937aecee status=pass target=region2.v2.argotunnel.com
 2026-08-26T18:04:48Z INF precheck component="TCP Connectivity" details="HTTP/2 connection successful" run_id=322949c6-0cd2-4d3c-8ce3-9fb2937aecee status=pass target=region1.v2.argotunnel.com
 2026-08-26T18:04:48Z INF precheck component="TCP Connectivity" details="HTTP/2 connection successful" run_id=322949c6-0cd2-4d3c-8ce3-9fb2937aecee status=pass target=region2.v2.argotunnel.com
 2026-08-26T18:04:48Z INF precheck component="Cloudflare API" details="API is reachable" run_id=322949c6-0cd2-4d3c-8ce3-9fb2937aecee status=pass target=api.cloudflare.com:443
@@ -48,6 +25,29 @@ root     1319042  0.1  1.6 1294676 34072 ?       Sl   02:04   0:03 /usr/local/bi
 2026-08-26T18:04:49Z WRN Connection terminated error="failed to dial to edge with quic: timeout: no recent network activity" connIndex=2
 2026-08-26T18:05:00Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=2 event=0 ip=198.41.200.53
 2026-08-26T18:05:00Z INF Registered tunnel connection connIndex=2 connection=cfa9206a-4e80-41fb-abe1-2835a42e37f2 event=0 ip=198.41.200.53 location=lax01 protocol=quic
+2026-08-26T18:58:34Z ERR failed to run the datagram handler error="timeout: no recent network activity" connIndex=2 event=0 ip=198.41.200.53
+2026-08-26T18:58:34Z ERR failed to accept incoming stream requests error="failed to accept QUIC stream: timeout: no recent network activity" connIndex=2 event=0 ip=198.41.200.53
+2026-08-26T18:58:34Z WRN failed to serve tunnel connection error="datagram manager encountered a failure while serving" connIndex=2 event=0 ip=198.41.200.53
+2026-08-26T18:58:34Z WRN Serve tunnel error error="datagram manager encountered a failure while serving" connIndex=2 event=0 ip=198.41.200.53
+2026-08-26T18:58:34Z INF Retrying connection in up to 1s connIndex=2 event=0 ip=198.41.200.53
+2026-08-26T18:58:34Z WRN Connection terminated error="datagram manager encountered a failure while serving" connIndex=2
+2026-08-26T18:58:46Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=2 event=0 ip=198.41.200.53
+2026-08-26T18:58:46Z INF Registered tunnel connection connIndex=2 connection=303bf7ed-1103-4768-bb91-105681436731 event=0 ip=198.41.200.53 location=lax01 protocol=quic
+2026-08-26T18:59:21Z ERR failed to accept incoming stream requests error="failed to accept QUIC stream: timeout: no recent network activity" connIndex=2 event=0 ip=198.41.200.53
+2026-08-26T18:59:21Z ERR failed to run the datagram handler error="context canceled" connIndex=2 event=0 ip=198.41.200.53
+2026-08-26T18:59:21Z WRN failed to serve tunnel connection error="accept stream listener encountered a failure while serving" connIndex=2 event=0 ip=198.41.200.53
+2026-08-26T18:59:21Z WRN Serve tunnel error error="accept stream listener encountered a failure while serving" connIndex=2 event=0 ip=198.41.200.53
+2026-08-26T18:59:21Z INF Retrying connection in up to 1s connIndex=2 event=0 ip=198.41.200.53
+2026-08-26T18:59:22Z ERR failed to run the datagram handler error="timeout: no recent network activity" connIndex=0 event=0 ip=198.41.200.113
+2026-08-26T18:59:22Z ERR failed to accept incoming stream requests error="failed to accept QUIC stream: timeout: no recent network activity" connIndex=0 event=0 ip=198.41.200.113
+2026-08-26T18:59:22Z WRN failed to serve tunnel connection error="datagram manager encountered a failure while serving" connIndex=0 event=0 ip=198.41.200.113
+2026-08-26T18:59:22Z WRN Serve tunnel error error="datagram manager encountered a failure while serving" connIndex=0 event=0 ip=198.41.200.113
+2026-08-26T18:59:22Z INF Retrying connection in up to 1s connIndex=0 event=0 ip=198.41.200.113
+2026-08-26T18:59:22Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=0 event=0 ip=198.41.200.113
+2026-08-26T18:59:23Z WRN Connection terminated error="accept stream listener encountered a failure while serving" connIndex=2
+2026-08-26T18:59:24Z INF Registered tunnel connection connIndex=0 connection=7be55c9b-1789-485b-a15d-2450f49b7cf6 event=0 ip=198.41.200.113 location=sjc10 protocol=quic
+2026-08-26T18:59:54Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=2 event=0 ip=198.41.200.53
+2026-08-26T18:59:54Z INF Registered tunnel connection connIndex=2 connection=91d72f3d-4a29-43ab-bd75-06b85ecdff61 event=0 ip=198.41.200.53 location=sjc07 protocol=quic
 === DEPLOY LOG ===
 === AIShield Named Tunnel Deployment ===
 [02:04:32] Time: Thu Aug 27 02:04:32 AM CST 2026
@@ -143,11 +143,11 @@ cert.pem: -rw------- 1 root root 282 Jul 28 11:02 /root/.cloudflared/cert.pem
 === SYSTEMD STATUS ===
 ● cloudflared-tunnel.service - Cloudflare Named Tunnel for AIShield
      Loaded: loaded (/etc/systemd/system/cloudflared-tunnel.service; enabled; vendor preset: enabled)
-     Active: active (running) since Thu 2026-08-27 02:04:44 CST; 26min ago
+     Active: active (running) since Thu 2026-08-27 02:04:44 CST; 3h 15min ago
    Main PID: 1319034 (start-tunnel.sh)
       Tasks: 9 (limit: 2216)
-     Memory: 17.1M
-        CPU: 3.095s
+     Memory: 17.2M
+        CPU: 20.353s
      CGroup: /system.slice/cloudflared-tunnel.service
              ├─1319034 /bin/bash /opt/start-tunnel.sh
              └─1319042 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
@@ -181,10 +181,10 @@ fi
 wait $CF_PID
 
 === HTTPS Test from Runner ===
-Time: Wed Aug 26 18:31:32 UTC 2026
+Time: Wed Aug 26 21:20:05 UTC 2026
 
 === curl test (aishield.tools) ===
-{"status": "ok", "version": "4.2", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 133, "uptime": 1787769092.3458452, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup"}
+{"status": "ok", "version": "4.2", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 133, "uptime": 1787779205.443647, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup"}
 === DNS lookup ===
 104.21.81.46
 172.67.188.44
