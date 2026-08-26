@@ -1,7 +1,15 @@
 {
-  "generated_at": "2026-08-26T14:00:00.882088+00:00",
-  "source_intel_count": 255,
+  "generated_at": "2026-08-26T14:55:38.354249+00:00",
+  "source_intel_count": 257,
   "package_blacklist": {
+    "pip:pantheon-agents": {
+      "ecosystem": "pip",
+      "package": "pantheon-agents",
+      "severity": "critical",
+      "advisories": [
+        "GHSA-93qj-5q5v-3c2h"
+      ]
+    },
     "pip:chainlit": {
       "ecosystem": "pip",
       "package": "chainlit",
@@ -695,5 +703,5 @@
     "LLM05": 3,
     "LLM01": 1
   },
-  "total_rules": 70
+  "total_rules": 71
 }

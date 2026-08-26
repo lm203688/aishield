@@ -1,6 +1,34 @@
 {
   "intel": [
     {
+      "id": "GHSA-93qj-5q5v-3c2h",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": null,
+      "title": "Trojanized pantheon-agents 0.6.1 and 0.6.2 on PyPI ship a credential stealer (supply-chain account compromise)",
+      "summary": "## Summary\nThe PyPI account that publishes `pantheon-agents` was compromised in the June 2026 \"Hades\" PyPI supply-chain attack (Mini Shai-Hulud / Miasma lineage). The attacker used a stolen, long-lived PyPI API token to upload **trojanized releases `pantheon-agents` 0.6.1 and 0.6.2 directly to PyPI**.\n\n**Only the PyPI artifacts are affected.** The GitHub source repository, its git tags, and all other distribution channels are clean — no malicious code was committed to the repository.\n\n## Affecte",
+      "affected": "pip:pantheon-agents",
+      "references": [
+        "https://github.com/advisories/GHSA-93qj-5q5v-3c2h"
+      ],
+      "published": "2026-08-26T14:36:45Z",
+      "fetched": "2026-08-26T14:55:24.842470+00:00"
+    },
+    {
+      "id": "GHSA-mv8m-v9v6-5f94",
+      "source": "github-advisory",
+      "severity": "low",
+      "cvss": 3.3,
+      "title": "kas Persistently Disables SSH Host Key Checking",
+      "summary": "### Summary\n\nkas persistently disables SSH host key checking for the invoking user when internal SSH key setup is triggered via `SSH_PRIVATE_KEY` or `SSH_PRIVATE_KEY_FILE` and no user-specific SSH configuration file exists so far.\n\nWhen this path is used, kas creates `~/.ssh/config` with a global `Host *` rule containing `StrictHostKeyChecking no`. This was intended to ease the use of kas in short-lived CI environments that lack a pre-configured set of known hosts. In case a local user had no SS",
+      "affected": "pip:kas",
+      "references": [
+        "https://github.com/advisories/GHSA-mv8m-v9v6-5f94"
+      ],
+      "published": "2026-08-26T14:18:24Z",
+      "fetched": "2026-08-26T14:55:24.842488+00:00"
+    },
+    {
       "id": "CVE-2026-53965",
       "source": "nvd",
       "severity": "unknown",
@@ -3783,19 +3811,19 @@
       "fetched": "2026-08-04T06:34:53.913899+00:00"
     }
   ],
-  "updated": "2026-08-26T13:59:49.656983+00:00",
+  "updated": "2026-08-26T14:55:25.346666+00:00",
   "sources": [
     "osv",
     "nvd",
     "github-advisory"
   ],
   "stats": {
+    "critical": 34,
+    "low": 4,
     "unknown": 22,
     "high": 123,
-    "critical": 33,
     "medium": 73,
-    "low": 3,
     "moderate": 1
   },
-  "total": 255
+  "total": 257
 }
