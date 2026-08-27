@@ -1,4 +1,5 @@
 name: Auto Label Issues
+
 on:
   issues:
     types: [opened, edited]
@@ -10,8 +11,12 @@ jobs:
   label:
     runs-on: ubuntu-latest
     steps:
-      - uses: github/issue-labeler@v3.4
+      - name: Apply labels based on issue title/body
+        uses: peter-evans/issue-labeler@v3
         with:
           configuration-path: .github/labeler.yml
           enable-versioned-regex: 0
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          repo-token: ${{ github.token }}
+          issue-number: ${{ github.event.issue.number }}
+          functions: ${{ github.event.issue.title }}
+          functions: ${{ github.event.issue.body }}
