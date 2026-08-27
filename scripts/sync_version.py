@@ -6,7 +6,7 @@
 
 背景
 ----
-项目在 6 个位置各自声明版本号，一次实测发现漂移出 3 个不同的值：
+项目在 9 个位置各自声明版本号，实测曾漂移出 3 个不同的值：
 
     mcp-server/package.json   4.1.0   ← npm 实际发布的版本
     mcp-server/mcp.json       4.2.0   ← 有人升了这里，忘了其它
@@ -75,6 +75,15 @@ TARGETS: List[Tuple[str, str, str]] = [
     # 只不过它藏在 TS 源码里而非配置文件，所以一直逃过了门禁。
     ("mcp-server/src/index.ts",
      r"(const SERVER_VERSION\s*=\s*')([^']+)(')",
+     r"\g<1>{v}\g<3>"),
+    # API 层自报版本：MCP 客户端在 negotiate 时看到的 serverInfo.version
+    # 曾长期硬编码 4.2.0 而 setup.py 已到 4.2.2 —— 用户报障时版本对不上。
+    ("api/server.py",
+     r'("serverInfo": \{"name": "AIShield", "version": ")([^"]+)(")',
+     r"\g<1>{v}\g<3>"),
+    # OpenAPI 规范里的 info.version
+    ("api/openapi_spec.py",
+     r'("title": "AIShield API",\s*\n\s*"version": ")([^"]+)(")',
      r"\g<1>{v}\g<3>"),
 ]
 
