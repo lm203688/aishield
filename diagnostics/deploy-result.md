@@ -1,5 +1,5 @@
 === DIAGNOSTIC ===
-Time: Thu Aug 27 08:33:49 AM CST 2026
+Time: Thu Aug 27 10:17:13 AM CST 2026
 === USER ===
 root
 === GIT LOG ===
@@ -13,10 +13,10 @@ dbcf3459 fix: download script from GitHub raw if git reset fails, add script ver
 # 解决 Quick Tunnel 的 error 1014 (CNAME Cross-User Banned) 问题
 #
 === API STATUS ===
-{"status": "ok", "version": "4.2", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 133, "uptime": 1787790829.9588754, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup"}OK
+{"status": "ok", "version": "4.2", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 133, "uptime": 1787797033.0973046, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup"}OK
 === CLOUDFLARED PROCESS ===
-root     1571307  1.0  1.9 1294676 38216 ?       Sl   08:33   0:00 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
-root     1571448  1.5  1.8 1294676 37988 ?       Sl   08:33   0:00 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
+root     1571307  0.1  1.7 1294676 34768 ?       Sl   08:33   0:10 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
+root     1571448  0.1  1.6 1294676 33988 ?       Sl   08:33   0:10 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
 === CLOUDFLARED LOG (last 30 lines) ===
 2026-08-27T00:33:39Z INF Registered tunnel connection connIndex=0 connection=8743fdd1-e325-4c0f-953a-0d081cc90b64 event=0 ip=198.41.200.13 location=lax01 protocol=quic
 2026-08-27T00:33:39Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=1 event=0 ip=198.41.192.167
@@ -142,11 +142,11 @@ cert.pem: -rw------- 1 root root 282 Jul 28 11:02 /root/.cloudflared/cert.pem
 === SYSTEMD STATUS ===
 ● cloudflared-tunnel.service - Cloudflare Named Tunnel for AIShield
      Loaded: loaded (/etc/systemd/system/cloudflared-tunnel.service; enabled; vendor preset: enabled)
-     Active: active (running) since Thu 2026-08-27 08:33:41 CST; 8s ago
+     Active: active (running) since Thu 2026-08-27 08:33:41 CST; 1h 43min ago
    Main PID: 1571447 (start-tunnel.sh)
-      Tasks: 8 (limit: 2216)
-     Memory: 18.5M
-        CPU: 133ms
+      Tasks: 10 (limit: 2216)
+     Memory: 18.1M
+        CPU: 10.401s
      CGroup: /system.slice/cloudflared-tunnel.service
              ├─1571447 /bin/bash /opt/start-tunnel.sh
              └─1571448 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
@@ -180,12 +180,12 @@ fi
 wait $CF_PID
 
 === HTTPS Test from Runner ===
-Time: Thu Aug 27 00:33:51 UTC 2026
+Time: Thu Aug 27 02:17:14 UTC 2026
 
 === curl test (aishield.tools) ===
-{"status": "ok", "version": "4.2", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 133, "uptime": 1787790831.889311, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup"}
+{"status": "ok", "version": "4.2", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 133, "uptime": 1787797034.133042, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup"}
 === DNS lookup ===
-172.67.188.44
 104.21.81.46
+172.67.188.44
 
 === DNS CNAME check ===
