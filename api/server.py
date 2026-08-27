@@ -33,6 +33,7 @@ sys.path.insert(0, os.path.join(BASE, ".."))
 from scanner.engine import scan, batch_scan
 from scanner.rug_pull import detect_rug_pull
 from scanner.handshake import verify_handshake
+from scanner.vertical_risk import scan_vertical_risk
 from scanner.rules import OWASP_MCP_TOP10, get_rule_count
 from scanner.monitor import get_monitored_tools, add_monitor as add_tool_monitor, remove_monitor, check_version_change, check_all_monitored
 from scanner.api_scanner import APIScanOrchestrator
@@ -401,24 +402,29 @@ class AIShieldHandler(BaseHTTPRequestHandler):
             else:
                 # Fallback: inline server card for deployments without the static file
                 json_data = json.dumps({
-                    "serverInfo": {"name": "AIShield", "version": "4.2.0",
+                    "serverInfo": {"name": "AIShield", "version": "4.2.2",
                         "description": "AI Agent Security Shield — OWASP MCP Top 10 aligned security scanning. 227 rules covering prompt injection, zero-width characters, Rug Pull, permission audit, and dependency monitoring."},
                     "url": "https://aishield.tools/mcp",
                     "provider": {"name": "AIShield", "url": "https://github.com/lm203688/aishield"},
                     "license": "MIT",
                     "tools": [
-                        {"name": "security_scan", "description": "Full security audit for MCP tools/agents with OWASP MCP Top 10 alignment.",
-                            "inputSchema": {"type": "object", "properties": {"tool_name": {"type": "string"}}, "required": ["tool_name"]}},
-                        {"name": "prompt_injection_check", "description": "Detect prompt injection attacks in Chinese and English. 200+ pattern matching.",
-                            "inputSchema": {"type": "object", "properties": {"prompt": {"type": "string"}}, "required": ["prompt"]}},
-                        {"name": "banned_words_check", "description": "Detect banned/sensitive words for 6 Chinese platforms.",
-                            "inputSchema": {"type": "object", "properties": {"text": {"type": "string"}}, "required": ["text"]}},
-                        {"name": "rug_pull_detect", "description": "Detect Rug Pull risk in MCP tool repositories.",
-                            "inputSchema": {"type": "object", "properties": {"source_url": {"type": "string"}}, "required": ["source_url"]}},
+                        {"name": "security_scan", "description": "[DEPRECATED — use aishield_scan] Full security audit for MCP tools/agents with OWASP MCP Top 10 alignment.",
+                            "inputSchema": {"type": "object", "properties": {"tool_name": {"type": "string"}}, "required": ["tool_name"]},
+                            "deprecated": true, "replacement": "aishield_scan"},
+                        {"name": "prompt_injection_check", "description": "[DEPRECATED — use aishield_prompt_check] Detect prompt injection attacks in Chinese and English. 200+ pattern matching.",
+                            "inputSchema": {"type": "object", "properties": {"prompt": {"type": "string"}}, "required": ["prompt"]},
+                            "deprecated": true, "replacement": "aishield_prompt_check"},
+                        {"name": "banned_words_check", "description": "[DEPRECATED — use aishield_banned_words] Detect banned/sensitive words for 6 Chinese platforms.",
+                            "inputSchema": {"type": "object", "properties": {"text": {"type": "string"}}, "required": ["text"]},
+                            "deprecated": true, "replacement": "aishield_banned_words"},
+                        {"name": "rug_pull_detect", "description": "[DEPRECATED — use aishield_rug_pull] Detect Rug Pull risk in MCP tool repositories.",
+                            "inputSchema": {"type": "object", "properties": {"source_url": {"type": "string"}}, "required": ["source_url"]},
+                            "deprecated": true, "replacement": "aishield_rug_pull"},
                         {"name": "agent_register", "description": "One-click agent onboarding with API key and DID identity.",
                             "inputSchema": {"type": "object", "properties": {"agent_name": {"type": "string"}}, "required": ["agent_name"]}},
-                        {"name": "dependency_monitor", "description": "Monitor MCP tool dependencies for version changes.",
-                            "inputSchema": {"type": "object", "properties": {"source_url": {"type": "string"}}, "required": ["source_url"]}}
+                        {"name": "dependency_monitor", "description": "[DEPRECATED — use aishield_scan with tool_type=monitor] Monitor MCP tool dependencies for version changes.",
+                            "inputSchema": {"type": "object", "properties": {"source_url": {"type": "string"}}, "required": ["source_url"]},
+                            "deprecated": true, "replacement": "aishield_scan"}
                     ]
                 }, ensure_ascii=False, indent=2)
             body = json_data.encode("utf-8")
@@ -2198,7 +2204,7 @@ blockquote{{border-left:4px solid #3b82f6;padding-left:16px;margin-left:0;color:
                     "capabilities": {"tools": {}},
                     "serverInfo": {
                         "name": "AIShield Security Scanner",
-                        "version": "4.2.0",
+                        "version": "4.2.2",
                     },
                 },
             })
@@ -2282,6 +2288,18 @@ blockquote{{border-left:4px solid #3b82f6;padding-left:16px;margin-left:0;color:
                             },
                         },
                         {
+                            "name": "aishield_vertical_risk",
+                            "description": "Vertical-industry risk scan — detect high-risk claims for finance/medical/gov sectors (unlicensed diagnosis, illegal medical device, financial over-promise, etc.)",
+                            "inputSchema": {
+                                "type": "object",
+                                "properties": {
+                                    "text": {"type": "string", "description": "Text content to scan"},
+                                    "domain": {"type": "string", "enum": ["finance", "medical", "government"], "default": "finance", "description": "Vertical domain"},
+                                },
+                                "required": ["text"],
+                            },
+                        },
+                        {
                             "name": "agent_register",
                             "description": "Agent-First one-click onboarding — register as an Agent, get DID + API Key + quick start guide in a single call",
                             "inputSchema": {
@@ -2318,6 +2336,16 @@ blockquote{{border-left:4px solid #3b82f6;padding-left:16px;margin-left:0;color:
             args = params.get("arguments", {})
             
             try:
+                # 旧工具名 → 新工具名 alias（兼容老客户端）
+                _TOOL_ALIAS = {
+                    "security_scan": "aishield_scan",
+                    "prompt_injection_check": "aishield_prompt_check",
+                    "banned_words_check": "aishield_banned_words",
+                    "rug_pull_detect": "aishield_rug_pull",
+                    "dependency_monitor": "aishield_scan",
+                }
+                tool_name = _TOOL_ALIAS.get(tool_name, tool_name)
+
                 if tool_name == "aishield_scan":
                     result_data = scan(args["source_url"], args.get("tool_type", "mcp"), args.get("name", ""))
                     text = json.dumps(result_data, ensure_ascii=False, indent=2)
@@ -2343,6 +2371,9 @@ blockquote{{border-left:4px solid #3b82f6;padding-left:16px;margin-left:0;color:
                     text = json.dumps(result_data, ensure_ascii=False, indent=2)
                 elif tool_name == "aishield_handshake":
                     result_data = verify_handshake(args["source_url"])
+                    text = json.dumps(result_data, ensure_ascii=False, indent=2)
+                elif tool_name == "aishield_vertical_risk":
+                    result_data = scan_vertical_risk(args["text"], args.get("domain", "finance"))
                     text = json.dumps(result_data, ensure_ascii=False, indent=2)
                 elif tool_name == "agent_register":
                     from eco.agent_gateway import agent_setup
