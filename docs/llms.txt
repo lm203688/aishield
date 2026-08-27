@@ -72,7 +72,13 @@ AIShield extended its coverage beyond payload content with **17 local heuristic 
 - **Rule-as-PR automation** (`scripts/propose_rule_pr.py`): auto-opens draft GitHub PRs from `scanner/_proposed/PROPOSED_*.py` (default dry-run; `--live` to create).
 - **Minimal Agent Dashboard** (`docs/dashboard.html`): static control-plane UI reading blackboard + trust scores.
 
-All 11 Agentic modules pass a **benign-zero-false-positive** and **malicious-still-blocked** contract in `tests/test_capability_full_scan.py` (40 cases). Full suite: **557 pass / 0 fail / 9 skip**.
+- **Differential scanning** (`scanner/diff.py`): compare two scan() reports and return structured delta — new risks, resolved risks, severity changes, score delta. Human-readable summary via `diff_summary()`.
+- **Fuzzing module** (`scanner/fuzzing.py`): generate up to N structured mutations (encoding evasion, structure mutation, semantic obfuscation) from any input; measure how many existing rules catch them; report uncovered new attack vectors for rule expansion.
+- **arXiv→rule auto-transcription** (`scripts/arxiv_to_rule.py`): fetch latest arXiv agent-security papers, extract attack patterns, generate rule stubs + unit test skeletons under `scanner/_proposed/`.
+- **Public benchmark report** (`docs/benchmark-report.md`): 10 malicious + 10 healthy samples, head-to-head vs mcp-audit and Sunglasses on detection rate, false positive rate, and scan time.
+- **9-point version gate** (`scripts/sync_version.py`): extended from 7 to 9 targets — now includes `api/server.py` serverInfo and `api/openapi_spec.py` info.version, closing the last drift vectors.
+
+All 11 Agentic modules pass a **benign-zero-false-positive** and **malicious-still-blocked** contract in `tests/test_capability_full_scan.py` (40 cases). Full suite: **590 pass / 0 fail / 12 skip**.
 
 Landscape & new-capability gaps: https://aishield.tools/agent-ecosystem-2026-landscape
 
