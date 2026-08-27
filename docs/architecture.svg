@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 360" font-family="Segoe UI, sans-serif" font-size="12">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#888"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="680" height="360" fill="#0f1420" rx="10"/>
+  <text x="340" y="26" text-anchor="middle" fill="#e6e6e6" font-size="15" font-weight="600">AIShield v4.2.2 — Agent Computer Content-Security Plane</text>
+
+  <!-- Layer 1: Ingest -->
+  <rect x="20" y="52" width="640" height="46" rx="8" fill="#1a2136" stroke="#2f3b57"/>
+  <text x="340" y="70" text-anchor="middle" fill="#9cb4d8" font-size="13">Ingest — local-first, zero network</text>
+  <text x="340" y="88" text-anchor="middle" fill="#667">MCP JSON · Skill dir · GPTs.json · prompt.md · agent config · repo URL</text>
+
+  <line x1="340" y1="98" x2="340" y2="120" stroke="#888" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Layer 2: Scanner core -->
+  <rect x="20" y="120" width="640" height="88" rx="8" fill="#1a2136" stroke="#2f3b57"/>
+  <text x="340" y="138" text-anchor="middle" fill="#9cb4d8" font-size="13">Scanner Core — rules engine + OSV + policy</text>
+  <rect x="34" y="150" width="120" height="42" rx="6" fill="#242f47" stroke="#3a4a6e"/>
+  <text x="94" y="170" text-anchor="middle" fill="#e0e0e0">MCP Rules</text><text x="94" y="184" text-anchor="middle" fill="#999">227 rules</text>
+  <rect x="164" y="150" width="120" height="42" rx="6" fill="#242f47" stroke="#3a4a6e"/>
+  <text x="224" y="170" text-anchor="middle" fill="#e0e0e0">Skill Rules</text><text x="224" y="184" text-anchor="middle" fill="#999">233 rules</text>
+  <rect x="294" y="150" width="120" height="42" rx="6" fill="#242f47" stroke="#3a4a6e"/>
+  <text x="354" y="170" text-anchor="middle" fill="#e0e0e0">OSV/Dependabot</text><text x="354" y="184" text-anchor="middle" fill="#999">live CVE</text>
+  <rect x="424" y="150" width="120" height="42" rx="6" fill="#242f47" stroke="#3a4a6e"/>
+  <text x="484" y="170" text-anchor="middle" fill="#e0e0e0">Policy engine</text><text x="484" y="184" text-anchor="middle" fill="#999">YAML/JSON</text>
+  <rect x="554" y="150" width="86" height="42" rx="6" fill="#242f47" stroke="#3a4a6e"/>
+  <text x="597" y="170" text-anchor="middle" fill="#e0e0e0">SARIF/JSON</text>
+
+  <line x1="340" y1="208" x2="340" y2="230" stroke="#888" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Layer 3: Agentic modules -->
+  <rect x="20" y="230" width="640" height="64" rx="8" fill="#1a2136" stroke="#2f3b57"/>
+  <text x="340" y="248" text-anchor="middle" fill="#9cb4d8" font-size="13">Agentic AI Detection — OWASP Agentic ASI01–10</text>
+  <text x="340" y="268" text-anchor="middle" fill="#667">tool_integrity · registry_supply · provenance · memory · antitamper · least_agency ·</text>
+  <text x="340" y="284" text-anchor="middle" fill="#667">scope_composition · goal_hijack · dark_pattern · mcp_oauth · computeruse</text>
+
+  <line x1="340" y1="294" x2="340" y2="316" stroke="#888" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Layer 4: Governance -->
+  <rect x="20" y="316" width="640" height="32" rx="8" fill="#1a2136" stroke="#2f3b57"/>
+  <text x="340" y="338" text-anchor="middle" fill="#9cb4d8">Governance — Trust Protocol (Ed25519 did:key) · x402/USDC · Spend Cap · Kill Switch · Fleet · Telemetry</text>
+</svg>
