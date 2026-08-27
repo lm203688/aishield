@@ -23,8 +23,12 @@ LLM_API_KEY = os.environ.get("AISHIELD_LLM_KEY", "")
 LLM_MODEL = os.environ.get("AISHIELD_LLM_MODEL", "deepseek-chat")
 LLM_TIMEOUT = int(os.environ.get("AISHIELD_LLM_TIMEOUT", "30"))
 
-# 没配置 LLM 则跳过语义分析（不阻塞扫描）
-LLM_ENABLED = bool(LLM_API_URL and LLM_API_KEY)
+# 语义分析启用条件：
+#   - 有 URL + 有 Key：标准 OpenAI 兼容模式
+#   - 有 URL + 无 Key + 本地地址：Ollama 模式（本地调用不需要 key）
+_LLMA_URL = LLM_API_URL.strip().rstrip("/")
+_LLM_IS_LOCAL = _LLMA_URL.startswith("http://127.0.0.1") or _LLMA_URL.startswith("http://localhost")
+LLM_ENABLED = bool(LLM_API_URL and (LLM_API_KEY or _LLM_IS_LOCAL))
 
 
 def _call_llm(prompt: str, system: str = "") -> str:
@@ -43,9 +47,10 @@ def _call_llm(prompt: str, system: str = "") -> str:
 
     headers = {
         "Content-Type": "application/json",
-        "Authorization": f"Bearer {LLM_API_KEY}",
         "User-Agent": "AIShield-LLM-Analyzer/4.0",
     }
+    if LLM_API_KEY:
+        headers["Authorization"] = f"Bearer {LLM_API_KEY}"
 
     req = urllib_request.Request(
         LLM_API_URL, data=body, headers=headers, method="POST"
