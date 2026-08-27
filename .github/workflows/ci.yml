@@ -219,6 +219,67 @@ jobs:
         docker stop aishield-test 2>/dev/null || true
         docker rm aishield-test 2>/dev/null || true
 
+  # 状态总线：CI 完成后写入 data/state/ci.json，下游 workflow（feature-closed-loop 等）可读取，
+  # 避免"下游重复跑测试 / 因 ci.json 不存在而静默失败"。
+  # 这是跨-workflow 闭环的核心枢纽——所有 Act 层的运行结果汇总到此处。
+  ci-state:
+    name: Write CI State to Bus
+    needs: [workflow-lint, distribution-gate, test, security-scan, dependency-check, performance-test, docker-test]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Compute overall result
+        id: result
+        run: |
+          # 任一核心 job 失败 → 整体失败
+          for job in workflow-lint distribution-gate test security-scan dependency-check performance-test docker-test; do
+            STATUS="${{ needs.$job.result }}"
+            if [ "$STATUS" = "failure" ] || [ "$STATUS" = "cancelled" ]; then
+              echo "overall=failure" >> $GITHUB_OUTPUT
+              exit 0
+            fi
+          done
+          echo "overall=success" >> $GITHUB_OUTPUT
+      - name: Write ci.json to state bus
+        run: |
+          mkdir -p data/state
+          python -c "
+          import json, os
+          data = {
+              'updated': '$(date -u +%Y-%m-%dT%H:%M:%SZ)',
+              'run_id': '${{ github.run_id }}',
+              'overall': '${{ steps.result.outputs.overall }}',
+              'source': 'ci.yml',
+              'jobs': {
+                  'workflow-lint': '${{ needs.workflow-lint.result }}',
+                  'distribution-gate': '${{ needs.distribution-gate.result }}',
+                  'test': '${{ needs.test.result }}',
+                  'security-scan': '${{ needs.security-scan.result }}',
+                  'dependency-check': '${{ needs.dependency-check.result }}',
+                  'performance-test': '${{ needs.performance-test.result }}',
+                  'docker-test': '${{ needs.docker-test.result }}',
+              }
+          }
+          with open('data/state/ci.json','w') as f:
+              json.dump(data, f, indent=2)
+          print(json.dumps(data, indent=2))
+          "
+      - name: Commit ci state
+        run: |
+          git config user.name "aishield-bot"
+          git config user.email "bot@aishield.local"
+          git add data/state/ci.json
+          if git diff --cached --quiet; then
+            echo "ci.json 无变更"
+          else
+            git commit -m "chore(ci-state): 更新 CI 状态总线"
+            git push origin main || echo "push failed"
+          fi
+
   notify-on-failure:
     name: Notify on CI Failure
     needs: [workflow-lint, distribution-gate, test, security-scan, dependency-check, performance-test, docker-test]
