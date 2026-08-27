@@ -47,6 +47,8 @@ def main():
         'tests.test_claim_lock',
         'tests.test_replay',
         'tests.test_vertical_risk',
+        'tests.test_diff',
+        'tests.test_fuzzing',
     ]
 
     loaded = 0
