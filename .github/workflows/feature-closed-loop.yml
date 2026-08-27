@@ -36,7 +36,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.13'
 
       - name: Aggregate feedback (4 sources)
         id: agg
@@ -77,28 +77,41 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.13'
       - name: Check CI status (引用 ci.yml 最近结果)
         id: ci-check
         run: |
           # 优化：如果 ci.yml 最近 1 小时内跑过且成功，跳过重复测试
+          # 新格式（ci.yml 2026-08-28 后）：{"overall":"success","updated":"..."}
+          # 旧格式：{"current":{"last_status":"success"}}
           SKIP=false
           if [ -f data/state/ci.json ]; then
-            LAST=$(python -c "
-          import json, sys
+            LAST=$(python3 -c "
+          import json
           try:
               d = json.load(open('data/state/ci.json'))
-              c = d.get('current', {})
-              print(c.get('last_status', 'unknown'))
-          except:
+              # 新格式：顶层 overall
+              v = d.get('overall', '')
+              if v == 'success':
+                  print('success')
+              # 旧格式：current.last_status
+              elif d.get('current', {}).get('last_status') == 'success':
+                  print('success')
+              # legacy
+              elif d.get('last_status') == 'success':
+                  print('success')
+              else:
+                  print('unknown')
+          except Exception:
               print('unknown')
-          " 2>/dev/null)
+          ")
             if [ "$LAST" = "success" ]; then
               echo "CI 最近成功，跳过重复测试"
               SKIP=true
             fi
           fi
           echo "skip_tests=$SKIP" >> $GITHUB_OUTPUT
+          echo "ci_status=$LAST" >> $GITHUB_OUTPUT
 
       - name: Compile & test
         if: steps.ci-check.outputs.skip_tests != 'true'
@@ -159,7 +172,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.13'
       - name: Notify
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
