@@ -51,6 +51,7 @@ KNOWN_DOMAINS = {
     "feature": "功能迭代闭环采纳结果",
     "meta": "元监控：自动化体系自身的健康度",
     "registry": "MCP Registry / npm / Marketplace 上架状态",
+    "ci": "CI 门禁运行结果（跨 workflow 复用的状态枢纽）",
 }
 
 MAX_HISTORY = 50
