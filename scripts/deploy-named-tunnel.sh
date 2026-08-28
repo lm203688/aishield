@@ -64,6 +64,17 @@ if ! curl -sf http://127.0.0.1:8450/api/v1/health 2>/dev/null; then
     NEED_RESTART=1
 fi
 
+# 【关键】判断「运行中的进程」是否就是磁盘上的代码。
+# 本脚本的调用方（workflow）通常已经先 git pull 过了，所以 HEAD 往往不再变化，
+# 单靠 HEAD 比较永远得不出「要重启」。唯一可靠的信号是：进程自报的版本
+# 与磁盘上的代码版本是否一致 —— 不一致就说明进程还在跑旧代码。
+live_ver=$(curl -s --max-time 10 http://127.0.0.1:8450/api/v1/health 2>/dev/null | python3 -c "import json,sys;print(json.load(sys.stdin).get('version',''))" 2>/dev/null || true)
+log "运行进程自报版本=${live_ver:-none} / 磁盘代码版本=${disk_ver:-none}"
+if [ -n "$disk_ver" ] && [ "$live_ver" != "$disk_ver" ]; then
+    log "运行进程落后于磁盘代码 -> 标记重启"
+    NEED_RESTART=1
+fi
+
 # ── 启动 / 重启 API ───────────────────────────────────────────────
 if [ "$NEED_RESTART" = "1" ]; then
     log "需要重新加载代码 -> 重启 API"
