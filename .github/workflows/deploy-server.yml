@@ -50,9 +50,25 @@ jobs:
         script: |
           cd /opt/aishield 2>/dev/null || cd ~/aishield 2>/dev/null || true
 
-          # Always download latest script from GitHub (git reset unreliable on this server)
-          echo "Downloading latest deploy script..."
-          curl -sL "https://raw.githubusercontent.com/lm203688/aishield/main/scripts/deploy-named-tunnel.sh" -o scripts/deploy-named-tunnel.sh
+          # 【2026-08-28 修复】本机访问 raw.githubusercontent.com 极慢（实测单次
+          # curl 挂起 5 分钟后失败），而 git 走 github.com 是通的且很快。
+          # 旧实现把「拿最新脚本」完全押在 raw 上：一旦超时，磁盘上仍是旧脚本，
+          # 于是每次部署都在跑旧逻辑 —— 这是线上长期停留在 4.2.0 的直接原因。
+          # 现改为：git 为主（保证拿到最新脚本），raw 仅作 best-effort 兜底且限时。
+          echo "Updating repo via git (primary)..."
+          git fetch --all 2>&1 | tail -2 || true
+          git reset --hard origin/main 2>&1 | tail -2 || git pull origin main 2>&1 | tail -3 || true
+
+          echo "Trying raw download (best-effort, 30s cap)..."
+          if curl -sL --max-time 30 --connect-timeout 10 \
+               "https://raw.githubusercontent.com/lm203688/aishield/main/scripts/deploy-named-tunnel.sh" \
+               -o /tmp/deploy-named-tunnel.sh && [ -s /tmp/deploy-named-tunnel.sh ]; then
+            mv /tmp/deploy-named-tunnel.sh scripts/deploy-named-tunnel.sh
+            echo "raw download OK"
+          else
+            echo "raw download failed/skipped -> using git version"
+            rm -f /tmp/deploy-named-tunnel.sh
+          fi
           chmod +x scripts/deploy-named-tunnel.sh
 
           echo "=== Script first 5 lines ==="
