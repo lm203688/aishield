@@ -19,7 +19,7 @@ info:
     - Silver (70-84): 存在轻微问题，基本安全
     - Bronze (55-69): 建议审查后使用
     - None (0-54): 检测到安全风险，谨慎使用
-  version: "4.2.2"
+  version: "4.3.0"
   contact:
     name: AIShield Team
     url: https://aishield.tools
