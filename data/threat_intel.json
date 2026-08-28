@@ -1,6 +1,79 @@
 {
   "intel": [
     {
+      "id": "CVE-2026-74820",
+      "source": "nvd",
+      "severity": "unknown",
+      "cvss": null,
+      "title": "ServiceNow has remediated a SQL injection vulnerability that was identified in in the ServiceNow AI platform. This vulnerability could enable an unauthenticated user, in certain circumstances, to exec",
+      "summary": "ServiceNow has remediated a SQL injection vulnerability that was identified in in the ServiceNow AI platform. This vulnerability could enable an unauthenticated user, in certain circumstances, to execute arbitrary SQL statements against the instance's underlying database and gain access to, or modify, instance data beyond what was intended. \n\n\n\n\n\nServiceNow deployed a security update to hosted instances and ServiceNow provided the update to our partners and self-hosted customers. We are not curr",
+      "affected": "prompt injection",
+      "references": [
+        "https://support.servicenow.com/kb?id=kb_article_view&sysparm_article=KB3152242"
+      ],
+      "published": "2026-08-27T20:18:36.670",
+      "fetched": "2026-08-28T01:21:46.749255+00:00"
+    },
+    {
+      "id": "CVE-2026-37006",
+      "source": "nvd",
+      "severity": "unknown",
+      "cvss": null,
+      "title": "A vulnerability in the WebSocket endpoint of gpt-researcher v0.14.7 and before allows an unauthenticated remote attacker to achieve code execution via malicious Model Context Protocol configurations.",
+      "summary": "A vulnerability in the WebSocket endpoint of gpt-researcher v0.14.7 and before allows an unauthenticated remote attacker to achieve code execution via malicious Model Context Protocol configurations.",
+      "affected": "model context protocol",
+      "references": [
+        "http://gpt-researcher.com",
+        "https://yerangamage.com/cves/detail/?slug=gptresearcher-websocket-rce"
+      ],
+      "published": "2026-08-27T20:17:41.423",
+      "fetched": "2026-08-28T01:21:52.922130+00:00"
+    },
+    {
+      "id": "CVE-2026-37003",
+      "source": "nvd",
+      "severity": "unknown",
+      "cvss": null,
+      "title": "Agno up to and including 2.5.8 is vulnerable to Remote Code Execution (RCE) via prompt injection. The PythonTools and ShellTools components pass unsanitized, LLM-generated arguments directly to execut",
+      "summary": "Agno up to and including 2.5.8 is vulnerable to Remote Code Execution (RCE) via prompt injection. The PythonTools and ShellTools components pass unsanitized, LLM-generated arguments directly to execution sinks including exec(), runpy.run_path(), and subprocess.run(). An unauthenticated attacker can exploit this by embedding malicious instructions in content processed by the agent (such as web pages or documents), allowing for arbitrary code and OS command execution on the host server.",
+      "affected": "prompt injection",
+      "references": [
+        "http://agno.com",
+        "https://yerangamage.com/cves/detail/?slug=agno-rce-tools"
+      ],
+      "published": "2026-08-27T20:17:41.107",
+      "fetched": "2026-08-28T01:21:46.749251+00:00"
+    },
+    {
+      "id": "CVE-2026-37003",
+      "source": "nvd",
+      "severity": "unknown",
+      "cvss": null,
+      "title": "Agno up to and including 2.5.8 is vulnerable to Remote Code Execution (RCE) via prompt injection. The PythonTools and ShellTools components pass unsanitized, LLM-generated arguments directly to execut",
+      "summary": "Agno up to and including 2.5.8 is vulnerable to Remote Code Execution (RCE) via prompt injection. The PythonTools and ShellTools components pass unsanitized, LLM-generated arguments directly to execution sinks including exec(), runpy.run_path(), and subprocess.run(). An unauthenticated attacker can exploit this by embedding malicious instructions in content processed by the agent (such as web pages or documents), allowing for arbitrary code and OS command execution on the host server.",
+      "affected": "llm agent",
+      "references": [
+        "http://agno.com",
+        "https://yerangamage.com/cves/detail/?slug=agno-rce-tools"
+      ],
+      "published": "2026-08-27T20:17:41.107",
+      "fetched": "2026-08-28T01:21:59.142350+00:00"
+    },
+    {
+      "id": "CVE-2026-18885",
+      "source": "nvd",
+      "severity": "unknown",
+      "cvss": null,
+      "title": "ServiceNow has remediated a code injection vulnerability that was identified in the ServiceNow AI platform. This vulnerability could enable an unauthenticated user, in certain circumstances, to execut",
+      "summary": "ServiceNow has remediated a code injection vulnerability that was identified in the ServiceNow AI platform. This vulnerability could enable an unauthenticated user, in certain circumstances, to execute arbitrary code in the ServiceNow platform and gain access to, or modify, instance data beyond what was intended. \n\n\n\n\n\nServiceNow deployed a security update to hosted instances and ServiceNow provided the update to our partners and self-hosted customers. We are not currently aware of malicious exp",
+      "affected": "prompt injection",
+      "references": [
+        "https://support.servicenow.com/kb?id=kb_article_view&sysparm_article=KB3152242"
+      ],
+      "published": "2026-08-27T20:17:03.870",
+      "fetched": "2026-08-28T01:21:46.749248+00:00"
+    },
+    {
       "id": "CVE-2026-75062",
       "source": "nvd",
       "severity": "unknown",
@@ -3843,19 +3916,19 @@
       "fetched": "2026-08-04T06:34:53.913899+00:00"
     }
   ],
-  "updated": "2026-08-27T16:15:08.679528+00:00",
+  "updated": "2026-08-28T01:22:07.244180+00:00",
   "sources": [
     "osv",
     "nvd",
     "github-advisory"
   ],
   "stats": {
-    "unknown": 24,
+    "unknown": 29,
     "critical": 34,
     "low": 4,
     "high": 123,
     "medium": 73,
     "moderate": 1
   },
-  "total": 259
+  "total": 264
 }

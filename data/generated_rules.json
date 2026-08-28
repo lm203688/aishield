@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-08-27T16:15:21.013364+00:00",
-  "source_intel_count": 259,
+  "generated_at": "2026-08-28T01:22:19.364848+00:00",
+  "source_intel_count": 264,
   "package_blacklist": {
     "pip:pantheon-agents": {
       "ecosystem": "pip",
@@ -564,6 +564,21 @@
     }
   },
   "pattern_rules": {
+    "(?i)(ignore|disregard|forget)\\s+(all\\s+)?(previous|prior|above)\\s+(instruction|prompt|rule)": {
+      "description": "提示注入: 覆盖历史指令",
+      "severity": "critical",
+      "owasp": "LLM01",
+      "owasp_name": "提示注入 (Prompt Injection)",
+      "derived_from": "prompt injection",
+      "intel_hits": 35,
+      "evidence": [
+        "CVE-2026-37003",
+        "CVE-2026-37003",
+        "CVE-2026-55557",
+        "GHSA-m9mq-7m7q-xc6p",
+        "GHSA-5r34-2g38-6569"
+      ]
+    },
     "(?i)(requests\\.(get|post)|urllib\\.request\\.urlopen|fetch)\\s*\\(\\s*[^)]*(user|input|param|req\\.)": {
       "description": "SSRF: 请求目标来自不可信输入",
       "severity": "high",
@@ -639,21 +654,6 @@
         "CVE-2026-76832"
       ]
     },
-    "(?i)(ignore|disregard|forget)\\s+(all\\s+)?(previous|prior|above)\\s+(instruction|prompt|rule)": {
-      "description": "提示注入: 覆盖历史指令",
-      "severity": "critical",
-      "owasp": "LLM01",
-      "owasp_name": "提示注入 (Prompt Injection)",
-      "derived_from": "prompt injection",
-      "intel_hits": 33,
-      "evidence": [
-        "CVE-2026-55557",
-        "GHSA-m9mq-7m7q-xc6p",
-        "GHSA-5r34-2g38-6569",
-        "CVE-2026-76832",
-        "CVE-2026-75130"
-      ]
-    },
     "(?i)(Access-Control-Allow-Origin['\\\"]?\\s*[:,]\\s*['\\\"]\\*|cors\\s*\\(\\s*\\)\\s*)": {
       "description": "跨域校验缺失: 允许任意来源",
       "severity": "high",
@@ -698,10 +698,10 @@
     }
   },
   "owasp_distribution": {
+    "LLM01": 1,
     "LLM06": 2,
     "LLM07": 3,
-    "LLM05": 3,
-    "LLM01": 1
+    "LLM05": 3
   },
   "total_rules": 71
 }
