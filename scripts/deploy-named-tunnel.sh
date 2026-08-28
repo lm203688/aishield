@@ -47,9 +47,28 @@ after_head=$(git rev-parse HEAD 2>/dev/null || echo "nogit")
 log "HEAD: ${before_head:0:8} -> ${after_head:0:8}"
 [ "$before_head" != "$after_head" ] && NEED_RESTART=1
 
+# 版本哨兵提取：server-card 有两种形态 —— api/static 下的嵌套形态
+# （serverInfo.version）与 docs 下的扁平形态（顶层 version）。只读顶层会让
+# 嵌套形态静默返回空串，进而让所有「版本不一致」判断失效（2026-08-28 踩坑）。
+card_ver() {
+    python3 -c "
+import json,sys
+try:
+    d=json.load(open(sys.argv[1]))
+    print(d.get('version') or d.get('serverInfo',{}).get('version',''))
+except Exception:
+    print('')
+" "$1" 2>/dev/null || true
+}
+
 # 以仓库 main 的 server-card 版本号作为「磁盘代码是否真的新」的哨兵
-expect_ver=$(curl -sL --max-time 20 "$RAW/api/static/.well-known/mcp/server-card.json" 2>/dev/null | python3 -c "import json,sys;print(json.load(sys.stdin).get('version',''))" 2>/dev/null || true)
-disk_ver=$(python3 -c "import json;print(json.load(open('api/static/.well-known/mcp/server-card.json')).get('version',''))" 2>/dev/null || true)
+if curl -sL --max-time 20 "$RAW/api/static/.well-known/mcp/server-card.json" -o /tmp/_card_main.json 2>/dev/null; then
+    expect_ver=$(card_ver /tmp/_card_main.json)
+else
+    expect_ver=""
+fi
+rm -f /tmp/_card_main.json
+disk_ver=$(card_ver api/static/.well-known/mcp/server-card.json)
 log "server-card 版本: 磁盘=${disk_ver:-none} 仓库=${expect_ver:-unknown}"
 
 if [ -n "$expect_ver" ] && [ "$disk_ver" != "$expect_ver" ]; then
@@ -89,13 +108,19 @@ if [ "$NEED_RESTART" = "1" ]; then
         sleep 10
     fi
 
-    if ! curl -sf http://127.0.0.1:8450/api/v1/health 2>/dev/null; then
-        log "Docker 未托管或重启失败 -> 直接运行 Python 进程"
+    # 兜底：只看「跑着的版本是否等于磁盘版本」。
+    # 注意不能写成「API 挂了才重启」—— 陈旧进程恰好是「活着但版本不对」，
+    # 那种写法会正好跳过重启，问题永远修不掉。
+    cur_ver=$(curl -s --max-time 10 http://127.0.0.1:8450/api/v1/health 2>/dev/null | python3 -c "import json,sys;print(json.load(sys.stdin).get('version',''))" 2>/dev/null || true)
+    if [ "$cur_ver" != "$disk_ver" ] || ! curl -sf http://127.0.0.1:8450/api/v1/health 2>/dev/null; then
+        log "强制重启 Python API 进程（当前=${cur_ver:-none} 目标=${disk_ver:-none}）"
         pkill -f "api/server.py" 2>/dev/null || true
         sleep 2
         export PORT=8450
         nohup python3 api/server.py > /tmp/aishield-api.log 2>&1 &
-        sleep 6
+        sleep 8
+    else
+        log "运行进程版本已与磁盘一致（${cur_ver}）-> 无需额外重启"
     fi
 else
     log "代码已是最新且 API 健康 -> 跳过重启"
