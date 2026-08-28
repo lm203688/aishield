@@ -2,7 +2,7 @@
   "name": "aishield-security",
   "displayName": "AIShield Security Scanner",
   "description": "AI Agent security scanner for MCP servers, AI skills and agents — OWASP MCP Top 10 + OWASP Agentic AI Top 10 (ASI01–ASI10) aligned. Local-first, open-source, no code leaves your machine.",
-  "version": "4.2.2",
+  "version": "4.3.0",
   "protocol_version": "2026-07-28",
   "legacy_protocol_versions": ["2025-03-26"],
   "license": "MIT",
