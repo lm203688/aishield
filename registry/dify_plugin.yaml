@@ -279,7 +279,7 @@ tools:
 # Logo URL
 logo_url: https://aishield.tools/logo.svg
 # 版本
-version: "4.2.2"
+version: "4.3.0"
 # 许可证
 license: MIT
 # 首页
