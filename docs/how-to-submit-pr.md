@@ -30,7 +30,7 @@ punkpeye/awesome-mcp-servers 是 MCP 生态最大的发现入口，2,600+ PR、9
 3. 在该分类下添加以下内容：
 
 ```markdown
-- [AIShield](https://aishield.tools) - AI Agent security & trust infrastructure. OWASP MCP Top 10 aligned scanner with 133 rules, MCP native, Agent-First one-click onboarding, A2A trust scoring. Zero dependencies, pure Python. ([Open Source](https://github.com/lm203688/aishield))
+- [AIShield](https://aishield.tools) - AI Agent security & trust infrastructure. OWASP MCP Top 10 aligned scanner with 227 rules, MCP native, Agent-First one-click onboarding, A2A trust scoring. Zero dependencies, pure Python. ([Open Source](https://github.com/lm203688/aishield))
 ```
 
 **Step 4: 提交 PR**
@@ -45,7 +45,7 @@ Adding AIShield, an open-source AI Agent security scanner aligned with OWASP MCP
 
 ## Key Features
 
-- **133 security rules** covering all 10 OWASP MCP Top 10 risk categories
+- **227 security rules** covering all 10 OWASP MCP Top 10 risk categories
 - **MCP native**: StreamableHTTP endpoint, 8 tools available
 - **Agent-First**: One-call onboarding (register + API key + quick start)
 - **Zero dependencies**: Pure Python stdlib
@@ -101,18 +101,18 @@ Adding AIShield, an open-source AI Agent security scanner aligned with OWASP MCP
 4. Title:
 
 ```
-AIShield: Open-source AI Agent security scanner (OWASP MCP Top 10, 133 rules, MCP native, zero deps)
+AIShield: Open-source AI Agent security scanner (OWASP MCP Top 10, 227 rules, MCP native, zero deps)
 ```
 
 5. 帖子内容（ flair 选 `Show & Tell` 或 `Tool`）:
 
 ```markdown
-I built AIShield, an open-source AI Agent security & trust infrastructure platform. It scans MCP servers and AI Agent tools against 133 security rules aligned with OWASP MCP Top 10.
+I built AIShield, an open-source AI Agent security & trust infrastructure platform. It scans MCP servers and AI Agent tools against 227 security rules aligned with OWASP MCP Top 10.
 
 **The problem**: The MCP ecosystem has 10,000+ servers and 97M monthly SDK downloads, but zero built-in security scanning. When an AI agent calls a MCP tool, it gets the same permissions as the user — no sandboxing, no trust verification, no prompt injection protection.
 
 **What it does**:
-- Scans MCP tool descriptions, schemas, and configs for 133 security risks
+- Scans MCP tool descriptions, schemas, and configs for 227 security risks
 - Detects prompt injection, secret leakage, excessive permissions, tool abuse, schema poisoning
 - Provides an MCP Server endpoint — Claude, Cursor, VS Code can call security scans directly
 - Agent-First: register + get DID + API key in ONE API call
@@ -127,7 +127,7 @@ I built AIShield, an open-source AI Agent security & trust infrastructure platfo
 }
 ```
 
-**Tech**: Pure Python stdlib (zero dependencies), 133 rules, MIT license.
+**Tech**: Pure Python stdlib (zero dependencies), 227 rules, MIT license.
 
 **Links**:
 - Demo: https://aishield.tools
@@ -164,7 +164,7 @@ AIShield: Open-source AI Agent security scanner (OWASP MCP Top 10)
 **Step 2: 首条评论**（提交后立即发）
 
 ```text
-Author here. AIShield scans MCP servers and AI Agent tools against 133 security rules aligned with OWASP MCP Top 10.
+Author here. AIShield scans MCP servers and AI Agent tools against 227 security rules aligned with OWASP MCP Top 10.
 
 Key differentiator vs existing tools (Guardrails AI, agentic_security, MEDUSA):
 - AIShield is a trust INFRASTRUCTURE, not just a scanner — DID identity, reputation system, skill marketplace, payment
@@ -187,7 +187,7 @@ I wrote a Chinese guide on OWASP MCP Top 10: https://aishield.tools/owasp-mcp-to
 2. 填写信息：
    - Name: `AIShield Security Scanner`
    - URL: `https://aishield.tools/api/v1/mcp`
-   - Description: `AI Agent security scanner aligned with OWASP MCP Top 10. 133 rules, prompt injection detection, secret leakage, tool abuse, MCP handshake verification.`
+   - Description: `AI Agent security scanner aligned with OWASP MCP Top 10. 227 rules, prompt injection detection, secret leakage, tool abuse, MCP handshake verification.`
    - Categories: `security`, `developer-tools`
    - Repository: `https://github.com/lm203688/aishield`
    - License: `MIT`

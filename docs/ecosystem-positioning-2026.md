@@ -21,8 +21,8 @@
 
 | 层 | 状态 | 证据 |
 |----|------|------|
-| **安全层** | ✅ 核心已建（最强） | 214 MCP / 220 Skill 规则；双维 OWASP MCP Top10 + Agentic ASI01-10；`workspace_scan` 启动前预扫；`SANDBOX_RULES` 沙箱硬化；taint / SBOM / OSV；CI gate（SARIF）+ `.md` 指令载荷盲点修复 |
-| **协议层** | 🟡 部分已建 | `aishield-mcp-server` npm **4.2.2 已发布**；A2A `agent-card.json`；`api/server.py` 全离线；`llms.txt`；但 **GitHub Action 未上 Marketplace**、A2A Task 路由未做 |
+| **安全层** | ✅ 核心已建（最强） | 227 MCP / 233 Skill 规则；双维 OWASP MCP Top10 + Agentic ASI01-10；`workspace_scan` 启动前预扫；`SANDBOX_RULES` 沙箱硬化；taint / SBOM / OSV；CI gate（SARIF）+ `.md` 指令载荷盲点修复 |
+| **协议层** | 🟡 部分已建 | `aishield-mcp-server` npm **4.3.0 已发布**；A2A `agent-card.json`；`api/server.py` 全离线；`llms.txt`；但 **GitHub Action 未上 Marketplace**、A2A Task 路由未做 |
 | **信任层** | 🟡 后端已建，未"占位" | `eco/attestation.py`（订阅/鉴证/哈希链）、`/api/v1/trust/*`、`/api/v1/attestation/*`、`/badge/{tool}`、`eco/badge`、x402 + 虎皮椒支付脚手架**都已就绪**——但没作为"公开、可嵌入的中立信任机构"推出 |
 | **经济层** | 🔴 弱（Phase 3） | 支付脚手架在（`eco/payment`、`eco/x402`、`eco/hupijiao`），但工具市场 / 调用网关 / escrow / 抽成未建 |
 | **数据层** | 🟡 部分 | 安全库 / 审计日志 / telemetry 在；fleet/policy 引擎仅部分（mcpaudit 已有，我们弱） |

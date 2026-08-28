@@ -173,7 +173,7 @@ AIShield 团队修复 / 新增规则
 ```
 Hi {maintainer_name},
 
-I'm building AIShield, an open-source AI Agent security scanner aligned with OWASP MCP Top 10 (133 rules, MIT license, zero dependencies).
+I'm building AIShield, an open-source AI Agent security scanner aligned with OWASP MCP Top 10 (227 rules, MIT license, zero dependencies).
 
 I noticed {project_name} doesn't have built-in security scanning for {specific_gap}. I'd like to propose an integration that:
 

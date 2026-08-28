@@ -7,7 +7,7 @@
 
 ## 0. 一句话结论
 
-AIShield 最强的护城河仍是**安全层（214/220 规则）**，但我们之前漏看了 2026 年最热的两条线：
+AIShield 最强的护城河仍是**安全层（227/233 规则）**，但我们之前漏看了 2026 年最热的两条线：
 
 1. **Agent 身份层（Identity / NHI）**——A2A 仓库 top 5 issue 全是身份（💬655 / 235 / 143 / 103 / 94），Authentik 借 NHI 重新爆火，ANS/DNSid/Entra Agent ID 扎堆。这是 2026 年 agent 安全的"主战场"，我们**有 attestation 后端、却没有"扫描身份"的能力**。
 2. **Agent 网络层（Mesh / 组网）**——Cloudflare Mesh 已把"agent 组网"做成基础设施，但官方自认**缺 per-agent 身份与策略**（"all agent traffic looks like from a Worker"）。这正好是 AIShield 内容可信 + 身份归因的补位点。
@@ -84,7 +84,7 @@ AIShield 最强的护城河仍是**安全层（214/220 规则）**，但我们�
 
 | 层          | 现状                   | 新技术暴露的缺口                             | 本次扩展                                                  |
 | ---------- | -------------------- | ------------------------------------ | ----------------------------------------------------- |
-| 安全层        | ✅ 214/220 规则         | 供应链/命令执行/内容净化                        | 已强；补"工具结果净化"建议项                                       |
+| 安全层        | ✅ 227/233 规则         | 供应链/命令执行/内容净化                        | 已强；补"工具结果净化"建议项                                       |
 | **身份层（新）** | 🟡 只"发"不"扫"          | A2A 身份💬655、Authentik NHI、ANS/DNSid  | **新增 `identity_scan`：扫 AgentCard 签名/过期/scope/mTLS**   |
 | **网络层（新）** | 🔴 无                 | Cloudflare Mesh 缺 per-agent 身份、过宽可达性 | **新增 `network_scan`：扫组网/Mesh 配置过宽暴露**                 |
 | 信任层        | 🟡 后端已建未亮            | trust.signals[] 规范起草中                | 已落地 `/api/v1/trust` + 提案（见 `trust-field-proposal.md`） |
@@ -168,4 +168,4 @@ AIShield 最强的护城河仍是**安全层（214/220 规则）**，但我们�
 
 **真实攻击信号对齐**：CVE-2026-30856（工具名碰撞/typosquat，WeKnora）、CVE-2026-32211（Azure MCP 无认证，CVSS 9.1）、ClawHavoc（1,184 个恶意 skill）、Zenity BlackHat 2026（skills.sh 1.7M 安装量 typosquat）、Canopii rug-pull 审计。
 
-**卡位含义**：aishield 现在对 OWASP Agentic AI Top 10 的覆盖从「双维对齐（MCP 214/220 + 内容/身份/网络）」补到「空白域全填」——这是相对 mcp-audit（89 SAST 规则、全离线）等竞品的差异化纵深：它们扫代码不扫 agent 行为语义（目标劫持/记忆投毒/反篡改/人机信任利用）。
+**卡位含义**：aishield 现在对 OWASP Agentic AI Top 10 的覆盖从「双维对齐（MCP 227/233 + 内容/身份/网络）」补到「空白域全填」——这是相对 mcp-audit（89 SAST 规则、全离线）等竞品的差异化纵深：它们扫代码不扫 agent 行为语义（目标劫持/记忆投毒/反篡改/人机信任利用）。

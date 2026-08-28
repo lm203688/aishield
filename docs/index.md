@@ -12,7 +12,7 @@ title: AIShield —— AI Agent 安全扫描
   "operatingSystem": "Cross-platform",
   "url": "https://aishield.tools",
   "description": "开源、本地优先的 AI Agent 安全扫描器与信任机构，覆盖 OWASP MCP Top 10 与 OWASP Agentic AI Top 10（ASI01–ASI10）。",
-  "softwareVersion": "4.2.0",
+  "softwareVersion": "4.3.0",
   "license": "CC BY 4.0",
   "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
   "author": { "@type": "Organization", "name": "AIShield Project", "url": "https://aishield.tools", "sameAs": ["https://github.com/lm203688/aishield"] }
@@ -23,7 +23,7 @@ title: AIShield —— AI Agent 安全扫描
   "@context": "https://schema.org",
   "@type": "FAQPage",
   "mainEntity": [
-    { "@type": "Question", "name": "AIShield 是什么？", "acceptedAnswer": { "@type": "Answer", "text": "AIShield 是一个开源、本地优先的 AI Agent 安全扫描器与信任机构，检测工具投毒、提示注入、密钥泄露、沙箱配置错误与供应链风险，覆盖 214 条 MCP 规则 / 220 条 Skill 规则，对齐 OWASP MCP Top 10 与 OWASP Agentic AI Top 10。" } },
+    { "@type": "Question", "name": "AIShield 是什么？", "acceptedAnswer": { "@type": "Answer", "text": "AIShield 是一个开源、本地优先的 AI Agent 安全扫描器与信任机构，检测工具投毒、提示注入、密钥泄露、沙箱配置错误与供应链风险，覆盖 227 条 MCP 规则 / 233 条 Skill 规则，对齐 OWASP MCP Top 10 与 OWASP Agentic AI Top 10。" } },
     { "@type": "Question", "name": "AIShield 和 Cloudflare Sandbox、forgevm 这类 agent 沙箱是什么关系？", "acceptedAnswer": { "@type": "Answer", "text": "互补，不是竞品。Cloudflare Sandboxes、forgevm、E2B、Open Interpreter、Goose 解决的是爆炸半径——agent 能碰到什么；AIShield 解决的是内容可信——agent 读进来的 MCP server、skill 与工具描述该不该信。被投毒的 skill 在沙箱里照样能把数据带走，用的还是你主动授予的凭据。两个平面应当同时部署：AIShield 提供启动前工作区预扫、沙箱硬化规则、每次工具调用的准入检查与持续鉴证。" } },
     { "@type": "Question", "name": "为什么 SKILL.md 里的危险内容不能当作文档示例？", "acceptedAnswer": { "@type": "Answer", "text": "因为对 AI Skill 来说 Markdown 就是可执行体——大模型读到什么就照做。AIShield 把 SKILL.md、AGENTS.md、CLAUDE.md、skills 与 prompts 目录下的 Markdown、以及带 name 与 description frontmatter 的 Markdown 当作指令载荷扫描，不做文档降级。把 .md 一律降级的扫描器会漏掉整条 skill 供应链。" } },
     { "@type": "Question", "name": "AIShield 免费吗？是否本地运行？", "acceptedAnswer": { "@type": "Answer", "text": "是的。AIShield 开源、免费，并完全离线/本地运行——代码不会上传到云端，与 Claude Security、Microsoft MDASH 等云端扫描器不同。" } },
@@ -77,7 +77,7 @@ curl https://aishield.tools/api/v1/health
 
 ## 检测能力
 
-- **214 条 MCP 规则 / 220 条 Skill 规则**，含由真实漏洞情报与技术雷达自动起草、经六项闸门校验后晋升的规则
+- **227 条 MCP 规则 / 233 条 Skill 规则**，含由真实漏洞情报与技术雷达自动起草、经六项闸门校验后晋升的规则
 - **OWASP MCP Top 10 + OWASP Agentic AI Top 10（ASI01–ASI10）** 全类别覆盖
 - **沙箱硬化 11 条**：docker.sock 挂载、`--privileged`、host 网络/PID/IPC、`cap_add: ALL`、`seccomp=unconfined`、`--user 0`、k8s `hostPath`——有沙箱不等于有隔离
 - **Skill 内容安全**：`SKILL.md` 按可执行载荷扫描，不做「文档示例」降级

@@ -13,12 +13,12 @@
 
 **Full (≤ 65000 chars, 这里给要点)**:
 - 本地优先、零出网：代码不出机器，无需上传 SaaS。
-- 双维对齐：OWASP MCP Top 10 (2025) + OWASP Agentic AI Top 10 (ASI01–10)，214 MCP / 220 Skill 规则。
+- 双维对齐：OWASP MCP Top 10 (2025) + OWASP Agentic AI Top 10 (ASI01–10)，227 MCP / 233 Skill 规则。
 - 内容安全平面：唯一扫 prompt 注入 / 工具中毒 / 供应链漂移的扫描器。
 - **绝不执行被扫配置**（no-spawn）：纯静态推断，扫恶意配置也不会中招（竞品会真实执行）。
 - 中文合规：6 大平台违禁词覆盖。
 - 输出 SARIF 2.1.0 → 直接进 GitHub Security；可嵌入信任徽章（金/银/铜）。
-- `uses: lm203688/aishield@v4.2.2`
+- `uses: lm203688/aishield@v4.3.0`
 
 **Category**: Security / Testing
 **Differentiator**: 占「中国合规 + 不执行」位，与 AgentAuditKit 通用位互补。
@@ -29,14 +29,14 @@
 
 **Title**: AIShield — open-source MCP/Agent security scanner & neutral trust authority
 **Blurb**:
-> AIShield scans MCP servers, skills and prompts for tool poisoning, prompt injection, secret leakage and supply-chain risk — fully offline, 214/220 OWASP-aligned rules, never executes the scanned config. Also acts as a neutral trust authority: embeddable `aishield-trust/v1` attestation for Server Card / Agent Card / ai-catalog.
+> AIShield scans MCP servers, skills and prompts for tool poisoning, prompt injection, secret leakage and supply-chain risk — fully offline, 227/233 OWASP-aligned rules, never executes the scanned config. Also acts as a neutral trust authority: embeddable `aishield-trust/v1` attestation for Server Card / Agent Card / ai-catalog.
 
 ---
 
 ## 3. Cursor / Glama 目录
 
 **One-liner**:
-> AIShield — 本地离线、不执行被扫配置的下一代 agent 安全扫描器与中立信任机构。214/220 OWASP 规则，扫内容（prompt 注入/工具中毒），可嵌入信任凭证。
+> AIShield — 本地离线、不执行被扫配置的下一代 agent 安全扫描器与中立信任机构。227/233 OWASP 规则，扫内容（prompt 注入/工具中毒），可嵌入信任凭证。
 
 **Tags**: security, mcp, agent, trust, offline, owasp, prompt-injection
 

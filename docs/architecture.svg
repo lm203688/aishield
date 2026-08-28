@@ -5,7 +5,7 @@
     </marker>
   </defs>
   <rect x="0" y="0" width="680" height="360" fill="#0f1420" rx="10"/>
-  <text x="340" y="26" text-anchor="middle" fill="#e6e6e6" font-size="15" font-weight="600">AIShield v4.2.2 — Agent Computer Content-Security Plane</text>
+  <text x="340" y="26" text-anchor="middle" fill="#e6e6e6" font-size="15" font-weight="600">AIShield v4.3.0 — Agent Computer Content-Security Plane</text>
 
   <!-- Layer 1: Ingest -->
   <rect x="20" y="52" width="640" height="46" rx="8" fill="#1a2136" stroke="#2f3b57"/>

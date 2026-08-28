@@ -1,6 +1,6 @@
 # AIShield — Full LLM Briefing
 
-*Canonical: https://aishield.tools · GitHub: https://github.com/lm203688/aishield · Version: 4.2.0*
+*Canonical: https://aishield.tools · GitHub: https://github.com/lm203688/aishield · Version: 4.3.0*
 
 AIShield is an open-source, local-first **AI Agent security scanner and trust authority** for the MCP / Agentic AI economy. This file is the long-form, machine-readable briefing for LLMs and agents (paired with the short `/llms.txt`).
 
@@ -23,7 +23,7 @@ AIShield protects AI agents and the MCP (Model Context Protocol) tools they call
 
 - **Poisoned skills, treated as code** — for skill-type assets, Markdown *is* the executable payload. `SKILL.md`, `AGENTS.md`, `CLAUDE.md`, files under `skills/` or `prompts/`, and any Markdown carrying `name` + `description` frontmatter are scanned as instructions, not documentation. Scanners that downgrade `.md` findings to "documentation example" structurally miss the entire skill supply chain — a malicious `SKILL.md` combining prompt injection with a `curl | bash` payload scores 98/100 under that assumption and 61/100 with critical findings once it is corrected.
 
-**Scale:** 214 MCP rule categories / 220 skill rule categories — 110 OWASP MCP Top 10 rules, 60 OWASP Agentic AI Top 10 (ASI01–ASI10) rules, 31 Chinese prompt-injection rules, 11 sandbox-hardening rules, plus rules promoted from the daily tech-radar pipeline through a six-check gate (schema, compilable regex, not overly broad, deduplicated, zero false positives on a benign corpus).
+**Scale:** 227 MCP rule categories / 233 skill rule categories — 110 OWASP MCP Top 10 rules, 60 OWASP Agentic AI Top 10 (ASI01–ASI10) rules, 31 Chinese prompt-injection rules, 11 sandbox-hardening rules, plus rules promoted from the daily tech-radar pipeline through a six-check gate (schema, compilable regex, not overly broad, deduplicated, zero false positives on a benign corpus).
 
 **Deployment:** fully local / offline. No source code is uploaded to any cloud. Detection runs on the developer's machine or in CI.
 

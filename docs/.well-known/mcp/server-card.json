@@ -1,6 +1,6 @@
 {
   "name": "aishield-mcp",
-  "version": "4.2.2",
+  "version": "4.3.0",
   "description": "AIShield security scanner as an MCP server: scan MCP servers, AI skills and agents for poisoning, injection, leakage, and supply-chain risk (OWASP MCP Top 10 + OWASP Agentic AI Top 10).",
   "endpoint": "https://aishield.tools/api/v1/mcp",
   "transport": "streamable-http",

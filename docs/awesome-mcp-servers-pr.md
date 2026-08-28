@@ -13,13 +13,13 @@
 - **Repository**: https://github.com/lm203688/aishield
 - **License**: MIT
 
-AIShield 是 AI Agent 安全与信任基础设施，为 MCP Server 和 AI Agent 工具提供 OWASP MCP Top 10 对齐的安全扫描。支持提示注入检测、密钥泄露检测、工具滥用检测、MCP 握手验证等 133 条安全规则。
+AIShield 是 AI Agent 安全与信任基础设施，为 MCP Server 和 AI Agent 工具提供 OWASP MCP Top 10 对齐的安全扫描。支持提示注入检测、密钥泄露检测、工具滥用检测、MCP 握手验证等 227 条安全规则。
 
 **特点：**
 - Agent-First 一键入驻（注册 Agent + 获取 API Key + 快速开始，一步完成）
 - MCP StreamableHTTP 原生集成，可直接被 Claude/Cursor/VS Code 调用
 - A2A Agent Card 自动发现，支持 Agent 间信任评分
-- 开源、零外部依赖、133 条安全规则
+- 开源、零外部依赖、227 条安全规则
 - OpenAPI 3.0.3 规范，支持 Agent 自动发现 API
 
 **安装方式：**

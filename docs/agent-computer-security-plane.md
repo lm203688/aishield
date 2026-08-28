@@ -150,7 +150,7 @@ Because an MCP `command` is arbitrary code supplied by the thing you are trying 
 reduced runtime visibility in exchange for the guarantee that scanning a hostile artifact is safe.
 
 **What does it cover?**
-214 MCP rules / 220 skill rules, aligned to OWASP MCP Top 10, OWASP Agentic AI Top 10 (ASI01–ASI10),
+227 MCP rules / 233 skill rules, aligned to OWASP MCP Top 10, OWASP Agentic AI Top 10 (ASI01–ASI10),
 Chinese-language prompt injection, and sandbox escape.
 
 ## 中文摘要

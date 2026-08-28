@@ -63,7 +63,7 @@ the schema with whatever the WG standardizes.
 4. 填定位（建议文案）：
    - **Tagline**: `Local-first, offline AI Agent security scanner & neutral trust authority for MCP / A2A`
    - **Category**: Security / Dev Tools
-   - **Description**: `214 MCP + 220 Skill OWASP-aligned rules; scans content (prompt injection, tool poisoning), agent identity, network/Mesh reachability, Authentik NHI, A2A AgentCard, AI-slop evasion and x402 payment scope. Never spawns the scanned config.`
+   - **Description**: `227 MCP + 233 Skill OWASP-aligned rules; scans content (prompt injection, tool poisoning), agent identity, network/Mesh reachability, Authentik NHI, A2A AgentCard, AI-slop evasion and x402 payment scope. Never spawns the scanned config.`
 5. 保存 → listing 变为 Claimed，出现在 Glama 发现流。
 
 ---
@@ -140,6 +140,6 @@ AIShield 解决"安全/可信层"：这个 agent 的内容有没有毒、有没�
 | awesome/Cursor/Registry 复核 | ⏳ 待复核 | 用户 | listing-copy.md 已备 |
 | ANS/ai-catalog trust 字段 | ⏳ 待提 | 用户 | 复用 P0-1 信封 |
 | soundshuman 桥接 | ⏳ 待发 | 用户 | 文案已备 |
-| GitHub Action Marketplace 最终 Publish | ⏳ 待用户点 Publish | 用户 | action.yml v4.2.2 已强移 tag |
+| GitHub Action Marketplace 最终 Publish | ⏳ 待用户点 Publish | 用户 | action.yml v4.3.0 已强移 tag |
 
 > 代码侧已闭环（6 个扫描模块 + 测试 483 通过）。外部动作只需账号登录，Agent 无法代点。
