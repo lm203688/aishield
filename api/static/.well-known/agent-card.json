@@ -1,393 +1,786 @@
 {
+
   "name": "AIShield",
-  "version": "4.2.2",
+
+  "version": "4.3.0",
+
   "description": "AI Agent 安全生态基础设施 — OWASP MCP Top 10 对齐，227条MCP/233条Skill安全规则 + 身份/网络/Authentik/A2A/AI-slop/x402 六维能力边界扫描，全链路守护Agent世界",
+
   "url": "https://aishield.tools",
+
   "authentication": [
+
     {
+
       "type": "oauth2",
+
       "description": "Hosted API endpoints accept an optional Bearer API key (AISHIELD_API_KEY) for higher rate limits; public scan endpoints are open. MCP server is local-first (npx aishield-mcp-server) and needs no auth."
+
     }
+
   ],
+
   "provider": {
+
     "name": "AIShield",
+
     "url": "https://github.com/lm203688/aishield"
+
   },
+
   "capabilities": [
+
     "security_scan",
+
     "prompt_injection_detection",
+
     "banned_words_detection",
+
     "agent_identity",
+
     "agent_collaboration",
+
     "sandbox_execution",
+
     "skill_marketplace",
+
     "a2a_gateway",
+
     "trust_badge",
+
     "continuous_monitoring",
+
     "identity_scan",
+
     "network_scan",
+
     "nh_i_scan",
+
     "agentcard_validation",
+
     "ai_slop_detection",
+
     "payment_scope_audit",
+
     "tool_integrity_scan",
+
     "registry_supply_scan",
+
     "provenance_scan",
+
     "memory_scan",
+
     "antitamper_scan",
+
     "least_agency_scan",
+
     "scope_composition_scan",
+
     "goal_hijack_scan",
+
     "dark_pattern_scan",
+
     "mcp_oauth_scan",
+
     "computeruse_scan"
+
   ],
+
   "skills": [
+
     {
+
       "id": "security_scan",
+
       "name": "MCP 工具安全扫描",
+
       "description": "基于 OWASP MCP Top 10 的 227 条 MCP / 233 条 Skill 规则，对 GitHub 上的 MCP 工具/Agent 技能进行静态安全分析，输出 5 维评分和详细发现",
+
       "input_schema": {
+
         "type": "object",
+
         "properties": {
+
           "source_url": {"type": "string", "description": "GitHub 仓库 URL"},
+
           "tool_type": {"type": "string", "enum": ["mcp", "skill", "gpt", "prompt"], "default": "mcp"},
+
           "name": {"type": "string", "description": "工具名称（可选）"}
+
         },
+
         "required": ["source_url"]
+
       },
+
       "output_schema": {
+
         "type": "object",
+
         "properties": {
+
           "overall_score": {"type": "number", "description": "总分 0-100"},
+
           "badge_level": {"type": "string", "enum": ["gold", "silver", "bronze", "none"]},
+
           "findings": {"type": "array", "items": {"type": "object"}},
+
           "owasp_compliance": {"type": "object"}
+
         }
+
       },
+
       "security_certification": {
+
         "level": "Level 3",
+
         "score": 95,
+
         "issuer": "AIShield",
+
         "certificate_url": "https://github.com/lm203688/aishield"
+
       }
+
     },
+
     {
+
       "id": "prompt_injection_detection",
+
       "name": "Prompt 注入检测",
+
       "description": "中英文 Prompt 注入攻击检测，支持拼音变体、谐音替换、拆字攻击、零宽字符等绕过手法识别",
+
       "input_schema": {
+
         "type": "object",
+
         "properties": {
+
           "prompt": {"type": "string", "description": "待检测的 Prompt 文本"}
+
         },
+
         "required": ["prompt"]
+
       },
+
       "output_schema": {
+
         "type": "object",
+
         "properties": {
+
           "safe": {"type": "boolean"},
+
           "score": {"type": "number"},
+
           "risk_level": {"type": "string"},
+
           "findings": {"type": "array"}
+
         }
+
       }
+
     },
+
     {
+
       "id": "banned_words_detection",
+
       "name": "中文违禁词检测",
+
       "description": "覆盖微信、抖音、小红书、B站、知乎、微博 6 大平台规则的中文违禁词/敏感词检测",
+
       "input_schema": {
+
         "type": "object",
+
         "properties": {
+
           "text": {"type": "string", "description": "待检测文本"},
+
           "platform": {"type": "string", "enum": ["all", "wechat", "douyin", "xiaohongshu", "bilibili", "weibo"], "default": "all"}
+
         },
+
         "required": ["text"]
+
       },
+
       "output_schema": {
+
         "type": "object",
+
         "properties": {
+
           "safe": {"type": "boolean"},
+
           "found_count": {"type": "number"},
+
           "words": {"type": "array"}
+
         }
+
       }
+
     },
+
     {
+
       "id": "rug_pull_detection",
+
       "name": "Rug Pull 检测",
+
       "description": "检测 MCP 工具是否在近期提交中移除安全代码或添加可疑变更",
+
       "input_schema": {
+
         "type": "object",
+
         "properties": {
+
           "source_url": {"type": "string", "description": "GitHub 仓库 URL"}
+
         },
+
         "required": ["source_url"]
+
       },
+
       "output_schema": {
+
         "type": "object",
+
         "properties": {
+
           "risk_level": {"type": "string"},
+
           "suspicious_changes": {"type": "array"}
+
         }
+
       }
+
     },
+
     {
+
       "id": "mcp_handshake",
+
       "name": "MCP 握手验证",
+
       "description": "分析 MCP 配置文件，检测 npx 自动安装、敏感环境变量、超长工具描述等风险，并尝试 HTTP 握手验证",
+
       "input_schema": {
+
         "type": "object",
+
         "properties": {
+
           "source_url": {"type": "string", "description": "GitHub 仓库 URL"}
+
         },
+
         "required": ["source_url"]
+
       },
+
       "output_schema": {
+
         "type": "object",
+
         "properties": {
+
           "handshake_ok": {"type": "boolean"},
+
           "warnings": {"type": "array"}
+
         }
+
       }
+
     },
+
     {
+
       "id": "identity_scan",
+
       "name": "Agent 身份缺陷扫描（身份层）",
+
       "description": "扫描 AgentCard / agent 身份声明是否签名（JWS/DID/proof）、凭证是否短期过期、授权是否过宽（scope:*）、是否缺 mTLS/DID、委托是否做 scope attenuation。对应 A2A #1672/#1786/#1829。",
+
       "input_schema": {
+
         "type": "object",
+
         "properties": {
+
           "source_url": {"type": "string", "description": "GitHub 仓库 URL 或本地路径"}
+
         },
+
         "required": ["source_url"]
+
       },
+
       "output_schema": {
+
         "type": "object",
+
         "properties": {
+
           "identity_findings": {"type": "array", "items": {"type": "object"}},
+
           "severity_counts": {"type": "object"}
+
         }
+
       }
+
     },
+
     {
+
       "id": "network_scan",
+
       "name": "Agent 网络/Mesh 配置扫描（网络层）",
+
       "description": "扫描整账户 Mesh/VPC 绑定是否把全网暴露给所有 agent（Cloudflare 自认缺口）、agent 端点是否无鉴权（auth:none）、私有资源是否公网暴露（public:true）。",
+
       "input_schema": {
+
         "type": "object",
+
         "properties": {
+
           "source_url": {"type": "string", "description": "GitHub 仓库 URL 或本地路径"}
+
         },
+
         "required": ["source_url"]
+
       },
+
       "output_schema": {
+
         "type": "object",
+
         "properties": {
+
           "network_findings": {"type": "array", "items": {"type": "object"}},
+
           "severity_counts": {"type": "object"}
+
         }
+
       }
+
     },
+
     {
+
       "id": "authentik_scan",
+
       "name": "Authentik / NHI service-account 扫描",
+
       "description": "扫描 Authentik 风格 service-account 导出：skip_authorization 跳同意、token_ttl:0/never 永不过期、scope 过宽（*）、硬编码 client_secret。NHI 卫生最佳实践缺口检测。",
+
       "input_schema": {
+
         "type": "object",
+
         "properties": {
+
           "source_url": {"type": "string", "description": "GitHub 仓库 URL 或本地路径"}
+
         },
+
         "required": ["source_url"]
+
       },
+
       "output_schema": {
+
         "type": "object",
+
         "properties": {
+
           "authentik_findings": {"type": "array", "items": {"type": "object"}},
+
           "severity_counts": {"type": "object"}
+
         }
+
       }
+
     },
+
     {
+
       "id": "agentcard_scan",
+
       "name": "A2A AgentCard 结构化校验",
+
       "description": "对 .well-known/agent.json 做 JSON 结构化校验：未签名、缺过期、非 https、无鉴权方案（securitySchemes）、委托链未做 scope attenuation。对应 A2A #1672/#1628 信任浅滩。",
+
       "input_schema": {
+
         "type": "object",
+
         "properties": {
+
           "source_url": {"type": "string", "description": "GitHub 仓库 URL 或本地路径"}
+
         },
+
         "required": ["source_url"]
+
       },
+
       "output_schema": {
+
         "type": "object",
+
         "properties": {
+
           "agentcard_findings": {"type": "array", "items": {"type": "object"}},
+
           "severity_counts": {"type": "object"}
+
         }
+
       }
+
     },
+
     {
+
       "id": "slop_scan",
+
       "name": "AI-slop / 越狱规避检测（内容溯源）",
+
       "description": "识别专为绕过内容分类器而设计的 prompt/skill：指令覆盖（ignore previous instructions）、DAN 角色扮演、base64/翻译混淆、反检测自指。与 de-AI（soundshuman）风格层互补。",
+
       "input_schema": {
+
         "type": "object",
+
         "properties": {
+
           "source_url": {"type": "string", "description": "GitHub 仓库 URL 或本地路径"}
+
         },
+
         "required": ["source_url"]
+
       },
+
       "output_schema": {
+
         "type": "object",
+
         "properties": {
+
           "slop_findings": {"type": "array", "items": {"type": "object"}},
+
           "severity_counts": {"type": "object"}
+
         }
+
       }
+
     },
+
     {
+
       "id": "payment_scan",
+
       "name": "AP2 / x402 支付授权 scope 审计",
+
       "description": "扫描 agent 支付配置：maxAmount 无限、auto_approve 免确认、支付 scope 过宽、支付授权未绑 intent（cartId/orderId）。覆盖 agent 经济层三授权收敛。",
+
       "input_schema": {
+
         "type": "object",
+
         "properties": {
+
           "source_url": {"type": "string", "description": "GitHub 仓库 URL 或本地路径"}
+
         },
+
         "required": ["source_url"]
+
       },
+
       "output_schema": {
+
         "type": "object",
+
         "properties": {
+
           "payment_findings": {"type": "array", "items": {"type": "object"}},
+
           "severity_counts": {"type": "object"}
+
         }
+
       }
+
     },
+
     {
+
       "id": "tool_integrity_scan",
+
       "name": "工具名 / 技能完整性扫描（ASI04 供应链）",
+
       "description": "检测工具名 typosquat（与规范品牌编辑距离 ≤2，CVE-2026-30856 类）、未 pin 版本的远程 MCP（rug-pull），对齐 WeKnora / ClawHavoc 信号。",
+
       "input_schema": {"type": "object", "properties": {"source_url": {"type": "string"}}, "required": ["source_url"]},
+
       "output_schema": {"type": "object", "properties": {"tool_integrity_findings": {"type": "array", "items": {"type": "object"}}, "severity_counts": {"type": "object"}}}
+
     },
+
     {
+
       "id": "registry_supply_scan",
+
       "name": "注册中心供应链扫描（ASI04 供应链）",
+
       "description": "检测技能名 typosquat、可疑外传、渐进式隐藏载荷（主文件把安装命令延迟到次级 .md，Zenity BlackHat 2026 信号）。",
+
       "input_schema": {"type": "object", "properties": {"source_url": {"type": "string"}}, "required": ["source_url"]},
+
       "output_schema": {"type": "object", "properties": {"registry_supply_findings": {"type": "array", "items": {"type": "object"}}, "severity_counts": {"type": "object"}}}
+
     },
+
     {
+
       "id": "provenance_scan",
+
       "name": "来源 / 完整性校验扫描（ASI04 供应链）",
+
       "description": "检测 npx/pip 未 pin 版本、git 安装未 pin commit、锁定文件缺完整性、SBOM 未签名（SLSA 来源可信缺口）。",
+
       "input_schema": {"type": "object", "properties": {"source_url": {"type": "string"}}, "required": ["source_url"]},
+
       "output_schema": {"type": "object", "properties": {"provenance_findings": {"type": "array", "items": {"type": "object"}}, "severity_counts": {"type": "object"}}}
+
     },
+
     {
+
       "id": "memory_scan",
+
       "name": "记忆 / 上下文投毒扫描（ASI06）",
+
       "description": "检测写入记忆的指令、持久/种子目标、记忆文件写入——RAG/长期记忆被投毒的风险。",
+
       "input_schema": {"type": "object", "properties": {"source_url": {"type": "string"}}, "required": ["source_url"]},
+
       "output_schema": {"type": "object", "properties": {"memory_findings": {"type": "array", "items": {"type": "object"}}, "severity_counts": {"type": "object"}}}
+
     },
+
     {
+
       "id": "antitamper_scan",
+
       "name": "失控 agent / 反篡改扫描（ASI10）",
+
       "description": "检测自保护/删除后重装、禁用/替换其它组件、反分析/隐藏指令——agent 脱离治理成为 rogue agent。",
+
       "input_schema": {"type": "object", "properties": {"source_url": {"type": "string"}}, "required": ["source_url"]},
+
       "output_schema": {"type": "object", "properties": {"antitamper_findings": {"type": "array", "items": {"type": "object"}}, "severity_counts": {"type": "object"}}}
+
     },
+
     {
+
       "id": "least_agency_scan",
+
       "name": "工具滥用 / 最小权限扫描（ASI02）",
+
       "description": "检测管道到 shell、rm -rf、sudo、chmod 777、os.system/eval、凭证与 SSH key 读取——过度授权的工具面。",
+
       "input_schema": {"type": "object", "properties": {"source_url": {"type": "string"}}, "required": ["source_url"]},
+
       "output_schema": {"type": "object", "properties": {"least_agency_findings": {"type": "array", "items": {"type": "object"}}, "severity_counts": {"type": "object"}}}
+
     },
+
     {
+
       "id": "scope_composition_scan",
+
       "name": "跨域组合 / 爆炸半径扫描（ASI07 / ASI08）",
+
       "description": "检测凭证读取 + 外传组合（级联失败/爆炸半径）、用 agent 自身凭证转发请求的混淆副手（confused deputy）。",
+
       "input_schema": {"type": "object", "properties": {"source_url": {"type": "string"}}, "required": ["source_url"]},
+
       "output_schema": {"type": "object", "properties": {"scope_composition_findings": {"type": "array", "items": {"type": "object"}}, "severity_counts": {"type": "object"}}}
+
     },
+
     {
+
       "id": "goal_hijack_scan",
+
       "name": "目标劫持扫描（ASI01）",
+
       "description": "检测把外部内容当指令、目标替换、持久/永久目标注入——agent 目标被劫持。",
+
       "input_schema": {"type": "object", "properties": {"source_url": {"type": "string"}}, "required": ["source_url"]},
+
       "output_schema": {"type": "object", "properties": {"goal_hijack_findings": {"type": "array", "items": {"type": "object"}}, "severity_counts": {"type": "object"}}}
+
     },
+
     {
+
       "id": "dark_pattern_scan",
+
       "name": "人机信任利用扫描（ASI09）",
+
       "description": "检测权威冒充、压制核验、虚假保证、紧迫感——需 ≥2 个信号同时命中才报警（低误报）。",
+
       "input_schema": {"type": "object", "properties": {"source_url": {"type": "string"}}, "required": ["source_url"]},
+
       "output_schema": {"type": "object", "properties": {"dark_pattern_findings": {"type": "array", "items": {"type": "object"}}, "severity_counts": {"type": "object"}}}
+
     },
+
     {
+
       "id": "mcp_oauth_scan",
+
       "name": "MCP OAuth 姿态扫描（ASI03）",
+
       "description": "检测无认证的远程 MCP server（CVE-2026-32211 类）、OAuth 缺 RFC 9207 issuer、长寿命/不轮换 token。GPT Action 清单按自身 auth schema 识别，不误报。",
+
       "input_schema": {"type": "object", "properties": {"source_url": {"type": "string"}}, "required": ["source_url"]},
+
       "output_schema": {"type": "object", "properties": {"mcp_oauth_findings": {"type": "array", "items": {"type": "object"}}, "severity_counts": {"type": "object"}}}
+
     },
+
     {
+
       "id": "computeruse_scan",
+
       "name": "计算机使用 / 内容安全平面扫描（ASI05 内容安全）",
+
       "description": "检测下载并运行、关闭安全机制、忽略安全警告、操作系统特权操作、浏览器提交——agent 计算机的内容安全平面。",
+
       "input_schema": {"type": "object", "properties": {"source_url": {"type": "string"}}, "required": ["source_url"]},
+
       "output_schema": {"type": "object", "properties": {"computeruse_findings": {"type": "array", "items": {"type": "object"}}, "severity_counts": {"type": "object"}}}
+
     }
+
   ],
+
   "trust_score": {
+
     "overall": 92,
+
     "security": 95,
+
     "reliability": 90,
+
     "reputation": 88,
+
     "activity": 92,
+
     "identity": 92,
+
     "methodology": "基于 OWASP MCP Top 10 (2025 v0.1) + OWASP Agentic AI Top 10 (ASI01-ASI10) 对齐度、扫描规则覆盖率（227 MCP/233 Skill + 17 能力边界模块，含 11 个 Agentic 专项模块）、API 可用性、开源社区活跃度综合计算"
+
   },
+
   "endpoints": {
+
     "agent_setup": "POST /api/v1/agent/setup",
+
     "agent_scan": "POST /api/v1/agent/scan",
+
     "agent_status": "GET /api/v1/agent/status/{did}",
+
     "openapi_spec": "GET /openapi.json",
+
     "scan_api": "POST /api/v1/audit",
+
     "prompt_check": "POST /api/v1/prompt-check",
+
     "banned_words": "POST /api/v1/banned-words",
+
     "rug_pull": "POST /api/v1/rug-pull",
+
     "handshake": "POST /api/v1/handshake",
+
     "audit": "POST /api/v1/audit",
+
     "trust_query": "GET /api/v1/identity/agents",
+
     "trust_verify": "GET /api/v1/trust",
+
     "mcp_endpoint": "POST /api/v1/mcp",
+
     "health": "GET /api/v1/health",
+
     "stats": "GET /api/v1/stats"
+
   },
+
   "compliance": {
+
     "owasp_mcp_top10": true,
+
     "owasp_version": "2025 v0.1",
+
     "a2a_protocol": true,
+
     "mcp_protocol": true,
+
     "mcp_protocol_version": "2026-07-28",
+
     "chinese_regulations": true,
+
     "rules_count": 227,
+
     "skill_rules_count": 233,
+
     "capability_modules": 17,
+
     "owasp_categories": 10
+
   },
+
   "contact": {
+
     "github": "https://github.com/lm203688/aishield",
+
     "license": "MIT",
+
     "license_url": "https://github.com/lm203688/aishield/blob/main/LICENSE",
+
     "api_docs": "https://github.com/lm203688/aishield/blob/main/README.md"
+
   },
+
   "mcp_install": "npx -y aishield-mcp-server",
+
   "protocol_version": "a2a-2025-06"
+
 }
+

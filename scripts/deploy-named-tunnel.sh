@@ -28,33 +28,66 @@ CRED_DIR='/root/.cloudflared'
 log "=== STEP 1: 启动 API (端口 8450) ==="
 
 cd /opt/aishield 2>/dev/null || cd ~/aishield 2>/dev/null || true
-git pull origin main 2>/dev/null || true
+# ── 代码更新 ──────────────────────────────────────────────────────
+# 【2026-08-28 修复】旧实现有两个叠加的静默失效：
+#   1) `git pull ... || true` 把拉取失败吞掉；
+#   2) 拉取之后，只要 API 已在运行就只打一行日志、永不重启 —— 进程
+#      一直跑着「启动那一刻」的旧代码。文件更新了，内存里没更新。
+# 结果：线上长期停在 4.2.0 / 133 规则，而所有部署门禁都是绿的
+# （health 只判断「活着」，从不判断「是不是新代码」）。
+# 现改为：以仓库 main 为真相源比对版本哨兵 -> 必要时 raw 兜底覆盖
+#         -> 只要代码有变化就必须重启进程。
+RAW=https://raw.githubusercontent.com/lm203688/aishield/main
+NEED_RESTART=0
 
-if curl -sf http://127.0.0.1:8450/api/v1/health 2>/dev/null; then
-    log "API 已在运行"
-else
-    log "API 未运行，尝试启动..."
+before_head=$(git rev-parse HEAD 2>/dev/null || echo "nogit")
+git fetch --all 2>/dev/null || true
+git reset --hard origin/main 2>/dev/null || git pull origin main 2>/dev/null || true
+after_head=$(git rev-parse HEAD 2>/dev/null || echo "nogit")
+log "HEAD: ${before_head:0:8} -> ${after_head:0:8}"
+[ "$before_head" != "$after_head" ] && NEED_RESTART=1
 
+# 以仓库 main 的 server-card 版本号作为「磁盘代码是否真的新」的哨兵
+expect_ver=$(curl -sL --max-time 20 "$RAW/api/static/.well-known/mcp/server-card.json" 2>/dev/null | python3 -c "import json,sys;print(json.load(sys.stdin).get('version',''))" 2>/dev/null || true)
+disk_ver=$(python3 -c "import json;print(json.load(open('api/static/.well-known/mcp/server-card.json')).get('version',''))" 2>/dev/null || true)
+log "server-card 版本: 磁盘=${disk_ver:-none} 仓库=${expect_ver:-unknown}"
+
+if [ -n "$expect_ver" ] && [ "$disk_ver" != "$expect_ver" ]; then
+    log "磁盘代码落后于仓库（git 在本机不可靠）-> 走 raw 通道覆盖关键文件"
+    curl -sL --max-time 30 "$RAW/api/static/.well-known/mcp/server-card.json" -o api/static/.well-known/mcp/server-card.json 2>/dev/null
+    curl -sL --max-time 30 "$RAW/api/static/.well-known/agent-card.json" -o api/static/.well-known/agent-card.json 2>/dev/null
+    curl -sL --max-time 30 "$RAW/api/server.py" -o /tmp/aishield-server.py.new 2>/dev/null && mv /tmp/aishield-server.py.new api/server.py
+    NEED_RESTART=1
+fi
+
+if ! curl -sf http://127.0.0.1:8450/api/v1/health 2>/dev/null; then
+    NEED_RESTART=1
+fi
+
+# ── 启动 / 重启 API ───────────────────────────────────────────────
+if [ "$NEED_RESTART" = "1" ]; then
+    log "需要重新加载代码 -> 重启 API"
+    cname=""
     if command -v docker &>/dev/null; then
-        docker start $(docker ps -aq --filter "status=exited") 2>/dev/null
-        sleep 3
+        cname=$(docker ps -a --format '{{.Names}}' 2>/dev/null | grep -i aishield | head -1)
+    fi
+
+    if [ -n "$cname" ]; then
+        log "通过 docker 重启容器: $cname"
+        docker restart "$cname" 2>/dev/null || true
+        sleep 10
     fi
 
     if ! curl -sf http://127.0.0.1:8450/api/v1/health 2>/dev/null; then
-        if [ -f docker-compose.yml ] && command -v docker &>/dev/null; then
-            docker compose up -d 2>/dev/null || docker-compose up -d 2>/dev/null || true
-            sleep 5
-        fi
-
-        if ! curl -sf http://127.0.0.1:8450/api/v1/health 2>/dev/null; then
-            log "Docker 启动失败，直接运行 Python..."
-            pkill -f "api/server.py" 2>/dev/null || true
-            sleep 1
-            export PORT=8450
-            nohup python3 api/server.py > /tmp/aishield-api.log 2>&1 &
-            sleep 5
-        fi
+        log "Docker 未托管或重启失败 -> 直接运行 Python 进程"
+        pkill -f "api/server.py" 2>/dev/null || true
+        sleep 2
+        export PORT=8450
+        nohup python3 api/server.py > /tmp/aishield-api.log 2>&1 &
+        sleep 6
     fi
+else
+    log "代码已是最新且 API 健康 -> 跳过重启"
 fi
 
 if curl -sf http://127.0.0.1:8450/api/v1/health 2>/dev/null; then

@@ -676,7 +676,7 @@ class AIShieldHandler(BaseHTTPRequestHandler):
         if path == "/api/v1/health":
             self._send_json({
                 "status": "ok",
-                "version": "4.2",
+                "version": "4.3.0",
                 "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)",
                 "rules_count": get_rule_count("mcp"),
                 "uptime": time.time(),
@@ -769,7 +769,7 @@ class AIShieldHandler(BaseHTTPRequestHandler):
         if path == "/api/v1":
             self._send_json({
                 "name": "AIShield API",
-                "version": "4.2",
+                "version": "4.3.0",
                 "description": "AI Agent Security & Trust Platform — Agent-First API",
                 "openapi": "/openapi.json",
                 "agent_setup": "/api/v1/agent/setup",
@@ -1889,7 +1889,7 @@ blockquote{{border-left:4px solid #3b82f6;padding-left:16px;margin-left:0;color:
                 "powered_by": {
                     "name": "AIShield",
                     "url": "https://aishield.tools",
-                    "version": "4.1",
+                    "version": "4.3.0",
                 },
             }
             
@@ -1935,7 +1935,7 @@ blockquote{{border-left:4px solid #3b82f6;padding-left:16px;margin-left:0;color:
         result["powered_by"] = {
             "name": "AIShield",
             "url": "https://aishield.tools",
-            "version": "4.1",
+            "version": "4.3.0",
         }
         self._send_json(result)
         _record_usage("prompt-check", self.client_address[0])
@@ -1952,7 +1952,7 @@ blockquote{{border-left:4px solid #3b82f6;padding-left:16px;margin-left:0;color:
         result["powered_by"] = {
             "name": "AIShield",
             "url": "https://aishield.tools",
-            "version": "4.1",
+            "version": "4.3.0",
         }
         self._send_json(result)
         _record_usage("banned-words", self.client_address[0])
@@ -2204,7 +2204,7 @@ blockquote{{border-left:4px solid #3b82f6;padding-left:16px;margin-left:0;color:
                     "capabilities": {"tools": {}},
                     "serverInfo": {
                         "name": "AIShield Security Scanner",
-                        "version": "4.2.2",
+                        "version": "4.3.0",
                     },
                 },
             })
