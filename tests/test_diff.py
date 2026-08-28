@@ -8,7 +8,7 @@ from scanner.diff import diff_scans, diff_summary
 
 class TestDiffScans(unittest.TestCase):
 
-    def _mk_report(self, findings, score=50, version="4.2.2", scanned_at="2026-08-27 12:00:00"):
+    def _mk_report(self, findings, score=50, version=None, scanned_at="2026-08-27 12:00:00"):
         return {
             "findings": findings,
             "overall_score": score,
@@ -76,7 +76,7 @@ class TestDiffScans(unittest.TestCase):
 
 
 class TestDiffSummaryFormat(unittest.TestCase):
-    def _mk_report(self, findings, score=50, version="4.2.2", scanned_at="2026-08-27 12:00:00"):
+    def _mk_report(self, findings, score=50, version=None, scanned_at="2026-08-27 12:00:00"):
         return {
             "findings": findings,
             "overall_score": score,
