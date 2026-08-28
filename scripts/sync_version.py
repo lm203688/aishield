@@ -85,6 +85,11 @@ TARGETS: List[Tuple[str, str, str]] = [
     ("api/openapi_spec.py",
      r'("title": "AIShield API",\s*\n\s*"version": ")([^"]+)(")',
      r"\g<1>{v}\g<3>"),
+    # dist 构建产物——每次 sync 必须同步，否则 npm 发布预检失败。
+    # 见 2026-08-28 npm publish v4.3.0 preflight 因 dist 仍 4.2.2 而失败。
+    ("mcp-server/dist/index.js",
+     r"(const SERVER_VERSION\s*=\s*')([^']+)(')",
+     r"\g<1>{v}\g<3>"),
 ]
 
 SEMVER = re.compile(r"^(\d+)\.(\d+)\.(\d+)")
