@@ -13,6 +13,8 @@ step id 而非 job id，GitHub Actions 解析期直接报错，整个 workflow 4
   E3 job 依赖成环
   E4 引用了不存在的本地脚本文件
   E5 定时任务缺少 workflow_dispatch（无法手动补跑）
+  E6 非法顶层键（run 块续行落到第 0 列，命令被静默截断）
+  E8 表达式含 shell 变量插值 / 注释里写坏表达式（workflow 无法加载）
   W1 关键步骤使用 continue-on-error（测试形同虚设）
   W2 workflow 无任何触发器
   W3 cron 表达式字段数不合法
@@ -34,6 +36,11 @@ from typing import Any, Dict, List
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 WF_DIR = REPO_ROOT / ".github" / "workflows"
+
+# ${{ ... }} 表达式提取（非贪婪，一行内可命中多个）
+EXPRESSION_RE = re.compile(r"\$\{\{(.*?)\}\}")
+# 表达式里的 shell 变量插值：$ 紧跟标识符。Actions 表达式不支持这个。
+SHELL_VAR_IN_EXPR = re.compile(r"\$[A-Za-z_][A-Za-z0-9_.]*")
 
 try:
     import yaml  # type: ignore
@@ -104,6 +111,34 @@ def check_file(path: Path) -> Dict[str, Any]:
             res["errors"].append(
                 f"E6 非法顶层键 '{key}' —— 多半是 run 块内多行字符串未缩进导致命令被截断"
             )
+
+    # E8 表达式合法性检查（抓「workflow 无法加载」这类沉默杀手）
+    #
+    # 背景：GitHub Actions 的表达式在 workflow 加载时就静态求值，而且
+    # **连 YAML 注释里的 ${{ }} 也照样求值**。所以任何写在注释里的坏表达式，
+    # 都会让整个 workflow 无法加载——而 PyYAML 与 E1 的语法检查都完全正常，
+    # 这个错只在 GitHub 侧出现，本地门禁永远发现不了。
+    #
+    # 两种已实测的致命写法：
+    #   1) 表达式里嵌 shell 变量：needs.$job.result
+    #      -> (Line 247, Col 14) Unexpected symbol: '$job'
+    #   2) 注释里写下坏表达式的字面量当作文档说明
+    #      -> 同一个解析错误被「注释」重新引入（已实测复现）
+    #
+    # 命中后的表现极具误导：run 名退化为 .github/workflows/ci.yml、
+    # 零 job、秒红，看起来像「CI 全红」，实际是「CI 从来没跑过」。
+    # 曾连续 17 次全因此失败，而门禁脚本本地全绿，极难发现。
+    #
+    # 这里只做可疑模式的静态拦截，不是完整表达式解析器——
+    # 宁可多报也不放过，人工 5 秒即可确认。
+    for lineno, line in enumerate(text.splitlines(), start=1):
+        for expr in EXPRESSION_RE.findall(line):
+            body = expr.strip()
+            if SHELL_VAR_IN_EXPR.search(body):
+                res["errors"].append(
+                    f"E8 第 {lineno} 行表达式含 shell 变量插值: ${{{{ {body} }}}}"
+                    f" —— Actions 表达式不支持，整个 workflow 将无法加载"
+                )
 
     # 触发器检查（PyYAML 会把 on: 解析成 True 键，需两边都看）
     on = data.get("on", data.get(True))
