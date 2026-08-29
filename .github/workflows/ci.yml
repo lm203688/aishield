@@ -245,15 +245,24 @@ jobs:
       - name: Compute overall result
         id: result
         run: |
-          # 任一核心 job 失败 → 整体失败
-          for job in workflow-lint distribution-gate test security-scan dependency-check performance-test docker-test; do
-            STATUS="${{ needs.$job.result }}"
-            if [ "$STATUS" = "failure" ] || [ "$STATUS" = "cancelled" ]; then
-              echo "overall=failure" >> $GITHUB_OUTPUT
-              exit 0
-            fi
-          done
-          echo "overall=success" >> $GITHUB_OUTPUT
+          # 任一核心 job 失败 / 被取消 → 整体失败
+          #
+          # 【2026-08-29 修复】上一版写成 for 循环 + `${{ needs.$job.result }}`。
+          # GitHub Actions 的表达式在 workflow 加载时就会被静态解析，而表达式里
+          # 不允许出现 shell 变量——于是整个 ci.yml 在解析阶段就被拒绝：
+          #   (Line 247, Col 14): Unexpected symbol: '$job' ... needs.$job.result
+          # 症状极具误导性：run 名退化成文件路径 .github/workflows/ci.yml、
+          # jobs 数为 0、秒变 failure，看起来像「CI 全红」，实际上是「CI 从没跑过」。
+          # 17/17 次运行全部因此失败，而门禁脚本本身在本地是绿的，所以很难发现。
+          # 现改用官方支持的 `needs.*.result` 数组 + contains()，
+          # 不依赖任何 shell 变量插值，也不受 job id 里带连字符影响。
+          if [ "${{ contains(needs.*.result, 'failure') }}" = "true" ] \
+             || [ "${{ contains(needs.*.result, 'cancelled') }}" = "true" ]; then
+            echo "overall=failure" >> "$GITHUB_OUTPUT"
+          else
+            echo "overall=success" >> "$GITHUB_OUTPUT"
+          fi
+          echo "overall=${{ steps.result.outputs.overall }}"
       - name: Write ci.json to state bus
         run: |
           mkdir -p data/state
