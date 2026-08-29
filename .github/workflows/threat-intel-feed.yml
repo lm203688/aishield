@@ -14,7 +14,7 @@ name: AIShield Threat-Intel Feed Update
 
 on:
   schedule:
-    - cron: '0 * * * *'   # 加速期每小时（2026-08-31 回滚至 '15 7 * * 1,4'）
+    - cron: '15 7 * * 1,4'   # 加速期结束，回到可持续节奏 —— 外部信号源
   workflow_dispatch:
     inputs:
       days:
@@ -183,27 +183,44 @@ jobs:
 
       - name: Run full test suite (引用 CI 状态，避免重复)
         run: |
-          # 优化：如果 CI 最近成功，跳过重复的全量测试
-          # 但规则特定验证（正则编译 + 扫描器加载）始终执行
+          # 复用 CI 结果，避免同一 commit 重复跑 590 条测试。
+          # 两个历史缺陷（曾导致本 workflow 连续失败 2 次）：
+          #   1) 读的是 d['current']['last_status']，而 ci.yml 写的是扁平的
+          #      'overall' —— 永远取到 'unknown'，优化从未生效过；
+          #   2) 内联 python 带着 10 空格缩进，Python 第一行不能缩进，
+          #      IndentationError 被 2>/dev/null 吞掉，同样静默失效。
+          # 现改为：同 commit + 最近成功 + 未过期 三者同时满足才跳过。
           SKIP_FULL=false
           if [ -f data/state/ci.json ]; then
-            LAST=$(python -c "
-          import json
-          try:
-              d = json.load(open('data/state/ci.json'))
-              print(d.get('current', {}).get('last_status', 'unknown'))
-          except:
-              print('unknown')
-          " 2>/dev/null)
-            if [ "$LAST" = "success" ]; then
-              echo "CI 最近成功，跳过重复全量测试"
+            VERDICT=$(python3 - <<'PYCI')
+          import json, datetime
+          d = json.load(open('data/state/ci.json'))
+          status = d.get('overall') or d.get('current', {}).get('last_status', 'unknown')
+          sha = d.get('sha', '')
+          if status != 'success':
+              print('other')
+          elif sha != '${{ github.sha }}':
+              print('other')
+          else:
+              try:
+                  t = datetime.datetime.strptime(d['updated'], '%Y-%m-%dT%H:%M:%SZ')
+                  t = t.replace(tzinfo=datetime.timezone.utc)
+                  age = (datetime.datetime.now(datetime.timezone.utc) - t).total_seconds()
+                  print('fresh' if age < 6 * 3600 else 'stale')
+              except Exception:
+                  print('stale')
+          PYCI
+            )
+            echo "CI 状态总线判定: ${VERDICT:-missing}"
+            if [ "$VERDICT" = "fresh" ]; then
               SKIP_FULL=true
             fi
           fi
           if [ "$SKIP_FULL" != "true" ]; then
+            echo "CI 状态不可用/过期/不同 commit -> 跑全量测试"
             python tests/run_all.py
           else
-            echo "跳过全量测试（CI 已验证）"
+            echo "跳过全量测试（同一 commit 的 CI 在最近 6 小时内已全绿）"
           fi
 
       - name: Confirm rules actually loaded by scanner

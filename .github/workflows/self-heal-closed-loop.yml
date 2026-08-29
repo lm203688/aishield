@@ -14,7 +14,7 @@ name: AIShield Auto Self-Heal Closed-Loop
 
 on:
   schedule:
-    - cron: '0 * * * *'   # 加速期每小时（2026-08-31 回滚至 '23 */4 * * *'）
+    - cron: '23 */4 * * *'   # 加速期结束，回到可持续节奏 —— 心跳：监测→判定→修复（闭环的 Sense/Act 主干）
   workflow_dispatch:
     inputs:
       force_repair:

@@ -47,9 +47,20 @@ after_head=$(git rev-parse HEAD 2>/dev/null || echo "nogit")
 log "HEAD: ${before_head:0:8} -> ${after_head:0:8}"
 [ "$before_head" != "$after_head" ] && NEED_RESTART=1
 
-# 版本哨兵提取：server-card 有两种形态 —— api/static 下的嵌套形态
-# （serverInfo.version）与 docs 下的扁平形态（顶层 version）。只读顶层会让
-# 嵌套形态静默返回空串，进而让所有「版本不一致」判断失效（2026-08-28 踩坑）。
+# ── 真相源：把「磁盘上的 commit」写进 .deploy_meta.json ─────────────────
+# 这一步必须在 git reset 之后、进程重启之前，否则 API 永远读不到新值。
+# 用 commit SHA 而不是版本字符串做判据：版本字符串只在发版时变，
+# 「只新增 12 条规则、不改版本号」这类日常改动会让版本判据完全失明。
+python3 - "$after_head" <<'PYMETA' 2>/dev/null || true
+import json, sys, datetime
+commit = sys.argv[1] if len(sys.argv) > 1 else ""
+if commit and commit != "nogit":
+    json.dump({"commit": commit,
+               "deployed_at": datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")},
+              open(".deploy_meta.json", "w"), indent=2)
+PYMETA
+
+# 兼容保留：版本字符串哨兵，仅在 git 完全不可用时（after_head=nogit）才用。
 card_ver() {
     python3 -c "
 import json,sys
@@ -61,36 +72,47 @@ except Exception:
 " "$1" 2>/dev/null || true
 }
 
-# 以仓库 main 的 server-card 版本号作为「磁盘代码是否真的新」的哨兵
-if curl -sL --max-time 20 "$RAW/api/static/.well-known/mcp/server-card.json" -o /tmp/_card_main.json 2>/dev/null; then
-    expect_ver=$(card_ver /tmp/_card_main.json)
-else
-    expect_ver=""
-fi
-rm -f /tmp/_card_main.json
 disk_ver=$(card_ver api/static/.well-known/mcp/server-card.json)
-log "server-card 版本: 磁盘=${disk_ver:-none} 仓库=${expect_ver:-unknown}"
 
-if [ -n "$expect_ver" ] && [ "$disk_ver" != "$expect_ver" ]; then
-    log "磁盘代码落后于仓库（git 在本机不可靠）-> 走 raw 通道覆盖关键文件"
-    curl -sL --max-time 30 "$RAW/api/static/.well-known/mcp/server-card.json" -o api/static/.well-known/mcp/server-card.json 2>/dev/null
-    curl -sL --max-time 30 "$RAW/api/static/.well-known/agent-card.json" -o api/static/.well-known/agent-card.json 2>/dev/null
-    curl -sL --max-time 30 "$RAW/api/server.py" -o /tmp/aishield-server.py.new 2>/dev/null && mv /tmp/aishield-server.py.new api/server.py
+# ── 关键判据：进程自报的 commit vs 磁盘上的 commit ─────────────────────
+# 唯一可靠的「进程是否在跑磁盘代码」信号。head_sha 每次 push 都会变，
+# 所以规则新增、脚本修改、文档更新都会被正确捕获。
+live_meta=$(curl -s --max-time 10 http://127.0.0.1:8450/api/v1/health 2>/dev/null || true)
+live_commit=$(printf '%s' "$live_meta" | python3 -c "import json,sys
+try:
+    print(json.load(sys.stdin).get('commit') or '')
+except Exception:
+    print('')" 2>/dev/null || true)
+disk_commit=$(python3 -c "import json
+try:
+    print(json.load(open('.deploy_meta.json')).get('commit') or '')
+except Exception:
+    print('')" 2>/dev/null || true)
+log "commit 对比: 运行进程=${live_commit:-none} / 磁盘=${disk_commit:-none}"
+
+if [ -n "$disk_commit" ] && [ "$live_commit" != "$disk_commit" ]; then
+    log "运行进程落后于磁盘代码（commit 不一致）-> 标记重启"
     NEED_RESTART=1
+fi
+
+# git 不可用时的兜底：raw 通道覆盖关键文件
+if [ "$after_head" = "nogit" ]; then
+    if curl -sL --max-time 20 "$RAW/api/static/.well-known/mcp/server-card.json" -o /tmp/_card_main.json 2>/dev/null; then
+        expect_ver=$(card_ver /tmp/_card_main.json)
+    else
+        expect_ver=""
+    fi
+    rm -f /tmp/_card_main.json
+    log "git 不可用 -> 走 raw 兜底 (磁盘=${disk_ver:-none} 仓库=${expect_ver:-unknown})"
+    if [ -n "$expect_ver" ] && [ "$disk_ver" != "$expect_ver" ]; then
+        curl -sL --max-time 30 "$RAW/api/static/.well-known/mcp/server-card.json" -o api/static/.well-known/mcp/server-card.json 2>/dev/null
+        curl -sL --max-time 30 "$RAW/api/static/.well-known/agent-card.json" -o api/static/.well-known/agent-card.json 2>/dev/null
+        curl -sL --max-time 30 "$RAW/api/server.py" -o /tmp/aishield-server.py.new 2>/dev/null && mv /tmp/aishield-server.py.new api/server.py
+        NEED_RESTART=1
+    fi
 fi
 
 if ! curl -sf http://127.0.0.1:8450/api/v1/health 2>/dev/null; then
-    NEED_RESTART=1
-fi
-
-# 【关键】判断「运行中的进程」是否就是磁盘上的代码。
-# 本脚本的调用方（workflow）通常已经先 git pull 过了，所以 HEAD 往往不再变化，
-# 单靠 HEAD 比较永远得不出「要重启」。唯一可靠的信号是：进程自报的版本
-# 与磁盘上的代码版本是否一致 —— 不一致就说明进程还在跑旧代码。
-live_ver=$(curl -s --max-time 10 http://127.0.0.1:8450/api/v1/health 2>/dev/null | python3 -c "import json,sys;print(json.load(sys.stdin).get('version',''))" 2>/dev/null || true)
-log "运行进程自报版本=${live_ver:-none} / 磁盘代码版本=${disk_ver:-none}"
-if [ -n "$disk_ver" ] && [ "$live_ver" != "$disk_ver" ]; then
-    log "运行进程落后于磁盘代码 -> 标记重启"
     NEED_RESTART=1
 fi
 
@@ -108,19 +130,23 @@ if [ "$NEED_RESTART" = "1" ]; then
         sleep 10
     fi
 
-    # 兜底：只看「跑着的版本是否等于磁盘版本」。
-    # 注意不能写成「API 挂了才重启」—— 陈旧进程恰好是「活着但版本不对」，
+    # 兜底：用 commit 判断「跑着的进程是否就是磁盘上的代码」。
+    # 注意不能写成「API 挂了才重启」—— 陈旧进程恰好是「活着但 commit 不对」，
     # 那种写法会正好跳过重启，问题永远修不掉。
-    cur_ver=$(curl -s --max-time 10 http://127.0.0.1:8450/api/v1/health 2>/dev/null | python3 -c "import json,sys;print(json.load(sys.stdin).get('version',''))" 2>/dev/null || true)
-    if [ "$cur_ver" != "$disk_ver" ] || ! curl -sf http://127.0.0.1:8450/api/v1/health 2>/dev/null; then
-        log "强制重启 Python API 进程（当前=${cur_ver:-none} 目标=${disk_ver:-none}）"
+    cur_commit=$(curl -s --max-time 10 http://127.0.0.1:8450/api/v1/health 2>/dev/null | python3 -c "import json,sys
+try:
+    print(json.load(sys.stdin).get('commit') or '')
+except Exception:
+    print('')" 2>/dev/null || true)
+    if [ "$cur_commit" != "$disk_commit" ] || ! curl -sf http://127.0.0.1:8450/api/v1/health 2>/dev/null; then
+        log "强制重启 Python API 进程（当前commit=${cur_commit:-none} 目标=${disk_commit:-none}）"
         pkill -f "api/server.py" 2>/dev/null || true
         sleep 2
         export PORT=8450
         nohup python3 api/server.py > /tmp/aishield-api.log 2>&1 &
         sleep 8
     else
-        log "运行进程版本已与磁盘一致（${cur_ver}）-> 无需额外重启"
+        log "运行进程 commit 已与磁盘一致（${cur_commit}）-> 无需额外重启"
     fi
 else
     log "代码已是最新且 API 健康 -> 跳过重启"

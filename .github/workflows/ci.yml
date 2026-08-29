@@ -3,10 +3,20 @@ name: AIShield CI/CD
 on:
   push:
     branches: [ main, dev ]
+    # 阻断自激回路：ci-state job 会把 data/state/ci.json 提交回 main，
+    # 而 main 的 push 又会重新触发本 workflow。每次状态回写都白烧一轮 Actions
+    # 配额，且失败时 notify-on-failure 还会重复建告警 issue。状态总线回写
+    # 不应触发 CI；diagnostics/ 与 automation/ 同理（都是 bot 写的元数据）。
+    paths-ignore:
+      - 'data/state/**'
+      - 'diagnostics/**'
+      - 'automation/**'
+      - 'docs/intel/**'
+      - '_logs*'
   pull_request:
     branches: [ main ]
   schedule:
-    - cron: '0 * * * *'  # 加速期每小时（2026-08-31 回滚至 '8 3 * * *'）
+    - cron: '8 3 * * *'  # 每日一次兜底；push/PR 已覆盖日常校验，不需要每小时
   workflow_dispatch:      # 补齐手动触发，故障时可立即补跑而无需等下一个 cron
 
 jobs:
@@ -252,6 +262,7 @@ jobs:
           data = {
               'updated': '$(date -u +%Y-%m-%dT%H:%M:%SZ)',
               'run_id': '${{ github.run_id }}',
+              'sha': '${{ github.sha }}',
               'overall': '${{ steps.result.outputs.overall }}',
               'source': 'ci.yml',
               'jobs': {
@@ -283,7 +294,9 @@ jobs:
   notify-on-failure:
     name: Notify on CI Failure
     needs: [workflow-lint, distribution-gate, test, security-scan, dependency-check, performance-test, docker-test]
-    if: failure()
+    # 只在人为动作（push / PR / 手动）上告警。定时兜底跑挂了不该每小时刷屏——
+    # 定时失败由 meta-monitor 汇总，人为改动失败才需要立刻有人看。
+    if: failure() && github.event_name != 'schedule'
     runs-on: ubuntu-latest
     permissions:
       issues: write
@@ -292,14 +305,26 @@ jobs:
       - uses: actions/github-script@v7
         with:
           script: |
-            const title = `❌ AIShield CI 失败 (run ${context.runId})`;
+            const url = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            // 标题不含 run id：否则每次失败都是"新标题"，去重永远不命中，
+            // 于是每小时的红 CI 会堆出每小时一个新 issue。
+            const title = '❌ AIShield CI 失败（持续告警）';
             const { data: issues } = await github.rest.issues.listForRepo({
               owner: context.repo.owner, repo: context.repo.repo, state: 'open', per_page: 100
             });
-            if (issues.find(i => i.title === title && !i.pull_request)) { console.log('已有告警'); return; }
+            const existing = issues.find(i => i.title === title && !i.pull_request);
+            if (existing) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: existing.number,
+                body: `run ${context.runId} (${context.eventName} @ ${context.sha.slice(0,7)}) 失败：${url}`
+              });
+              console.log(`已追评到 issue #${existing.number}`);
+              return;
+            }
             await github.rest.issues.create({
               owner: context.repo.owner, repo: context.repo.repo, title,
-              body: `CI 流水线在 run ${context.runId} 失败，请查看：\n${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+              body: `CI 流水线在 run ${context.runId} 失败，请查看：\n${url}\n\n后续失败会追加评论到本 issue。修复后请关闭。`,
               labels: ['ci','alert','automated']
             });
             console.log('已创建 CI 失败告警 issue');

@@ -115,3 +115,12 @@ data/telemetry.jsonl
 # WorkBuddy (personal memory + private skills)
 # =====================
 .workbuddy/.cache/
+
+# ── 部署期产物：由 deploy-named-tunnel.sh 在服务器上写入，不进仓库 ──
+.deploy_meta.json
+
+# ── 一次性诊断脚本（用完即弃，避免污染 scripts/）──
+scripts/_audit.py
+scripts/_drift_audit.py
+scripts/_drift_detail.py
+scripts/_rollback_crons.py

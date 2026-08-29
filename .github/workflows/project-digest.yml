@@ -9,7 +9,7 @@ name: AIShield Project Digest (统一迭代汇报)
 
 on:
   schedule:
-    - cron: '0 */6 * * *'  # 每 6 小时
+    - cron: '5 */6 * * *'  # 每 6 小时（错峰到 :05，避开整点高负载）
   workflow_dispatch:
   workflow_run:
     workflows: ["AIShield Meta-Monitor (监控自动化体系本身)"]

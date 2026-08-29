@@ -18,7 +18,7 @@ on:
       - 'scanner/**'
       - 'eco/**'
   schedule:
-    - cron: '0 * * * *'  # 加速期每小时（2026-08-31 回滚至 '52 4 * * 1'）
+    - cron: '52 4 * * 1'   # 加速期结束，回到可持续节奏 —— 自扫描
   workflow_dispatch:
     inputs:
       repo_url:

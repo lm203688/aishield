@@ -1,11 +1,18 @@
 """
 AIShield Scanner Integrations
 ================================
-澶栭儴椤圭洰闆嗘垚妯″潡 鈥斺€?鎻愬崌瀹夊叏鎵弿鍜屽▉鑳佹儏鎶ヨ兘鍔涖€?
-妯″潡鍒楄〃锛?- bb_browser: BB Browser 濞佽儊鎯呮姤閲囬泦锛?6骞冲彴103鍛戒护锛?- browser_use: Browser Use AI 娴忚鍣ㄥ畨鍏ㄦ壂鎻?- graph_db: 鍥炬暟鎹簱濞佽儊鍥捐氨锛圢eo4j/FalkorDB/ArangoDB锛?- event_stream: Apache Kafka/Flink 瀹炴椂浜嬩欢绠￠亾
-- scan_isolation: vCluster 闅旂鎵弿鐜
-- persistent_agent: Grok Bot 鎸佷箙鍖栧畨鍏ㄧ洃鎺?
-鐢ㄦ硶锛?    from scanner.integrations import (
+外部项目集成模块 —— 提升安全扫描和威胁情报能力。
+
+模块列表：
+- bb_browser: BB Browser 威胁情报采集（36平台103命令）
+- browser_use: Browser Use AI 浏览器安全扫描
+- graph_db: 图数据库威胁图谱（Neo4j/FalkorDB/ArangoDB）
+- event_stream: Apache Kafka/Flink 实时事件管道
+- scan_isolation: vCluster 隔离扫描环境
+- persistent_agent: Grok Bot 持久化安全监控
+
+用法：
+    from scanner.integrations import (
         BBBrowserAdapter,
         BrowserScanAdapter,
         ThreatGraphIntegration,

@@ -282,7 +282,15 @@ class TestMcpStdioEndToEnd(unittest.TestCase):
 
     @classmethod
     def _talk(cls):
-        """启动 server，跑一轮 initialize + 两次 tools/call，收集响应"""
+        """启动 server，逐条发 initialize + 两次 tools/call，收集响应。
+
+        采用「发一条、等一条回复」的握手式循环，而不是过去那种
+        「盲写 4 条 + 固定 0.35s sleep」的写法：后者在 node 子进程
+        提前退出时会在 proc.stdin.write() 上抛 BrokenPipeError，
+        而 stderr 从未被读取，失败信息只剩一句 opaque 的
+        "BrokenPipeError: [Errno 32] Broken pipe"，完全无法定位
+        （曾在 threat-intel-feed 与 rule-promoter 的 CI 里各挂 2 次）。
+        """
         env = dict(os.environ, AISHIELD_API_URL='http://127.0.0.1:%d' % cls.port)
         proc = subprocess.Popen(
             [cls.node, 'dist/index.js'],
@@ -301,45 +309,67 @@ class TestMcpStdioEndToEnd(unittest.TestCase):
 
         threading.Thread(target=reader, daemon=True).start()
 
-        msgs = [
-            {"jsonrpc": "2.0", "id": 1, "method": "initialize",
-             "params": {"protocolVersion": "2024-11-05", "capabilities": {},
-                        "clientInfo": {"name": "contract-test", "version": "1"}}},
-            {"jsonrpc": "2.0", "method": "notifications/initialized"},
-            {"jsonrpc": "2.0", "id": 2, "method": "tools/call",
-             "params": {"name": "aishield_scan",
-                        "arguments": {"source_url": "https://github.com/x/y",
-                                      "tool_type": "mcp"}}},
-            {"jsonrpc": "2.0", "id": 3, "method": "tools/call",
-             "params": {"name": "aishield_guardrail",
-                        "arguments": {"source_url": "https://github.com/x/y",
-                                      "auto_block": True}}},
-        ]
-        try:
-            for m in msgs:
-                proc.stdin.write(json.dumps(m) + '\n')
-                proc.stdin.flush()
-                time.sleep(0.35)
-
-            deadline = time.time() + 25
+        def wait_for(rid, timeout=12.0):
+            """等 id=rid 的响应到达，超时/子进程早退时给出可定位的信息。"""
+            deadline = time.time() + timeout
             while time.time() < deadline:
-                if any('"id":3' in c or '"id": 3' in c for c in collected):
+                for c in collected:
+                    if '"id":%d' % rid in c or '"id": %d' % rid in c:
+                        return True
+                if proc.poll() is not None:
+                    break  # 子进程已退出，继续等也没有意义
+                time.sleep(0.15)
+            return any(('"id":%d' % rid in c or '"id": %d' % rid in c)
+                       for c in collected)
+
+        msgs = [
+            (1, {"jsonrpc": "2.0", "id": 1, "method": "initialize",
+                 "params": {"protocolVersion": "2024-11-05", "capabilities": {},
+                            "clientInfo": {"name": "contract-test", "version": "1"}}}),
+            (None, {"jsonrpc": "2.0", "method": "notifications/initialized"}),
+            (2, {"jsonrpc": "2.0", "id": 2, "method": "tools/call",
+                 "params": {"name": "aishield_scan",
+                            "arguments": {"source_url": "https://github.com/x/y",
+                                          "tool_type": "mcp"}}}),
+            (3, {"jsonrpc": "2.0", "id": 3, "method": "tools/call",
+                 "params": {"name": "aishield_guardrail",
+                            "arguments": {"source_url": "https://github.com/x/y",
+                                          "auto_block": True}}}),
+        ]
+        missing = []
+        try:
+            for rid, m in msgs:
+                if proc.poll() is not None:
+                    break  # 子进程已死，后续写入必然 BrokenPipe
+                try:
+                    proc.stdin.write(json.dumps(m) + '\n')
+                    proc.stdin.flush()
+                except (BrokenPipeError, OSError):
                     break
-                time.sleep(0.25)
+                if rid is None:
+                    continue
+                if not wait_for(rid):
+                    missing.append(rid)
         finally:
             try:
                 proc.kill()
                 proc.wait(timeout=5)
             except Exception:
                 pass
-            # 显式关闭三条管道，否则 unittest 会刷一屏 ResourceWarning，
-            # 把真正的失败信息淹掉。
+            # 先读 stderr 再关管道：它是唯一能解释子进程为何早退的线索。
+            # Popen 用了 text=True，所以 read() 返回 str 而非 bytes。
+            try:
+                err = proc.stderr.read() or ''
+            except Exception:
+                err = ''
             for stream in (proc.stdin, proc.stdout, proc.stderr):
                 try:
                     if stream:
                         stream.close()
                 except Exception:
                     pass
+            cls._stderr = (err if isinstance(err, str)
+                           else err.decode('utf-8', 'replace'))
 
         out = {}
         for line in collected:
@@ -352,6 +382,14 @@ class TestMcpStdioEndToEnd(unittest.TestCase):
                 continue
             if 'id' in d:
                 out[d['id']] = d
+
+        # 缺失的响应必须失败，但要把 stderr 带上，否则又是无声失败。
+        if missing:
+            tail = (cls._stderr or '').strip()[-800:]
+            raise AssertionError(
+                "MCP stdio 端到端未收到响应 id=%s；子进程 stderr 尾部：\n%s"
+                % (missing, tail or '(stderr 为空)'))
+
         return out
 
     def _text(self, rid):

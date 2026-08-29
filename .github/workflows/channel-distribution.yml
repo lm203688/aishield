@@ -10,7 +10,7 @@ name: AIShield Channel Distribution (Content + Registry + Social)
 
 on:
   schedule:
-    - cron: '0 * * * *'   # 加速期每小时（2026-08-31 回滚至 '47 6 * * 4'）
+    - cron: '47 6 * * 4'   # 加速期结束，回到可持续节奏 —— 对外分发
   workflow_dispatch:
     inputs:
       publish_only:

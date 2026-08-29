@@ -1,7 +1,7 @@
 name: Stale Issues Manager
 on:
   schedule:
-    - cron: '0 * * * *'  # 加速期每小时（2026-08-31 回滚至 '26 2 * * *'）
+    - cron: '26 2 * * *'   # 加速期结束，回到可持续节奏 —— issue 清理
   workflow_dispatch:
 
 permissions:

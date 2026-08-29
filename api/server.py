@@ -81,6 +81,32 @@ def _save_json(path, data):
             json.dump(data, f, ensure_ascii=False, indent=2)
 
 
+# 部署元信息：由 deploy-named-tunnel.sh 在每次 git reset 之后写入。
+# 用 commit SHA（而非版本字符串）作为「进程是否在跑磁盘上的代码」的判据——
+# 版本字符串只在发版时变化，日常只新增规则不会改它，导致进程在规则已更新后
+# 仍被判定为「最新」而永不重启（线上曾因此长期报告 215 条规则，实际应为 227）。
+# 注意：必须定义在 _load_json 之后，否则模块加载时 NameError。
+DEPLOY_META_FILE = os.path.join(BASE, ".deploy_meta.json")
+_DEPLOY_META = _load_json(DEPLOY_META_FILE, {})
+
+
+def _git_meta():
+    """返回 {commit, deployed_at}；.deploy_meta.json 缺失时回退到实时 git 查询。"""
+    meta = {
+        "commit": _DEPLOY_META.get("commit"),
+        "deployed_at": _DEPLOY_META.get("deployed_at"),
+    }
+    if not meta["commit"]:
+        try:
+            import subprocess
+            meta["commit"] = (subprocess.check_output(
+                ["git", "rev-parse", "--short", "HEAD"], cwd=BASE,
+                stderr=subprocess.DEVNULL, timeout=5).decode().strip())
+        except Exception:
+            meta["commit"] = None
+    return meta
+
+
 def _record_usage(endpoint, ip, success=True):
     usage = _load_json(USAGE_FILE, {"daily": {}, "total": 0})
     today = datetime.now(TZ).strftime("%Y-%m-%d")
@@ -674,6 +700,7 @@ class AIShieldHandler(BaseHTTPRequestHandler):
             return
         
         if path == "/api/v1/health":
+            _meta = _git_meta()
             self._send_json({
                 "status": "ok",
                 "version": "4.3.0",
@@ -683,6 +710,10 @@ class AIShieldHandler(BaseHTTPRequestHandler):
                 "agent_first": True,
                 "openapi": "/openapi.json",
                 "agent_setup": "/api/v1/agent/setup",
+                # commit 是重启判据的真相源：每次 push 都会变，所以能捕获
+                # 「版本字符串未变但代码已变」的情况。
+                "commit": _meta["commit"],
+                "deployed_at": _meta["deployed_at"],
             })
             _record_usage("health", self.client_address[0])
             return

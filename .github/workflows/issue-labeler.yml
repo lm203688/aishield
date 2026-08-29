@@ -4,19 +4,23 @@ on:
   issues:
     types: [opened, edited]
 
+# issue-labeler 需要 contents: read 才能读到 .github/labeler.yml。
+# 原先只有 issues: write —— 配置读取 403，18/18 次运行全部失败。
 permissions:
   issues: write
+  contents: read
 
 jobs:
   label:
     runs-on: ubuntu-latest
     steps:
-      - name: Apply labels based on issue title/body
+      - name: Apply labels based on issue title
         uses: peter-evans/issue-labeler@v3
         with:
           configuration-path: .github/labeler.yml
-          enable-versioned-regex: 0
           repo-token: ${{ github.token }}
           issue-number: ${{ github.event.issue.number }}
+          # 只用 title：单一值，不存在多值/重复键的歧义。
+          # 之前写成两个 functions: 键（YAML 重复键，解析后只保留最后一个），
+          # 且本仓库的自动化告警 issue 关键信息都在 title 里。
           functions: ${{ github.event.issue.title }}
-          functions: ${{ github.event.issue.body }}

@@ -1,7 +1,7 @@
 # AIShield 自动化台账
 
 > **本文件由 `scripts/gen_task_registry.py` 自动生成，请勿手工编辑。**
-> 生成时间：2026-08-24 09:47 UTC
+> 生成时间：2026-08-29 02:44 UTC
 
 历史教训：本台账曾手工声称「二十八项定时任务在跑」，而仓库实际只有十四个 workflow，其中 self-heal 因 YAML 语法错静默失效 48 天。台账一旦脱离现实，就会把「看起来很自动化」的幻觉喂给每一次决策。现改为从 workflow 真实内容派生。
 
@@ -9,34 +9,33 @@
 
 | 指标 | 数值 |
 |------|------|
-| 本仓库 workflow 总数 | 18 个任务 |
+| 本仓库 workflow 总数 | 17 个任务 |
 | 其中定时驱动 | 13 个 |
-| 其中事件驱动 | 5 个 |
+| 其中事件驱动 | 4 个 |
 | 存在断链/语法问题 | 0 个 |
 
 ## 定时任务
 
 | Workflow | 名称 | 调度 | Jobs | 闭环环节 |
 |----------|------|------|------|----------|
-| `channel-distribution.yml` | AIShield Channel Distribution (Content + Registry + Social) | 每小时第 0 分 UTC | 7 | 检测✓动作✓验证✓告警✓ |
-| `ci.yml` | AIShield CI/CD | 每小时第 0 分 UTC | 8 | 检测✓验证✓ ⚠️缺动作告警 |
-| `data-scan-flywheel.yml` | AIShield Data Flywheel (Batch Scan to Self-Built Database) | 每小时第 0 分 UTC | 2 | 检测✓动作✓验证✓告警✓ |
-| `deploy-server.yml` | Deploy to Production Server | 每小时第 0 分 UTC | 2 | 检测✓动作✓验证✓告警✓ |
-| `feature-closed-loop.yml` | AIShield Intelligence-to-Feature Closed-Loop | 每小时第 0 分 UTC | 4 | 检测✓动作✓验证✓告警✓ |
-| `meta-monitor.yml` | AIShield Meta-Monitor (监控自动化体系本身) | 每小时第 0 分 UTC | 2 | 检测✓动作✓验证✓告警✓ |
-| `npm-self-heal.yml` | npm self-heal | 每小时第 0 分 UTC | 1 | 动作✓验证✓ ⚠️缺检测告警 |
-| `project-digest.yml` | AIShield Project Digest (统一迭代汇报) | 每 6 小时（第 0 分）UTC | 1 | 检测✓动作✓验证✓ ⚠️缺告警 |
+| `channel-distribution.yml` | AIShield Channel Distribution (Content + Registry + Social) | 每周四 06:47 UTC | 7 | 检测✓动作✓验证✓告警✓ |
+| `ci.yml` | AIShield CI/CD | 每日 03:08 UTC | 9 | 检测✓动作✓验证✓ ⚠️缺告警 |
+| `data-scan-flywheel.yml` | AIShield Data Flywheel (Batch Scan to Self-Built Database) | 每周二、周五 05:30 UTC | 2 | 检测✓动作✓验证✓告警✓ |
+| `deploy-server.yml` | Deploy to Production Server | 每 6 小时（第 17 分）UTC | 2 | 检测✓动作✓验证✓告警✓ |
+| `feature-closed-loop.yml` | AIShield Intelligence-to-Feature Closed-Loop | 每周一 08:20 UTC | 4 | 检测✓动作✓验证✓告警✓ |
+| `meta-monitor.yml` | AIShield Meta-Monitor (监控自动化体系本身) | 每 6 小时（第 15 分）UTC | 2 | 检测✓动作✓验证✓告警✓ |
+| `npm-self-heal.yml` | npm self-heal | 每 6 小时（第 12 分）UTC | 1 | 动作✓验证✓ ⚠️缺检测告警 |
+| `project-digest.yml` | AIShield Project Digest (统一迭代汇报) | 每 6 小时（第 5 分）UTC | 1 | 检测✓动作✓验证✓ ⚠️缺告警 |
 | `rule-promoter.yml` | AIShield Rule Auto-Promoter | 每日 03:40 UTC | 2 | 检测✓动作✓验证✓告警✓ |
-| `self-heal-closed-loop.yml` | AIShield Auto Self-Heal Closed-Loop | 每小时第 0 分 UTC | 6 | 检测✓动作✓验证✓告警✓ |
-| `stale.yml` | Stale Issues Manager | 每小时第 0 分 UTC | 1 | 验证✓ ⚠️缺检测动作告警 |
-| `threat-intel-feed.yml` | AIShield Threat-Intel Feed Update | 每小时第 0 分 UTC | 5 | 检测✓动作✓验证✓告警✓ |
-| `unified-security-scan.yml` | AIShield Unified Security Scan | 每小时第 0 分 UTC | 2 | 检测✓验证✓ ⚠️缺动作告警 |
+| `self-heal-closed-loop.yml` | AIShield Auto Self-Heal Closed-Loop | 每 4 小时（第 23 分）UTC | 6 | 检测✓动作✓验证✓告警✓ |
+| `stale.yml` | Stale Issues Manager | 每日 02:26 UTC | 1 | 验证✓ ⚠️缺检测动作告警 |
+| `threat-intel-feed.yml` | AIShield Threat-Intel Feed Update | 每周一、周四 07:15 UTC | 5 | 检测✓动作✓验证✓告警✓ |
+| `unified-security-scan.yml` | AIShield Unified Security Scan | 每周一 04:52 UTC | 2 | 检测✓验证✓ ⚠️缺动作告警 |
 
 ## 事件驱动任务
 
 | Workflow | 名称 | 触发 | Jobs |
 |----------|------|------|------|
-| `deploy.yml` | Deploy to Railway | push(main) | 1 |
 | `issue-labeler.yml` | Auto Label Issues | Issue 事件 | 1 |
 | `pages.yml` | Pages Site (内容站构建与发布) | push(main) / workflow_run / 手动 | 4 |
 | `publish-mcp-registry.yml` | Publish to MCP Registry | workflow_run / 手动 | 2 |
@@ -52,7 +51,7 @@
 | feature | 2026-08-04 06:41:12 |
 | health | 2026-08-05 01:22:22 |
 | intel | 2026-08-04 06:35:13 |
-| meta | 2026-08-24 02:39:51 |
+| meta | 2026-08-24 09:48:48 |
 | registry | 2026-08-04 09:33:55 |
 | rules | 2026-08-04 06:37:09 |
 | selfheal | 2026-08-04 15:33:55 |

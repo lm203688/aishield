@@ -90,6 +90,17 @@ TARGETS: List[Tuple[str, str, str]] = [
     ("mcp-server/dist/index.js",
      r"(const SERVER_VERSION\s*=\s*')([^']+)(')",
      r"\g<1>{v}\g<3>"),
+    # MCP Registry 提交清单：顶层 version。
+    # 该文件曾有 10 个声明位被门禁覆盖，server.json 是第 11 个却漏在外面，
+    # 于是它停在 4.2.2 而其余全是 4.3.0 —— validate_registry 每次都报
+    # "npm 版本不一致"，把 ci.yml 的 workflow-lint 永久打成红灯。
+    # 两个 version 字段必须用各自锚定的正则，count=1 只会替换首个命中。
+    ("registry/server.json",
+     r'("description": "[^"]+",\r?\n\s+"version": ")([^"]+)(")',
+     r"\g<1>{v}\g<3>"),
+    ("registry/server.json",
+     r'("identifier": "aishield-mcp-server",\r?\n\s+"version": ")([^"]+)(")',
+     r"\g<1>{v}\g<3>"),
 ]
 
 SEMVER = re.compile(r"^(\d+)\.(\d+)\.(\d+)")
