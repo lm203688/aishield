@@ -34,7 +34,7 @@ from scanner.engine import scan, batch_scan
 from scanner.rug_pull import detect_rug_pull
 from scanner.handshake import verify_handshake
 from scanner.vertical_risk import scan_vertical_risk
-from scanner.rules import OWASP_MCP_TOP10, get_rule_count
+from scanner.rules import OWASP_MCP_TOP10, get_rule_count, get_rule_breakdown
 from scanner.monitor import get_monitored_tools, add_monitor as add_tool_monitor, remove_monitor, check_version_change, check_all_monitored
 from scanner.api_scanner import APIScanOrchestrator
 from proxy import gateway as proxy_gateway
@@ -81,13 +81,23 @@ def _save_json(path, data):
             json.dump(data, f, ensure_ascii=False, indent=2)
 
 
-# 部署元信息：由 deploy-named-tunnel.sh 在每次 git reset 之后写入。
+# 部署元信息：由 deploy-named-tunnel.sh 在每次 git reset 之后写入仓库根目录。
 # 用 commit SHA（而非版本字符串）作为「进程是否在跑磁盘上的代码」的判据——
 # 版本字符串只在发版时变化，日常只新增规则不会改它，导致进程在规则已更新后
-# 仍被判定为「最新」而永不重启（线上曾因此长期报告 215 条规则，实际应为 227）。
-# 注意：必须定义在 _load_json 之后，否则模块加载时 NameError。
-DEPLOY_META_FILE = os.path.join(BASE, ".deploy_meta.json")
+# 仍被判定为「最新」而永不重启。
+#
+# 【2026-08-29 修复：路径错配】此前写成 os.path.join(BASE, ...)，而 BASE 是
+# os.path.dirname(abspath(__file__)) 即 <repo>/api —— 部署脚本在 CWD
+# （<repo>/）写 .deploy_meta.json，两者对不上。结果 deployed_at 恒为 null，
+# commit 只能靠下面的 git 实时回退顶着，而那个回退每次 health 请求都要起一个
+# 子进程。真相源必须是仓库根（与部署脚本的 CWD 一致），这里显式用 REPO_ROOT。
+REPO_ROOT = os.path.dirname(BASE)
+DEPLOY_META_FILE = os.path.join(REPO_ROOT, ".deploy_meta.json")
 _DEPLOY_META = _load_json(DEPLOY_META_FILE, {})
+
+# git 回退结果缓存：只在首次命中时查一次，避免每次 health 请求都 fork 子进程。
+# 部署脚本每次部署都会重写 .deploy_meta.json，正常情况下根本走不到这个分支。
+_git_meta_fallback = {}
 
 
 def _git_meta():
@@ -97,13 +107,15 @@ def _git_meta():
         "deployed_at": _DEPLOY_META.get("deployed_at"),
     }
     if not meta["commit"]:
-        try:
-            import subprocess
-            meta["commit"] = (subprocess.check_output(
-                ["git", "rev-parse", "--short", "HEAD"], cwd=BASE,
-                stderr=subprocess.DEVNULL, timeout=5).decode().strip())
-        except Exception:
-            meta["commit"] = None
+        if not _git_meta_fallback.get("commit"):
+            try:
+                import subprocess
+                _git_meta_fallback["commit"] = (subprocess.check_output(
+                    ["git", "rev-parse", "--short", "HEAD"], cwd=REPO_ROOT,
+                    stderr=subprocess.DEVNULL, timeout=5).decode().strip())
+            except Exception:
+                _git_meta_fallback["commit"] = None
+        meta["commit"] = _git_meta_fallback["commit"]
     return meta
 
 
@@ -706,12 +718,19 @@ class AIShieldHandler(BaseHTTPRequestHandler):
                 "version": "4.3.0",
                 "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)",
                 "rules_count": get_rule_count("mcp"),
+                # 规则构成明细：static 是发版时固化的常量，generated / radar
+                # 来自 data/generated_rules.json 与 data/radar_rules.json（数据飞轮
+                # 产物）。三者不齐时，问题一定出在动态数据文件的部署上，
+                # 而不是扫描器代码——不用再靠猜。
+                "rules_breakdown": get_rule_breakdown(),
                 "uptime": time.time(),
                 "agent_first": True,
                 "openapi": "/openapi.json",
                 "agent_setup": "/api/v1/agent/setup",
                 # commit 是重启判据的真相源：每次 push 都会变，所以能捕获
                 # 「版本字符串未变但代码已变」的情况。
+                # deployed_at 为 null 说明 .deploy_meta.json 没写进仓库根，
+                # 此时 commit 是 git 实时回退值（可能比磁盘落后）。
                 "commit": _meta["commit"],
                 "deployed_at": _meta["deployed_at"],
             })
