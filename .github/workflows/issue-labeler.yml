@@ -3,9 +3,23 @@ name: Auto Label Issues
 on:
   issues:
     types: [opened, edited]
+  # 手动触发：既能人工补标，也能在无人开 issue 时验证本 workflow 是否仍可解析。
+  # 【2026-08-29】此前只有 issues 事件，一旦想单独验证就必须先造一个 issue；
+  # 而本文件曾因 YAML 重复键整体无法加载（见下方说明），却没有任何触发方式能
+  # 暴露这个错误，直到 push 触发的「幽灵 run」被注意到。
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: 要打标/重打的 issue 编号
+        required: false
+        type: string
+      text:
+        description: 覆盖匹配用的文本（默认用该 issue 的标题）
+        required: false
+        type: string
 
 # issue-labeler 需要 contents: read 才能读到 .github/labeler.yml。
-# 原先只有 issues: write —— 配置读取 403，18/18 次运行全部失败。
+# 原先只有 issues: write —— 配置读取 403。
 permissions:
   issues: write
   contents: read
@@ -19,8 +33,13 @@ jobs:
         with:
           configuration-path: .github/labeler.yml
           repo-token: ${{ github.token }}
-          issue-number: ${{ github.event.issue.number }}
-          # 只用 title：单一值，不存在多值/重复键的歧义。
-          # 之前写成两个 functions: 键（YAML 重复键，解析后只保留最后一个），
-          # 且本仓库的自动化告警 issue 关键信息都在 title 里。
-          functions: ${{ github.event.issue.title }}
+          issue-number: ${{ inputs.issue_number || github.event.issue.number }}
+          # 只用 title：单一值，避免多值歧义。本仓库的自动化告警 issue 关键信息
+          # 都在 title 里（标题里带 P0/P1、失败步骤名等结构化信息）。
+          #
+          # 【2026-08-29 更正】此前注释写「YAML 重复键解析后只保留最后一个」——
+          # 这是错的。PyYAML 等宽松解析器确实只保留最后一个，但 **GitHub Actions
+          # 的解析器直接拒绝重复键**，整个 workflow 无法加载。这正是本文件
+          # 连续 18 次运行全部失败（run 名退化成 .github/workflows/issue-labeler.yml、
+          # 零 job、秒红）的真实原因，而非「只匹配到 body 一个值」。
+          functions: ${{ inputs.text || github.event.issue.title }}
