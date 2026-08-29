@@ -119,11 +119,13 @@ def check_file(path: Path) -> Dict[str, Any]:
     # 都会让整个 workflow 无法加载——而 PyYAML 与 E1 的语法检查都完全正常，
     # 这个错只在 GitHub 侧出现，本地门禁永远发现不了。
     #
-    # 两种已实测的致命写法：
+    # 三种已实测的致命写法：
     #   1) 表达式里嵌 shell 变量：needs.$job.result
     #      -> (Line 247, Col 14) Unexpected symbol: '$job'
     #   2) 注释里写下坏表达式的字面量当作文档说明
     #      -> 同一个解析错误被「注释」重新引入（已实测复现）
+    #   3) 注释里打一个空的表达式标记占位（本来说明「注释也会被求值」时
+    #      顺手打的例子）-> An expression was expected（已实测复现）
     #
     # 命中后的表现极具误导：run 名退化为 .github/workflows/ci.yml、
     # 零 job、秒红，看起来像「CI 全红」，实际是「CI 从来没跑过」。
@@ -134,6 +136,16 @@ def check_file(path: Path) -> Dict[str, Any]:
     for lineno, line in enumerate(text.splitlines(), start=1):
         for expr in EXPRESSION_RE.findall(line):
             body = expr.strip()
+            if not body:
+                # 空表达式标记：GitHub 报 "An expression was expected"。
+                # 极易在注释里踩到——写「表达式标记」来解释这个规则时，
+                # 顺手打个占位空标记，就会让整个 workflow 无法加载。
+                res["errors"].append(
+                    f"E8 第 {lineno} 行存在空表达式标记 —— GitHub 报 "
+                    f"'An expression was expected'，整个 workflow 无法加载。"
+                    f"注释里要举例就用文字描述，不要打标记的字面量。"
+                )
+                continue
             if SHELL_VAR_IN_EXPR.search(body):
                 res["errors"].append(
                     f"E8 第 {lineno} 行表达式含 shell 变量插值: ${{{{ {body} }}}}"
