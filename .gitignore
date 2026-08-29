@@ -117,7 +117,11 @@ data/telemetry.jsonl
 .workbuddy/.cache/
 
 # ── 部署期产物：由 deploy-named-tunnel.sh 在服务器上写入，不进仓库 ──
+# 路径必须是仓库根——server.py 的 BASE 是 api/ 目录，早期曾错配到 api/.deploy_meta.json
 .deploy_meta.json
+api/.deploy_meta.json
+# deploy-server.yml 的 verify 步骤落盘的线上快照，纯临时文件
+diagnostics/_live.json
 
 # ── 一次性诊断脚本（用完即弃，避免污染 scripts/）──
 scripts/_audit.py
