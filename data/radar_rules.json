@@ -8,6 +8,58 @@
     "(?:learned|经验表明|根据经验|based on (?:past )?experience)[^\\n]{0,30}(?:you must|必须|务必|should always)[^\\n]{0,40}(?:执行|运行|上传|发送|exec|upload|send|curl|wget)": [
       "轨迹投毒: 伪装成\"历史经验\"的强制执行指令",
       "high"
+    ],
+    "(?:broadcast|relay|send|dispatch|propagate)\\b.{0,30}(?:to|among|across)\\b.{0,20}(?:all|other|peer|every|neighbou?r|fellow)\\s+(?:agent|node|robot|drone|device)\\b.{0,30}(?:without|with no|unauthenticated|unsigned|unverified|no (?:auth|verif))": [
+      "多智能体通信攻击: 向全体/对端 agent 广播消息却无身份认证 (多机器人协调攻击)",
+      "high"
+    ],
+    "(?:persistent|persist|store|save|write)\\b.{0,30}(?:memory|instruction|prompt|configuration|config|payload)\\b.{0,30}(?:re[- ]?load|re[- ]?read|on (?:every|each|next|all) (?:session|startup|boot|launch)|across (?:all )?sessions|each time (?:it|the agent) (?:starts|runs|loads))": [
+      "Agent harness 持久载体: 跨会话保存并在每次启动重读的持久化指令载体 (HarnessSafe)",
+      "high"
+    ],
+    "(?:load_adapter|load_lora_weights|add_adapter|set_adapter|from_pretrained|merge_and_unload)\\b.{0,60}(?:https?://|untrusted|remote|external|[a-z0-9_-]+\\.(?:safetensors|bin|pt))": [
+      "模型供应链: 从不可信/远程源加载 LoRA/adapter 微调权重 (LoRAScan)",
+      "high"
+    ],
+    "(?:webpage|web page|document|email|search results?|retrieved content|external content)\\b.{0,40}(?:follow (?:the )?(?:instruction|command)|you must|you should|your (?:new )?task|execute (?:the )?following)": [
+      "间接/多步提示注入: 外部内容(网页/文档/邮件/检索结果)携带祈使指令，被 agent 当作任务执行 (StepJack)",
+      "high"
+    ],
+    "(?:build|construct|generate|compose|form)\\b.{0,25}(?:its (?:own|self[- ]generated)|an autonomous|a multi[- ]step)\\b.{0,25}(?:attack chain|action chain|tool chain|plan of action|sequence of (?:steps|commands|actions))": [
+      "Agent 自构攻击链: 配置/提示要求 agent 自主构建多步行动/工具链 (SynChain)",
+      "high"
+    ],
+    "(?:PreToolUse|PostToolUse|UserPromptSubmit|SessionStart|SessionEnd|SubagentStop|PreCompact|Notification)\\b[^\\n]{0,120}(?:curl|wget|base64\\s+-d|eval\\b|iex\\b|invoke-expression|python\\s+-c|node\\s+-e|/dev/tcp|nc\\s+-|chmod\\s+\\+x|powershell[^\\n]{0,20}-e|osascript|schtasks|crontab|\\|\\s*sh\\b|\\|\\s*bash\\b)": [
+      "Agent生命周期钩子绑定危险载荷: PreToolUse/SessionStart 等钩子执行 curl|sh / base64 / eval 类命令, 每次工具调用或会话启动即静默触发",
+      "high"
+    ],
+    "(?:writ(?:e|es|ing)|append(?:s|ed|ing)?|inject(?:s|ed|ing)?|patch(?:es|ed|ing)?|add(?:s|ed|ing)?|install(?:s|ed|ing)?|creat(?:e|es|ing))\\b[^\\n]{0,60}(?:(?:settings\\.json|settings\\.local\\.json|\\.cursorrules|\\.clinerules|\\.windsurfrules|CLAUDE\\.md|AGENTS\\.md)\\b[^\\n]{0,60}hooks?\\b|hooks?\\b[^\\n]{0,60}(?:settings\\.json|settings\\.local\\.json|\\.cursorrules|\\.clinerules|\\.windsurfrules|CLAUDE\\.md|AGENTS\\.md)\\b)|(?:settings\\.json|settings\\.local\\.json|\\.cursorrules|\\.clinerules|\\.windsurfrules|CLAUDE\\.md|AGENTS\\.md)\\b[^\\n]{0,60}hooks?\\b[^\\n]{0,60}(?:curl|wget|base64\\s+-d|eval\\b|iex\\b|invoke-expression|python\\s+-c|node\\s+-e|/dev/tcp|nc\\s+-|chmod\\s+\\+x|powershell[^\\n]{0,20}-e|osascript|schtasks|crontab|\\|\\s*sh\\b|\\|\\s*bash\\b)": [
+      "Agent配置持久化载体: 向 settings.json/.cursorrules/CLAUDE.md 等写入 hooks, 或钩子中挂载危险命令, 属仓库克隆即触发的持久化执行载体",
+      "medium"
+    ],
+    "\\badb\\b(?:\\s+-s\\s+\\S+)?\\s+(?:shell|install|uninstall|push|pull|root|remount|forward|reverse)\\b": [
+      "移动设备特权控制: MCP/skill 暴露 adb 命令原语, agent 可在真机上任意执行/装卸应用/读写文件系统",
+      "high"
+    ],
+    "(?:\\bfastboot\\s+(?:flash|oem|erase)\\b|\\bidevice[a-z_]*\\b|\\bxcrun\\s+simctl\\b|\\bfrida(?:-ps|-trace|-server)?\\s+-U\\b)": [
+      "移动设备特权控制: 暴露 fastboot 刷机 / iOS idevice / frida 注入等设备级原语, 越过应用沙箱",
+      "high"
+    ],
+    "(?:generat\\w*|creat\\w*|synthesi[sz]\\w*|craft\\w*|writ\\w*)\\b.{0,30}(?:working\\s+)?(?:exploits?\\b|0-?day|zero-?day|proof[- ]of[- ]concept|shellcode|weaponi[sz]ed?|(?:malicious|attack|injection)\\s+payloads?)": [
+      "进攻性能力自声明: 工具描述中声称自动生成漏洞利用/0day/PoC/shellcode, 供应链中属双用途高风险组件",
+      "medium"
+    ],
+    "(?:autonomous|automated|self-?driving|agentic|unattended)\\b.{0,25}(?:fuzz\\w*|exploitation|pentest\\w*|penetration test\\w*|vulnerability (?:discovery|hunting|injection))": [
+      "进攻性能力自声明: 声称自主 fuzzing/渗透/漏洞注入, agent 可无人值守发起攻击链",
+      "medium"
+    ],
+    "(?:private[_ ]?key|mnemonic|seed[_ ]?phrase|keystore)\\b.{0,40}(?:wallet|mnemonic|0x[a-fA-F0-9]{2,}|eth_|solana|metamask|ledger|web3|on-?chain|derivation path)": [
+      "web3密钥材料暴露: MCP/skill 配置中出现私钥/助记词/keystore 且绑定链上钱包上下文 (一次泄露即不可逆资金损失)",
+      "high"
+    ],
+    "(?:\\beth_|\\bweb3|\\bwallet\\b|\\bsolana\\b|\\bmetamask\\b|\\bledger\\b|\\bon-?chain\\b).{0,40}(?:private[_ ]?key|mnemonic|seed[_ ]?phrase|keystore)": [
+      "web3密钥材料暴露(反序): 链上操作原语旁携带私钥/助记词/keystore, agent 可直接签名转账",
+      "high"
     ]
   },
   "provenance": {
@@ -26,6 +78,110 @@
       "attack_category": "trajectory-poisoning",
       "promoted_from": "PROPOSED_20260809_when_experience_becomes_instru_3c3a5b.json",
       "drafted_at": "2026-08-09"
+    },
+    "(?:broadcast|relay|send|dispatch|propagate)\\b.{0,30}(?:to|among|across)\\b.{0,20}(?:all|other|peer|every|neighbou?r|fellow)\\s+(?:agent|node|robot|drone|device)\\b.{0,30}(?:without|with no|unauthenticated|unsigned|unverified|no (?:auth|verif))": {
+      "signal_title": "When Coordination Becomes a Threat: Communication Attacks in LLM-Controlled Multi-Robot Systems",
+      "signal_url": "https://arxiv.org/abs/2608.06830",
+      "source": "arxiv",
+      "attack_category": "inter-agent-comm-attack",
+      "promoted_from": "PROPOSED_20260811_coord_interagent_m3n4o5.json",
+      "drafted_at": "2026-08-11"
+    },
+    "(?:persistent|persist|store|save|write)\\b.{0,30}(?:memory|instruction|prompt|configuration|config|payload)\\b.{0,30}(?:re[- ]?load|re[- ]?read|on (?:every|each|next|all) (?:session|startup|boot|launch)|across (?:all )?sessions|each time (?:it|the agent) (?:starts|runs|loads))": {
+      "signal_title": "HarnessSafe: Evaluating Safety Across Persistent Carriers in Agent Harnesses",
+      "signal_url": "https://arxiv.org/abs/2608.06984",
+      "source": "arxiv",
+      "attack_category": "persistent-carrier",
+      "promoted_from": "PROPOSED_20260811_harnesssafe_persist_g7h8i9.json",
+      "drafted_at": "2026-08-11"
+    },
+    "(?:load_adapter|load_lora_weights|add_adapter|set_adapter|from_pretrained|merge_and_unload)\\b.{0,60}(?:https?://|untrusted|remote|external|[a-z0-9_-]+\\.(?:safetensors|bin|pt))": {
+      "signal_title": "LoRAScan: Detecting Backdoor Prompts in Low-Rank Adapters for Large Language Models via Down-Projection Activation Spikes",
+      "signal_url": "https://arxiv.org/abs/2608.06795",
+      "source": "arxiv",
+      "attack_category": "model-supply-chain",
+      "promoted_from": "PROPOSED_20260811_lorascan_adapter_j0k1l2.json",
+      "drafted_at": "2026-08-11"
+    },
+    "(?:webpage|web page|document|email|search results?|retrieved content|external content)\\b.{0,40}(?:follow (?:the )?(?:instruction|command)|you must|you should|your (?:new )?task|execute (?:the )?following)": {
+      "signal_title": "StepJack: Benchmarking Computer-Use Agent Safety Against Multi-Step Indirect Prompt Injection",
+      "signal_url": "https://arxiv.org/abs/2608.06477",
+      "source": "arxiv",
+      "attack_category": "indirect-prompt-injection",
+      "promoted_from": "PROPOSED_20260811_stepjack_indirect_pi_a1b2c3.json",
+      "drafted_at": "2026-08-11"
+    },
+    "(?:build|construct|generate|compose|form)\\b.{0,25}(?:its (?:own|self[- ]generated)|an autonomous|a multi[- ]step)\\b.{0,25}(?:attack chain|action chain|tool chain|plan of action|sequence of (?:steps|commands|actions))": {
+      "signal_title": "SynChain: Inducing Computer-Use Agent Systems to Construct Their Own Attack Chains",
+      "signal_url": "https://arxiv.org/abs/2608.06862",
+      "source": "arxiv",
+      "attack_category": "agentic-attack-chain",
+      "promoted_from": "PROPOSED_20260811_synchain_attack_chain_d4e5f6.json",
+      "drafted_at": "2026-08-11"
+    },
+    "(?:PreToolUse|PostToolUse|UserPromptSubmit|SessionStart|SessionEnd|SubagentStop|PreCompact|Notification)\\b[^\\n]{0,120}(?:curl|wget|base64\\s+-d|eval\\b|iex\\b|invoke-expression|python\\s+-c|node\\s+-e|/dev/tcp|nc\\s+-|chmod\\s+\\+x|powershell[^\\n]{0,20}-e|osascript|schtasks|crontab|\\|\\s*sh\\b|\\|\\s*bash\\b)": {
+      "signal_title": "thixpin/claude-config (agent config hook auto-execution surface)",
+      "signal_url": "https://github.com/thixpin/claude-config",
+      "source": "github-trending",
+      "attack_category": "config-hook-execution",
+      "promoted_from": "PROPOSED_20260811_agentcfg_hook_q0r1s2.json",
+      "drafted_at": "2026-08-11"
+    },
+    "(?:writ(?:e|es|ing)|append(?:s|ed|ing)?|inject(?:s|ed|ing)?|patch(?:es|ed|ing)?|add(?:s|ed|ing)?|install(?:s|ed|ing)?|creat(?:e|es|ing))\\b[^\\n]{0,60}(?:(?:settings\\.json|settings\\.local\\.json|\\.cursorrules|\\.clinerules|\\.windsurfrules|CLAUDE\\.md|AGENTS\\.md)\\b[^\\n]{0,60}hooks?\\b|hooks?\\b[^\\n]{0,60}(?:settings\\.json|settings\\.local\\.json|\\.cursorrules|\\.clinerules|\\.windsurfrules|CLAUDE\\.md|AGENTS\\.md)\\b)|(?:settings\\.json|settings\\.local\\.json|\\.cursorrules|\\.clinerules|\\.windsurfrules|CLAUDE\\.md|AGENTS\\.md)\\b[^\\n]{0,60}hooks?\\b[^\\n]{0,60}(?:curl|wget|base64\\s+-d|eval\\b|iex\\b|invoke-expression|python\\s+-c|node\\s+-e|/dev/tcp|nc\\s+-|chmod\\s+\\+x|powershell[^\\n]{0,20}-e|osascript|schtasks|crontab|\\|\\s*sh\\b|\\|\\s*bash\\b)": {
+      "signal_title": "thixpin/claude-config (agent config hook auto-execution surface)",
+      "signal_url": "https://github.com/thixpin/claude-config",
+      "source": "github-trending",
+      "attack_category": "config-hook-execution",
+      "promoted_from": "PROPOSED_20260811_agentcfg_hook_q0r1s2.json",
+      "drafted_at": "2026-08-11"
+    },
+    "\\badb\\b(?:\\s+-s\\s+\\S+)?\\s+(?:shell|install|uninstall|push|pull|root|remount|forward|reverse)\\b": {
+      "signal_title": "ivRodriguezCA/MobHunt (mobile device control surface exposed to agents)",
+      "signal_url": "https://github.com/ivRodriguezCA/MobHunt",
+      "source": "github-trending",
+      "attack_category": "privileged-device-control",
+      "promoted_from": "PROPOSED_20260811_device_shell_k4l5m6.json",
+      "drafted_at": "2026-08-11"
+    },
+    "(?:\\bfastboot\\s+(?:flash|oem|erase)\\b|\\bidevice[a-z_]*\\b|\\bxcrun\\s+simctl\\b|\\bfrida(?:-ps|-trace|-server)?\\s+-U\\b)": {
+      "signal_title": "ivRodriguezCA/MobHunt (mobile device control surface exposed to agents)",
+      "signal_url": "https://github.com/ivRodriguezCA/MobHunt",
+      "source": "github-trending",
+      "attack_category": "privileged-device-control",
+      "promoted_from": "PROPOSED_20260811_device_shell_k4l5m6.json",
+      "drafted_at": "2026-08-11"
+    },
+    "(?:generat\\w*|creat\\w*|synthesi[sz]\\w*|craft\\w*|writ\\w*)\\b.{0,30}(?:working\\s+)?(?:exploits?\\b|0-?day|zero-?day|proof[- ]of[- ]concept|shellcode|weaponi[sz]ed?|(?:malicious|attack|injection)\\s+payloads?)": {
+      "signal_title": "LLM-Driven Fuzzing of JavaScript Engines / CyberForge: Verified Vulnerability Injection",
+      "signal_url": "https://arxiv.org/abs/2608.06641",
+      "source": "arxiv",
+      "attack_category": "offensive-capability",
+      "promoted_from": "PROPOSED_20260811_offensive_cap_n7o8p9.json",
+      "drafted_at": "2026-08-11"
+    },
+    "(?:autonomous|automated|self-?driving|agentic|unattended)\\b.{0,25}(?:fuzz\\w*|exploitation|pentest\\w*|penetration test\\w*|vulnerability (?:discovery|hunting|injection))": {
+      "signal_title": "LLM-Driven Fuzzing of JavaScript Engines / CyberForge: Verified Vulnerability Injection",
+      "signal_url": "https://arxiv.org/abs/2608.06641",
+      "source": "arxiv",
+      "attack_category": "offensive-capability",
+      "promoted_from": "PROPOSED_20260811_offensive_cap_n7o8p9.json",
+      "drafted_at": "2026-08-11"
+    },
+    "(?:private[_ ]?key|mnemonic|seed[_ ]?phrase|keystore)\\b.{0,40}(?:wallet|mnemonic|0x[a-fA-F0-9]{2,}|eth_|solana|metamask|ledger|web3|on-?chain|derivation path)": {
+      "signal_title": "iktok90-design/ai-smart-contract-auditor (web3 agent tooling surface)",
+      "signal_url": "https://github.com/iktok90-design/ai-smart-contract-auditor",
+      "source": "github-trending",
+      "attack_category": "credential-exposure",
+      "promoted_from": "PROPOSED_20260811_web3_keymat_h1i2j3.json",
+      "drafted_at": "2026-08-11"
+    },
+    "(?:\\beth_|\\bweb3|\\bwallet\\b|\\bsolana\\b|\\bmetamask\\b|\\bledger\\b|\\bon-?chain\\b).{0,40}(?:private[_ ]?key|mnemonic|seed[_ ]?phrase|keystore)": {
+      "signal_title": "iktok90-design/ai-smart-contract-auditor (web3 agent tooling surface)",
+      "signal_url": "https://github.com/iktok90-design/ai-smart-contract-auditor",
+      "source": "github-trending",
+      "attack_category": "credential-exposure",
+      "promoted_from": "PROPOSED_20260811_web3_keymat_h1i2j3.json",
+      "drafted_at": "2026-08-11"
     }
   }
 }
