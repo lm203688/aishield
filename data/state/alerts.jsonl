@@ -517,3 +517,4 @@
 {"ts": "2026-08-29T04:59:31.731291+00:00", "level": "RESOLVED", "title": "部署后验证恢复", "fingerprint": "deploy-verify-failed", "note": "线上 commit 与规则数已与 VPS 磁盘一致，.deploy_meta.json 正常写入。"}
 {"ts": "2026-08-29T05:04:31.170987+00:00", "level": "RESOLVED", "title": "部署后验证恢复", "fingerprint": "deploy-verify-failed", "note": "线上 commit 与规则数已与 VPS 磁盘一致，.deploy_meta.json 正常写入。"}
 {"ts": "2026-08-29T12:43:27.229259+00:00", "level": "RESOLVED", "title": "部署后验证恢复", "fingerprint": "deploy-verify-failed", "note": "线上 commit 与规则数已与 VPS 磁盘一致，.deploy_meta.json 正常写入。"}
+{"ts": "2026-08-29T20:57:50.603484+00:00", "level": "RESOLVED", "title": "部署后验证恢复", "fingerprint": "deploy-verify-failed", "note": "线上 commit 与规则数已与 VPS 磁盘一致，.deploy_meta.json 正常写入。"}
