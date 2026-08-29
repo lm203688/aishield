@@ -594,6 +594,11 @@ ALL_RULES.update(ASI09_RULES)
 ALL_RULES.update(ASI10_RULES)
 ALL_RULES.update(ZH_PROMPT_INJECTION_RULES)
 
+# 静态规则总数快照：在任何动态规则合并之前取。
+# 用途：把「线上报 215 条、本地却是 227 条」这类差异，从一句笼统的数字拆成
+# static / generated / radar 三段，直接看出是哪一段没加载到，而不是猜。
+_STATIC_RULE_COUNT = len(ALL_RULES)
+
 # ============================================================
 # 情报驱动的动态规则（数据飞轮闭环的最后一齿）
 # ============================================================
@@ -1186,6 +1191,23 @@ def get_all_rules(tool_type="mcp"):
 def get_rule_count(tool_type="mcp"):
     """获取规则数量"""
     return len(get_all_rules(tool_type))
+
+
+def get_rule_breakdown():
+    """规则的构成明细：静态规则 / 情报驱动 / 雷达晋升。
+
+    为什么需要这个：`get_rule_count()` 只给一个总数，一旦线上与本地对不上
+    （例如线上 215、本地 227），只能靠猜是哪一环出了问题。拆开之后立刻可见：
+    静态规则数应当是常量（只随发版变），动态规则数随数据飞轮变化——
+    两者不同步时，问题必然出在 data/generated_rules.json / data/radar_rules.json
+    的部署上，而不是扫描器代码。
+    """
+    return {
+        "static": _STATIC_RULE_COUNT,
+        "generated": len(GENERATED_RULES),
+        "radar": len(RADAR_RULES),
+        "total": len(ALL_RULES),
+    }
 
 
 def get_owasp_category_rules(category):
