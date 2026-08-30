@@ -284,12 +284,16 @@ jobs:
             failures.append("线上服务不健康（9 次探测后仍未就绪）")
         else:
             # 2) commit 一致性
+            # 两侧长度不同是常态：线上读的是 .deploy_meta.json 里部署脚本写入的
+            # 完整 sha，磁盘侧是 git rev-parse --short 的短 sha。直接 == 比较
+            # 会永远不等，这个断言就变成又一个恒红的假门禁。
+            # 用前缀匹配：短的是长的真前缀即视为一致。
             lc = live.get("commit") or ""
             dc = disk.get("disk_commit") or ""
             print(f"commit     : 线上={lc or '—'}  磁盘={dc or '—'}")
             if not dc:
                 print("⚠️  未取到磁盘 commit（SSH 抓取失败），该断言跳过")
-            elif lc != dc:
+            elif not lc.startswith(dc):
                 failures.append(
                     f"部署未落地：线上 commit={lc or '空'}，VPS 磁盘 commit={dc}。"
                     f"通常意味着进程未重启（仍在跑旧代码）。")
