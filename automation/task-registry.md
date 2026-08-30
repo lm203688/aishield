@@ -1,7 +1,7 @@
 # AIShield 自动化台账
 
 > **本文件由 `scripts/gen_task_registry.py` 自动生成，请勿手工编辑。**
-> 生成时间：2026-08-29 02:44 UTC
+> 生成时间：2026-08-29 05:15 UTC
 
 历史教训：本台账曾手工声称「二十八项定时任务在跑」，而仓库实际只有十四个 workflow，其中 self-heal 因 YAML 语法错静默失效 48 天。台账一旦脱离现实，就会把「看起来很自动化」的幻觉喂给每一次决策。现改为从 workflow 真实内容派生。
 
@@ -36,7 +36,7 @@
 
 | Workflow | 名称 | 触发 | Jobs |
 |----------|------|------|------|
-| `issue-labeler.yml` | Auto Label Issues | Issue 事件 | 1 |
+| `issue-labeler.yml` | Auto Label Issues | Issue 事件 / 手动 | 1 |
 | `pages.yml` | Pages Site (内容站构建与发布) | push(main) / workflow_run / 手动 | 4 |
 | `publish-mcp-registry.yml` | Publish to MCP Registry | workflow_run / 手动 | 2 |
 | `publish-npm.yml` | Publish to npm | release / push / 手动 | 5 |

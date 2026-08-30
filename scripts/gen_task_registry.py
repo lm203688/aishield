@@ -273,11 +273,14 @@ def main() -> int:
         old = REGISTRY.read_text(encoding="utf-8") if REGISTRY.exists() else ""
 
         def normalize(t: str) -> str:
-            """剔除随时间自然变动的部分，只比对结构性内容。
+            """剔除随时间/平台自然变动的部分，只比对结构性内容。
 
             否则每跑一次探活、状态时间戳一变，台账就"过期"，
             CI 门禁会天天误红 —— 一个天天报警的门禁等于没有门禁。
             """
+            # 行尾统一：CRLF 与 LF 只差一个 CR，但会让「全文件 137 行」都算差异，
+            # 把真正的 1 行语义变化淹没掉。先归一化再比。
+            t = t.replace("\r\n", "\n").replace("\r", "\n")
             t = re.sub(r"> 生成时间：.*", "", t)
             # 状态总线时间戳区段随时变，不参与结构比对
             t = re.sub(r"## 状态总线最近更新.*?(?=\n## |\n---)", "", t, flags=re.S)
@@ -291,7 +294,12 @@ def main() -> int:
         return 0
 
     REGISTRY.parent.mkdir(parents=True, exist_ok=True)
-    REGISTRY.write_text(content, encoding="utf-8")
+    # newline="\n" 是刻意的：不指定时 Python 会把 \n 转成 os.linesep，
+    # Windows 上是 \r\n、Linux 上是 \n。于是同一个文件在本地生成是 CRLF、
+    # 在 CI(Linux) 重新生成是 LF，git diff 会显示「137 行全变」——
+    # 实际语义差异可能只有 1 行，但那满屏的红绿会让人误判成整份台账重写。
+    # 固定 LF 后，本地与 CI 产出完全一致。
+    REGISTRY.write_text(content, encoding="utf-8", newline="\n")
     scheduled = sum(1 for r in rows if r["crons"])
     print(f"已生成 {REGISTRY.relative_to(REPO_ROOT)}")
     print(f"  workflow 总数 {len(rows)} 个 / 定时 {scheduled} 个 / "

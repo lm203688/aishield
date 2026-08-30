@@ -267,6 +267,24 @@ class TestMcpStdioEndToEnd(unittest.TestCase):
         if not os.path.exists(DIST_JS):
             raise unittest.SkipTest('mcp-server/dist 未构建，跳过 stdio 端到端')
 
+        # 光有 node + dist 还不够：node_modules 被 gitignore，而 GitHub 的
+        # ubuntu runner 预装了 node、dist/index.js 又是提交进仓库的，所以上面两条
+        # 在 CI 上永远为真，_talk() 一启动就是 MODULE_NOT_FOUND。
+        # 结果是一个永远红的端到端测试 —— 比没有测试更糟，因为它把真问题
+        # （依赖没装）伪装成测试失败。这里用 require.resolve 真探一次依赖解析，
+        # 解析不到就明确跳过并给出恢复方式。
+        dep = '@modelcontextprotocol/sdk/server/mcp.js'
+        probe = subprocess.run(
+            [cls.node, '-e',
+             "try{require.resolve('%s');process.exit(0)}catch(e){process.exit(1)}" % dep],
+            cwd=os.path.join(ROOT, 'mcp-server'),
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+        )
+        if probe.returncode != 0:
+            raise unittest.SkipTest(
+                'mcp-server 依赖未安装（%s 无法解析），跳过 stdio 端到端；'
+                '在 mcp-server 下运行 npm ci 即可恢复' % dep)
+
         cls.port = _free_port()
         cls.srv = HTTPServer(('127.0.0.1', cls.port), _StubAPI)
         cls.thread = threading.Thread(target=cls.srv.serve_forever, daemon=True)

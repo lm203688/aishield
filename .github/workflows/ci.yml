@@ -98,6 +98,19 @@ jobs:
       run: |
         python -m py_compile api/server.py eco/*.py scanner/*.py scripts/*.py
 
+    - name: Install mcp-server deps (enables the stdio E2E test)
+      shell: bash
+      run: |
+        # stdio 端到端测试要真的启动 node 子进程，需要 @modelcontextprotocol/sdk。
+        # node_modules 被 gitignore、runner 又是干净环境，不装这一步 E2E 只能跳过，
+        # 于是「端到端」名存实亡。装不上时降级为警告而不是让整个 job 失败：
+        # 依赖网络/注册表不可用时，不该让一整套 590 个 Python 测试陪葬。
+        cd mcp-server
+        set -o pipefail
+        if ! npm ci --no-audit --no-fund 2>&1 | tail -15; then
+          echo "::warning::mcp-server 依赖安装失败 —— stdio 端到端测试会自动跳过"
+        fi
+
     - name: Run quick tests
       run: |
         python tests/quick_test.py
