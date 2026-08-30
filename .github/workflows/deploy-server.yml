@@ -173,6 +173,21 @@ jobs:
         echo "=== deploy-state.json ==="
         cat diagnostics/deploy-state.json
 
+    # 【2026-08-30】把刚采集的磁盘状态传给验证门 job。
+    # 两个 job 的 workspace 不共享，而验证门的 actions/checkout 检出的是
+    # **触发本次 run 的那个 commit** —— 它永远拿不到本 job 新写的文件，
+    # 只能读到仓库里上一次提交留下的旧值。实测验证门读到的就是
+    # {"disk_commit": null}，于是「无法验证」被误判成「验证通过」的反面：
+    # 它拿到了假数据，还以为是真的。用 artifact 传递才能跨 job 对齐。
+    - name: Upload deploy state for verification
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: deploy-state
+        path: diagnostics/deploy-state.json
+        if-no-files-found: error
+        retention-days: 7
+
     - name: Test HTTPS from runner
       if: always()
       continue-on-error: true
@@ -216,6 +231,17 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    # 取 deploy job 刚采集的磁盘状态。必须走 artifact —— checkout 检出的是
+    # 触发本次 run 的 commit，读不到同一次 run 里另一个 job 新写的文件。
+    # 取不到就判失败：拿旧数据做比对，比不做比对更危险。
+    - name: Download deploy state captured this run
+      id: getstate
+      continue-on-error: true
+      uses: actions/download-artifact@v4
+      with:
+        name: deploy-state
+        path: diagnostics
+
     - uses: actions/setup-python@v5
       with:
         python-version: '3.13'
@@ -237,6 +263,16 @@ jobs:
         #   4) 线上 deployed_at 非空               —— .deploy_meta.json 是否写成功
         # 磁盘侧真相来自上一步从 VPS 抓回的 diagnostics/deploy-state.json，
         # 与线上侧同一时刻读，因此不存在「部署与验证之间被 bot 提交插队」的竞态。
+        # 该文件由 deploy job 通过 artifact 传来（两个 job 的 workspace 不共享）。
+
+        # 取不到本次 run 的磁盘状态就直接判失败。
+        # 不能退回读仓库里的旧文件：checkout 检出的是触发本次 run 的 commit，
+        # 那里躺着的是**上一次运行留下的** deploy-state.json，用旧数据做比对
+        # 会把「看起来验证过了」当成「验证通过了」，比不做比对更危险。
+        if [ "${{ steps.getstate.outcome }}" != "success" ]; then
+          echo "::error::未能取得本次 run 的磁盘状态（artifact 下载失败），拒绝用旧数据判定"
+          exit 1
+        fi
 
         # ── 线上侧：多重试（部署后进程可能需要几秒才起来）──
         LIVE_JSON=""
