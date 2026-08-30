@@ -26,6 +26,11 @@ permissions:
 
 jobs:
   label:
+    # 手动触发但不填 issue 编号时不该报错。peter-evans/issue-labeler 要求
+    # issue-number 非空，缺了就抛错，看起来像「workflow 坏了」——实际上只是
+    # 没人告诉它要给哪个 issue 打标。跳过即可，本 workflow 能被解析这一点
+    # 从 run 本身存在就已经证明了。
+    if: github.event_name == 'issues' || inputs.issue_number != ''
     runs-on: ubuntu-latest
     steps:
       - name: Apply labels based on issue title
