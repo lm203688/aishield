@@ -1,1 +1,1 @@
-{"disk_commit": null}
+{"disk_commit": "95c91227", "disk_rules_count": 228, "disk_rules_breakdown": {"static": 204, "generated": 9, "radar": 15, "total": 228}, "disk_commit_full": "95c91227797dcfdd5c1987d8f078e698b7ebb512", "deploy_meta": {"commit": "95c91227797dcfdd5c1987d8f078e698b7ebb512", "deployed_at": "2026-08-30T00:31:35Z"}, "data_files": ["batch_scans.json", "generated_rules.json", "monitored_tools.json", "radar_rules.json", "security_report.md", "state", "threat_intel.json"], "python": "/usr/bin/python3", "cwd": "/opt/aishield"}
