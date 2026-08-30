@@ -148,39 +148,27 @@ jobs:
         chmod 600 ~/.ssh/id_rsa
         ssh-keyscan -H "$SERVER_HOST" >> ~/.ssh/known_hosts 2>/dev/null
 
-        # 【2026-08-29】部署验证门之前只判断「服务活着」，于是恒绿：
-        # 进程活着但跑的是旧代码、规则文件没部署上去，门禁一样全过。
-        # 要让门有约束力，必须让 VPS 自己报出「磁盘上的真实状态」，
-        # 再和「线上自报的运行状态」逐字段比对。这里抓的就是磁盘侧真相。
-        ssh -o StrictHostKeyChecking=no -p "${SERVER_PORT:-22}" "$SERVER_USER@$SERVER_HOST" '
-          cd /opt/aishield 2>/dev/null || cd ~/aishield 2>/dev/null || exit 3
-          python3 - <<PYSTATE
-          import json, os, subprocess
-          def sh(cmd):
-              try:
-                  return subprocess.check_output(cmd, shell=True,
-                         stderr=subprocess.DEVNULL, timeout=15).decode().strip()
-              except Exception:
-                  return ""
-          disk_commit = sh("git rev-parse --short HEAD") or None
-          try:
-              from scanner.rules import get_rule_count, get_rule_breakdown
-              disk_rules, breakdown = get_rule_count("mcp"), get_rule_breakdown()
-          except Exception as exc:
-              disk_rules, breakdown = None, {"error": str(exc)}
-          try:
-              meta = json.load(open(".deploy_meta.json"))
-          except Exception:
-              meta = {}
-          print(json.dumps({
-              "disk_commit": disk_commit,
-              "disk_rules_count": disk_rules,
-              "disk_rules_breakdown": breakdown,
-              "deploy_meta": meta,
-              "data_files": sorted(os.listdir("data")) if os.path.isdir("data") else [],
-          }, ensure_ascii=False))
-          PYSTATE
-        ' > diagnostics/deploy-state.json 2>/dev/null || echo '{"disk_commit": null}' > diagnostics/deploy-state.json
+        # 【2026-08-30 重写】上一版把采集脚本内联成嵌套 heredoc 传给 ssh，
+        # 但 heredoc 结束符必须顶格，而 YAML 块标量里每一行都必须比 run: 多缩进
+        # —— 两者不可调和。结果 ssh 命令畸形失败，又被 `2>/dev/null || echo '{}'`
+        # 吞掉，磁盘侧状态恒为 null，验证门的两条核心断言被**静默跳过**，
+        # 门禁退化成又一个橡皮图章（实测 deploy-state.json 内容就是
+        # {"disk_commit": null}，而门禁照样报绿）。
+        #
+        # 现改为：采集逻辑放进仓库里的独立脚本 scripts/deploy_state_probe.py，
+        # 经 stdin 喂给远端 python3。缩进问题从根上消失，脚本还能在本地单测。
+        #
+        # 失败语义刻意保留为「写入 capture_failed 标记」而不是让本步骤失败：
+        # 步骤一失败后面的验证门就跑不到了，反而丢掉一次明确的判定机会。
+        # 由验证门把「抓不到磁盘状态」判为失败 —— 无法验证 ≠ 验证通过。
+        set -o pipefail
+        if ! ssh -o StrictHostKeyChecking=no -p "${SERVER_PORT:-22}" \
+              "$SERVER_USER@$SERVER_HOST" \
+              "cd /opt/aishield 2>/dev/null || cd ~/aishield 2>/dev/null; python3 -" \
+              < scripts/deploy_state_probe.py > diagnostics/deploy-state.json; then
+          echo "::error::无法经 SSH 采集 VPS 磁盘状态"
+          echo '{"disk_commit": null, "capture_failed": true}' > diagnostics/deploy-state.json
+        fi
 
         echo "=== deploy-state.json ==="
         cat diagnostics/deploy-state.json
@@ -292,7 +280,14 @@ jobs:
             dc = disk.get("disk_commit") or ""
             print(f"commit     : 线上={lc or '—'}  磁盘={dc or '—'}")
             if not dc:
-                print("⚠️  未取到磁盘 commit（SSH 抓取失败），该断言跳过")
+                # 刻意判失败而不是跳过。上一版写成「未取到就跳过」，结果
+                # 采集步骤一挂，这条最重要的断言就永久失效，而门禁照样报绿
+                # —— 实测 deploy-state.json 就是 {"disk_commit": null}。
+                # 无法验证就是不能判定成功。
+                failures.append(
+                    f"无法取得 VPS 磁盘 commit（capture_failed=%s），部署是否落地"
+                    f"无从判定。检查 SSH 连通性与 scripts/deploy_state_probe.py。"
+                    % disk.get("capture_failed", False))
             elif not lc.startswith(dc):
                 failures.append(
                     f"部署未落地：线上 commit={lc or '空'}，VPS 磁盘 commit={dc}。"
@@ -302,7 +297,9 @@ jobs:
             lr, dr = live.get("rules_count"), disk.get("disk_rules_count")
             print(f"rules_count: 线上={lr}  磁盘={dr}")
             if dr is None:
-                print("⚠️  未取到磁盘规则数，该断言跳过")
+                failures.append(
+                    "无法取得 VPS 磁盘规则数，规则数据是否同步无从判定。"
+                    "（远端执行 scripts/deploy_state_probe.py 失败）")
             elif lr != dr:
                 failures.append(
                     f"规则数据未同步：线上={lr}，VPS 磁盘={dr}。"
