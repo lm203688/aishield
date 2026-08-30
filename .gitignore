@@ -123,6 +123,10 @@ api/.deploy_meta.json
 # deploy-server.yml 的 verify 步骤落盘的线上快照，纯临时文件
 diagnostics/_live.json
 
+# ── 根目录下划线开头 = 一次性抓产物（API 响应、日志包、临时报告）──
+# 只锁根目录：scanner/_proposed/ 是雷达规则候选的正式存放处，不能一起忽略。
+/_*
+
 # ── 一次性诊断脚本（用完即弃，避免污染 scripts/）──
 scripts/_audit.py
 scripts/_drift_audit.py
