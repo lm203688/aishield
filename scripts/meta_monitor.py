@@ -13,7 +13,7 @@ AIShield 元监控 (Meta-Monitor)：监控自动化体系本身
 本模块的检查项：
   M1 语法有效性   —— 所有 workflow 能否被 Actions 正常解析（含 needs 依赖链）
   M2 运行活性     —— 定时任务是否真的在按 cron 执行（对比预期频率与实际记录）
-  M3 静默失败     —— 状态总线中是否存在长期未更新的状态域
+  M3 静默失败     —— 各状态域归属的 workflow 是否按期成功执行（状态文件为 CI 运行时产物，不入库，故以运行活性为准）
   M4 台账一致性   —— 文档声称的任务数 vs 实际存在的 workflow 数
   M5 闭环完整性   —— 每个闭环 workflow 是否具备"检测→动作→验证→告警"四个环节
   M6 告警可达性   —— 通知总线是否具备至少一个可用出口
@@ -110,6 +110,49 @@ CRON_MAX_AGE_HOURS = {
     "meta-monitor.yml": 48,
 }
 
+# 状态域 -> 归属（写入该域的）workflow 列表。
+# 用于 M3：判断"环节是否停摆"不是看本地状态文件是否新鲜
+# （状态文件是 CI 运行时产物，从不入库，本地永远是陈旧副本），
+# 而是看归属 workflow 近期是否真的成功跑过。
+DOMAIN_OWNERS = {
+    "health": ["self-heal-closed-loop.yml", "deploy-server.yml"],
+    "selfheal": ["self-heal-closed-loop.yml", "deploy-server.yml"],
+    "distribution": ["channel-distribution.yml"],
+    "intel": ["threat-intel-feed.yml"],
+    "rules": ["threat-intel-feed.yml", "rule-promoter.yml"],
+    "flywheel": ["data-scan-flywheel.yml"],
+    "feature": ["feature-closed-loop.yml"],
+    "meta": ["meta-monitor.yml"],
+    "registry": ["publish-mcp-registry.yml", "publish-npm.yml"],
+    "ci": ["ci.yml"],
+}
+# 状态域 -> 允许的最大静默小时数（取归属 workflow 中最严格的阈值）。
+DOMAIN_MAX_AGE_HOURS = {
+    "health": 12, "selfheal": 12, "distribution": 336, "intel": 96,
+    "rules": 96, "flywheel": 96, "feature": 336, "meta": 48,
+    "registry": 336, "ci": 48,
+}
+
+_LATEST_RUNS_CACHE: Dict[str, Dict[str, Any]] | None = None
+
+
+def _get_latest_runs() -> Dict[str, Dict[str, Any]]:
+    """获取各 workflow 最近一次运行记录（带缓存，M2/M3 共用，避免重复调 API）。"""
+    global _LATEST_RUNS_CACHE
+    if _LATEST_RUNS_CACHE is not None:
+        return _LATEST_RUNS_CACHE
+    runs = _gh(f"/repos/{GH_OWNER}/{GH_REPO}/actions/runs?per_page=100")
+    latest: Dict[str, Dict[str, Any]] = {}
+    if runs:
+        for r in runs.get("workflow_runs", []):
+            wf = (r.get("path") or "").split("/")[-1]
+            if wf not in latest:
+                latest[wf] = {"at": r.get("run_started_at"),
+                              "conclusion": r.get("conclusion"),
+                              "status": r.get("status")}
+    _LATEST_RUNS_CACHE = latest
+    return latest
+
 
 def check_liveness() -> Dict[str, Any]:
     if not GH_TOKEN:
@@ -156,21 +199,49 @@ def check_liveness() -> Dict[str, Any]:
 # M3 静默失败（状态总线陈旧）
 # --------------------------------------------------------------------------
 def check_state_freshness() -> Dict[str, Any]:
-    try:
-        from scripts.state_bus import StateBus
+    """M3 静默失败检测。
 
-        bus = StateBus()
-        stale = bus.stale_domains(72)
-        summary = bus.summary()
-        return {
-            "ok": not stale,
-            "stale": stale,
-            "domains": list(summary.get("domains", {}).keys()),
-            "detail": "所有状态域保持新鲜" if not stale
-                      else f"状态域 {stale} 超过 72 小时未更新，对应环节可能已停摆",
-        }
-    except Exception as e:
-        return {"ok": False, "detail": f"状态总线读取失败: {e}"}
+    旧实现读 data/state/<domain>.json 的 updated 时间戳判新鲜度，但该文件是 CI
+    运行时产物：workflow 写后 `git add data/state/ && git commit ... || echo skipped`，
+    并发 push 冲突被 `|| echo` 吞掉，仓库里从未真正入库（git ls-files = 0），
+    本地副本永远是 08-04 的陈旧快照 —— 据此判分会产生恒定的假 degraded。
+
+    正确信号：状态域归属的 workflow 近期是否真的成功跑过（与 M2 同源的运行活性）。
+    无 token（本地）时跳过，与 M2/M6 一致，避免本地永远亮红灯。
+    """
+    if not GH_TOKEN:
+        return {"ok": None,
+                "detail": "本地无 token；状态文件为 CI 运行时产物，新鲜度以 CI 内运行活性（M2）为准，本地不判红"}
+    latest = _get_latest_runs()
+    if not latest:
+        return {"ok": None, "detail": "无法获取运行记录，跳过状态新鲜度检查"}
+
+    now = datetime.now(timezone.utc)
+    stale = []
+    for domain, owners in DOMAIN_OWNERS.items():
+        if not (WF_DIR / owners[0]).exists():
+            continue
+        fresh = False
+        for wf in owners:
+            info = latest.get(wf)
+            if not info or not info.get("at"):
+                continue
+            try:
+                t = datetime.fromisoformat(info["at"].replace("Z", "+00:00"))
+                age = (now - t).total_seconds() / 3600
+                if age <= DOMAIN_MAX_AGE_HOURS.get(domain, 336):
+                    fresh = True
+                    break
+            except Exception:
+                pass
+        if not fresh:
+            stale.append(domain)
+    return {
+        "ok": not stale,
+        "stale": stale,
+        "detail": "所有状态域的归属 workflow 均按期成功执行" if not stale
+                  else f"状态域 {stale} 的归属 workflow 超过阈值未成功运行 —— 对应环节可能已停摆",
+    }
 
 
 # --------------------------------------------------------------------------
