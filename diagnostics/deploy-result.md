@@ -1,5 +1,5 @@
 === DIAGNOSTIC ===
-Time: Mon Aug 31 09:57:38 PM CST 2026
+Time: Tue Sep 1 06:53:25 AM CST 2026
 === USER ===
 root
 === GIT LOG ===
@@ -13,10 +13,10 @@ af0a80cd auto: 自愈闭环状态结算 [skip ci]
 # 解决 Quick Tunnel 的 error 1014 (CNAME Cross-User Banned) 问题
 #
 === API STATUS ===
-{"status": "ok", "version": "4.3.0", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 228, "rules_breakdown": {"static": 204, "generated": 9, "radar": 15, "total": 228}, "uptime": 1788184658.1101325, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup", "commit": "c82438e8c24b6a9f693aa49adc4a8ae7733324f8", "deployed_at": "2026-08-31T09:51:46Z"}OK
+{"status": "ok", "version": "4.3.0", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 228, "rules_breakdown": {"static": 204, "generated": 9, "radar": 15, "total": 228}, "uptime": 1788216805.2105157, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup", "commit": "c82438e8c24b6a9f693aa49adc4a8ae7733324f8", "deployed_at": "2026-08-31T09:51:46Z"}OK
 === CLOUDFLARED PROCESS ===
-root     1501698  0.1  1.5 1294932 32108 ?       Sl   17:52   0:23 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
-root     1501801  0.1  1.5 1294676 31048 ?       Sl   17:52   0:23 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
+root     1501698  0.1  1.1 1294932 23180 ?       Sl   Aug31   1:11 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
+root     1501801  0.1  1.1 1294676 23624 ?       Sl   Aug31   1:13 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
 === CLOUDFLARED LOG (last 30 lines) ===
 2026-08-31T09:52:07Z INF Registered tunnel connection connIndex=2 connection=52db805a-d86a-4d74-84ee-0ca6bd48bfb9 event=0 ip=198.41.200.53 location=sjc10 protocol=quic
 2026-08-31T09:52:07Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=3 event=0 ip=198.41.192.67
@@ -147,11 +147,11 @@ cert.pem: -rw------- 1 root root 282 Jul 28 11:02 /root/.cloudflared/cert.pem
 === SYSTEMD STATUS ===
 ● cloudflared-tunnel.service - Cloudflare Named Tunnel for AIShield
      Loaded: loaded (/etc/systemd/system/cloudflared-tunnel.service; enabled; vendor preset: enabled)
-     Active: active (running) since Mon 2026-08-31 17:52:07 CST; 4h 5min ago
+     Active: active (running) since Mon 2026-08-31 17:52:07 CST; 13h ago
    Main PID: 1501793 (start-tunnel.sh)
-      Tasks: 10 (limit: 2216)
-     Memory: 17.8M
-        CPU: 23.974s
+      Tasks: 11 (limit: 2216)
+     Memory: 18.8M
+        CPU: 1min 13.297s
      CGroup: /system.slice/cloudflared-tunnel.service
              ├─1501793 /bin/bash /opt/start-tunnel.sh
              └─1501801 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
@@ -185,10 +185,10 @@ fi
 wait $CF_PID
 
 === HTTPS Test from Runner ===
-Time: Mon Aug 31 13:57:51 UTC 2026
+Time: Mon Aug 31 22:53:33 UTC 2026
 
 === curl test (aishield.tools) ===
-{"status": "ok", "version": "4.3.0", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 228, "rules_breakdown": {"static": 204, "generated": 9, "radar": 15, "total": 228}, "uptime": 1788184671.5973463, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup", "commit": "c82438e8c24b6a9f693aa49adc4a8ae7733324f8", "deployed_at": "2026-08-31T09:51:46Z"}
+{"status": "ok", "version": "4.3.0", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 228, "rules_breakdown": {"static": 204, "generated": 9, "radar": 15, "total": 228}, "uptime": 1788216813.7933955, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup", "commit": "c82438e8c24b6a9f693aa49adc4a8ae7733324f8", "deployed_at": "2026-08-31T09:51:46Z"}
 === DNS lookup ===
 104.21.81.46
 172.67.188.44
