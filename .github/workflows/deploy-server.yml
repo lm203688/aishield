@@ -1,18 +1,9 @@
 name: Deploy to Production Server
 
 on:
-  push:
-    branches: [ main ]
-    # self-heal-closed-loop 每次探测都会把 data/state/health.json 提交回 main，
-    # 状态回写不是代码变更，不该触发一次 20 分钟的 SSH 部署。
-    # diagnostics/ 与 automation/ 同理（都是 bot 写的元数据）。
-    paths-ignore:
-      - 'data/state/**'
-      - 'diagnostics/**'
-      - 'automation/**'
-      - 'docs/**'
-  schedule:
-    - cron: '17 */6 * * *'   # 加速期结束，回到可持续节奏 —— 投递安全网；健康驱动的修复由 self-heal 负责
+  # 部署严格由主干闭环（closed-loop-spine.yml）在「CI 验证通过」之后调用，
+  # 不再监听 push —— 避免未经验证的提交直接上线，也不与 spine 内其他 commit 重复触发。
+  workflow_call:
   workflow_dispatch:
 
 permissions:

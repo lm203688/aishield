@@ -1,0 +1,82 @@
+name: AIShield Closed-Loop Spine (情报→修复→提升→迭代)
+
+# 主干闭环：把原本各自独立调度的定时任务串成一条串行链路，每日一次由本工作流统一驱动：
+#   雷达采集 → 威胁情报采集+转规则 → 规则晋升闸门 → 自扫描(新规则回归) →
+#   CI 验证 → 部署(验证后才上线) → 反馈采纳→ROADMAP → 对外分发 → 迭代汇报
+#
+# 设计要点：
+#   1) 各子工作流已去掉独立 cron，仅保留 workflow_call + workflow_dispatch（手动兜底），
+#      因此每日调度从 ~27 次降到 spine 1 次 + 安全网(self-heal/meta/npm/stale) ≈ 11 次。
+#   2) 用 GitHub 原生可复用工作流(uses:) 串行编排，依赖链即门禁：
+#      验证未过 → 不部署；部署未过 → 不汇报。任何一环失败，整条链路在当日终止，
+#      由独立的 meta-monitor 捕获并告警，不会静默带着坏产物继续跑。
+#   3) 子工作流内部仍各自 commit 回 main（情报/雷达/反馈数据入库），
+#      deploy 步骤在 verify 之后执行，actions/checkout 会拉到已含新数据的最新 main。
+
+on:
+  schedule:
+    - cron: '17 3 * * *'   # 每日 03:17 UTC，错峰；单日一次性驱动整条闭环
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+  actions: write
+
+concurrency:
+  group: closed-loop-spine
+  cancel-in-progress: false
+
+jobs:
+  radar:
+    name: 1. 雷达数据采集 (Tech Radar Flywheel)
+    uses: ./.github/workflows/data-scan-flywheel.yml
+    secrets: inherit
+
+  intel:
+    name: 2. 威胁情报采集 + 转规则
+    needs: [radar]
+    uses: ./.github/workflows/threat-intel-feed.yml
+    secrets: inherit
+
+  promote:
+    name: 3. 规则晋升闸门
+    needs: [intel]
+    uses: ./.github/workflows/rule-promoter.yml
+    secrets: inherit
+
+  scan:
+    name: 4. 自扫描 (新规则回归)
+    needs: [intel]
+    uses: ./.github/workflows/unified-security-scan.yml
+    secrets: inherit
+
+  verify:
+    name: 5. CI 验证
+    needs: [promote, scan]
+    uses: ./.github/workflows/ci.yml
+    secrets: inherit
+
+  deploy:
+    name: 6. 部署 (验证后才上线)
+    needs: [verify]
+    uses: ./.github/workflows/deploy-server.yml
+    secrets: inherit
+
+  feedback:
+    name: 7. 反馈采纳 → ROADMAP
+    needs: [deploy]
+    uses: ./.github/workflows/feature-closed-loop.yml
+    secrets: inherit
+
+  distribute:
+    name: 8. 对外分发
+    needs: [deploy]
+    uses: ./.github/workflows/channel-distribution.yml
+    secrets: inherit
+
+  report:
+    name: 9. 迭代汇报
+    needs: [feedback, distribute]
+    uses: ./.github/workflows/project-digest.yml
+    secrets: inherit

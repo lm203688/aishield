@@ -6,6 +6,7 @@ name: AIShield Unified Security Scan
 #   - external-scan: 扫描外部工具（schedule/workflow_dispatch + repo_url）
 
 on:
+  workflow_call:
   push:
     branches: [main]
     paths:
@@ -17,8 +18,6 @@ on:
     paths:
       - 'scanner/**'
       - 'eco/**'
-  schedule:
-    - cron: '52 4 * * 1'   # 加速期结束，回到可持续节奏 —— 自扫描
   workflow_dispatch:
     inputs:
       repo_url:

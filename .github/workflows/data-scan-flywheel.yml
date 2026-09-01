@@ -5,8 +5,7 @@ name: AIShield Data Flywheel (Batch Scan to Self-Built Database)
 # 原则：Research-Informed（对齐 OWASP Top10 与最新工具）
 
 on:
-  schedule:
-    - cron: '30 5 * * 2,5'   # 加速期结束，回到可持续节奏 —— 数据源扫描
+  workflow_call:
   workflow_dispatch:
     inputs:
       source:

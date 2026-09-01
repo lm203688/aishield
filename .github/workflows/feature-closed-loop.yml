@@ -5,8 +5,7 @@ name: AIShield Intelligence-to-Feature Closed-Loop
 # 现版本：feedback_aggregator.py 真实写入 ROADMAP.md + data/state/feature.json 并 commit
 
 on:
-  schedule:
-    - cron: '20 8 * * 1'   # 加速期结束，回到可持续节奏 —— 情报→功能转化
+  workflow_call:
   issues:
     types: [opened, reopened]
   workflow_dispatch:

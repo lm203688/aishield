@@ -9,8 +9,7 @@ name: AIShield Channel Distribution (Content + Registry + Social)
 #   本版改为「零凭据渠道默认必发 + 付费渠道可选放大」，发布不再依赖任何人工申请的凭据。
 
 on:
-  schedule:
-    - cron: '47 6 * * 4'   # 加速期结束，回到可持续节奏 —— 对外分发
+  workflow_call:
   workflow_dispatch:
     inputs:
       publish_only:

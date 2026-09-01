@@ -13,8 +13,7 @@ name: AIShield Threat-Intel Feed Update
 #     3) 新增回归验证与高危告警（原版无任何验证与告警环节）
 
 on:
-  schedule:
-    - cron: '15 7 * * 1,4'   # 加速期结束，回到可持续节奏 —— 外部信号源
+  workflow_call:
   workflow_dispatch:
     inputs:
       days:
@@ -181,47 +180,22 @@ jobs:
               print('README counts already in sync')
           PY
 
-      - name: Run full test suite (引用 CI 状态，避免重复)
+      - name: Run full test suite
         run: |
-          # 复用 CI 结果，避免同一 commit 重复跑 590 条测试。
-          # 两个历史缺陷（曾导致本 workflow 连续失败 2 次）：
-          #   1) 读的是 d['current']['last_status']，而 ci.yml 写的是扁平的
-          #      'overall' —— 永远取到 'unknown'，优化从未生效过；
-          #   2) 内联 python 带着 10 空格缩进，Python 第一行不能缩进，
-          #      IndentationError 被 2>/dev/null 吞掉，同样静默失效。
-          # 现改为：同 commit + 最近成功 + 未过期 三者同时满足才跳过。
-          SKIP_FULL=false
-          if [ -f data/state/ci.json ]; then
-            VERDICT=$(python3 - <<'PYCI')
-          import json, datetime
-          d = json.load(open('data/state/ci.json'))
-          status = d.get('overall') or d.get('current', {}).get('last_status', 'unknown')
-          sha = d.get('sha', '')
-          if status != 'success':
-              print('other')
-          elif sha != '${{ github.sha }}':
-              print('other')
-          else:
-              try:
-                  t = datetime.datetime.strptime(d['updated'], '%Y-%m-%dT%H:%M:%SZ')
-                  t = t.replace(tzinfo=datetime.timezone.utc)
-                  age = (datetime.datetime.now(datetime.timezone.utc) - t).total_seconds()
-                  print('fresh' if age < 6 * 3600 else 'stale')
-              except Exception:
-                  print('stale')
-          PYCI
-            )
-            echo "CI 状态总线判定: ${VERDICT:-missing}"
-            if [ "$VERDICT" = "fresh" ]; then
-              SKIP_FULL=true
-            fi
-          fi
-          if [ "$SKIP_FULL" != "true" ]; then
-            echo "CI 状态不可用/过期/不同 commit -> 跑全量测试"
-            python tests/run_all.py
-          else
-            echo "跳过全量测试（同一 commit 的 CI 在最近 6 小时内已全绿）"
-          fi
+          # 【2026-09-01 修复】本步骤曾让整个 workflow 连续 3 次失败，真因三层叠加：
+          #   1) 语法层：VERDICT=$(python3 - <<'PYCI' ... PYCI) 在命令替换里嵌 heredoc，
+          #      bash 解析 $( ) 时遇到 ')' 就认为替换已结束，heredoc 永远等不到结束符，
+          #      报 "unterminated here-document" 继而是 "syntax error near )"。
+          #      本仓库所有 workflow 均为 CRLF 行尾，PYCI 结束符带 CR 时也匹配不上。
+
+          #   2) 依赖层：判定依据是 data/state/ci.json，但状态文件从未成功入库
+          #      （并发 push 冲突被 || echo 吞掉），新 checkout 里永远不存在该文件。
+          #   3) 语义层（最关键）：本 workflow 刚把新情报规则写入
+          #      data/generated_rules.json，此刻要验证的正是「新规则会不会破坏扫描器」；
+          #      而同 commit 的 CI 验证的是**加规则之前**的代码状态。跳过测试，
+          #      恰恰跳过了最该跑的那一次回归。
+          # 三条同时成立 -> 该"优化"是彻头彻尾的死代码，直接删除，无条件跑全量测试。
+          python tests/run_all.py
 
       - name: Confirm rules actually loaded by scanner
         run: |

@@ -9,7 +9,7 @@ name: npm self-heal
 
 on:
   schedule:
-    - cron: '12 */6 * * *'   # 加速期结束，回到可持续节奏 —— 错峰到 :12，避开 self-heal 的 :23
+    - cron: '12 */12 * * *'   # 降频：每 12 小时，令牌检查两次/日足够
   workflow_dispatch:
 
 permissions:

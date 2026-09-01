@@ -6,7 +6,7 @@ name: AIShield Meta-Monitor (监控自动化体系本身)
 
 on:
   schedule:
-    - cron: '15 */6 * * *'   # 加速期结束，回到可持续节奏 —— 看自动化体系本身（Verify 层）
+    - cron: '15 */8 * * *'   # 降频：每 8 小时；spine 每日跑，元监控只需兜底盯梢
   workflow_dispatch:
   push:
     paths:

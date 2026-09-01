@@ -10,8 +10,7 @@ name: AIShield Rule Auto-Promoter
 # 威胁情报流水线不会抹掉雷达晋升的规则。
 
 on:
-  schedule:
-    - cron: '40 3 * * *'   # 每日 03:40 UTC —— Tech Radar(02:00) 起草之后
+  workflow_call:
   workflow_dispatch:
 
 permissions:

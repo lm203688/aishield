@@ -8,12 +8,10 @@ name: AIShield Project Digest (统一迭代汇报)
 #   4. 通知用户（webhook + Issue）
 
 on:
-  schedule:
-    - cron: '5 */6 * * *'  # 每 6 小时（错峰到 :05，避开整点高负载）
+  # 统一汇报改为由主干闭环（closed-loop-spine）每日末段调用，去掉 workflow_run 触发
+  # （此前被 meta-monitor 每次完成触发 14 次/日，是最大空转源）。
+  workflow_call:
   workflow_dispatch:
-  workflow_run:
-    workflows: ["AIShield Meta-Monitor (监控自动化体系本身)"]
-    types: [completed]
 
 permissions:
   contents: write

@@ -1,6 +1,7 @@
 name: AIShield CI/CD
 
 on:
+  workflow_call:
   push:
     branches: [ main, dev ]
     # 阻断自激回路：ci-state job 会把 data/state/ci.json 提交回 main，
@@ -15,8 +16,6 @@ on:
       - '_logs*'
   pull_request:
     branches: [ main ]
-  schedule:
-    - cron: '8 3 * * *'  # 每日一次兜底；push/PR 已覆盖日常校验，不需要每小时
   workflow_dispatch:      # 补齐手动触发，故障时可立即补跑而无需等下一个 cron
 
 jobs:
