@@ -1,6 +1,90 @@
 {
   "intel": [
     {
+      "id": "GHSA-ffg3-p8fm-mjx2",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 8.3,
+      "title": "RestrictedPython guard hooks can be shadowed via positional-only arguments",
+      "summary": "### Impact\n\nRestrictedPython rewrites sensitive operations to go through guard hooks. Attribute access becomes `_getattr_(obj, name)`, item access becomes `_getitem_(obj, key)`, writes go through `_write_`, and print goes through `_print_`. The embedding application supplies these hooks to enforce its policy.\n\nArgument-name validation rejects these protected names for regular arguments, `*args`, `**kwargs`, and keyword-only arguments, but it misses positional-only arguments (the ones before `/`)",
+      "affected": "pip:RestrictedPython",
+      "references": [
+        "https://github.com/advisories/GHSA-ffg3-p8fm-mjx2"
+      ],
+      "published": "2026-08-28T22:51:35Z",
+      "fetched": "2026-09-01T04:49:58.895602+00:00"
+    },
+    {
+      "id": "GHSA-73p9-6hrp-8qhr",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": null,
+      "title": "AIIR verification and policy gates could report success without enforcing the control (fail-open)",
+      "summary": "### Summary\nSeveral of AIIR's verification and policy paths could return a success/\"verified\" result without actually enforcing the control they represent — they could **fail open** rather than fail closed. For a tool whose purpose is trustworthy verification, a consumer relying on these gates may have treated unverified or non-conforming input as verified.\n\nFound during an internal adversarial hardening review of AIIR (not a third-party audit). All paths are fixed in **1.7.0**.\n\n### Affected pa",
+      "affected": "pip:aiir",
+      "references": [
+        "https://github.com/advisories/GHSA-73p9-6hrp-8qhr"
+      ],
+      "published": "2026-08-28T19:20:32Z",
+      "fetched": "2026-09-01T04:49:58.895639+00:00"
+    },
+    {
+      "id": "GHSA-wjmf-p669-5m5p",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": null,
+      "title": "Protego has exponential backtracking ReDoS in robots.txt URL wildcard matching",
+      "summary": "### Problem description\n\nProtego constructs regular expressions to match URLs against `robots.txt` `Allow:` and `Disallow:` directives, see `protego._urlpattern._URLPattern._prepare_pattern_for_regex()`. Every `*` in the directive value is translated into a lazy `.*?` regex piece, thus a specially crafted directive value with many asterisks may produce a regex that freezes the parser due to exponential backtracking.\n\n### Impact\n\nParsing a specially crafted `robots.txt` with `protego.Protego.pars",
+      "affected": "pip:Protego",
+      "references": [
+        "https://github.com/advisories/GHSA-wjmf-p669-5m5p"
+      ],
+      "published": "2026-08-28T18:43:02Z",
+      "fetched": "2026-09-01T04:49:58.895670+00:00"
+    },
+    {
+      "id": "GHSA-86m2-fcxq-5q7c",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 8.2,
+      "title": "9router: Unauthenticated `/v1` proxy access via `Host`-header spoofing → open AI relay + SSRF",
+      "summary": "## Summary\n\n9router's request guard decides a request is \"local\" (and therefore exempt from API-key auth on the `/v1` LLM proxy) by reading the **client-controlled `Host` header**. Because 9router binds `0.0.0.0` by default (and the CLI misleadingly prints \"localhost\"), a remote, unauthenticated attacker who can reach the port can send `Host: localhost` to be treated as local and obtain `/v1` proxy access with **no API key, no CLI token, and no dashboard login**. In the default configuration (`r",
+      "affected": "npm:9router",
+      "references": [
+        "https://github.com/advisories/GHSA-86m2-fcxq-5q7c"
+      ],
+      "published": "2026-08-28T18:33:20Z",
+      "fetched": "2026-09-01T04:49:57.561181+00:00"
+    },
+    {
+      "id": "GHSA-8gmq-j984-vp4r",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 8.6,
+      "title": "9router: Unauthenticated LLM proxy access via /codex rewrite authorization bypass",
+      "summary": "## Summary\n\n9router exposes an OpenAI/Anthropic-compatible LLM proxy. Remote access to this proxy is intended to be protected by an API-key check in the Next.js middleware.\n\nHowever, 9router also defines a rewrite that maps `/codex/*` to the backend LLM endpoint `/api/v1/responses`. The middleware authorization decision is made on the incoming request path before the rewrite is applied. Because `/codex` is not included in the middleware's protected LLM API prefix list, requests to `/codex/*` byp",
+      "affected": "npm:9router",
+      "references": [
+        "https://github.com/advisories/GHSA-8gmq-j984-vp4r"
+      ],
+      "published": "2026-08-28T18:32:01Z",
+      "fetched": "2026-09-01T04:49:57.561245+00:00"
+    },
+    {
+      "id": "GHSA-jw39-3688-r4rx",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.8,
+      "title": "Trestle has Server-Side Template Injection (SSTI) via Recursive Template Re-evaluation of Untrusted Data",
+      "summary": "### Impact\n\nA Server-Side Template Injection (SSTI) vulnerability exists in multiple locations of trestle's Jinja2 rendering pipeline due to a systemic pattern: **untrusted data is re-parsed as Jinja2 template source code without sandboxing**. This advisory tracks the root cause across all affected code paths.\n\nThe core anti-pattern is: treating runtime data (rendered output, included Markdown content, LUT values) as Jinja2 template source code and passing it to `Parser.parse()` or an equivalent",
+      "affected": "pip:compliance-trestle, pip:compliance-trestle",
+      "references": [
+        "https://github.com/advisories/GHSA-jw39-3688-r4rx"
+      ],
+      "published": "2026-08-28T16:15:38Z",
+      "fetched": "2026-09-01T04:49:58.895939+00:00"
+    },
+    {
       "id": "CVE-2026-74820",
       "source": "nvd",
       "severity": "unknown",
@@ -3916,19 +4000,19 @@
       "fetched": "2026-08-04T06:34:53.913899+00:00"
     }
   ],
-  "updated": "2026-08-28T01:22:07.244180+00:00",
+  "updated": "2026-09-01T04:49:59.400300+00:00",
   "sources": [
     "osv",
     "nvd",
     "github-advisory"
   ],
   "stats": {
+    "high": 128,
+    "medium": 74,
     "unknown": 29,
     "critical": 34,
     "low": 4,
-    "high": 123,
-    "medium": 73,
     "moderate": 1
   },
-  "total": 264
+  "total": 270
 }

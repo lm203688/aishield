@@ -1,7 +1,41 @@
 {
-  "generated_at": "2026-08-28T01:22:19.364848+00:00",
-  "source_intel_count": 264,
+  "generated_at": "2026-09-01T04:50:11.684142+00:00",
+  "source_intel_count": 270,
   "package_blacklist": {
+    "pip:RestrictedPython": {
+      "ecosystem": "pip",
+      "package": "RestrictedPython",
+      "severity": "high",
+      "advisories": [
+        "GHSA-ffg3-p8fm-mjx2"
+      ]
+    },
+    "pip:Protego": {
+      "ecosystem": "pip",
+      "package": "Protego",
+      "severity": "high",
+      "advisories": [
+        "GHSA-wjmf-p669-5m5p"
+      ]
+    },
+    "npm:9router": {
+      "ecosystem": "npm",
+      "package": "9router",
+      "severity": "high",
+      "advisories": [
+        "GHSA-86m2-fcxq-5q7c",
+        "GHSA-8gmq-j984-vp4r"
+      ]
+    },
+    "pip:compliance-trestle": {
+      "ecosystem": "pip",
+      "package": "compliance-trestle",
+      "severity": "high",
+      "advisories": [
+        "GHSA-jw39-3688-r4rx",
+        "GHSA-h47f-gmjp-m7rr"
+      ]
+    },
     "pip:pantheon-agents": {
       "ecosystem": "pip",
       "package": "pantheon-agents",
@@ -364,14 +398,6 @@
         "GHSA-49m4-vp58-wgc9"
       ]
     },
-    "pip:compliance-trestle": {
-      "ecosystem": "pip",
-      "package": "compliance-trestle",
-      "severity": "high",
-      "advisories": [
-        "GHSA-h47f-gmjp-m7rr"
-      ]
-    },
     "pip:pymdown-extensions": {
       "ecosystem": "pip",
       "package": "pymdown-extensions",
@@ -564,6 +590,21 @@
     }
   },
   "pattern_rules": {
+    "(?i)(requests\\.(get|post)|urllib\\.request\\.urlopen|fetch)\\s*\\(\\s*[^)]*(user|input|param|req\\.)": {
+      "description": "SSRF: 请求目标来自不可信输入",
+      "severity": "high",
+      "owasp": "LLM06",
+      "owasp_name": "过度代理权限 (Excessive Agency)",
+      "derived_from": "ssrf",
+      "intel_hits": 25,
+      "evidence": [
+        "GHSA-86m2-fcxq-5q7c",
+        "GHSA-hvfh-5mj3-5f3j",
+        "GHSA-ppx3-28rw-8fpf",
+        "GHSA-9qhg-99ww-9mqc",
+        "GHSA-rg5q-pp8p-f7jm"
+      ]
+    },
     "(?i)(ignore|disregard|forget)\\s+(all\\s+)?(previous|prior|above)\\s+(instruction|prompt|rule)": {
       "description": "提示注入: 覆盖历史指令",
       "severity": "critical",
@@ -577,21 +618,6 @@
         "CVE-2026-55557",
         "GHSA-m9mq-7m7q-xc6p",
         "GHSA-5r34-2g38-6569"
-      ]
-    },
-    "(?i)(requests\\.(get|post)|urllib\\.request\\.urlopen|fetch)\\s*\\(\\s*[^)]*(user|input|param|req\\.)": {
-      "description": "SSRF: 请求目标来自不可信输入",
-      "severity": "high",
-      "owasp": "LLM06",
-      "owasp_name": "过度代理权限 (Excessive Agency)",
-      "derived_from": "ssrf",
-      "intel_hits": 24,
-      "evidence": [
-        "GHSA-hvfh-5mj3-5f3j",
-        "GHSA-ppx3-28rw-8fpf",
-        "GHSA-9qhg-99ww-9mqc",
-        "GHSA-rg5q-pp8p-f7jm",
-        "GHSA-vg6p-v9vm-6fgj"
       ]
     },
     "(?i)(session|token)\\s*[:=]\\s*['\\\"][^'\\\"]{0,8}['\\\"]": {
@@ -698,10 +724,10 @@
     }
   },
   "owasp_distribution": {
-    "LLM01": 1,
     "LLM06": 2,
+    "LLM01": 1,
     "LLM07": 3,
     "LLM05": 3
   },
-  "total_rules": 71
+  "total_rules": 74
 }
