@@ -536,3 +536,4 @@
 {"ts": "2026-09-01T05:01:08.239151+00:00", "level": "RESOLVED", "title": "部署后验证恢复", "fingerprint": "deploy-verify-failed", "note": "线上 commit 与规则数已与 VPS 磁盘一致，.deploy_meta.json 正常写入。"}
 {"ts": "2026-09-01T05:02:12.384807+00:00", "level": "RESOLVED", "title": "内容分发恢复正常", "fingerprint": "distribution-not-landed", "note": "分发链路验证通过，内容已抵达零凭据渠道。"}
 {"ts": "2026-09-01T08:39:29.647299+00:00", "level": "RESOLVED", "title": "部署后验证恢复", "fingerprint": "deploy-verify-failed", "note": "线上 commit 与规则数已与 VPS 磁盘一致，.deploy_meta.json 正常写入。"}
+{"ts": "2026-09-01T08:40:25.551679+00:00", "level": "RESOLVED", "title": "内容分发恢复正常", "fingerprint": "distribution-not-landed", "note": "分发链路验证通过，内容已抵达零凭据渠道。"}
