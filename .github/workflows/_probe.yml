@@ -1,0 +1,14 @@
+name: _PROBE reusable call test
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  single:
+    name: single reusable call
+    uses: ./.github/workflows/data-scan-flywheel.yml
+    secrets: inherit
