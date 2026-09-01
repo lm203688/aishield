@@ -9,6 +9,6 @@ permissions:
 
 jobs:
   single:
-    name: single reusable call
-    uses: ./.github/workflows/data-scan-flywheel.yml
+    name: call trivial callee
+    uses: ./.github/workflows/_callee.yml
     secrets: inherit
