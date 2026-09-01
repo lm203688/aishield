@@ -143,13 +143,14 @@
 
 ## 自动采纳项（迭代闭环产出）
 
-> 由 feedback_aggregator 于 2026-08-31 自动聚合四路输入生成，每轮覆盖更新。勾选即视为已处理。
+> 由 feedback_aggregator 于 2026-09-01 自动聚合四路输入生成，每轮覆盖更新。勾选即视为已处理。
 
 | 优先级 | 来源 | 事项 | 参考 |
 |--------|------|------|------|
 | P1 | S2 生态位待办 | MCP 官方 Registry 收录：向 modelcontextprotocol/registry 提交 server.json —— 生态入口即用户入口 | — |
-| P1 | S3 体系问题 | 修复自动化体系缺陷 — M2 运行活性: 3 个任务超期未执行 —— 这是静默失效的典型信号 | — |
-| P1 | S3 体系问题 | 修复自动化体系缺陷 — M3 状态新鲜度: 状态域 ['distribution', 'flywheel', 'feature', 'registry'] 的归属 workflow 超过阈值未成功运行 —— 对应环节可能已停摆 | — |
+| P1 | S3 体系问题 | 修复自动化体系缺陷 — M2 运行活性: 2 个任务超期未执行 —— 这是静默失效的典型信号 | — |
+| P1 | S3 体系问题 | 修复自动化体系缺陷 — M3 状态新鲜度: 状态域 ['distribution', 'flywheel', 'registry'] 的归属 workflow 超过阈值未成功运行 —— 对应环节可能已停摆 | — |
+| P1 | S4 情报驱动 | 评审本轮 5 条新增高危漏洞的检测覆盖情况 | — |
 | P2 | S1 用户反馈 | 📊 AIShield 项目迭代报告 (自动更新) | [链接](https://github.com/lm203688/aishield/issues/659) |
 | P2 | S1 用户反馈 | [P0] 被调用的安全数据源 API：触发自愈闭环恢复服务 | [链接](https://github.com/lm203688/aishield/issues/656) |
 | P2 | S1 用户反馈 | [P1] 修复自动化体系缺陷 — M3 状态新鲜度: 状态域 ['feature', 'intel'] 超过 72 小时未更新，对应环节可能已停摆 | [链接](https://github.com/lm203688/aishield/issues/41) |
