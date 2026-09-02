@@ -1,6 +1,76 @@
 {
   "intel": [
     {
+      "id": "GHSA-m4rf-3fr8-xwx3",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": 9.8,
+      "title": "NLTK: JVM argument injection bypass via per-call options in the NLTK Stanford wrappers (incomplete fix of CVE-2026-12841)",
+      "summary": "## Vulnerability\n\nThe fix for CVE-2026-12841 (CWE-88, JVM argument injection) added `_validate_java_options()` to block dangerous JVM flags such as `-agentlib`, `-agentpath`, `-javaagent`, `-Xrunjdwp`, and `@argfile` references. However, the validation is only applied when setting global options via `config_java()`. The `java()` function's per-call `options` parameter -- added by PR #3683 (CVE-2026-12615 fix) -- passes options directly to `subprocess.Popen` without calling `_validate_java_option",
+      "affected": "pip:nltk",
+      "references": [
+        "https://github.com/advisories/GHSA-m4rf-3fr8-xwx3"
+      ],
+      "published": "2026-09-01T20:38:22Z",
+      "fetched": "2026-09-02T07:53:43.919281+00:00"
+    },
+    {
+      "id": "GHSA-6hwm-xvph-95vm",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.8,
+      "title": "NLTK: Uncontrolled search path when invoking the Graphviz 'dot' binary",
+      "summary": "Two NLTK sites executed the Graphviz `dot` program by bare name, so process creation resolved it via the search path — and on Windows via the current working directory — rather than a validated absolute location. An attacker who can place a file named `dot` where resolution looks (the CWD on Windows, or a writable/relative entry such as `.` on `PATH`) has their binary executed in place of Graphviz (arbitrary code execution).\n\nAffected (<= 3.10.2):\n- `nltk.parse.dependencygraph.dot2img` — called ",
+      "affected": "pip:nltk",
+      "references": [
+        "https://github.com/advisories/GHSA-6hwm-xvph-95vm"
+      ],
+      "published": "2026-09-01T20:27:20Z",
+      "fetched": "2026-09-02T07:53:43.919332+00:00"
+    },
+    {
+      "id": "GHSA-2rx9-3g3h-c2jv",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.1,
+      "title": "pnpm: pacquet trust-lockfile install can create dependency symlinks outside the project",
+      "summary": "## Summary\n\nA crafted lockfile alias could reach several install-time filesystem joins. With `--trust-lockfile` or a frozen lockfile, traversal segments could create links outside the intended project or `node_modules` boundary. This patch validates dependency names and every virtual-store slot before creating directories, links, bins, or hoisted entries.\n\n## Security boundary\n\n- A shared safe-join helper rejects traversal, absolute, platform-specific, and reserved dependency names before filesy",
+      "affected": "npm:pnpm",
+      "references": [
+        "https://github.com/advisories/GHSA-2rx9-3g3h-c2jv"
+      ],
+      "published": "2026-09-01T18:59:22Z",
+      "fetched": "2026-09-02T07:53:42.589800+00:00"
+    },
+    {
+      "id": "GHSA-3wgp-x9p5-c7cc",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 6.5,
+      "title": "Appium: Reflected XSS / arbitrary JS in @appium/base-driver /test/guinea-pig* routes",
+      "summary": "## Summary\n\nAppium's base-driver mounts the built-in `/test/guinea-pig`, `/test/guinea-pig-scrollable` and `/test/guinea-pig-app-banner` routes **unconditionally** on every server. The handler reflects the `throwError` query param, the `comments` POST field, and the `User-Agent` request header into the returned HTML via `compileLodashTemplate`, which interpolates `<%= expr %>` as `String(expr)` with **no HTML/JS escaping**. This yields reflected XSS, and the `throwError` value is reflected **ins",
+      "affected": "npm:@appium/base-driver",
+      "references": [
+        "https://github.com/advisories/GHSA-3wgp-x9p5-c7cc"
+      ],
+      "published": "2026-09-01T18:54:53Z",
+      "fetched": "2026-09-02T07:53:42.589835+00:00"
+    },
+    {
+      "id": "GHSA-73wf-gq98-2v4g",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.5,
+      "title": "Browserslist: Uncaught crash / prototype write via untrusted browserslist-stats.json custom stats (normalizeStats)",
+      "summary": "## Vulnerability Details\n\n**File**: `node.js`\n**Function**: `normalizeStats()` (line ~214), reached from `getStat()` (called\n**unconditionally** on every `browserslist()` call) and `loadStat()`\n\n### Root Cause\n```js\nfunction normalizeStats(data, stats) {\n  if (!data) { data = {} }\n  if (stats && 'dataByBrowser' in stats) { stats = stats.dataByBrowser }\n  if (typeof stats !== 'object') return undefined\n\n  var normalized = {}\n  for (var i in stats) {\n    var versions = Object.keys(stats[i])\n    if",
+      "affected": "npm:browserslist",
+      "references": [
+        "https://github.com/advisories/GHSA-73wf-gq98-2v4g"
+      ],
+      "published": "2026-09-01T16:41:54Z",
+      "fetched": "2026-09-02T07:53:42.589950+00:00"
+    },
+    {
       "id": "GHSA-ffg3-p8fm-mjx2",
       "source": "github-advisory",
       "severity": "high",
@@ -331,6 +401,20 @@
       ],
       "published": "2026-08-25T18:32:06Z",
       "fetched": "2026-08-25T18:43:24.464385+00:00"
+    },
+    {
+      "id": "GHSA-3h2g-j4wp-7qqq",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": 9.8,
+      "title": "Duplicate Advisory: JVM argument injection bypass via per-call options in the NLTK Stanford wrappers (incomplete fix of CVE-2026-12841)",
+      "summary": "## Duplicate Advisory\n\nThis advisory has been withdrawn because it is a duplicate of GHSA-m4rf-3fr8-xwx3. This link is maintained to preserve external references.\n\n## Original Description\n\nNLTK before 3.10.3 fails to validate JVM options passed through the per-call options parameter in the java() function, allowing attackers to inject dangerous JVM flags. Attackers can supply malicious options like -agentpath, -javaagent, or @argfile to Stanford wrapper classes to achieve arbitrary code executio",
+      "affected": "pip:nltk",
+      "references": [
+        "https://github.com/advisories/GHSA-3h2g-j4wp-7qqq"
+      ],
+      "published": "2026-08-25T18:31:52Z",
+      "fetched": "2026-09-02T07:53:43.920497+00:00"
     },
     {
       "id": "GHSA-g7gc-gmgp-wgqg",
@@ -4000,19 +4084,19 @@
       "fetched": "2026-08-04T06:34:53.913899+00:00"
     }
   ],
-  "updated": "2026-09-01T08:37:02.070094+00:00",
+  "updated": "2026-09-02T07:53:44.423392+00:00",
   "sources": [
     "osv",
     "nvd",
     "github-advisory"
   ],
   "stats": {
-    "high": 128,
-    "medium": 74,
+    "critical": 36,
+    "high": 131,
+    "medium": 75,
     "unknown": 29,
-    "critical": 34,
     "low": 4,
     "moderate": 1
   },
-  "total": 270
+  "total": 276
 }

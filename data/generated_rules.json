@@ -1,7 +1,37 @@
 {
-  "generated_at": "2026-09-01T08:37:14.097774+00:00",
-  "source_intel_count": 270,
+  "generated_at": "2026-09-02T07:53:57.259938+00:00",
+  "source_intel_count": 276,
   "package_blacklist": {
+    "pip:nltk": {
+      "ecosystem": "pip",
+      "package": "nltk",
+      "severity": "critical",
+      "advisories": [
+        "GHSA-m4rf-3fr8-xwx3",
+        "GHSA-6hwm-xvph-95vm",
+        "GHSA-3h2g-j4wp-7qqq",
+        "GHSA-qvv7-cg9c-w4x3",
+        "GHSA-fg7f-2386-8897",
+        "GHSA-6hm5-jgcp-p838",
+        "GHSA-xh95-f55m-82fw"
+      ]
+    },
+    "npm:pnpm": {
+      "ecosystem": "npm",
+      "package": "pnpm",
+      "severity": "high",
+      "advisories": [
+        "GHSA-2rx9-3g3h-c2jv"
+      ]
+    },
+    "npm:browserslist": {
+      "ecosystem": "npm",
+      "package": "browserslist",
+      "severity": "high",
+      "advisories": [
+        "GHSA-73wf-gq98-2v4g"
+      ]
+    },
     "pip:RestrictedPython": {
       "ecosystem": "pip",
       "package": "RestrictedPython",
@@ -514,17 +544,6 @@
         "GHSA-rxcw-mc6f-6hr3"
       ]
     },
-    "pip:nltk": {
-      "ecosystem": "pip",
-      "package": "nltk",
-      "severity": "high",
-      "advisories": [
-        "GHSA-qvv7-cg9c-w4x3",
-        "GHSA-fg7f-2386-8897",
-        "GHSA-6hm5-jgcp-p838",
-        "GHSA-xh95-f55m-82fw"
-      ]
-    },
     "npm:@dynatrace-oss/dynatrace-mcp-server": {
       "ecosystem": "npm",
       "package": "@dynatrace-oss/dynatrace-mcp-server",
@@ -686,13 +705,13 @@
       "owasp": "LLM07",
       "owasp_name": "系统提示泄露 (System Prompt Leakage)",
       "derived_from": "origin",
-      "intel_hits": 18,
+      "intel_hits": 19,
       "evidence": [
+        "GHSA-3h2g-j4wp-7qqq",
         "GHSA-hq3h-g68c-hp78",
         "GHSA-6g6r-q6gw-w8fg",
         "GHSA-pvph-5j39-v8qc",
-        "GHSA-wj6g-v78p-6fx3",
-        "GHSA-8qf9-62x2-82pp"
+        "GHSA-wj6g-v78p-6fx3"
       ]
     },
     "(?i)(docker\\.sock|/proc/self/|privileged\\s*[:=]\\s*true|--cap-add\\s*=?\\s*SYS_ADMIN)": {
@@ -729,5 +748,5 @@
     "LLM07": 3,
     "LLM05": 3
   },
-  "total_rules": 74
+  "total_rules": 76
 }
