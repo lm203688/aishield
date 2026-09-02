@@ -1,5 +1,5 @@
 === DIAGNOSTIC ===
-Time: Tue Sep 1 04:39:07 PM CST 2026
+Time: Wed Sep 2 03:55:48 PM CST 2026
 === USER ===
 root
 === GIT LOG ===
@@ -13,9 +13,10 @@ ec65b03f auto: 批量扫描入库 [skip ci]
 # 解决 Quick Tunnel 的 error 1014 (CNAME Cross-User Banned) 问题
 #
 === API STATUS ===
-{"status": "ok", "version": "4.3.0", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 228, "rules_breakdown": {"static": 204, "generated": 9, "radar": 15, "total": 228}, "uptime": 1788251947.8154712, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup", "commit": "93fcd10c5a07cf882e7bfbb7a3ee6da122e3a19c", "deployed_at": "2026-09-01T05:00:07Z"}OK
+{"status": "ok", "version": "4.3.0", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 228, "rules_breakdown": {"static": 204, "generated": 9, "radar": 15, "total": 228}, "uptime": 1788335749.0879211, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup", "commit": "93fcd10c5a07cf882e7bfbb7a3ee6da122e3a19c", "deployed_at": "2026-09-01T05:00:07Z"}OK
 === CLOUDFLARED PROCESS ===
-root     2319596  0.1  1.6 1294676 33080 ?       Sl   14:44   0:11 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
+root     3017546  0.1  1.3 1294676 27024 ?       Sl   08:37   0:42 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
+root     3021150  0.1  1.1 1294676 23816 ?       Ssl  08:41   0:42 /usr/local/bin/cloudflared --config /etc/cloudflared-healthlens/config.yml tunnel --metrics 127.0.0.1:8099 run
 === CLOUDFLARED LOG (last 30 lines) ===
 2026-09-01T05:00:34Z INF precheck component="UDP Connectivity" details="QUIC connection successful" run_id=0fa67f45-be0c-4843-ad7a-2e9adc41796d status=pass target=region2.v2.argotunnel.com
 2026-09-01T05:00:34Z INF precheck component="TCP Connectivity" details="HTTP/2 connection successful" run_id=0fa67f45-be0c-4843-ad7a-2e9adc41796d status=pass target=region1.v2.argotunnel.com
@@ -146,20 +147,20 @@ cert.pem: -rw------- 1 root root 282 Jul 28 11:02 /root/.cloudflared/cert.pem
 === SYSTEMD STATUS ===
 ● cloudflared-tunnel.service - Cloudflare Named Tunnel for AIShield
      Loaded: loaded (/etc/systemd/system/cloudflared-tunnel.service; enabled; vendor preset: enabled)
-     Active: active (running) since Tue 2026-09-01 14:44:12 CST; 1h 54min ago
-   Main PID: 2319594 (start-tunnel.sh)
-      Tasks: 9 (limit: 2216)
-     Memory: 18.4M
-        CPU: 11.623s
+     Active: active (running) since Wed 2026-09-02 08:37:16 CST; 7h ago
+   Main PID: 3017545 (start-tunnel.sh)
+      Tasks: 10 (limit: 2216)
+     Memory: 25.4M
+        CPU: 42.800s
      CGroup: /system.slice/cloudflared-tunnel.service
-             ├─2319594 /bin/bash /opt/start-tunnel.sh
-             └─2319596 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
+             ├─3017545 /bin/bash /opt/start-tunnel.sh
+             └─3017546 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
 === PORTS ===
 LISTEN 0      5            0.0.0.0:8450       0.0.0.0:*    users:(("python3",pid=2249866,fd=3))                                                    
 === CRONTAB ===
 */5 * * * * flock -xn /tmp/stargate.lock -c '/usr/local/qcloud/stargate/admin/start.sh > /dev/null 2>&1 &'
 * * * * * pgrep -f 'cloudflared tunnel' > /dev/null 2>&1 || /opt/start-tunnel.sh >> /tmp/cloudflared.log 2>&1
-*/5 * * * * /usr/bin/python3 /usr/local/bin/merge_cloudflared_ingress.py >> /var/log/healthlens-ingress.log 2>&1
+*/5 * * * * systemctl is-active --quiet cloudflared-healthlens || systemctl restart cloudflared-healthlens
 === START SCRIPT ===
 #!/bin/bash
 # AIShield Tunnel 启动脚本
@@ -185,12 +186,12 @@ fi
 wait $CF_PID
 
 === HTTPS Test from Runner ===
-Time: Tue Sep  1 08:39:18 UTC 2026
+Time: Wed Sep  2 07:56:00 UTC 2026
 
 === curl test (aishield.tools) ===
-{"status": "ok", "version": "4.3.0", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 228, "rules_breakdown": {"static": 204, "generated": 9, "radar": 15, "total": 228}, "uptime": 1788251958.583833, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup", "commit": "93fcd10c5a07cf882e7bfbb7a3ee6da122e3a19c", "deployed_at": "2026-09-01T05:00:07Z"}
+{"status": "ok", "version": "4.3.0", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 228, "rules_breakdown": {"static": 204, "generated": 9, "radar": 15, "total": 228}, "uptime": 1788335760.857745, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup", "commit": "93fcd10c5a07cf882e7bfbb7a3ee6da122e3a19c", "deployed_at": "2026-09-01T05:00:07Z"}
 === DNS lookup ===
-172.67.188.44
 104.21.81.46
+172.67.188.44
 
 === DNS CNAME check ===
