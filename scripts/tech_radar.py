@@ -683,26 +683,110 @@ _SEV_HIGH = ["new attack", "first", "novel", "breaking", "automated attack",
              "practical attack", "real-world attack", "in the wild"]
 
 
+# ---------------------------------------------------------------------------
+# Attack vs. defence side
+# ---------------------------------------------------------------------------
+# Root cause of the 49 rotting `_proposed/` drafts: the radar drafted *any*
+# signal matching an attack keyword as an attack-rule candidate, even when the
+# signal was itself a DEFENSIVE artefact (a guardrail tool, a detection paper,
+# a benchmark) or owner-level REPO SPAM. Defensive artefacts are not threats
+# AIShield needs to detect, so drafting them only produced unpromotable stubs.
+# We now tag every classified signal with a `side` (attack | defense | spam)
+# and the drafting/issue pipeline only acts on the attack side.
+
+# Defence vocabulary -- overwhelmingly appears in protective tools/papers, not
+# offensive techniques. A signal carrying any of these is treated as the
+# defence side unless it also uses explicit exploit language (see below).
+DEFENSE_INDICATORS = [
+    "defen",          # defend / defense / defensive
+    "guard",          # guardrail / guardian
+    "mitigat",        # mitigate / mitigation
+    "shield",         # shielding / shield
+    "firewall",
+    "protect",        # protection / protective
+    "safeguard",
+    "sandbox",
+    "harden",         # hardening
+    "benchmark",
+    "survey",
+    "detect",         # detection / detect (defensive research)
+    "countermeasure",
+    "prevention",
+    "adversarial training",
+    "robustness",     # robustness against attacks (defensive)
+    "neutraliz",      # neutralize
+    "quarantine",
+    "fuzz",           # fuzzing / fuzzer (security-testing tooling)
+    "sentinel",
+]
+
+# Owner-level repo spam: a single GitHub owner mass-producing similarly-named
+# repos (often defensive demos) that flood the radar with low-signal noise.
+# Keyed by owner login -> human note. Signalled repos are suppressed from
+# attack drafting entirely.
+REPO_SPAM_OWNERS = {
+    "alphaparkinc": "genpark-* mass-repo spam (defensive demos)",
+}
+REPO_SPAM_PREFIXES = ("genpark-",)
+
+
+def _is_repo_spam(sig):
+    """True if the signal is owner-level repo spam that should be suppressed."""
+    low = (sig.get("title") or "").lower()
+    if any(owner.lower() in low for owner in REPO_SPAM_OWNERS):
+        return True
+    repo_part = low.split("/")[-1]          # owner/repo -> repo name
+    return any(repo_part.startswith(p) for p in REPO_SPAM_PREFIXES)
+
+
+def _is_defense_side(text, title):
+    """True if the signal describes a defensive artefact rather than an attack."""
+    return any(k in text for k in DEFENSE_INDICATORS)
+
+
 def classify_signal(sig):
-    """Return (category, severity) for a signal, or (None, None)."""
+    """Return (category, severity, side) for a signal, or (None, None, "none").
+
+    `side` is one of:
+      - "attack"  : an offensive technique / new threat -> draft a rule candidate
+      - "defense" : a protective tool/paper/benchmark -> tracked, NOT drafted
+      - "spam"    : owner-level repo spam -> suppressed from attack drafting
+      - "none"    : no attack pattern matched -> ignored
+    """
     text = " ".join(str(v) for v in sig.values() if isinstance(v, str)).lower()
+
+    # 1) owner-level repo spam: suppress entirely, before any pattern match
+    if _is_repo_spam(sig):
+        return None, None, "spam"
+
     cat = next((c for pat, c in ATTACK_PATTERNS if re.search(pat, text)), None)
     if not cat:
-        return None, None
+        return None, None, "none"
+
     title = (sig.get("title") or "").lower()
+
+    # severity escalation (attacker language)
     if any(k in title for k in _SEV_CRITICAL):
-        return cat, "critical"
-    if any(k in title for k in _SEV_HIGH):
-        return cat, "high"
-    # A defence/benchmark paper describes an attack but is not itself a threat.
-    if any(k in title for k in ["defen", "guard", "mitigat", "survey", "benchmark",
-                                "detect", "safeguard", "certification"]):
-        return cat, "medium"
-    return cat, "high"
+        sev = "critical"
+    elif any(k in title for k in _SEV_HIGH):
+        sev = "high"
+    else:
+        sev = "high"
+
+    # attack vs. defence side
+    side = "defense" if _is_defense_side(text, title) else "attack"
+    if side == "defense":
+        if sev == "critical":
+            # explicit exploit language (bypass/exploit/rce/...) means this is a
+            # real attack technique that merely mentions defences -> keep attack
+            side = "attack"
+        else:
+            sev = "medium"          # defensive artefacts are not high-priority threats
+    return cat, sev, side
 
 
 def is_critical(sig):
-    cat, sev = classify_signal(sig)
+    cat, sev, _side = classify_signal(sig)
     return sev == "critical"
 
 
@@ -722,8 +806,8 @@ def draft_rule_candidate(sig):
     version emitted Python stubs subclassing `Rule`/`RuleResult`; those classes
     do not exist in this project, so every stub was unusable by construction.
     """
-    cat, sev = classify_signal(sig)
-    if not cat:
+    cat, sev, side = classify_signal(sig)
+    if not cat or side != "attack":
         return None
     slug = _slugify(sig.get("title", "rule")) + "_" + sig.get("id", "x")[:6]
     date = _today_str()
@@ -988,9 +1072,14 @@ def render_report(signals, drafted_rules, created_issues, errors):
             line = f"- [{title}]({url})" if url else f"- {title}"
             if extra:
                 line += "  " + " · ".join(extra)
-            cat, sev = classify_signal(it)
+            cat, sev, side = classify_signal(it)
             if cat:
-                line += f"  → **{cat}** / {sev}"
+                tag = f"**{cat}** / {sev}"
+                if side == "defense":
+                    tag += " _(defense-side, not drafted)_"
+                elif side == "spam":
+                    tag += " _(repo-spam, suppressed)_"
+                line += f"  → {tag}"
             lines.append(line)
         lines.append("")
 
@@ -1112,8 +1201,8 @@ def main():
     drafted_rules = []
     if not dry_run or True:  # always draft in both modes; user reviews regardless
         for sig in new_signals:
-            cat, sev = classify_signal(sig)
-            if cat and sev in ("high", "critical"):
+            cat, sev, side = classify_signal(sig)
+            if cat and side == "attack" and sev in ("high", "critical"):
                 path = draft_rule_candidate(sig)
                 if path:
                     drafted_rules.append(path)
@@ -1123,8 +1212,8 @@ def main():
     created_issues = []
     if not dry_run:
         for sig in new_signals:
-            cat, sev = classify_signal(sig)
-            if cat and sev == "critical":
+            cat, sev, side = classify_signal(sig)
+            if cat and side == "attack" and sev == "critical":
                 url = create_github_issue(pat, sig, cat, sev)
                 if url:
                     created_issues.append(url)

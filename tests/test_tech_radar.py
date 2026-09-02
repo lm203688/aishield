@@ -120,26 +120,27 @@ class TestSignalClassification(unittest.TestCase):
 
     def test_known_attack_papers_are_classified(self):
         for title, expected in self.CASES:
-            cat, sev = tech_radar.classify_signal({'title': title, 'summary': ''})
+            cat, sev, side = tech_radar.classify_signal({'title': title, 'summary': ''})
             self.assertEqual(cat, expected, '误分类: %s' % title[:60])
             self.assertIn(sev, ('critical', 'high', 'medium'))
 
     def test_defence_papers_are_downgraded_not_escalated(self):
         """防御类论文描述了攻击，但它本身不是威胁，不应判为 critical"""
-        cat, sev = tech_radar.classify_signal({
+        cat, sev, side = tech_radar.classify_signal({
             'title': 'PromptShield Home: Ambient Multimodal Prompt Injection '
                      'Defense for Smart-Home Agents', 'summary': ''})
         self.assertEqual(cat, 'prompt-injection')
         self.assertEqual(sev, 'medium')
+        self.assertEqual(side, 'defense')
 
     def test_exploit_language_escalates_to_critical(self):
-        _, sev = tech_radar.classify_signal({
+        _, sev, _ = tech_radar.classify_signal({
             'title': 'Unauthenticated RCE exploit in MCP tool poisoning chain',
             'summary': ''})
         self.assertEqual(sev, 'critical')
 
     def test_unrelated_paper_is_not_classified(self):
-        cat, _ = tech_radar.classify_signal({
+        cat, _, _ = tech_radar.classify_signal({
             'title': 'A Survey of Adversarial Efficiency Degradation for '
                      'Vision Transformer', 'summary': ''})
         self.assertIsNone(cat, '与 agent 安全无关的论文不应产生规则候选')
@@ -150,6 +151,23 @@ class TestSignalClassification(unittest.TestCase):
         hits = sum(1 for t in titles
                    if tech_radar.classify_signal({'title': t, 'summary': ''})[0])
         self.assertEqual(hits, len(titles))
+
+    def test_defense_side_is_not_drafted(self):
+        """根因修复：防御侧信号不得进入攻击起草链路（不得产死稿）"""
+        sig = {'_source': 'arxiv', 'id': 'def1',
+               'title': 'PromptShield: Prompt Injection Defense for Agents',
+               'url': 'https://example.com/x'}
+        self.assertIsNone(tech_radar.draft_rule_candidate(sig),
+                          '防御侧信号不应起草攻击规则候选')
+
+    def test_repo_spam_is_suppressed(self):
+        """根因修复：owner 级仓库刷量（genpark-*）须被抑制为 spam"""
+        sig = {'_source': 'github', 'id': 'spam1',
+               'title': 'alphaparkinc/genpark-firewall-sentinel-skill',
+               'url': 'https://github.com/alphaparkinc/genpark-firewall-sentinel-skill'}
+        cat, sev, side = tech_radar.classify_signal(sig)
+        self.assertEqual(side, 'spam')
+        self.assertIsNone(cat)
 
 
 # ══════════════════════════════════════════════════════════════
@@ -193,6 +211,28 @@ class TestCapabilityGap(unittest.TestCase):
             'title': 'LLM-Assisted Detection and Repair of Hardware Security '
                      'Vulnerabilities in Verilog Designs'}),
             '硬件安全属于相邻领域，不应进入采纳清单')
+
+    def test_life_science_papers_excluded(self):
+        """2026-08-11 实测误报：'risk of bias' 里的 risk 被当成安全强词，
+        叠加摘要里的 'LLM agents' 就误判为可采纳防御能力。生命科学论文
+        大量复用 risk/safety/integrity 的非安全义项，必须按垂直领域排除。"""
+        self.assertFalse(capability_gap.is_defensive({
+            'id': 'x',
+            'title': 'Authoring and Management of Transparent Research '
+                     'Integrity Assessments of Randomised Clinical Trial '
+                     'Publications',
+            'summary': 'We present a platform where large language model '
+                       'agents assist reviewers in assessing risk of bias '
+                       'in randomised clinical trial reports.'}),
+            '临床试验论文不应进入采纳清单（risk of bias 非安全语义）')
+
+    def test_agent_security_paper_survives_new_exclusions(self):
+        """垂直黑名单不能误伤本领域论文——加词后必须重跑这条"""
+        self.assertTrue(capability_gap.is_defensive({
+            'id': 'x',
+            'title': 'Prompt injection attacks against MCP tool descriptions',
+            'summary': 'We show malicious skill manifests can hijack agents.'}),
+            '本领域攻防论文被新增排除词误伤')
 
     def test_existing_capability_is_matched_not_flagged_as_gap(self):
         """我们已有的能力不能被报成缺口，否则会重复造轮子"""
