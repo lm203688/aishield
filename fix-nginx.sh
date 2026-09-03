@@ -152,7 +152,7 @@ map $http_upgrade $connection_upgrade {
 server {
     listen 80 default_server;
     listen [::]:80 default_server;
-    server_name aishield.tools www.aishield.tools healthlens.cc www.healthlens.cc _;
+    server_name aishield.tools www.aishield.tools _;
 
     client_max_body_size 50m;
 
