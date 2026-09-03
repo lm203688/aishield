@@ -202,7 +202,7 @@ else
     cat > /etc/nginx/conf.d/aishield.conf << 'FALLBACK'
 server {
     listen 80 default_server;
-    server_name _;
+    server_name aishield.tools www.aishield.tools;
     location / {
         proxy_pass http://127.0.0.1:8450;
         proxy_set_header Host $host;

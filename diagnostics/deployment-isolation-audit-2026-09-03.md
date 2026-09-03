@@ -87,7 +87,7 @@ VPS 上实际加载的是哪一份无法从本地确认（SSH key 已失效）�
 |---|---|---|---|
 | 1 | **删除 DNS 死记录** | `aishield.tools.healthlens.cc`（healthlens zone → aishield 隧道） | ✅ 已删除并复验，zone 内仅剩 api/根/www 三条 |
 | 2 | **删除无引用子域** | `swarm.aishield.tools` | ✅ 已删除并复验，全仓无任何代码/配置引用 |
-| 3 | **解耦 nginx 配置** | `nginx/nginx.conf`（L27、L61）、`fix-nginx.sh`（L155）移除 `healthlens.cc www.healthlens.cc` | ✅ 已改为 `server_name aishield.tools www.aishield.tools _;` |
+| 3 | **解耦 nginx 配置** | `nginx/nginx.conf`（L27、L61）、`fix-nginx.sh`（主配置 L155、FALLBACK 兜底 L205）移除 `healthlens.cc www.healthlens.cc`；FALLBACK 由 `server_name _;`（全兜）收紧为 `server_name aishield.tools www.aishield.tools;` | ✅ 主配置=`server_name aishield.tools www.aishield.tools _;`；FALLBACK=`server_name aishield.tools www.aishield.tools;`；`setup-nginx.sh` 经 grep 确认无 healthlens 残留；两脚本 `bash -n` 通过 |
 | 4 | `www.aishield.tools` | 保留 | ⛔ 无法由我修复，见下 |
 
 **执行后健康复核（无连带影响）**
