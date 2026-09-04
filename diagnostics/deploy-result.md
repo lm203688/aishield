@@ -1,5 +1,5 @@
 === DIAGNOSTIC ===
-Time: Wed Sep 2 03:55:48 PM CST 2026
+Time: Fri Sep 4 03:59:54 PM CST 2026
 === USER ===
 root
 === GIT LOG ===
@@ -13,10 +13,10 @@ ec65b03f auto: 批量扫描入库 [skip ci]
 # 解决 Quick Tunnel 的 error 1014 (CNAME Cross-User Banned) 问题
 #
 === API STATUS ===
-{"status": "ok", "version": "4.3.0", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 228, "rules_breakdown": {"static": 204, "generated": 9, "radar": 15, "total": 228}, "uptime": 1788335749.0879211, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup", "commit": "93fcd10c5a07cf882e7bfbb7a3ee6da122e3a19c", "deployed_at": "2026-09-01T05:00:07Z"}OK
+{"status": "ok", "version": "4.3.0", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 228, "rules_breakdown": {"static": 204, "generated": 9, "radar": 15, "total": 228}, "uptime": 1788508794.6170928, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup", "commit": "93fcd10c5a07cf882e7bfbb7a3ee6da122e3a19c", "deployed_at": "2026-09-01T05:00:07Z"}OK
 === CLOUDFLARED PROCESS ===
-root     3017546  0.1  1.3 1294676 27024 ?       Sl   08:37   0:42 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
-root     3021150  0.1  1.1 1294676 23816 ?       Ssl  08:41   0:42 /usr/local/bin/cloudflared --config /etc/cloudflared-healthlens/config.yml tunnel --metrics 127.0.0.1:8099 run
+root     3017546  0.1  1.2 1294932 25196 ?       Sl   Sep02   5:18 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
+root     3021150  0.1  1.1 1360540 22688 ?       Ssl  Sep02   5:18 /usr/local/bin/cloudflared --config /etc/cloudflared-healthlens/config.yml tunnel --metrics 127.0.0.1:8099 run
 === CLOUDFLARED LOG (last 30 lines) ===
 2026-09-01T05:00:34Z INF precheck component="UDP Connectivity" details="QUIC connection successful" run_id=0fa67f45-be0c-4843-ad7a-2e9adc41796d status=pass target=region2.v2.argotunnel.com
 2026-09-01T05:00:34Z INF precheck component="TCP Connectivity" details="HTTP/2 connection successful" run_id=0fa67f45-be0c-4843-ad7a-2e9adc41796d status=pass target=region1.v2.argotunnel.com
@@ -147,11 +147,11 @@ cert.pem: -rw------- 1 root root 282 Jul 28 11:02 /root/.cloudflared/cert.pem
 === SYSTEMD STATUS ===
 ● cloudflared-tunnel.service - Cloudflare Named Tunnel for AIShield
      Loaded: loaded (/etc/systemd/system/cloudflared-tunnel.service; enabled; vendor preset: enabled)
-     Active: active (running) since Wed 2026-09-02 08:37:16 CST; 7h ago
+     Active: active (running) since Wed 2026-09-02 08:37:16 CST; 2 days ago
    Main PID: 3017545 (start-tunnel.sh)
       Tasks: 10 (limit: 2216)
-     Memory: 25.4M
-        CPU: 42.800s
+     Memory: 23.8M
+        CPU: 5min 18.912s
      CGroup: /system.slice/cloudflared-tunnel.service
              ├─3017545 /bin/bash /opt/start-tunnel.sh
              └─3017546 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
@@ -186,12 +186,12 @@ fi
 wait $CF_PID
 
 === HTTPS Test from Runner ===
-Time: Wed Sep  2 07:56:00 UTC 2026
+Time: Fri Sep  4 08:00:05 UTC 2026
 
 === curl test (aishield.tools) ===
-{"status": "ok", "version": "4.3.0", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 228, "rules_breakdown": {"static": 204, "generated": 9, "radar": 15, "total": 228}, "uptime": 1788335760.857745, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup", "commit": "93fcd10c5a07cf882e7bfbb7a3ee6da122e3a19c", "deployed_at": "2026-09-01T05:00:07Z"}
+{"status": "ok", "version": "4.3.0", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 228, "rules_breakdown": {"static": 204, "generated": 9, "radar": 15, "total": 228}, "uptime": 1788508806.3107076, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup", "commit": "93fcd10c5a07cf882e7bfbb7a3ee6da122e3a19c", "deployed_at": "2026-09-01T05:00:07Z"}
 === DNS lookup ===
-104.21.81.46
 172.67.188.44
+104.21.81.46
 
 === DNS CNAME check ===
