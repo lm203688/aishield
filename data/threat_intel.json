@@ -1,6 +1,272 @@
 {
   "intel": [
     {
+      "id": "GHSA-79wm-x847-7cvg",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 8.8,
+      "title": "Claude Code Templates: Unauthenticated OS command injection (RCE) in Claude Code Studio server (--studio)",
+      "summary": "### Summary\n`npx claude-code-templates --studio` launches \"Claude Code Studio\", an Express HTTP server (`cli-tool/src/sandbox-server.js`, default port 3444) that binds to **all interfaces** (`0.0.0.0`), sets `Access-Control-Allow-Origin: *`, and requires **no authentication**. Two POST endpoints pass attacker-controlled request-body fields into `child_process.spawn(..., { shell: true })`. Because `shell: true` makes Node join the argv array into a single `sh -c` string, the fields are parsed by ",
+      "affected": "npm:claude-code-templates",
+      "references": [
+        "https://github.com/advisories/GHSA-79wm-x847-7cvg"
+      ],
+      "published": "2026-09-03T19:50:47Z",
+      "fetched": "2026-09-04T07:57:38.299041+00:00"
+    },
+    {
+      "id": "GHSA-fg9p-mrxr-hvq7",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": null,
+      "title": "Orval: RCE via OpenAPI path -> unescaped request-URL template literal (backtick breakout)",
+      "summary": "### Summary\n\nOrval emits the OpenAPI path into the generated request URL as a TEMPLATE LITERAL (`` `/users/...` ``) without escaping the backtick character. A path containing a backtick closes the template literal and injects a concatenation expression that is evaluated when the generated URL/request/key function is called, executing attacker-controlled code. Affects the axios, fetch, react-query, and swr clients. Verified on Orval 8.19.0; survives Orval's default OpenAPI validation.\n\n### Detail",
+      "affected": "npm:orval",
+      "references": [
+        "https://github.com/advisories/GHSA-fg9p-mrxr-hvq7"
+      ],
+      "published": "2026-09-03T19:17:32Z",
+      "fetched": "2026-09-04T07:57:38.299130+00:00"
+    },
+    {
+      "id": "GHSA-88f2-fpv8-89q2",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": null,
+      "title": "Orval: RCE via servers[].url -> unescaped request-URL template literal (with getBaseUrlFromSpecification)",
+      "summary": "### Summary\n\nWhen Orval is configured with `output.baseUrl.getBaseUrlFromSpecification: true`, it bakes the spec's `servers[0].url` into the generated request URL as a template literal without escaping the backtick. A server URL containing a backtick closes the template literal and injects a concatenation expression evaluated when the generated URL/request function is called, executing attacker-controlled code. Verified on Orval 8.19.0 (fetch client); survives default OpenAPI validation.\n\n### De",
+      "affected": "npm:orval",
+      "references": [
+        "https://github.com/advisories/GHSA-88f2-fpv8-89q2"
+      ],
+      "published": "2026-09-03T19:06:52Z",
+      "fetched": "2026-09-04T07:57:38.299141+00:00"
+    },
+    {
+      "id": "GHSA-w727-8j6c-2rj4",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": null,
+      "title": "Orval: Import-time RCE via schema default -> zod module-level template literal",
+      "summary": "### Summary\n\nOrval's zod schema generation emits a schema's `default` value as a module-level template literal (`export const …Default = `<default>`;`) without escaping `${` or the backtick. A default of the form `v${<code>}w` injects a live JavaScript expression that is evaluated when the generated zod schema module is imported, executing attacker-controlled code at import — no request or function call needed. Verified on Orval 8.19.0; survives default OpenAPI validation.\n\n### Details\n\n```ts\nex",
+      "affected": "npm:orval",
+      "references": [
+        "https://github.com/advisories/GHSA-w727-8j6c-2rj4"
+      ],
+      "published": "2026-09-03T19:03:03Z",
+      "fetched": "2026-09-04T07:57:38.299158+00:00"
+    },
+    {
+      "id": "GHSA-w8wf-3qvj-6xqf",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 8.1,
+      "title": "OpenClaw Feishu permission tools could ignore per-account disablement",
+      "summary": "### Summary\n\nFeishu permission tools could ignore per-account disablement. In affected versions, a lower-trust caller or configured input path could perform actions that should have required a stronger authorization or policy check.\n\nThis advisory is scoped to the named feature and configuration. It does not change OpenClaw's trusted-operator model: authenticated Gateway operators, installed plugins, and intentional local execution surfaces remain trusted unless a separate policy, approval, allo",
+      "affected": "npm:@openclaw/feishu",
+      "references": [
+        "https://github.com/advisories/GHSA-w8wf-3qvj-6xqf"
+      ],
+      "published": "2026-09-03T17:33:19Z",
+      "fetched": "2026-09-04T07:57:38.299368+00:00"
+    },
+    {
+      "id": "GHSA-2q7j-2vhx-56g8",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 8.1,
+      "title": "OpenClaw Feishu tools could ignore per-account disablement",
+      "summary": "### Summary\n\nFeishu tools could ignore per-account disablement. In affected versions, a lower-trust caller or configured input path could perform actions that should have required a stronger authorization or policy check.\n\nThis advisory is scoped to the named feature and configuration. It does not change OpenClaw's trusted-operator model: authenticated Gateway operators, installed plugins, and intentional local execution surfaces remain trusted unless a separate policy, approval, allowlist, sand",
+      "affected": "npm:@openclaw/feishu",
+      "references": [
+        "https://github.com/advisories/GHSA-2q7j-2vhx-56g8"
+      ],
+      "published": "2026-09-03T17:30:55Z",
+      "fetched": "2026-09-04T07:57:38.299375+00:00"
+    },
+    {
+      "id": "CVE-2026-84779",
+      "source": "nvd",
+      "severity": "high",
+      "cvss": 8.1,
+      "title": "Subscriber Broken Access Control in Agentimus – AI SEO, llms.txt &amp; MCP for AI Agents <= 1.51.0 versions.",
+      "summary": "Subscriber Broken Access Control in Agentimus – AI SEO, llms.txt &amp; MCP for AI Agents <= 1.51.0 versions.",
+      "affected": "llm agent",
+      "references": [
+        "https://patchstack.com/database/wordpress/plugin/agentimus/vulnerability/wordpress-agentimus-ai-seo-llms-txt-mcp-for-ai-agents-plugin-1-51-0-broken-access-control-vulnerability?_s_id=cve"
+      ],
+      "published": "2026-09-03T17:17:28.880",
+      "fetched": "2026-09-04T07:57:31.231569+00:00"
+    },
+    {
+      "id": "GHSA-4mvj-m6j5-pmf7",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": 9.3,
+      "title": "unstructured: Server-Side Request Forgery in the URL-based partitioning",
+      "summary": "### Summary\n\nServer-Side Request Forgery in `unstructured`. The `url=` argument of `partition()`, `partition_html()`, and `partition_md()` is fetched via `requests.get()` with no host validation. The response body is returned as `Element` text, so this is a **full-read SSRF** — attackers reach loopback admin APIs, internal HTTP services, and cloud metadata endpoints, and read the response. \n\n`unstructured` is the de facto URL ingestion layer for LangChain `UnstructuredURLLoader`, LlamaIndex `Uns",
+      "affected": "pip:unstructured",
+      "references": [
+        "https://github.com/advisories/GHSA-4mvj-m6j5-pmf7"
+      ],
+      "published": "2026-09-03T17:02:46Z",
+      "fetched": "2026-09-04T07:57:39.728256+00:00"
+    },
+    {
+      "id": "GHSA-78x9-fhhx-v2g6",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 6.5,
+      "title": "CKAN MCP Server: Cache-key canonicalization collision enables cache confusion / poisoning",
+      "summary": "## Summary\n\nThe response cache derives its key from an ambiguous string serialization of the request parameters. `canonicalizeParams` joins sorted `${key}=${value}` pairs with `&` and does not escape `&`, `=`, or the `|` field separators used in `buildCacheKey`. Two **different** logical parameter sets can therefore serialize to the **same** key and share one cache entry. Because the cached value is whatever the upstream returned for whichever request populated the entry first, an attacker can p",
+      "affected": "npm:@aborruso/ckan-mcp-server",
+      "references": [
+        "https://github.com/advisories/GHSA-78x9-fhhx-v2g6"
+      ],
+      "published": "2026-09-03T14:49:22Z",
+      "fetched": "2026-09-04T07:57:38.299389+00:00"
+    },
+    {
+      "id": "GHSA-6f9w-9hf2-5rg3",
+      "source": "github-advisory",
+      "severity": "low",
+      "cvss": 3.7,
+      "title": "CKAN MCP Server: Information disclosure via verbose error reflection",
+      "summary": "## Summary\n\nError paths reflect raw upstream response bodies and internal exception messages back to the caller instead of a sanitized, generic message. When the server is pointed at (or redirected/SSRF'd to) a host that returns a non-CKAN response, or when an internal exception occurs, the caller receives verbatim upstream content and internal detail (hostnames, internal IPs, DB errors, stack fragments).\n\n## Affected code\n\n`src/utils/http.ts` — the entire decoded upstream body is embedded in th",
+      "affected": "npm:@aborruso/ckan-mcp-server",
+      "references": [
+        "https://github.com/advisories/GHSA-6f9w-9hf2-5rg3"
+      ],
+      "published": "2026-09-03T14:49:10Z",
+      "fetched": "2026-09-04T07:57:38.299450+00:00"
+    },
+    {
+      "id": "GHSA-7mqg-cx4g-x2rf",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.1,
+      "title": "Omnigent Guardrail policy bypass: shell-command parser fails open in policies/builtins/_shell.py",
+      "summary": "**Reporter:** Aaron / Aeon — autonomous security agent (https://github.com/aaronjmars/aeon)\n**Project:** `omnigent-ai/omnigent` v0.1.0 (Databricks) — meta-harness running Claude Code / Codex / Pi \"in check with policies and sandboxing\"\n**Component:** `omnigent/policies/builtins/_shell.py` (shared parser) → consumed by `policies/builtins/github.py` (`write_repos`/`write_branches` allowlist) and `policies/builtins/working_dir.py` (workspace confinement)\n\n## Summary\n\nThe shared shell-command parser",
+      "affected": "pip:omnigent",
+      "references": [
+        "https://github.com/advisories/GHSA-7mqg-cx4g-x2rf"
+      ],
+      "published": "2026-09-02T22:40:07Z",
+      "fetched": "2026-09-04T07:57:39.728294+00:00"
+    },
+    {
+      "id": "GHSA-p8rw-8qj3-hf33",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 8.8,
+      "title": "Omnigent: Unvalidated os_env.cwd in agent bundle yields arbitrary host filesystem access on runners without OMNIGENT_RUNNER_WORKSPACE",
+      "summary": "### Summary\n\nAn authenticated, non-admin user can obtain **arbitrary host-filesystem read/write** (and host environment-secret disclosure) on an Omnigent **runner** by uploading an agent bundle whose `os_env.cwd` points outside any intended workspace (e.g. `/` or `/home/<victim>`). The `cwd` field is taken **verbatim** from the bundle with no validation, normalization, or boundary check anywhere in the spec pipeline.\n\nThis is a **different sink** from GHSA-jrrm-9hc7-2v3h (CWE-94, shared-agent bu",
+      "affected": "pip:omnigent",
+      "references": [
+        "https://github.com/advisories/GHSA-p8rw-8qj3-hf33"
+      ],
+      "published": "2026-09-02T22:00:54Z",
+      "fetched": "2026-09-04T07:57:39.728312+00:00"
+    },
+    {
+      "id": "GHSA-jrrm-9hc7-2v3h",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": 9.0,
+      "title": "Omnigent: Shared Agent Bundle Overwrite Leads to Authenticated Runner RCE",
+      "summary": "### Summary\n\nAn authenticated user with edit access to their own session can overwrite a shared/template agent by uploading a full agent bundle through `PUT /sessions/{session_id}/agent`.\n\nShared/template agents are shown as not MCP-editable, but this upload path still accepts a replacement bundle. By adding a `stdio` MCP server to the shared agent, the attacker can cause future runner sessions using that shared agent to start an attacker-controlled command.\n\n### Details\n\nThe vulnerable endpoint",
+      "affected": "pip:omnigent",
+      "references": [
+        "https://github.com/advisories/GHSA-jrrm-9hc7-2v3h"
+      ],
+      "published": "2026-09-02T21:55:11Z",
+      "fetched": "2026-09-04T07:57:39.728320+00:00"
+    },
+    {
+      "id": "GHSA-756x-9hf6-q4h4",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 8.8,
+      "title": "Omnigent: Uploaded Agent Bundle Allows Authenticated Runner RCE via Python Callable Tools",
+      "summary": "### Summary\n\nAn authenticated user can upload a crafted agent bundle that defines a server-side Python callable tool. The server validates the uploaded bundle, but it does not block dangerous `callable:` paths in untrusted user-provided agent configs.\n\nWhen the tool is invoked, the runner imports and executes that Python callable. A crafted bundle can point the tool at `subprocess.check_output`, which lets the attacker run a local command on the runner machine.\n\nThis is serious because hosted Om",
+      "affected": "pip:omnigent",
+      "references": [
+        "https://github.com/advisories/GHSA-756x-9hf6-q4h4"
+      ],
+      "published": "2026-09-02T21:54:52Z",
+      "fetched": "2026-09-04T07:57:39.728328+00:00"
+    },
+    {
+      "id": "GHSA-83x6-42hr-jc76",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 5.3,
+      "title": "CKAN MCP Server: MQA server allowlist bypass via unanchored regex (`isValidMqaServer`)",
+      "summary": "## Summary\n\nThe `ckan_get_mqa_quality` and `ckan_get_mqa_quality_details` tools restrict their `server_url` argument to `dati.gov.it` via a regular expression. The regex is anchored only at the start and places no boundary after the host, so any URL whose host merely **begins with** `dati.gov.it` — or that uses `dati.gov.it` as URL *userinfo* before an `@` — passes validation while actually targeting an attacker-controlled host.\n\n## Affected code\n\n```js\n// src/tools/quality.ts\nconst ALLOWED_SERV",
+      "affected": "npm:@aborruso/ckan-mcp-server",
+      "references": [
+        "https://github.com/advisories/GHSA-83x6-42hr-jc76"
+      ],
+      "published": "2026-09-02T14:52:21Z",
+      "fetched": "2026-09-04T07:57:38.299728+00:00"
+    },
+    {
+      "id": "GHSA-x8wg-4xgc-vr54",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": null,
+      "title": "Banks: Path traversal in `DirectoryPromptRegistry.set()` allows arbitrary file write outside the registry root",
+      "summary": "## Summary\n\n`DirectoryPromptRegistry.set()` interpolates the attacker-controllable `Prompt.name` into a `Path` expression with no canonicalization. An application that derives the prompt name from request data lets a caller write attacker-controlled bytes outside the configured registry directory.\n\n## Details\n\n`src/banks/registries/directory.py:44`\n\n```python\nprompt_file = path / f\"{prompt.name}.{prompt.version}.jinja\"\nprompt_file.write_text(prompt.raw)\n```\n\nTwo failure modes:\n\n1. **Relative tra",
+      "affected": "pip:banks",
+      "references": [
+        "https://github.com/advisories/GHSA-x8wg-4xgc-vr54"
+      ],
+      "published": "2026-09-02T14:38:24Z",
+      "fetched": "2026-09-04T07:57:39.728414+00:00"
+    },
+    {
+      "id": "GHSA-8mgp-746c-j5xp",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.0,
+      "title": "NLTK: Model-artifact APIs bypass pathsec and touch files outside allowed roots",
+      "summary": "### Summary\n\nSeveral model-artifact APIs still treat caller-controlled model paths as ordinary filenames even when NLTK path security is enforced. The same outside-root paths are rejected by guarded helpers, but these public read and write flows still use raw file APIs.\n\n### Details\n\n- **Vulnerability type:** File sandbox bypass\n- **Affected component:** `TransitionParser.train`, `TransitionParser.parse`, `AveragedPerceptron.save`, `AveragedPerceptron.load`, `PerceptronTagger.save_to_json`, `sav",
+      "affected": "pip:nltk",
+      "references": [
+        "https://github.com/advisories/GHSA-8mgp-746c-j5xp"
+      ],
+      "published": "2026-09-02T14:35:04Z",
+      "fetched": "2026-09-04T07:57:39.728457+00:00"
+    },
+    {
+      "id": "GHSA-vp2x-qp44-57v7",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 3.7,
+      "title": "NLTK: Quadratic CPU Exhaustion in `XMLCorpusView._read_xml_fragment()`",
+      "summary": "## Summary\n\n`XMLCorpusView._read_xml_fragment()` reads a corpus file in 1 KiB blocks, appending\neach block to a growing `fragment` string, then calls `_VALID_XML_RE.match(fragment)`\non the full accumulated buffer every iteration. Because each iteration rescans the\nentire accumulated fragment, the total amount of work grows quadratically with input\nsize.\n\nCommit `c9c332284` (CWE-1333) made each `match()` call linear. The quadratic behavior\nis separate: the loop calls `match()` once per 1 KiB bloc",
+      "affected": "pip:nltk",
+      "references": [
+        "https://github.com/advisories/GHSA-vp2x-qp44-57v7"
+      ],
+      "published": "2026-09-02T14:34:11Z",
+      "fetched": "2026-09-04T07:57:39.728495+00:00"
+    },
+    {
+      "id": "GHSA-cw6x-m8jw-qmrh",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 5.3,
+      "title": "NLTK: Uncontrolled recursion in nltk.featstruct.FeatStructReader causes unhandled RecursionError (DoS) via deeply nested feature-structure input",
+      "summary": "### Summary\n\n`nltk.featstruct.FeatStructReader` (used by `FeatStruct(str)` and by `FeatureGrammar.fromstring()`) parses feature-structure strings such as `[a=1]` with a recursive-descent parser that has no nesting-depth limit. A small, trivially-crafted input (~700 bytes) with deeply nested brackets drives the parser past Python's recursion limit and raises an **unhandled `RecursionError`** instead of the library's normal, catchable `ValueError`/`LogicalExpressionException`. Any application that",
+      "affected": "pip:nltk",
+      "references": [
+        "https://github.com/advisories/GHSA-cw6x-m8jw-qmrh"
+      ],
+      "published": "2026-09-02T14:33:22Z",
+      "fetched": "2026-09-04T07:57:39.728563+00:00"
+    },
+    {
       "id": "GHSA-m4rf-3fr8-xwx3",
       "source": "github-advisory",
       "severity": "critical",
@@ -69,6 +335,39 @@
       ],
       "published": "2026-09-01T16:41:54Z",
       "fetched": "2026-09-02T07:53:42.589950+00:00"
+    },
+    {
+      "id": "CVE-2026-82217",
+      "source": "nvd",
+      "severity": "high",
+      "cvss": 8.8,
+      "title": "In Eclipse Theia versions 1.73.0 up to but not including 1.75.0, the AI \"Agent Mode\" file-change tools (writeFileContent, suggestFileContent, and the replacement and state helpers) resolved a model-su",
+      "summary": "In Eclipse Theia versions 1.73.0 up to but not including 1.75.0, the AI \"Agent Mode\" file-change tools (writeFileContent, suggestFileContent, and the replacement and state helpers) resolved a model-supplied file path without a workspace-containment check. A crafted relative path such as ../.bashrc, an absolute path, or a ~-expanded path could therefore write or delete files outside the workspace with the privileges of the Theia backend OS user. Because the path argument is influenced by model ou",
+      "affected": "prompt injection",
+      "references": [
+        "https://github.com/eclipse-theia/theia/commit/28da106c254",
+        "https://gitlab.eclipse.org/security/vulnerability-reports/-/work_items/624"
+      ],
+      "published": "2026-08-31T14:17:26.610",
+      "fetched": "2026-09-04T07:57:18.598119+00:00"
+    },
+    {
+      "id": "CVE-2026-77956",
+      "source": "nvd",
+      "severity": "unknown",
+      "cvss": null,
+      "title": "Improper Control of Generation of Code (Code Injection) vulnerability in ash-project ash_ai allows a remote, unauthenticated client to execute arbitrary Elixir code.\n\nAshAi.Actions.Prompt evaluates pr",
+      "summary": "Improper Control of Generation of Code (Code Injection) vulnerability in ash-project ash_ai allows a remote, unauthenticated client to execute arbitrary Elixir code.\n\nAshAi.Actions.Prompt evaluates prompt content through EEx.eval_string/2. The documented prompt: fn input, context -> ... end form lets the prompt content be built from action arguments, so when a prompt action's text incorporates request data, that attacker-controlled text is compiled and run as an EEx template (Elixir source). Con",
+      "affected": "prompt injection",
+      "references": [
+        "https://cna.erlef.org/cves/CVE-2026-77956.html",
+        "https://github.com/ash-project/ash_ai/commit/e9948254b5659c1143b73dc2f59f457931e64514",
+        "https://github.com/ash-project/ash_ai/security/advisories/GHSA-2g59-hg7m-qc83",
+        "https://osv.dev/vulnerability/EEF-CVE-2026-77956",
+        "https://github.com/ash-project/ash_ai/security/advisories/GHSA-2g59-hg7m-qc83"
+      ],
+      "published": "2026-08-31T01:16:49.563",
+      "fetched": "2026-09-04T07:57:18.598117+00:00"
     },
     {
       "id": "GHSA-ffg3-p8fm-mjx2",
@@ -155,6 +454,22 @@
       "fetched": "2026-09-01T04:49:58.895939+00:00"
     },
     {
+      "id": "CVE-2026-82233",
+      "source": "nvd",
+      "severity": "medium",
+      "cvss": 5.7,
+      "title": "SiYuan before v3.8.1 contains a path traversal vulnerability in the asset.upload MCP tool that accepts arbitrary absolute file paths without workspace boundary validation. Attackers can induce the AI ",
+      "summary": "SiYuan before v3.8.1 contains a path traversal vulnerability in the asset.upload MCP tool that accepts arbitrary absolute file paths without workspace boundary validation. Attackers can induce the AI Agent to upload sensitive files such as SSH keys or credentials from outside the workspace into the asset directory through prompt injection.",
+      "affected": "prompt injection",
+      "references": [
+        "https://github.com/siyuan-note/siyuan/security/advisories/GHSA-p23f-cm6q-2qp8",
+        "https://www.vulncheck.com/advisories/siyuan-before-3.8.1-path-traversal-via-asset-upload",
+        "https://github.com/siyuan-note/siyuan/security/advisories/GHSA-p23f-cm6q-2qp8"
+      ],
+      "published": "2026-08-28T12:16:32.953",
+      "fetched": "2026-09-04T07:57:18.598115+00:00"
+    },
+    {
       "id": "CVE-2026-74820",
       "source": "nvd",
       "severity": "unknown",
@@ -226,6 +541,20 @@
       ],
       "published": "2026-08-27T20:17:03.870",
       "fetched": "2026-08-28T01:21:46.749248+00:00"
+    },
+    {
+      "id": "GHSA-hqj7-phwp-c3fp",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.0,
+      "title": "Duplicate Advisory: Model-artifact APIs bypass pathsec and touch files outside allowed roots",
+      "summary": "## Duplicate Advisory\n\nThis advisory has been withdrawn because it is a duplicate of GHSA-8mgp-746c-j5xp. This link is maintained to preserve external references.\n\n## Original Description\nNLTK through 3.10.3 contains a path traversal vulnerability in model-artifact APIs that bypass pathsec enforcement by using raw file operations on caller-controlled paths. Attackers can read or write files outside allowed sandbox roots through TransitionParser, AveragedPerceptron, PerceptronTagger, and maxent p",
+      "affected": "pip:nltk",
+      "references": [
+        "https://github.com/advisories/GHSA-hqj7-phwp-c3fp"
+      ],
+      "published": "2026-08-27T18:32:30Z",
+      "fetched": "2026-09-04T07:57:39.729097+00:00"
     },
     {
       "id": "CVE-2026-75062",
@@ -4084,19 +4413,19 @@
       "fetched": "2026-08-04T06:34:53.913899+00:00"
     }
   ],
-  "updated": "2026-09-02T07:53:44.423392+00:00",
+  "updated": "2026-09-04T07:57:40.231003+00:00",
   "sources": [
     "osv",
     "nvd",
     "github-advisory"
   ],
   "stats": {
-    "critical": 36,
-    "high": 131,
-    "medium": 75,
-    "unknown": 29,
-    "low": 4,
+    "high": 141,
+    "critical": 41,
+    "medium": 81,
+    "low": 5,
+    "unknown": 30,
     "moderate": 1
   },
-  "total": 276
+  "total": 299
 }
