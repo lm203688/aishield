@@ -220,6 +220,15 @@ OUT_OF_SCOPE = [
     r"\bsocial inference\b", r"\bsurvey[- ]country\b", r"\bmedical imaging\b",
     r"\bautonomous driving\b", r"\bvision transformer\b", r"\bwireless\b",
     r"\bfederated learning\b", r"\brecommendation system\b",
+    # Life sciences / materials. These papers routinely pair a domain word
+    # ("LLM agents assist reviewers") with a strong security word used in its
+    # non-security sense -- "risk of bias", "safety endpoint", "trial
+    # integrity" -- and would otherwise be mistaken for adoptable defences.
+    r"\bclinical trial\w*", r"\brandomi[sz]ed (?:clinical|controlled)\b",
+    r"\bsystematic review\b", r"\bmeta[- ]analys\w+", r"\bbiomedical\b",
+    r"\brisk of bias\b", r"\bdrug discovery\b", r"\bgenomic\w*",
+    r"\bprotein (?:folding|structure)\b", r"\bradiolog\w+",
+    r"\bmaterials science\b", r"\bchemical synthesis\b",
 ]
 _OUT_OF_SCOPE_RE = re.compile("|".join(OUT_OF_SCOPE), re.I)
 
