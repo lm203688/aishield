@@ -1,0 +1,23 @@
+{
+  "domain": "flywheel",
+  "current": {
+    "total": 8,
+    "before": 8,
+    "grew": false,
+    "_source": "data-scan-flywheel",
+    "_ts": "2026-09-05T07:35:48.417887+00:00"
+  },
+  "history": [
+    {
+      "ts": "2026-09-05T07:35:48.417903+00:00",
+      "source": "data-scan-flywheel",
+      "state": {
+        "total": 8,
+        "before": 8,
+        "grew": false
+      }
+    }
+  ],
+  "updated": "2026-09-05T07:35:48.417908+00:00",
+  "desc": "数据飞轮批量扫描进度"
+}
