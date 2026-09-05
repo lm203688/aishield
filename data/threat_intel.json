@@ -1,6 +1,216 @@
 {
   "intel": [
     {
+      "id": "GHSA-7q9c-hpx7-9cwm",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.5,
+      "title": "TypeSpec: Unauthenticated Remote Shutdown of Spector Mock Server via POST /.admin/stop",
+      "summary": "### Summary\n\n`@typespec/spector` registers a `POST /.admin/stop` HTTP route with no authentication, authorization token, Origin check, or IP-source restriction. Any network-reachable client can send a single unauthenticated POST request to terminate the mock server process. Because the server binds to `0.0.0.0` by default (all interfaces), this endpoint is exposed to any host that can reach the server's port—not just localhost—making a complete denial-of-service trivially achievable with one HTT",
+      "affected": "npm:@typespec/spector",
+      "references": [
+        "https://github.com/advisories/GHSA-7q9c-hpx7-9cwm"
+      ],
+      "published": "2026-09-04T21:43:13Z",
+      "fetched": "2026-09-05T07:36:31.976644+00:00"
+    },
+    {
+      "id": "GHSA-pr7f-p5mw-fc87",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": null,
+      "title": " vLLM: Incomplete CVE-2025-62164 remediation can be bypassed by concurrent prompt parts",
+      "summary": "## Executive Summary\n\nThe follow-up protection for CVE-2025-62164 is incomplete at vLLM revision `26587f9519e22a5c4549ead7595ad9ca3229c4fd`. It wraps serialized prompt-embedding reconstruction and dense conversion in `torch.sparse.check_sparse_tensor_invariants()`, but PyTorch 2.11.0 implements that context with save/enable/restore operations over process-global state. Two prompt-embedding parts in one `/v1/chat/completions` request are gathered concurrently on the event loop's default executor.",
+      "affected": "pip:vllm",
+      "references": [
+        "https://github.com/advisories/GHSA-pr7f-p5mw-fc87"
+      ],
+      "published": "2026-09-04T21:39:02Z",
+      "fetched": "2026-09-05T07:36:33.402909+00:00"
+    },
+    {
+      "id": "GHSA-48jh-3gj7-fg8v",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 5.3,
+      "title": "vLLM: ReDoS via structured_outputs.regex in the lm-format-enforcer backend (no compile timeout) — missed sibling of GHSA-rwxx-mrjm-wc2m",
+      "summary": "### Summary\n\nThe fix for `GHSA-rwxx-mrjm-wc2m` (\"ReDoS via `structured_outputs.regex` compiled without timeout\") wrapped the regex compile in the **xgrammar** and **outlines** backends with `compile_regex_with_timeout` (and, for outlines, `validate_regex_is_buildable`). The **lm-format-enforcer** backend was left unguarded: it compiles the attacker-supplied regex with no timeout and no buildability check. A single request with a catastrophic regex hangs the structured-output compile step and sta",
+      "affected": "pip:vllm",
+      "references": [
+        "https://github.com/advisories/GHSA-48jh-3gj7-fg8v"
+      ],
+      "published": "2026-09-04T21:37:00Z",
+      "fetched": "2026-09-05T07:36:33.402945+00:00"
+    },
+    {
+      "id": "GHSA-hwrm-c4cx-rf4j",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 5.3,
+      "title": "vLLM: Unauthenticated Internal Path and Username Disclosure via Validation Error Messages",
+      "summary": "## Summary\n\nWhen the vLLM API receives a malformed request (e.g., invalid JSON or missing required fields), FastAPI raises a Pydantic `RequestValidationError`. The `validation_exception_handler` in `vllm/entrypoints/openai/server_utils.py` converts this exception to a string via `str(exc)`, which includes the internal file path and line number of the handler function. The existing `sanitize_message()` function in `vllm/entrypoints/utils.py` strips memory addresses (e.g., `0x7f...`) but does not ",
+      "affected": "pip:vllm",
+      "references": [
+        "https://github.com/advisories/GHSA-hwrm-c4cx-rf4j"
+      ],
+      "published": "2026-09-04T21:36:33Z",
+      "fetched": "2026-09-05T07:36:33.402965+00:00"
+    },
+    {
+      "id": "GHSA-8737-qx52-hjff",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 4.3,
+      "title": "vLLM: Derender endpoints decode caller-supplied GenerateResponse token IDs without output bounds",
+      "summary": "## Summary\n\nThe `/v1/completions/derender` and `/v1/chat/completions/derender` endpoints accept caller-supplied `GenerateResponse` objects and postprocess every nested `choices[*].token_ids` list directly. Unlike the normal render/generate path, derender does not enforce model context length, resolved `max_tokens`, `max_num_seqs`, choice-count, or response-size bounds before detokenizing and returning the supplied token IDs. An authenticated API client can therefore make the CPU-only render fron",
+      "affected": "pip:vllm",
+      "references": [
+        "https://github.com/advisories/GHSA-8737-qx52-hjff"
+      ],
+      "published": "2026-09-04T21:32:07Z",
+      "fetched": "2026-09-05T07:36:33.402978+00:00"
+    },
+    {
+      "id": "GHSA-gx45-xrj5-g6c4",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.8,
+      "title": "CodeWhale: Project config `allow_shell` override enables arbitrary shell command execution via cloned repository",
+      "summary": "### Maintainer resolution\n\nThe CodeWhale maintainers validated this report. The affected package ranges are recorded in the advisory metadata. Version 0.8.64 contains the fix in commit 43563356b98c6b993085554da82e77370160a31c. Users should upgrade to 0.8.64 or later. The original reporter analysis is preserved below.\n\n### Summary\n\nA malicious `.codewhale/config.toml` or `.deepseek/config.toml` committed to a repository can silently set `allow_shell = true` for any user who clones and opens the r",
+      "affected": "npm:deepseek-tui, npm:deepseek-tui, npm:codewhale-tui, npm:codewhale",
+      "references": [
+        "https://github.com/advisories/GHSA-gx45-xrj5-g6c4"
+      ],
+      "published": "2026-09-04T18:14:09Z",
+      "fetched": "2026-09-05T07:36:31.976715+00:00"
+    },
+    {
+      "id": "GHSA-wrj3-vj8c-784f",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.8,
+      "title": "CodeWhale: rlm_eval auto-approves arbitrary Python execution, bypassing the user's approval policy (RCE)",
+      "summary": "### Maintainer resolution\n\nThe CodeWhale maintainers validated this report. The affected package ranges are recorded in the advisory metadata. Version 0.8.64 contains the fix in commit 57f3c89471e27ac4032d9791f6885e5d4408c381. Users should upgrade to 0.8.64 or later. The original reporter analysis is preserved below.\n\n### Summary\nThe `rlm_eval` tool runs an arbitrary Python string chosen by the model in a real `python3` interpreter. Its `approval_requirement()` returns `ApprovalRequirement::Auto",
+      "affected": "npm:deepseek-tui, npm:deepseek-tui, npm:codewhale-tui, npm:codewhale",
+      "references": [
+        "https://github.com/advisories/GHSA-wrj3-vj8c-784f"
+      ],
+      "published": "2026-09-04T18:12:15Z",
+      "fetched": "2026-09-05T07:36:31.976742+00:00"
+    },
+    {
+      "id": "GHSA-c6mw-8xh8-gpq6",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.4,
+      "title": "CodeWhale: Argument Injection in `git_blame` Tool Allows Arbitrary File Read Without Approval",
+      "summary": "### Maintainer resolution\n\nThe CodeWhale maintainers validated this report. The affected package ranges are recorded in the advisory metadata. Version 0.8.64 contains the fix in commit 9a34b5034d29f05d1f28fa61b04719ca6a741020. Users should upgrade to 0.8.64 or later. The original reporter analysis is preserved below.\n\n# Argument Injection in `git_blame` Tool Allows Arbitrary File Read Without Approval\n\n## Overview\n\nThe `git_blame` tool in DeepSeek-TUI passes the model-supplied `rev` parameter un",
+      "affected": "npm:deepseek-tui, npm:deepseek-tui, npm:codewhale-tui, npm:codewhale",
+      "references": [
+        "https://github.com/advisories/GHSA-c6mw-8xh8-gpq6"
+      ],
+      "published": "2026-09-04T18:11:45Z",
+      "fetched": "2026-09-05T07:36:31.976772+00:00"
+    },
+    {
+      "id": "GHSA-6v2g-fpxh-pmmh",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": 8.6,
+      "title": "CodeWhale: SSRF‌ bypass - TOCTOU on DNS failure for DNS pinning",
+      "summary": "### Maintainer resolution\n\nThe CodeWhale maintainers validated this report. The affected package ranges are recorded in the advisory metadata. Version 0.8.64 contains the fix in commit 26de44a8bd5051f8f944ea60b2c37ae1d2b7d25e. Users should upgrade to 0.8.64 or later. The original reporter analysis is preserved below.\n\n### Summary\nDNS-pinning failure allows natural failure of code, however with a custom DNS server that fails the initial requests and allows the secondary requests, it's possible to",
+      "affected": "npm:deepseek-tui, npm:deepseek-tui, npm:codewhale-tui, npm:codewhale",
+      "references": [
+        "https://github.com/advisories/GHSA-6v2g-fpxh-pmmh"
+      ],
+      "published": "2026-09-04T18:05:12Z",
+      "fetched": "2026-09-05T07:36:31.976821+00:00"
+    },
+    {
+      "id": "GHSA-h539-c7r8-3xq4",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.5,
+      "title": "CodeWhale: js_execution leaks parent environment to model context via missing env scrub",
+      "summary": "### Maintainer resolution\n\nThe CodeWhale maintainers validated this report. The affected package ranges are recorded in the advisory metadata. Version 0.8.64 contains the fix in commit 26de44a8bd5051f8f944ea60b2c37ae1d2b7d25e. Users should upgrade to 0.8.64 or later. The original reporter analysis is preserved below.\n\n### Summary\n\njs_execution exposes parent process environment to model-provided JavaScript\n\nThe js_execution tool spawns Node with tokio::process::Command::new without calling the c",
+      "affected": "npm:deepseek-tui, npm:deepseek-tui, npm:codewhale-tui, npm:codewhale",
+      "references": [
+        "https://github.com/advisories/GHSA-h539-c7r8-3xq4"
+      ],
+      "published": "2026-09-04T18:03:08Z",
+      "fetched": "2026-09-05T07:36:31.976831+00:00"
+    },
+    {
+      "id": "GHSA-7j5w-7r7x-9v27",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 9.3,
+      "title": "CodeWhale: Argument Injection in `git_show` Tool Allows Arbitrary File Write Without Approval",
+      "summary": "### Maintainer resolution\n\nThe CodeWhale maintainers validated this report. The affected package ranges are recorded in the advisory metadata. Version 0.8.64 contains the fix in commit 9a34b5034d29f05d1f28fa61b04719ca6a741020. Users should upgrade to 0.8.64 or later. The original reporter analysis is preserved below.\n\n# Argument Injection in `git_show` Tool Allows Arbitrary File Write Without Approval\n\n## Overview\n\nThe `git_show` tool in DeepSeek-TUI executes `git show` with the model-supplied `",
+      "affected": "npm:deepseek-tui, npm:deepseek-tui, npm:codewhale-tui, npm:codewhale",
+      "references": [
+        "https://github.com/advisories/GHSA-7j5w-7r7x-9v27"
+      ],
+      "published": "2026-09-04T18:02:37Z",
+      "fetched": "2026-09-05T07:36:31.976839+00:00"
+    },
+    {
+      "id": "GHSA-g29h-pfmp-qp9r",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.0,
+      "title": "CodeWhale: exec_shell_interact sends LLM-controlled input to a running shell without an approval prompt (privilege escalation)",
+      "summary": "### Maintainer resolution\n\nThe CodeWhale maintainers validated this report. The affected package ranges are recorded in the advisory metadata. Version 0.8.64 contains the fix in commit 57f3c89471e27ac4032d9791f6885e5d4408c381. Users should upgrade to 0.8.64 or later. The original reporter analysis is preserved below.\n\n### Summary\n`exec_shell` is correctly approval-gated. Its sibling `exec_shell_interact` returns `ApprovalRequirement::Auto`, so when the model writes input into a shell the user al",
+      "affected": "npm:deepseek-tui, npm:deepseek-tui, npm:codewhale-tui, npm:codewhale",
+      "references": [
+        "https://github.com/advisories/GHSA-g29h-pfmp-qp9r"
+      ],
+      "published": "2026-09-04T18:02:10Z",
+      "fetched": "2026-09-05T07:36:31.976859+00:00"
+    },
+    {
+      "id": "GHSA-62f5-cp2p-vq95",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.5,
+      "title": "CodeWhale: Project config `instructions` override enables arbitrary file read into AI system prompt via cloned repository",
+      "summary": "### Maintainer resolution\n\nThe CodeWhale maintainers validated this report. The affected package ranges are recorded in the advisory metadata. Version 0.8.64 contains the fix in commit 43563356b98c6b993085554da82e77370160a31c. Users should upgrade to 0.8.64 or later. The original reporter analysis is preserved below.\n\n### Summary\n\nA malicious `.codewhale/config.toml` or `.deepseek/config.toml` committed to a repository can set `instructions` to an array of arbitrary file paths (including paths o",
+      "affected": "npm:deepseek-tui, npm:deepseek-tui, npm:codewhale-tui, npm:codewhale",
+      "references": [
+        "https://github.com/advisories/GHSA-62f5-cp2p-vq95"
+      ],
+      "published": "2026-09-04T18:00:37Z",
+      "fetched": "2026-09-05T07:36:31.976902+00:00"
+    },
+    {
+      "id": "GHSA-w7wx-5q49-r59w",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.5,
+      "title": "CodeWhale: image_analyze follows workspace symlinks, leaking external file bytes",
+      "summary": "### Maintainer resolution\n\nThe CodeWhale maintainers validated this report. The affected package ranges are recorded in the advisory metadata. Version 0.8.64 contains the fix in commit 26de44a8bd5051f8f944ea60b2c37ae1d2b7d25e. Users should upgrade to 0.8.64 or later. The original reporter analysis is preserved below.\n\n### Summary\n\nimage_analyze follows workspace symlinks and leaks outside-workspace file bytes to the vision endpoint\n\nThe image_analyze tool resolves its image_path with a bare cont",
+      "affected": "npm:deepseek-tui, npm:deepseek-tui, npm:codewhale-tui, npm:codewhale",
+      "references": [
+        "https://github.com/advisories/GHSA-w7wx-5q49-r59w"
+      ],
+      "published": "2026-09-04T17:34:55Z",
+      "fetched": "2026-09-05T07:36:31.976911+00:00"
+    },
+    {
+      "id": "CVE-2026-19645",
+      "source": "nvd",
+      "severity": "medium",
+      "cvss": 6.5,
+      "title": "IBM MQ Agent CD: v1.0.0, v1.0.1, v2.0.0, v2.0.1 An authenticated user with a valid session cookie can submit arbitrarily large or computationallyexpensive requests that cause the LLM agent workers to ",
+      "summary": "IBM MQ Agent CD: v1.0.0, v1.0.1, v2.0.0, v2.0.1 An authenticated user with a valid session cookie can submit arbitrarily large or computationallyexpensive requests that cause the LLM agent workers to be held for extended periods — rangingfrom tens of seconds to over ten minutes per request. When multiple such requests are sentconcurrently, the agent worker pool becomes exhausted, causing all other IBM MQ Console users toexperience degraded performance or complete unavailability of the AI Agent f",
+      "affected": "llm agent",
+      "references": [
+        "https://www.ibm.com/support/pages/node/7285394"
+      ],
+      "published": "2026-09-04T16:17:24.923",
+      "fetched": "2026-09-05T07:36:24.830930+00:00"
+    },
+    {
       "id": "GHSA-79wm-x847-7cvg",
       "source": "github-advisory",
       "severity": "high",
@@ -335,6 +545,24 @@
       ],
       "published": "2026-09-01T16:41:54Z",
       "fetched": "2026-09-02T07:53:42.589950+00:00"
+    },
+    {
+      "id": "CVE-2026-79745",
+      "source": "nvd",
+      "severity": "high",
+      "cvss": 7.1,
+      "title": "MCPHub is a unified hub for centrally managing and dynamically orchestrating multiple MCP servers/APIs into separate endpoints with flexible routing strategies. Prior to version 1.0.32, the built-in p",
+      "summary": "MCPHub is a unified hub for centrally managing and dynamically orchestrating multiple MCP servers/APIs into separate endpoints with flexible routing strategies. Prior to version 1.0.32, the built-in prompt and resource controllers perform no role checking. The mutating POST/PUT /api/prompts* and POST/PUT /api/resources* routes are attached to the authenticated router with no admin gate, and the handlers never read req.user. The DAO singletons they write are consulted first — ahead of any connect",
+      "affected": "prompt injection",
+      "references": [
+        "https://github.com/samanhappy/mcphub/commit/6ba55ac63954a71506e61c088753251e2ff643cf",
+        "https://github.com/samanhappy/mcphub/pull/1069",
+        "https://github.com/samanhappy/mcphub/releases/tag/v1.0.32",
+        "https://github.com/samanhappy/mcphub/security/advisories/GHSA-6cvf-cfch-4g7m",
+        "https://github.com/samanhappy/mcphub/security/advisories/GHSA-6cvf-cfch-4g7m"
+      ],
+      "published": "2026-08-31T18:17:19.910",
+      "fetched": "2026-09-05T07:36:12.064890+00:00"
     },
     {
       "id": "CVE-2026-82217",
@@ -4413,19 +4641,19 @@
       "fetched": "2026-08-04T06:34:53.913899+00:00"
     }
   ],
-  "updated": "2026-09-04T07:57:40.231003+00:00",
+  "updated": "2026-09-05T07:36:33.906635+00:00",
   "sources": [
     "osv",
     "nvd",
     "github-advisory"
   ],
   "stats": {
-    "high": 141,
-    "critical": 41,
-    "medium": 81,
+    "high": 151,
+    "medium": 86,
+    "critical": 42,
     "low": 5,
     "unknown": 30,
     "moderate": 1
   },
-  "total": 299
+  "total": 315
 }

@@ -1,7 +1,63 @@
 {
-  "generated_at": "2026-09-04T07:57:51.822044+00:00",
-  "source_intel_count": 299,
+  "generated_at": "2026-09-05T07:36:46.237357+00:00",
+  "source_intel_count": 315,
   "package_blacklist": {
+    "npm:@typespec/spector": {
+      "ecosystem": "npm",
+      "package": "@typespec/spector",
+      "severity": "high",
+      "advisories": [
+        "GHSA-7q9c-hpx7-9cwm"
+      ]
+    },
+    "npm:deepseek-tui": {
+      "ecosystem": "npm",
+      "package": "deepseek-tui",
+      "severity": "critical",
+      "advisories": [
+        "GHSA-gx45-xrj5-g6c4",
+        "GHSA-wrj3-vj8c-784f",
+        "GHSA-c6mw-8xh8-gpq6",
+        "GHSA-6v2g-fpxh-pmmh",
+        "GHSA-h539-c7r8-3xq4",
+        "GHSA-7j5w-7r7x-9v27",
+        "GHSA-g29h-pfmp-qp9r",
+        "GHSA-62f5-cp2p-vq95",
+        "GHSA-w7wx-5q49-r59w"
+      ]
+    },
+    "npm:codewhale-tui": {
+      "ecosystem": "npm",
+      "package": "codewhale-tui",
+      "severity": "critical",
+      "advisories": [
+        "GHSA-gx45-xrj5-g6c4",
+        "GHSA-wrj3-vj8c-784f",
+        "GHSA-c6mw-8xh8-gpq6",
+        "GHSA-6v2g-fpxh-pmmh",
+        "GHSA-h539-c7r8-3xq4",
+        "GHSA-7j5w-7r7x-9v27",
+        "GHSA-g29h-pfmp-qp9r",
+        "GHSA-62f5-cp2p-vq95",
+        "GHSA-w7wx-5q49-r59w"
+      ]
+    },
+    "npm:codewhale": {
+      "ecosystem": "npm",
+      "package": "codewhale",
+      "severity": "critical",
+      "advisories": [
+        "GHSA-gx45-xrj5-g6c4",
+        "GHSA-wrj3-vj8c-784f",
+        "GHSA-c6mw-8xh8-gpq6",
+        "GHSA-6v2g-fpxh-pmmh",
+        "GHSA-h539-c7r8-3xq4",
+        "GHSA-7j5w-7r7x-9v27",
+        "GHSA-g29h-pfmp-qp9r",
+        "GHSA-62f5-cp2p-vq95",
+        "GHSA-w7wx-5q49-r59w"
+      ]
+    },
     "npm:claude-code-templates": {
       "ecosystem": "npm",
       "package": "claude-code-templates",
@@ -657,6 +713,66 @@
     }
   },
   "pattern_rules": {
+    "(?i)(Access-Control-Allow-Origin['\\\"]?\\s*[:,]\\s*['\\\"]\\*|cors\\s*\\(\\s*\\)\\s*)": {
+      "description": "跨域校验缺失: 允许任意来源",
+      "severity": "high",
+      "owasp": "LLM07",
+      "owasp_name": "系统提示泄露 (System Prompt Leakage)",
+      "derived_from": "origin",
+      "intel_hits": 31,
+      "evidence": [
+        "GHSA-7q9c-hpx7-9cwm",
+        "GHSA-gx45-xrj5-g6c4",
+        "GHSA-wrj3-vj8c-784f",
+        "GHSA-c6mw-8xh8-gpq6",
+        "GHSA-6v2g-fpxh-pmmh"
+      ]
+    },
+    "(?i)(auth(entication)?\\s*[:=]\\s*(False|None|null|0)\\b|verify\\s*=\\s*False)": {
+      "description": "认证绕过: 显式关闭校验",
+      "severity": "critical",
+      "owasp": "LLM07",
+      "owasp_name": "系统提示泄露 (System Prompt Leakage)",
+      "derived_from": "authentication",
+      "intel_hits": 28,
+      "evidence": [
+        "GHSA-7q9c-hpx7-9cwm",
+        "GHSA-79wm-x847-7cvg",
+        "GHSA-hvfh-5mj3-5f3j",
+        "GHSA-w3fx-mc44-mf6j",
+        "GHSA-72f3-6w86-7rv3"
+      ]
+    },
+    "(?i)(requests\\.(get|post)|urllib\\.request\\.urlopen|fetch)\\s*\\(\\s*[^)]*(user|input|param|req\\.)": {
+      "description": "SSRF: 请求目标来自不可信输入",
+      "severity": "high",
+      "owasp": "LLM06",
+      "owasp_name": "过度代理权限 (Excessive Agency)",
+      "derived_from": "ssrf",
+      "intel_hits": 28,
+      "evidence": [
+        "GHSA-6v2g-fpxh-pmmh",
+        "GHSA-4mvj-m6j5-pmf7",
+        "GHSA-6f9w-9hf2-5rg3",
+        "GHSA-86m2-fcxq-5q7c",
+        "GHSA-hvfh-5mj3-5f3j"
+      ]
+    },
+    "(?i)(session|token)\\s*[:=]\\s*['\\\"][^'\\\"]{0,8}['\\\"]": {
+      "description": "会话安全: 会话标识过短或硬编码",
+      "severity": "high",
+      "owasp": "LLM07",
+      "owasp_name": "系统提示泄露 (System Prompt Leakage)",
+      "derived_from": "session",
+      "intel_hits": 30,
+      "evidence": [
+        "CVE-2026-19645",
+        "GHSA-jrrm-9hc7-2v3h",
+        "GHSA-hvfh-5mj3-5f3j",
+        "GHSA-w3fx-mc44-mf6j",
+        "GHSA-72f3-6w86-7rv3"
+      ]
+    },
     "(?i)(os\\.system|subprocess\\.(call|run|Popen)|child_process\\.exec)\\s*\\(\\s*[^)]*(\\+|%|\\$\\{|f['\\\"])": {
       "description": "命令注入: 动态拼接系统命令",
       "severity": "critical",
@@ -670,66 +786,6 @@
         "GHSA-p853-83gj-wjj3",
         "GHSA-rghg-q7wp-9767",
         "GHSA-73wf-9vmv-5pv9"
-      ]
-    },
-    "(?i)(Access-Control-Allow-Origin['\\\"]?\\s*[:,]\\s*['\\\"]\\*|cors\\s*\\(\\s*\\)\\s*)": {
-      "description": "跨域校验缺失: 允许任意来源",
-      "severity": "high",
-      "owasp": "LLM07",
-      "owasp_name": "系统提示泄露 (System Prompt Leakage)",
-      "derived_from": "origin",
-      "intel_hits": 21,
-      "evidence": [
-        "GHSA-79wm-x847-7cvg",
-        "GHSA-hqj7-phwp-c3fp",
-        "GHSA-3h2g-j4wp-7qqq",
-        "GHSA-hq3h-g68c-hp78",
-        "GHSA-6g6r-q6gw-w8fg"
-      ]
-    },
-    "(?i)(auth(entication)?\\s*[:=]\\s*(False|None|null|0)\\b|verify\\s*=\\s*False)": {
-      "description": "认证绕过: 显式关闭校验",
-      "severity": "critical",
-      "owasp": "LLM07",
-      "owasp_name": "系统提示泄露 (System Prompt Leakage)",
-      "derived_from": "authentication",
-      "intel_hits": 27,
-      "evidence": [
-        "GHSA-79wm-x847-7cvg",
-        "GHSA-hvfh-5mj3-5f3j",
-        "GHSA-w3fx-mc44-mf6j",
-        "GHSA-72f3-6w86-7rv3",
-        "GHSA-fh3r-g96v-f578"
-      ]
-    },
-    "(?i)(requests\\.(get|post)|urllib\\.request\\.urlopen|fetch)\\s*\\(\\s*[^)]*(user|input|param|req\\.)": {
-      "description": "SSRF: 请求目标来自不可信输入",
-      "severity": "high",
-      "owasp": "LLM06",
-      "owasp_name": "过度代理权限 (Excessive Agency)",
-      "derived_from": "ssrf",
-      "intel_hits": 27,
-      "evidence": [
-        "GHSA-4mvj-m6j5-pmf7",
-        "GHSA-6f9w-9hf2-5rg3",
-        "GHSA-86m2-fcxq-5q7c",
-        "GHSA-hvfh-5mj3-5f3j",
-        "GHSA-ppx3-28rw-8fpf"
-      ]
-    },
-    "(?i)(session|token)\\s*[:=]\\s*['\\\"][^'\\\"]{0,8}['\\\"]": {
-      "description": "会话安全: 会话标识过短或硬编码",
-      "severity": "high",
-      "owasp": "LLM07",
-      "owasp_name": "系统提示泄露 (System Prompt Leakage)",
-      "derived_from": "session",
-      "intel_hits": 29,
-      "evidence": [
-        "GHSA-jrrm-9hc7-2v3h",
-        "GHSA-hvfh-5mj3-5f3j",
-        "GHSA-w3fx-mc44-mf6j",
-        "GHSA-72f3-6w86-7rv3",
-        "GHSA-fh3r-g96v-f578"
       ]
     },
     "(?i)(\\.\\./){2,}|(%2e%2e%2f)": {
@@ -791,10 +847,10 @@
     }
   },
   "owasp_distribution": {
-    "LLM05": 3,
     "LLM07": 3,
     "LLM06": 2,
+    "LLM05": 3,
     "LLM01": 1
   },
-  "total_rules": 81
+  "total_rules": 85
 }
