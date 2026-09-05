@@ -125,7 +125,7 @@
 
 | 渠道 | 状态 | 资产就绪 | 需用户手动 |
 |---|---|---|---|
-| Official MCP Registry | ✅ **已上架 active 4.2.2**（2026-08-22 纠正误判） | ✅ 在册 | 无（remote 元数据 stale 待决策） |
+| Official MCP Registry | ✅ **已上架 active 4.3.0**（2026-09-05 复测；remotes 已移除，stdio-only） | ✅ 在册 | 无（勿提 PR，已在册） |
 | Glama | ✅ 已上架（2026-08-22 复测 200） | ✅ README/llms.txt 已去云化(2026-08-15) | 后台短描述待用户登录改 |
 | npm | ✅ 4.2.2（2026-08-22 复测 latest=4.2.2） | — | — |
 | LobeHub | ⚠️ 被 SaaS 占位 | ✅ 文案 | 登录发布开源版 |
