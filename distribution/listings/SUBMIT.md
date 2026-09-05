@@ -121,7 +121,7 @@
 
 ## 发布状态速查（每周由自动化刷新）
 
-> 状态截止 **2026-08-22** 自动巡检（全部经 curl 实测）。
+> 状态截止 **2026-09-05** 自动巡检（全部经 curl 实测）。
 
 | 渠道 | 状态 | 资产就绪 | 需用户手动 |
 |---|---|---|---|
@@ -138,8 +138,8 @@
 | HuggingFace | ❌ | ✅ README | 上传 |
 | A2A Registry | ❌ | ✅ agent-card | 注册 |
 | DSH | ❌ | ✅ 全套 | 投稿+npm |
-| aishield.tools 静态发现文件 | ⚠️ **stale 4.2.0/133/错工具名**（连续第 3 周未变） | ✅ main 已是 4.2.2 正确 | **CF Pages Retry** |
-| aishield.tools `/api/v1` 后端 | ⚠️ **活着但 stale**（health 报 4.2/133；工具名正确） | — | 后端重新部署 |
+| aishield.tools 静态发现文件 | ✅ **已修复 4.3.0**（2026-09-05 复测：227 MCP/233 skill、6 工具名正确） | ✅ main 已是 4.3.0 正确 | 无（drift 随 4.3.0 发版消除，CF Pages Retry 不再需要） |
+| aishield.tools `/api/v1` 后端 | ✅ **已修复 4.3.0/228**（2026-09-05 复测；commit 93fcd10c，deployed 2026-09-01） | — | 无（随 4.3.0 发版部署，元数据已新鲜） |
 | GitHub Pages（github.io） | ⛔ **死端表面**：301→aishield.tools，内容不可达 | — | 无（勿再修，见下） |
 
 ### 表面拓扑（2026-08-22 实测厘清）
