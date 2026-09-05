@@ -323,7 +323,10 @@ jobs:
 
   notify-on-failure:
     name: Notify on CI Failure
-    needs: [workflow-lint, distribution-gate, test, security-scan, dependency-check, performance-test, docker-test]
+    # 【2026-09-05 修复】needs 原先漏了 ci-state：状态总线回写失败（如并发
+    # push 冲突导致 git_push_safe 退出码 3）时，failure() 对本 job 求值为假，
+    # 告警被 skip——9 链 spine 在 ci-state 失败后整链终止却无人收到通知。
+    needs: [workflow-lint, distribution-gate, test, security-scan, dependency-check, performance-test, docker-test, ci-state]
     # 只在人为动作（push / PR / 手动）上告警。定时兜底跑挂了不该每小时刷屏——
     # 定时失败由 meta-monitor 汇总，人为改动失败才需要立刻有人看。
     if: failure() && github.event_name != 'schedule'
