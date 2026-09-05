@@ -85,8 +85,7 @@ jobs:
             echo "状态无变化"
           else
             git commit -m "chore(meta): 体系体检 score=${{ steps.check.outputs.score }} level=${{ steps.check.outputs.level }}"
-            git pull --rebase --autostash || true
-            git push || echo "push 失败，状态已本地记录"
+            bash scripts/git_push_safe.sh
           fi
 
   heartbeat:

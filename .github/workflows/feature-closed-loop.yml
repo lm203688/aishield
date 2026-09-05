@@ -157,8 +157,10 @@ jobs:
             echo "无变更，跳过提交"
           else
             git commit -m "chore(feature-loop): 自动采纳 ${{ needs.aggregate.outputs.count }} 项反馈 (P0/P1: ${{ needs.aggregate.outputs.p0p1 }})"
-            git pull --rebase --autostash origin main || true
-            git push origin main
+            # 并发 push 保护：spine 主干里多个 workflow 先后 push main，裸 push
+            # 会因 "cannot lock ref" 失败并永久丢失采纳结果（09-01/09-02 因此连挂
+            # 两天、迭代汇报被 skip）。改为共享脚本带重试，耗尽才真报错触发 alert。
+            bash scripts/git_push_safe.sh
             echo "已提交采纳结果"
           fi
 

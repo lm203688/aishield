@@ -87,7 +87,7 @@ jobs:
             echo "::warning::飞轮未增长（$BEFORE -> $N），数据源可能已失效"
           fi
           GREW=$([ "$N" -gt "$BEFORE" ] && echo true || echo false)
-          python scripts/state_bus.py set data \
+          python scripts/state_bus.py set flywheel \
             "{\"total\":$N,\"before\":$BEFORE,\"grew\":$GREW}" \
             --source data-scan-flywheel || true
 
@@ -98,11 +98,10 @@ jobs:
           git config user.name "github-actions[full]"
           git config user.email "github-actions[full]@users.noreply.github.com"
           git add data/batch_scans.json data/monitored_tools.json data/security_report.md 2>/dev/null
-          git add data/batch_scans.json data/monitored_tools.json data/security_report.md data/state/ 2>/dev/null
+          git add data/batch_scans.json data/monitored_tools.json data/security_report.md data/state/flywheel.json  2>/dev/null
           if ! git diff --cached --quiet; then
             git commit -m "auto: 批量扫描入库 [skip ci]"
-            git pull --rebase --autostash origin main || true
-            git push origin main
+            bash scripts/git_push_safe.sh
             echo "DB updated & committed"
           else
             echo "No new scan data this cycle"

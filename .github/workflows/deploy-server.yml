@@ -202,10 +202,9 @@ jobs:
       run: |
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
-        git add diagnostics/deploy-result.md diagnostics/deploy-state.json data/state/ 2>/dev/null || true
+        git add diagnostics/deploy-result.md diagnostics/deploy-state.json data/state/deploy.json  2>/dev/null || true
         git commit -m "chore: update deploy diagnostics [skip ci]" || echo "No changes to commit"
-        git pull --rebase --autostash origin main || true
-        git push || echo "Push failed"
+        bash scripts/git_push_safe.sh
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -367,12 +366,13 @@ jobs:
     - name: Record deploy state
       if: always()
       run: |
-        python scripts/state_bus.py set selfheal '{"last_deploy_verify":"${{ steps.verify.outcome }}","deploy_run_id":"${{ github.run_id }}"}' --source deploy-server
+        # deploy 域独占：过去与 self-heal-closed-loop 共用 selfheal 域，两个
+        # workflow 同时重写同一 JSON 文件会触发 rebase 内容冲突。
+        python scripts/state_bus.py set deploy '{"last_deploy_verify":"${{ steps.verify.outcome }}","deploy_run_id":"${{ github.run_id }}"}' --source deploy-server
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
-        git add data/state/ 2>/dev/null || true
+        git add data/state/deploy.json  2>/dev/null || true
         if ! git diff --cached --quiet; then
           git commit -m "auto: 部署验证状态回写 [skip ci]" || true
-          git pull --rebase --autostash origin main || true
-          git push || echo "push skipped"
+          bash scripts/git_push_safe.sh
         fi

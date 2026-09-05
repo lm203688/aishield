@@ -85,8 +85,7 @@ jobs:
           git add content/ eco/content/ 2>/dev/null || true
           if ! git diff --cached --quiet; then
             git commit -m "auto: 内容流水线产出 [skip ci]" || true
-            git pull --rebase --autostash origin main || true
-            git push origin main || echo "push skipped"
+            bash scripts/git_push_safe.sh
           else
             echo "本周期无新增内容"
           fi
@@ -119,11 +118,10 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add docs/blog/ api/static/feeds.xml README.md data/state/ 2>/dev/null || true
+          git add docs/blog/ api/static/feeds.xml README.md data/state/distribution.json data/state/registry.json  2>/dev/null || true
           if ! git diff --cached --quiet; then
             git commit -m "auto: 内容多渠道分发 [skip ci]" || true
-            git pull --rebase --autostash origin main || true
-            git push origin main || echo "push skipped"
+            bash scripts/git_push_safe.sh
           fi
 
   # ── 3. 生态目录上架（真实提交，不再只做 preview）─────────────────────
@@ -156,11 +154,10 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add registry/ data/state/ 2>/dev/null || true
+          git add registry/ data/state/distribution.json data/state/registry.json  2>/dev/null || true
           if ! git diff --cached --quiet; then
             git commit -m "auto: 生态目录上架状态更新 [skip ci]" || true
-            git pull --rebase --autostash origin main || true
-            git push origin main || echo "push skipped"
+            bash scripts/git_push_safe.sh
           fi
 
   # ── 4. 付费/授权渠道放大（可选，缺凭据不影响主流程）──────────────────
@@ -284,11 +281,10 @@ jobs:
             --source channel-distribution || true
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/state/ 2>/dev/null || true
+          git add data/state/distribution.json data/state/registry.json  2>/dev/null || true
           if ! git diff --cached --quiet; then
             git commit -m "auto: distribution 状态域心跳 [skip ci]" || true
-            git pull --rebase --autostash origin main || true
-            git push origin main || echo "push skipped"
+            bash scripts/git_push_safe.sh
           fi
 
   # ── 合并自 acquisition-automation.yml：获客监控 ──────────────────

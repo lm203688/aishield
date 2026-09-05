@@ -318,7 +318,7 @@ jobs:
             echo "ci.json 无变更"
           else
             git commit -m "chore(ci-state): 更新 CI 状态总线"
-            git push origin main || echo "push failed"
+            bash scripts/git_push_safe.sh
           fi
 
   notify-on-failure:

@@ -254,11 +254,10 @@ jobs:
             --source threat-intel-feed || true
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/threat_intel.json data/generated_rules.json data/state/ mcp-server/README.md 2>/dev/null || true
+          git add data/threat_intel.json data/generated_rules.json data/state/intel.json  mcp-server/README.md 2>/dev/null || true
           if ! git diff --cached --quiet; then
             git commit -m "auto: 威胁情报入库 + 检测规则更新 + README计数同步（情报 ${{ needs.fetch.outputs.total }} 条 / 规则 ${{ needs.to-rules.outputs.rules }} 条）[skip ci]" || true
-            git pull --rebase --autostash origin main || true
-            git push origin main || echo "push skipped"
+            bash scripts/git_push_safe.sh
           else
             echo "本周期无情报与规则变化"
           fi

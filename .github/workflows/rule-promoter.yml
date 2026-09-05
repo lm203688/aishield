@@ -87,24 +87,17 @@ jobs:
           # 心跳：rules 域每周期刷新（数值不变则不刷 history）
           RADAR_N=$(python -c "import json;print(len(json.load(open('data/radar_rules.json')).get('rules',{})))" 2>/dev/null || echo 0)
           python scripts/state_bus.py set rules "{\"radar_rules\":$RADAR_N,\"last_promoted\":${{ steps.promo.outputs.promoted }}}" --source rule-promoter || true
-          # 注意：不要 git add data/state/ —— 状态文件是并发冲突磁铁（多个 workflow
-          # 同时写并 push），把它并进本次提交会让 push 非快进失败。晋升产物只涉及
-          # radar_rules.json / _proposed / README，这些文件仅本 workflow 接触，无冲突。
+          # 注意：不要 git add data/state/ —— 整个状态目录是并发冲突磁铁（多个
+          # workflow 同时写并 push），把它并进本次提交会让 rebase 产生内容冲突。
+          # 晋升产物只涉及 radar_rules.json / _proposed / README，这些文件仅本
+          # workflow 接触，无冲突。
           git add data/radar_rules.json scanner/_proposed/ mcp-server/README.md 2>/dev/null || true
           if ! git diff --cached --quiet; then
             git commit -m "auto: 规则闸门自动晋升 ${{ steps.promo.outputs.promoted }} 条 [skip ci]"
             # 修复"只进不出"：并发 push 冲突曾被 `|| echo skipped` 静默吞掉，
-            # 晋升结果永远进不了仓库（靠人工补 13 条）。改为带重试的 rebase+push，
-            # 重试耗尽才真报错（触发 alert job），不再制造假绿门禁。
-            for i in 1 2 3 4 5; do
-              git pull --rebase --autostash origin main || true
-              if git push origin main; then
-                echo "push ok (attempt $i)"
-                break
-              fi
-              echo "push 冲突/失败，重试 $i/5 ..."
-              sleep 8
-            done
+            # 晋升结果永远进不了仓库（靠人工补 13 条）。统一走共享脚本带重试，
+            # 重试耗尽才真 exit 1（触发 alert job），不再制造假绿门禁。
+            bash scripts/git_push_safe.sh
           else
             echo "本周期无可晋升候选或无实际变化"
           fi
