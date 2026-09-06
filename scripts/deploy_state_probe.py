@@ -77,13 +77,24 @@ def main():
 
     disk_rules, breakdown = rules_state()
 
+    # 【2026-09-06 修复】disk_commit 的权威源改为 .deploy_meta.json：
+    # 代码现在由 runner 经 SSH 投递 tarball 覆盖（不带 .git），投递后
+    # `git rev-parse HEAD` 仍停在旧值，而部署脚本会把真实投递的 sha
+    # 写进 .deploy_meta.json —— 读 git HEAD 会把「新代码」误报成「旧代码」，
+    # 反过来断言 2/5 就会误红。git HEAD 仅在 meta 缺失时兜底。
+    meta = deploy_meta()
+    disk_commit = meta.get("commit") or git_head() or None
+
     out = {
-        "disk_commit": git_head(),
+        "disk_commit": disk_commit,
         "disk_rules_count": disk_rules,
         "disk_rules_breakdown": breakdown,
         # 部署脚本写的是完整 sha，这里一并保留，让验证门可自行决定比对方式
-        "disk_commit_full": sh("git rev-parse HEAD") or None,
-        "deploy_meta": deploy_meta(),
+        "disk_commit_full": meta.get("commit")
+        or sh("git rev-parse HEAD")
+        or None,
+        "git_head_fallback": sh("git rev-parse --short HEAD") or None,
+        "deploy_meta": meta,
         "data_files": (
             sorted(os.listdir("data")) if os.path.isdir("data") else []
         ),

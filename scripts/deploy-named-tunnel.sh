@@ -41,11 +41,50 @@ RAW=https://raw.githubusercontent.com/lm203688/aishield/main
 NEED_RESTART=0
 
 before_head=$(git rev-parse HEAD 2>/dev/null || echo "nogit")
-git fetch --all 2>/dev/null || true
-git reset --hard origin/main 2>/dev/null || git pull origin main 2>/dev/null || true
-after_head=$(git rev-parse HEAD 2>/dev/null || echo "nogit")
-log "HEAD: ${before_head:0:8} -> ${after_head:0:8}"
-[ "$before_head" != "$after_head" ] && NEED_RESTART=1
+# 【2026-09-06 修复】旧实现 `git fetch --all 2>/dev/null || true` 把 fetch 失败
+# 静默吞掉，reset 复位到陈旧的本地 origin/main 引用 —— 部署日志铁证
+# `HEAD: 93fcd10c -> 93fcd10c`，线上停在 09-01 代码而所有门禁照绿。
+# 新语义（按可靠性排序）：
+#   1) DEPLOY_SHA 注入（GitHub Actions 经 SSH 投递代码 tarball 时设置）——
+#      代码已在磁盘，唯一要做的就是如实把该 sha 写进 .deploy_meta.json；
+#   2) 无 DEPLOY_SHA 时走 git fetch，失败显式暴露（不再吞），
+#      并尝试 codeload 全量 tarball 兜底（单请求，区别于逐文件 raw）；
+#   3) 全部失败 -> 保留磁盘现状，meta 维持旧值，
+#      由验证门第 5 条断言（磁盘 commit == 触发 run 的 GitHub sha）判红。
+after_head=""
+if [ -n "${DEPLOY_SHA:-}" ]; then
+    after_head="$DEPLOY_SHA"
+    log "代码由 runner tarball 投递，权威 sha=${after_head:0:8}"
+else
+    fetch_ok=0
+    if git fetch --all 2>/tmp/aishield-fetch.log; then
+        fetch_ok=1
+    else
+        log "git fetch 失败: $(tail -2 /tmp/aishield-fetch.log 2>/dev/null)"
+    fi
+    if [ "$fetch_ok" = "1" ]; then
+        git reset --hard origin/main 2>/dev/null || git pull origin main 2>/dev/null || true
+        after_head=$(git rev-parse HEAD 2>/dev/null || echo "nogit")
+    else
+        # fetch 失败 -> codeload 全量 tarball 兜底覆盖（不含 .git 元数据）
+        if curl -fsSL --max-time 60 "https://github.com/lm203688/aishield/archive/main.tar.gz" -o /tmp/aishield-main.tgz 2>/dev/null && [ -s /tmp/aishield-main.tgz ]; then
+            rm -rf /tmp/aishield-main
+            tar xzf /tmp/aishield-main.tgz -C /tmp 2>/dev/null
+            if [ -d /tmp/aishield-main ]; then
+                ( shopt -s dotglob; cp -a /tmp/aishield-main/* . ) 2>/dev/null
+                rm -rf /tmp/aishield-main
+            fi
+            rm -f /tmp/aishield-main.tgz
+            after_head="tarball"
+            log "git fetch 失败 -> codeload tarball 兜底覆盖完成"
+        else
+            after_head="$before_head"
+            log "git fetch 与 tarball 兜底均失败 -> 磁盘维持旧代码（验证门应判红）"
+        fi
+    fi
+    log "HEAD: ${before_head:0:8} -> ${after_head:0:8}"
+    [ "$before_head" != "$after_head" ] && NEED_RESTART=1
+fi
 
 # ── 真相源：把「磁盘上的 commit」写进 .deploy_meta.json ─────────────────
 # 这一步必须在 git reset 之后、进程重启之前，否则 API 永远读不到新值。

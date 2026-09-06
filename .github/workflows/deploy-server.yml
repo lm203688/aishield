@@ -35,6 +35,30 @@ jobs:
         echo "Server degraded (HTTP ${code:-unreachable}). Triggering auto-repair deploy."
         echo "deploy_needed=true" >> "$GITHUB_OUTPUT"
 
+    # 【2026-09-06 修复】VPS 自行 git fetch 已实证失效（fetch 失败被吞掉后
+    # reset 到陈旧的本地 origin/main 引用，线上停在 09-01 代码），而
+    # runner -> VPS 的 SSH 通道是经年验证可用的。现在由 runner 把本次触发
+    # commit 的完整工作区（checkout 产物）打成 tarball 经 SSH 投递，
+    # VPS 不再依赖自身到 github.com 的网络。tarball 不含 .git 与任何
+    # gitignored 内容（.workbuddy 等本就不在 checkout 里）。
+    - name: Upload code tarball to VPS
+      if: steps.healthgate.outputs.deploy_needed != 'false'
+      env:
+        SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
+        SERVER_HOST: ${{ secrets.SERVER_HOST }}
+        SERVER_USER: ${{ secrets.SERVER_USER }}
+        SERVER_PORT: ${{ secrets.SERVER_PORT || 22 }}
+      run: |
+        mkdir -p ~/.ssh
+        echo "$SSH_KEY" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -H "$SERVER_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+        tar czf /tmp/aishield-code.tgz --exclude=.git .
+        ls -la /tmp/aishield-code.tgz
+        scp -o StrictHostKeyChecking=no -P "${SERVER_PORT:-22}" \
+          /tmp/aishield-code.tgz "$SERVER_USER@$SERVER_HOST":/tmp/aishield-code.tgz
+        echo "tarball 上传完成"
+
     - name: Deploy via SSH
       id: deploy
       if: steps.healthgate.outputs.deploy_needed != 'false'
@@ -47,34 +71,28 @@ jobs:
         command_timeout: 20m
         capture_stdout: true
         script: |
-          cd /opt/aishield 2>/dev/null || cd ~/aishield 2>/dev/null || true
+          TARGET_DIR=/opt/aishield
+          [ -d "$TARGET_DIR" ] || TARGET_DIR=$HOME/aishield
+          mkdir -p "$TARGET_DIR"
+          cd "$TARGET_DIR"
 
-          # 【2026-08-28 修复】本机访问 raw.githubusercontent.com 极慢（实测单次
-          # curl 挂起 5 分钟后失败），而 git 走 github.com 是通的且很快。
-          # 旧实现把「拿最新脚本」完全押在 raw 上：一旦超时，磁盘上仍是旧脚本，
-          # 于是每次部署都在跑旧逻辑 —— 这是线上长期停留在 4.2.0 的直接原因。
-          # 现改为：git 为主（保证拿到最新脚本），raw 仅作 best-effort 兜底且限时。
-          echo "Updating repo via git (primary)..."
-          git fetch --all 2>&1 | tail -2 || true
-          git reset --hard origin/main 2>&1 | tail -2 || git pull origin main 2>&1 | tail -3 || true
-
-          echo "Trying raw download (best-effort, 30s cap)..."
-          if curl -sL --max-time 30 --connect-timeout 10 \
-               "https://raw.githubusercontent.com/lm203688/aishield/main/scripts/deploy-named-tunnel.sh" \
-               -o /tmp/deploy-named-tunnel.sh && [ -s /tmp/deploy-named-tunnel.sh ]; then
-            mv /tmp/deploy-named-tunnel.sh scripts/deploy-named-tunnel.sh
-            echo "raw download OK"
+          # 【2026-09-06 修复】代码同步主通道 = runner tarball（见上一步）。
+          # tarball 未送达时才回退 git 同步；若 git 也失败，磁盘维持旧代码，
+          # 验证门第 5 条断言（磁盘 commit == 触发 run 的 sha）会如实判红。
+          echo "=== Unpacking code tarball (delivered by runner) ==="
+          if [ -s /tmp/aishield-code.tgz ]; then
+            tar xzf /tmp/aishield-code.tgz -C "$TARGET_DIR"
+            rm -f /tmp/aishield-code.tgz
+            echo "tarball unpacked OK"
           else
-            echo "raw download failed/skipped -> using git version"
-            rm -f /tmp/deploy-named-tunnel.sh
+            echo "WARN: tarball 未送达，回退 git 同步"
+            git fetch --all 2>&1 | tail -2 || true
+            git reset --hard origin/main 2>&1 | tail -2 || git pull origin main 2>&1 | tail -3 || true
           fi
           chmod +x scripts/deploy-named-tunnel.sh
 
-          echo "=== Script first 5 lines ==="
-          head -5 scripts/deploy-named-tunnel.sh
-          echo "=== Checking for DNS API fix ==="
-          grep -c "所有模式" scripts/deploy-named-tunnel.sh || echo "DNS API fix NOT found!"
-          echo "=== Running deploy ==="
+          echo "=== Running deploy (authoritative sha ${{ github.sha }}) ==="
+          export DEPLOY_SHA="${{ github.sha }}"
           bash scripts/deploy-named-tunnel.sh 2>&1
           echo "DEPLOY_EXIT_CODE=$?"
 
@@ -246,11 +264,17 @@ jobs:
         #   进程活着但跑旧代码     -> 通过
         #   规则数据文件没部署上去 -> 通过
         # 这个门从建成起就没拦下任何东西。恒定输出的门禁 = 没门禁。
-        # 现在改成四条硬断言，任一不满足即 exit 1（阻断部署判定为成功）：
+        # 现在改成五条硬断言，任一不满足即 exit 1（阻断部署判定为成功）：
         #   1) 线上服务健康
         #   2) 线上 commit  == VPS 磁盘 commit      —— 部署是否真的落地
         #   3) 线上 rules  == VPS 磁盘 rules        —— 规则数据是否同步
         #   4) 线上 deployed_at 非空               —— .deploy_meta.json 是否写成功
+        #   5) VPS 磁盘 commit == 触发 run 的 GitHub sha —— 磁盘自身是否陈旧
+        # 【2026-09-05 实测的结构性假绿】断言 2 的参照物是 VPS 磁盘，而磁盘
+        # 自身会整体漂移：磁盘越陈旧，线上与磁盘越一致，断言 2 越绿。
+        # 线上 commit 停在 09-01(93fcd10c)、main 已到 09-04(e4ffd347)，
+        # 落后 82 提交而四条断言每天全绿。第 5 条把磁盘钉在触发 run 的 sha
+        # 上 —— 磁盘陈旧必红，P0 告警随验证门触发。
         # 磁盘侧真相来自上一步从 VPS 抓回的 diagnostics/deploy-state.json，
         # 与线上侧同一时刻读，因此不存在「部署与验证之间被 bot 提交插队」的竞态。
         # 该文件由 deploy job 通过 artifact 传来（两个 job 的 workspace 不共享）。
@@ -340,6 +364,22 @@ jobs:
                     "deployed_at 为空：.deploy_meta.json 未写入仓库根。"
                     "commit 判据正在退化为 git 实时回退值，部署陈旧性无法可靠判定。")
 
+            # 5) 磁盘 commit == 触发 run 的 GitHub sha（磁盘陈旧性断言）
+            # 双向前缀匹配兼容长/短 sha；"tarball" 等非 sha 标记两边都匹配
+            # 不上，会如实判红 —— 那种情况下代码虽新，但主同步通道已退化，
+            # 值得一次 P0 提醒。
+            expect = "${{ github.sha }}"
+            print(f"期望 HEAD  : {expect[:8]}（触发 run 的 GitHub sha）")
+            if not dc:
+                failures.append(
+                    "断言 5 无法执行：磁盘 commit 为空（与断言 2 的失败同因）。")
+            elif not (expect.startswith(dc) or dc.startswith(expect)):
+                failures.append(
+                    f"VPS 磁盘代码陈旧：磁盘={dc[:8]}，触发 run 的 GitHub "
+                    f"sha={expect[:8]}。代码同步通道失效（VPS git fetch 失败"
+                    f"且 runner tarball / 兜底均未生效），磁盘越旧断言 2 越"
+                    f"绿的结构性假绿已由本断言封堵。")
+
             # 规则构成明细（信息性输出，便于事后对照）
             print(f"线上规则构成: {live.get('rules_breakdown')}")
 
@@ -347,7 +387,7 @@ jobs:
             print("❌ " + msg)
         if failures:
             sys.exit(1)
-        print("✅ 四项断言全部通过：线上与磁盘一致")
+        print("✅ 五项断言全部通过：线上与磁盘一致，且磁盘与触发 commit 一致")
         PYVERDICT
         verdict=$?
 
