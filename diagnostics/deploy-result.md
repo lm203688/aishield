@@ -1,5 +1,5 @@
 === DIAGNOSTIC ===
-Time: Sat Sep 5 05:40:29 PM CST 2026
+Time: Sun Sep 6 03:55:21 PM CST 2026
 === USER ===
 root
 === GIT LOG ===
@@ -13,25 +13,12 @@ c5554455 auto: 批量扫描入库 [skip ci]
 # 解决 Quick Tunnel 的 error 1014 (CNAME Cross-User Banned) 问题
 #
 === API STATUS ===
-{"status": "ok", "version": "4.3.0", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 228, "rules_breakdown": {"static": 204, "generated": 9, "radar": 15, "total": 228}, "uptime": 1788601229.2783308, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup", "commit": "4c18b94bcb180aec29357e6a18cfc15bb4a956cc", "deployed_at": "2026-09-05T09:39:48Z"}OK
+{"status": "ok", "version": "4.3.0", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 228, "rules_breakdown": {"static": 204, "generated": 9, "radar": 15, "total": 228}, "uptime": 1788681321.4531739, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup", "commit": "4c18b94bcb180aec29357e6a18cfc15bb4a956cc", "deployed_at": "2026-09-05T09:39:48Z"}OK
 === CLOUDFLARED PROCESS ===
-root     1988751  0.6  1.8 1294676 36656 ?       Sl   17:40   0:00 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
-root     1988779  1.0  1.8 1294420 36936 ?       Ssl  17:40   0:00 /usr/local/bin/cloudflared --config /etc/cloudflared-healthlens/config.yml tunnel --metrics 127.0.0.1:8099 run
-root     1988969  1.7  1.8 1294668 37216 ?       Sl   17:40   0:00 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
+root     1988751  0.1  1.0 1294676 21148 ?       Sl   Sep05   2:10 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
+root     1988779  0.1  1.0 1294676 20792 ?       Ssl  Sep05   2:10 /usr/local/bin/cloudflared --config /etc/cloudflared-healthlens/config.yml tunnel --metrics 127.0.0.1:8099 run
+root     1988969  0.1  1.0 1294676 21180 ?       Sl   Sep05   2:10 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
 === CLOUDFLARED LOG (last 30 lines) ===
-2026-09-05T09:40:17Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=0 event=0 ip=198.41.192.27
-2026-09-05T09:40:17Z INF +-------------------------------------------------------------------------------------+
-2026-09-05T09:40:17Z INF |                               CONNECTIVITY PRE-CHECKS                               |
-2026-09-05T09:40:17Z INF +-------------------------------------------------------------------------------------+
-2026-09-05T09:40:17Z INF |  COMPONENT         TARGET                     STATUS  DETAILS                       |
-2026-09-05T09:40:17Z INF |  DNS Resolution    region1.v2.argotunnel.com  PASS    DNS Resolved successfully     |
-2026-09-05T09:40:17Z INF |  DNS Resolution    region2.v2.argotunnel.com  PASS    DNS Resolved successfully     |
-2026-09-05T09:40:17Z INF |  UDP Connectivity  region1.v2.argotunnel.com  PASS    QUIC connection successful    |
-2026-09-05T09:40:17Z INF |  UDP Connectivity  region2.v2.argotunnel.com  PASS    QUIC connection successful    |
-2026-09-05T09:40:17Z INF |  TCP Connectivity  region1.v2.argotunnel.com  PASS    HTTP/2 connection successful  |
-2026-09-05T09:40:17Z INF |  TCP Connectivity  region2.v2.argotunnel.com  PASS    HTTP/2 connection successful  |
-2026-09-05T09:40:17Z INF |  Cloudflare API    api.cloudflare.com:443     PASS    API is reachable              |
-2026-09-05T09:40:17Z INF |                                                                                     |
 2026-09-05T09:40:17Z INF |  SUMMARY: Environment is healthy. cloudflared will use 'quic' as primary protocol.  |
 2026-09-05T09:40:17Z INF +-------------------------------------------------------------------------------------+
 2026-09-05T09:40:17Z INF precheck component="DNS Resolution" details="DNS Resolved successfully" run_id=f617b7db-7f64-42d9-a9cf-b58010022060 status=pass target=region1.v2.argotunnel.com
@@ -49,6 +36,19 @@ root     1988969  1.7  1.8 1294668 37216 ?       Sl   17:40   0:00 /usr/local/bi
 2026-09-05T09:40:19Z INF Registered tunnel connection connIndex=2 connection=a91d0121-d7c9-49c2-8682-9992cc0d5876 event=0 ip=198.41.200.113 location=sjc10 protocol=quic
 2026-09-05T09:40:19Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=3 event=0 ip=198.41.192.107
 2026-09-05T09:40:20Z INF Registered tunnel connection connIndex=3 connection=1df130ca-de88-4aef-8318-2e15bfad5c61 event=0 ip=198.41.192.107 location=lax07 protocol=quic
+2026-09-05T12:44:36Z ERR failed to accept incoming stream requests error="failed to accept QUIC stream: timeout: no recent network activity" connIndex=0 event=0 ip=198.41.192.27
+2026-09-05T12:44:36Z ERR failed to run the datagram handler error="timeout: no recent network activity" connIndex=0 event=0 ip=198.41.192.27
+2026-09-05T12:44:36Z WRN failed to serve tunnel connection error="accept stream listener encountered a failure while serving" connIndex=0 event=0 ip=198.41.192.27
+2026-09-05T12:44:36Z WRN Serve tunnel error error="accept stream listener encountered a failure while serving" connIndex=0 event=0 ip=198.41.192.27
+2026-09-05T12:44:36Z INF Retrying connection in up to 1s connIndex=0 event=0 ip=198.41.192.27
+2026-09-05T12:44:38Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=0 event=0 ip=198.41.192.27
+2026-09-05T12:44:46Z ERR failed to accept incoming stream requests error="failed to accept QUIC stream: timeout: no recent network activity" connIndex=0 event=0 ip=198.41.192.27
+2026-09-05T12:44:46Z ERR failed to run the datagram handler error="timeout: no recent network activity" connIndex=0 event=0 ip=198.41.192.27
+2026-09-05T12:44:46Z WRN failed to serve tunnel connection error="control stream encountered a failure while serving" connIndex=0 event=0 ip=198.41.192.27
+2026-09-05T12:44:46Z WRN Serve tunnel error error="control stream encountered a failure while serving" connIndex=0 event=0 ip=198.41.192.27
+2026-09-05T12:44:46Z INF Retrying connection in up to 4s connIndex=0 event=0 ip=198.41.192.27
+2026-09-05T12:44:49Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=0 event=0 ip=198.41.192.27
+2026-09-05T12:44:54Z INF Registered tunnel connection connIndex=0 connection=8b6081d4-d79c-4585-9cf9-c9a5f3d2bc45 event=0 ip=198.41.192.27 location=lax07 protocol=quic
 === DEPLOY LOG ===
 === AIShield Named Tunnel Deployment ===
 [17:39:47] Time: Sat Sep  5 05:39:47 PM CST 2026
@@ -149,11 +149,11 @@ cert.pem: -rw------- 1 root root 282 Jul 28 11:02 /root/.cloudflared/cert.pem
 === SYSTEMD STATUS ===
 ● cloudflared-tunnel.service - Cloudflare Named Tunnel for AIShield
      Loaded: loaded (/etc/systemd/system/cloudflared-tunnel.service; enabled; vendor preset: enabled)
-     Active: active (running) since Sat 2026-09-05 17:40:21 CST; 8s ago
+     Active: active (running) since Sat 2026-09-05 17:40:21 CST; 22h ago
    Main PID: 1988965 (start-tunnel.sh)
-      Tasks: 9 (limit: 2216)
-     Memory: 19.1M
-        CPU: 154ms
+      Tasks: 10 (limit: 2216)
+     Memory: 18.9M
+        CPU: 2min 10.621s
      CGroup: /system.slice/cloudflared-tunnel.service
              ├─1988965 /bin/bash /opt/start-tunnel.sh
              └─1988969 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
@@ -187,12 +187,12 @@ fi
 wait $CF_PID
 
 === HTTPS Test from Runner ===
-Time: Sat Sep  5 09:40:37 UTC 2026
+Time: Sun Sep  6 07:55:31 UTC 2026
 
 === curl test (aishield.tools) ===
-{"status": "ok", "version": "4.3.0", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 228, "rules_breakdown": {"static": 204, "generated": 9, "radar": 15, "total": 228}, "uptime": 1788601238.2455547, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup", "commit": "4c18b94bcb180aec29357e6a18cfc15bb4a956cc", "deployed_at": "2026-09-05T09:39:48Z"}
+{"status": "ok", "version": "4.3.0", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 228, "rules_breakdown": {"static": 204, "generated": 9, "radar": 15, "total": 228}, "uptime": 1788681331.815845, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup", "commit": "4c18b94bcb180aec29357e6a18cfc15bb4a956cc", "deployed_at": "2026-09-05T09:39:48Z"}
 === DNS lookup ===
-104.21.81.46
 172.67.188.44
+104.21.81.46
 
 === DNS CNAME check ===
