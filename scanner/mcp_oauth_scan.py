@@ -14,6 +14,7 @@ issuer 校验缺失导致 mix-up 攻击；长寿命 token 扩大泄露半径。
 
 import re
 import json
+import os
 
 _OWASP = "MCP02"
 
@@ -27,6 +28,32 @@ _REFRESH_NO_ROTATE = re.compile(
     r'("?refresh_token"?\s*[:=])', re.I)
 # GPT Action 清单：认证通过顶层/action 级 "auth" 字段声明，无 auth = 合法公开行为
 _IS_GPT_MANIFEST = re.compile(r'"actions"\s*:\s*\[', re.I)
+
+# 【2026-09-06 修复】mcp_no_auth 曾过宽：凡 .json/.yaml/.yml + 含任意 url 即报 high，
+# 不校验是否真声明 MCP server —— 含 repository.url 的 package.json 等会被误报。
+# 收窄：仅当文件名暗示 MCP server 配置（mcp/server/config/claude）或内容显式声明
+# mcpServers、或带 <mcp-config> 标签时，才当远端 server 查认证。
+# 保留 test_no_auth_flagged(server.json) 语义（server.json 命中 "server"）。
+_MCP_FILENAME = re.compile(r"(mcp|server|config|claude)", re.I)
+_MCP_DECL = re.compile(r'"mcpServers"', re.I)
+_MCP_CONFIG_NAMES = {
+    "mcp.json", "mcp-config.json", "mcp_config.json",
+    "claude_desktop_config.json", "mcp_settings.json",
+}
+
+
+def _is_mcp_server_config(content, fp):
+    """仅把『真声明了 MCP server』的配置当远端 server 来查认证。"""
+    if "<mcp-config>" in fp:
+        return True
+    base = os.path.basename(fp).lower()
+    if base in _MCP_CONFIG_NAMES:
+        return True
+    if _MCP_FILENAME.search(base):
+        return True
+    if _MCP_DECL.search(content):
+        return True
+    return False
 
 
 def _looks_like_gpt_manifest(content):
@@ -55,9 +82,7 @@ def mcp_oauth_analysis(files):
     for fp, content in files.items():
         if not isinstance(content, str) or not content.strip():
             continue
-        is_server = ("<mcp-config>" in fp or fp.endswith(".json")
-                     or fp.endswith(".yaml") or fp.endswith(".yml"))
-        if not is_server:
+        if not _is_mcp_server_config(content, fp):
             continue
         if not _HAS_URL.search(content):
             continue  # 仅检查远程 server

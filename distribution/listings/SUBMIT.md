@@ -56,11 +56,11 @@
   |---|---|
   | name | `io.github.lm203688/aishield` |
   | title | AIShield Security Scanner |
-  | version | **4.2.2** ✅ 与基线一致 |
+  | version | **4.3.0** ✅ 与基线一致 |
   | status | **active** |
   | isLatest | **true** |
   | publishedAt | 2026-08-07T12:54:18Z |
-  | packages | `aishield-mcp-server` 4.2.2 · transport **stdio** ✅ |
+  | packages | `aishield-mcp-server` 4.3.0 · transport **stdio** ✅ |
   | remotes | `streamable-http` → `https://aishield.tools/api/v1/mcp` |
 
 - **无需提 PR**：条目已在册（推测由 `.github/workflows/publish-mcp-registry.yml` 发布）。此前「fork + 提 PR」的指引**作废**，勿重复提交造成重复条目。
@@ -127,7 +127,7 @@
 |---|---|---|---|
 | Official MCP Registry | ✅ **已上架 active 4.3.0**（2026-09-05 复测；remotes 已移除，stdio-only） | ✅ 在册 | 无（勿提 PR，已在册） |
 | Glama | ✅ 已上架（2026-08-22 复测 200） | ✅ README/llms.txt 已去云化(2026-08-15) | 后台短描述待用户登录改 |
-| npm | ✅ 4.2.2（2026-08-22 复测 latest=4.2.2） | — | — |
+| npm | ✅ 4.3.0（2026-09-06 复测 latest=4.3.0） | — | — |
 | LobeHub | ⚠️ 被 SaaS 占位 | ✅ 文案 | 登录发布开源版 |
 | Smithery | ❌ 未发布 | ✅ smithery.yaml | 登录发布 |
 | ClawHub | ❌ 缺位+squat | ✅ SKILL.md | clawhub publish |
@@ -145,7 +145,7 @@
 ### 表面拓扑（2026-08-22 实测厘清）
 
 ```
-main 分支 (✅ 4.2.2 / 227 / aishield_*  ← 唯一正确的真相源)
+main 分支 (✅ 4.3.0 / 230 / aishield_*  ← 唯一正确的真相源)
   │
   ├── GitHub Pages ── pages.yml 构建成功 ──► github.io ──301(CNAME)──► aishield.tools
   │                                                                    （自身内容永不可达 = 死端）

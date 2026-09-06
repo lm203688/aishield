@@ -1,0 +1,26 @@
+{
+  "status": "ready",
+  "drafted_at": "2026-08-25",
+  "authored_at": "2026-09-03",
+  "signal": {
+    "id": "6aac90ca68d5",
+    "title": "SkillBloat: Token Amplification Attacks via Skill Injection in LLM Coding Agents",
+    "url": "https://arxiv.org/abs/2608.21929",
+    "source": "arxiv"
+  },
+  "attack_category": "skill-poisoning",
+  "severity": "high",
+  "rules": [
+    {
+      "pattern": "(?i)(?:repeat|re-?output|re-?print|duplicate|echo|重复|复述)[^\\n]{0,30}?\\b\\d{3,}\\s*(?:times|x|次|遍)",
+      "description": "Skill 注入型 Token 放大: 要求对输出做三位数以上次数的重复，制造算力/费用放大 (SkillBloat)",
+      "severity": "high"
+    },
+    {
+      "pattern": "(?i)(?:until|直到)[^\\n]{0,30}(?:context\\s*(?:window|limit)|token\\s*(?:limit|budget|quota)|上下文(?:窗口|上限)|token\\s*额度)[^\\n]{0,20}(?:is\\s*)?(?:exhaust\\w*|full|reached|maxed|用尽|耗尽|打满)",
+      "description": "Skill 注入型 Token 放大: 指令持续生成直至上下文/Token 预算耗尽，构成成本型拒绝服务 (SkillBloat)",
+      "severity": "high"
+    }
+  ],
+  "review_notes": "2026-09-03 人工撰写。选此条的依据: 现网 228 条规则中 Token 相关仅覆盖『硬编码 Token』『Token 上限缺失』『大上下文窗口』三类配置项，无任何『放大指令』特征，属真实覆盖空缺（其余 4 条 memory-poisoning 草稿已被雷达『轨迹投毒』+『持久载体』规则覆盖，故判重复并归档）。离线验伪: 4/4 攻击样本命中；对 10 条 benign 语料 + 6 条对抗性负样本（Repeat this step 5 times / at least 2000 words / Retry up to 3 times / 重复执行该命令两次 等）零误报——三位数下限是关键，它把合法的小次数重复与放大攻击分开。"
+}

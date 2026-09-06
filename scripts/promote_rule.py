@@ -228,7 +228,12 @@ def sync_readme_counts():
         return False
     try:
         sys.path.insert(0, ROOT)
-        from scanner import rules as scanner_rules
+        import importlib
+        import scanner.rules as scanner_rules
+        # scanner.rules 在 import 时把 RADAR_RULES 缓存进模块级变量；本进程里
+        # 模块已在 radar_rules.json 写入前被 import（validate 阶段），缓存滞后。
+        # 重新加载以读取刚写入的文件，否则 README 永远停在晋升前的旧计数。
+        importlib.reload(scanner_rules)
         mcp_n = scanner_rules.get_rule_count("mcp")
         skill_n = scanner_rules.get_rule_count("skill")
     except Exception as e:
