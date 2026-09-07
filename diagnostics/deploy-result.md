@@ -1,5 +1,5 @@
 === DIAGNOSTIC ===
-Time: Sun Sep 6 04:49:09 PM CST 2026
+Time: Mon Sep 7 04:17:36 PM CST 2026
 === USER ===
 root
 === GIT LOG ===
@@ -15,11 +15,11 @@ NO GIT REPO
 # 解决 Quick Tunnel 的 error 1014 (CNAME Cross-User Banned) 问题
 #
 === API STATUS ===
-{"status": "ok", "version": "4.3.0", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 228, "rules_breakdown": {"static": 204, "generated": 9, "radar": 15, "total": 228}, "uptime": 1788684549.1318884, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup", "commit": "08a75eba2c2987e2368f7618a0f6303dac212c0e", "deployed_at": "2026-09-06T08:48:34Z"}OK
+{"status": "ok", "version": "4.3.0", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 228, "rules_breakdown": {"static": 204, "generated": 9, "radar": 15, "total": 228}, "uptime": 1788769056.1762052, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup", "commit": "08a75eba2c2987e2368f7618a0f6303dac212c0e", "deployed_at": "2026-09-06T08:48:34Z"}OK
 === CLOUDFLARED PROCESS ===
-root     2962567  0.8  1.8 1294420 37352 ?       Sl   16:48   0:00 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
-root     2962687  1.1  1.9 1360284 39000 ?       Ssl  16:48   0:00 /usr/local/bin/cloudflared --config /etc/cloudflared-healthlens/config.yml tunnel --metrics 127.0.0.1:8099 run
-root     2962692  1.1  1.9 1294676 38728 ?       Sl   16:48   0:00 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
+root     2962567  0.1  1.0 1294676 20932 ?       Sl   Sep06   2:09 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
+root     2962687  0.1  1.0 1360284 21016 ?       Ssl  Sep06   2:09 /usr/local/bin/cloudflared --config /etc/cloudflared-healthlens/config.yml tunnel --metrics 127.0.0.1:8099 run
+root     2962692  0.1  1.3 1294676 26684 ?       Sl   Sep06   2:08 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
 === CLOUDFLARED LOG (last 30 lines) ===
 2026-09-06T08:48:54Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256] connIndex=0 event=0 ip=198.41.200.33
 2026-09-06T08:48:54Z INF Registered tunnel connection connIndex=0 connection=4b57ba17-1991-45e4-a6f2-3e2f9b6a1cbd event=0 ip=198.41.200.33 location=sjc11 protocol=quic
@@ -151,11 +151,11 @@ cert.pem: -rw------- 1 root root 282 Jul 28 11:02 /root/.cloudflared/cert.pem
 === SYSTEMD STATUS ===
 ● cloudflared-tunnel.service - Cloudflare Named Tunnel for AIShield
      Loaded: loaded (/etc/systemd/system/cloudflared-tunnel.service; enabled; vendor preset: enabled)
-     Active: active (running) since Sun 2026-09-06 16:48:57 CST; 11s ago
+     Active: active (running) since Sun 2026-09-06 16:48:57 CST; 23h ago
    Main PID: 2962691 (start-tunnel.sh)
-      Tasks: 9 (limit: 2216)
-     Memory: 20.3M
-        CPU: 153ms
+      Tasks: 10 (limit: 2216)
+     Memory: 26.7M
+        CPU: 2min 8.651s
      CGroup: /system.slice/cloudflared-tunnel.service
              ├─2962691 /bin/bash /opt/start-tunnel.sh
              └─2962692 /usr/local/bin/cloudflared tunnel --config /root/.cloudflared/config.yml run
@@ -189,12 +189,12 @@ fi
 wait $CF_PID
 
 === HTTPS Test from Runner ===
-Time: Sun Sep  6 08:49:18 UTC 2026
+Time: Mon Sep  7 08:17:46 UTC 2026
 
 === curl test (aishield.tools) ===
-{"status": "ok", "version": "4.3.0", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 228, "rules_breakdown": {"static": 204, "generated": 9, "radar": 15, "total": 228}, "uptime": 1788684558.6274676, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup", "commit": "08a75eba2c2987e2368f7618a0f6303dac212c0e", "deployed_at": "2026-09-06T08:48:34Z"}
+{"status": "ok", "version": "4.3.0", "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)", "rules_count": 228, "rules_breakdown": {"static": 204, "generated": 9, "radar": 15, "total": 228}, "uptime": 1788769066.6679187, "agent_first": true, "openapi": "/openapi.json", "agent_setup": "/api/v1/agent/setup", "commit": "08a75eba2c2987e2368f7618a0f6303dac212c0e", "deployed_at": "2026-09-06T08:48:34Z"}
 === DNS lookup ===
-172.67.188.44
 104.21.81.46
+172.67.188.44
 
 === DNS CNAME check ===
