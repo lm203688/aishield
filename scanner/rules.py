@@ -159,6 +159,10 @@ MCP04_RULES = {
     # postinstall/preinstall恶意脚本
     r'"(postinstall|preinstall|postpublish)"\s*:\s*["\'].*?(curl|wget|exec|eval|bash|sh|python|node\s+-e)': ("postinstall脚本执行外部命令", "critical"),
     r'"(postinstall|preinstall|postpublish)"\s*:\s*["\'].*?https?://': ("postinstall脚本访问网络", "high"),
+    # 时间炸弹逻辑（借鉴 MK-ScorpioSec/mcp-scanner supply-chain 检查）
+    r'(datetime|date|new\s+Date)\s*\(\s*20(2[5-9]|[3-9]\d)\s*,.{0,80}(execute|exec|eval|delete|encrypt|ransom|curl|wget|shred|format)': ("日期触发的执行/破坏逻辑(时间炸弹)", "high"),
+    r'(execute|exec|eval|delete|encrypt|ransom)\b.{0,80}(datetime|Date\.now|time\.time|new\s+Date).{0,30}(>=|>|after|trigger)': ("执行逻辑绑定日期条件(时间炸弹)", "high"),
+    r'(cron|schedule|crontab).{0,60}(rm\s+-rf|mkfs|shred|del\s+/[sSq]|format\s+[cC]:)': ("计划任务执行破坏性命令(定时炸弹)", "critical"),
     # pip install from git
     r'\bpip\s+install\s+git\+https?://': ("从git URL安装Python包(供应链风险)", "high"),
     r'\bnpm\s+install\s+git\+https?://': ("从git URL安装npm包(供应链风险)", "high"),
@@ -299,6 +303,9 @@ MCP10_RULES = {
     r'\b(new\s+)?WebSocket\s*\(': ("WebSocket连接(可能用于数据外泄)", "medium"),
     # DNS隧道
     r'\bDNS\s*(exfil|tunnel|over)\b': ("DNS隧道数据外传", "critical"),
+    # ReDoS：schema 正则中的嵌套量词（借鉴 Latteflo/mcp-scanner MCP-DOS-002）
+    # evil 形态 = 组内含量词且组后紧跟量词，如 (a+)+ 、([a-z]+)*$
+    r'"pattern"\s*:\s*"[^"]*\([^()]*[*+{][^()]*\)\s*[*+{]': ("schema正则含嵌套量词(ReDoS风险)", "medium"),
 }
 
 # ============================================================
@@ -451,6 +458,9 @@ ASI03_RULES = {
     r'\bautonomous_mode\s*[:=]\s*(true|1|on)': ("自主模式无检查点", "high"),
     r'(no|without).{0,20}(confirmation|approval|checkpoint)': ("缺少确认/检查点", "high"),
     r'permissions\s*[:=]\s*["\']?write["\']?': ("授予写权限(最小权限违反)", "medium"),
+    # 凭证变量直接进入网络调用（toxic flow 单行代理信号，借鉴 Snyk agent-scan）
+    r'(curl|wget|requests\.|httpx|fetch\().{0,60}\$?[A-Z0-9_]*(API_?KEY|TOKEN|SECRET|PASSWORD|CREDENTIAL)[A-Z0-9_]*': ("网络调用携带凭证变量(外泄风险)", "high"),
+    r'(\$[A-Z0-9_]*(KEY|TOKEN|SECRET|PASSWORD|CREDENTIAL)[A-Z0-9_]*).{0,60}(curl|wget|requests\.|httpx|fetch\()': ("凭证变量直接进入网络调用(外泄风险)", "high"),
 }
 
 # ============================================================

@@ -49,6 +49,7 @@ def main():
         'tests.test_vertical_risk',
         'tests.test_diff',
         'tests.test_fuzzing',
+        'tests.test_baseline_scan',
     ]
 
     loaded = 0

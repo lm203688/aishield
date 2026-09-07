@@ -498,7 +498,7 @@ def generate_recommendations(findings, scores):
     return recs
 
 
-def scan(source_url, tool_type="mcp", name="", description="", enable_osv=False):
+def scan(source_url, tool_type="mcp", name="", description="", enable_osv=False, baseline=None):
     """
     完整扫描流水线
 
@@ -571,10 +571,26 @@ def scan(source_url, tool_type="mcp", name="", description="", enable_osv=False)
     # Step 6: 污点分析
     taint_results = taint_analysis(files)
 
+    # Step 6b: Toxic Flow 致命三要素（借鉴 Snyk agent-scan / mcp-security-scan）
+    try:
+        from .baseline_scan import detect_toxic_flows, check_drift
+        toxic_results = detect_toxic_flows(files).get("findings", [])
+    except Exception:
+        toxic_results = []
+
+    # Step 6c: 基线漂移比对（可选，传入 baseline 时启用 —— 定义级 rug-pull 钉扎）
+    drift_findings = []
+    if baseline is not None:
+        try:
+            from .baseline_scan import check_drift as _check_drift
+            drift_findings = _check_drift(files, baseline).get("findings", [])
+        except Exception:
+            drift_findings = []
+
     # Step 7: 评分（含 LLM 语义 findings 归因）
     scores = calculate_scores(
         static_results, dependency_results, secrets_results, poisoning_results, taint_results,
-        total_files, extra_findings=llm_results.get("findings", []) + llm_sc_results.get("findings", []),
+        total_files, extra_findings=llm_results.get("findings", []) + llm_sc_results.get("findings", []) + toxic_results,
     )
 
     # 汇总去重
@@ -586,6 +602,8 @@ def scan(source_url, tool_type="mcp", name="", description="", enable_osv=False)
     for f in taint_results: all_findings.append(f)
     for f in llm_results.get("findings", []): all_findings.append(f)
     for f in llm_sc_results.get("findings", []): all_findings.append(f)
+    for f in toxic_results: all_findings.append(f)
+    for f in drift_findings: all_findings.append(f)
     for f in osv_findings: all_findings.append(f)
 
     seen = set()
@@ -610,6 +628,8 @@ def scan(source_url, tool_type="mcp", name="", description="", enable_osv=False)
         "secrets_detection": secrets_results,
         "llm_analysis": llm_results,
         "llm_supply_chain": llm_sc_results,
+        "toxic_flow_scan": toxic_results,
+        "baseline_drift": drift_findings,
         "osv_cve": osv_findings,
         "commit_hash": source_data.get("commit_hash", ""),
         "recommendations": recommendations,
