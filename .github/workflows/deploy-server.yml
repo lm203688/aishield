@@ -25,14 +25,17 @@ jobs:
         # "监测"环节：定时任务先检查线上状态，健康则跳过重部署（避免无效重建）
         code=$(curl -sk -o /tmp/health.json -w '%{http_code}' --max-time 20 https://aishield.tools/api/v1/health || true)
         echo "health_http=$code"
-        if [ "$code" = "200" ]; then
-          if grep -q '"status": "ok"' /tmp/health.json; then
-            echo "Server healthy (HTTP $code). Skipping redeploy on this cycle."
-            echo "deploy_needed=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
+        # 【2026-09-07 修复】旧逻辑「健康即跳过部署」是代码陈旧的结构性根源：
+        # main 不断推进而服务一直健康 → 永不部署 → 线上/磁盘代码越落越远
+        # （09-01~09-05 停摆 82+ 提交即此因）；且第 5 条断言（磁盘 commit ==
+        # 触发 run 的 sha）在跳过路径下恒红（09-07 cron spine 实证）。
+        # 改为每次必部署：tarball 投递成本极低，重启在每日低峰（03:17），
+        # 代码新鲜度由流水线结构保证而非靠「服务恰好挂了」的运气。
+        if [ "$code" = "200" ] && grep -q '"status": "ok"' /tmp/health.json; then
+          echo "Server healthy (HTTP $code). Deploying anyway to pin latest commit."
+        else
+          echo "Server degraded (HTTP ${code:-unreachable}). Auto-repair deploy."
         fi
-        echo "Server degraded (HTTP ${code:-unreachable}). Triggering auto-repair deploy."
         echo "deploy_needed=true" >> "$GITHUB_OUTPUT"
 
     # 【2026-09-06 修复】VPS 自行 git fetch 已实证失效（fetch 失败被吞掉后
