@@ -32,8 +32,10 @@ import os
 import re
 import subprocess
 import sys
+import time
 import urllib.error
 import urllib.request
+import http.client
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, List
@@ -57,18 +59,47 @@ def _now() -> str:
 
 
 def _gh(path: str):
+    """带分块读取与重试的 GitHub API 调用。
+
+    历史坑：/actions/runs?per_page=100 的响应体较大，某些运行环境里
+    urllib 的 `resp.read()` 会抛出 http.client.IncompleteRead 而截断，
+    导致本应返回运行记录的调用变成 None —— 监控器随之把 M2/M3 判成
+    "无法获取运行记录"（ok=null）而静默放行，等于没监控。改用分块读取
+    （循环 read(64k) 直到 EOF）并把瞬时网络错误重试 3 次，确保拿到完整
+    JSON，让活性/新鲜度检查真正生效。
+    """
     if not GH_TOKEN:
         return None
-    req = urllib.request.Request(f"https://api.github.com{path}")
-    req.add_header("Authorization", f"Bearer {GH_TOKEN}")
-    req.add_header("Accept", "application/vnd.github+json")
-    req.add_header("User-Agent", "aishield-meta-monitor")
-    try:
-        with urllib.request.urlopen(req, timeout=30) as r:
-            return json.loads(r.read().decode("utf-8"))
-    except Exception as e:
-        print(f"[meta] GitHub API 失败 {path}: {e}")
-        return None
+    url = f"https://api.github.com{path}"
+    last_err = None
+    for attempt in range(3):
+        try:
+            req = urllib.request.Request(url)
+            req.add_header("Authorization", f"Bearer {GH_TOKEN}")
+            req.add_header("Accept", "application/vnd.github+json")
+            req.add_header("User-Agent", "aishield-meta-monitor")
+            with urllib.request.urlopen(req, timeout=60) as r:
+                chunks = []
+                while True:
+                    chunk = r.read(65536)
+                    if not chunk:
+                        break
+                    chunks.append(chunk)
+                return json.loads(b"".join(chunks).decode("utf-8"))
+        except urllib.error.HTTPError as e:
+            if e.code in (403, 429):
+                time.sleep(2 * (attempt + 1))
+                last_err = e
+                continue
+            print(f"[meta] GitHub API HTTP 错误 {path}: {e.code}")
+            return None
+        except (http.client.IncompleteRead, ConnectionError, urllib.error.URLError,
+                TimeoutError, OSError) as e:
+            last_err = e
+            time.sleep(1.5 * (attempt + 1))
+            continue
+    print(f"[meta] GitHub API 多次失败 {path}: {last_err}")
+    return None
 
 
 # --------------------------------------------------------------------------
@@ -100,28 +131,42 @@ def check_syntax() -> Dict[str, Any]:
 # --------------------------------------------------------------------------
 CRON_MAX_AGE_HOURS = {
     # workflow 文件名 -> 允许的最大静默小时数（约为 cron 周期的 2 倍）
+    # 注意：自 2026-09 起，原独立调度的子工作流（data-scan-flywheel /
+    # threat-intel-feed / channel-distribution / feature-closed-loop 等）已取消
+    # 独立 cron，改为由 closed-loop-spine.yml 每日 03:17 经 uses: 串行编排。
+    # 它们不再有"独立运行活性"，故此处只登记真正独立按 cron 运行的工作流，
+    # 避免 M2 把"被 spine 吸收的子工作流"误报为静默失效。
     "self-heal-closed-loop.yml": 12,
-    "deploy-server.yml": 12,
+    # deploy-server 由 closed-loop-spine 每日 03:17 触发（每次必部署），
+    # 正常最大静默约 24h+，12h 阈值会造成每日误报；放宽到 30h。
+    "deploy-server.yml": 30,
     "ci.yml": 48,
-    "data-scan-flywheel.yml": 96,
-    "threat-intel-feed.yml": 96,
-    "channel-distribution.yml": 336,
-    "feature-closed-loop.yml": 336,
     "meta-monitor.yml": 48,
+    "npm-self-heal.yml": 48,
+    "stale.yml": 48,
+    "closed-loop-spine.yml": 48,
 }
 
 # 状态域 -> 归属（写入该域的）workflow 列表。
 # 用于 M3：判断"环节是否停摆"不是看本地状态文件是否新鲜
 # （状态文件是 CI 运行时产物，从不入库，本地永远是陈旧副本），
 # 而是看归属 workflow 近期是否真的成功跑过。
+#
+# 关键修正（2026-09-08）：自闭环合并进 closed-loop-spine.yml 后，下列子工作流
+# 只经 spine 的 uses: 调用执行。GitHub 的 /actions/runs 全局列表**不会**把
+# uses: 调用的可复用工作流作为独立条目返回（仅 ci/deploy-server/
+# unified-security-scan 等仍留有独立触发，才会出现）。因此直接用子工作流
+# 文件名判活性会恒定误报"stale"。修正方案：把被 spine 吸收的状态域，在归属
+# 列表末尾补上 closed-loop-spine.yml 作为可靠归属——spine 自身确实出现在全局
+# runs 列表里，且每日成功运行即代表这些环节都已跑通。
 DOMAIN_OWNERS = {
     "health": ["self-heal-closed-loop.yml", "deploy-server.yml"],
     "selfheal": ["self-heal-closed-loop.yml", "deploy-server.yml"],
-    "distribution": ["channel-distribution.yml"],
-    "intel": ["threat-intel-feed.yml"],
-    "rules": ["threat-intel-feed.yml", "rule-promoter.yml"],
-    "flywheel": ["data-scan-flywheel.yml"],
-    "feature": ["feature-closed-loop.yml"],
+    "distribution": ["channel-distribution.yml", "closed-loop-spine.yml"],
+    "intel": ["threat-intel-feed.yml", "closed-loop-spine.yml"],
+    "rules": ["threat-intel-feed.yml", "rule-promoter.yml", "closed-loop-spine.yml"],
+    "flywheel": ["data-scan-flywheel.yml", "closed-loop-spine.yml"],
+    "feature": ["feature-closed-loop.yml", "closed-loop-spine.yml"],
     "meta": ["meta-monitor.yml"],
     "registry": ["publish-mcp-registry.yml", "publish-npm.yml"],
     "ci": ["ci.yml"],
@@ -130,14 +175,32 @@ DOMAIN_OWNERS = {
 DOMAIN_MAX_AGE_HOURS = {
     "health": 12, "selfheal": 12, "distribution": 336, "intel": 96,
     "rules": 96, "flywheel": 96, "feature": 336, "meta": 48,
-    "registry": 336, "ci": 48,
+    # registry = 发布动作（publish-mcp-registry / publish-npm），发版事件驱动，
+    # 非定时任务；两次发版间隔数周属正常，不应按 336h 判停摆。
+    "registry": 1440, "ci": 48,
 }
 
 _LATEST_RUNS_CACHE: Dict[str, Dict[str, Any]] | None = None
 
 
+def _monitored_workflows() -> List[str]:
+    """M2/M3 需要判活的所有 workflow 文件名（去重）。"""
+    names = set(CRON_MAX_AGE_HOURS)
+    for owners in DOMAIN_OWNERS.values():
+        names.update(owners)
+    return sorted(n for n in names if (WF_DIR / n).exists())
+
+
 def _get_latest_runs() -> Dict[str, Dict[str, Any]]:
-    """获取各 workflow 最近一次运行记录（带缓存，M2/M3 共用，避免重复调 API）。"""
+    """获取各 workflow 最近一次运行记录（带缓存，M2/M3 共用，避免重复调 API）。
+
+    两级查询（2026-09-08 修正）：先从全局 /actions/runs?per_page=100 提取；
+    但该窗口在高频 push（状态总线每次提交都触发 CI）下只覆盖约 2 天，
+    低频事件驱动型 workflow（如 publish-mcp-registry / publish-npm，
+    仅发版时运行）会整体缺席，导致 M3 把"只是最近没发版"误判为"停摆"。
+    故对全局列表里缺席的受监 workflow，逐个补查其专属
+    /workflows/<file>/runs?per_page=1 端点（结论以该端点为准）。
+    """
     global _LATEST_RUNS_CACHE
     if _LATEST_RUNS_CACHE is not None:
         return _LATEST_RUNS_CACHE
@@ -150,6 +213,19 @@ def _get_latest_runs() -> Dict[str, Dict[str, Any]]:
                 latest[wf] = {"at": r.get("run_started_at"),
                               "conclusion": r.get("conclusion"),
                               "status": r.get("status")}
+    # 二级补查：缺席的受监 workflow 用专属端点兜底
+    for wf in _monitored_workflows():
+        if wf in latest:
+            continue
+        data = _gh(f"/repos/{GH_OWNER}/{GH_REPO}/actions/workflows/{wf}/runs?per_page=1")
+        wr = (data or {}).get("workflow_runs") or []
+        if wr:
+            latest[wf] = {"at": wr[0].get("run_started_at"),
+                          "conclusion": wr[0].get("conclusion"),
+                          "status": wr[0].get("status")}
+        else:
+            # 明确登记"从未运行"，与网络失败区分开
+            latest[wf] = {"at": None, "conclusion": None, "status": None}
     _LATEST_RUNS_CACHE = latest
     return latest
 
@@ -157,15 +233,9 @@ def _get_latest_runs() -> Dict[str, Dict[str, Any]]:
 def check_liveness() -> Dict[str, Any]:
     if not GH_TOKEN:
         return {"ok": None, "detail": "无 GITHUB_TOKEN，跳过运行活性检查"}
-    runs = _gh(f"/repos/{GH_OWNER}/{GH_REPO}/actions/runs?per_page=100")
-    if not runs:
+    latest = _get_latest_runs()
+    if not latest:
         return {"ok": None, "detail": "无法获取运行记录"}
-
-    latest: Dict[str, Dict[str, Any]] = {}
-    for r in runs.get("workflow_runs", []):
-        wf = (r.get("path") or "").split("/")[-1]
-        if wf not in latest:
-            latest[wf] = {"at": r.get("run_started_at"), "conclusion": r.get("conclusion")}
 
     now = datetime.now(timezone.utc)
     silent, failing = [], []
@@ -173,7 +243,7 @@ def check_liveness() -> Dict[str, Any]:
         if not (WF_DIR / wf).exists():
             continue
         info = latest.get(wf)
-        if not info:
+        if not info or not info.get("at"):
             silent.append({"workflow": wf, "reason": "从未运行过（极可能解析失败）"})
             continue
         try:
@@ -187,11 +257,11 @@ def check_liveness() -> Dict[str, Any]:
             failing.append(wf)
 
     return {
-        "ok": not silent,
+        "ok": not silent and not failing,
         "silent": silent,
         "failing": failing,
-        "detail": "所有定时任务按期执行" if not silent
-                  else f"{len(silent)} 个任务超期未执行 —— 这是静默失效的典型信号",
+        "detail": "所有定时任务按期执行且最近一次均成功" if not silent and not failing
+                  else f"{len(silent)} 个任务超期未执行，{len(failing)} 个最近运行失败 —— 这是静默失效的典型信号",
     }
 
 
@@ -229,7 +299,9 @@ def check_state_freshness() -> Dict[str, Any]:
             try:
                 t = datetime.fromisoformat(info["at"].replace("Z", "+00:00"))
                 age = (now - t).total_seconds() / 3600
-                if age <= DOMAIN_MAX_AGE_HOURS.get(domain, 336):
+                # 近期运行且结论为成功（或尚未得出结论）才算新鲜；
+                # 仅"最近跑过"但失败，仍视为该环节已停摆。
+                if age <= DOMAIN_MAX_AGE_HOURS.get(domain, 336) and info.get("conclusion") in (None, "success"):
                     fresh = True
                     break
             except Exception:
