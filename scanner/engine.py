@@ -616,6 +616,14 @@ def scan(source_url, tool_type="mcp", name="", description="", enable_osv=False,
 
     recommendations = generate_recommendations(unique_findings, scores)
 
+    # Step 8: 合规映射（借鉴 Latteflo/mcp-scanner —— 纯报告层，
+    # findings 按 OWASP 类别聚合到 NIST CSF / ISO 27001 / PCI DSS 控制项）
+    try:
+        from .compliance import compliance_summary as _compliance
+        compliance_results = _compliance(unique_findings)
+    except Exception:
+        compliance_results = {}
+
     return {
         **scores,
         "name": name or source_url.split("/")[-1],
@@ -630,6 +638,7 @@ def scan(source_url, tool_type="mcp", name="", description="", enable_osv=False,
         "llm_supply_chain": llm_sc_results,
         "toxic_flow_scan": toxic_results,
         "baseline_drift": drift_findings,
+        "compliance": compliance_results,
         "osv_cve": osv_findings,
         "commit_hash": source_data.get("commit_hash", ""),
         "recommendations": recommendations,

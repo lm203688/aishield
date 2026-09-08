@@ -50,6 +50,7 @@ def main():
         'tests.test_diff',
         'tests.test_fuzzing',
         'tests.test_baseline_scan',
+        'tests.test_compliance',
     ]
 
     loaded = 0

@@ -31,6 +31,8 @@ from .baseline_scan import (
     baseline_scan,
     definition_fingerprints,
 )
+# 合规映射（借鉴 Latteflo/mcp-scanner：findings → NIST CSF / ISO 27001 / PCI DSS）
+from .compliance import compliance_summary, controls_for_category, CATEGORY_CONTROLS
 
 __all__ = [
     "get_rule_count", "get_all_rules", "OWASP_MCP_TOP10",
@@ -38,6 +40,7 @@ __all__ = [
     "detect_rug_pull",
     "build_baseline", "check_drift", "detect_toxic_flows",
     "baseline_scan", "definition_fingerprints",
+    "compliance_summary", "controls_for_category", "CATEGORY_CONTROLS",
     "verify_handshake",
     "APIScanOrchestrator",
     # 多客户端 MCP 配置发现（纯离线，绝不执行被扫命令）
