@@ -1,7 +1,66 @@
 {
-  "generated_at": "2026-09-08T08:05:57.481892+00:00",
-  "source_intel_count": 315,
+  "generated_at": "2026-09-09T08:07:00.938602+00:00",
+  "source_intel_count": 336,
   "package_blacklist": {
+    "npm:svgo": {
+      "ecosystem": "npm",
+      "package": "svgo",
+      "severity": "high",
+      "advisories": [
+        "GHSA-w27v-7q3p-w38r"
+      ]
+    },
+    "npm:@xmldom/xmldom": {
+      "ecosystem": "npm",
+      "package": "@xmldom/xmldom",
+      "severity": "high",
+      "advisories": [
+        "GHSA-4w3w-2rp5-g8jm"
+      ]
+    },
+    "npm:xmldom": {
+      "ecosystem": "npm",
+      "package": "xmldom",
+      "severity": "high",
+      "advisories": [
+        "GHSA-4w3w-2rp5-g8jm"
+      ]
+    },
+    "pip:nltk": {
+      "ecosystem": "pip",
+      "package": "nltk",
+      "severity": "critical",
+      "advisories": [
+        "GHSA-w3v8-gmh9-3wv7",
+        "GHSA-rrv8-h7p8-rx55",
+        "GHSA-3gq4-3j92-5w49",
+        "GHSA-p4rw-rvv2-7xwr",
+        "GHSA-f833-7jw8-xwrv",
+        "GHSA-x5ph-mj9p-rfr8",
+        "GHSA-r6gq-whwq-mvg9",
+        "GHSA-8mgp-746c-j5xp",
+        "GHSA-m4rf-3fr8-xwx3",
+        "GHSA-6hwm-xvph-95vm",
+        "GHSA-hqj7-phwp-c3fp",
+        "GHSA-3h2g-j4wp-7qqq",
+        "GHSA-qvv7-cg9c-w4x3",
+        "GHSA-fg7f-2386-8897",
+        "GHSA-6hm5-jgcp-p838",
+        "GHSA-xh95-f55m-82fw"
+      ]
+    },
+    "pip:GitPython": {
+      "ecosystem": "pip",
+      "package": "GitPython",
+      "severity": "critical",
+      "advisories": [
+        "GHSA-8mcc-hrx5-hvxc",
+        "GHSA-284h-m62q-gf8w",
+        "GHSA-7833-fr7j-v32q",
+        "GHSA-hmq2-w58f-27jc",
+        "GHSA-3f7w-8rr8-f37f"
+      ]
+    },
     "npm:@typespec/spector": {
       "ecosystem": "npm",
       "package": "@typespec/spector",
@@ -102,22 +161,6 @@
         "GHSA-p8rw-8qj3-hf33",
         "GHSA-jrrm-9hc7-2v3h",
         "GHSA-756x-9hf6-q4h4"
-      ]
-    },
-    "pip:nltk": {
-      "ecosystem": "pip",
-      "package": "nltk",
-      "severity": "critical",
-      "advisories": [
-        "GHSA-8mgp-746c-j5xp",
-        "GHSA-m4rf-3fr8-xwx3",
-        "GHSA-6hwm-xvph-95vm",
-        "GHSA-hqj7-phwp-c3fp",
-        "GHSA-3h2g-j4wp-7qqq",
-        "GHSA-qvv7-cg9c-w4x3",
-        "GHSA-fg7f-2386-8897",
-        "GHSA-6hm5-jgcp-p838",
-        "GHSA-xh95-f55m-82fw"
       ]
     },
     "npm:pnpm": {
@@ -548,15 +591,6 @@
         "GHSA-wcx4-wpfv-mc5c"
       ]
     },
-    "pip:GitPython": {
-      "ecosystem": "pip",
-      "package": "GitPython",
-      "severity": "high",
-      "advisories": [
-        "GHSA-hmq2-w58f-27jc",
-        "GHSA-3f7w-8rr8-f37f"
-      ]
-    },
     "npm:ngx-extended-pdf-viewer": {
       "ecosystem": "npm",
       "package": "ngx-extended-pdf-viewer",
@@ -713,19 +747,49 @@
     }
   },
   "pattern_rules": {
+    "(?i)(requests\\.(get|post)|urllib\\.request\\.urlopen|fetch)\\s*\\(\\s*[^)]*(user|input|param|req\\.)": {
+      "description": "SSRF: 请求目标来自不可信输入",
+      "severity": "high",
+      "owasp": "LLM06",
+      "owasp_name": "过度代理权限 (Excessive Agency)",
+      "derived_from": "ssrf",
+      "intel_hits": 29,
+      "evidence": [
+        "GHSA-4hhp-h66f-j5j7",
+        "GHSA-6v2g-fpxh-pmmh",
+        "GHSA-4mvj-m6j5-pmf7",
+        "GHSA-6f9w-9hf2-5rg3",
+        "GHSA-86m2-fcxq-5q7c"
+      ]
+    },
+    "(?i)(\\.\\./){2,}|(%2e%2e%2f)": {
+      "description": "路径遍历: 越权访问上级目录",
+      "severity": "high",
+      "owasp": "LLM06",
+      "owasp_name": "过度代理权限 (Excessive Agency)",
+      "derived_from": "path traversal",
+      "intel_hits": 21,
+      "evidence": [
+        "GHSA-8mcc-hrx5-hvxc",
+        "GHSA-p4rw-rvv2-7xwr",
+        "GHSA-f833-7jw8-xwrv",
+        "GHSA-x8wg-4xgc-vr54",
+        "CVE-2026-82233"
+      ]
+    },
     "(?i)(Access-Control-Allow-Origin['\\\"]?\\s*[:,]\\s*['\\\"]\\*|cors\\s*\\(\\s*\\)\\s*)": {
       "description": "跨域校验缺失: 允许任意来源",
       "severity": "high",
       "owasp": "LLM07",
       "owasp_name": "系统提示泄露 (System Prompt Leakage)",
       "derived_from": "origin",
-      "intel_hits": 31,
+      "intel_hits": 32,
       "evidence": [
+        "GHSA-f833-7jw8-xwrv",
         "GHSA-7q9c-hpx7-9cwm",
         "GHSA-gx45-xrj5-g6c4",
         "GHSA-wrj3-vj8c-784f",
-        "GHSA-c6mw-8xh8-gpq6",
-        "GHSA-6v2g-fpxh-pmmh"
+        "GHSA-c6mw-8xh8-gpq6"
       ]
     },
     "(?i)(auth(entication)?\\s*[:=]\\s*(False|None|null|0)\\b|verify\\s*=\\s*False)": {
@@ -741,21 +805,6 @@
         "GHSA-hvfh-5mj3-5f3j",
         "GHSA-w3fx-mc44-mf6j",
         "GHSA-72f3-6w86-7rv3"
-      ]
-    },
-    "(?i)(requests\\.(get|post)|urllib\\.request\\.urlopen|fetch)\\s*\\(\\s*[^)]*(user|input|param|req\\.)": {
-      "description": "SSRF: 请求目标来自不可信输入",
-      "severity": "high",
-      "owasp": "LLM06",
-      "owasp_name": "过度代理权限 (Excessive Agency)",
-      "derived_from": "ssrf",
-      "intel_hits": 28,
-      "evidence": [
-        "GHSA-6v2g-fpxh-pmmh",
-        "GHSA-4mvj-m6j5-pmf7",
-        "GHSA-6f9w-9hf2-5rg3",
-        "GHSA-86m2-fcxq-5q7c",
-        "GHSA-hvfh-5mj3-5f3j"
       ]
     },
     "(?i)(session|token)\\s*[:=]\\s*['\\\"][^'\\\"]{0,8}['\\\"]": {
@@ -786,21 +835,6 @@
         "GHSA-p853-83gj-wjj3",
         "GHSA-rghg-q7wp-9767",
         "GHSA-73wf-9vmv-5pv9"
-      ]
-    },
-    "(?i)(\\.\\./){2,}|(%2e%2e%2f)": {
-      "description": "路径遍历: 越权访问上级目录",
-      "severity": "high",
-      "owasp": "LLM06",
-      "owasp_name": "过度代理权限 (Excessive Agency)",
-      "derived_from": "path traversal",
-      "intel_hits": 18,
-      "evidence": [
-        "GHSA-x8wg-4xgc-vr54",
-        "CVE-2026-82233",
-        "GHSA-hqj7-phwp-c3fp",
-        "GHSA-xc9g-j69q-37xw",
-        "GHSA-3vfr-4gwf-qxfp"
       ]
     },
     "(?i)(ignore|disregard|forget)\\s+(all\\s+)?(previous|prior|above)\\s+(instruction|prompt|rule)": {
@@ -847,10 +881,10 @@
     }
   },
   "owasp_distribution": {
-    "LLM07": 3,
     "LLM06": 2,
+    "LLM07": 3,
     "LLM05": 3,
     "LLM01": 1
   },
-  "total_rules": 85
+  "total_rules": 88
 }

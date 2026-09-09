@@ -1,6 +1,303 @@
 {
   "intel": [
     {
+      "id": "CVE-2026-53937",
+      "source": "nvd",
+      "severity": "medium",
+      "cvss": 6.2,
+      "title": "MCP Kotlin SDK is the Kotlin Multiplatform software development kit for the Model Context Protocol. In versions 0.7.0 through 0.12.0, `ReadBuffer.append` in `kotlin-sdk-core/src/commonMain/kotlin/io/m",
+      "summary": "MCP Kotlin SDK is the Kotlin Multiplatform software development kit for the Model Context Protocol. In versions 0.7.0 through 0.12.0, `ReadBuffer.append` in `kotlin-sdk-core/src/commonMain/kotlin/io/modelcontextprotocol/kotlin/sdk/shared/ReadBuffer.kt` writes every chunk of bytes received from the stdio transport into a `kotlinx.io.Buffer` with no size cap. Frames are extracted from that buffer only when a `\\n` (0x0a) byte is observed. A peer that streams bytes without ever sending a newline cau",
+      "affected": "model context protocol",
+      "references": [
+        "https://github.com/modelcontextprotocol/kotlin-sdk/blob/6d5bac1/kotlin-sdk-core/src/commonMain/kotlin/io/modelcontextprotocol/kotlin/sdk/shared/ReadBuffer.kt",
+        "https://github.com/modelcontextprotocol/kotlin-sdk/commit/6e6f80512fb8fcc9f3c031cfd693ccbcf9c4aaab",
+        "https://github.com/modelcontextprotocol/kotlin-sdk/releases/tag/0.13.0",
+        "https://github.com/modelcontextprotocol/kotlin-sdk/security/advisories/GHSA-74gp-qhv5-v493"
+      ],
+      "published": "2026-09-09T00:17:31.407",
+      "fetched": "2026-09-09T08:06:35.559633+00:00"
+    },
+    {
+      "id": "GHSA-7hgx-277f-7vmg",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": null,
+      "title": "n8n: Agent Workflow Tool Bypasses Sub-Workflow Caller Policy",
+      "summary": "## Impact\n\nA workflow's \"_This workflow can be called by_\" setting was enforced by the Execute Workflow node but was not consulted when the same workflow was attached to an Agent as a tool. A user who could build an Agent could therefore call a workflow that its owner had restricted, and read back what it returned. The patch applies the sub-workflow caller policy on the Agent tool path.\n\n## Patches\n\nThe issue has been fixed in n8n versions 2.37.7 and 2.38.2. Users should upgrade to one of these ",
+      "affected": "npm:n8n, npm:n8n",
+      "references": [
+        "https://github.com/advisories/GHSA-7hgx-277f-7vmg"
+      ],
+      "published": "2026-09-08T21:33:47Z",
+      "fetched": "2026-09-09T08:06:48.875133+00:00"
+    },
+    {
+      "id": "GHSA-jxfw-x594-9x9m",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 5.3,
+      "title": "morgan vulnerable to Log Forging via unescaped Unicode line separators",
+      "summary": "### Impact\n\nMorgan writes attacker-controlled request data to the access log through its tokens. The 1.11.0 fix neutralizes C0 control characters, DEL, and backslash, but it does not escape the Unicode line separators `U+0085` (NEL), `U+2028` (LINE SEPARATOR), or `U+2029` (PARAGRAPH SEPARATOR). These code points are reachable through several tokens, including the request URL (`:url`), request headers such as `:user-agent` and `:referrer`, arbitrary `:req[header]` values, and the Basic auth usern",
+      "affected": "npm:morgan",
+      "references": [
+        "https://github.com/advisories/GHSA-jxfw-x594-9x9m"
+      ],
+      "published": "2026-09-08T21:28:26Z",
+      "fetched": "2026-09-09T08:06:48.875540+00:00"
+    },
+    {
+      "id": "GHSA-w27v-7q3p-w38r",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 8.2,
+      "title": "SVGO: removeScripts allows executable links through namespace and control-character bypasses",
+      "summary": "## Summary\n\nSVGO's opt-in `removeScripts` plugin failed to remove some executable links. Namespace-prefixed SVG anchors and URL schemes containing ASCII tabs or newlines could bypass its checks. Applications that used this plugin as their only protection for untrusted SVG input could expose users to cross-site scripting (XSS).\n\nSVGO is an optimizer rather than a comprehensive sanitization library, but `removeScripts` is maintained for consumers that already rely on it to remove common script exe",
+      "affected": "npm:svgo, npm:svgo, npm:svgo",
+      "references": [
+        "https://github.com/advisories/GHSA-w27v-7q3p-w38r"
+      ],
+      "published": "2026-09-08T21:20:28Z",
+      "fetched": "2026-09-09T08:06:48.875698+00:00"
+    },
+    {
+      "id": "GHSA-4vpr-x523-8j87",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 6.1,
+      "title": "SVGO: removeScripts incompletely sanitizes executable HTML in SVG foreignObject elements",
+      "summary": "## Summary\n\nSVGO's opt-in `removeScripts` plugin did not inspect executable HTML content inside SVG `<foreignObject>` elements. Applications that used this plugin as their only protection for untrusted SVG input could produce SVGs containing active HTML and expose users to cross-site scripting (XSS).\n\nSVGO is an optimizer rather than a comprehensive sanitization library, but `removeScripts` is maintained for consumers that already rely on it to remove common script execution paths.\n\n## Details\n\n",
+      "affected": "npm:svgo, npm:svgo, npm:svgo",
+      "references": [
+        "https://github.com/advisories/GHSA-4vpr-x523-8j87"
+      ],
+      "published": "2026-09-08T21:20:05Z",
+      "fetched": "2026-09-09T08:06:48.875719+00:00"
+    },
+    {
+      "id": "GHSA-8m3c-c648-2xjj",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 5.9,
+      "title": "Nodemailer: resolveContent() on a MailMessage bypasses disableFileAccess/disableUrlAccess when called with the legacy signature",
+      "summary": "### Summary\n\nNodemailer's `disableFileAccess` / `disableUrlAccess` options are a security sandbox that lets an application forbid untrusted message content (`html`/`text`/attachment `path`/`href`) from reading local files or making outbound HTTP(S) requests. The fix for GHSA-wqvq-jvpq-h66f (commit `5f69497`) threaded these flags through the library's internal resolution paths (`MailMessage.resolveAll()` and `_convertDataImages()`), but the public plugin API `MailMessage.resolveContent(...args)` ",
+      "affected": "npm:nodemailer",
+      "references": [
+        "https://github.com/advisories/GHSA-8m3c-c648-2xjj"
+      ],
+      "published": "2026-09-08T21:16:00Z",
+      "fetched": "2026-09-09T08:06:48.875799+00:00"
+    },
+    {
+      "id": "GHSA-4hhp-h66f-j5j7",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 6.5,
+      "title": "vLLM: SSRF + arbitrary local file read in MiMoV2OmniMultiModalProcessor `_fetch_image` and audio loader bypass MediaConnector protections",
+      "summary": "### Summary\n\n`vllm/transformers_utils/processors/mimo_v2_omni.py` — the multimodal processor for `MiMoV2OmniForCausalLM` — issues `requests.get(...)` directly on user-supplied image and audio URL strings and `Image.open(...)` on user-supplied local paths, **without** the SSRF / `allowed_local_media_path` checks that `vllm.multimodal.utils.MediaConnector` was hardened with in **GHSA-qh4c-xf7m-gxfc**, **GHSA-v359-jj2v-j536**, and **GHSA-pf3h-qjgv-vcpr**.\n\nThis is the same bug class as those three ",
+      "affected": "pip:vllm",
+      "references": [
+        "https://github.com/advisories/GHSA-4hhp-h66f-j5j7"
+      ],
+      "published": "2026-09-08T20:42:00Z",
+      "fetched": "2026-09-09T08:06:50.018804+00:00"
+    },
+    {
+      "id": "GHSA-4w3w-2rp5-g8jm",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": null,
+      "title": "xmldom: Attribute name injection via setAttribute() bypasses requireWellFormed",
+      "summary": "## Summary\n\n`Element.setAttribute()` in `@xmldom/xmldom` bypasses attribute name validation by calling the private `_createAttribute(name)` method, which performs no validation. The public `createAttribute()` method correctly validates names against an anchored `QName` pattern, but `setAttribute()` never uses it. The serializer escapes attribute *values* but trusts attribute *names*, allowing an attacker to inject additional attributes (including event handlers) into serialized output. The `requ",
+      "affected": "npm:@xmldom/xmldom, npm:@xmldom/xmldom, npm:xmldom",
+      "references": [
+        "https://github.com/advisories/GHSA-4w3w-2rp5-g8jm"
+      ],
+      "published": "2026-09-08T20:30:51Z",
+      "fetched": "2026-09-09T08:06:48.876934+00:00"
+    },
+    {
+      "id": "GHSA-w3v8-gmh9-3wv7",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": null,
+      "title": "NLTK: ReDoS in nltk.tgrep via unvalidated user-supplied regular expressions",
+      "summary": "### Summary\nThe NLTK `tgrep` module accepts user-supplied regular expressions and passes them to the Python `re` engine without a timeout or validation, enabling catastrophic backtracking (ReDoS). Applications that expose the `tgrep` API to external input are vulnerable to a single-request denial of service that blocks the Python process indefinitely.\n\n### Affected Code\n`nltk/tgrep.py` — `_tgrep_node_action()` (around line 320)\n\nWhen a tgrep pattern contains a `/regex/` node, `_tgrep_node_action",
+      "affected": "pip:nltk",
+      "references": [
+        "https://github.com/advisories/GHSA-w3v8-gmh9-3wv7"
+      ],
+      "published": "2026-09-08T20:28:28Z",
+      "fetched": "2026-09-09T08:06:50.018883+00:00"
+    },
+    {
+      "id": "GHSA-rrv8-h7p8-rx55",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.5,
+      "title": " NLTK: ReDoS in nltk.text.Text.findall() via unvalidated user-supplied regular expressions",
+      "summary": "### Summary\nNLTK's `Text.findall()` and `TokenSearcher.findall()` methods accept user-supplied regular expressions and pass them to the Python `re` engine without timeout or validation, enabling catastrophic backtracking (ReDoS). This issue is isolated to the `nltk.text` module and was resolved in a prior commit.\n\n### Affected Code\n`nltk/text.py` — `TokenSearcher.findall()` (line 255) / `Text.findall()` (line 620)\n\n`TokenSearcher.__init__` builds an internal string by wrapping each token in angl",
+      "affected": "pip:nltk",
+      "references": [
+        "https://github.com/advisories/GHSA-rrv8-h7p8-rx55"
+      ],
+      "published": "2026-09-08T20:28:13Z",
+      "fetched": "2026-09-09T08:06:50.018915+00:00"
+    },
+    {
+      "id": "GHSA-7m6h-x95x-82q5",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 5.3,
+      "title": "vLLM: Cross-User Data Leak Vulnerability",
+      "summary": "### Summary\nAn integer overflow in the act_and_mul_kernel kernel can cause the output of one user request to be incorporated into the response of another request within the same inference batch. Under certain conditions, the last request in a batch can receive a partial or complete copy of the first user's inference result, resulting in cross-user data leakage.\n\n\n### Details\nThe root cause is an integer overflow in the expression blockIdx.x * 2 * d at https://github.com/vllm-project/vllm/blob/ff",
+      "affected": "pip:vllm",
+      "references": [
+        "https://github.com/advisories/GHSA-7m6h-x95x-82q5"
+      ],
+      "published": "2026-09-08T20:24:49Z",
+      "fetched": "2026-09-09T08:06:50.018923+00:00"
+    },
+    {
+      "id": "GHSA-8mcc-hrx5-hvxc",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.5,
+      "title": "GitPython: clone_from()/clone() omit --separate-git-dir from unsafe_git_clone_options, enabling arbitrary git-directory creation outside the destination",
+      "summary": "- **CWE:** CWE-73 (External Control of File Name or Path) / CWE-22 (Path Traversal, in the \"escapes intended base directory\" sense)\n- **Affected component:** `git/repo/base.py`, `Repo.unsafe_git_clone_options` (class attribute, lines 153-165) and `Repo._clone()` (lines 1477-1520), reached via the public `Repo.clone_from()` (line 1626) and `Repo.clone()` (line 1567) APIs.\n- **Affected version:** GitPython at HEAD (`9729ed3b948f2bde09f1f188c5311e172212b67e`, 2026-08-05, VERSION `3.1.58`)\n\n## Reach",
+      "affected": "pip:GitPython",
+      "references": [
+        "https://github.com/advisories/GHSA-8mcc-hrx5-hvxc"
+      ],
+      "published": "2026-09-08T18:41:52Z",
+      "fetched": "2026-09-09T08:06:50.019104+00:00"
+    },
+    {
+      "id": "GHSA-284h-m62q-gf8w",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": 9.8,
+      "title": "GitPython: Dormant multi-line git-config values are corrupted into live injected directives (e.g. core.hooksPath) on any unrelated GitConfigParser write, enabling RCE",
+      "summary": "- **CWE:** CWE-88 (Argument Injection) / CWE-94 (Code Injection) — via a read-then-corrupt-on-rewrite config round trip, not a direct setter argument\n- **Affected component:** `git/config.py` — `GitConfigParser._read()` (multi-line value decoding, lines 444-541, esp. `string_decode()` at line 460 and its call sites at 519/541) and `GitConfigParser._write()`/`write_section()` (serialization, lines ~694-712, esp. line 708)\n- **Affected version:** GitPython at HEAD (`9729ed3b948f2bde09f1f188c5311e1",
+      "affected": "pip:GitPython",
+      "references": [
+        "https://github.com/advisories/GHSA-284h-m62q-gf8w"
+      ],
+      "published": "2026-09-08T18:39:40Z",
+      "fetched": "2026-09-09T08:06:50.019325+00:00"
+    },
+    {
+      "id": "GHSA-7833-fr7j-v32q",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 8.4,
+      "title": "GitPython: Arbitrary local file content disclosure via [include] directive in untrusted .gitmodules (SubmoduleConfigParser never disables merge_includes)",
+      "summary": "# [HIGH] Arbitrary local file content disclosure via `[include]` directive in untrusted `.gitmodules` (`SubmoduleConfigParser` never disables `merge_includes`)\n\n- **CWE:** CWE-200 (Exposure of Sensitive Information) / CWE-73 (External Control of File Name or Path)\n- **Affected component:** `git/objects/submodule/base.py`, `Submodule._config_parser()` (~line 273) constructing `SubmoduleConfigParser(fp_module, read_only=read_only)`; `git/config.py`, `GitConfigParser.__init__` (`merge_includes` def",
+      "affected": "pip:GitPython",
+      "references": [
+        "https://github.com/advisories/GHSA-7833-fr7j-v32q"
+      ],
+      "published": "2026-09-08T18:38:51Z",
+      "fetched": "2026-09-09T08:06:50.019497+00:00"
+    },
+    {
+      "id": "GHSA-3gq4-3j92-5w49",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": null,
+      "title": "NLTK: Corpus Reader Sandbox Bypass",
+      "summary": "## Summary\n\nNLTK corpus-reader constructors can still reach outside-root file and database reads before the `nltk.pathsec` sandbox boundary is enforced.\n\nThe PoC shows the safe path blocked by `pathsec.open`, then `LinThesaurusCorpusReader` and `PanLexLiteCorpusReader` succeeding in the same process.\n\n## Affected Product\n\n- Product: NLTK\n- Asset / component: `nltk.corpus.reader` constructors\n- Version tested: `3.10.2`\n- Deployment / package / tag: commit `474af1f5a94b1b8d53fc2b6defec3a2ce7633b74",
+      "affected": "pip:nltk",
+      "references": [
+        "https://github.com/advisories/GHSA-3gq4-3j92-5w49"
+      ],
+      "published": "2026-09-08T16:57:08Z",
+      "fetched": "2026-09-09T08:06:50.019565+00:00"
+    },
+    {
+      "id": "GHSA-p4rw-rvv2-7xwr",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": null,
+      "title": "NLTK: Corpus readers follow symlinks outside trusted roots despite pathsec enforcement",
+      "summary": "### Summary\n\nSeveral corpus readers still step outside NLTK's symlink-aware trusted-root model. They derive in-root paths from trusted corpus state, convert those paths back into plain strings, and reopen them with built-in `open()` rather than `nltk.pathsec.open()`.\n\n### Details\n\n- **Vulnerability type:** Path traversal and symlink boundary bypass\n- **Affected component:** `nltk.corpus.reader.ipipan`, `nltk.corpus.reader.crubadan`, `nltk.corpus.reader.lin`\n- **Affected versions:** Published `3.",
+      "affected": "pip:nltk",
+      "references": [
+        "https://github.com/advisories/GHSA-p4rw-rvv2-7xwr"
+      ],
+      "published": "2026-09-08T16:55:38Z",
+      "fetched": "2026-09-09T08:06:50.019627+00:00"
+    },
+    {
+      "id": "GHSA-3hhw-38pf-pxj6",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 5.5,
+      "title": "NLTK: Symlink-based arbitrary file read in IPIPANCorpusReader, bypasses nltk.pathsec entirely",
+      "summary": "## Summary\n\n`IPIPANCorpusReader` (`nltk/corpus/reader/ipipan.py`) exposes public methods, `channels()`, `domains()`, `categories()`, and `fileids(channels=...)`, that accept a caller supplied `fileids` list and read a file via a completely unprotected builtin `open()` call, with no `nltk.pathsec` involvement at all. A symlink placed inside the corpus root, with a name containing no separators or `..`, passes NLTK's existing traversal checks and is opened directly, reading a file from anywhere on",
+      "affected": "pip:nltk",
+      "references": [
+        "https://github.com/advisories/GHSA-3hhw-38pf-pxj6"
+      ],
+      "published": "2026-09-08T16:40:38Z",
+      "fetched": "2026-09-09T08:06:50.019886+00:00"
+    },
+    {
+      "id": "GHSA-f833-7jw8-xwrv",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.5,
+      "title": "NLTK: Symlink-based sandbox bypass in FramenetCorpusReader (bypasses the fix for CVE-2026-54292)",
+      "summary": "This is a **new, distinct vulnerability**: a bypass of the fix already published as [GHSA-xh95-f55m-82fw](https://github.com/nltk/nltk/security/advisories/GHSA-xh95-f55m-82fw) (\"Path traversal in NLTK FramenetCorpusReader.frame() allows arbitrary XML file read, bypassing the nltk.pathsec sandbox\"), not a duplicate of it.\n\n## Summary\n\nThe original advisory was fixed (PR [#3581](https://github.com/nltk/nltk/pull/3581)) by adding `_reject_unsafe_path_component()`, which blocks literal `/`, `\\`, `..",
+      "affected": "pip:nltk",
+      "references": [
+        "https://github.com/advisories/GHSA-f833-7jw8-xwrv"
+      ],
+      "published": "2026-09-08T16:39:24Z",
+      "fetched": "2026-09-09T08:06:50.019913+00:00"
+    },
+    {
+      "id": "GHSA-x5ph-mj9p-rfr8",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": null,
+      "title": "NLTK: StreamBackedCorpusView Bypasses pathsec.ENFORCE - Arbitrary Local File Read",
+      "summary": "## Summary\nSetting `nltk.pathsec.ENFORCE = True` is documented to sandbox all file access to allowed NLTK data directories and raise `PermissionError` on unauthorized access. However, `StreamBackedCorpusView` opens files via `builtins.open()` directly, bypassing `pathsec.validate_path()` entirely. An attacker who can influence the `fileid` argument can read arbitrary local files regardless of the `ENFORCE` setting.\n\n## Details\n`nltk/pathsec.py:274` defines the enforcement point:\n```python\ndef op",
+      "affected": "pip:nltk",
+      "references": [
+        "https://github.com/advisories/GHSA-x5ph-mj9p-rfr8"
+      ],
+      "published": "2026-09-08T15:27:32Z",
+      "fetched": "2026-09-09T08:06:50.019983+00:00"
+    },
+    {
+      "id": "GHSA-72r2-7mfr-5xr9",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 6.5,
+      "title": "NLTK: FileSystemPathPointer.open() sandbox check is dead code — arbitrary file read via file:// protocol",
+      "summary": "### Summary\n\nThere's a logic bug in `FileSystemPathPointer.open()` inside `nltk/data.py`\nthat makes the sandbox check permanently inert. The guard condition is always\n`False` — meaning any file the process can read is accessible by passing a\n`file://` URL to `nltk.data.load()`.\n\n---\n\n### Details\n\nIn `nltk/data.py`, `FileSystemPathPointer.open()` was patched at some point\nwith a comment saying \"SECURITY PATCH ENFORCING SANDBOX\", but the check\ndoesn't work:\n```python\ndef open(self, encoding=None):",
+      "affected": "pip:nltk",
+      "references": [
+        "https://github.com/advisories/GHSA-72r2-7mfr-5xr9"
+      ],
+      "published": "2026-09-08T15:27:12Z",
+      "fetched": "2026-09-09T08:06:50.020028+00:00"
+    },
+    {
+      "id": "GHSA-r6gq-whwq-mvg9",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 6.2,
+      "title": "NLTK: Symlink escape in CorpusReader allows arbitrary local file read outside the corpus root",
+      "summary": "### Summary\n`nltk.corpus.reader.api.CorpusReader.open()` can be used to read files outside the intended corpus root via a symlink placed inside that root. Although NLTK blocks absolute paths and `..` traversal, the current boundary check is only lexical and does not account for symlink resolution. This leads to an arbitrary local file read / filesystem sandbox bypass for applications that rely on `CorpusReader` or `FileSystemPathPointer` to restrict file access.\n\n### Details\nThe vulnerable flow ",
+      "affected": "pip:nltk",
+      "references": [
+        "https://github.com/advisories/GHSA-r6gq-whwq-mvg9"
+      ],
+      "published": "2026-09-08T15:26:47Z",
+      "fetched": "2026-09-09T08:06:50.020054+00:00"
+    },
+    {
       "id": "GHSA-7q9c-hpx7-9cwm",
       "source": "github-advisory",
       "severity": "high",
@@ -4641,19 +4938,19 @@
       "fetched": "2026-08-04T06:34:53.913899+00:00"
     }
   ],
-  "updated": "2026-09-08T08:05:47.883433+00:00",
+  "updated": "2026-09-09T08:06:50.523453+00:00",
   "sources": [
     "osv",
     "nvd",
     "github-advisory"
   ],
   "stats": {
-    "high": 151,
-    "medium": 86,
-    "critical": 42,
+    "medium": 95,
+    "high": 162,
+    "critical": 43,
     "low": 5,
     "unknown": 30,
     "moderate": 1
   },
-  "total": 315
+  "total": 336
 }
