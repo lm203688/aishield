@@ -137,9 +137,12 @@ CRON_MAX_AGE_HOURS = {
     # 它们不再有"独立运行活性"，故此处只登记真正独立按 cron 运行的工作流，
     # 避免 M2 把"被 spine 吸收的子工作流"误报为静默失效。
     "self-heal-closed-loop.yml": 12,
-    # deploy-server 由 closed-loop-spine 每日 03:17 触发（每次必部署），
-    # 正常最大静默约 24h+，12h 阈值会造成每日误报；放宽到 30h。
-    "deploy-server.yml": 30,
+    # deploy-server.yml 不在本清单：它已无独立 cron，仅由 spine 经
+    # `uses: ./.github/workflows/deploy-server.yml` 调用（见 spine 第 64 行）。
+    # GitHub **不会**把 uses: 调用登记进被调 workflow 自己的 runs 列表（实测
+    # deploy-server 自身最后一次 schedule 停在 08-31），因此用它的运行记录判活
+    # 必然误报"静默"。部署环节的活性正确判据 = spine 本次运行成功（spine 已登记，
+    # 且其 deploy job 失败会使 spine 整体 conclusion=failure → 仍能捕获真实故障）。
     "ci.yml": 48,
     "meta-monitor.yml": 48,
     "npm-self-heal.yml": 48,
