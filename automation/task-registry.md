@@ -1,7 +1,7 @@
 # AIShield 自动化台账
 
 > **本文件由 `scripts/gen_task_registry.py` 自动生成，请勿手工编辑。**
-> 生成时间：2026-09-05 07:34 UTC
+> 生成时间：2026-09-10 15:31 UTC
 
 历史教训：本台账曾手工声称「二十八项定时任务在跑」，而仓库实际只有十四个 workflow，其中 self-heal 因 YAML 语法错静默失效 48 天。台账一旦脱离现实，就会把「看起来很自动化」的幻觉喂给每一次决策。现改为从 workflow 真实内容派生。
 
@@ -32,14 +32,14 @@
 | `ci.yml` | AIShield CI/CD | workflow_call / push(main,dev) / PR / 手动 | 9 |
 | `data-scan-flywheel.yml` | AIShield Data Flywheel (Batch Scan to Self-Built Database) | workflow_call / 手动 | 2 |
 | `deploy-server.yml` | Deploy to Production Server | workflow_call / 手动 | 2 |
-| `feature-closed-loop.yml` | AIShield Intelligence-to-Feature Closed-Loop | workflow_call / Issue 事件 / 手动 | 4 |
+| `feature-closed-loop.yml` | AIShield Intelligence-to-Feature Closed-Loop | workflow_call / Issue 事件 / 手动 | 5 |
 | `issue-labeler.yml` | Auto Label Issues | Issue 事件 / 手动 | 1 |
 | `pages.yml` | Pages Site (内容站构建与发布) | push(main) / workflow_run / 手动 | 4 |
 | `project-digest.yml` | AIShield Project Digest (统一迭代汇报) | workflow_call / 手动 | 1 |
 | `publish-mcp-registry.yml` | Publish to MCP Registry | workflow_run / 手动 | 2 |
 | `publish-npm.yml` | Publish to npm | release / push / 手动 | 5 |
 | `rule-promoter.yml` | AIShield Rule Auto-Promoter | workflow_call / 手动 | 2 |
-| `threat-intel-feed.yml` | AIShield Threat-Intel Feed Update | workflow_call / 手动 | 5 |
+| `threat-intel-feed.yml` | AIShield Threat-Intel Feed Update | workflow_call / 手动 | 6 |
 | `unified-security-scan.yml` | AIShield Unified Security Scan | workflow_call / push(main) / PR / 手动 | 2 |
 
 ## 状态总线最近更新
@@ -52,7 +52,7 @@
 | feature | 2026-08-04 06:41:12 |
 | health | 2026-08-05 01:22:22 |
 | intel | 2026-08-04 06:35:13 |
-| meta | 2026-08-31 09:43:44 |
+| meta | 2026-09-10 15:30:31 |
 | registry | 2026-08-04 09:33:55 |
 | rules | 2026-08-04 06:37:09 |
 | selfheal | 2026-08-04 15:33:55 |
