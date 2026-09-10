@@ -376,10 +376,32 @@ class TestMetaMonitorM7(unittest.TestCase):
         payload = base64.b64encode(json.dumps(db, ensure_ascii=False).encode("utf-8")).decode()
         return {"content": payload}
 
-    def _check_with(self, db):
+    def _check_with(self, db, capture=None):
+        def fake_gh(path):
+            if capture is not None:
+                capture.append(path)
+            return self._remote(db)
         with mock.patch.object(mm, "GH_TOKEN", "x"), \
-             mock.patch.object(mm, "_gh", lambda p: self._remote(db)):
+             mock.patch.object(mm, "_gh", fake_gh):
             return mm.check_intel_sources()
+
+    def test_uses_correct_repo_scoped_api_path(self):
+        """回归护栏：M7 曾把路径写成 `/contents/...`（漏了 /repos/{owner}/{repo}）。
+
+        `_gh()` 只负责拼 `https://api.github.com`，仓库前缀必须由调用方给出。
+        漏掉前缀 = GitHub 返 404 → 检查静默降级成 ok=None（假放行）。
+        全量 mock `_gh` 会把这类 URL 错误藏起来，所以必须断言路径本身。
+        """
+        from datetime import datetime, timezone
+        cap = []
+        self._check_with({"source_health": {
+            "sources": {"osv": {"ok": True}},
+            "last_success": datetime.now(timezone.utc).isoformat()}}, capture=cap)
+        self.assertEqual(len(cap), 1)
+        self.assertTrue(
+            cap[0].startswith(f"/repos/{mm.GH_OWNER}/{mm.GH_REPO}/contents/"),
+            f"M7 必须用仓库作用域路径，实际为 {cap[0]}")
+        self.assertIn(mm.INTEL_DB_PATH, cap[0])
 
     def test_flags_persistent_source_failure(self):
         from datetime import datetime, timezone

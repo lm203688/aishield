@@ -433,7 +433,7 @@ def check_intel_sources() -> Dict[str, Any]:
     if not GH_TOKEN:
         return {"ok": None,
                 "detail": "本地无 token；上游源健康以 CI 内采集结果为准，本地不判红"}
-    meta = _gh(f"/contents/{INTEL_DB_PATH}?ref=main")
+    meta = _gh(f"/repos/{GH_OWNER}/{GH_REPO}/contents/{INTEL_DB_PATH}?ref=main")
     if not isinstance(meta, dict) or not meta.get("content"):
         return {"ok": None, "detail": "无法读取远端情报库，跳过上游源健康检查"}
     try:
