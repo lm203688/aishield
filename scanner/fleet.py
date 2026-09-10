@@ -56,6 +56,27 @@ def _identity(scan_result: dict) -> str:
             or f"anon-{_now_iso()}")
 
 
+def _ver_tuple(v: str) -> tuple:
+    """把语义化版本解析成可比较元组。非数字段记为 0，保证不抛异常。"""
+    parts = []
+    for chunk in str(v or "").split("."):
+        digits = "".join(c for c in chunk if c.isdigit())
+        parts.append(int(digits) if digits else 0)
+    return tuple(parts) if parts else (0,)
+
+
+def _version_of(scan_result: dict, report: dict) -> str:
+    """从扫描结果里尽力提取被扫体的版本号（MCP 配置 / 报告 / 顶层均可）。"""
+    for src in (scan_result, report):
+        if not isinstance(src, dict):
+            continue
+        for key in ("version", "server_version", "tool_version"):
+            val = src.get(key)
+            if val:
+                return str(val)
+    return "unknown"
+
+
 class FleetService:
     """机队聚合服务（线程安全，本地 JSON 持久化）。"""
 
@@ -97,6 +118,7 @@ class FleetService:
             "identity": ident,
             "source_url": scan_result.get("source_url") or report.get("source_url", ""),
             "name": scan_result.get("name") or report.get("name") or ident,
+            "version": _version_of(scan_result, report),
             "overall_score": int(scan_result.get("overall_score")
                                  or report.get("overall_score", 0)),
             "badge_level": scan_result.get("badge_level")
@@ -175,6 +197,44 @@ class FleetService:
             "updated_at": self._load().get("updated_at", ""),
         }
 
+    def version_stream(self) -> dict:
+        """版本流视图：谁在哪版、哪些成员漂移。
+
+        canonical（基准版本）取"最多成员采用、且尽量是真实版本号、版本号更高"者：
+        先按采用数，再排除 unknown，最后按语义化版本大小，保证确定性。
+        drifted = 不在基准版本上的成员 —— 这就是"版本漂移"的可见信号，
+        Fleet 据此可以驱动滚动升级 / 告警闭环。
+        """
+        members = self.list_members()
+        if not members:
+            return {"total": 0, "canonical": None, "versions": {},
+                    "drifted": [], "ok": True, "unknown": 0}
+
+        buckets: dict[str, list] = defaultdict(list)
+        for m in members:
+            buckets[m.get("version") or "unknown"].append(m)
+
+        def _key(v: str):
+            return (len(buckets[v]),
+                    0 if v == "unknown" else 1,
+                    _ver_tuple(v))
+
+        canonical = max(buckets, key=_key)
+        drifted = [
+            {"identity": m["identity"], "name": m.get("name", m["identity"]),
+             "version": m.get("version") or "unknown"}
+            for m in members if (m.get("version") or "unknown") != canonical
+        ]
+        return {
+            "total": len(members),
+            "canonical": canonical,
+            "versions": {v: sorted(m["identity"] for m in ms)
+                         for v, ms in sorted(buckets.items())},
+            "drifted": drifted,
+            "unknown": len(buckets.get("unknown", [])),
+            "ok": not drifted,
+        }
+
     def reset(self):
         self._save({"members": {}, "updated_at": _now_iso()})
 
@@ -193,6 +253,10 @@ def summary():
 
 def list_members():
     return _default.list_members()
+
+
+def version_stream():
+    return _default.version_stream()
 
 
 def reset():
