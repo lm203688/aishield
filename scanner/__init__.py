@@ -20,7 +20,7 @@ from .live_probe import probe_server_metadata
 from .registry_discovery import discover_across_registries, search_registry
 from .engine import explain_score
 # Fleet 中心化聚合 (F5)
-from .fleet import FleetService, ingest as fleet_ingest, summary as fleet_summary, list_members as fleet_list_members
+from .fleet import FleetService, ingest as fleet_ingest, summary as fleet_summary, list_members as fleet_list_members, version_stream as fleet_version_stream
 from .diff import diff_scans, diff_summary
 from .fuzzing import fuzz, FuzzReport
 # 基线漂移扫描（借鉴 agent-audit save-baseline + agentgraph 定义钉扎 + Snyk toxic flow）
@@ -54,5 +54,5 @@ __all__ = [
     "probe_server_metadata", "discover_across_registries", "search_registry",
     "explain_score",
     # Fleet 中心化聚合 (F5)
-    "FleetService", "fleet_ingest", "fleet_summary", "fleet_list_members",
+    "FleetService", "fleet_ingest", "fleet_summary", "fleet_list_members", "fleet_version_stream",
 ]
