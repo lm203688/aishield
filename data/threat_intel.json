@@ -1,6 +1,76 @@
 {
   "intel": [
     {
+      "id": "GHSA-5x7x-4c3c-qf5w",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 5.0,
+      "title": "Open WebUI: Server-side fetches reach blocked and internal hosts via unvalidated HTTP redirect targets",
+      "summary": "## Summary\n\nOpen WebUI protects server-side web fetches with two controls: the operator's list of excluded hosts, and a check that refuses private and internal addresses. Neither control was applied to the destination of an HTTP redirect. On a deployment where redirect following is enabled, any authenticated user who can cause the server to fetch a URL could submit a page that redirects, and the server would fetch the redirect destination without either control being applied to it. The server th",
+      "affected": "pip:open-webui",
+      "references": [
+        "https://github.com/advisories/GHSA-5x7x-4c3c-qf5w"
+      ],
+      "published": "2026-09-09T23:54:08Z",
+      "fetched": "2026-09-10T08:06:30.123152+00:00"
+    },
+    {
+      "id": "GHSA-jqhh-cjmq-vmv6",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 6.5,
+      "title": "Open WebUI: Any authenticated user can hang the server via a cyclic chat message history",
+      "summary": "## Summary\nChat histories are stored as an unvalidated JSON object. The walk that reconstructs a chat's message chain detected repeats using each message's own `id` field while moving through the history by map key, so a message that simply omitted `id` was never recorded as visited. A history whose messages referenced each other in a parent cycle therefore made the walk run forever. Any account with the default `user` role could store such a chat and trigger the walk, blocking the server for ev",
+      "affected": "pip:open-webui",
+      "references": [
+        "https://github.com/advisories/GHSA-jqhh-cjmq-vmv6"
+      ],
+      "published": "2026-09-09T23:53:59Z",
+      "fetched": "2026-09-10T08:06:30.123175+00:00"
+    },
+    {
+      "id": "GHSA-wcjj-9m6g-2fr2",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.8,
+      "title": "functype-mcp-server: MCP `set_functype_version` Package Alias RCE via Unsanitized pnpm install + Dynamic Import",
+      "summary": "## MCP `set_functype_version` Package Alias RCE via Unsanitized pnpm install + Dynamic Import\n\n### Summary\n\nThe `set_functype_version` MCP tool in `functype-mcp-server` accepts an unconstrained `version` string, interpolates it directly into an npm package specifier (`functype@<version>`), and installs it via `pnpm add` without any validation. Because npm/pnpm package specifiers support `file:`, `npm:`, and other alias syntaxes, an attacker who can send an MCP `tools/call` request to this tool c",
+      "affected": "npm:functype-mcp-server",
+      "references": [
+        "https://github.com/advisories/GHSA-wcjj-9m6g-2fr2"
+      ],
+      "published": "2026-09-09T23:49:20Z",
+      "fetched": "2026-09-10T08:06:29.160799+00:00"
+    },
+    {
+      "id": "GHSA-2r5q-h53f-9rp3",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 8.8,
+      "title": "@yeger/turbo-graph: Unauthenticated Network-Exposed Task Execution via /api/run",
+      "summary": "## Unauthenticated Network-Exposed Turborepo Task Execution via /api/run\n\n### Summary\n\n`@yeger/turbo-graph` starts its embedded Next.js server without binding to the loopback interface, causing it to listen on all network interfaces (`0.0.0.0:29312` by default). The `/api/run` HTTP endpoint exposed by this server performs no authentication, authorization, CSRF protection, or task allowlist check before executing attacker-supplied Turborepo task names via `spawn()`. Any adjacent-network attacker ",
+      "affected": "npm:@yeger/turbo-graph",
+      "references": [
+        "https://github.com/advisories/GHSA-2r5q-h53f-9rp3"
+      ],
+      "published": "2026-09-09T23:47:55Z",
+      "fetched": "2026-09-10T08:06:29.161071+00:00"
+    },
+    {
+      "id": "GHSA-fxg7-897c-57mp",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.5,
+      "title": "Nuxt Ollama: Public Runtime Config Exposes Ollama API Key to Browser Clients",
+      "summary": "## Public Runtime Config Exposes Ollama API Key to Browser Clients\n\n### Summary\n\n`nuxt-ollama@1.2.26` unconditionally merges all module options — including `api_key` — into Nuxt's **public** runtime config (`runtimeConfig.public.ollama`). Nuxt serializes `runtimeConfig.public` into the SSR HTML response inside a `<script>` payload block (`window.__NUXT__`), making the API key visible in plaintext to any unauthenticated HTTP client that fetches the page. An attacker with no credentials can steal ",
+      "affected": "npm:nuxt-ollama",
+      "references": [
+        "https://github.com/advisories/GHSA-fxg7-897c-57mp"
+      ],
+      "published": "2026-09-09T23:47:44Z",
+      "fetched": "2026-09-10T08:06:29.161275+00:00"
+    },
+    {
       "id": "CVE-2026-53937",
       "source": "nvd",
       "severity": "medium",
@@ -4938,19 +5008,19 @@
       "fetched": "2026-08-04T06:34:53.913899+00:00"
     }
   ],
-  "updated": "2026-09-09T08:06:50.523453+00:00",
+  "updated": "2026-09-10T08:06:30.628403+00:00",
   "sources": [
     "osv",
     "nvd",
     "github-advisory"
   ],
   "stats": {
-    "medium": 95,
-    "high": 162,
+    "medium": 97,
+    "high": 165,
     "critical": 43,
     "low": 5,
     "unknown": 30,
     "moderate": 1
   },
-  "total": 336
+  "total": 341
 }

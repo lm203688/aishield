@@ -1,7 +1,31 @@
 {
-  "generated_at": "2026-09-09T08:07:00.938602+00:00",
-  "source_intel_count": 336,
+  "generated_at": "2026-09-10T08:06:42.643930+00:00",
+  "source_intel_count": 341,
   "package_blacklist": {
+    "npm:functype-mcp-server": {
+      "ecosystem": "npm",
+      "package": "functype-mcp-server",
+      "severity": "high",
+      "advisories": [
+        "GHSA-wcjj-9m6g-2fr2"
+      ]
+    },
+    "npm:@yeger/turbo-graph": {
+      "ecosystem": "npm",
+      "package": "@yeger/turbo-graph",
+      "severity": "high",
+      "advisories": [
+        "GHSA-2r5q-h53f-9rp3"
+      ]
+    },
+    "npm:nuxt-ollama": {
+      "ecosystem": "npm",
+      "package": "nuxt-ollama",
+      "severity": "high",
+      "advisories": [
+        "GHSA-fxg7-897c-57mp"
+      ]
+    },
     "npm:svgo": {
       "ecosystem": "npm",
       "package": "svgo",
@@ -747,6 +771,21 @@
     }
   },
   "pattern_rules": {
+    "(?i)(auth(entication)?\\s*[:=]\\s*(False|None|null|0)\\b|verify\\s*=\\s*False)": {
+      "description": "认证绕过: 显式关闭校验",
+      "severity": "critical",
+      "owasp": "LLM07",
+      "owasp_name": "系统提示泄露 (System Prompt Leakage)",
+      "derived_from": "authentication",
+      "intel_hits": 29,
+      "evidence": [
+        "GHSA-2r5q-h53f-9rp3",
+        "GHSA-7q9c-hpx7-9cwm",
+        "GHSA-79wm-x847-7cvg",
+        "GHSA-hvfh-5mj3-5f3j",
+        "GHSA-w3fx-mc44-mf6j"
+      ]
+    },
     "(?i)(requests\\.(get|post)|urllib\\.request\\.urlopen|fetch)\\s*\\(\\s*[^)]*(user|input|param|req\\.)": {
       "description": "SSRF: 请求目标来自不可信输入",
       "severity": "high",
@@ -790,21 +829,6 @@
         "GHSA-gx45-xrj5-g6c4",
         "GHSA-wrj3-vj8c-784f",
         "GHSA-c6mw-8xh8-gpq6"
-      ]
-    },
-    "(?i)(auth(entication)?\\s*[:=]\\s*(False|None|null|0)\\b|verify\\s*=\\s*False)": {
-      "description": "认证绕过: 显式关闭校验",
-      "severity": "critical",
-      "owasp": "LLM07",
-      "owasp_name": "系统提示泄露 (System Prompt Leakage)",
-      "derived_from": "authentication",
-      "intel_hits": 28,
-      "evidence": [
-        "GHSA-7q9c-hpx7-9cwm",
-        "GHSA-79wm-x847-7cvg",
-        "GHSA-hvfh-5mj3-5f3j",
-        "GHSA-w3fx-mc44-mf6j",
-        "GHSA-72f3-6w86-7rv3"
       ]
     },
     "(?i)(session|token)\\s*[:=]\\s*['\\\"][^'\\\"]{0,8}['\\\"]": {
@@ -881,10 +905,10 @@
     }
   },
   "owasp_distribution": {
-    "LLM06": 2,
     "LLM07": 3,
+    "LLM06": 2,
     "LLM05": 3,
     "LLM01": 1
   },
-  "total_rules": 88
+  "total_rules": 91
 }
