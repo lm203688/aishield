@@ -200,6 +200,146 @@ def verify_chain():
 
 
 # ══════════════════════════════════════════
+#  行为监控（事中异常检测）
+# ══════════════════════════════════════════
+#
+# 决策网关回答"这次调用允许吗"（点），行为监控回答"这个 agent 最近的调用模式
+# 正常吗"（线）。二者互补：一个 agent 每次调用都合规，但 60 秒内打 500 次、
+# 或连续被拒 20 次疯狂探测，这本身就是失控/入侵信号（ASI08 失控自主性 /
+# ASI10 治理缺失的行为面）。闭环四环节：检测(observe) → 动作(审计+可选升级
+# 事故/熔断) → 验证(status) → 告警(behavior_anomaly 审计事件)。
+
+BEHAVIOR_WINDOW_SEC = 60      # 滑动窗口
+BEHAVIOR_RATE_MAX = 120       # 单 server 窗口内调用数上限，超过判 rate_burst
+BEHAVIOR_DENIAL_MAX = 8       # 单 server 窗口内拒绝数达此值判 denial_probe
+
+ANOMALY_RATE_BURST = "rate_burst"
+ANOMALY_DENIAL_PROBE = "denial_probe"
+
+
+def _behavior_path():
+    """行为文件与审计日志同目录 —— 测试替换 AUDIT_LOG 时自动隔离，不碰真实数据。"""
+    return os.path.join(os.path.dirname(AUDIT_LOG), "runtime_behavior.json")
+
+
+class BehaviorMonitor:
+    """运行时行为监控：滑动窗口速率 + 拒绝探测，异常写入哈希链审计。"""
+
+    def __init__(self, path=None, window_sec=BEHAVIOR_WINDOW_SEC,
+                 rate_max=BEHAVIOR_RATE_MAX, denial_max=BEHAVIOR_DENIAL_MAX,
+                 escalate=None):
+        self.path = path or _behavior_path()
+        self.window_sec = window_sec
+        self.rate_max = rate_max
+        self.denial_max = denial_max
+        # escalate(server, severity, detail) —— 命中异常时的"动作"钩子；
+        # 默认 None（只审计不升级），闭环保守，避免监控本身误伤。
+        self.escalate = escalate
+
+    # ── 持久化（原子写） ──
+    def _load(self):
+        if os.path.exists(self.path):
+            try:
+                with open(self.path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                if isinstance(data, dict):
+                    data.setdefault("windows", {})
+                    data.setdefault("anomalies", [])
+                    data.setdefault("fired", {})
+                    return data
+            except Exception:
+                pass
+        return {"windows": {}, "anomalies": [], "fired": {}}
+
+    def _save(self, data):
+        os.makedirs(os.path.dirname(self.path) or ".", exist_ok=True)
+        tmp = self.path + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+        os.replace(tmp, self.path)
+
+    def observe(self, server, tool="", decision=DECISION_ALLOW, ts=None):
+        """记录一次调用，返回本次命中的异常列表（无异常为 []）。
+
+        异常按窗口去重（每个窗口每种异常只报一次），避免刷屏。
+        """
+        server = (server or "").strip()
+        if not server:
+            return []
+        if ts is None:
+            now = datetime.now(TZ)
+        elif isinstance(ts, str):
+            now = datetime.fromisoformat(ts)
+        else:
+            now = ts
+        cutoff = (now - timedelta(seconds=self.window_sec)).isoformat()
+
+        with _lock:
+            data = self._load()
+            win = data["windows"].setdefault(server, [])
+            win.append({"ts": now.isoformat(), "tool": tool, "decision": decision})
+            win[:] = [e for e in win if e.get("ts", "") >= cutoff]
+            fired = data["fired"].setdefault(server, {})
+
+            anomalies = []
+
+            def _fire(kind, severity, count, reason):
+                last = fired.get(kind)
+                if last and last >= cutoff:
+                    return              # 本窗口已报过，去重
+                fired[kind] = now.isoformat()
+                anomalies.append({"type": kind, "severity": severity, "server": server,
+                                  "count": count, "window_sec": self.window_sec,
+                                  "reason": reason, "ts": now.isoformat()})
+
+            if len(win) > self.rate_max:
+                _fire(ANOMALY_RATE_BURST, "high", len(win),
+                      f"{self.window_sec}s 内调用 {len(win)} 次，超过上限 {self.rate_max}")
+            denials = sum(1 for e in win if e.get("decision") == DECISION_DENY)
+            if denials >= self.denial_max:
+                _fire(ANOMALY_DENIAL_PROBE, "high", denials,
+                      f"{self.window_sec}s 内被拒 {denials} 次，疑似越权探测")
+
+            if anomalies:
+                data["anomalies"].extend(anomalies)
+                data["anomalies"] = data["anomalies"][-200:]
+            self._save(data)
+
+        for a in anomalies:
+            audit("behavior_anomaly", a)
+            if self.escalate:
+                try:
+                    self.escalate(server, a["severity"],
+                                  {"anomaly": a["type"], "count": a["count"]})
+                except Exception:
+                    pass
+        return anomalies
+
+    def status(self):
+        """验证环节：当前各 server 的窗口统计 + 最近异常。"""
+        data = self._load()
+        servers = {}
+        for s, win in data.get("windows", {}).items():
+            servers[s] = {
+                "calls": len(win),
+                "denials": sum(1 for e in win if e.get("decision") == DECISION_DENY),
+                "tools": sorted({e.get("tool", "") for e in win if e.get("tool")}),
+            }
+        return {
+            "window_sec": self.window_sec,
+            "rate_max": self.rate_max,
+            "denial_max": self.denial_max,
+            "servers": servers,
+            "anomalies": data.get("anomalies", [])[-50:],
+            "anomaly_count": len(data.get("anomalies", [])),
+            "healthy": not data.get("anomalies"),
+        }
+
+    def reset(self):
+        self._save({"windows": {}, "anomalies": [], "fired": {}})
+
+
+# ══════════════════════════════════════════
 #  决策网关
 # ══════════════════════════════════════════
 
@@ -219,11 +359,14 @@ def _matches(entry, tool):
 class RuntimeGovernor:
     """运行时治理网关。evaluate() 是唯一的准入判定入口。"""
 
-    def evaluate(self, server, tool="", context=None, log=True):
+    def evaluate(self, server, tool="", context=None, log=True, behavior=True):
         """判定一次工具调用是否放行。
 
         优先级（从高到低，任何一层命中即终止）：
             kill switch > deny 名单 > allow 名单 > default_deny 兜底
+
+        behavior=True 时顺带把这次决策喂给行为监控（检测调用模式异常）。
+        行为监控的任何故障都不影响放行判定本身（吞掉异常，绝不因监控而误拒）。
         """
         server = (server or "").strip()
         tool = (tool or "").strip()
@@ -240,6 +383,11 @@ class RuntimeGovernor:
                                    "decision": decision, "reason": reason,
                                    "policy_hit": policy_hit,
                                    "context": (context or {})})
+                if behavior:
+                    try:
+                        _default_behavior.observe(server, tool, decision)
+                    except Exception:
+                        pass
             return res
 
         if not server:
@@ -401,10 +549,44 @@ class RuntimeGovernor:
 
 # ── 模块级便捷 API ──
 _default = RuntimeGovernor()
+# 默认行为监控：只检测+审计，不自动升级（闭环保守；需要自动熔断时调
+# enable_behavior_escalation()）。escalate 钩子可在任意时刻挂上。
+_default_behavior = BehaviorMonitor()
 
 
-def evaluate(server, tool="", context=None, log=True):
-    return _default.evaluate(server, tool, context, log)
+def evaluate(server, tool="", context=None, log=True, behavior=True):
+    return _default.evaluate(server, tool, context, log, behavior)
+
+
+def observe_behavior(server, tool="", decision=DECISION_ALLOW, ts=None):
+    return _default_behavior.observe(server, tool, decision, ts)
+
+
+def behavior_status():
+    return _default_behavior.status()
+
+
+def reset_behavior():
+    _default_behavior.reset()
+
+
+def configure_behavior(**kw):
+    """运行时调参：window_sec / rate_max / denial_max / escalate。
+
+    例：configure_behavior(rate_max=30, denial_max=3)
+    """
+    for k in ("window_sec", "rate_max", "denial_max", "escalate", "path"):
+        if k in kw:
+            setattr(_default_behavior, k, kw[k])
+    return behavior_status()
+
+
+def enable_behavior_escalation(enabled=True):
+    """把行为异常升级为运行时事故（进而触发既有的事故→自动熔断链路）。"""
+    _default_behavior.escalate = (
+        (lambda server, severity, detail: record_incident(server, severity, detail))
+        if enabled else None)
+    return {"success": True, "escalation_enabled": enabled}
 
 
 def kill(server, reason="manual kill switch"):
