@@ -1,38 +1,38 @@
 # AIShield MCP安全扫描报告
 
-生成时间: 2026-09-09 16:06:05
+生成时间: 2026-09-10 16:05:44
 扫描引擎版本: 4.1
-扫描工具总数: 65
-平均安全评分: 78.5/100
+扫描工具总数: 66
+平均安全评分: 78.4/100
 
 ## 评分分布
 
 | 等级 | 数量 |
 |------|------|
 | gold | 26 |
-| silver | 21 |
+| silver | 22 |
 | bronze | 9 |
 | none | 9 |
 
 ## OWASP MCP Top 10 覆盖率
 
-- **MCP01** 令牌管理不当: 5/65 (8%)
-- **MCP010** : 0/65 (0%)
-- **MCP02** 权限范围蔓延: 23/65 (35%)
-- **MCP03** 工具投毒: 9/65 (14%)
-- **MCP04** 供应链攻击: 22/65 (34%)
-- **MCP05** 命令注入: 9/65 (14%)
-- **MCP06** 提示注入: 31/65 (48%)
-- **MCP07** 认证不足: 1/65 (2%)
-- **MCP08** 审计缺失: 28/65 (43%)
-- **MCP09** 影子服务器: 37/65 (57%)
+- **MCP01** 令牌管理不当: 5/66 (8%)
+- **MCP010** : 0/66 (0%)
+- **MCP02** 权限范围蔓延: 23/66 (35%)
+- **MCP03** 工具投毒: 10/66 (15%)
+- **MCP04** 供应链攻击: 23/66 (35%)
+- **MCP05** 命令注入: 9/66 (14%)
+- **MCP06** 提示注入: 32/66 (48%)
+- **MCP07** 认证不足: 1/66 (2%)
+- **MCP08** 审计缺失: 28/66 (42%)
+- **MCP09** 影子服务器: 38/66 (58%)
 
 ## 高风险工具 (score < 60)
 
 - **arcadeai-labs/smithery-cli** — 36/100, 25 issues
 - **BeehiveInnovations/pal-mcp-server** — 37/100, 44 issues
 - **OpenByteInc/QuantDinger** — 39/100, 58 issues
-- **amruthpillai/reactive-resume** — 42/100, 38 issues
+- **amruthpillai/reactive-resume** — 42/100, 31 issues
 - **czlonkowski/n8n-mcp** — 46/100, 23 issues
 - **assafelovic/gpt-researcher** — 48/100, 15 issues
 - **mrexodia/ida-pro-mcp** — 50/100, 31 issues
