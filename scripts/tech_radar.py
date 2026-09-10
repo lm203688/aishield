@@ -729,6 +729,40 @@ REPO_SPAM_OWNERS = {
 }
 REPO_SPAM_PREFIXES = ("genpark-",)
 
+# R4-capability (REJECTED-INDEX 2026-09-03): self-evolving / self-improving
+# agent *capability* papers cite attacks only as motivation ("是攻击前提，非攻击").
+# They match the `self[- ]evolving\s+agent` / `trajectory poison` attack patterns
+# yet are not draftable attack techniques — drafting them produced rotting,
+# non-promotable stubs (e.g. "Closing the Consistency Gap: Self-Evolving Agents").
+# We suppress such signals to "none" unless they carry explicit weaponisation
+# language proving a concrete technique is described.
+CAPABILITY_INDICATORS = [
+    "self-evolv",        # self-evolving / self-evolution
+    "self-improv",       # self-improving / self-improvement
+    "consistency gap",   # "Closing the Consistency Gap" capability paper
+    "autonomous improvement",
+    "emergent ability", "emergent capability",
+]
+# Strong exploit language: a signal carrying any of these is a real technique,
+# not mere capability research -> keep it on the attack side.
+_EXPLOIT_HARD = ["bypass", "exploit", "weaponiz", "rce",
+                 "arbitrary code", "remote code", "0day", "zero-day",
+                 "in the wild", "proof-of-concept", "poc"]
+
+
+def _is_capability_side(text, title):
+    """True if the signal is agent-capability / self-evolution research that
+    must NOT be drafted as an attack (R4-capability)."""
+    if not any(k in text for k in CAPABILITY_INDICATORS):
+        # broad "agent/llm capability" phrasing (R4 self-evolving capability)
+        if "capability" in text and any(
+                w in text for w in ("agent", "llm", "model", "foundation")):
+            pass
+        else:
+            return False
+    # explicit weaponisation / concrete attack technique -> keep as attack
+    return not any(k in text for k in _EXPLOIT_HARD)
+
 
 def _is_repo_spam(sig):
     """True if the signal is owner-level repo spam that should be suppressed."""
@@ -761,6 +795,15 @@ def classify_signal(sig):
 
     cat = next((c for pat, c in ATTACK_PATTERNS if re.search(pat, text)), None)
     if not cat:
+        return None, None, "none"
+
+    # R4-capability: self-evolution / agent-capability research that merely
+    # motivates with attack keywords is NOT a draftable attack technique.
+    # Suppress to "none" (never drafted) unless explicit exploit language proves
+    # a concrete technique is described. This stops the rotting-draft spiral
+    # (e.g. "Self-Evolving Agents … Trajectory Poisoning" → none, not attack).
+    _title = (sig.get("title") or "").lower()
+    if _is_capability_side(text, _title):
         return None, None, "none"
 
     title = (sig.get("title") or "").lower()
@@ -1226,7 +1269,10 @@ def main():
     # delta, so the public daily trail is always a faithful snapshot of what
     # the radar saw that day (dedup only gates issues/drafts, not the report).
     report = render_report(valid, drafted_rules, created_issues, errors)
-    report_path = os.path.join(INTEL_DIR, f"{_today_str()}-tech-radar.md")
+    # 待办⑤ (2026-09-03 起挂起): 同 UTC 日多次重跑会覆盖同名报告导致早版丢失。
+    # 文件名加 HHMM 时间戳，保留每次完整快照（滚动索引按前缀解析日期，兼容）。
+    report_stamp = _now_utc().strftime("%Y-%m-%d-%H%M")
+    report_path = os.path.join(INTEL_DIR, f"{report_stamp}-tech-radar.md")
     with open(report_path, "w", encoding="utf-8") as f:
         f.write(report)
     print(f"[report] {report_path}")
