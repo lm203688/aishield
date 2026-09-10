@@ -108,14 +108,14 @@ class TestSignalClassification(unittest.TestCase):
     """真实论文标题，取自 2026-08-09 当天 arXiv 扫描结果"""
 
     CASES = [
-        ('When Experience Becomes Instruction: Trajectory Poisoning in '
-         'Self-Evolving Agent Skill Systems', 'trajectory-poisoning'),
         ('Towards a Risk Assessment of Malicious Skill Files in Coding Agents',
          'skill-poisoning'),
         ('Breaking Customized LLMs for Coding: Automated Red Teaming for '
          'Instruction Backdoor Attacks', 'instruction-hijack'),
         ('Agent Against Agent: An Agentic System for Automatic Prompt '
          'Injection Red Teaming', 'prompt-injection'),
+        ('A Universal Jailbreak Toolkit for Large Language Model Agents',
+         'jailbreak'),
     ]
 
     def test_known_attack_papers_are_classified(self):
@@ -168,6 +168,29 @@ class TestSignalClassification(unittest.TestCase):
         cat, sev, side = tech_radar.classify_signal(sig)
         self.assertEqual(side, 'spam')
         self.assertIsNone(cat)
+
+    def test_r4_capability_self_evolution_paper_suppressed(self):
+        """待办④/R4-capability：自进化 agent 能力论文（攻击前提，非攻击）
+        曾误标 trajectory-poisoning 进入起草链路产死稿；须抑制为 none。"""
+        sig = {'_source': 'arxiv', 'id': 'cap1',
+               'title': 'When Experience Becomes Instruction: Trajectory '
+                        'Poisoning in Self-Evolving Agent Skill Systems',
+               'url': 'https://arxiv.org/abs/2609.08832'}
+        cat, sev, side = tech_radar.classify_signal(sig)
+        self.assertIsNone(cat, 'R4-capability 能力论文不得判为攻击类别')
+        self.assertEqual(side, 'none')
+        self.assertIsNone(tech_radar.draft_rule_candidate(sig),
+                          '能力论文不得产生规则候选（避免 _proposed/ 腐烂）')
+
+    def test_capability_paper_with_exploit_language_stays_attack(self):
+        """能力论文若同时给出具体利用链（exploit/bypass），则是真实技术，保留攻击侧"""
+        sig = {'_source': 'arxiv', 'id': 'cap2',
+               'title': 'Self-Evolving Agent Skill Poisoning: a working '
+                        'exploit chain to bypass tool attestation',
+               'url': 'https://arxiv.org/abs/x'}
+        cat, sev, side = tech_radar.classify_signal(sig)
+        self.assertIsNotNone(cat, '含显式利用语的能力论文应保留为攻击类别')
+        self.assertEqual(side, 'attack')
 
 
 # ══════════════════════════════════════════════════════════════
@@ -426,7 +449,7 @@ class TestDraftFormatMatchesEngine(unittest.TestCase):
     def test_draft_is_json_with_promotable_shape(self):
         path = tech_radar.draft_rule_candidate({
             '_source': 'arxiv', 'id': 'abcdef123456',
-            'title': 'Trajectory Poisoning in Self-Evolving Agent Skill Systems',
+            'title': 'A Universal Jailbreak Toolkit for Large Language Model Agents',
             'url': 'https://arxiv.org/abs/1234.5678'})
         self.assertIsNotNone(path)
         self.assertTrue(path.endswith('.json'))
