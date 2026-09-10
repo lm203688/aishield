@@ -51,6 +51,9 @@ def main():
         'tests.test_fuzzing',
         'tests.test_baseline_scan',
         'tests.test_compliance',
+        'tests.test_fleet_versions',
+        'tests.test_runtime_behavior',
+        'tests.test_self_reference',
     ]
 
     loaded = 0
