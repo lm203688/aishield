@@ -361,3 +361,38 @@ jobs:
               labels: ['ci','alert','automated']
             });
             console.log('已创建 CI 失败告警 issue');
+
+  # ── 恢复即关闭：CI 成功时关掉历史失败告警 ────────────────────────────
+  # 补的是告警闭环缺的另一半：notify-on-failure 只开 Issue 不关，导致修复后
+  # issue 仍长期挂 open（#666「CI 失败持续告警」即此因），陈旧开启项淹没新故障。
+  resolve-ci-alert:
+    name: Close CI Failure Alert on Recovery
+    needs: [workflow-lint, distribution-gate, test, security-scan, dependency-check, performance-test, docker-test, ci-state]
+    # 只在人为动作上收口；定时兜底成功无需动 Issue（与告警侧对称）。
+    if: success() && github.event_name != 'schedule'
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const title = '❌ AIShield CI 失败（持续告警）';
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner, repo: context.repo.repo, state: 'open', per_page: 100
+            });
+            const existing = issues.find(i => i.title === title && !i.pull_request);
+            if (!existing) {
+              console.log('无开启中的 CI 失败告警，无需关闭');
+              return;
+            }
+            await github.rest.issues.createComment({
+              owner: context.repo.owner, repo: context.repo.repo,
+              issue_number: existing.number,
+              body: `✅ CI 已恢复（run ${context.runId} @ ${context.sha.slice(0,7)}），自动关闭本告警。`
+            });
+            await github.rest.issues.update({
+              owner: context.repo.owner, repo: context.repo.repo,
+              issue_number: existing.number, state: 'closed', state_reason: 'completed'
+            });
+            console.log(`已自动关闭 CI 失败告警 issue #${existing.number}`);
