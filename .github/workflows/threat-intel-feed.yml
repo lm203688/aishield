@@ -36,6 +36,7 @@ jobs:
     outputs:
       total: ${{ steps.fetch.outputs.total }}
       high: ${{ steps.fetch.outputs.high }}
+      failed: ${{ steps.fetch.outputs.failed }}
     steps:
       - uses: actions/checkout@v4
 
@@ -49,11 +50,20 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NOTIFY_WEBHOOK: ${{ secrets.NOTIFY_WEBHOOK }}
         run: |
-          python scripts/fetch_vuln_feeds.py --days "${{ inputs.days || 30 }}" --notify 2>&1 | tail -30
+          # pipefail 必需：管道退出码默认取最后一个命令（tail → 恒为 0），
+          # 会把 fetch_vuln_feeds 的 fail-closed 退出码吞掉 —— 表现为
+          # "三个上游源全挂、情报库停更，流水线依然全绿"的假绿。
+          set -o pipefail
+          python scripts/fetch_vuln_feeds.py --days "${{ inputs.days || 30 }}" --notify 2>&1 | tail -40
           total=$(python -c "import json;print(json.load(open('data/threat_intel.json'))['total'])")
+          failed=$(python -c "import json;print(','.join(json.load(open('data/threat_intel.json')).get('sources_failed') or []))")
           high=$(python -c "import json;d=json.load(open('data/state/intel.json'))['current'];print(d.get('high_new',0))")
           echo "total=$total" >> "$GITHUB_OUTPUT"
-          echo "high=$high"   >> "$GITHUB_OUTPUT"
+          echo "failed=$failed" >> "$GITHUB_OUTPUT"
+          echo "high=$high"     >> "$GITHUB_OUTPUT"
+          if [ -n "$failed" ]; then
+            echo "::warning::上游情报源降级不可用：$failed"
+          fi
 
       - name: Upload intel artifact
         uses: actions/upload-artifact@v4

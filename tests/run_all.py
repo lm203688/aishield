@@ -54,6 +54,7 @@ def main():
         'tests.test_fleet_versions',
         'tests.test_runtime_behavior',
         'tests.test_self_reference',
+        'tests.test_vuln_feed_health',
     ]
 
     loaded = 0

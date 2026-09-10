@@ -17,6 +17,7 @@ AIShield 元监控 (Meta-Monitor)：监控自动化体系本身
   M4 台账一致性   —— 文档声称的任务数 vs 实际存在的 workflow 数
   M5 闭环完整性   —— 每个闭环 workflow 是否具备"检测→动作→验证→告警"四个环节
   M6 告警可达性   —— 通知总线是否具备至少一个可用出口
+  M7 上游情报源   —— OSV / NVD / GitHub Advisory 是否真的可用（情报库有无停更）
 
 用法：
     python scripts/meta_monitor.py
@@ -27,6 +28,7 @@ AIShield 元监控 (Meta-Monitor)：监控自动化体系本身
 from __future__ import annotations
 
 import argparse
+import base64
 import json
 import os
 import re
@@ -405,6 +407,76 @@ def check_alert_reachability() -> Dict[str, Any]:
             "detail": "CI 中无任何可用告警出口 —— 告警将只能落盘，等同于没有告警"}
 
 
+# --------------------------------------------------------------------------
+# M7 上游情报源健康
+# --------------------------------------------------------------------------
+INTEL_DB_PATH = "data/threat_intel.json"
+INTEL_MAX_SILENT_HOURS = 72     # 情报库超过 3 天未成功更新 → 视为停更
+SOURCE_FAIL_THRESHOLD = 2       # 单源连续失败 >= 2 次才判 degraded（放过单次抖动）
+
+
+def check_intel_sources() -> Dict[str, Any]:
+    """M7 上游数据源健康（OSV / NVD / GitHub Advisory）。
+
+    补的洞：fetch_vuln_feeds 旧版把每源异常 print 掉就完事，既不记状态也不
+    告警，更糟的是三个源全挂仍 exit 0 —— 情报库停更而流程全绿。现在采集端
+    已逐源留痕（source_health），本检查负责把它纳入体系体检。
+
+    为什么必须读**远端**副本：data/threat_intel.json 由 CI 提交，本地工作区
+    是 08-04 的陈旧快照（与 M3 同一个坑），据本地文件判分会产生恒定假 degraded。
+
+    判据（本地无 token 时跳过，与 M2/M3/M6 一致）：
+      · 任一源连续失败 >= 2 次           → 上游长期不可用
+      · 情报库 last_success 超过 72h     → 情报停更
+    升级前的老数据（无 source_health 字段）不判红，避免误伤。
+    """
+    if not GH_TOKEN:
+        return {"ok": None,
+                "detail": "本地无 token；上游源健康以 CI 内采集结果为准，本地不判红"}
+    meta = _gh(f"/contents/{INTEL_DB_PATH}?ref=main")
+    if not isinstance(meta, dict) or not meta.get("content"):
+        return {"ok": None, "detail": "无法读取远端情报库，跳过上游源健康检查"}
+    try:
+        db = json.loads(base64.b64decode(meta["content"]).decode("utf-8"))
+    except Exception as e:
+        return {"ok": None, "detail": f"远端情报库解析失败，跳过检查: {e}"}
+
+    block = db.get("source_health")
+    if not isinstance(block, dict):
+        return {"ok": None, "detail": "情报库尚无 source_health 字段（升级前数据），跳过"}
+
+    now = datetime.now(timezone.utc)
+    bad: List[str] = []
+    srcs = block.get("sources") if isinstance(block.get("sources"), dict) else {}
+    for name, h in srcs.items():
+        if not isinstance(h, dict):
+            continue
+        try:
+            n = int(h.get("consecutive_failures") or 0)
+        except Exception:
+            n = 0
+        if h.get("ok") is False and n >= SOURCE_FAIL_THRESHOLD:
+            bad.append(f"{name} 连续 {n} 次失败")
+
+    stale_hours = None
+    ls = block.get("last_success")
+    if ls:
+        try:
+            t = datetime.fromisoformat(str(ls).replace("Z", "+00:00"))
+            stale_hours = (now - t).total_seconds() / 3600
+        except Exception:
+            stale_hours = None
+    if stale_hours is not None and stale_hours > INTEL_MAX_SILENT_HOURS:
+        bad.append(f"情报库已 {stale_hours:.0f}h 未成功更新")
+
+    if bad:
+        return {"ok": False, "detail": "上游情报源异常：" + "；".join(bad)}
+
+    ok_n = sum(1 for h in srcs.values() if isinstance(h, dict) and h.get("ok"))
+    fresh = f"{stale_hours:.0f}h 前更新" if stale_hours is not None else "更新时间未知"
+    return {"ok": True, "detail": f"上游情报源健康（{ok_n}/{len(srcs)} 正常），情报库 {fresh}"}
+
+
 CHECKS = [
     ("M1 语法有效性", check_syntax),
     ("M2 运行活性", check_liveness),
@@ -412,6 +484,7 @@ CHECKS = [
     ("M4 台账一致性", check_ledger),
     ("M5 闭环完整性", check_loop_integrity),
     ("M6 告警可达性", check_alert_reachability),
+    ("M7 上游情报源", check_intel_sources),
 ]
 
 
