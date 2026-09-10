@@ -1,0 +1,84 @@
+{
+  "version": 1,
+  "note": "AIShield 自身已发布制品的自指误报允许清单。这些阻断级发现来自扫描器自己的检测词汇、演示载荷或只读 preflight，不是真实漏洞。按 (source, file, type) 三元组精确匹配；未登记的新发现一律照旧阻断。每次新增条目都必须在 reason 里写清为什么它不是真实问题。",
+  "entries": [
+    {
+      "source": "mcp-server/src",
+      "file": "index.ts",
+      "type": "dangerous_pattern",
+      "reason": "MCP server 工具描述里含检测词表（越狱关键词/零宽字符/npx 远程包），这是扫描器自身暴露给 LLM 的词汇，不是被扫目标的载荷"
+    },
+    {
+      "source": "mcp-server/src",
+      "file": "index.ts",
+      "type": "exfil_combo",
+      "reason": "同一文件同时出现凭证读取与网络检测字样，属检测器定义（工具会读待扫文件并发本地请求），非真实外泄链路"
+    },
+    {
+      "source": "distribution/github-marketplace",
+      "file": "action_entrypoint.py",
+      "type": "dangerous_pattern",
+      "reason": "GitHub Action 入口：subprocess 仅用于 clone 待扫目标后跑只读 preflight，绝不执行被扫命令（与主扫描器同一不变量）"
+    },
+    {
+      "source": "distribution/github-marketplace",
+      "file": "action_entrypoint.py",
+      "type": "capability_overclaim",
+      "reason": "同上：只读 preflight 所需的最小能力原语，非越权"
+    },
+    {
+      "source": "action_entrypoint.py",
+      "file": "action_entrypoint.py",
+      "type": "dangerous_pattern",
+      "reason": "GitHub Marketplace Action 入口根副本：subprocess 仅 clone 待扫目标跑只读 preflight"
+    },
+    {
+      "source": "action_entrypoint.py",
+      "file": "action_entrypoint.py",
+      "type": "capability_overclaim",
+      "reason": "同上：只读 preflight 所需的最小能力原语"
+    },
+    {
+      "source": "distribution/guardrail-harness",
+      "file": "proxy_example.py",
+      "type": "dangerous_pattern",
+      "reason": "guardrail 示例：演示一条**会被拦截**的恶意载荷（curl 管道执行），用于展示防护生效，非真实后门"
+    },
+    {
+      "source": "distribution/guardrail-harness",
+      "file": "proxy_example.py",
+      "type": "unsigned_agent_identity",
+      "reason": "示例 agent 卡片，故意不签名以演示「未签名身份」被识别的场景"
+    },
+    {
+      "source": "distribution/guardrail-harness",
+      "file": "proxy_example.py",
+      "type": "skill_self_update",
+      "reason": "示例含 postinstall 演示片段，正是 guardrail 要拦截的对象"
+    },
+    {
+      "source": "distribution/guardrail-harness",
+      "file": "proxy_example.py",
+      "type": "capability_overclaim",
+      "reason": "演示载荷的 pipe_exec 原语，用于触发并展示能力越界告警"
+    },
+    {
+      "source": "distribution/guardrail-harness",
+      "file": "README.md",
+      "type": "unsigned_agent_identity",
+      "reason": "README 描述 agent 卡片示例，引用了未签名身份这一演示场景"
+    },
+    {
+      "source": "distribution/guardrail-harness",
+      "file": "README.md",
+      "type": "skill_self_update",
+      "reason": "README 引用演示中的 postinstall 片段作为反例"
+    },
+    {
+      "source": "distribution/guardrail-harness",
+      "file": "README.md",
+      "type": "capability_overclaim",
+      "reason": "README 描述演示载荷的能力原语作为反例"
+    }
+  ]
+}
