@@ -1,7 +1,7 @@
 {
-  "updated": "2026-09-10T15:28:08Z",
-  "run_id": "34495758551",
-  "sha": "3c4f13ce8bf42138a2787dc070ddfbd6902eefce",
+  "updated": "2026-09-10T15:28:11Z",
+  "run_id": "34495753943",
+  "sha": "36d854609124f69b4bd3011fde9bdce2509646aa",
   "overall": "failure",
   "source": "ci.yml",
   "jobs": {
