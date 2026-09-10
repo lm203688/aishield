@@ -108,10 +108,19 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NOTIFY_WEBHOOK: ${{ secrets.NOTIFY_WEBHOOK }}
         run: |
+          # 恢复即关闭：晋升成功必须同时清掉两条指纹，否则 alert job 在
+          # promote 崩溃时开的 "rule-promoter-crashed" 告警永远无人关闭
+          # （04 号态：告警有了、恢复通知没有 → 闭环断一半）。
+          # --resolve 在"无对应开启 Issue"时也返回 0，故无需吞失败（铁律：
+          # 不放过真失败）。
           python scripts/notify.py --resolve \
             --fingerprint rule-promotion-failed \
             --title "规则晋升恢复" \
-            --body "晋升后全量测试通过。" || true
+            --body "晋升后全量测试通过。"
+          python scripts/notify.py --resolve \
+            --fingerprint rule-promoter-crashed \
+            --title "规则晋升任务恢复" \
+            --body "promote job 本轮成功，历史崩溃告警关闭。"
 
   alert:
     name: Alert on Loop Failure
