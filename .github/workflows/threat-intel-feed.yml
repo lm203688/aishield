@@ -293,3 +293,28 @@ jobs:
             --fingerprint threat-intel-failed \
             --title "威胁情报闭环失败" \
             --body "$(cat /tmp/body.md)"
+
+  # ── 6. 恢复：全链路成功 → 关闭历史告警（闭环的"恢复即关闭"）──────────
+  # 缺这一半的后果：alert 开了 Issue，恢复后没人关，告警堆成噪声，
+  # 真正的新故障淹没在陈旧开启项里（#660/#662/#664 即此因）。
+  resolve-alert:
+    name: 6-Resolve Alert on Recovery
+    needs: [fetch, to-rules, verify, commit]
+    if: always() && needs.fetch.result == 'success' && needs.to-rules.result == 'success' && needs.verify.result == 'success' && needs.commit.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Clear historical alarm
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NOTIFY_WEBHOOK: ${{ secrets.NOTIFY_WEBHOOK }}
+        run: |
+          python scripts/notify.py --resolve \
+            --fingerprint threat-intel-failed \
+            --title "威胁情报闭环已恢复" \
+            --body "本轮采集→转规则→验证→入库全链路成功。"
