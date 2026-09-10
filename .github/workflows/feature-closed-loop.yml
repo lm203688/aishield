@@ -194,3 +194,26 @@ jobs:
             --title "功能闭环执行失败" \
             --fingerprint "feature-loop-fail" \
             --body "$(cat /tmp/loop_fail.md)"
+
+  resolve-alert:
+    name: Resolve Alert on Loop Recovery
+    needs: [aggregate, verify, settle]
+    if: always() && needs.aggregate.result == 'success' && needs.verify.result == 'success' && needs.settle.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Resolve historical alarm
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NOTIFY_WEBHOOK: ${{ secrets.NOTIFY_WEBHOOK }}
+          GH_OWNER: lm203688
+          GH_REPO: aishield
+        run: |
+          # 恢复即关闭：闭环成功时关掉历史失败告警，避免陈旧开启项堆积成噪声。
+          python scripts/notify.py --resolve \
+            --fingerprint "feature-loop-fail" \
+            --title "功能闭环已恢复" \
+            --body "aggregate / verify / settle 三段全部成功。"
