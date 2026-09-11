@@ -111,7 +111,9 @@ jobs:
             } catch(e) {}
             if (score === null) { console.log('无法解析分数，跳过'); return; }
             if (score >= 60) { console.log('安全得分正常:', score); return; }
-            const title = `🔒 安全门禁未通过：得分 ${score}/100 (run ${context.runId})`;
+            // 标题不含 run id：否则每次失败的 run 都是"新标题"，去重永远不命中，
+            // 陈旧告警会无限堆积（与 ci.yml 同样的教训）。
+            const title = `🔒 安全门禁未通过（AIShield 自扫描）`;
             const { data: issues } = await github.rest.issues.listForRepo({
               owner: context.repo.owner, repo: context.repo.repo, state: 'open', per_page: 100
             });
@@ -121,6 +123,32 @@ jobs:
               body: `AIShield 自扫描安全得分 ${score}/100 低于阈值 60。\n运行链接: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
               labels: ['security','alert','automated']
             });
+
+      # ── 恢复即关闭：自扫描得分回到阈值以上时，关掉历史告警 ──────────
+      # 补齐告警闭环另一半：上面只在失败时开 Issue 不关，修复后（得分回升）
+      # Issue 仍长期挂 open，淹没新故障。self-scan 低分时 job 自身 exit 1，
+      # 故用 success() 判定"已恢复"。
+      - name: Close self-scan alert on recovery
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = '🔒 安全门禁未通过（AIShield 自扫描）';
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner, repo: context.repo.repo, state: 'open', per_page: 100
+            });
+            const ex = issues.find(i => i.title === title && !i.pull_request);
+            if (!ex) { console.log('无开启中的自扫描安全告警'); return; }
+            await github.rest.issues.createComment({
+              owner: context.repo.owner, repo: context.repo.repo,
+              issue_number: ex.number,
+              body: `✅ 自扫描安全得分已回到阈值(60)以上（run ${context.runId} @ ${context.sha.slice(0,7)}），自动关闭本告警。`
+            });
+            await github.rest.issues.update({
+              owner: context.repo.owner, repo: context.repo.repo,
+              issue_number: ex.number, state: 'closed', state_reason: 'completed'
+            });
+            console.log(`已自动关闭自扫描安全告警 issue #${ex.number}`);
 
   # ── Job 2: 外部扫描（扫描指定工具）──────────────────────
   external-scan:
@@ -179,7 +207,8 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-            const title = `🛡️ AIShield 扫描发现严重安全问题 (run ${context.runId})`;
+            // 标题稳定（不含 run id），才能被"恢复即关闭"步骤按标题定位并关闭。
+            const title = `🛡️ AIShield 扫描发现严重安全问题`;
             const { data: issues } = await github.rest.issues.listForRepo({
               owner: context.repo.owner, repo: context.repo.repo, state: 'open', per_page: 100
             });
@@ -195,6 +224,36 @@ jobs:
               body: `AIShield 自动扫描发现严重安全问题。\n\n${detail}\n\n运行链接: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
               labels: ['security','alert','automated']
             });
+
+      # ── 恢复即关闭：外部扫描未发现 critical 时，关掉历史告警 ──────────
+      # 作业内自闭环：external-scan 在 push/PR 时被 job 级 if 跳过，若用独立
+      # resolve 作业 needs 它会被"跳过传播"连累，故在每个 job 内自行开关。
+      - name: Close external alert on clean scan
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const ran = fs.existsSync('external-scan-report.json');
+            const crit = parseInt('${{ steps.check.outputs.critical_count }}' || 'NaN', 10);
+            if (!ran) { console.log('本次未执行外部扫描，跳过'); return; }
+            if (isNaN(crit) || crit > 0) { console.log('存在 critical 问题，外部告警保持开启'); return; }
+            const title = '🛡️ AIShield 扫描发现严重安全问题';
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner, repo: context.repo.repo, state: 'open', per_page: 100
+            });
+            const ex = issues.find(i => i.title === title && !i.pull_request);
+            if (!ex) { console.log('无开启中的外部扫描安全告警'); return; }
+            await github.rest.issues.createComment({
+              owner: context.repo.owner, repo: context.repo.repo,
+              issue_number: ex.number,
+              body: `✅ 本轮外部扫描未发现 critical 级问题（run ${context.runId} @ ${context.sha.slice(0,7)}），自动关闭本告警。`
+            });
+            await github.rest.issues.update({
+              owner: context.repo.owner, repo: context.repo.repo,
+              issue_number: ex.number, state: 'closed', state_reason: 'completed'
+            });
+            console.log(`已自动关闭外部扫描安全告警 issue #${ex.number}`);
 
       - name: Upload External Scan Report
         if: always() && hashFiles('external-scan-report.json') != ''
