@@ -1,6 +1,104 @@
 {
   "intel": [
     {
+      "id": "GHSA-p78m-89r6-pgf7",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 6.8,
+      "title": "Open WebUI: A user's session cookies are sent to tool servers configured for bearer authentication",
+      "summary": "## Summary\n\nWhen more than one external tool server is reachable in the same request, a tool call to a server configured for bearer authentication can arrive carrying the calling user's Open WebUI session cookies alongside that server's own key. The cookie jar is built per connection, but the callable that performs the request reads it late instead of per connection, so every tool callable built in the same pass sends the cookies belonging to whichever connection was processed last. An administr",
+      "affected": "pip:open-webui",
+      "references": [
+        "https://github.com/advisories/GHSA-p78m-89r6-pgf7"
+      ],
+      "published": "2026-09-10T21:23:44Z",
+      "fetched": "2026-09-11T08:01:30.085262+00:00"
+    },
+    {
+      "id": "GHSA-hf57-cqmx-p4gr",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": null,
+      "title": " OmniRoute ACP Custom-Agent Remote Code Execution (RCE)",
+      "summary": "## 2. Summary\n\n`POST /api/acp/agents` registers a custom ACP agent. The endpoint accepts user-controlled\n`binary` and `versionCommand` values. After saving the custom agent, the same request calls\n`refreshAgentCache()`, which triggers agent version detection. The version probe eventually runs:\n\n```ts\nexecFileSync(probe.command, probe.args, ...)\n```\n\nThe only validation is `resolveVersionProbe(binary, versionCommand, true)`, which checks that the\nfirst token of `versionCommand` matches the reques",
+      "affected": "npm:omniroute",
+      "references": [
+        "https://github.com/advisories/GHSA-hf57-cqmx-p4gr"
+      ],
+      "published": "2026-09-10T21:22:12Z",
+      "fetched": "2026-09-11T08:01:28.757722+00:00"
+    },
+    {
+      "id": "GHSA-cw9w-vv67-hf73",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": null,
+      "title": "n8n: Per-Resource OAuth Consent Bypass via Unbound Refresh Token Resource Substitution",
+      "summary": "## Impact\n\nThe OAuth token endpoint bound an authorization code's first access token to the consented resource, but not its refresh token. Refreshing only checked that the requested resource was registered, not that it matched the original grant. An OAuth client approved for one workflow could refresh with a different workflow's URL and get a valid, unapproved token for it. The patch binds refresh tokens to the granted resource and rejects mismatches.\n\nExploitation requires the attacker to regis",
+      "affected": "npm:n8n, npm:n8n",
+      "references": [
+        "https://github.com/advisories/GHSA-cw9w-vv67-hf73"
+      ],
+      "published": "2026-09-10T21:21:49Z",
+      "fetched": "2026-09-11T08:01:28.757747+00:00"
+    },
+    {
+      "id": "GHSA-q5wm-mgqx-fv2f",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": null,
+      "title": "n8n: Instance AI Credential Setup Accepts Unvalidated Probe URL from Fetched Content",
+      "summary": "## Impact\n\nInstance AI credential setup accepted a credential test/verification URL without checking it matched the workflow node's origin. Exfiltration required the user to actively inject an attacker-controlled URL into the setup flow. The patch derives the credential destination from the node's own URL and confines authenticated requests, redirects and probes to that origin.\n\n## Patches\n\nThe issue has been fixed in n8n versions 2.38.2 and 2.37.7. Users should upgrade to one of these versions ",
+      "affected": "npm:n8n, npm:n8n",
+      "references": [
+        "https://github.com/advisories/GHSA-q5wm-mgqx-fv2f"
+      ],
+      "published": "2026-09-10T21:18:48Z",
+      "fetched": "2026-09-11T08:01:28.757760+00:00"
+    },
+    {
+      "id": "GHSA-qgpw-8g46-w95v",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": null,
+      "title": "n8n: Git Node branch.<name>.remote Config Key Bypasses Sandbox Path Restriction, Enabling Local Git Repository Read",
+      "summary": "## Impact\n\nThe Git node validated the repository that a fetch or pull targeted, but `setUpstream` wrote a `branch.<name>.remote` value into the repository's own configuration without validating it. A subsequent fetch or pull resolved the remote from that configuration rather than from the checked parameter, so an authenticated user with workflow-edit permission could point it at any local repository the n8n process could read and receive its contents. The patch validates the branch remote config",
+      "affected": "npm:n8n, npm:n8n, npm:n8n",
+      "references": [
+        "https://github.com/advisories/GHSA-qgpw-8g46-w95v"
+      ],
+      "published": "2026-09-10T21:16:36Z",
+      "fetched": "2026-09-11T08:01:28.757775+00:00"
+    },
+    {
+      "id": "GHSA-679f-58pq-4v2c",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": null,
+      "title": "n8n: Prototype Pollution via Workflow Structure Summary Can Lead to Denial of Service",
+      "summary": "## Impact\n\nThe Instance AI workflow summary built its result with get-or-create-then-nested-write idioms keyed by node names and connection keys taken from the stored workflow. Those are arbitrary strings: the restricted-name guard n8n shows in the editor is client-side and is bypassed by posting the workflow to the REST API directly. So a reserved key such as `__proto__` resolved up the prototype chain instead of creating an own key, and the write landed on `Object.prototype` in the main n8n pr",
+      "affected": "npm:n8n, npm:n8n",
+      "references": [
+        "https://github.com/advisories/GHSA-679f-58pq-4v2c"
+      ],
+      "published": "2026-09-10T21:05:24Z",
+      "fetched": "2026-09-11T08:01:28.757837+00:00"
+    },
+    {
+      "id": "GHSA-6xcw-7xm6-48c6",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": null,
+      "title": "n8n: Expression Sandbox Escape via Shared Builtin Tampering and Code-Printer Injection Leads to Code Execution",
+      "summary": "## Impact\n\nTwo stages of expression code generation built source text by calling the global `JSON.stringify` at generation time: the compiler when printing synthetic string literals, and the isolate bridge when interpolating a timezone value into its per-evaluation wrapper. An expression that replaced that global therefore changed the code that was subsequently generated and executed, turning literal data into executable source. The patch renders both code-generation stages through a reference c",
+      "affected": "npm:n8n, npm:n8n, npm:n8n",
+      "references": [
+        "https://github.com/advisories/GHSA-6xcw-7xm6-48c6"
+      ],
+      "published": "2026-09-10T20:37:21Z",
+      "fetched": "2026-09-11T08:01:28.757859+00:00"
+    },
+    {
       "id": "GHSA-34ff-336r-5q23",
       "source": "github-advisory",
       "severity": "high",
@@ -5128,7 +5226,7 @@
       "fetched": "2026-08-04T06:34:53.913899+00:00"
     }
   ],
-  "updated": "2026-09-10T15:50:46.624838+00:00",
+  "updated": "2026-09-11T08:01:30.587983+00:00",
   "sources": [
     "osv",
     "nvd",
@@ -5147,16 +5245,16 @@
         "items": 0,
         "attempts": 1,
         "error": null,
-        "checked_at": "2026-09-10T15:50:24.847798+00:00",
+        "checked_at": "2026-09-11T08:01:08.338167+00:00",
         "consecutive_failures": 0,
         "degraded_since": null
       },
       "nvd": {
         "ok": true,
-        "items": 6,
+        "items": 34,
         "attempts": 1,
         "error": null,
-        "checked_at": "2026-09-10T15:50:43.685841+00:00",
+        "checked_at": "2026-09-11T08:01:27.875063+00:00",
         "consecutive_failures": 0,
         "degraded_since": null
       },
@@ -5165,22 +5263,22 @@
         "items": 33,
         "attempts": 1,
         "error": null,
-        "checked_at": "2026-09-10T15:50:46.624576+00:00",
+        "checked_at": "2026-09-11T08:01:30.587652+00:00",
         "consecutive_failures": 0,
         "degraded_since": null
       }
     },
     "degraded": [],
-    "last_success": "2026-09-10T15:50:46.624838+00:00",
-    "last_attempt": "2026-09-10T15:50:46.624838+00:00"
+    "last_success": "2026-09-11T08:01:30.587983+00:00",
+    "last_attempt": "2026-09-11T08:01:30.587983+00:00"
   },
   "stats": {
-    "high": 170,
-    "medium": 99,
-    "critical": 44,
+    "medium": 104,
+    "critical": 45,
+    "high": 171,
     "low": 5,
     "unknown": 30,
     "moderate": 1
   },
-  "total": 349
+  "total": 356
 }
