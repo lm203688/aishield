@@ -443,5 +443,69 @@ class TestMetaMonitorM7(unittest.TestCase):
         self.assertIn("3/3", r["detail"])
 
 
+class TestMetaMonitorM8(unittest.TestCase):
+    """M8：体系体检必须能看见 Tech Radar 源（尤其 Reddit）长期不可达。"""
+
+    def test_registered_in_checks(self):
+        labels = [lbl for lbl, _ in mm.CHECKS]
+        self.assertIn("M8 雷达情报源", labels)
+
+    def test_skips_without_token(self):
+        with mock.patch.object(mm, "GH_TOKEN", ""):
+            r = mm.check_radar_sources()
+        self.assertIsNone(r["ok"], "本地无 token 应跳过而非判红")
+
+    def _remote(self, st):
+        payload = base64.b64encode(json.dumps(st, ensure_ascii=False).encode("utf-8")).decode()
+        return {"content": payload}
+
+    def _check_with(self, st, capture=None):
+        def fake_gh(path):
+            if capture is not None:
+                capture.append(path)
+            return self._remote(st)
+        with mock.patch.object(mm, "GH_TOKEN", "x"), \
+             mock.patch.object(mm, "_gh", fake_gh):
+            return mm.check_radar_sources()
+
+    def test_uses_correct_repo_scoped_api_path(self):
+        cap = []
+        self._check_with({"source_health": {"reddit": {"consecutive_failures": 12}}},
+                          capture=cap)
+        self.assertEqual(len(cap), 1)
+        self.assertTrue(
+            cap[0].startswith(f"/repos/{mm.GH_OWNER}/{mm.GH_REPO}/contents/"),
+            f"M8 必须用仓库作用域路径，实际为 {cap[0]}")
+        self.assertIn(mm.RADAR_STATE_PATH, cap[0])
+
+    def test_flags_persistent_radar_source_failure(self):
+        r = self._check_with({"source_health": {
+            "reddit": {"consecutive_failures": 12},
+            "arxiv": {"consecutive_failures": 0}}})
+        self.assertFalse(r["ok"])
+        self.assertIn("reddit", r["detail"])
+
+    def test_tolerates_single_transient_failure(self):
+        r = self._check_with({"source_health": {
+            "reddit": {"consecutive_failures": 1},
+            "arxiv": {"consecutive_failures": 0}}})
+        self.assertTrue(r["ok"], "单次抖动不该把雷达判成 degraded")
+
+    def test_skips_legacy_state_without_health_block(self):
+        r = self._check_with({"seen_ids": [], "runs": 46})
+        self.assertIsNone(r["ok"], "升级前老状态不应判红")
+
+    def test_healthy_when_all_sources_fresh(self):
+        r = self._check_with({"source_health": {
+            "github": {"consecutive_failures": 0},
+            "arxiv": {"consecutive_failures": 0},
+            "hn": {"consecutive_failures": 0},
+            "reddit": {"consecutive_failures": 0},
+            "standards": {"consecutive_failures": 0},
+            "platforms": {"consecutive_failures": 0}}})
+        self.assertTrue(r["ok"])
+        self.assertIn("6/6", r["detail"])
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

@@ -32,8 +32,12 @@ jobs:
         with:
           python-version: '3.13'
 
-      - name: Gate report (--check，blocked 属正常待作者补全，不失败)
-        run: python scripts/promote_rule.py --check || true
+      - name: Gate report (--check；blocked=六道闸门未过，必须可见，不得吞)
+        # 铁律：禁止 `|| true` 吞门禁失败。blocked（校验未过，如良性语料误报）
+        # 必须红在 UI 上让人看见，而非静默全绿。用 continue-on-error 让红步
+        # 可见但不阻断健康候选的晋升（真正把关的是下面的 --promote-all）。
+        run: python scripts/promote_rule.py --check
+        continue-on-error: true
 
       - name: Promote all passing candidates
         id: promo

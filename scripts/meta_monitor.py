@@ -18,6 +18,7 @@ AIShield 元监控 (Meta-Monitor)：监控自动化体系本身
   M5 闭环完整性   —— 每个闭环 workflow 是否具备"检测→动作→验证→告警"四个环节
   M6 告警可达性   —— 通知总线是否具备至少一个可用出口
   M7 上游情报源   —— OSV / NVD / GitHub Advisory 是否真的可用（情报库有无停更）
+  M8 雷达情报源   —— Tech Radar 的 github/arxiv/hn/reddit/standards/platforms 是否可用
 
 用法：
     python scripts/meta_monitor.py
@@ -477,6 +478,60 @@ def check_intel_sources() -> Dict[str, Any]:
     return {"ok": True, "detail": f"上游情报源健康（{ok_n}/{len(srcs)} 正常），情报库 {fresh}"}
 
 
+# --------------------------------------------------------------------------
+# M8 雷达情报源健康
+# --------------------------------------------------------------------------
+RADAR_STATE_PATH = "data/state/tech_radar.json"
+RADAR_FAIL_THRESHOLD = 3       # 单源连续失败 >= 3 次（约 3 天）才判 degraded
+
+
+def check_radar_sources() -> Dict[str, Any]:
+    """M8 雷达情报源健康（github / arxiv / hn / reddit / standards / platforms）。
+
+    对称的洞：M7 只覆盖 fetch_vuln_feeds 的 OSV/NVD/GitHub Advisory，而 Tech
+    Radar 的 6 个源（尤其 Reddit）此前没有任何健康监控。实测 Reddit 连续 12 天
+    HTTP -1（本机出口不可达），却因聚合 errors=4 < 阈值而 Permanent 绿——典型
+    的"源挂了但流程全绿"。tech_radar 现已逐源留痕 source_health（并随
+    --publish 推到远端），本检查把它纳入体系体检，与 M7 同构。
+
+    判据（无 token / 远端无 state / 无 source_health 时跳过，与 M7 一致）：
+      · 任一源连续失败 >= 3 次（约 3 天）→ 该源长期不可用
+    """
+    if not GH_TOKEN:
+        return {"ok": None,
+                "detail": "本地无 token；雷达源健康以 CI 内采集结果为准，本地不判红"}
+    meta = _gh(f"/repos/{GH_OWNER}/{GH_REPO}/contents/{RADAR_STATE_PATH}?ref=main")
+    if not isinstance(meta, dict) or not meta.get("content"):
+        return {"ok": None, "detail": "无法读取远端雷达状态，跳过雷达源健康检查"}
+    try:
+        st = json.loads(base64.b64decode(meta["content"]).decode("utf-8"))
+    except Exception as e:
+        return {"ok": None, "detail": f"远端雷达状态解析失败，跳过检查: {e}"}
+
+    health = st.get("source_health")
+    if not isinstance(health, dict):
+        return {"ok": None, "detail": "雷达状态尚无 source_health 字段，跳过"}
+
+    bad: List[str] = []
+    for name, h in health.items():
+        if not isinstance(h, dict):
+            continue
+        try:
+            n = int(h.get("consecutive_failures") or 0)
+        except Exception:
+            n = 0
+        if n >= RADAR_FAIL_THRESHOLD:
+            bad.append(f"{name} 连续 {n} 次失败")
+
+    if bad:
+        return {"ok": False, "detail": "雷达情报源异常：" + "；".join(bad)}
+
+    ok_n = sum(1 for h in health.values()
+               if isinstance(h, dict)
+               and int(h.get("consecutive_failures", 0) or 0) == 0)
+    return {"ok": True, "detail": f"雷达情报源健康（{ok_n}/{len(health)} 正常）"}
+
+
 CHECKS = [
     ("M1 语法有效性", check_syntax),
     ("M2 运行活性", check_liveness),
@@ -485,6 +540,7 @@ CHECKS = [
     ("M5 闭环完整性", check_loop_integrity),
     ("M6 告警可达性", check_alert_reachability),
     ("M7 上游情报源", check_intel_sources),
+    ("M8 雷达情报源", check_radar_sources),
 ]
 
 

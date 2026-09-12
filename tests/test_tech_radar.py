@@ -478,5 +478,58 @@ class TestDraftFormatMatchesEngine(unittest.TestCase):
             'title': 'A study of protein folding', 'url': 'u'}))
 
 
+# ══════════════════════════════════════════════════════════════
+# 8. 每源健康：崩溃源不得隐身、连续失败可见（补 Reddit 死 12 天假绿）
+# ══════════════════════════════════════════════════════════════
+class TestSourceHealth(unittest.TestCase):
+    """某源崩溃/持续不可达，必须可单独判红，而非淹没在聚合 errors 里全绿。"""
+
+    def test_crash_marks_source_failed_and_records_error(self):
+        state, sr, errs = {}, {"reddit": {"ok": False, "items": 0}}, \
+            ["reddit :: CRASH :: ConnectionError: dead"]
+        h = tech_radar._update_source_health(state, sr, errs)
+        self.assertEqual(h["reddit"]["consecutive_failures"], 1)
+        self.assertIsNotNone(h["reddit"]["last_fail"])
+
+    def test_consecutive_failures_accumulate_across_runs(self):
+        state = {}
+        for _ in range(4):
+            tech_radar._update_source_health(
+                state, {"reddit": {"ok": False, "items": 0}},
+                ["reddit :: CRASH :: x"])
+        self.assertEqual(state["source_health"]["reddit"]["consecutive_failures"], 4)
+
+    def test_success_resets_counter(self):
+        state = {}
+        tech_radar._update_source_health(
+            state, {"reddit": {"ok": False, "items": 0}},
+            ["reddit :: CRASH :: x"])
+        tech_radar._update_source_health(
+            state, {"reddit": {"ok": True, "items": 3}}, [])
+        self.assertEqual(state["source_health"]["reddit"]["consecutive_failures"], 0)
+        self.assertIsNotNone(state["source_health"]["reddit"]["last_success"])
+
+    def test_error_entry_counts_as_failure(self):
+        """HTTP -1（Reddit 现状）走 _error 分支，也应累计为失败"""
+        state = {}
+        tech_radar._update_source_health(
+            state, {"reddit": {"ok": True, "items": 0}},
+            ["reddit :: HTTP -1"])
+        self.assertEqual(state["source_health"]["reddit"]["consecutive_failures"], 1)
+
+    def test_render_report_flags_degraded_source(self):
+        health = {"reddit": {"consecutive_failures": 12, "last_fail": "x",
+                              "last_success": None, "last_items": 0}}
+        rep = tech_radar.render_report([], [], [], [], source_health=health)
+        self.assertIn("DEGRADED", rep)
+        self.assertIn("reddit", rep)
+
+    def test_render_report_no_degraded_when_healthy(self):
+        health = {"reddit": {"consecutive_failures": 0, "last_success": "x",
+                              "last_items": 5}}
+        rep = tech_radar.render_report([], [], [], [], source_health=health)
+        self.assertNotIn("DEGRADED", rep)
+
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)
