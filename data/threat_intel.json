@@ -1,6 +1,62 @@
 {
   "intel": [
     {
+      "id": "GHSA-8wqc-v2q8-vff2",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 6.5,
+      "title": "@Mockoon/commons-server: Path traversal in templated `filePath` lets a request escape the served directory (prefix-only base check)",
+      "summary": "## Summary\n\nA `FILE` response whose `filePath` embeds request data (e.g. `\"/srv/public/{{queryParam 'name'}}\"`, the documented way to let the client pick a file) is confined by `getSafeFilePath` with `resolvedPath.startsWith(staticBaseDir)`. That prefix test has no path-separator boundary, so a `../`-escaped path whose absolute form string-prefixes the base directory passes. An unauthenticated client reads files from sibling paths outside the served directory.\n\n## Details\n\n`packages/commons-serv",
+      "affected": "npm:@mockoon/commons-server, npm:@mockoon/cli",
+      "references": [
+        "https://github.com/advisories/GHSA-8wqc-v2q8-vff2"
+      ],
+      "published": "2026-09-11T22:04:32Z",
+      "fetched": "2026-09-12T07:54:22.469406+00:00"
+    },
+    {
+      "id": "GHSA-65h7-9wrw-629c",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 8.5,
+      "title": "FrontMCP and mcp-from-openapi have bypass of OpenAPI external $ref SSRF fix",
+      "summary": "## Summary\n\nThe published fix for GHSA-v6ph-xcq9-qxxj / CVE-2026-39885 added a direct hostname denylist for OpenAPI external `$ref` dereferencing, but the latest patched dependency `mcp-from-openapi` 2.3.0 still makes backend-origin requests to loopback when the target is reached through hostname resolution, redirects, or IPv4-mapped IPv6 syntax.\n\nFrontMCP latest release v1.2.1 and current main still call `OpenAPIToolGenerator.fromURL()` and `OpenAPIToolGenerator.fromJSON()` from `mcp-from-opena",
+      "affected": "npm:mcp-from-openapi, npm:@frontmcp/adapters, npm:frontmcp",
+      "references": [
+        "https://github.com/advisories/GHSA-65h7-9wrw-629c"
+      ],
+      "published": "2026-09-11T22:02:04Z",
+      "fetched": "2026-09-12T07:54:22.469442+00:00"
+    },
+    {
+      "id": "GHSA-h8m9-jgf8-vwvp",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": 9.6,
+      "title": "Prowler: SAML Domain Claiming Enables Cross-Tenant Account Takeover",
+      "summary": "## SAML Tenant Binding Enables Cross-Tenant Account Takeover\n\n### Summary\n\nProwler's SAML authentication flow trusted the email domain asserted in a SAMLResponse when deciding which tenant should receive the final token. A malicious tenant with its own SAML configuration and a self-controlled IdP could complete a valid SAML flow for its own configured domain, while asserting an email address from another configured domain.\n\nIn the vulnerable flow, the ACS finish logic later derived the tenant fr",
+      "affected": "pip:prowler-cloud",
+      "references": [
+        "https://github.com/advisories/GHSA-h8m9-jgf8-vwvp"
+      ],
+      "published": "2026-09-11T21:38:24Z",
+      "fetched": "2026-09-12T07:54:23.445790+00:00"
+    },
+    {
+      "id": "GHSA-rqfv-2mw9-78g2",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": 10.0,
+      "title": "MySQL MCP Server: Missing Origin/Host Validation in SSE Transport Enables Unauthenticated SQL Execution (DNS Rebinding / Direct Exposure)",
+      "summary": "## Summary\n\nIn SSE/HTTP transport mode, `mysql_mcp_server` constructs `SseServerTransport` without passing `security_settings`. As a result, the MCP Python SDK's DNS-rebinding protection (Origin/Host header validation) is disabled; the Starlette application has no CORS or TrustedHost middleware; and the service binds to `0.0.0.0` by default with no authentication on any route.\n\n**Trigger condition:** `MCP_TRANSPORT=sse`. The default stdio mode is not affected.\n\n## Attack Scenarios\n\n**Scenario A ",
+      "affected": "pip:mysql-mcp-server",
+      "references": [
+        "https://github.com/advisories/GHSA-rqfv-2mw9-78g2"
+      ],
+      "published": "2026-09-11T20:35:42Z",
+      "fetched": "2026-09-12T07:54:23.445865+00:00"
+    },
+    {
       "id": "GHSA-p78m-89r6-pgf7",
       "source": "github-advisory",
       "severity": "medium",
@@ -5226,7 +5282,7 @@
       "fetched": "2026-08-04T06:34:53.913899+00:00"
     }
   ],
-  "updated": "2026-09-11T08:01:30.587983+00:00",
+  "updated": "2026-09-12T07:54:23.948699+00:00",
   "sources": [
     "osv",
     "nvd",
@@ -5245,40 +5301,40 @@
         "items": 0,
         "attempts": 1,
         "error": null,
-        "checked_at": "2026-09-11T08:01:08.338167+00:00",
+        "checked_at": "2026-09-12T07:54:03.171871+00:00",
         "consecutive_failures": 0,
         "degraded_since": null
       },
       "nvd": {
         "ok": true,
-        "items": 34,
+        "items": 33,
         "attempts": 1,
         "error": null,
-        "checked_at": "2026-09-11T08:01:27.875063+00:00",
+        "checked_at": "2026-09-12T07:54:21.716608+00:00",
         "consecutive_failures": 0,
         "degraded_since": null
       },
       "github-advisory": {
         "ok": true,
-        "items": 33,
+        "items": 34,
         "attempts": 1,
         "error": null,
-        "checked_at": "2026-09-11T08:01:30.587652+00:00",
+        "checked_at": "2026-09-12T07:54:23.948436+00:00",
         "consecutive_failures": 0,
         "degraded_since": null
       }
     },
     "degraded": [],
-    "last_success": "2026-09-11T08:01:30.587983+00:00",
-    "last_attempt": "2026-09-11T08:01:30.587983+00:00"
+    "last_success": "2026-09-12T07:54:23.948699+00:00",
+    "last_attempt": "2026-09-12T07:54:23.948699+00:00"
   },
   "stats": {
-    "medium": 104,
-    "critical": 45,
-    "high": 171,
+    "medium": 105,
+    "high": 172,
+    "critical": 47,
     "low": 5,
     "unknown": 30,
     "moderate": 1
   },
-  "total": 356
+  "total": 360
 }
