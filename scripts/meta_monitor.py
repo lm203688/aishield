@@ -19,6 +19,7 @@ AIShield 元监控 (Meta-Monitor)：监控自动化体系本身
   M6 告警可达性   —— 通知总线是否具备至少一个可用出口
   M7 上游情报源   —— OSV / NVD / GitHub Advisory 是否真的可用（情报库有无停更）
   M8 雷达情报源   —— Tech Radar 的 github/arxiv/hn/reddit/standards/platforms 是否可用
+  M9 雷达规则效果 —— 已晋升的雷达规则是否真的命中攻击、是否误伤良性输入
 
 用法：
     python scripts/meta_monitor.py
@@ -532,6 +533,51 @@ def check_radar_sources() -> Dict[str, Any]:
     return {"ok": True, "detail": f"雷达情报源健康（{ok_n}/{len(health)} 正常）"}
 
 
+# --------------------------------------------------------------------------
+# M9 雷达规则效果
+# --------------------------------------------------------------------------
+RADAR_EFFECT_PATH = "data/state/radar_effect.json"
+
+
+def check_radar_effect() -> Dict[str, Any]:
+    """M9 雷达规则效果（晋升的规则是否真的有效 / 是否误报）。
+
+    补的洞：promote->effect 的最后一环此前完全缺失 —— 晋升进 data/radar_rules.json
+    的规则，既没人验证它真能命中攻击文本，也没人复查它是否误伤良性输入。一条在良性
+    语料上误报的规则比没有规则更糟（见 promote_rule.py 的注释）。radar_effect 现在
+    逐条衡量 catch（正样本命中）与 false_positive（良性误报），rule-promoter 晋升后
+    刷新并提交该状态；本检查把它纳入体系体检。
+
+    判据（无 token / 远端无状态 / 无已晋升规则时跳过，与 M7/M8 一致）：
+      · 任一已晋升规则在良性语料上误报 → 规则本身是缺陷，判红
+      （"零命中"只作信息展示：正样本语料有限，缺命中不等于规则无效，不判红。）
+    """
+    if not GH_TOKEN:
+        return {"ok": None,
+                "detail": "本地无 token；雷达规则效果以 CI 内评估为准，本地不判红"}
+    meta = _gh(f"/repos/{GH_OWNER}/{GH_REPO}/contents/{RADAR_EFFECT_PATH}?ref=main")
+    if not isinstance(meta, dict) or not meta.get("content"):
+        return {"ok": None, "detail": "无法读取远端雷达效果状态，跳过规则效果检查"}
+    try:
+        eff = json.loads(base64.b64decode(meta["content"]).decode("utf-8"))
+    except Exception as e:
+        return {"ok": None, "detail": f"远端雷达效果状态解析失败，跳过检查: {e}"}
+
+    rules = eff.get("rules") if isinstance(eff.get("rules"), dict) else {}
+    if not rules:
+        return {"ok": None, "detail": "尚无已晋升雷达规则，跳过效果检查"}
+
+    fp = [p for p, r in rules.items() if isinstance(r, dict) and r.get("false_positive")]
+    if fp:
+        return {"ok": False,
+                "detail": "已晋升雷达规则在良性语料上误报：" +
+                          "；".join(f"{p} -> {(rules[p].get('fp_sample') or '')[:40]}" for p in fp[:3])}
+
+    catch_n = sum(1 for r in rules.values() if isinstance(r, dict) and r.get("catch"))
+    return {"ok": True,
+            "detail": f"雷达规则效果正常（{len(rules)} 条，{catch_n} 条命中正样本，零误报）"}
+
+
 CHECKS = [
     ("M1 语法有效性", check_syntax),
     ("M2 运行活性", check_liveness),
@@ -541,6 +587,7 @@ CHECKS = [
     ("M6 告警可达性", check_alert_reachability),
     ("M7 上游情报源", check_intel_sources),
     ("M8 雷达情报源", check_radar_sources),
+    ("M9 雷达规则效果", check_radar_effect),
 ]
 
 

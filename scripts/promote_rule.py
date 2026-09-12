@@ -65,6 +65,16 @@ BENIGN_CORPUS = [
     '{"tools": [{"name": "search", "description": "搜索知识库中的文档"}]}',
     "const server = new Server({name: 'demo', version: '1.0.0'});\nserver.start();\n",
     "logger.info('request completed in %d ms', elapsed)\n",
+    # --- 2026-09-12 加固：提及威胁名但属防御/文档语境的良性文本 ---------------
+    # 从分类关键词推导的规则（如 `prompt injection`、`mcp .* attack`）会命中
+    # 下列文本。加入后它们会在闸门处被拦下 —— 否则雷达自己的每日报告（满篇
+    # "prompt injection" / "MCP attack"）都会触发误报，污染自扫描门禁。
+    "This MCP server is a defensive guardrail: it detects prompt injection and "
+    "jailbreak attempts, then blocks them. 本服务器仅用于防御，不发起任何攻击。",
+    "安全公告：我们已缓解 MCP 工具投毒（tool poisoning）与 MCP attack 风险，"
+    "并加入审计日志；本项目本身是防御类安全工具。",
+    "A security scanner that reports rumored supply-chain and credential-theft "
+    "techniques to help developers harden their agents against attacks.",
 ]
 
 
@@ -267,8 +277,11 @@ def cmd_check():
         return 0
 
     known = live_patterns()
-    ready, blocked, drafts = [], [], []
+    ready, blocked, drafts, rejected = [], [], [], []
     for path, data in cands:
+        if data.get("status") == "rejected":
+            rejected.append(path)
+            continue
         ok, problems = validate(path, data, known)
         if ok:
             ready.append(path)
@@ -278,7 +291,8 @@ def cmd_check():
             blocked.append((path, problems))
 
     print(f"candidates: {len(cands)}  |  ready: {len(ready)}  "
-          f"blocked: {len(blocked)}  awaiting-authoring: {len(drafts)}")
+          f"blocked: {len(blocked)}  awaiting-authoring: {len(drafts)}  "
+          f"rejected: {len(rejected)}")
 
     if ready:
         print("\nREADY to promote:")
@@ -293,8 +307,35 @@ def cmd_check():
         print("\nAwaiting authoring (status != ready):")
         for p in drafts:
             print(f"  . {os.path.basename(p)}")
+    if rejected:
+        print("\nRejected (radar could not auto-derive a safe pattern; see _rejected_reason):")
+        for p in rejected:
+            print(f"  x {os.path.basename(p)}")
 
     return 1 if blocked else 0
+
+
+def _evaluate_effect():
+    """Re-measure catch/false-positive for the live radar rules after a change.
+
+    Best-effort: effect measurement must never break promotion. A promoted rule
+    that somehow false-positives is surfaced loudly (the promotion gate should
+    have caught it, so this is a belt-and-braces alarm).
+    """
+    try:
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import radar_effect  # noqa: WPS433
+        store = radar_effect.evaluate()
+        s = store.get("summary", {})
+        print(f"  effect: promoted={s.get('promoted', 0)} "
+              f"with_catch={s.get('with_catch', 0)} "
+              f"false_positives={s.get('false_positives', 0)}")
+        for pat, r in store.get("rules", {}).items():
+            if r.get("false_positive"):
+                print(f"  !! WARNING: promoted rule false-positives on benign "
+                      f"input: {pat} -> {r.get('fp_sample')}")
+    except Exception as e:
+        print(f"  warning: effect evaluation skipped ({e})")
 
 
 def cmd_promote(target):
@@ -312,6 +353,7 @@ def cmd_promote(target):
         return 1
     n = promote(path, data)
     print(f"promoted {n} rule(s) from {os.path.basename(path)} -> data/radar_rules.json")
+    _evaluate_effect()
     return 0
 
 
@@ -324,6 +366,7 @@ def cmd_promote_all():
             promoted += promote(path, data)
             known |= {r["pattern"].strip() for r in data["rules"]}
     print(f"promoted {promoted} rule(s)")
+    _evaluate_effect()
     return 0
 
 

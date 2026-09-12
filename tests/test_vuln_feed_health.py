@@ -507,5 +507,59 @@ class TestMetaMonitorM8(unittest.TestCase):
         self.assertIn("6/6", r["detail"])
 
 
+class TestMetaMonitorM9(unittest.TestCase):
+    """M9：体系体检必须能看见"已晋升的雷达规则在良性输入上误报"。"""
+
+    def test_registered_in_checks(self):
+        labels = [lbl for lbl, _ in mm.CHECKS]
+        self.assertIn("M9 雷达规则效果", labels)
+
+    def test_skips_without_token(self):
+        with mock.patch.object(mm, "GH_TOKEN", ""):
+            r = mm.check_radar_effect()
+        self.assertIsNone(r["ok"], "本地无 token 应跳过而非判红")
+
+    def _remote(self, eff):
+        payload = base64.b64encode(json.dumps(eff, ensure_ascii=False).encode("utf-8")).decode()
+        return {"content": payload}
+
+    def _check_with(self, eff, capture=None):
+        def fake_gh(path):
+            if capture is not None:
+                capture.append(path)
+            return self._remote(eff)
+        with mock.patch.object(mm, "GH_TOKEN", "x"), \
+             mock.patch.object(mm, "_gh", fake_gh):
+            return mm.check_radar_effect()
+
+    def test_uses_correct_repo_scoped_api_path(self):
+        """回归护栏：路径必须带 /repos/{owner}/{repo}，否则 404 静默降级。"""
+        cap = []
+        self._check_with({"rules": {"p": {"catch": True}}}, capture=cap)
+        self.assertEqual(len(cap), 1)
+        self.assertTrue(
+            cap[0].startswith(f"/repos/{mm.GH_OWNER}/{mm.GH_REPO}/contents/"),
+            f"M9 必须用仓库作用域路径，实际为 {cap[0]}")
+        self.assertIn(mm.RADAR_EFFECT_PATH, cap[0])
+
+    def test_flags_false_positive_rule(self):
+        r = self._check_with({"rules": {
+            "prompt\\s*injection": {"catch": True, "false_positive": True,
+                                    "fp_sample": "benign doc mentioning prompt injection"}}})
+        self.assertFalse(r["ok"], "已上线规则误报良性输入必须判红")
+        self.assertIn("误报", r["detail"])
+
+    def test_clean_rules_are_healthy(self):
+        r = self._check_with({"rules": {
+            "credential\\s*(leak|theft)": {"catch": True, "false_positive": False},
+            "backdoor\\s*(attack|trigger)": {"catch": False, "false_positive": False}}})
+        self.assertTrue(r["ok"])
+        self.assertIn("2", r["detail"])
+
+    def test_no_promoted_rules_skips(self):
+        r = self._check_with({"rules": {}})
+        self.assertIsNone(r["ok"], "尚无晋升规则时应跳过而非判红")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

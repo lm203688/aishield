@@ -30,6 +30,8 @@ Usage:
   python scripts/tech_radar.py --dry-run            # local validation
   python scripts/tech_radar.py --once --dry-run     # single pass, no issues
   python scripts/tech_radar.py --once --live        # single pass + create issues
+  python scripts/tech_radar.py --publish            # + publish report/index/state to main
+  python scripts/tech_radar.py --migrate-drafts     # one-shot: fix legacy TODO drafts
 """
 from __future__ import annotations
 
@@ -682,6 +684,103 @@ ATTACK_PATTERNS = [
                                                               "adversarial-agent"),
 ]
 
+# First pattern per attack category -- used to auto-fill a first-pass detection
+# regex when drafting a candidate (see draft_rule_candidate). The radar's job is
+# to *propose*; the promotion gate (scripts/promote_rule.py) is the backstop that
+# refuses anything too broad or that fires on the benign corpus.
+CATEGORY_FIRST_PATTERN = {}
+for _cat_pat, _cat_name in ATTACK_PATTERNS:
+    CATEGORY_FIRST_PATTERN.setdefault(_cat_name, _cat_pat)
+
+
+def _is_specific(pattern):
+    """True only if a pattern encodes *structure*, not just a keyword phrase.
+
+    A detection rule that is a bare phrase (`jailbreak`, `prompt injection`,
+    `supply chain`) or a greedy co-occurrence (`mcp .* attack`) fires on any
+    *mention* of the threat. In this project that is fatal: the radar's own
+    daily reports discuss "prompt injection" / "MCP attack" by name, so a
+    keyword rule would flag our own repository on the nightly self-scan -- and
+    a rule that fires on benign input is worse than no rule (see promote_rule.py).
+    Only an alternation of distinct tokens (`credential (leak|theft|...)`) or a
+    bounded cross-token gap (`X .{0,40} Y`) qualifies; everything else stays a
+    `draft` for a human to tighten, exactly how the hand-authored live rules
+    were written.
+    """
+    if "|" in pattern:
+        return True
+    return bool(re.search(r"\.\{\d+,\d+\}", pattern))
+
+
+def _existing_patterns(live_only=False):
+    """Every pattern already promoted or queued, so we never draft a duplicate.
+
+    live_only=True returns only *live* patterns (promoted radar rules + scanner
+    rules), which is what migrate_drafts needs: it must not treat a sibling
+    queued candidate -- or the file's own current pattern -- as a duplicate of
+    itself.
+    """
+    pats = set()
+    try:
+        rr = os.path.join(ROOT, "data", "radar_rules.json")
+        if os.path.exists(rr):
+            with open(rr, encoding="utf-8") as f:
+                pats |= set(json.load(f).get("rules", {}))
+    except Exception:
+        pass
+    try:
+        sys.path.insert(0, ROOT)
+        from scanner import rules as _sr          # noqa: WPS433
+        pats |= set(getattr(_sr, "ALL_RULES", {}))
+    except Exception:
+        pass
+    if live_only:
+        return pats
+    for p in glob.glob(os.path.join(PROPOSED_DIR, "PROPOSED_*.json")):
+        try:
+            with open(p, encoding="utf-8") as f:
+                d = json.load(f)
+            for r in (d.get("rules") or []):
+                pat = (r.get("pattern") or "").strip()
+                if pat and not pat.upper().startswith("TODO"):
+                    pats.add(pat)
+        except Exception:
+            pass
+    return pats
+
+
+def _gate_precheck(pattern, existing):
+    """Mirror of promote_rule's six gates, so drafts are born promotable.
+
+    Returns (ok, reason). A draft that clears this will pass --promote-all;
+    one that does not is written with status=draft + a reason, not left to rot
+    silently. BENIGN_CORPUS is imported from the gate so the two never drift.
+    """
+    if not pattern or pattern.upper().startswith("TODO"):
+        return False, "pattern still a TODO placeholder"
+    if not _is_specific(pattern):
+        return False, "pattern too broad (bare keyword) -- needs a specific regex"
+    try:
+        compiled = re.compile(pattern, re.IGNORECASE)
+    except re.error as e:
+        return False, f"regex does not compile: {e}"
+    if len(pattern) < 6:
+        return False, "pattern suspiciously short"
+    if compiled.search("") or compiled.search("a"):
+        return False, "pattern matches empty/trivial input -- too broad"
+    if pattern in existing:
+        return False, "duplicate -- pattern already active or queued"
+    try:
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import promote_rule                      # noqa: WPS433
+        corpus = promote_rule.BENIGN_CORPUS
+    except Exception:
+        corpus = []
+    for i, sample in enumerate(corpus):
+        if compiled.search(sample):
+            return False, f"false positive on benign sample #{i}"
+    return True, ""
+
 # Title cues that escalate severity.
 _SEV_CRITICAL = ["bypass", "exploit", "rce", "remote code", "unauthenticated",
                  "zero-day", "0-day", "wormable", "privilege escalation"]
@@ -851,29 +950,50 @@ def draft_rule_candidate(sig):
     """Write a rule candidate for a high-severity signal. Return path or None.
 
     Candidates are JSON, matching how the scanner actually stores rules
-    (`{pattern: (description, severity)}` -- see scanner/rules.py). An earlier
-    version emitted Python stubs subclassing `Rule`/`RuleResult`; those classes
-    do not exist in this project, so every stub was unusable by construction.
+    (`{pattern: (description, severity)}` -- see scanner/rules.py).
+
+    2026-09-12: the radar now emits a **first-pass** regex derived from the
+    signal's attack category and, when that regex clears the promotion gate's
+    pre-check (compiles / not too broad / no duplicate / zero benign-corpus
+    false positives), marks the candidate `ready` so rule-promoter can promote
+    it unattended. This is what finally closes signal -> draft -> promote: 22
+    candidates had rotted in `draft` for a month because every one was a TODO
+    stub waiting for a human who never came. Anything the radar cannot make
+    specific enough stays a `draft` with an explicit `_auto_ready_blocked`
+    reason, so the queue is honest rather than silently un-promotable.
     """
     cat, sev, side = classify_signal(sig)
     if not cat or side != "attack":
         return None
+
+    pattern = CATEGORY_FIRST_PATTERN.get(cat)
+    if not pattern:
+        return None
+
+    existing = _existing_patterns()
+    if pattern in existing:
+        # Already promoted or queued -- do not accumulate a duplicate stub.
+        return None
+
+    ok, reason = _gate_precheck(pattern, existing)
+
     slug = _slugify(sig.get("title", "rule")) + "_" + sig.get("id", "x")[:6]
     date = _today_str()
     fname = f"PROPOSED_{date.replace('-', '')}_{slug}.json"
     fpath = os.path.join(PROPOSED_DIR, fname)
 
     candidate = {
-        "status": "draft",
+        "status": "ready" if ok else "draft",
+        "auto_ready": ok,
         "_instructions": [
-            "1. Read the source signal URL and understand the attack.",
-            "2. Fill in `rules`: each needs a real regex `pattern`, a Chinese "
-            "`description` and a `severity` (critical|high|medium|low).",
-            "3. Set `status` to `ready`.",
-            "4. Run: python scripts/promote_rule.py --check   (validates every "
-            "candidate: regex compiles, no false positives on benign corpus)",
-            "5. Run: python scripts/promote_rule.py --promote <file>",
-            "   Rejected? Fix or delete the file -- do not leave drafts to rot.",
+            "雷达自动起草（first-pass）：pattern 由 attack_category 的既有检测词表"
+            "推导，并已通过 promote_rule 的六道闸门预检。",
+            "status=ready 时会被 rule-promoter 自动晋升；若 --check 判 blocked，"
+            "请人工收紧 pattern 后再置 ready。",
+        ] if ok else [
+            "雷达未能自动给出足够具体的 pattern（见 _auto_ready_blocked）。",
+            "请人工填写 rules[].pattern（真实正则）+ 中文 description，再置 status=ready。",
+            "被 --promote-all 拒收的候选会一直卡在 draft —— 修好或删除，勿任其腐烂。",
         ],
         "drafted_at": date,
         "signal": {
@@ -886,16 +1006,75 @@ def draft_rule_candidate(sig):
         "severity": sev,
         "rules": [
             {
-                "pattern": "TODO: regex here",
-                "description": f"TODO: 中文描述 ({cat})",
+                "pattern": pattern,
+                "description": f"{cat} 检测（雷达自动起草，first-pass 正则，待人工复核）"
+                               if ok else f"{cat} 检测（pattern 待人工收紧）",
                 "severity": sev,
             }
         ],
         "review_notes": "",
     }
+    if not ok:
+        candidate["_auto_ready_blocked"] = reason
     with open(fpath, "w", encoding="utf-8") as f:
         json.dump(candidate, f, ensure_ascii=False, indent=2)
     return fpath
+
+
+def migrate_drafts():
+    """One-shot: bring every legacy queued candidate to a known, honest state.
+
+    Legacy drafts (pre-2026-09-12) are all TODO stubs. For each we derive a
+    first-pass pattern from its stored `attack_category` and either:
+      * mark it `ready`      -- pattern is specific and clears the gate, or
+      * mark it `rejected`   -- duplicate / too broad / no pattern for category,
+    rewriting the file in place (push-friendly: no moves, no deletes).
+    Idempotent: safe to re-run.
+    """
+    existing = _existing_patterns(live_only=True)   # only live rules count
+    assigned = set()                                # patterns claimed this run
+    n_ready = n_rejected = n_skip = 0
+    for p in sorted(glob.glob(os.path.join(PROPOSED_DIR, "PROPOSED_*.json"))):
+        try:
+            with open(p, encoding="utf-8") as f:
+                d = json.load(f)
+        except Exception:
+            continue
+        cat = d.get("attack_category") or ""
+        first = CATEGORY_FIRST_PATTERN.get(cat)
+        cur = {(r.get("pattern") or "").strip() for r in (d.get("rules") or [])}
+        radar_derived = ("auto_ready" in d) or (not cur) or cur == {"TODO: regex here"} \
+            or (first is not None and first in cur)
+        if not radar_derived:
+            n_skip += 1                    # leave hand-authored candidates alone
+            continue
+        if not first:
+            ok, reason = False, "no first-pass pattern for category"
+        else:
+            ok, reason = _gate_precheck(first, existing)
+        if ok and first in assigned:
+            ok, reason = False, "duplicate -- another queued candidate already covers this category"
+        if ok:
+            d["status"] = "ready"
+            d["auto_ready"] = True
+            d["rules"] = [{
+                "pattern": first,
+                "description": f"{cat} 检测（雷达自动起草，first-pass 正则，待人工复核）",
+                "severity": d.get("severity", "high"),
+            }]
+            d.pop("_rejected_reason", None)
+            d.pop("_auto_ready_blocked", None)
+            assigned.add(first)
+            n_ready += 1
+        else:
+            d["status"] = "rejected"
+            d["auto_ready"] = False
+            d["_rejected_reason"] = reason
+            n_rejected += 1
+        with open(p, "w", encoding="utf-8") as f:
+            json.dump(d, f, ensure_ascii=False, indent=2)
+    print(f"[migrate] ready={n_ready} rejected={n_rejected} left-alone={n_skip}")
+    return 0
 
 
 # ---------------------------------------------------------------------------
@@ -1242,8 +1421,13 @@ def main():
                     default=["all"],
                     help="Which sources to scan")
     ap.add_argument("--publish", action="store_true",
-                    help="Auto-commit intel report + index to public main via Contents API")
+                    help="Auto-commit intel report + index + state to public main via Contents API")
+    ap.add_argument("--migrate-drafts", dest="migrate_drafts", action="store_true",
+                    help="One-shot: upgrade legacy TODO drafts to ready/rejected, then exit")
     args = ap.parse_args()
+
+    if args.migrate_drafts:
+        return migrate_drafts()
 
     dry_run = not args.live
     sources = set(args.sources) if "all" not in args.sources else {

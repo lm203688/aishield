@@ -1,0 +1,30 @@
+{
+  "status": "rejected",
+  "_instructions": [
+    "1. Read the source signal URL and understand the attack.",
+    "2. Fill in `rules`: each needs a real regex `pattern`, a Chinese `description` and a `severity` (critical|high|medium|low).",
+    "3. Set `status` to `ready`.",
+    "4. Run: python scripts/promote_rule.py --check   (validates every candidate: regex compiles, no false positives on benign corpus)",
+    "5. Run: python scripts/promote_rule.py --promote <file>",
+    "   Rejected? Fix or delete the file -- do not leave drafts to rot."
+  ],
+  "drafted_at": "2026-08-11",
+  "signal": {
+    "id": "281d171dc053",
+    "title": "Toward Metacognitive One-Shot Indirect Prompt Injection: Strategy Abstraction Via Outcome-Conditioned Reflection",
+    "url": "https://arxiv.org/abs/2608.08795",
+    "source": "arxiv"
+  },
+  "attack_category": "prompt-injection",
+  "severity": "high",
+  "rules": [
+    {
+      "pattern": "prompt\\s*injection",
+      "description": "prompt-injection 检测（雷达自动起草，first-pass 正则，待人工复核）",
+      "severity": "high"
+    }
+  ],
+  "review_notes": "",
+  "auto_ready": false,
+  "_rejected_reason": "pattern too broad (bare keyword) -- needs a specific regex"
+}

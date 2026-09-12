@@ -531,5 +531,135 @@ class TestSourceHealth(unittest.TestCase):
         self.assertNotIn("DEGRADED", rep)
 
 
+# ══════════════════════════════════════════════════════════════
+# 9. 起草自动 ready + 遗留草稿迁移（闭合 signal→draft→promote）
+# ══════════════════════════════════════════════════════════════
+class TestDraftAutoReady(unittest.TestCase):
+    """高置信类别直接给出 first-pass 正则并标 ready；过宽的只留 draft。"""
+
+    def setUp(self):
+        self.tmp = tempfile.mkdtemp(prefix='aishield_ready_')
+        self._orig_dir = tech_radar.PROPOSED_DIR
+        tech_radar.PROPOSED_DIR = self.tmp
+        self._orig_existing = tech_radar._existing_patterns
+
+    def tearDown(self):
+        tech_radar.PROPOSED_DIR = self._orig_dir
+        tech_radar._existing_patterns = self._orig_existing
+        shutil.rmtree(self.tmp, ignore_errors=True)
+
+    @staticmethod
+    def _sig(title):
+        return {'_source': 'github-trending', 'id': 'abc123def456',
+                'title': title, 'url': 'https://example.com/x'}
+
+    def _isolate(self):
+        tech_radar._existing_patterns = lambda live_only=False: set()
+
+    def test_specific_category_drafts_ready(self):
+        self._isolate()
+        path = tech_radar.draft_rule_candidate(
+            self._sig('Malicious skill silently backdoors the agent on install'))
+        self.assertIsNotNone(path)
+        with open(path, encoding='utf-8') as f:
+            data = json.load(f)
+        self.assertEqual(data['attack_category'], 'skill-poisoning')
+        self.assertEqual(data['status'], 'ready',
+                         '结构具体的类别应直接 ready，否则循环又只进不出')
+        self.assertTrue(data['auto_ready'])
+        self.assertNotIn('_auto_ready_blocked', data)
+        self.assertNotIn('TODO', data['rules'][0]['pattern'])
+
+    def test_broad_category_stays_draft_with_reason(self):
+        self._isolate()
+        path = tech_radar.draft_rule_candidate(
+            self._sig('Universal AI Jailbreak Collection for LLM agents'))
+        with open(path, encoding='utf-8') as f:
+            data = json.load(f)
+        self.assertEqual(data['status'], 'draft',
+                         '裸关键字规则会误伤良性文档，不得自动上线')
+        self.assertFalse(data['auto_ready'])
+        self.assertIn('_auto_ready_blocked', data)
+
+    def test_duplicate_pattern_not_redrafted(self):
+        """同类别已排队的候选不得再堆积重复 stub（22 条腐烂草稿的根源）。"""
+        skill_pat = tech_radar.CATEGORY_FIRST_PATTERN['skill-poisoning']
+        with open(os.path.join(self.tmp, 'PROPOSED_20260101_queued.json'),
+                  'w', encoding='utf-8') as f:
+            json.dump({'status': 'ready', 'attack_category': 'skill-poisoning',
+                       'rules': [{'pattern': skill_pat, 'description': 'd',
+                                  'severity': 'high'}]}, f)
+        # use the real _existing_patterns so the queued file is seen
+        tech_radar._existing_patterns = self._orig_existing
+        self.assertIsNone(tech_radar.draft_rule_candidate(
+            self._sig('Malicious skill backdoors the agent')))
+
+    def test_is_specific_requires_structure(self):
+        self.assertFalse(tech_radar._is_specific('jailbreak'))
+        self.assertFalse(tech_radar._is_specific(r'prompt\s*injection'))
+        self.assertTrue(tech_radar._is_specific(r'credential\s*(leak|theft)'))
+        self.assertTrue(tech_radar._is_specific(r'a\b.{0,40}\bb'))
+
+
+class TestMigrateDrafts(unittest.TestCase):
+    """一次性迁移：遗留 TODO 草稿刷成 ready / rejected，不再静默腐烂。"""
+
+    def setUp(self):
+        self.tmp = tempfile.mkdtemp(prefix='aishield_migrate_')
+        self._orig_dir = tech_radar.PROPOSED_DIR
+        self._orig_existing = tech_radar._existing_patterns
+        tech_radar.PROPOSED_DIR = self.tmp
+        tech_radar._existing_patterns = lambda live_only=False: set()
+
+    def tearDown(self):
+        tech_radar.PROPOSED_DIR = self._orig_dir
+        tech_radar._existing_patterns = self._orig_existing
+        shutil.rmtree(self.tmp, ignore_errors=True)
+
+    def _write(self, name, cat, pattern='TODO: regex here', **extra):
+        d = {'status': 'draft', 'attack_category': cat,
+             'rules': [{'pattern': pattern, 'description': 'd', 'severity': 'high'}]}
+        d.update(extra)
+        p = os.path.join(self.tmp, name)
+        with open(p, 'w', encoding='utf-8') as f:
+            json.dump(d, f)
+        return p
+
+    def _load(self, p):
+        with open(p, encoding='utf-8') as f:
+            return json.load(f)
+
+    def test_upgrades_safe_todo_draft_to_ready(self):
+        p = self._write('PROPOSED_20260101_skill.json', 'skill-poisoning')
+        tech_radar.migrate_drafts()
+        d = self._load(p)
+        self.assertEqual(d['status'], 'ready')
+        self.assertEqual(d['rules'][0]['pattern'],
+                         tech_radar.CATEGORY_FIRST_PATTERN['skill-poisoning'])
+
+    def test_rejects_broad_draft_with_reason(self):
+        p = self._write('PROPOSED_20260101_pi.json', 'prompt-injection')
+        tech_radar.migrate_drafts()
+        d = self._load(p)
+        self.assertEqual(d['status'], 'rejected')
+        self.assertIn('_rejected_reason', d)
+        self.assertIn('bare keyword', d['_rejected_reason'])
+
+    def test_leaves_hand_authored_candidate_alone(self):
+        custom = r'custom\s*(leak|theft)\s+specific'
+        p = self._write('PROPOSED_20260101_custom.json', 'prompt-injection',
+                        pattern=custom)
+        tech_radar.migrate_drafts()
+        d = self._load(p)
+        self.assertEqual(d['status'], 'draft', '人工候选不应被迁移覆盖')
+        self.assertEqual(d['rules'][0]['pattern'], custom)
+
+    def test_idempotent(self):
+        p = self._write('PROPOSED_20260101_skill2.json', 'skill-poisoning')
+        tech_radar.migrate_drafts()
+        tech_radar.migrate_drafts()
+        self.assertEqual(self._load(p)['status'], 'ready')
+
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)

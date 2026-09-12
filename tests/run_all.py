@@ -55,6 +55,7 @@ def main():
         'tests.test_runtime_behavior',
         'tests.test_self_reference',
         'tests.test_vuln_feed_health',
+        'tests.test_radar_effect',
     ]
 
     loaded = 0

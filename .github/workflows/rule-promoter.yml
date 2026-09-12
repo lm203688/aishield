@@ -94,8 +94,10 @@ jobs:
           # 注意：不要 git add data/state/ —— 整个状态目录是并发冲突磁铁（多个
           # workflow 同时写并 push），把它并进本次提交会让 rebase 产生内容冲突。
           # 晋升产物只涉及 radar_rules.json / _proposed / README，这些文件仅本
-          # workflow 接触，无冲突。
-          git add data/radar_rules.json scanner/_proposed/ mcp-server/README.md 2>/dev/null || true
+          # workflow 接触，无冲突。radar_effect.json 是唯一例外：它仅由本 workflow
+          # 的 --promote-all（内部调用 radar_effect.evaluate）写入，单写者，无冲突，
+          # 且 meta-monitor M9 需要从 main 读取它来检查"晋升规则是否误报"。
+          git add data/radar_rules.json scanner/_proposed/ mcp-server/README.md data/state/radar_effect.json 2>/dev/null || true
           if ! git diff --cached --quiet; then
             git commit -m "auto: 规则闸门自动晋升 ${{ steps.promo.outputs.promoted }} 条 [skip ci]"
             # 修复"只进不出"：并发 push 冲突曾被 `|| echo skipped` 静默吞掉，
