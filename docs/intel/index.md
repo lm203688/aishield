@@ -4,6 +4,17 @@ _滚动索引：每日自动生成并推送到 public `main`。一条带日期�
 
 | 日期 | 报告 |
 |---|---|
+| 2026-09-12-1801 | [2026-09-12-1801-tech-radar.md](./2026-09-12-1801-tech-radar.md) |
+| 2026-09-11-1802 | [2026-09-11-1802-tech-radar.md](./2026-09-11-1802-tech-radar.md) |
+| 2026-09-10-1803 | [2026-09-10-1803-tech-radar.md](./2026-09-10-1803-tech-radar.md) |
+| 2026-09-09 | [2026-09-09-tech-radar.md](./2026-09-09-tech-radar.md) |
+| 2026-09-08 | [2026-09-08-tech-radar.md](./2026-09-08-tech-radar.md) |
+| 2026-09-07 | [2026-09-07-tech-radar.md](./2026-09-07-tech-radar.md) |
+| 2026-09-06 | [2026-09-06-tech-radar.md](./2026-09-06-tech-radar.md) |
+| 2026-09-05 | [2026-09-05-tech-radar.md](./2026-09-05-tech-radar.md) |
+| 2026-09-04 | [2026-09-04-tech-radar.md](./2026-09-04-tech-radar.md) |
+| 2026-09-02 | [2026-09-02-tech-radar.md](./2026-09-02-tech-radar.md) |
+| 2026-09-01 | [2026-09-01-tech-radar.md](./2026-09-01-tech-radar.md) |
 | 2026-08-29 | [2026-08-29-tech-radar.md](./2026-08-29-tech-radar.md) |
 | 2026-08-28 | [2026-08-28-tech-radar.md](./2026-08-28-tech-radar.md) |
 | 2026-08-27 | [2026-08-27-tech-radar.md](./2026-08-27-tech-radar.md) |
