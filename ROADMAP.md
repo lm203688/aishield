@@ -143,16 +143,15 @@
 
 ## 自动采纳项（迭代闭环产出）
 
-> 由 feedback_aggregator 于 2026-09-11 自动聚合四路输入生成，每轮覆盖更新。勾选即视为已处理。
+> 由 feedback_aggregator 于 2026-09-12 自动聚合四路输入生成，每轮覆盖更新。勾选即视为已处理。
 
 | 优先级 | 来源 | 事项 | 参考 |
 |--------|------|------|------|
 | P1 | S2 生态位待办 | MCP 官方 Registry 收录：向 modelcontextprotocol/registry 提交 server.json —— 生态入口即用户入口 | — |
-| P1 | S4 情报驱动 | 评审本轮 6 条新增高危漏洞的检测覆盖情况 | — |
+| P1 | S4 情报驱动 | 评审本轮 2 条新增高危漏洞的检测覆盖情况 | — |
 | P2 | S1 用户反馈 | 📊 AIShield 项目迭代报告 (自动更新) | [链接](https://github.com/lm203688/aishield/issues/659) |
 | P2 | S1 用户反馈 | [P1] 评审本轮 52 条新增高危漏洞的检测覆盖情况 | [链接](https://github.com/lm203688/aishield/issues/7) |
 | P2 | S1 用户反馈 | [P1] 内容站 GitHub Pages：在仓库 Settings → Pages 开启 GitHub Pages（Source: main /docs） | [链接](https://github.com/lm203688/aishield/issues/5) |
-| P2 | S1 用户反馈 | [P1] npm 包分发（Agent 直接调用入口）：执行 npm publish —— 这是 Agent 能'直接用上'AIShield 的最短路径 | [链接](https://github.com/lm203688/aishield/issues/3) |
 | P2 | S2 生态位待办 | GitHub Topics 检索曝光：补齐 GitHub topics: ai-security —— 零成本获取平台内检索流量 | — |
 | P2 | S4 情报驱动 | 补齐 OWASP LLM Top10 未覆盖类别的检测规则：LLM02, LLM03, LLM04, LLM08, LLM09, LLM10 | — |
 
