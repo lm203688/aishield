@@ -1,6 +1,685 @@
 {
   "intel": [
     {
+      "id": "GHSA-q986-4x7x-gx39",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.5,
+      "title": "SCBE-AETHERMOORE Unauthenticated AetherBrowser Ops API Exposes Operator Email Digests",
+      "summary": "### Summary\n\nThe AetherBrowser API server (`scripts/aetherbrowser/api_server.py`) exposes the `POST /api/ops/check-email` endpoint without any authentication. Any remote attacker can call this endpoint and trigger execution of the `email_reader.py` subprocess, which connects to configured ProtonMail or Gmail accounts via IMAP and returns email metadata (sender, subject, body snippet) in the JSON response. The server binds to `0.0.0.0:8100` by default with CORS set to `allow_origins=[\"*\"]`, makin",
+      "affected": "pip:scbe-aethermoore",
+      "references": [
+        "https://github.com/advisories/GHSA-q986-4x7x-gx39"
+      ],
+      "published": "2026-09-25T21:48:03Z",
+      "fetched": "2026-09-26T01:13:30.607498+00:00"
+    },
+    {
+      "id": "CVE-2026-100368",
+      "source": "nvd",
+      "severity": "high",
+      "cvss": 8.4,
+      "title": "CliInvoke is a .NET library for invoking command-line programs, and its `CliInvoke.Specializations` packages provide specialized wrappers for shells such as PowerShell and Windows Command Prompt. `Cli",
+      "summary": "CliInvoke is a .NET library for invoking command-line programs, and its `CliInvoke.Specializations` packages provide specialized wrappers for shells such as PowerShell and Windows Command Prompt. `CliInvoke.Specializations` versions 2.2.0 through 2.8.4, 2.9.0 through 2.9.3, 2.10.0 through 2.10.4, 3.0.0-alpha.1 through 3.0.0-alpha.4, and 3.0.0-alpha.8 through 3.0.0-alpha.10, as well as `AlastairLundy.CliInvoke.Specializations` versions 1.0.0-rc.1 through 1.6.1.1, contain an OS command injection v",
+      "affected": "prompt injection",
+      "references": [
+        "https://github.com/alastairlundy/CliInvoke/security/advisories/GHSA-wrvw-254r-wpmv"
+      ],
+      "published": "2026-09-25T20:17:05.990",
+      "fetched": "2026-09-26T01:13:09.064664+00:00"
+    },
+    {
+      "id": "GHSA-9gfj-28hw-jchp",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 8.8,
+      "title": "Knowns Unrestricted Path Traversal leading to out-of-bounds arbitrary .md file read, write, and deletion in MCP Docs + Memory Tools",
+      "summary": "## Overview\n\nVerified. Multiple **Unrestricted Path Traversal** vulnerabilities exist in the Knowns MCP `docs` and `memory` tools, allowing arbitrary file read, write, and deletion operations outside the project sandbox. The storage layer functions (`Get`, `Create`, `Update`, `Rename`, `Delete`) in both `doc_store.go` and `memory_store.go` concatenate user-controlled paths with `filepath.Join()` without any containment validation. \n\nAdditionally, the `docs.update` action with a `newPath` paramet",
+      "affected": "npm:knowns",
+      "references": [
+        "https://github.com/advisories/GHSA-9gfj-28hw-jchp"
+      ],
+      "published": "2026-09-25T19:32:05Z",
+      "fetched": "2026-09-26T01:13:29.222011+00:00"
+    },
+    {
+      "id": "CVE-2026-97228",
+      "source": "nvd",
+      "severity": "low",
+      "cvss": 2.7,
+      "title": "Rapid7 Bulk Export MCP versions 0.2.5 through 0.6.1 suffer from a GraphQL query injection issue in the export-status component (`get_export_status` in `src/export_manager.py`), whereby the `export_id`",
+      "summary": "Rapid7 Bulk Export MCP versions 0.2.5 through 0.6.1 suffer from a GraphQL query injection issue in the export-status component (`get_export_status` in `src/export_manager.py`), whereby the `export_id` value — an unvalidated MCP tool argument reaching the function via the `check_rapid7_export_status` and `download_rapid7_export` tools — is interpolated directly into the GraphQL query string. A crafted `export_id` containing quote and brace characters can terminate the intended `export(id: \"...\")`",
+      "affected": "prompt injection",
+      "references": [
+        "https://github.com/rapid7/rapid7-bulk-export-mcp/releases/tag/v0.6.2"
+      ],
+      "published": "2026-09-25T11:17:02.163",
+      "fetched": "2026-09-26T01:13:09.064660+00:00"
+    },
+    {
+      "id": "GHSA-mr95-65j8-9mxp",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.8,
+      "title": "Trestle SSTI in Jinja2 include tags allows arbitrary code execution (Incomplete fix of CVE-2026-46439)",
+      "summary": "Reporter: Cavan Loughran, Celvex Group Inc.\n\nSummary\n-------\nThe fix for CVE-2026-46439 (3.12.2 / 4.0.3) removed the recursive re-render loop in trestle/core/commands/author/jinja.py render_template, but the custom include tags in trestle/core/jinja/tags.py (MDSectionInclude, MDCleanInclude) still re-parse the CONTENT of an included markdown file as a Jinja2 template via Parser(self.environment, <file text>).parse() in a plain (non-sandboxed) jinja2.Environment. Because the trestle markdown writ",
+      "affected": "pip:compliance-trestle, pip:compliance-trestle",
+      "references": [
+        "https://github.com/advisories/GHSA-mr95-65j8-9mxp"
+      ],
+      "published": "2026-09-24T19:50:27Z",
+      "fetched": "2026-09-26T01:13:30.607897+00:00"
+    },
+    {
+      "id": "GHSA-3cj3-hqcr-g934",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 8.8,
+      "title": "Cline: Cross-Origin WebSocket Hijacking in Cline Hub Dashboard (`/browser` endpoint)",
+      "summary": "### Summary\n\nThe Cline Hub dashboard server (`@cline/cline-hub`), launched via the `cline dashboard` CLI command, accepts WebSocket connections on the `/browser` endpoint without validating the HTTP `Origin` header. When `ROOM_SECRET` is not set—the default for local (`127.0.0.1`) binds—`isAuthorizedBrowserRequest()` returns `true` unconditionally, allowing any website a developer visits to open a cross-origin WebSocket to `ws://127.0.0.1:8787/browser`. An attacker-controlled page can then send ",
+      "affected": "npm:cline",
+      "references": [
+        "https://github.com/advisories/GHSA-3cj3-hqcr-g934"
+      ],
+      "published": "2026-09-24T19:48:34Z",
+      "fetched": "2026-09-26T01:13:29.222204+00:00"
+    },
+    {
+      "id": "GHSA-mwwr-p57h-56pf",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.4,
+      "title": "@bytebase/dbhub's read-only mode does not prevent database writes",
+      "summary": "### Summary\n \nSetting `readonly = true` on the `execute_sql` tool does not make the connection read-only. The connectors are written to set PostgreSQL `default_transaction_read_only=on` (and open SQLite in `readOnly` mode), but that code is gated on a config value that is never populated, so it never runs. The only thing left enforcing read-only is a classifier that inspects the first keyword of each statement. Any `SELECT` that writes or has side effects through a function call passes it. With ",
+      "affected": "npm:@bytebase/dbhub",
+      "references": [
+        "https://github.com/advisories/GHSA-mwwr-p57h-56pf"
+      ],
+      "published": "2026-09-24T19:37:59Z",
+      "fetched": "2026-09-26T01:13:29.222549+00:00"
+    },
+    {
+      "id": "GHSA-fm8p-53ww-hf6w",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": null,
+      "title": "DBHub HTTP transport DNS rebinding allows unauthenticated browser-origin SQL execution",
+      "summary": "### Summary\n\nDBHub `0.21.2` exposes an unauthenticated HTTP MCP endpoint when started with the documented HTTP transport mode, for example `--transport http --port 8080`.\n\nThe HTTP server attempts to protect browser-origin access by checking whether the `Origin` hostname equals the `Host` hostname, then reflecting the validated `Origin` into `Access-Control-Allow-Origin`. This does not stop DNS rebinding. After an attacker-controlled hostname rebinds to a victim-accessible DBHub HTTP server, bot",
+      "affected": "npm:@bytebase/dbhub",
+      "references": [
+        "https://github.com/advisories/GHSA-fm8p-53ww-hf6w"
+      ],
+      "published": "2026-09-24T19:36:57Z",
+      "fetched": "2026-09-26T01:13:29.222566+00:00"
+    },
+    {
+      "id": "GHSA-36f9-7rg5-cpf8",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": null,
+      "title": "`@bsv/wallet-toolbox` / `-client` / `-mobile` don't verify storage-supplied recipient output scripts against caller-requested outputs in createAction",
+      "summary": "Reported by @echennells (Eric Chennells). Migrated from public issue #191 to a private advisory.\n\n**Affected:** `@bsv/wallet-toolbox` / `-client` / `-mobile`. Verified in `2.1.21` and `2.1.21-parity-fix.2`; the relevant code is the same at current HEAD\n\n**Summary:**\nWhen `createAction` runs against a remote `StorageClient`, the storage server returns the outputs to build. `buildSignableTransaction` takes each non-change output's `lockingScript` from the storage response and signs it, without com",
+      "affected": "npm:@bsv/wallet-toolbox, npm:@bsv/wallet-toolbox-client, npm:@bsv/wallet-toolbox-mobile",
+      "references": [
+        "https://github.com/advisories/GHSA-36f9-7rg5-cpf8"
+      ],
+      "published": "2026-09-24T19:32:00Z",
+      "fetched": "2026-09-26T01:13:29.222622+00:00"
+    },
+    {
+      "id": "GHSA-g5f9-3xfg-p9mf",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": 10.0,
+      "title": "Decepticon: Role-boundary forgery via ChatML special-token literals in web crawl output composed into LLM context",
+      "summary": "## Summary\n\nDecepticon wraps web crawl results — the output of agent reconnaissance against target services — into LLM messages without neutralizing ChatML special-token literals. Under the BYOK (Bring Your Own Key) deployment model, users configure their own LLM credentials to any OpenAI-compatible endpoint. Most open-source and self-deployed model providers (vLLM, SGLang, Ollama, LM Studio, text-generation-webui, etc.) do not filter special-token literals from user content in their default con",
+      "affected": "pip:decepticon-core, pip:decepticon, pip:decepticon-sdk",
+      "references": [
+        "https://github.com/advisories/GHSA-g5f9-3xfg-p9mf"
+      ],
+      "published": "2026-09-24T19:17:49Z",
+      "fetched": "2026-09-26T01:13:30.607999+00:00"
+    },
+    {
+      "id": "CVE-2026-13016",
+      "source": "nvd",
+      "severity": "unknown",
+      "cvss": null,
+      "title": "ServiceNow has remediated a SQL injection vulnerability that was identified in the ServiceNow AI Platform. This vulnerability could enable an unauthenticated user, in certain circumstances, to execute",
+      "summary": "ServiceNow has remediated a SQL injection vulnerability that was identified in the ServiceNow AI Platform. This vulnerability could enable an unauthenticated user, in certain circumstances, to execute arbitrary SQL statements against the instance's underlying database and gain access to, or modify, instance data beyond what was intended. \n\n\n\n\n\nServiceNow deployed a security update to hosted instances and ServiceNow provided the update to our partners and self-hosted customers. We are not current",
+      "affected": "prompt injection",
+      "references": [
+        "https://support.servicenow.com/kb?id=kb_article_view&sysparm_article=KB3159623"
+      ],
+      "published": "2026-09-24T19:17:11.820",
+      "fetched": "2026-09-26T01:13:09.064656+00:00"
+    },
+    {
+      "id": "GHSA-6v3r-4p5c-mrp5",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.8,
+      "title": "Language Servers for AWS vulnerable to arbitrary file write",
+      "summary": "## Summary\nLanguage Servers for AWS (the aws/language-servers project) provides the Language Server Protocol implementations that power AWS developer tooling, including the Amazon Q Developer agentic chat experience, across IDEs such as VS Code, JetBrains, Visual Studio, and Eclipse.\n\nMissing symlink validation in Language Servers for AWS may allow an arbitrary file write outside of the workspace trust boundary. This may occur when a local user opens a workspace containing a maliciously crafted ",
+      "affected": "npm:@aws/lsp-codewhisperer",
+      "references": [
+        "https://github.com/advisories/GHSA-6v3r-4p5c-mrp5"
+      ],
+      "published": "2026-09-24T19:15:39Z",
+      "fetched": "2026-09-26T01:13:29.222649+00:00"
+    },
+    {
+      "id": "GHSA-xhcr-j4j9-3gh7",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": null,
+      "title": "Language Servers for AWS Vulnerable to Arbitrary Code Execution",
+      "summary": "### Summary\nLanguage Servers for AWS (the aws/language-servers project) provide the underlying language-server runtime that powers Amazon Q Developer's AI coding assistance across its IDE plugins (Visual Studio Code, JetBrains, Eclipse, and\nVisual Studio).\n\nImproper trust boundary enforcement in Language Servers for AWS may allow for arbitrary code execution. If a local user opens a maliciously crafted workspace, any commands within the project configuration files may be automatically\nexecuted.\n",
+      "affected": "npm:@aws/lsp-codewhisperer",
+      "references": [
+        "https://github.com/advisories/GHSA-xhcr-j4j9-3gh7"
+      ],
+      "published": "2026-09-24T19:13:53Z",
+      "fetched": "2026-09-26T01:13:29.222657+00:00"
+    },
+    {
+      "id": "CVE-2026-61742",
+      "source": "nvd",
+      "severity": "unknown",
+      "cvss": null,
+      "title": "DBHub is a database MCP server for Postgres, MySQL, SQL Server, Oracle, MariaDB, SQLite. Versions prior to 0.22.5 expose an unauthenticated HTTP MCP endpoint when started with the documented HTTP tran",
+      "summary": "DBHub is a database MCP server for Postgres, MySQL, SQL Server, Oracle, MariaDB, SQLite. Versions prior to 0.22.5 expose an unauthenticated HTTP MCP endpoint when started with the documented HTTP transport mode, for example `--transport http --port 8080`. The HTTP server attempts to protect browser-origin access by checking whether the `Origin` hostname equals the `Host` hostname, then reflecting the validated `Origin` into `Access-Control-Allow-Origin`. This does not stop DNS rebinding. After a",
+      "affected": "prompt injection",
+      "references": [
+        "https://github.com/bytebase/dbhub/security/advisories/GHSA-fm8p-53ww-hf6w",
+        "https://github.com/bytebase/dbhub/security/advisories/GHSA-fm8p-53ww-hf6w"
+      ],
+      "published": "2026-09-24T18:17:16.173",
+      "fetched": "2026-09-26T01:13:09.064652+00:00"
+    },
+    {
+      "id": "CVE-2026-61732",
+      "source": "nvd",
+      "severity": "critical",
+      "cvss": 10.0,
+      "title": "Decepticon is an autonomous hacking agent for red teams. Versions prior to 1.1.17 wrap web crawl results — the output of agent reconnaissance against target services — into LLM messages without neutra",
+      "summary": "Decepticon is an autonomous hacking agent for red teams. Versions prior to 1.1.17 wrap web crawl results — the output of agent reconnaissance against target services — into LLM messages without neutralizing ChatML special-token literals. Under the BYOK (Bring Your Own Key) deployment model, users configure their own LLM credentials to any OpenAI-compatible endpoint. Most open-source and self-deployed model providers (vLLM, SGLang, Ollama, LM Studio, text-generation-webui, etc.) do not filter spe",
+      "affected": "llm agent",
+      "references": [
+        "https://github.com/BitterSecurity/Decepticon/commit/79ee2aaf22f4c36a5b1968f6ca3f8086b6e35b67",
+        "https://github.com/BitterSecurity/Decepticon/security/advisories/GHSA-g5f9-3xfg-p9mf",
+        "https://github.com/BitterSecurity/Decepticon/security/advisories/GHSA-g5f9-3xfg-p9mf"
+      ],
+      "published": "2026-09-24T18:17:15.860",
+      "fetched": "2026-09-26T01:13:21.949520+00:00"
+    },
+    {
+      "id": "GHSA-vf2x-4v53-pm7v",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 6.5,
+      "title": "Streamlink: HTTPSession follows HTTP redirects into file:// URLs, reading local files",
+      "summary": "## Summary\n\n`HTTPSession` mounts a `FileAdapter` for the `file://` scheme and inherits redirect handling\nunchanged from `requests.Session`. `requests` does not check for scheme downgrades or\ncross-protocol transitions when it follows a redirect, so any http(s) request Streamlink makes can\nbe redirected by the remote server into `file:///...` and the local file is returned as the\nresponse body.\n\n`GHSA-hgqw-6m45-hw5f` / `CVE-2026-44353` fixed direct `file://` segment and playlist URIs in HLS\nplayl",
+      "affected": "pip:streamlink",
+      "references": [
+        "https://github.com/advisories/GHSA-vf2x-4v53-pm7v"
+      ],
+      "published": "2026-09-24T14:58:04Z",
+      "fetched": "2026-09-26T01:13:30.608028+00:00"
+    },
+    {
+      "id": "GHSA-gvf2-2rh5-mpgf",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.6,
+      "title": "OpenC3 COSMOS: Stored, cross-user XSS via Telemetry screen BUTTON widget",
+      "summary": "## Summary\nA user who can save a telemetry **screen** (permission `system_set`) can embed JavaScript in a screen `BUTTON` widget. The `BUTTON` widget **`eval()`s the stored button text in the browser** when the button is activated, and screens are **shared content rendered to other users in the scope**. As a result, an attacker's stored JavaScript executes **in a different operator's authenticated session** — a **stored, cross-user XSS** (not self-XSS). The payload runs in the COSMOS origin and ",
+      "affected": "npm:@openc3/vue-common",
+      "references": [
+        "https://github.com/advisories/GHSA-gvf2-2rh5-mpgf"
+      ],
+      "published": "2026-09-23T21:24:11Z",
+      "fetched": "2026-09-26T01:13:29.222831+00:00"
+    },
+    {
+      "id": "GHSA-rr49-f9g6-c9r5",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": 9.9,
+      "title": "plone.app.portlets Vulnerable to Remote Code Execution via TALES Injection",
+      "summary": "### Impact\nThe Classic portlet (plone.app.portlets.portlets.classic) used its user-supplied template/macro fields to build a TALES path expression that was then evaluated by the TAL path() helper. Because the value was interpreted as a full TALES expression, a user able to add or edit a Classic portlet could supply a crafted value that escapes simple path traversal and is evaluated as arbitrary code.\n\nThis is exploitable by any authenticated user who can configure a Classic portlet - which, with",
+      "affected": "pip:plone.app.portlets, pip:plone.app.portlets, pip:plone.app.portlets",
+      "references": [
+        "https://github.com/advisories/GHSA-rr49-f9g6-c9r5"
+      ],
+      "published": "2026-09-23T13:55:47Z",
+      "fetched": "2026-09-26T01:13:30.608134+00:00"
+    },
+    {
+      "id": "GHSA-wx4m-69m9-gx3m",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": null,
+      "title": "Home Assistant: XSS in Statistics Graph Card",
+      "summary": "### Summary\nAn authenticated party can add a malicious name to any statistics-capable entity, allowing for\nCross-Site Scripting attacks against anyone who views a Statistics Graph card containing that\nentity, when they hover over any data point on the chart.\n\n**Payload**\n<img width=\"1529\" height=\"441\" alt=\"image\" src=\"https://github.com/user-attachments/assets/6926ce53-75fb-455a-bd4e-0c5281e8bed8\" />\n\n**Payload triggering**\n<img width=\"835\" height=\"469\" alt=\"image\" src=\"https://github.com/user-a",
+      "affected": "pip:homeassistant",
+      "references": [
+        "https://github.com/advisories/GHSA-wx4m-69m9-gx3m"
+      ],
+      "published": "2026-09-22T20:40:55Z",
+      "fetched": "2026-09-26T01:13:30.608206+00:00"
+    },
+    {
+      "id": "GHSA-xpjq-3w4w-w5wr",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 6.1,
+      "title": "lightrag-hku: Stored Cross-Site Scripting (XSS) in the LightRAG WebUI chat/answer renderer via ingested content",
+      "summary": "### Summary\nThe LightRAG WebUI renders assistant/answer chat content as **raw HTML** — `react-markdown` is\nconfigured with `rehypePlugins={[rehypeRaw]}` and `skipHtml={false}` and **no** HTML sanitizer\n(`rehype-sanitize`), element allow-list, or custom `urlTransform`. Because answer content is derived\nfrom user-ingested documents, an attacker who can add a single document can store an HTML/JavaScript\npayload that executes in the browser of any user who later retrieves it (typically an administra",
+      "affected": "pip:lightrag-hku",
+      "references": [
+        "https://github.com/advisories/GHSA-xpjq-3w4w-w5wr"
+      ],
+      "published": "2026-09-22T20:40:27Z",
+      "fetched": "2026-09-26T01:13:30.608336+00:00"
+    },
+    {
+      "id": "GHSA-hrmj-7rvj-4hg8",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 5.3,
+      "title": "lightrag-hku: Sensitive Information Exposure Through Raw Exception Messages in API Error Responses",
+      "summary": "### Summary\n\nThe LightRAG API server passes raw Python exception messages directly into HTTP\nerror responses across 30+ error handlers in every router. When combined with\nthe default unauthenticated configuration (see companion report on CWE-306), any\nnetwork-reachable client can trigger exceptions whose raw text discloses\ninternal infrastructure — server filesystem paths, database host/port/user, LLM\nprovider error details, and Python library internals. No global exception\nhandler sanitizes err",
+      "affected": "pip:lightrag-hku",
+      "references": [
+        "https://github.com/advisories/GHSA-hrmj-7rvj-4hg8"
+      ],
+      "published": "2026-09-22T20:37:36Z",
+      "fetched": "2026-09-26T01:13:30.608524+00:00"
+    },
+    {
+      "id": "GHSA-93xw-j965-9mx3",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.7,
+      "title": "MCP Atlassian: Arbitrary file read/exfiltration via upload_attachment missing validate_safe_path()",
+      "summary": "## Summary\n\nThe `upload_attachment` method in `confluence/attachments.py` reads and uploads arbitrary local files to Confluence without calling `validate_safe_path()`. Both download methods (`download_attachment` at line 223, `download_content_attachments` at line 272) correctly call `validate_safe_path()` before writing files, but the upload path at lines 35-79 skips this check entirely.\n\nAn AI agent connected via MCP (or an attacker influencing that agent through prompt injection) can read any",
+      "affected": "pip:mcp-atlassian",
+      "references": [
+        "https://github.com/advisories/GHSA-93xw-j965-9mx3"
+      ],
+      "published": "2026-09-22T20:36:37Z",
+      "fetched": "2026-09-26T01:13:30.608643+00:00"
+    },
+    {
+      "id": "GHSA-g5xv-mhgm-v5f6",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 6.1,
+      "title": "MCP Atlassian: OAuth fallback token storage writes plaintext access and refresh tokens with group-readable permissions",
+      "summary": "### Summary\n\nWhen OAuth tokens are saved, MCP Atlassian always writes a plaintext fallback copy under `~/.mcp-atlassian/oauth-<client_id>.json`. The fallback file is created with the process default umask rather than restrictive permissions. In this environment the file was created as mode `0664`, exposing access and refresh tokens to same-group local users and any process that can read the home directory.\n\n### Details\n\n`OAuthConfig._save_tokens()` stores OAuth token data in keyring, but it also",
+      "affected": "pip:mcp-atlassian",
+      "references": [
+        "https://github.com/advisories/GHSA-g5xv-mhgm-v5f6"
+      ],
+      "published": "2026-09-22T20:36:34Z",
+      "fetched": "2026-09-26T01:13:30.608664+00:00"
+    },
+    {
+      "id": "GHSA-v9m3-wfh8-5646",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 5.3,
+      "title": "MCP Atlassian:  Incomplete fix for GHSA-7r34-79r5-rcc9: redirect-based SSRF via unhooked requests session in Jira user-permission lookup",
+      "summary": "Summary\n\nThe fix for the SSRF vulnerability tracked as GHSA-7r34-79r5-rcc9 / CVE-2026-27826 is incomplete. That fix added two defenses: validate_url_for_ssrf() on the per-request X-Atlassian-Jira-Url / X-Atlassian-Confluence-Url headers (blocking a directly-internal base URL), and a redirect-validation hook (_make_ssrf_safe_hook) attached to the fetcher's HTTP session so that an attacker-controlled public host cannot redirect outbound requests to an internal address.\n\nHowever, one outbound reque",
+      "affected": "pip:mcp-atlassian",
+      "references": [
+        "https://github.com/advisories/GHSA-v9m3-wfh8-5646"
+      ],
+      "published": "2026-09-22T20:36:31Z",
+      "fetched": "2026-09-26T01:13:30.608749+00:00"
+    },
+    {
+      "id": "GHSA-f6pj-qv47-g96w",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": null,
+      "title": "MCP Atlassian: Arbitrary server-local file upload to Jira/Confluence attachments via unrestricted file_path parameters",
+      "summary": "## Summary\n\nThe Jira and Confluence attachment upload tools accept caller-controlled file path parameters and read those paths from the MCP server's local filesystem before uploading the file as an Atlassian attachment.\n\nIn local `stdio` deployments, this can expose files readable by the user's MCP process. In documented HTTP/SSE or `streamable-http` deployments, the impact is higher: any MCP client that is allowed to invoke write/upload tools can cause the server process to read a server-local ",
+      "affected": "pip:mcp-atlassian",
+      "references": [
+        "https://github.com/advisories/GHSA-f6pj-qv47-g96w"
+      ],
+      "published": "2026-09-22T20:36:29Z",
+      "fetched": "2026-09-26T01:13:30.608762+00:00"
+    },
+    {
+      "id": "GHSA-wrhw-j3f9-8vc6",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": 10.0,
+      "title": "[mcp-atlassian] Authentication bypass in HTTP transport: AtlassianOpaqueTokenVerifier accepts any non-empty token",
+      "summary": "**Description**\n\nmcp-atlassian deploys in two common patterns:\n\n  Pattern A (single-user, server-side credentials): operator sets\n    JIRA_USERNAME + JIRA_API_TOKEN (or CONFLUENCE_USERNAME + CONFLUENCE_API_TOKEN)\n    in environment variables. Server uses these to call Jira/Confluence.\n    This is the documented quickstart pattern.\n\n  Pattern B (multi-user, OAuth or per-request PAT): operator sets up OAuth\n    proxy or accepts per-user tokens via Authorization or service headers.\n\nThe authenticat",
+      "affected": "pip:mcp-atlassian",
+      "references": [
+        "https://github.com/advisories/GHSA-wrhw-j3f9-8vc6"
+      ],
+      "published": "2026-09-22T20:36:26Z",
+      "fetched": "2026-09-26T01:13:30.608828+00:00"
+    },
+    {
+      "id": "GHSA-hgcf-4mq8-5266",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": null,
+      "title": "MCP Atlassian: SSRF Protection Bypass",
+      "summary": "## Environment\n\n- Project: `sooperset/mcp-atlassian`\n- Affected function: `validate_url_for_ssrf()`\n- Affected path: header-based Jira/Confluence URL authentication flow\n- Tested endpoint: `POST /mcp`\n- Tested version: `2.14.5`\n\n## Description\n\nThe SSRF protection in `validate_url_for_ssrf()` can be bypassed with a URL containing a backslash before userinfo-like syntax.\n\nAffected code:\n\n```python\nparsed = urlparse(url)\nhostname = parsed.hostname\n...\nip_error = _check_ip_address(hostname)\n...\ndns",
+      "affected": "pip:mcp-atlassian",
+      "references": [
+        "https://github.com/advisories/GHSA-hgcf-4mq8-5266"
+      ],
+      "published": "2026-09-22T20:36:22Z",
+      "fetched": "2026-09-26T01:13:30.608843+00:00"
+    },
+    {
+      "id": "GHSA-6vmq-24h2-pj7j",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": null,
+      "title": "MCP Atlassian: Incomplete path traversal fix allows intra-CWD module overwrite and RCE (bypass of GHSA-xjgw-4wvw-rgm4)",
+      "summary": "### Summary\n\nThe path traversal fix introduced in v0.17.0 (GHSA-xjgw-4wvw-rgm4) is incomplete. `validate_safe_path()` is called without an explicit `base_dir`, defaulting to `os.getcwd()`. In standard container deployments the process CWD is the application directory (e.g. `/app`), so paths within that directory, including the application's own Python source modules, pass validation without\nraising an exception. An attacker can overwrite a module file and achieve remote code execution on the nex",
+      "affected": "pip:mcp-atlassian",
+      "references": [
+        "https://github.com/advisories/GHSA-6vmq-24h2-pj7j"
+      ],
+      "published": "2026-09-22T20:36:20Z",
+      "fetched": "2026-09-26T01:13:30.608889+00:00"
+    },
+    {
+      "id": "GHSA-5wf4-jqxh-8gm3",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": null,
+      "title": "mcp-atlassian has an incomplete SSRF remediation",
+      "summary": "### Summary\n\nThe `UserTokenMiddleware` extracts URLs from `X-Atlassian-Jira-Url` and `X-Atlassian-Confluence-Url` HTTP headers and passes them directly to API client constructors without any SSRF validation.\n\n### Affected Package\n\n- **Ecosystem:** PyPI\n- **Package:** mcp-atlassian\n- **Affected versions:** all versions before fix commit 5cd697dfce91\n- **Patched versions:** >= commit 5cd697dfce91\n\n### Details\n\nIn `main.py`, `_process_authentication_headers()` extracts URLs from ASGI headers withou",
+      "affected": "pip:mcp-atlassian",
+      "references": [
+        "https://github.com/advisories/GHSA-5wf4-jqxh-8gm3"
+      ],
+      "published": "2026-09-22T20:36:17Z",
+      "fetched": "2026-09-26T01:13:30.608900+00:00"
+    },
+    {
+      "id": "GHSA-g2r2-3j32-j27x",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 5.4,
+      "title": "MCP Atlassian: Reflected XSS in OAuth Setup Callback Handler",
+      "summary": "## Summary\n\nThe OAuth 2.0 setup wizard's local callback HTTP server reflects the `error` query parameter directly into an HTML response without any sanitization or encoding. An attacker can craft a malicious callback URL containing JavaScript in the `error` parameter that executes in the victim's browser when the setup wizard is running. The server binds to all network interfaces (`0.0.0.0`), making it accessible from the local network rather than just localhost.\n\n## Details\n\nThe vulnerability e",
+      "affected": "pip:mcp-atlassian",
+      "references": [
+        "https://github.com/advisories/GHSA-g2r2-3j32-j27x"
+      ],
+      "published": "2026-09-22T20:35:25Z",
+      "fetched": "2026-09-26T01:13:30.608920+00:00"
+    },
+    {
+      "id": "GHSA-p6hp-93wp-fh6p",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 8.6,
+      "title": "MCP Atlassian: Path Traversal / Arbitrary File Read in confluence_upload_attachment MCP tool (incomplete fix of GHSA-xjgw-4wvw-rgm4)",
+      "summary": "## Summary\n\n`mcp-atlassian` exposes an MCP tool `confluence_upload_attachment` whose `file_path` argument is passed directly to `open(file_path, \"rb\")` without any path validation. An attacker able to invoke the tool can read arbitrary files readable by the server process and exfiltrate them into a multipart upload directed at an attacker-controlled Confluence host. In the default `streamable-http` transport the server binds `0.0.0.0` with no built-in authentication, making this remotely exploit",
+      "affected": "pip:mcp-atlassian",
+      "references": [
+        "https://github.com/advisories/GHSA-p6hp-93wp-fh6p"
+      ],
+      "published": "2026-09-22T20:35:21Z",
+      "fetched": "2026-09-26T01:13:30.608972+00:00"
+    },
+    {
+      "id": "GHSA-4596-2p6p-28cv",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 5.5,
+      "title": "MCP Atlassian: Insecure File Permissions on OAuth Token Storage",
+      "summary": "## Summary\n\nThe OAuth token fallback file storage in `OAuthConfig._save_tokens_to_file()` creates token files containing access tokens, refresh tokens, and cloud IDs with default filesystem permissions (typically `0644` on Linux, world-readable). Any local user on a shared system can read these files to obtain full Atlassian API credentials, enabling unauthorized access to the victim's Jira and Confluence data.\n\n## Details\n\nThe vulnerability exists in `src/mcp_atlassian/utils/oauth.py` in the `_",
+      "affected": "pip:mcp-atlassian",
+      "references": [
+        "https://github.com/advisories/GHSA-4596-2p6p-28cv"
+      ],
+      "published": "2026-09-22T20:35:19Z",
+      "fetched": "2026-09-26T01:13:30.608991+00:00"
+    },
+    {
+      "id": "GHSA-6cr4-ccf3-x7h4",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.7,
+      "title": "MCP Atlassian: Arbitrary file read via confluence_upload_attachment allows exfiltration of server credentials",
+      "summary": "### Summary\n\nMissing path validation in `confluence_upload_attachment` allows any authenticated MCP client to read arbitrary files from the server filesystem and exfiltrate their contents to Confluence. On Linux deployments, `/proc/self/environ` yields all runtime secrets in a single call.\n\n---\n### Details\n\n`AttachmentsMixin.upload_attachment()` in `src/mcp_atlassian/confluence/attachments.py` opens the caller-supplied `file_path` with no boundary check:\n\n```python\n# line 477\nfiles = {\"file\": (f",
+      "affected": "pip:mcp-atlassian",
+      "references": [
+        "https://github.com/advisories/GHSA-6cr4-ccf3-x7h4"
+      ],
+      "published": "2026-09-22T20:35:16Z",
+      "fetched": "2026-09-26T01:13:30.609013+00:00"
+    },
+    {
+      "id": "GHSA-6529-c226-h328",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.1,
+      "title": "MCP Atlassian: SSRF redirect protection missing for basic-auth and OAuth authentication branches",
+      "summary": "### Summary\n\n`_make_ssrf_safe_hook()` blocks HTTP redirects to private/internal IPs by validating the `Location` header before the client follows a `3xx` response. The problem is that this hook is only attached in one of three authentication branches — the header-PAT path. Basic auth and OAuth branches skip it entirely, so if the connected Atlassian server returns a redirect to something like `http://169.254.169.254/`, the `requests` session follows it without complaint.\n\nThis is an incomplete f",
+      "affected": "pip:mcp-atlassian",
+      "references": [
+        "https://github.com/advisories/GHSA-6529-c226-h328"
+      ],
+      "published": "2026-09-22T20:35:13Z",
+      "fetched": "2026-09-26T01:13:30.609051+00:00"
+    },
+    {
+      "id": "GHSA-f26r-j276-ggg4",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 6.5,
+      "title": "MCP Atlassian: Arbitrary File Read via Upload Attachment Tools",
+      "summary": "## Summary\n\nThe upload attachment tools in both Confluence and Jira accept arbitrary file paths without path traversal validation. The upload_attachment methods read any file accessible to the server process and upload it to a Confluence page or Jira issue. Despite the existence of a validate_safe_path utility function (used correctly in download operations), the upload paths do not use it. This allows an authenticated MCP client (or an AI assistant manipulated via prompt injection) to exfiltrat",
+      "affected": "pip:mcp-atlassian",
+      "references": [
+        "https://github.com/advisories/GHSA-f26r-j276-ggg4"
+      ],
+      "published": "2026-09-22T20:35:11Z",
+      "fetched": "2026-09-26T01:13:30.609060+00:00"
+    },
+    {
+      "id": "GHSA-49xv-9743-pw8w",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 5.9,
+      "title": "MCP Atlassian: SSRF via DNS Rebinding in Header-Based Authentication Flow",
+      "summary": "## Summary\n\nThe SSRF protection for header-based authentication uses a validate-then-use pattern vulnerable to DNS rebinding. validate_url_for_ssrf resolves the hostname via DNS and checks that the resolved IP is globally routable. However, the actual HTTP request happens later, during which the DNS record may have changed to point to an internal IP (127.0.0.1, 169.254.169.254, etc.). The SSRF redirect hook only validates redirect targets, not the initial connection.\n\n## Details\n\nThe vulnerabili",
+      "affected": "pip:mcp-atlassian",
+      "references": [
+        "https://github.com/advisories/GHSA-49xv-9743-pw8w"
+      ],
+      "published": "2026-09-22T20:35:08Z",
+      "fetched": "2026-09-26T01:13:30.609072+00:00"
+    },
+    {
+      "id": "GHSA-mfv2-4wvm-9pgp",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 6.5,
+      "title": "MCP Atlassian: Path traversal in upload_attachment allows arbitrary file read and exfiltration via MCP tool call",
+      "summary": "### Summary\n\nThe `upload_attachment` functions in both the Jira and Confluence modules accept a user-controlled `file_path` parameter and open the specified file for reading **without calling `validate_safe_path()`**. An authenticated MCP client can supply an arbitrary path such as `/etc/passwd` or `/proc/self/environ`, causing the server process to read and transmit the file's contents to the remote Atlassian instance as an attachment.\n\nThis is an **incomplete fix** relative to GHSA-xjgw-4wvw-r",
+      "affected": "pip:mcp-atlassian",
+      "references": [
+        "https://github.com/advisories/GHSA-mfv2-4wvm-9pgp"
+      ],
+      "published": "2026-09-22T20:35:06Z",
+      "fetched": "2026-09-26T01:13:30.609114+00:00"
+    },
+    {
+      "id": "GHSA-h7wj-5v37-59r2",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 6.5,
+      "title": "MCP Atlassian: Path traversal in upload_attachment allows arbitrary file read (incomplete fix for CVE-2026-27825)",
+      "summary": "### Summary\n\nThe `confluence_upload_attachment` and `confluence_upload_attachments` MCP tools accept a `file_path` parameter and do not validate that the path is confined to an allowed directory before opening the file. An attacker who can call these tools can read any file accessible to the MCP server process (SSH keys, .env files, API credentials) and exfiltrate it by uploading it to Confluence.\n\nNote: The Jira `upload_attachment` mixin method in `jira/attachments.py` has the same missing vali",
+      "affected": "pip:mcp-atlassian",
+      "references": [
+        "https://github.com/advisories/GHSA-h7wj-5v37-59r2"
+      ],
+      "published": "2026-09-22T20:35:03Z",
+      "fetched": "2026-09-26T01:13:30.609142+00:00"
+    },
+    {
+      "id": "GHSA-f4p7-qx46-wc5j",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": null,
+      "title": "MCP Atlassian: Arbitrary local file READ via unconstrained file_path in upload_attachment (Confluence + Jira)",
+      "summary": "## Summary\n\nThis is an arbitrary local file READ vulnerability on the Confluence and Jira `upload_attachment` tool paths. It's the symmetric counterpart of the file-write vulnerability you patched as CVE-2026-27825. The write direction was fixed; the read direction was left open.\n\n**Reporter:** Sean Valentine\n**Severity:** High (Critical in LLM-driven / prompt-injection deployments)\n**Affected versions:** main branch as of 2026-04-21. Both Confluence and Jira upload paths.\n\n## Details\n\n**File:**",
+      "affected": "pip:mcp-atlassian",
+      "references": [
+        "https://github.com/advisories/GHSA-f4p7-qx46-wc5j"
+      ],
+      "published": "2026-09-22T20:35:00Z",
+      "fetched": "2026-09-26T01:13:30.609164+00:00"
+    },
+    {
+      "id": "GHSA-mrq8-fv7v-hhjg",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": null,
+      "title": "MCP Atlassian: HTTP upload tools accept arbitrary server-local file paths",
+      "summary": "# sooperset/mcp-atlassian: HTTP upload tools can attach arbitrary server-local files\n\nDate: 2026-05-05\nTarget: `sooperset/mcp-atlassian`\nCommit: `d8bc78698a63cb6b321c7ca796d6329d448f7f6d`\n\n## Summary\n\n`mcp-atlassian` supports HTTP/SSE deployment for persistent, remote, and multi-user use. In that mode, write-capable Jira and Confluence attachment flows accept caller-controlled server-local file paths and read those paths without an upload-source allowlist or base directory restriction.\n\nAn authe",
+      "affected": "pip:mcp-atlassian",
+      "references": [
+        "https://github.com/advisories/GHSA-mrq8-fv7v-hhjg"
+      ],
+      "published": "2026-09-22T20:34:58Z",
+      "fetched": "2026-09-26T01:13:30.609216+00:00"
+    },
+    {
+      "id": "GHSA-3r68-hf9h-887v",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 8.8,
+      "title": "MCP Atlassian: ENABLED_TOOLS / Toolset authorization bypass",
+      "summary": "### Summary\n\n`ENABLED_TOOLS` and `TOOLSETS` filters are enforced at `tools/list` time only. `tools/call` dispatches from the full unfiltered tool registry (73 tools). Any user with access to the server endpoint that knows a tool name can invoke it directly. Tool names are not secret since mcp-atlassian is open source. Any direct JSON-RPC call bypasses the restriction entirely.\n\n`READ_ONLY_MODE` is **not** affected: it has dual enforcement at list time (`_list_tools_mcp`) and call time `@check_wr",
+      "affected": "pip:mcp-atlassian",
+      "references": [
+        "https://github.com/advisories/GHSA-3r68-hf9h-887v"
+      ],
+      "published": "2026-09-22T20:34:55Z",
+      "fetched": "2026-09-26T01:13:30.609253+00:00"
+    },
+    {
+      "id": "GHSA-2xj6-xx86-cwwc",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 8.6,
+      "title": "MCP Atlassian: Arbitrary File Read & Exfiltration (Confused Deputy) in JIRA update_issue",
+      "summary": "### Summary\nA critical Confused Deputy (Arbitrary File Read & Exfiltration) vulnerability in the Atlassian MCP server (Python) allows an AI agent to exfiltrate sensitive host files and environment secrets. By providing absolute system paths to the attachments parameter of the update_issue tool, an agent can force the privileged MCP process to read and upload any file it has access to—including its own environment variables and host configuration—directly to a Jira ticket.\n\n### Details\nThe vulner",
+      "affected": "pip:mcp-atlassian",
+      "references": [
+        "https://github.com/advisories/GHSA-2xj6-xx86-cwwc"
+      ],
+      "published": "2026-09-22T20:34:52Z",
+      "fetched": "2026-09-26T01:13:30.609279+00:00"
+    },
+    {
+      "id": "GHSA-r3r9-wp5j-pq5g",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.5,
+      "title": "request-filtering-agent: Synchronous throw from createConnection() for literal private-IP hosts bypasses req.on('error'), crashing the Node.js process",
+      "summary": "### Summary\n`RequestFilteringHttpAgent` / `RequestFilteringHttpsAgent` block requests to private IPs, but the blocking happens via a **synchronous `throw`** inside `createConnection()` for literal private-IP hostnames (e.g. `169.254.169.254`, `127.0.0.1`). Node.js's `http.request` / `http.get` expects `createConnection` to emit an error asynchronously; a synchronous throw instead escapes the caller's `req.on('error', ...)` handler entirely and becomes an **unhandled exception** that crashes the ",
+      "affected": "npm:request-filtering-agent",
+      "references": [
+        "https://github.com/advisories/GHSA-r3r9-wp5j-pq5g"
+      ],
+      "published": "2026-09-22T19:54:18Z",
+      "fetched": "2026-09-26T01:13:29.223563+00:00"
+    },
+    {
+      "id": "CVE-2026-95660",
+      "source": "nvd",
+      "severity": "medium",
+      "cvss": 6.3,
+      "title": "A security flaw has been discovered in Moonshot AI Kimi Code up to 0.31.0. The affected element is an unknown function of the file agent-core-v2/src/agent/mcp/config-loader.ts of the component MCP Con",
+      "summary": "A security flaw has been discovered in Moonshot AI Kimi Code up to 0.31.0. The affected element is an unknown function of the file agent-core-v2/src/agent/mcp/config-loader.ts of the component MCP Configuration Loader. The manipulation results in os command injection. The attack may be launched remotely. The exploit has been released to the public and may be used for attacks. Upgrading to version 0.31.1 is sufficient to fix this issue. It is recommended to upgrade the affected component. Beyond ",
+      "affected": "prompt injection",
+      "references": [
+        "https://docs.google.com/document/d/1GPDw0UzUkgfXRkWEDqCIanKDq3Tpvllyf08O-0eLyoQ/edit?usp=sharing",
+        "https://github.com/MoonshotAI/kimi-code/releases/tag/%40moonshot-ai%2Fkimi-code%400.31.1",
+        "https://vuldb.com/cve/CVE-2026-95660",
+        "https://vuldb.com/submit/897071",
+        "https://vuldb.com/vuln/408415"
+      ],
+      "published": "2026-09-22T18:17:37.750",
+      "fetched": "2026-09-26T01:13:09.064646+00:00"
+    },
+    {
+      "id": "GHSA-5mj8-gf6m-fhw8",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.3,
+      "title": "9Router has an Authentication Bypass in Public LLM API via Spoofable X-9r-Real-Ip Header",
+      "summary": "## Summary\n\n9router determines whether an incoming request originates from localhost by trusting the X-9r-Real-Ip HTTP request header. This header is intended to be produced and sanitized exclusively by the bundled custom-server.js layer from the TCP socket address. In deployment modes where requests reach Next.js directly (the header is never stripped/regenerated), a remote, unauthenticated attacker can simply send X-9r-Real-Ip: 127.0.0.1 and be treated as a local client. This bypasses the API-",
+      "affected": "npm:9router",
+      "references": [
+        "https://github.com/advisories/GHSA-5mj8-gf6m-fhw8"
+      ],
+      "published": "2026-09-22T16:34:06Z",
+      "fetched": "2026-09-26T01:13:29.223696+00:00"
+    },
+    {
+      "id": "GHSA-798p-78g2-v556",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 5.7,
+      "title": "@aborruso/ckan-mcp-server has SSRF via DNS-name → internal IP — incomplete fix of CVE-2026-53509",
+      "summary": "## Summary\nThe SSRF guard `validateServerUrl` (added for CVE-2026-33060, extended for CVE-2026-53509) validates only the **hostname string** and never resolves DNS. Any caller-supplied `server_url` whose hostname *resolves* to an internal address passes the guard, so the server issues requests to **loopback and cloud metadata (`169.254.169.254`)**. This is a third bypass of the same guard, still present in the current latest **0.4.107**, and it reaches IMDS — strictly more than CVE-2026-53509, w",
+      "affected": "npm:@aborruso/ckan-mcp-server",
+      "references": [
+        "https://github.com/advisories/GHSA-798p-78g2-v556"
+      ],
+      "published": "2026-09-22T14:51:20Z",
+      "fetched": "2026-09-26T01:13:29.223740+00:00"
+    },
+    {
+      "id": "GHSA-92cr-jxw4-5wjg",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 8.1,
+      "title": "Sync-in Server has a complete 2FA Bypass via `POST /api/auth/token`",
+      "summary": "**Affected component:** Sync-in Server v2.3.0, `POST /api/auth/token` (`auth.controller.ts:50-55`).\n\n**Required attacker capability:** Valid username and password for a 2FA-enabled account.\n\n## Summary\n\n`POST /api/auth/token` authenticates with username and password only, then calls `getTokens()`, which returns unrestricted Bearer access and refresh JWTs without checking whether the account has TOTP 2FA enabled. An attacker who already knows valid credentials for a 2FA-enabled account can bypass",
+      "affected": "npm:@sync-in/server",
+      "references": [
+        "https://github.com/advisories/GHSA-92cr-jxw4-5wjg"
+      ],
+      "published": "2026-09-22T14:46:30Z",
+      "fetched": "2026-09-26T01:13:29.223836+00:00"
+    },
+    {
+      "id": "GHSA-jjhp-8crj-mppq",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": null,
+      "title": "@roomi-fields/notebooklm-mcp has a path traversal in vault.batch tool that allows arbitrary file write outside intended vault directory",
+      "summary": "## Summary\n\nThe `vault_batch` MCP tool (and the equivalent `POST /batch-to-vault` HTTP endpoint) accepted a caller-supplied `vault_dir` path that was passed directly to `path.resolve()` + `fs.mkdir()` with no containment check. A caller — or a prompt-injected LLM driving the MCP — could therefore create directories and write `.md` / `.json` answer files anywhere the server process can write.\n\nThe `slug_prefix` parameter had a parallel, smaller traversal vector: it was concatenated into the filen",
+      "affected": "npm:@roomi-fields/notebooklm-mcp",
+      "references": [
+        "https://github.com/advisories/GHSA-jjhp-8crj-mppq"
+      ],
+      "published": "2026-09-22T14:43:26Z",
+      "fetched": "2026-09-26T01:13:29.223927+00:00"
+    },
+    {
       "id": "GHSA-2vh9-42vm-xmv2",
       "source": "github-advisory",
       "severity": "critical",
@@ -155,6 +834,24 @@
       "fetched": "2026-09-17T08:38:06.461200+00:00"
     },
     {
+      "id": "CVE-2026-61559",
+      "source": "nvd",
+      "severity": "critical",
+      "cvss": 9.6,
+      "title": "`@zereight/mcp-gitlab` is a Model Context Protocol server for GitLab. Starting in version 0.0.1 and prior to version 2.1.27, when the environment variable `ENABLE_DYNAMIC_API_URL=true` is set, the ser",
+      "summary": "`@zereight/mcp-gitlab` is a Model Context Protocol server for GitLab. Starting in version 0.0.1 and prior to version 2.1.27, when the environment variable `ENABLE_DYNAMIC_API_URL=true` is set, the server reads the `X-GitLab-API-URL` HTTP request header and uses it as the base URL for all outbound GitLab API calls made within that request. The server validates that the value is a well-formed URL (`new URL(dynamicApiUrl)`) but applies no allowlist or hostname restriction. The server then attaches ",
+      "affected": "model context protocol",
+      "references": [
+        "https://github.com/zereight/gitlab-mcp/commit/6ffb4cc70706fd05b1ab80901676bc2998b6db6d",
+        "https://github.com/zereight/gitlab-mcp/pull/625",
+        "https://github.com/zereight/gitlab-mcp/releases/tag/v2.1.27",
+        "https://github.com/zereight/gitlab-mcp/security/advisories/GHSA-2h44-8472-frjj",
+        "https://github.com/zereight/gitlab-mcp/security/advisories/GHSA-2h44-8472-frjj"
+      ],
+      "published": "2026-09-15T21:16:41.390",
+      "fetched": "2026-09-26T01:13:15.609094+00:00"
+    },
+    {
       "id": "GHSA-2h44-8472-frjj",
       "source": "github-advisory",
       "severity": "critical",
@@ -195,6 +892,23 @@
       ],
       "published": "2026-09-15T20:48:22Z",
       "fetched": "2026-09-16T08:33:20.268382+00:00"
+    },
+    {
+      "id": "CVE-2026-58485",
+      "source": "nvd",
+      "severity": "high",
+      "cvss": 7.1,
+      "title": "mcp-searxng is a Model Context Protocol server that gives AI assistants web search and URL-reading capabilities through SearXNG. Prior to 1.7.1, web_url_read receives its caller-controlled URL through",
+      "summary": "mcp-searxng is a Model Context Protocol server that gives AI assistants web search and URL-reading capabilities through SearXNG. Prior to 1.7.1, web_url_read receives its caller-controlled URL through src/index.ts and validates only the literal hostname in assertUrlAllowed() within src/url-reader.ts before undiciFetch() performs operating-system DNS resolution. A public-looking attacker-controlled hostname that resolves to a private, loopback, link-local, or cloud-metadata address therefore pass",
+      "affected": "model context protocol",
+      "references": [
+        "https://github.com/ihor-sokoliuk/mcp-searxng/commit/14575eaaa46a21391477d2b68673858ba6b52bd6",
+        "https://github.com/ihor-sokoliuk/mcp-searxng/pull/120",
+        "https://github.com/ihor-sokoliuk/mcp-searxng/releases/tag/v1.7.1",
+        "https://github.com/ihor-sokoliuk/mcp-searxng/security/advisories/GHSA-mrvx-jmjw-vggc"
+      ],
+      "published": "2026-09-15T18:17:26.040",
+      "fetched": "2026-09-26T01:13:15.609089+00:00"
     },
     {
       "id": "CVE-2026-58483",
@@ -5820,7 +6534,7 @@
       "fetched": "2026-08-04T06:34:53.913899+00:00"
     }
   ],
-  "updated": "2026-09-21T08:53:15.320431+00:00",
+  "updated": "2026-09-26T01:13:31.109972+00:00",
   "sources": [
     "osv",
     "nvd",
@@ -5839,40 +6553,40 @@
         "items": 0,
         "attempts": 1,
         "error": null,
-        "checked_at": "2026-09-21T08:52:52.807161+00:00",
+        "checked_at": "2026-09-26T01:13:08.635380+00:00",
         "consecutive_failures": 0,
         "degraded_since": null
       },
       "nvd": {
         "ok": true,
-        "items": 42,
+        "items": 43,
         "attempts": 1,
         "error": null,
-        "checked_at": "2026-09-21T08:53:12.341469+00:00",
+        "checked_at": "2026-09-26T01:13:27.949758+00:00",
         "consecutive_failures": 0,
         "degraded_since": null
       },
       "github-advisory": {
         "ok": true,
-        "items": 29,
+        "items": 44,
         "attempts": 1,
         "error": null,
-        "checked_at": "2026-09-21T08:53:15.320220+00:00",
+        "checked_at": "2026-09-26T01:13:31.109607+00:00",
         "consecutive_failures": 0,
         "degraded_since": null
       }
     },
     "degraded": [],
-    "last_success": "2026-09-21T08:53:15.320431+00:00",
-    "last_attempt": "2026-09-21T08:53:15.320431+00:00"
+    "last_success": "2026-09-26T01:13:31.109972+00:00",
+    "last_attempt": "2026-09-26T01:13:31.109972+00:00"
   },
   "stats": {
-    "critical": 54,
-    "medium": 116,
-    "high": 184,
-    "unknown": 34,
-    "low": 5,
+    "high": 211,
+    "low": 6,
+    "critical": 61,
+    "unknown": 36,
+    "medium": 129,
     "moderate": 1
   },
-  "total": 394
+  "total": 444
 }
