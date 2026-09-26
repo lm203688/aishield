@@ -359993,11 +359993,1097 @@
         }
       ],
       "error_details": []
+    },
+    {
+      "id": "batch_20260926_163304",
+      "source": "all",
+      "scanner_version": "4.1",
+      "scanned_at": "2026-09-26 16:33:04",
+      "total": 1,
+      "success": 1,
+      "errors": 0,
+      "results": [
+        {
+          "security_score": 45,
+          "permissions_score": 100,
+          "data_handling_score": 76,
+          "supply_chain_score": 100,
+          "reliability_score": 100,
+          "overall_score": 73,
+          "risk_level": "high",
+          "badge_level": "silver",
+          "owasp_coverage": {
+            "covered": [
+              "MCP03",
+              "MCP06",
+              "MCP09",
+              "MCP10"
+            ],
+            "covered_count": 4,
+            "total": 10,
+            "coverage_percent": 40,
+            "categories": {
+              "MCP06": {
+                "name": "Intent Flow Subversion / Prompt Injection",
+                "name_cn": "意图流颠覆/上下文提示注入",
+                "rules_triggered": 2,
+                "total_rules": 13
+              },
+              "MCP09": {
+                "name": "Shadow MCP Servers",
+                "name_cn": "影子MCP服务器",
+                "rules_triggered": 14,
+                "total_rules": 6
+              },
+              "MCP10": {
+                "name": "Context Injection & Over-Sharing",
+                "name_cn": "上下文注入与过度共享",
+                "rules_triggered": 7,
+                "total_rules": 8
+              },
+              "MCP03": {
+                "name": "Tool Poisoning",
+                "name_cn": "工具投毒",
+                "rules_triggered": 2,
+                "total_rules": 8
+              }
+            }
+          },
+          "agentic_coverage": {
+            "covered": [
+              "ASI10"
+            ],
+            "covered_count": 1,
+            "total": 10,
+            "coverage_percent": 10,
+            "categories": {
+              "ASI10": {
+                "name": "Rogue Agent & Human-Autonomy Boundary",
+                "name_cn": "流氓智能体与人-机自治边界",
+                "rules_triggered": 1,
+                "total_rules": 6
+              }
+            }
+          },
+          "rules_count": 235,
+          "score_breakdown": {
+            "security_score": {
+              "base": 100,
+              "penalty": 55,
+              "contributors": [
+                {
+                  "reason": "内网/元数据地址访问(SSRF)",
+                  "severity": "critical",
+                  "amount": 20,
+                  "owasp": "MCP10"
+                },
+                {
+                  "reason": "执行任意/动态代码(失控)",
+                  "severity": "critical",
+                  "amount": 20,
+                  "owasp": "ASI10"
+                },
+                {
+                  "reason": "通过npx/npm/node/python启动MCP服务器",
+                  "severity": "medium",
+                  "amount": 4,
+                  "owasp": "MCP09"
+                },
+                {
+                  "reason": "远程MCP服务器URL配置",
+                  "severity": "medium",
+                  "amount": 4,
+                  "owasp": "MCP09"
+                },
+                {
+                  "reason": "非标准端口服务(检查是否为未授权MCP)",
+                  "severity": "low",
+                  "amount": 1,
+                  "owasp": "MCP09"
+                }
+              ]
+            },
+            "permissions_score": {
+              "base": 100,
+              "penalty": 0,
+              "contributors": []
+            },
+            "data_handling_score": {
+              "base": 100,
+              "penalty": 24,
+              "contributors": [
+                {
+                  "reason": "内网/元数据地址访问(SSRF)",
+                  "severity": "critical",
+                  "amount": 20,
+                  "owasp": "MCP10"
+                },
+                {
+                  "reason": "内网/元数据地址访问(SSRF) (文档示例)",
+                  "severity": "low",
+                  "amount": 2,
+                  "owasp": "MCP10"
+                },
+                {
+                  "reason": "内网/元数据地址访问(SSRF) (引用上下文)",
+                  "severity": "low",
+                  "amount": 2,
+                  "owasp": "MCP10"
+                }
+              ]
+            },
+            "supply_chain_score": {
+              "base": 100,
+              "penalty": 0,
+              "contributors": []
+            },
+            "reliability_score": {
+              "base": 100,
+              "penalty": 0,
+              "contributors": []
+            }
+          },
+          "top_deductions": [
+            {
+              "dimension": "security_score",
+              "reason": "内网/元数据地址访问(SSRF)",
+              "severity": "critical",
+              "amount": 20,
+              "owasp": "MCP10"
+            },
+            {
+              "dimension": "security_score",
+              "reason": "执行任意/动态代码(失控)",
+              "severity": "critical",
+              "amount": 20,
+              "owasp": "ASI10"
+            },
+            {
+              "dimension": "data_handling_score",
+              "reason": "内网/元数据地址访问(SSRF)",
+              "severity": "critical",
+              "amount": 20,
+              "owasp": "MCP10"
+            },
+            {
+              "dimension": "security_score",
+              "reason": "通过npx/npm/node/python启动MCP服务器",
+              "severity": "medium",
+              "amount": 4,
+              "owasp": "MCP09"
+            },
+            {
+              "dimension": "security_score",
+              "reason": "远程MCP服务器URL配置",
+              "severity": "medium",
+              "amount": 4,
+              "owasp": "MCP09"
+            },
+            {
+              "dimension": "data_handling_score",
+              "reason": "内网/元数据地址访问(SSRF) (文档示例)",
+              "severity": "low",
+              "amount": 2,
+              "owasp": "MCP10"
+            },
+            {
+              "dimension": "data_handling_score",
+              "reason": "内网/元数据地址访问(SSRF) (引用上下文)",
+              "severity": "low",
+              "amount": 2,
+              "owasp": "MCP10"
+            },
+            {
+              "dimension": "security_score",
+              "reason": "非标准端口服务(检查是否为未授权MCP)",
+              "severity": "low",
+              "amount": 1,
+              "owasp": "MCP09"
+            }
+          ],
+          "name": "containers/kubernetes-mcp-server",
+          "source_url": "https://github.com/containers/kubernetes-mcp-server",
+          "tool_type": "mcp",
+          "findings": [
+            {
+              "type": "dangerous_pattern",
+              "rule_id": "MCP09-002",
+              "severity": "medium",
+              "description": "通过npx/npm/node/python启动MCP服务器",
+              "file": "smithery.yaml",
+              "lines": "9",
+              "col": 7,
+              "evidence": "\"command\": \"npx",
+              "owasp_category": "MCP09",
+              "remediation": "禁止 npx 从远程 URL 自动安装即执行：提交 lockfile 并用 npm ci 安装已审计的本地依赖",
+              "citation_context": false
+            },
+            {
+              "type": "dangerous_pattern",
+              "rule_id": "MCP09-003",
+              "severity": "medium",
+              "description": "远程MCP服务器URL配置",
+              "file": "server.json",
+              "lines": "6",
+              "col": 5,
+              "evidence": "\"url\": \"https://",
+              "owasp_category": "MCP09",
+              "remediation": "清点并登记所有运行的 MCP 服务端点，纳入统一的接入审批与生命周期管理",
+              "citation_context": false
+            },
+            {
+              "type": "dangerous_pattern",
+              "rule_id": "MCP09-005",
+              "severity": "low",
+              "description": "非标准端口服务(检查是否为未授权MCP)",
+              "file": "server.json",
+              "lines": "57",
+              "col": 27,
+              "evidence": ":8080",
+              "owasp_category": "MCP09",
+              "remediation": "清点并登记所有运行的 MCP 服务端点，纳入统一的接入审批与生命周期管理",
+              "citation_context": false
+            },
+            {
+              "type": "dangerous_pattern",
+              "rule_id": "MCP10-002",
+              "severity": "critical",
+              "description": "内网/元数据地址访问(SSRF)",
+              "file": "server.json",
+              "lines": "62",
+              "col": 24,
+              "evidence": "localhost",
+              "owasp_category": "MCP10",
+              "remediation": "不要把服务绑定到所有网卡，仅绑定本机或内网地址并配合防火墙",
+              "citation_context": false
+            },
+            {
+              "type": "dangerous_pattern",
+              "rule_id": "MCP09-003",
+              "severity": "medium",
+              "description": "远程MCP服务器URL配置",
+              "file": "manifest.json",
+              "lines": "9",
+              "col": 5,
+              "evidence": "\"url\": \"https://",
+              "owasp_category": "MCP09",
+              "remediation": "清点并登记所有运行的 MCP 服务端点，纳入统一的接入审批与生命周期管理",
+              "citation_context": false
+            },
+            {
+              "type": "dangerous_pattern",
+              "rule_id": "MCP03-001",
+              "severity": "low",
+              "description": "零宽字符(可能隐藏恶意指令) (文档示例)",
+              "file": "README.md",
+              "lines": "9",
+              "col": 195,
+              "evidence": "‍",
+              "owasp_category": "MCP03",
+              "remediation": "清除零宽字符与隐藏 Unicode：描述与正文只能包含可见字符，这些字符正是用来夹带指令的",
+              "citation_context": false
+            },
+            {
+              "type": "dangerous_pattern",
+              "rule_id": "MCP06-012",
+              "severity": "low",
+              "description": "持久化/自启动指令 (文档示例)",
+              "file": "README.md",
+              "lines": "538",
+              "col": 220,
+              "evidence": "autostart",
+              "owasp_category": "MCP06",
+              "remediation": "移除命令执行拼接，改用参数化调用（execFile/子进程参数列表）或白名单命令，且不接受用户输入直接进入",
+              "citation_context": false
+            },
+            {
+              "type": "dangerous_pattern",
+              "rule_id": "MCP09-002",
+              "severity": "info",
+              "description": "通过npx/npm/node/python启动MCP服务器 (文档示例)",
+              "file": "README.md",
+              "lines": "85",
+              "col": 7,
+              "evidence": "\"command\": \"npx",
+              "owasp_category": "MCP09",
+              "remediation": "禁止 npx 从远程 URL 自动安装即执行：提交 lockfile 并用 npm ci 安装已审计的本地依赖",
+              "citation_context": false
+            },
+            {
+              "type": "dangerous_pattern",
+              "rule_id": "MCP09-005",
+              "severity": "low",
+              "description": "非标准端口服务(检查是否为未授权MCP) (文档示例)",
+              "file": "README.md",
+              "lines": "223",
+              "col": 29,
+              "evidence": ":4317",
+              "owasp_category": "MCP09",
+              "remediation": "清点并登记所有运行的 MCP 服务端点，纳入统一的接入审批与生命周期管理",
+              "citation_context": false
+            },
+            {
+              "type": "dangerous_pattern",
+              "rule_id": "MCP10-002",
+              "severity": "low",
+              "description": "内网/元数据地址访问(SSRF) (文档示例)",
+              "file": "README.md",
+              "lines": "223",
+              "col": 20,
+              "evidence": "localhost",
+              "owasp_category": "MCP10",
+              "remediation": "不要把服务绑定到所有网卡，仅绑定本机或内网地址并配合防火墙",
+              "citation_context": false
+            },
+            {
+              "type": "dangerous_pattern",
+              "rule_id": "ASI10-003",
+              "severity": "critical",
+              "description": "执行任意/动态代码(失控)",
+              "file": ".agents/skills/toolset-design/SKILL.md",
+              "lines": "180",
+              "col": 49,
+              "evidence": "run arbitrary",
+              "owasp_category": "ASI10",
+              "remediation": "移除命令执行拼接，改用参数化调用（execFile/子进程参数列表）或白名单命令，且不接受用户输入直接进入",
+              "citation_context": false
+            },
+            {
+              "type": "dangerous_pattern",
+              "rule_id": "MCP09-005",
+              "severity": "low",
+              "description": "非标准端口服务(检查是否为未授权MCP) (文档示例)",
+              "file": "charts/kubernetes-mcp-server/README.md",
+              "lines": "164",
+              "col": 47,
+              "evidence": ":8080",
+              "owasp_category": "MCP09",
+              "remediation": "清点并登记所有运行的 MCP 服务端点，纳入统一的接入审批与生命周期管理",
+              "citation_context": false
+            },
+            {
+              "type": "dangerous_pattern",
+              "rule_id": "MCP10-002",
+              "severity": "low",
+              "description": "内网/元数据地址访问(SSRF) (引用上下文)",
+              "file": "charts/kubernetes-mcp-server/ci/configmap-numeric-test-values.yaml",
+              "lines": "9",
+              "col": 9,
+              "evidence": "localhost",
+              "owasp_category": "MCP10",
+              "remediation": "不要把服务绑定到所有网卡，仅绑定本机或内网地址并配合防火墙",
+              "citation_context": true
+            },
+            {
+              "type": "dangerous_pattern",
+              "rule_id": "MCP10-002",
+              "severity": "critical",
+              "description": "内网/元数据地址访问(SSRF)",
+              "file": "charts/kubernetes-mcp-server/ci/sa-automount-test-values.yaml",
+              "lines": "7",
+              "col": 9,
+              "evidence": "localhost",
+              "owasp_category": "MCP10",
+              "remediation": "不要把服务绑定到所有网卡，仅绑定本机或内网地址并配合防火墙",
+              "citation_context": false
+            },
+            {
+              "type": "dangerous_pattern",
+              "rule_id": "MCP10-002",
+              "severity": "critical",
+              "description": "内网/元数据地址访问(SSRF)",
+              "file": "charts/kubernetes-mcp-server/ci/security-context-test-values.yaml",
+              "lines": "7",
+              "col": 9,
+              "evidence": "localhost",
+              "owasp_category": "MCP10",
+              "remediation": "不要把服务绑定到所有网卡，仅绑定本机或内网地址并配合防火墙",
+              "citation_context": false
+            },
+            {
+              "type": "dangerous_pattern",
+              "rule_id": "MCP10-002",
+              "severity": "critical",
+              "description": "内网/元数据地址访问(SSRF)",
+              "file": "charts/kubernetes-mcp-server/ci/tls-test-values.yaml",
+              "lines": "5",
+              "col": 9,
+              "evidence": "localhost",
+              "owasp_category": "MCP10",
+              "remediation": "不要把服务绑定到所有网卡，仅绑定本机或内网地址并配合防火墙",
+              "citation_context": false
+            },
+            {
+              "type": "dangerous_pattern",
+              "rule_id": "MCP10-002",
+              "severity": "critical",
+              "description": "内网/元数据地址访问(SSRF)",
+              "file": "charts/kubernetes-mcp-server/ci/tpl-test-values.yaml",
+              "lines": "9",
+              "col": 9,
+              "evidence": "localhost",
+              "owasp_category": "MCP10",
+              "remediation": "不要把服务绑定到所有网卡，仅绑定本机或内网地址并配合防火墙",
+              "citation_context": false
+            },
+            {
+              "type": "dangerous_pattern",
+              "rule_id": "GEN-B2A0",
+              "severity": "low",
+              "description": "[情报驱动] 路径遍历: 越权访问上级目录 (文档示例)",
+              "file": "charts/kubernetes-mcp-server/examples/README.md",
+              "lines": "12",
+              "col": 66,
+              "evidence": "../../../",
+              "owasp_category": null,
+              "remediation": "对用户输入的路径做规范化并校验是否落在允许目录内，拒绝 .. 穿越与 URL 编码变体",
+              "citation_context": false
+            },
+            {
+              "type": "dangerous_pattern",
+              "rule_id": "MCP09-005",
+              "severity": "low",
+              "description": "非标准端口服务(检查是否为未授权MCP)",
+              "file": "charts/kubernetes-mcp-server/examples/values-openshift-netobserv.yaml",
+              "lines": "10",
+              "col": 90,
+              "evidence": ":9001",
+              "owasp_category": "MCP09",
+              "remediation": "清点并登记所有运行的 MCP 服务端点，纳入统一的接入审批与生命周期管理",
+              "citation_context": false
+            }
+          ],
+          "total_findings": 19,
+          "static_analysis": {
+            "findings": [
+              {
+                "type": "dangerous_pattern",
+                "rule_id": "MCP09-002",
+                "severity": "medium",
+                "description": "通过npx/npm/node/python启动MCP服务器",
+                "file": "smithery.yaml",
+                "lines": "9",
+                "col": 7,
+                "evidence": "\"command\": \"npx",
+                "owasp_category": "MCP09",
+                "remediation": "禁止 npx 从远程 URL 自动安装即执行：提交 lockfile 并用 npm ci 安装已审计的本地依赖",
+                "citation_context": false
+              },
+              {
+                "type": "dangerous_pattern",
+                "rule_id": "MCP09-003",
+                "severity": "medium",
+                "description": "远程MCP服务器URL配置",
+                "file": "server.json",
+                "lines": "6",
+                "col": 5,
+                "evidence": "\"url\": \"https://",
+                "owasp_category": "MCP09",
+                "remediation": "清点并登记所有运行的 MCP 服务端点，纳入统一的接入审批与生命周期管理",
+                "citation_context": false
+              },
+              {
+                "type": "dangerous_pattern",
+                "rule_id": "MCP09-003",
+                "severity": "medium",
+                "description": "远程MCP服务器URL配置",
+                "file": "server.json",
+                "lines": "62",
+                "col": 9,
+                "evidence": "\"url\": \"http://",
+                "owasp_category": "MCP09",
+                "remediation": "清点并登记所有运行的 MCP 服务端点，纳入统一的接入审批与生命周期管理",
+                "citation_context": false
+              },
+              {
+                "type": "dangerous_pattern",
+                "rule_id": "MCP09-005",
+                "severity": "low",
+                "description": "非标准端口服务(检查是否为未授权MCP)",
+                "file": "server.json",
+                "lines": "57",
+                "col": 27,
+                "evidence": ":8080",
+                "owasp_category": "MCP09",
+                "remediation": "清点并登记所有运行的 MCP 服务端点，纳入统一的接入审批与生命周期管理",
+                "citation_context": false
+              },
+              {
+                "type": "dangerous_pattern",
+                "rule_id": "MCP09-005",
+                "severity": "low",
+                "description": "非标准端口服务(检查是否为未授权MCP)",
+                "file": "server.json",
+                "lines": "62",
+                "col": 33,
+                "evidence": ":8080",
+                "owasp_category": "MCP09",
+                "remediation": "清点并登记所有运行的 MCP 服务端点，纳入统一的接入审批与生命周期管理",
+                "citation_context": false
+              },
+              {
+                "type": "dangerous_pattern",
+                "rule_id": "MCP10-002",
+                "severity": "critical",
+                "description": "内网/元数据地址访问(SSRF)",
+                "file": "server.json",
+                "lines": "62",
+                "col": 24,
+                "evidence": "localhost",
+                "owasp_category": "MCP10",
+                "remediation": "不要把服务绑定到所有网卡，仅绑定本机或内网地址并配合防火墙",
+                "citation_context": false
+              },
+              {
+                "type": "dangerous_pattern",
+                "rule_id": "MCP09-003",
+                "severity": "medium",
+                "description": "远程MCP服务器URL配置",
+                "file": "manifest.json",
+                "lines": "9",
+                "col": 5,
+                "evidence": "\"url\": \"https://",
+                "owasp_category": "MCP09",
+                "remediation": "清点并登记所有运行的 MCP 服务端点，纳入统一的接入审批与生命周期管理",
+                "citation_context": false
+              },
+              {
+                "type": "dangerous_pattern",
+                "rule_id": "MCP09-003",
+                "severity": "medium",
+                "description": "远程MCP服务器URL配置",
+                "file": "manifest.json",
+                "lines": "13",
+                "col": 5,
+                "evidence": "\"url\": \"https://",
+                "owasp_category": "MCP09",
+                "remediation": "清点并登记所有运行的 MCP 服务端点，纳入统一的接入审批与生命周期管理",
+                "citation_context": false
+              },
+              {
+                "type": "dangerous_pattern",
+                "rule_id": "MCP03-001",
+                "severity": "low",
+                "description": "零宽字符(可能隐藏恶意指令) (文档示例)",
+                "file": "README.md",
+                "lines": "9",
+                "col": 195,
+                "evidence": "‍",
+                "owasp_category": "MCP03",
+                "remediation": "清除零宽字符与隐藏 Unicode：描述与正文只能包含可见字符，这些字符正是用来夹带指令的",
+                "citation_context": false
+              },
+              {
+                "type": "dangerous_pattern",
+                "rule_id": "MCP03-001",
+                "severity": "low",
+                "description": "零宽字符(可能隐藏恶意指令) (文档示例)",
+                "file": "README.md",
+                "lines": "929",
+                "col": 5,
+                "evidence": "‍",
+                "owasp_category": "MCP03",
+                "remediation": "清除零宽字符与隐藏 Unicode：描述与正文只能包含可见字符，这些字符正是用来夹带指令的",
+                "citation_context": false
+              },
+              {
+                "type": "dangerous_pattern",
+                "rule_id": "MCP06-012",
+                "severity": "low",
+                "description": "持久化/自启动指令 (文档示例)",
+                "file": "README.md",
+                "lines": "538",
+                "col": 220,
+                "evidence": "autostart",
+                "owasp_category": "MCP06",
+                "remediation": "移除命令执行拼接，改用参数化调用（execFile/子进程参数列表）或白名单命令，且不接受用户输入直接进入",
+                "citation_context": false
+              },
+              {
+                "type": "dangerous_pattern",
+                "rule_id": "MCP06-012",
+                "severity": "low",
+                "description": "持久化/自启动指令 (文档示例)",
+                "file": "README.md",
+                "lines": "539",
+                "col": 6,
+                "evidence": "autostart",
+                "owasp_category": "MCP06",
+                "remediation": "移除命令执行拼接，改用参数化调用（execFile/子进程参数列表）或白名单命令，且不接受用户输入直接进入",
+                "citation_context": false
+              },
+              {
+                "type": "dangerous_pattern",
+                "rule_id": "MCP09-002",
+                "severity": "info",
+                "description": "通过npx/npm/node/python启动MCP服务器 (文档示例)",
+                "file": "README.md",
+                "lines": "85",
+                "col": 7,
+                "evidence": "\"command\": \"npx",
+                "owasp_category": "MCP09",
+                "remediation": "禁止 npx 从远程 URL 自动安装即执行：提交 lockfile 并用 npm ci 安装已审计的本地依赖",
+                "citation_context": false
+              },
+              {
+                "type": "dangerous_pattern",
+                "rule_id": "MCP09-002",
+                "severity": "info",
+                "description": "通过npx/npm/node/python启动MCP服务器 (文档示例)",
+                "file": "README.md",
+                "lines": "103",
+                "col": 38,
+                "evidence": "\"command\":\"npx",
+                "owasp_category": "MCP09",
+                "remediation": "禁止 npx 从远程 URL 自动安装即执行：提交 lockfile 并用 npm ci 安装已审计的本地依赖",
+                "citation_context": false
+              },
+              {
+                "type": "dangerous_pattern",
+                "rule_id": "MCP09-002",
+                "severity": "info",
+                "description": "通过npx/npm/node/python启动MCP服务器 (文档示例)",
+                "file": "README.md",
+                "lines": "105",
+                "col": 47,
+                "evidence": "\"command\":\"npx",
+                "owasp_category": "MCP09",
+                "remediation": "禁止 npx 从远程 URL 自动安装即执行：提交 lockfile 并用 npm ci 安装已审计的本地依赖",
+                "citation_context": false
+              },
+              {
+                "type": "dangerous_pattern",
+                "rule_id": "MCP09-005",
+                "severity": "low",
+                "description": "非标准端口服务(检查是否为未授权MCP) (文档示例)",
+                "file": "README.md",
+                "lines": "223",
+                "col": 29,
+                "evidence": ":4317",
+                "owasp_category": "MCP09",
+                "remediation": "清点并登记所有运行的 MCP 服务端点，纳入统一的接入审批与生命周期管理",
+                "citation_context": false
+              },
+              {
+                "type": "dangerous_pattern",
+                "rule_id": "MCP10-002",
+                "severity": "low",
+                "description": "内网/元数据地址访问(SSRF) (文档示例)",
+                "file": "README.md",
+                "lines": "223",
+                "col": 20,
+                "evidence": "localhost",
+                "owasp_category": "MCP10",
+                "remediation": "不要把服务绑定到所有网卡，仅绑定本机或内网地址并配合防火墙",
+                "citation_context": false
+              },
+              {
+                "type": "dangerous_pattern",
+                "rule_id": "ASI10-003",
+                "severity": "critical",
+                "description": "执行任意/动态代码(失控)",
+                "file": ".agents/skills/toolset-design/SKILL.md",
+                "lines": "180",
+                "col": 49,
+                "evidence": "run arbitrary",
+                "owasp_category": "ASI10",
+                "remediation": "移除命令执行拼接，改用参数化调用（execFile/子进程参数列表）或白名单命令，且不接受用户输入直接进入",
+                "citation_context": false
+              },
+              {
+                "type": "dangerous_pattern",
+                "rule_id": "MCP09-005",
+                "severity": "low",
+                "description": "非标准端口服务(检查是否为未授权MCP) (文档示例)",
+                "file": "charts/kubernetes-mcp-server/README.md",
+                "lines": "164",
+                "col": 47,
+                "evidence": ":8080",
+                "owasp_category": "MCP09",
+                "remediation": "清点并登记所有运行的 MCP 服务端点，纳入统一的接入审批与生命周期管理",
+                "citation_context": false
+              },
+              {
+                "type": "dangerous_pattern",
+                "rule_id": "MCP10-002",
+                "severity": "low",
+                "description": "内网/元数据地址访问(SSRF) (引用上下文)",
+                "file": "charts/kubernetes-mcp-server/ci/configmap-numeric-test-values.yaml",
+                "lines": "9",
+                "col": 9,
+                "evidence": "localhost",
+                "owasp_category": "MCP10",
+                "remediation": "不要把服务绑定到所有网卡，仅绑定本机或内网地址并配合防火墙",
+                "citation_context": true
+              },
+              {
+                "type": "dangerous_pattern",
+                "rule_id": "MCP10-002",
+                "severity": "critical",
+                "description": "内网/元数据地址访问(SSRF)",
+                "file": "charts/kubernetes-mcp-server/ci/sa-automount-test-values.yaml",
+                "lines": "7",
+                "col": 9,
+                "evidence": "localhost",
+                "owasp_category": "MCP10",
+                "remediation": "不要把服务绑定到所有网卡，仅绑定本机或内网地址并配合防火墙",
+                "citation_context": false
+              },
+              {
+                "type": "dangerous_pattern",
+                "rule_id": "MCP10-002",
+                "severity": "critical",
+                "description": "内网/元数据地址访问(SSRF)",
+                "file": "charts/kubernetes-mcp-server/ci/security-context-test-values.yaml",
+                "lines": "7",
+                "col": 9,
+                "evidence": "localhost",
+                "owasp_category": "MCP10",
+                "remediation": "不要把服务绑定到所有网卡，仅绑定本机或内网地址并配合防火墙",
+                "citation_context": false
+              },
+              {
+                "type": "dangerous_pattern",
+                "rule_id": "MCP10-002",
+                "severity": "critical",
+                "description": "内网/元数据地址访问(SSRF)",
+                "file": "charts/kubernetes-mcp-server/ci/tls-test-values.yaml",
+                "lines": "5",
+                "col": 9,
+                "evidence": "localhost",
+                "owasp_category": "MCP10",
+                "remediation": "不要把服务绑定到所有网卡，仅绑定本机或内网地址并配合防火墙",
+                "citation_context": false
+              },
+              {
+                "type": "dangerous_pattern",
+                "rule_id": "MCP10-002",
+                "severity": "critical",
+                "description": "内网/元数据地址访问(SSRF)",
+                "file": "charts/kubernetes-mcp-server/ci/tpl-test-values.yaml",
+                "lines": "9",
+                "col": 9,
+                "evidence": "localhost",
+                "owasp_category": "MCP10",
+                "remediation": "不要把服务绑定到所有网卡，仅绑定本机或内网地址并配合防火墙",
+                "citation_context": false
+              },
+              {
+                "type": "dangerous_pattern",
+                "rule_id": "GEN-B2A0",
+                "severity": "low",
+                "description": "[情报驱动] 路径遍历: 越权访问上级目录 (文档示例)",
+                "file": "charts/kubernetes-mcp-server/examples/README.md",
+                "lines": "12",
+                "col": 66,
+                "evidence": "../../../",
+                "owasp_category": null,
+                "remediation": "对用户输入的路径做规范化并校验是否落在允许目录内，拒绝 .. 穿越与 URL 编码变体",
+                "citation_context": false
+              },
+              {
+                "type": "dangerous_pattern",
+                "rule_id": "MCP09-005",
+                "severity": "low",
+                "description": "非标准端口服务(检查是否为未授权MCP)",
+                "file": "charts/kubernetes-mcp-server/examples/values-openshift-netobserv.yaml",
+                "lines": "10",
+                "col": 90,
+                "evidence": ":9001",
+                "owasp_category": "MCP09",
+                "remediation": "清点并登记所有运行的 MCP 服务端点，纳入统一的接入审批与生命周期管理",
+                "citation_context": false
+              },
+              {
+                "type": "dangerous_pattern",
+                "rule_id": "MCP09-005",
+                "severity": "low",
+                "description": "非标准端口服务(检查是否为未授权MCP)",
+                "file": "charts/kubernetes-mcp-server/examples/values-openshift-netobserv.yaml",
+                "lines": "45",
+                "col": 99,
+                "evidence": ":9001",
+                "owasp_category": "MCP09",
+                "remediation": "清点并登记所有运行的 MCP 服务端点，纳入统一的接入审批与生命周期管理",
+                "citation_context": false
+              }
+            ],
+            "total_files": 20,
+            "patterns_checked": 235,
+            "owasp_coverage": {
+              "covered": [
+                "MCP03",
+                "MCP06",
+                "MCP09",
+                "MCP10"
+              ],
+              "covered_count": 4,
+              "total": 10,
+              "coverage_percent": 40,
+              "categories": {
+                "MCP06": {
+                  "name": "Intent Flow Subversion / Prompt Injection",
+                  "name_cn": "意图流颠覆/上下文提示注入",
+                  "rules_triggered": 2,
+                  "total_rules": 13
+                },
+                "MCP09": {
+                  "name": "Shadow MCP Servers",
+                  "name_cn": "影子MCP服务器",
+                  "rules_triggered": 14,
+                  "total_rules": 6
+                },
+                "MCP10": {
+                  "name": "Context Injection & Over-Sharing",
+                  "name_cn": "上下文注入与过度共享",
+                  "rules_triggered": 7,
+                  "total_rules": 8
+                },
+                "MCP03": {
+                  "name": "Tool Poisoning",
+                  "name_cn": "工具投毒",
+                  "rules_triggered": 2,
+                  "total_rules": 8
+                }
+              }
+            },
+            "agentic_coverage": {
+              "covered": [
+                "ASI10"
+              ],
+              "covered_count": 1,
+              "total": 10,
+              "coverage_percent": 10,
+              "categories": {
+                "ASI10": {
+                  "name": "Rogue Agent & Human-Autonomy Boundary",
+                  "name_cn": "流氓智能体与人-机自治边界",
+                  "rules_triggered": 1,
+                  "total_rules": 6
+                }
+              }
+            }
+          },
+          "dependency_analysis": {
+            "findings": [],
+            "dependencies": [],
+            "total_dependencies": 0
+          },
+          "secrets_detection": {
+            "findings": []
+          },
+          "llm_analysis": {
+            "findings": [],
+            "analyzed": false,
+            "reason": "LLM not configured (set AISHIELD_LLM_URL and AISHIELD_LLM_KEY)"
+          },
+          "llm_supply_chain": {
+            "findings": [],
+            "analyzed": false
+          },
+          "toxic_flow_scan": [],
+          "baseline_drift": [],
+          "compliance": {
+            "frameworks": {
+              "nist_csf": {
+                "controls_hit": 9,
+                "controls": {
+                  "ID.AM-01": {
+                    "findings_count": 8,
+                    "max_severity": "medium"
+                  },
+                  "PR.AA-05": {
+                    "findings_count": 9,
+                    "max_severity": "critical"
+                  },
+                  "DE.CM-01": {
+                    "findings_count": 7,
+                    "max_severity": "critical"
+                  },
+                  "PR.DS-02": {
+                    "findings_count": 7,
+                    "max_severity": "critical"
+                  },
+                  "PR.PS-06": {
+                    "findings_count": 1,
+                    "max_severity": "low"
+                  },
+                  "DE.CM-09": {
+                    "findings_count": 1,
+                    "max_severity": "low"
+                  },
+                  "PR.PS-01": {
+                    "findings_count": 1,
+                    "max_severity": "low"
+                  },
+                  "DE.AE-02": {
+                    "findings_count": 1,
+                    "max_severity": "low"
+                  },
+                  "GV.PO-02": {
+                    "findings_count": 1,
+                    "max_severity": "critical"
+                  }
+                }
+              },
+              "iso27001": {
+                "controls_hit": 8,
+                "controls": {
+                  "A.5.9": {
+                    "findings_count": 8,
+                    "max_severity": "medium"
+                  },
+                  "A.5.19": {
+                    "findings_count": 8,
+                    "max_severity": "medium"
+                  },
+                  "A.8.20": {
+                    "findings_count": 7,
+                    "max_severity": "critical"
+                  },
+                  "A.8.22": {
+                    "findings_count": 7,
+                    "max_severity": "critical"
+                  },
+                  "A.8.28": {
+                    "findings_count": 2,
+                    "max_severity": "low"
+                  },
+                  "A.5.37": {
+                    "findings_count": 2,
+                    "max_severity": "low"
+                  },
+                  "A.5.4": {
+                    "findings_count": 1,
+                    "max_severity": "critical"
+                  },
+                  "A.5.15": {
+                    "findings_count": 1,
+                    "max_severity": "critical"
+                  }
+                }
+              },
+              "pci_dss": {
+                "controls_hit": 4,
+                "controls": {
+                  "12.5.2": {
+                    "findings_count": 9,
+                    "max_severity": "critical"
+                  },
+                  "1.2": {
+                    "findings_count": 7,
+                    "max_severity": "critical"
+                  },
+                  "11.5": {
+                    "findings_count": 7,
+                    "max_severity": "critical"
+                  },
+                  "6.2.4": {
+                    "findings_count": 2,
+                    "max_severity": "low"
+                  }
+                }
+              },
+              "maestro": {
+                "controls_hit": 6,
+                "controls": {
+                  "L7": {
+                    "findings_count": 9,
+                    "max_severity": "critical"
+                  },
+                  "L3": {
+                    "findings_count": 10,
+                    "max_severity": "critical"
+                  },
+                  "L4": {
+                    "findings_count": 7,
+                    "max_severity": "critical"
+                  },
+                  "L6": {
+                    "findings_count": 1,
+                    "max_severity": "low"
+                  },
+                  "L1": {
+                    "findings_count": 1,
+                    "max_severity": "low"
+                  },
+                  "L8": {
+                    "findings_count": 1,
+                    "max_severity": "critical"
+                  }
+                }
+              }
+            },
+            "categories_mapped": 5,
+            "findings_unmapped": 1,
+            "note": "映射为审计锚点（select-the-control），不构成合规认证结论",
+            "category_id_namespace": "aishield-internal",
+            "owasp_agentic_2026": {
+              "ASI01": "Agent Goal Hijack",
+              "ASI02": "Tool Misuse & Exploitation",
+              "ASI03": "Identity & Privilege Abuse",
+              "ASI04": "Agentic Supply Chain Vulnerabilities",
+              "ASI05": "Unexpected Code Execution",
+              "ASI06": "Memory & Context Poisoning",
+              "ASI07": "Insecure Inter-Agent Communication",
+              "ASI08": "Cascading Failures",
+              "ASI09": "Human-Agent Trust Exploitation",
+              "ASI10": "Rogue Agents"
+            },
+            "internal_to_owasp_agentic": {
+              "ASI01": [
+                "ASI01"
+              ],
+              "ASI02": [
+                "ASI02"
+              ],
+              "ASI03": [
+                "ASI03"
+              ],
+              "ASI04": [
+                "ASI06"
+              ],
+              "ASI05": [
+                "ASI03"
+              ],
+              "ASI06": [
+                "ASI07",
+                "ASI04"
+              ],
+              "ASI07": [],
+              "ASI08": [],
+              "ASI09": [
+                "ASI08"
+              ],
+              "ASI10": [
+                "ASI10",
+                "ASI09"
+              ]
+            },
+            "owasp_agentic_uncovered": [
+              "ASI05"
+            ]
+          },
+          "osv_cve": [],
+          "commit_hash": "58931a7e",
+          "recommendations": [
+            "检测到数据外传/SSRF风险，建议审查数据流向并添加URL白名单",
+            "安全评分较低，建议进行全面安全审查后再发布"
+          ],
+          "scanned_at": "2026-09-26 16:33:04",
+          "scanner_version": "4.0",
+          "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)",
+          "source": "smithery-api-github-fallback",
+          "directory_description": "Model Context Protocol (MCP) server for Kubernetes and OpenShift",
+          "stars": 2123
+        }
+      ],
+      "error_details": []
     }
   ],
   "summary": {
     "total_tools": 73,
-    "last_scan": "2026-09-25 16:46:34",
+    "last_scan": "2026-09-26 16:33:04",
     "scanner_version": "4.1",
     "avg_score": 72.1917808219178,
     "badge_distribution": {
@@ -431944,17 +433030,17 @@
         "total": 10,
         "coverage_percent": 40,
         "categories": {
-          "MCP03": {
-            "name": "Tool Poisoning",
-            "name_cn": "工具投毒",
-            "rules_triggered": 2,
-            "total_rules": 8
-          },
           "MCP06": {
             "name": "Intent Flow Subversion / Prompt Injection",
             "name_cn": "意图流颠覆/上下文提示注入",
             "rules_triggered": 2,
             "total_rules": 13
+          },
+          "MCP09": {
+            "name": "Shadow MCP Servers",
+            "name_cn": "影子MCP服务器",
+            "rules_triggered": 14,
+            "total_rules": 6
           },
           "MCP10": {
             "name": "Context Injection & Over-Sharing",
@@ -431962,11 +433048,11 @@
             "rules_triggered": 7,
             "total_rules": 8
           },
-          "MCP09": {
-            "name": "Shadow MCP Servers",
-            "name_cn": "影子MCP服务器",
-            "rules_triggered": 14,
-            "total_rules": 6
+          "MCP03": {
+            "name": "Tool Poisoning",
+            "name_cn": "工具投毒",
+            "rules_triggered": 2,
+            "total_rules": 8
           }
         }
       },
@@ -432742,17 +433828,17 @@
           "total": 10,
           "coverage_percent": 40,
           "categories": {
-            "MCP03": {
-              "name": "Tool Poisoning",
-              "name_cn": "工具投毒",
-              "rules_triggered": 2,
-              "total_rules": 8
-            },
             "MCP06": {
               "name": "Intent Flow Subversion / Prompt Injection",
               "name_cn": "意图流颠覆/上下文提示注入",
               "rules_triggered": 2,
               "total_rules": 13
+            },
+            "MCP09": {
+              "name": "Shadow MCP Servers",
+              "name_cn": "影子MCP服务器",
+              "rules_triggered": 14,
+              "total_rules": 6
             },
             "MCP10": {
               "name": "Context Injection & Over-Sharing",
@@ -432760,11 +433846,11 @@
               "rules_triggered": 7,
               "total_rules": 8
             },
-            "MCP09": {
-              "name": "Shadow MCP Servers",
-              "name_cn": "影子MCP服务器",
-              "rules_triggered": 14,
-              "total_rules": 6
+            "MCP03": {
+              "name": "Tool Poisoning",
+              "name_cn": "工具投毒",
+              "rules_triggered": 2,
+              "total_rules": 8
             }
           }
         },
@@ -432986,17 +434072,17 @@
         ]
       },
       "osv_cve": [],
-      "commit_hash": "6fd66fb4",
+      "commit_hash": "58931a7e",
       "recommendations": [
         "检测到数据外传/SSRF风险，建议审查数据流向并添加URL白名单",
         "安全评分较低，建议进行全面安全审查后再发布"
       ],
-      "scanned_at": "2026-09-19 16:00:53",
+      "scanned_at": "2026-09-26 16:33:04",
       "scanner_version": "4.0",
       "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)",
       "source": "smithery-api-github-fallback",
       "directory_description": "Model Context Protocol (MCP) server for Kubernetes and OpenShift",
-      "stars": 2110
+      "stars": 2123
     },
     {
       "security_score": 0,
