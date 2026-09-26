@@ -8,23 +8,25 @@
     "5. Run: python scripts/promote_rule.py --promote <file>",
     "   Rejected? Fix or delete the file -- do not leave drafts to rot."
   ],
-  "drafted_at": "2026-09-04",
+  "drafted_at": "2026-09-11",
   "signal": {
-    "id": "8362498bb4d4",
-    "title": "Adapting to Evolving Requirements: Agentic AI for Retail Supply Chain Operations",
-    "url": "https://arxiv.org/abs/2609.03860",
+    "id": "6e63e099f37f",
+    "title": "An Empirical Measurement of Jailbreaking Evaluators",
+    "url": "https://arxiv.org/abs/2609.10594",
     "source": "arxiv"
   },
-  "attack_category": "supply-chain",
+  "attack_category": "jailbreak",
   "severity": "high",
   "rules": [
     {
-      "pattern": "supply\\s*chain",
-      "description": "supply-chain 检测（雷达自动起草，first-pass 正则，待人工复核）",
+      "pattern": "TODO: regex here",
+      "description": "TODO: 中文描述 (jailbreak)",
       "severity": "high"
     }
   ],
-  "review_notes": "",
+  "review_notes": "评测/基准方法学，度量攻击而非攻击本身，无可提取 IOC｜越狱评估器经验度量方法学",
   "auto_ready": false,
-  "_rejected_reason": "pattern too broad (bare keyword) -- needs a specific regex"
+  "_rejected_reason": "pattern too broad (bare keyword) -- needs a specific regex",
+  "rejected_at": "2026-09-03",
+  "reject_reason": "R2-benchmark"
 }

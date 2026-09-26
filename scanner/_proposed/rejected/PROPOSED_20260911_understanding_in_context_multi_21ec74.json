@@ -8,23 +8,25 @@
     "5. Run: python scripts/promote_rule.py --promote <file>",
     "   Rejected? Fix or delete the file -- do not leave drafts to rot."
   ],
-  "drafted_at": "2026-09-09",
+  "drafted_at": "2026-09-11",
   "signal": {
-    "id": "562d2784c2a3",
-    "title": "VEX-Bench: Benchmarking LLM Agents for Assessing Exploitability of Software Supply Chain Vulnerabilities",
-    "url": "https://arxiv.org/abs/2609.08040",
+    "id": "21ec74ad48f3",
+    "title": "Understanding In-Context Multimodal Jailbreaks via Posterior Reweighting",
+    "url": "https://arxiv.org/abs/2609.10613",
     "source": "arxiv"
   },
-  "attack_category": "supply-chain",
-  "severity": "critical",
+  "attack_category": "jailbreak",
+  "severity": "high",
   "rules": [
     {
       "pattern": "TODO: regex here",
-      "description": "TODO: 中文描述 (supply-chain)",
-      "severity": "critical"
+      "description": "TODO: 中文描述 (jailbreak)",
+      "severity": "high"
     }
   ],
-  "review_notes": "",
+  "review_notes": "防御侧工具/论文或刷仓仓库，无攻击面可提取为检测特征｜后验重加权分析多模态越狱，机制可解释性防御侧研究",
   "auto_ready": false,
-  "_rejected_reason": "pattern too broad (bare keyword) -- needs a specific regex"
+  "_rejected_reason": "pattern too broad (bare keyword) -- needs a specific regex",
+  "rejected_at": "2026-09-03",
+  "reject_reason": "R1-defense-side"
 }

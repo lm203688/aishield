@@ -24,7 +24,9 @@
       "severity": "high"
     }
   ],
-  "review_notes": "",
+  "review_notes": "自进化 agent 能力论文被误标 trajectory-poisoning（是攻击前提，非攻击）｜自进化 agent 能力论文（保持课程），被误标 trajectory-poisoning",
   "auto_ready": false,
-  "_rejected_reason": "pattern too broad (bare keyword) -- needs a specific regex"
+  "_rejected_reason": "pattern too broad (bare keyword) -- needs a specific regex",
+  "rejected_at": "2026-09-03",
+  "reject_reason": "R4-capability"
 }

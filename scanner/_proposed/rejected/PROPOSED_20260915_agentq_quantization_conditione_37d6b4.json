@@ -1,0 +1,27 @@
+{
+  "status": "rejected",
+  "auto_ready": true,
+  "_instructions": [
+    "雷达自动起草（first-pass）：pattern 由 attack_category 的既有检测词表推导，并已通过 promote_rule 的六道闸门预检。",
+    "status=ready 时会被 rule-promoter 自动晋升；若 --check 判 blocked，请人工收紧 pattern 后再置 ready。"
+  ],
+  "drafted_at": "2026-09-15",
+  "signal": {
+    "id": "37d6b423e065",
+    "title": "AGENTQ: Quantization-Conditioned Backdoor Attacks on LLM Agents",
+    "url": "https://arxiv.org/abs/2609.14060",
+    "source": "arxiv"
+  },
+  "attack_category": "backdoor",
+  "severity": "high",
+  "rules": [
+    {
+      "pattern": "backdoor\\s*(attack|trigger)",
+      "description": "backdoor 检测（雷达自动起草，first-pass 正则，待人工复核）",
+      "severity": "high"
+    }
+  ],
+  "review_notes": "真实攻击，但位于模型权重或非文本模态，文本/配置扫描器天然不可见｜量化级后门（AgentQ），注入位于模型权重层，配置/文本扫描器天然不可见",
+  "rejected_at": "2026-09-03",
+  "reject_reason": "R5-out-of-reach"
+}

@@ -1,0 +1,27 @@
+{
+  "status": "rejected",
+  "auto_ready": true,
+  "_instructions": [
+    "雷达自动起草（first-pass）：pattern 由 attack_category 的既有检测词表推导，并已通过 promote_rule 的六道闸门预检。",
+    "status=ready 时会被 rule-promoter 自动晋升；若 --check 判 blocked，请人工收紧 pattern 后再置 ready。"
+  ],
+  "drafted_at": "2026-09-15",
+  "signal": {
+    "id": "3d90821771e6",
+    "title": "Monesgoda/offensive-Agent-s",
+    "url": "https://github.com/Monesgoda/offensive-Agent-s",
+    "source": "github-trending"
+  },
+  "attack_category": "adversarial-agent",
+  "severity": "high",
+  "rules": [
+    {
+      "pattern": "(llm|agent|agentic)\\s*.*\\b(red[- ]team\\w*|adversarial attack)\\b",
+      "description": "adversarial-agent 检测（雷达自动起草，first-pass 正则，待人工复核）",
+      "severity": "high"
+    }
+  ],
+  "review_notes": "与 MCP 配置 / skill / prompt 扫描无关｜regex 匹配的是「LLM+红队」话题组合（.* 无界），非攻击 IOC；话题提及≠攻击特征",
+  "rejected_at": "2026-09-03",
+  "reject_reason": "R3-off-scope"
+}
