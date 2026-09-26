@@ -49,7 +49,7 @@ AIShield 定位：**Personal Agent Governance Kernel**。
 | Evidence Bundle | `eco/evidence_bundle.py` | SOC 向审计（OCSF/STIX/ATT&CK） |
 | Ship Gate | `scripts/ship_gate.py` | 10 态发布门 |
 | Spend Cap | `eco/spend_cap.py` | 支付层额度（reserve/commit） |
-| Trust Score | `eco/trust_score.py` | 5 维评分 |
+| Trust Score | `api/trust_api.py` / `eco/trust_protocol.py` | 扫描分+鉴证+信誉+责任链 4 维加权 |
 
 **缺失（个人 Agent 场景必须补）**：
 | Gap | 已有？ | 说明 |

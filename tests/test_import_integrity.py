@@ -6,8 +6,8 @@
 结果是 `import api.server` 在 CI 的干净 checkout 上直接 ImportError，
 unified-security-scan 连续 8 次红灯，而本机一切正常——因为本机有那份文件。
 
-更隐蔽的一层：main 上还有 6 个被引用的模块根本不存在
-(eco/crypto_sign.py、eco/platform.py、eco/protocol_bridge.py、eco/trust_score.py、
+更隐蔽的一层：main 上还有 5 个被引用的模块根本不存在
+(eco/crypto_sign.py、eco/platform.py、eco/protocol_bridge.py、
 collector/audit_chain.py、scanner/sandbox.py)。它们没有炸，只是因为引用点要么
 在 try/except 里、要么在函数体内的惰性 import 里、要么在 server.py 请求处理器
 的惰性 import 里——CI 只跑 `import api.server`，永远触达不到。
