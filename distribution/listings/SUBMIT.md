@@ -3,7 +3,7 @@
 > 用途：把各平台的「去哪提交 / 贴什么」固化成可直接复制的文本，降低手动发布摩擦。
 > 维护节奏：由自动化 `AIShield 多渠道分发缺口巡检` 每周核对状态并刷新本文件。
 > 最后人工核对：2026-08-15（curl/WebFetch 实测）。
-> 最后自动巡检：**2026-09-19**（curl 实测；本域无 drift，4.3.0/238 稳定；Registry 4.3.0 active 复测在册；npm 4.3.0 latest；详见表内 aishield.tools 两行）。
+> 最后自动巡检：**2026-09-26**（curl 实测；**重大变化**：aishield.tools 已重建至 4.8.3，长期 CF Pages 未重建 drift 消除；但 npm latest=4.4.0、Registry=4.3.0 均落后于 live 4.8.3，须补齐发布；详见表内 aishield.tools / npm / Registry 三行）。
 
 ---
 
@@ -48,6 +48,7 @@
 ## 1. Official MCP Registry（✅ 已上架 — 2026-08-22 纠正）
 
 - **状态**：✅ **已上架且 active**。此前「未上架/404」是**核验方法错误**导致的误判，本次纠正。
+- **⚠️ 2026-09-26 更新：Registry 现 STALE**。复测 `io.github.lm203688/aishield` 仍为 `isLatest=true` 但 **version 4.3.0**（不是 4.8.3）。live `aishield.tools` 已 4.8.3，故 Registry 落后于线上 5 个次要版本。原表内 `version 4.3.0 ✅ 与基线一致` 现已不准确（live 基线已升 4.8.3）。→ 等 `npm publish` 4.8.3 后由 `publish-mcp-registry.yml` 自动重发，**勿手提单 PR**（重复条目风险）。
 - **实测证据（2026-08-22）**：
   ```
   curl -sS --ssl-no-revoke --tlsv1.3 \
@@ -142,13 +143,13 @@
 
 ## 发布状态速查（每周由自动化刷新）
 
-> 状态截止 **2026-09-19** 自动巡检（全部经 curl 实测；本域无 drift、Registry/npm 复测一致）。
+> 状态截止 **2026-09-26** 自动巡检（curl 实测；aishield.tools 已 4.8.3 且内容新鲜；npm 4.4.0 / Registry 4.3.0 落后于 live 4.8.3）。
 
 | 渠道 | 状态 | 资产就绪 | 需用户手动 |
 |---|---|---|---|
-| Official MCP Registry | ✅ **已上架 active 4.3.0**（2026-09-05 复测；remotes 已移除，stdio-only） | ✅ 在册 | 无（勿提 PR，已在册） |
+| Official MCP Registry | 🟡 **已上架 active 但 STALE 4.3.0**（2026-09-26 复测；live aishield.tools 已 4.8.3 → 须 republish 4.8.3） | ✅ 在册 | 发版后由 `publish-mcp-registry.yml` 随 npm 4.8.3 自动重发（勿手提单 PR） |
 | Glama | ✅ 已上架（2026-08-22 复测 200） | ✅ README/llms.txt 已去云化(2026-08-15) | 后台短描述待用户登录改 |
-| npm | ✅ 4.3.0（2026-09-06 复测 latest=4.3.0） | — | — |
+| npm | 🟡 **4.4.0 latest**（2026-09-26 复测；版本集 4.2.0→4.4.0；**4.8.3 尚未发布**） | — | 发布 4.8.3 到 npm（Registry 随后自动跟随） |
 | LobeHub | ⚠️ 被 SaaS 占位 | ✅ 文案 | 登录发布开源版 |
 | Smithery | ❌ 未发布 | ✅ smithery.yaml | 登录发布 |
 | ClawHub | ❌ 缺位+squat | ✅ SKILL.md | clawhub publish |
@@ -161,21 +162,22 @@
 | DSH | ❌ | ✅ 全套 | 投稿+npm |
 | TeamAI | ✅ **source 已就绪（2026-09-15，无需账号）** | ✅ `teamai.yaml` + `skills/aishield-scan/SKILL.md` | 无 |
 | CocoLoop | 🟡 **文案就绪，待注册**（2026-09-15） | ✅ LISTING.md | 注册 + 社区投稿 |
-| aishield.tools 静态发现文件 | ✅ **已修复 4.3.0 → 235 MCP/241 Skill**（2026-09-15 sweep 复测） | ✅ main 已同步 | 无 |
-| aishield.tools `/api/v1` 后端 | ✅ **4.3.0/238**（deployed 2026-09-18T08:22:26Z, commit 83d6318b；rules_breakdown {static:210, generated:9, radar:19}，与 server-card 238 MCP 一致） | — | 无（已部署） |
+| aishield.tools 静态发现文件 | ✅ **已重建 4.8.3 → 235 MCP/262 Skill**（2026-09-26 复测；部署 commit 96b030f0，deployed 2026-09-26T01:16:44Z；7 工具含 aishield_digest 齐全；长期 CF Pages 未重建 drift 已消除） | ✅ main 已同步 | 无 |
+| aishield.tools `/api/v1` 后端 | ✅ **4.8.3/235**（deployed 2026-09-26T01:16:44Z, commit 96b030f0；rules_breakdown {static:208, generated:8, radar:19}=235，与 server-card 一致） | — | 无（已部署） |
 | GitHub Pages（github.io） | ⛔ **死端表面**：301→aishield.tools，内容不可达 | — | 无（勿再修，见下） |
 
-### 表面拓扑（2026-08-22 实测厘清）
+### 表面拓扑（2026-09-26 实测更新）
+
+> ⚠️ **2026-09-26 更正**：此前「main 4.3.0 + 两个线上表面 stale」的长期结论**已过时**。本次复测 aishield.tools 静态发现文件与 `/api/v1` 后端**均已升至 4.8.3 且内容新鲜**（commit 96b030f0，deployed 2026-09-26T01:16:44Z，rules_breakdown {208,8,19}=235，7 工具含 aishield_digest 齐全）。CF Pages 未重建的 drift **已消除**。
 
 ```
-main 分支 (✅ 4.3.0 / 230 / aishield_*  ← 唯一正确的真相源)
+main 分支 (✅ 4.8.3 / 235 rules / aishield_*  ← 真相源)
   │
-  ├── GitHub Pages ── pages.yml 构建成功 ──► github.io ──301(CNAME)──► aishield.tools
-  │                                                                    （自身内容永不可达 = 死端）
-  ├── Cloudflare Pages ──► aishield.tools 静态页 + .well-known/*  ⚠️ stale 4.2.0/133
-  └── 某后端 origin ─────► aishield.tools/api/v1/*                ⚠️ stale 4.2/133（但工具名对）
+  ├── GitHub Pages ── github.io ──301(CNAME)──► aishield.tools  （死端表面，内容不可达）
+  ├── Cloudflare Pages ──► aishield.tools 静态页 + .well-known/*  ✅ 现 4.8.3 新鲜
+  └── 后端 origin ─────► aishield.tools/api/v1/*                ✅ 现 4.8.3 新鲜
 ```
 
-**结论**：main 是对的，两个线上表面都是旧的。`pages.yml` 修不修都不影响 aishield.tools —— 唯一解是**重建 CF Pages + 重新部署后端**。
+**新缺口（2026-09-26）**：aishield.tools 已领先于发布渠道——**npm latest=4.4.0、Registry=4.3.0**，均落后于 live 4.8.3。须补：① `npm publish` 4.8.3；② 触发 `publish-mcp-registry.yml` 把 Registry 推到 4.8.3（自动随 npm 走，勿手提单 PR）。
 
 **⚠️ 附带发现（待用户拍板，本自动化未擅自改动）**：`pages.yml` 的 `3-Verify Reachable` 用 `curl -sL .../github.io/aishield/blog/` 探测，因 301 实际测的是 **CF Pages**，只要 aishield.tools 返回 200 就判绿 —— 即便内容 stale 也永远 success（78 次运行全绿）。这是一处**假绿门禁**（"恒定输出的门禁等于没门禁"）。建议改为断言内容新鲜度（抓 `.well-known/mcp/server-card.json` 断言 `version == 4.2.2`），这样 drift 会真实报红。此项属 workflow 改动，超出本自动化「只更新台账」职责，需用户授权。
