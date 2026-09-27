@@ -357,6 +357,8 @@ _PLACEHOLDER_RE = re.compile(
 )
 
 _RUNTIME_FETCH_RUNNERS = {"npx", "npx.cmd", "uvx", "pnpm", "pnpx", "bunx", "pipx", "dlx"}
+# 这些 runner 天然自动安装（无需 -y 确认），应与 npx -y 同等严重度。
+_ALWAYS_AUTO_INSTALL = {"uvx", "bunx", "pipx", "dlx", "pnpx"}
 _PRIVATE_HOST_RE = re.compile(
     r"^(localhost|127\.0\.0\.1|::1|0\.0\.0\.0|10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|"
     r"172\.(?:1[6-9]|2\d|3[01])\.\d+\.\d+|.*\.local|.*\.internal)$",
@@ -365,7 +367,7 @@ _PRIVATE_HOST_RE = re.compile(
 _AUTH_KEY_RE = re.compile(
     r"(authorization|api[-_]?key|token|bearer|secret|credential|oauth|client[-_]?secret)", re.I
 )
-_VERSION_PIN_RE = re.compile(r"@\d+\.\d+")
+_VERSION_PIN_RE = re.compile(r"(?:@\d+\.\d+|[><=~!]=\d+\.\d+)")
 
 # 会被当作「远程 MCP server」的传输协议白名单。
 # 用白名单而非「任何有 scheme 的 URL」：`file://` / `docker://` 这类本地协议
@@ -470,11 +472,13 @@ def analyze_server_entry(name, entry, source="", scope="user"):
     # 3) 运行时拉包（rug-pull / 幻觉包落地）
     if base.split(".")[0] in _RUNTIME_FETCH_RUNNERS or base in _RUNTIME_FETCH_RUNNERS:
         auto_yes = any(a in ("-y", "--yes", "--force") for a in args_s)
+        # uvx / bunx / pipx / dlx / pnpx 天然自动安装，无需 -y 即应等同 high
+        auto_install = auto_yes or base.split(".")[0] in _ALWAYS_AUTO_INSTALL
         pkg = next((a for a in args_s if not a.startswith("-")), "")
         pinned = bool(_VERSION_PIN_RE.search(pkg))
         latest = pkg.endswith("@latest")
         if not pinned or latest:
-            add("runtime_package_fetch", "high" if auto_yes or latest else "medium",
+            add("runtime_package_fetch", "high" if auto_install or latest else "medium",
                 f"server '{name}' 每次启动都从注册表拉取未锁定版本的包"
                 f"（{pkg or base}），存在 rug-pull 与幻觉包落地风险",
                 "MCP04", f"{command} {argline}",
