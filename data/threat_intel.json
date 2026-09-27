@@ -834,6 +834,23 @@
       "fetched": "2026-09-17T08:38:06.461200+00:00"
     },
     {
+      "id": "CVE-2026-61568",
+      "source": "nvd",
+      "severity": "critical",
+      "cvss": 9.6,
+      "title": "`@zereight/mcp-gitlab` is a Model Context Protocol server for GitLab. Versions prior to 2.1.30 expose the Streamable HTTP MCP endpoint without an effective Host or Origin allowlist. A malicious web pa",
+      "summary": "`@zereight/mcp-gitlab` is a Model Context Protocol server for GitLab. Versions prior to 2.1.30 expose the Streamable HTTP MCP endpoint without an effective Host or Origin allowlist. A malicious web page can use DNS rebinding to route browser requests to a victim's local MCP listener while preserving an attacker-controlled `Host` and `Origin`. The server accepts those headers and reaches the MCP initialization path instead of rejecting the request at the HTTP boundary. Version 2.1.30 contains a p",
+      "affected": "model context protocol",
+      "references": [
+        "https://github.com/zereight/gitlab-mcp/commit/52207c6f5c0e7a39e9235d491225edbb562a0290",
+        "https://github.com/zereight/gitlab-mcp/pull/555",
+        "https://github.com/zereight/gitlab-mcp/releases/tag/v2.1.30",
+        "https://github.com/zereight/gitlab-mcp/security/advisories/GHSA-vmp7-252j-cwp7"
+      ],
+      "published": "2026-09-15T21:16:41.570",
+      "fetched": "2026-09-27T09:12:59.559908+00:00"
+    },
+    {
       "id": "CVE-2026-61559",
       "source": "nvd",
       "severity": "critical",
@@ -6534,7 +6551,7 @@
       "fetched": "2026-08-04T06:34:53.913899+00:00"
     }
   ],
-  "updated": "2026-09-26T08:33:57.501809+00:00",
+  "updated": "2026-09-27T09:13:15.033287+00:00",
   "sources": [
     "osv",
     "nvd",
@@ -6553,16 +6570,16 @@
         "items": 0,
         "attempts": 1,
         "error": null,
-        "checked_at": "2026-09-26T08:33:32.246481+00:00",
+        "checked_at": "2026-09-27T09:12:52.481529+00:00",
         "consecutive_failures": 0,
         "degraded_since": null
       },
       "nvd": {
         "ok": true,
-        "items": 43,
+        "items": 39,
         "attempts": 1,
         "error": null,
-        "checked_at": "2026-09-26T08:33:54.442748+00:00",
+        "checked_at": "2026-09-27T09:13:11.763307+00:00",
         "consecutive_failures": 0,
         "degraded_since": null
       },
@@ -6571,22 +6588,22 @@
         "items": 44,
         "attempts": 1,
         "error": null,
-        "checked_at": "2026-09-26T08:33:57.501495+00:00",
+        "checked_at": "2026-09-27T09:13:15.032916+00:00",
         "consecutive_failures": 0,
         "degraded_since": null
       }
     },
     "degraded": [],
-    "last_success": "2026-09-26T08:33:57.501809+00:00",
-    "last_attempt": "2026-09-26T08:33:57.501809+00:00"
+    "last_success": "2026-09-27T09:13:15.033287+00:00",
+    "last_attempt": "2026-09-27T09:13:15.033287+00:00"
   },
   "stats": {
     "high": 211,
     "low": 6,
-    "critical": 61,
+    "critical": 62,
     "unknown": 36,
     "medium": 129,
     "moderate": 1
   },
-  "total": 444
+  "total": 445
 }

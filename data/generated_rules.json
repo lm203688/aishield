@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-09-26T08:34:14.490152+00:00",
-  "source_intel_count": 444,
+  "generated_at": "2026-09-27T09:13:28.980151+00:00",
+  "source_intel_count": 445,
   "package_blacklist": {
     "pip:scbe-aethermoore": {
       "ecosystem": "pip",
@@ -1041,7 +1041,7 @@
       "owasp": "LLM07",
       "owasp_name": "系统提示泄露 (System Prompt Leakage)",
       "derived_from": "origin",
-      "intel_hits": 46,
+      "intel_hits": 47,
       "evidence": [
         "GHSA-q986-4x7x-gx39",
         "GHSA-3cj3-hqcr-g934",
