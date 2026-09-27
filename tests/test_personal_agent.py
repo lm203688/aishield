@@ -19,6 +19,8 @@ import os
 import sys
 import tempfile
 import unittest
+from datetime import datetime, timedelta, timezone
+from unittest.mock import patch
 
 _BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 for _p in (_BASE, _BASE + "/api", _BASE + "/eco"):
@@ -220,6 +222,14 @@ class TestBudget(unittest.TestCase):
         self.assertLess(chk["risk_score"], 40)
 
     def test_check_confirm_medium_risk(self):
+        # Fix time to 12:00 to avoid off-hours penalty (hour < 6 → +10)
+        # which causes a false confirm verdict when run between 00:00-05:59 GMT+8.
+        tz = timezone(timedelta(hours=8))
+        fixed_now = datetime(2026, 9, 27, 12, 0, tzinfo=tz)
+        with patch("eco.personal_agent._now", return_value=fixed_now):
+            self._run_confirm_medium_risk()
+
+    def _run_confirm_medium_risk(self):
         self.pa.set_budget_policy("alice@example.com", "CNY", per_tx=1000, daily=5000)
         # 首次调用（无历史）：purchase + checkout 域名 → 30 分（allow）
         chk1 = self.pa.check_budget_and_risk(
