@@ -6551,7 +6551,7 @@
       "fetched": "2026-08-04T06:34:53.913899+00:00"
     }
   ],
-  "updated": "2026-09-27T09:13:15.033287+00:00",
+  "updated": "2026-09-28T09:42:40.232314+00:00",
   "sources": [
     "osv",
     "nvd",
@@ -6570,16 +6570,16 @@
         "items": 0,
         "attempts": 1,
         "error": null,
-        "checked_at": "2026-09-27T09:12:52.481529+00:00",
+        "checked_at": "2026-09-28T09:42:18.517677+00:00",
         "consecutive_failures": 0,
         "degraded_since": null
       },
       "nvd": {
         "ok": true,
-        "items": 39,
+        "items": 38,
         "attempts": 1,
         "error": null,
-        "checked_at": "2026-09-27T09:13:11.763307+00:00",
+        "checked_at": "2026-09-28T09:42:37.282750+00:00",
         "consecutive_failures": 0,
         "degraded_since": null
       },
@@ -6588,14 +6588,14 @@
         "items": 44,
         "attempts": 1,
         "error": null,
-        "checked_at": "2026-09-27T09:13:15.032916+00:00",
+        "checked_at": "2026-09-28T09:42:40.231939+00:00",
         "consecutive_failures": 0,
         "degraded_since": null
       }
     },
     "degraded": [],
-    "last_success": "2026-09-27T09:13:15.033287+00:00",
-    "last_attempt": "2026-09-27T09:13:15.033287+00:00"
+    "last_success": "2026-09-28T09:42:40.232314+00:00",
+    "last_attempt": "2026-09-28T09:42:40.232314+00:00"
   },
   "stats": {
     "high": 211,
