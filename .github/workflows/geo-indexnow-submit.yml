@@ -190,7 +190,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           python scripts/state_bus.py set distribution \
-            "{\"indexnow_last_run\":\"key=${{ needs.key-check.result }}:submit=${{ needs.submit.result || 'skipped'}}\",\"indexnow_submitted\":${{ needs.submit.outputs.submitted || 0 }}}\" \
+            "{\"indexnow_last_run\":\"key=${{ needs.key-check.result }}:submit=${{ needs.submit.result || 'skipped'}}\",\"indexnow_submitted\":${{ needs.submit.outputs.submitted || 0 }}}" \
             --source geo-indexnow || true
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
