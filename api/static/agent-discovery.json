@@ -4,7 +4,7 @@
   "full_name": "AIShield — AI Agent 安全扫描与可信工具认证",
   "domain": "aishield.tools",
   "tagline": "Agent 原生 AI 工具安全扫描器 / MCP 与 Agent 可信基础设施",
-  "service_version": "4.9.0",
+  "service_version": "4.10.0",
   "license": "MIT",
   "last_updated": "2026-09-15T12:45:00Z",
   "standards": [
