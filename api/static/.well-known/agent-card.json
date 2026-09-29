@@ -1,6 +1,6 @@
 {
   "name": "AIShield",
-  "version": "4.8.3",
+  "version": "4.9.0",
   "description": "AI Agent 安全生态基础设施 — OWASP MCP Top 10 对齐，235条MCP/262条Skill安全规则 + 身份/网络/Authentik/A2A/AI-slop/x402 六维能力边界扫描，全链路守护Agent世界",
   "url": "https://aishield.tools",
   "authentication": [
