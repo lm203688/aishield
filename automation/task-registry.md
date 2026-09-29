@@ -1,7 +1,7 @@
 # AIShield 自动化台账
 
 > **本文件由 `scripts/gen_task_registry.py` 自动生成，请勿手工编辑。**
-> 生成时间：2026-09-25 09:40 UTC
+> 生成时间：2026-09-29 03:24 UTC
 
 历史教训：本台账曾手工声称「二十八项定时任务在跑」，而仓库实际只有十四个 workflow，其中 self-heal 因 YAML 语法错静默失效 48 天。台账一旦脱离现实，就会把「看起来很自动化」的幻觉喂给每一次决策。现改为从 workflow 真实内容派生。
 
@@ -9,9 +9,9 @@
 
 | 指标 | 数值 |
 |------|------|
-| 本仓库 workflow 总数 | 21 个任务 |
+| 本仓库 workflow 总数 | 20 个任务 |
 | 其中定时驱动 | 6 个 |
-| 其中事件驱动 | 15 个 |
+| 其中事件驱动 | 14 个 |
 | 存在断链/语法问题 | 0 个 |
 
 ## 定时任务
@@ -41,7 +41,6 @@
 | `publish-mcp-registry.yml` | Publish to MCP Registry | workflow_run / 手动 | 2 |
 | `publish-npm.yml` | Publish to npm | release / push / 手动 | 5 |
 | `rule-promoter.yml` | AIShield Rule Auto-Promoter | workflow_call / 手动 | 2 |
-| `security-scan.yml` | AIShield Security Scan | push(main,develop) / PR / 手动 | 1 |
 | `threat-intel-feed.yml` | AIShield Threat-Intel Feed Update | workflow_call / 手动 | 6 |
 | `unified-security-scan.yml` | AIShield Unified Security Scan | workflow_call / push(main) / PR / 手动 | 2 |
 
