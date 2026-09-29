@@ -1,6 +1,6 @@
 {
   "schema_version": "v1",
-  "version": "4.9.0",
+  "version": "4.10.0",
   "name_for_human": "AIShield",
   "name_for_model": "aishield",
   "short_description_for_model": "Static security scanner for MCP servers, AI skills and AI agents. OWASP MCP Top 10 + OWASP Agentic AI Top 10 aligned, 235 rule categories, offline, never executes the configuration it scans.",
