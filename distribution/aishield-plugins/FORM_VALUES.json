@@ -7,7 +7,7 @@
   "form": {
     "plugin_name": "aishield-security-scan",
     "display_name": "AIShield Security Scan",
-    "version": "4.8.3",
+    "version": "4.9.0",
     "owner_or_publisher": "lm203688",
     "homepage": "https://aishield.tools",
     "repository": "https://github.com/lm203688/aishield",
