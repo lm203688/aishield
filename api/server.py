@@ -47,7 +47,7 @@ from trust_api import generate_attestation, verify_attestation, list_attestation
 # mcp.json 已是 "4.8.3"——用户按 /health 的版本去查文档，查到的永远是旧版。
 # 现在收敛为一个常量，由 scripts/sync_version.py 门禁约束；新增任何
 # "用户能读到的版本"都必须引用它，不得再写字面量。
-API_VERSION = "4.8.3"
+API_VERSION = "4.9.0"
 
 # ── Eco Dispatcher ──
 try:
