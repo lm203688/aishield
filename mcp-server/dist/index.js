@@ -25,7 +25,7 @@ const promises_1 = require("node:fs/promises");
 const zod_1 = require("zod");
 // 版本单一真源。由 scripts/sync_version.py 统一维护，CI 的版本一致性门禁会校验它，
 // 因此这里不再手写数字 —— 硬编码的 '3.0.0' 曾与已发布的 4.2.x 差了一个大版本。
-const SERVER_VERSION = '4.9.0';
+const SERVER_VERSION = '4.10.0';
 const API_BASE = process.env.AISHIELD_API_URL || 'https://api.aishield.tools';
 const API_KEY = process.env.AISHIELD_API_KEY || '';
 // ── Laya 本地决策模型集成 (可选) ──
@@ -541,6 +541,137 @@ server.tool('aishield_laya_shadow_stats', `查看 Laya 影子判定台账统计 
         lines.push('尚无影子条目 — 跑一次 aishield_prompt_check 即开始积累。');
     }
     return { content: [{ type: 'text', text: lines.join('\n') }] };
+});
+// ══════════════════════════════════════════════════════════════
+// Tool: Laya Semantic Gate (Allow/Ask/Deny 三档门禁, Jev Harness 白皮书式双层设计)
+// ══════════════════════════════════════════════════════════════
+// 第一层: 确定性规则 (只有这层能给出 DENY)。覆盖经典破坏性/渗透命令形态,
+// 命令名黑白名单拦不住的语义漏洞交给第二层。
+const GATE_RULES = [
+    { name: 'rm_rf_root_home', re: /\brm\s+(?:-[a-zA-Z]+\s+)+(?:["']?)((?:\/|~|\$HOME|%USERPROFILE%))(?:\s|$|\/)/i, reason: '递归强删根/家目录' },
+    { name: 'ps_remove_root', re: /Remove-Item\s+[^;\n]*-Recurse[^;\n]*-Force[^;\n]*[c-zC-Z]:\\\s*$/i, reason: 'PowerShell 递归强删盘符根路径' },
+    { name: 'windows_rmdir', re: /\b(rd|rmdir)\s+\/s\/q\s+[c-zC-Z]:\\?\s*$/i, reason: 'Windows 递归静默删盘' },
+    { name: 'del_tree', re: /\bdel\s+\/[sfq]{2,}\s+[c-zC-Z]:\\/i, reason: 'Windows 批量强删系统盘路径' },
+    { name: 'mkfs_dd', re: /\b(mkfs(\.\w+)?|dd\s+if=\/dev\/(zero|random)\s+of=\/dev\/[shv]d)/i, reason: '文件系统/裸设备覆写' },
+    { name: 'fork_bomb', re: /:\(\)\s*\{\s*:\s*\|\s*:\s*&\s*\}\s*;\s*:/, reason: 'fork 炸弹' },
+    { name: 'chmod777_root', re: /\bchmod\s+-R\s+777\s+\/(\s|$)/i, reason: '根目录全开权限' },
+    { name: 'pipe_remote_shell', re: /\b(curl|wget|fetch)\b[^|]*\|\s*(sudo\s+)?(ba|z|da|k)?sh\b/i, reason: '远端脚本直接管道进 shell (供应链执行)' },
+    { name: 'ps_iex_download', re: /Invoke-(WebRequest|Expression)\b.*(\|\s*)?(iex|Invoke-Expression)\b/i, reason: 'PowerShell 下载即执行' },
+    { name: 'eval_decoded', re: /\beval\s*\(\s*(atob|base64\s+-d|decode)\b/i, reason: '解码后 eval 执行' },
+    { name: 'ssh_key_read', re: /\b(cat|type|Get-Content|less|more)\b[^;&|]*\.ssh[/\\]id_rsa/i, reason: '读取 SSH 私钥' },
+    { name: 'cred_exfil_pipe', re: /(\.env|credentials?\.json|id_rsa|AWS_SECRET|PRIVATE\s+KEY)[^;&|]*\|\s*(curl|wget|nc\b|Invoke-WebRequest)/i, reason: '凭证管道外发' },
+    { name: 'secret_to_webhook', re: /(AWS_SECRET_ACCESS_KEY|API_KEY|PRIVATE KEY)[^\n]{0,80}(https?:\/\/|webhook\.site|telegram|pastebin)/i, reason: '密钥拼接外发 URL' },
+    { name: 'history_wipe', re: /\b(shred|wipe)\s+-[a-zA-Z]*u?[a-zA-Z]*\s+(\/var\/log|~\/\.bash_history)/i, reason: '销毁审计日志' },
+];
+// P1 校准产物 (calibrate_laya.py, 2026-09-29, seed n=48/ckpt):
+// checkpoint 的 temperature_by_options 按"选项数"做键, 所有 noul 问题共享一个温度,
+// 逐问题校准只能放在消费层后验应用。数值来自 calibration_report_{en,ml}.json 的 best_T。
+// 应用后: en jailbreak NLL -29.3%, 校准后 P>=0.9 预测 100% 准确 (57.5% 覆盖);
+//         ml jailbreak/injection 温度只能修置信度诚实度 (NLL -76%/-70%), 修不了 acc@0.5=0.75/0.85。
+const CAL_T = {
+    en: { jailbreak: 2.6, prompt_injection: 1.0 },
+    ml: { jailbreak: 5.0, prompt_injection: 5.0 },
+};
+function calibrateP(p, T) {
+    const eps = 1e-6;
+    const v = Math.min(Math.max(p, eps), 1 - eps);
+    return 1 / (1 + Math.exp(-Math.log(v / (1 - v)) / T));
+}
+server.tool('aishield_laya_gate', `命令/脚本三档语义门禁 (Allow/Ask/Deny) — Jev Harness 白皮书式双层设计。
+
+第一层 (确定性规则): 13 条经典破坏形态正则 (递归删盘/fork 炸弹/远端脚本管道执行/SSH 私钥读取/
+凭证外发等) — 只有这层能给出 DENY。
+第二层 (Laya 语义判定): 规则未命中时, 用本地 Laya 对命令全文做越狱/注入语义判定 —
+校准完成前只贡献 ASK (升级人工确认) 信号, 永不自动 DENY (置信度×后果分级原则)。
+
+返回: verdict (ALLOW/ASK/DENY) + 命中规则/Laya 概率 + 延迟。
+需要本地 Laya 服务在线 (AISHIELD_LAYA_URL, 默认 http://127.0.0.1:8188);
+服务离线时按 fail_mode 处理: warn=放行但标注语义层不可用, closed=一律 ASK。`, {
+    command: zod_1.z.string().min(1).describe('待检命令或脚本全文'),
+    fail_mode: zod_1.z.enum(['warn', 'closed']).default('warn').describe('Laya 离线时: warn=放行+标注, closed=一律 ASK'),
+    ask_threshold: zod_1.z.number().min(0).max(1).default(0.9).describe('校准后概率达到该值即升级 ASK (默认 0.9: 校准曲线上 P>=0.9 精度 100%)'),
+}, async ({ command, fail_mode, ask_threshold }) => {
+    const t0 = Date.now();
+    // ── 第一层: 确定性规则 (可 DENY) ──
+    for (const rule of GATE_RULES) {
+        if (rule.re.test(command)) {
+            return {
+                content: [{
+                        type: 'text',
+                        text: [
+                            `⛔ DENY — 命中确定性规则 [${rule.name}]`,
+                            `原因: ${rule.reason}`,
+                            `延迟: ${Date.now() - t0}ms (纯规则, 未调用 Laya)`,
+                            ``,
+                            `该命令匹配已知破坏性/渗透形态, 无论语义判定结果如何一律拒绝。`,
+                            `如是误报, 请修改命令写法绕开该形态后重试, 或人工审核后执行。`,
+                        ].join('\n'),
+                    }],
+            };
+        }
+    }
+    // ── 第二层: Laya 语义判定 (只 ASK, 不 DENY) ──
+    // CJK 检测: 含中文字符用 ml checkpoint, 否则 en
+    const hasCJK = /[\u4e00-\u9fff]/.test(command);
+    const checkpoint = hasCJK ? 'ml' : 'en';
+    try {
+        const res = await fetch(`${LAYA_URL}/decide`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: command, checkpoint, questions: 'guard', threshold: 0.5 }),
+            signal: AbortSignal.timeout(10000),
+        });
+        if (!res.ok)
+            throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        const it = Array.isArray(data.items) ? data.items[0] : undefined;
+        const answers = it?.result?.answers || {};
+        // 后验温度校准 (P1 产物), ASK 阈值作用在校准后的概率上
+        const tMap = CAL_T[checkpoint] || {};
+        const pj = calibrateP(answers.jailbreak?.p ?? 0, tMap.jailbreak ?? 1.0);
+        const pi = calibrateP(answers.prompt_injection?.p ?? 0, tMap.prompt_injection ?? 1.0);
+        const rawJ = answers.jailbreak?.p ?? 0;
+        const rawI = answers.prompt_injection?.p ?? 0;
+        const maxP = Math.max(pj, pi);
+        const layaMs = it?.result?.ms ?? null;
+        layaShadowJudge(command, 'gate', { safe: maxP < ask_threshold, score: maxP, risk: maxP >= ask_threshold ? 'escalate' : 'ok' });
+        const verdict = maxP >= ask_threshold ? 'ASK' : 'ALLOW';
+        const lines = [
+            `${verdict === 'ASK' ? '⚠️' : '✅'} ${verdict} — 规则层未命中, Laya 语义判定 (已校准)`,
+            `checkpoint=${checkpoint}  jailbreak P=${pj.toFixed(4)} (raw ${rawJ.toFixed(4)})  prompt_injection P=${pi.toFixed(4)} (raw ${rawI.toFixed(4)})  (ask 阈值 ${ask_threshold})`,
+            `延迟: 规则 ${Date.now() - t0 - (layaMs ?? 0)}ms + Laya ${layaMs ?? '?'}ms`,
+        ];
+        if (verdict === 'ASK') {
+            lines.push('', `语义判定置信度达到升级阈值, 建议人工确认后再执行。`, `注: 校准完成前 Laya 信号只用于 ASK 升级, 不用于自动 DENY。`);
+        }
+        else {
+            lines.push('', `注: 通过 = 规则层无命中且语义判定低风险; Laya 校准仍在进行 (影子台账持续积累), 高后果操作请保持人工复核习惯。`);
+        }
+        return { content: [{ type: 'text', text: lines.join('\n') }] };
+    }
+    catch (e) {
+        const msg = e?.message || String(e);
+        if (fail_mode === 'closed') {
+            return {
+                content: [{
+                        type: 'text',
+                        text: `⚠️ ASK — Laya 服务不可达 (${msg.slice(0, 120)}), fail_mode=closed 升级人工确认。\n启动: start_laya.bat 或 laya_infer.py serve --port 8188`,
+                    }],
+            };
+        }
+        return {
+            content: [{
+                    type: 'text',
+                    text: [
+                        `✅ ALLOW (语义层不可用) — 规则层未命中, 但 Laya 离线: ${msg.slice(0, 120)}`,
+                        `延迟: ${Date.now() - t0}ms (仅规则层)`,
+                        ``,
+                        `⚠️ 本次判定未经语义第二层, 仅靠确定性规则。高后果操作请人工复核。`,
+                        `启动 Laya: start_laya.bat 或 laya_infer.py serve --port 8188 (AISHIELD_LAYA_URL 可覆盖)`,
+                    ].join('\n'),
+                }],
+        };
+    }
 });
 // Helper: 格式化 Laya 决策结果
 function formatLayaResult(data, threshold) {
