@@ -5,7 +5,7 @@ license: MIT
 compatibility: Requires network access to https://aishield.tools (optional — local scan path is offline). Python 3.9+ for local scan_workspace.py. No credentials needed.
 allowed-tools: Read Write Bash
 metadata:
-  version: "4.9.0"
+  version: "4.10.0"
   skill-author: lm203688
   category: quality-security
   rules_mcp: 235
