@@ -1,7 +1,7 @@
 # Smithery.ai configuration
 # https://smithery.ai/docs/build/project-config/smithery-yaml
 name: "@lm203688/aishield"
-version: "4.8.3"
+version: "4.9.0"
 description: "Local-first, zero-egress AI-tool security scanner for MCP servers, AI skills, GPTs and prompts. OWASP MCP Top 10 + Agentic ASI01-10 aligned. 238 MCP / 262 skill rules. Your code never leaves your machine."
 author:
   name: "AIShield Team"
