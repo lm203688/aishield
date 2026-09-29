@@ -1,6 +1,6 @@
 {
   "name": "dsh-aishield",
-  "version": "4.8.3",
+  "version": "4.9.0",
   "description": "Local, offline security scanner for DeepSeek Harness plugins (supply-chain / prompt-injection / over-privilege). Wraps aishield-mcp-server; your code never leaves your machine.",
   "type": "module",
   "main": "index.js",
