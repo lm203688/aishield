@@ -1,7 +1,7 @@
 {
   "serverInfo": {
     "name": "AIShield",
-    "version": "4.8.3",
+    "version": "4.9.0",
     "description": "AI Agent Security Shield — OWASP MCP Top 10 + OWASP Agentic AI Top 10 aligned security scanning. 235 MCP rules (+262 skill rules) covering prompt injection, zero-width characters, Rug Pull, permission audit, supply-chain and agentic risk. Local-first: no code leaves your machine. Features pre-install guardrail gating, OpenAPI auto-discovery, compact trust digest (aishield-digest/v1) and embeddable security badges."
   },
   "url": "https://github.com/lm203688/aishield",
