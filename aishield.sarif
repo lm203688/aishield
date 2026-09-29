@@ -6,7 +6,7 @@
       "tool": {
         "driver": {
           "name": "AIShield",
-          "version": "4.8.3",
+          "version": "4.9.0",
           "informationUri": "https://aishield.tools",
           "rules": [
             {
