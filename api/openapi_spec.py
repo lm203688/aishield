@@ -69,7 +69,7 @@ def get_openapi_spec():
         "openapi": "3.0.3",
         "info": {
             "title": "AIShield API",
-            "version": "4.8.3",
+            "version": "4.9.0",
             "description": (
                 "AI Agent Security & Trust Platform — Agent-First API\n\n"
                 "AIShield 为 AI Agent 提供一站式安全能力：安全扫描、Prompt 注入检测、\n"
