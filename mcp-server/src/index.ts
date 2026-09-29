@@ -2,25 +2,31 @@
 
 /**
  * AIShield MCP Server
- * 
+ *
  * OWASP MCP Top 10 aligned security scanner.
- * 7 tools: scan / guardrail / prompt_check / banned_words / rug_pull / handshake / digest
- * 
+ * Core tools: scan / guardrail / prompt_check / banned_words / rug_pull / handshake / digest
+ * Laya tools: laya_precheck (本地决策模型初筛) / laya_shadow_stats (影子判定台账)
+ * Plus: evidence_* / chain_* / connector_* / contributor_* / agent_infra_* tool groups.
+ *
  * Usage:
  *   npx aishield-mcp-server
- * 
+ *
  * Env:
- *   AISHIELD_API_URL  — backend API URL (default: https://api.aishield.tools)
- *   AISHIELD_API_KEY  — optional API key for higher rate limits
+ *   AISHIELD_API_URL      — backend API URL (default: https://api.aishield.tools)
+ *   AISHIELD_API_KEY      — optional API key for higher rate limits
+ *   AISHIELD_LAYA_URL     — local Laya HTTP service (default: http://127.0.0.1:8188)
+ *   AISHIELD_LAYA_SHADOW  — 'off' disables the shadow decision ledger (default: on)
+ *   AISHIELD_LAYA_LEDGER  — shadow ledger JSONL path (default: see LAYA_LEDGER)
  */
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { appendFile, readFile } from 'node:fs/promises';
 import { z } from 'zod';
 
 // 版本单一真源。由 scripts/sync_version.py 统一维护，CI 的版本一致性门禁会校验它，
 // 因此这里不再手写数字 —— 硬编码的 '3.0.0' 曾与已发布的 4.2.x 差了一个大版本。
-const SERVER_VERSION = '4.8.3';
+const SERVER_VERSION = '4.9.0';
 
 const API_BASE = process.env.AISHIELD_API_URL || 'https://api.aishield.tools';
 const API_KEY = process.env.AISHIELD_API_KEY || '';
@@ -41,6 +47,67 @@ const API_KEY = process.env.AISHIELD_API_KEY || '';
 // 质量提示: 英文 checkpoint (en) 对中文 prompt 误报率高，中文请用 checkpoint=ml。
 // harm_severity 置信度低 (0.03-0.38)，仅作参考。零样本不可直接投产。
 const LAYA_URL = (process.env.AISHIELD_LAYA_URL || 'http://127.0.0.1:8188').replace(/\/$/, '');
+
+// ── Laya Shadow 判定点 (借鉴 mu-agent 影子模式: 只记录, 不拦截, 不改任何行为) ──
+//
+// aishield_prompt_check / aishield_laya_precheck 运行时, 后台静默请求本地 Laya,
+// 把「Laya 判定 vs 远程规则引擎判定」的配对结果追加进 JSONL 台账。
+// 目的: 零成本攒一份自有配对标注数据, 供 Laya 温度校准/微调使用
+// (零样本质量红线: ml checkpoint 对正常中文 jailbreak=1.0, harm_severity 不可用)。
+//
+// 安全性: 影子调用 8s 超时、全部异常就地吞掉、绝不向上抛错、绝不阻塞主判定 ——
+// Laya 服务挂了也只是台账里多一条 shadow_error, 工具行为与 4.8.3 完全一致。
+const LAYA_LEDGER = process.env.AISHIELD_LAYA_LEDGER || 'C:\\Users\\xing\\.workbuddy\\laya\\shadow_ledger.jsonl';
+const LAYA_SHADOW_ON = (process.env.AISHIELD_LAYA_SHADOW || 'on').toLowerCase() !== 'off';
+
+function layaShadowJudge(prompt: string, source: string, rules?: Record<string, unknown>): void {
+  if (!LAYA_SHADOW_ON) return;
+  const t0 = Date.now();
+  fetch(`${LAYA_URL}/decide`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ text: prompt, checkpoint: 'en', questions: 'guard', threshold: 0.5 }),
+    signal: AbortSignal.timeout(8000),
+  })
+    .then(async (res) => {
+      const entry: Record<string, unknown> = {
+        ts: new Date().toISOString(),
+        kind: 'shadow',
+        source,
+        checkpoint: 'en',
+        questions: 'guard',
+        prompt_head: String(prompt).slice(0, 200),
+        rules: rules ?? null,
+        laya_ok: res.ok,
+        ms: Date.now() - t0,
+      };
+      if (res.ok) {
+        const data = await res.json();
+        const it = Array.isArray(data.items) ? data.items[0] : undefined;
+        const r = it?.result || {};
+        entry.laya = { answers: r.answers ?? null, latency_ms: r.ms ?? null };
+      }
+      await appendFile(LAYA_LEDGER, JSON.stringify(entry) + '\n', 'utf8');
+    })
+    .catch(async (err: unknown) => {
+      // 台账写失败也吞掉 —— 影子模式对主链路必须完全零影响。
+      try {
+        await appendFile(
+          LAYA_LEDGER,
+          JSON.stringify({
+            ts: new Date().toISOString(),
+            kind: 'shadow_error',
+            source,
+            err: String((err as Error)?.message || err).slice(0, 160),
+            ms: Date.now() - t0,
+          }) + '\n',
+          'utf8'
+        );
+      } catch {
+        /* swallow */
+      }
+    });
+}
 
 // ── API Helper ──
 async function apiCall(path: string, body: Record<string, unknown>, timeoutMs = 30000): Promise<any> {
@@ -195,6 +262,8 @@ server.tool(
   async ({ prompt }) => {
     try {
       const data = await apiCall('/api/v1/prompt-check', { prompt });
+      // 影子判定点: 后台记录 Laya 判定 vs 规则引擎判定的配对数据, 不阻塞不拦截。
+      layaShadowJudge(prompt, 'prompt_check', { safe: data.safe, score: data.score, risk: data.risk });
       const safe = data.safe ? '✅ SAFE' : '❌ UNSAFE';
       const summary = [
         `Prompt安全检测结果: ${safe}`,
@@ -431,6 +500,8 @@ server.tool(
         };
       }
       const data = await res.json();
+      // 显式调用同样入台账 (kind=shadow, source=explicit_precheck), 供校准数据集积累。
+      layaShadowJudge(prompt, 'explicit_precheck');
       return { content: [{ type: 'text' as const, text: formatLayaResult(data, threshold) }] };
     } catch (e: any) {
       const msg = e?.message || String(e);
@@ -445,6 +516,95 @@ server.tool(
         }],
       };
     }
+  }
+);
+
+// ══════════════════════════════════════════════════════════════
+// Tool: Laya Shadow Ledger Stats (影子判定台账统计)
+// ══════════════════════════════════════════════════════════════
+
+server.tool(
+  'aishield_laya_shadow_stats',
+  `查看 Laya 影子判定台账统计 — 影子模式在 aishield_prompt_check / laya_precheck 运行时
+后台静默记录「Laya 判定 vs 规则引擎判定」的配对数据 (只记录、不拦截)。
+
+用途: 积累自有标注数据集, 供 Laya 温度校准/微调前评估质量红线修复进度。
+返回: 总条数 / 影子命中率 / Laya 可用率 / 平均延迟 / 与规则引擎一致率 / 最近条目预览。`,
+  {},
+  async () => {
+    let raw: string;
+    try {
+      raw = await readFile(LAYA_LEDGER, 'utf8');
+    } catch {
+      return {
+        content: [{
+          type: 'text' as const,
+          text: [
+            'Laya 影子台账: 空 (尚无记录)',
+            '',
+            `台账路径: ${LAYA_LEDGER}`,
+            '影子模式在 aishield_prompt_check / aishield_laya_precheck 每次运行时自动积累,',
+            '需要本地 Laya 服务在线 (start_laya.bat / laya_infer.py serve --port 8188)。',
+            `当前开关: ${LAYA_SHADOW_ON ? 'on' : 'off'} (AISHIELD_LAYA_SHADOW=off 可关闭)`,
+          ].join('\n'),
+        }],
+      };
+    }
+
+    const entries: any[] = [];
+    for (const line of raw.split('\n')) {
+      const s = line.trim();
+      if (!s) continue;
+      try { entries.push(JSON.parse(s)); } catch { /* 跳过坏行 */ }
+    }
+
+    const shadows = entries.filter((e) => e.kind === 'shadow');
+    const errors = entries.filter((e) => e.kind === 'shadow_error');
+    const okShadows = shadows.filter((e) => e.laya_ok);
+    const latencySamples = okShadows.map((e) => e.ms).filter((v) => typeof v === 'number');
+    const meanMs = latencySamples.length
+      ? Math.round(latencySamples.reduce((a: number, b: number) => a + b, 0) / latencySamples.length)
+      : null;
+
+    // 与规则引擎一致率: 规则 safe=false 视为 flagged;
+    // Laya jailbreak/prompt_injection 任一 P>=0.5 视为 flagged。
+    let paired = 0;
+    let agree = 0;
+    for (const e of okShadows) {
+      const rules = e.rules;
+      const answers = e.laya?.answers || {};
+      if (!rules || typeof rules.safe !== 'boolean') continue;
+      const rulesFlagged = rules.safe === false;
+      const layaFlagged =
+        (typeof answers.jailbreak?.p === 'number' && answers.jailbreak.p >= 0.5) ||
+        (typeof answers.prompt_injection?.p === 'number' && answers.prompt_injection.p >= 0.5);
+      paired += 1;
+      if (rulesFlagged === layaFlagged) agree += 1;
+    }
+
+    const lines: string[] = [
+      'Laya 影子判定台账统计',
+      '─'.repeat(44),
+      `台账路径: ${LAYA_LEDGER}`,
+      `总条数: ${entries.length} (影子 ${shadows.length} / 错误 ${errors.length})`,
+      `Laya 可用率: ${shadows.length ? Math.round((okShadows.length / shadows.length) * 100) + '%' : 'n/a'}`,
+      `平均影子延迟: ${meanMs !== null ? meanMs + 'ms' : 'n/a'}`,
+      `与规则引擎一致率: ${paired ? `${agree}/${paired} (${Math.round((agree / paired) * 100)}%)` : '尚无配对数据'}`,
+      '',
+    ];
+
+    const recent = shadows.slice(-3).reverse();
+    if (recent.length) {
+      lines.push('最近条目:');
+      for (const e of recent) {
+        const rulesTxt = e.rules ? `rules_safe=${e.rules.safe}` : 'rules=n/a';
+        lines.push(`  [${e.ts}] ${e.source} ${rulesTxt} ${String(e.prompt_head || '').slice(0, 60)}`);
+      }
+    } else {
+      lines.push('尚无影子条目 — 跑一次 aishield_prompt_check 即开始积累。');
+    }
+
+    return { content: [{ type: 'text' as const, text: lines.join('\n') }] };
   }
 );
 
