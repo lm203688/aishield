@@ -276,7 +276,7 @@ commit of `github.com/lm203688/aishield` that ran on GitHub Actions, and is
 signed by sigstore. Verify it rather than trusting the version number:
 
 ```bash
-npm install aishield-mcp-server@4.9.0
+npm install aishield-mcp-server@4.10.0
 npm audit signatures          # npm >= 9.5
 ```
 
