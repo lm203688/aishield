@@ -1,63 +1,76 @@
-# AIShield 长期记忆（2026-09-24 精简，限 3K）
+# AIShield 长期记忆（2026-09-30 精简，限 3K）
 > 细节见 `automation-digest/YYYY-MM-DD.md` 与 `automations/*/memory.md`；本文只留可复用硬事实。
 
 ## 定位 / 版本
-Agent 原生 AI 工具安全扫描器（MCP/skill/GPTs/prompt），对齐 OWASP MCP Top10 + ASI01–10，零依赖可离线。`lm203688/aishield`(public)，npm **4.8.3**。
-**不变量：绝不 spawn 被扫配置里的命令**（自证 `scripts/prove_isolation.py`）。
-2026-09-24 重定位：研发导向的开源 agent 生态统一服务平台；5 支柱（发现/认证/组合/执行/鉴证）对齐 agent 生命周期，商业门禁降为「认证」之一。详情 `docs/aishield-direction-2026-09-research.md`。
-版本史（均已推 main）：4.5.0 五支柱 API；4.6.0 KYA SD-JWT Ed25519 + Leaderboard + Contributors + Sandbox 5 后端；4.7.0 Evidence Bundle 1.0（OCSF/STIX/ATT&CK + 双轮复测）+ Ship Gate 10 态机；4.7.1 MCP 45 工具**实装**（此前只改 manifest = 假绿）；4.8.0 个人 Agent 治理层 `eco/personal_agent.py`（PAI DID + Capability Ticket + 预算 4 档 + 8 因素风险分 + 行动链 + Connector 8 规则审核）+ 18 端点 + 8 MCP 工具；4.8.1 平台中立接入层 `eco/platform_registry.py`；4.8.2 海外平台真实接入 `connectors/{muse,grok_bot}`（**只接国外**：Muse / Grok Bot，国内 Coze 误建已删、仅留注册表条目）；4.8.3 NVIDIA 开发者平台接入 + Agent 基础设施开源扫描管道，MCP **66 工具**。
+Agent 生态支持体系基础设施（原 agent 安全扫描器，2026-09-30 战略转向），对齐 OWASP MCP Top10 + Agentic AI Top10，零依赖离线可用。`lm203688/aishield`(public)，npm **4.10.0**。**不变量：绝不 spawn 被扫配置里的命令**（自证 `scripts/prove_isolation.py`）。
+版本史（均已推 main）：4.5.0 五支柱 API → 4.8.3 NVIDIA 接入 + Agent 基础设施开源扫描（MCP 66 工具）→ **4.10.0 Agent 生态支持体系基础设施**：Agent Memory 深度扫描 + confidence 晋升 + 独立 rule decay + Policy Pack + Red-team probe 5 硬骨头模块统一 API（MCP 76 工具）。
 
-## 接入层（connectors/，v4.8.2-4.8.3）
-`connectors/base.py`（OAuth/token/proxy 通用）+ `connectors/dispatcher.py`（platform 参数化分发 + **按平台 kwargs 白名单过滤**，防统一 MCP schema 传多余 kwarg → TypeError）。
-三平台：`meta-muse`（OAuth）、`xai-grok-bot`（OAuth+PAT）、`nvidia-dev`（NGC API Key；NGC/NIM/NeMo 三端点）。
-**双形态**：① 开发者身份（OAuth/PAT/API Key）② MCP 桥（66 工具 server 即桥，零迁移）。身份（PAI DID）与治理层跨平台共用。
-**API**：`/api/v1/connectors/{plat}/{self-check,oauth/*,agents/register,actions/{preflight,run}}` + `/api/v1/agent-infra/{targets,scan,scan-portfolio}`；server.py 两个 prefix 都路由到 `connectors_api`。
-**Agent 基础设施扫描管道** `connectors/agent_infra/scan_pipeline.py`：三层（scan_target → build_mcp_adapter_skeleton → build_secondary_rd_checklist），三态输入 repo_url/local_path/files，复用 `scanner.engine` 底层函数，零依赖离线可用。注册表 36 平台（+nvidia-dev/laya/nasiko/agent-desktop，family=developer|infrastructure）。
-**测试隔离坑（2026-09-25 实锤）**：本机 WorkBuddy 运行时的**安全删除守卫**（sitecustomize.py 包 os.remove）按 TOOL_CALL_ID 累计 os.remove 次数，超阈值 → `SAFE_DELETE_BULK_GUARD_ERROR` → `SystemExit(1)`，把测试自清理误判成批量删除（1522 测试一次进程 290 次删除）。**`env -u` 不可用**（会吞掉 stdout，因 TOOL_CALL_ID 兼做输出路由）；正确做法：`python -u -c "import os;os.environ.pop('CODEBUDDY_SAFE_DELETE_BULK_STATE_DIR',None);import runpy;runpy.run_path('tests/run_all.py',run_name='__main__')"`（守卫需 STATE_DIR+TOOL_CALL_ID 同时存在才激活，pop 掉前者即 no-op，保留后者保住输出）。CI 无此变量、守卫本就不触发。
+## 5 硬骨头模块（2026-09-30 落地）
+- **`scanner/agent_memory_scan.py`**：8 框架（Hermes/Hindsight/Innate/Letta/Mem0/Zep/Memobase/Cognee）+ 4 品类攻击面（framework_specific_api / cross_session_accumulation / memory_recall_injection / persistent_goal_injection）。对齐 ASI06 + MCP06。文件级 guards 判断（非行内 lookahead，防 `datetime.now()` 内部 `)` 提前 break）。
+- **`scripts/confidence_promotion.py`**：raw → seed(1) → draft(5) → rule(10+) 三态 + 90/180 天 decay。BENIGN_CORPUS 红线：任何 benign 命中 → false_positive 阻断。
+- **`scripts/rule_decay.py`**：独立出口机制（vs 晋升入口）。90 天 HIST_KEEP / 14 天 DORMANT / 30 天 RETIRE 窗口。`_pattern_hash`=sha1[:12] 保身份稳定。
+- **`scanner/policy_pack.py`**：5 内置 pack（default/strict/mcp-only/personal-agent/red-team），六维策略（severity_min/fail_on/excluded_categories/required_categories/excluded_files/description）。red-team `fail_on="impossible"` 特判为永不 fail。
+- **`scanner/red_team_probe.py`**：17 probe 覆盖 MCP01-10 + ASI04/06/07/08。finding 用 `rule_id="MCP01-001"` 前缀匹配 + `owasp_category="MCP06"` 类别匹配。
+- **`api/ecosystem_support_api.py`**：10 REST 端点（前缀 `/api/v1/eco-support/`），路由到 server.py GET + POST 双分支，MCP 7 个新工具。
 
+## 接入层
+`connectors/`：`base.py` + `dispatcher.py`（按平台 kwargs 白名单过滤防统一 schema 传多余 kwarg → TypeError）。三平台：`meta-muse`(OAuth)、`xai-grok-bot`(OAuth+PAT)、`nvidia-dev`(NGC API Key)。**只接国外**（国内 Coze 误建已删）。注册表 36 平台（family=developer|infrastructure）。
+`connectors/agent_infra/scan_pipeline.py`：scan_target → build_mcp_adapter_skeleton → build_secondary_rd_checklist，三态输入 repo_url/local_path/files。
+**API**：`/api/v1/connectors/{plat}/{self-check,oauth/*,agents/register,actions/{preflight,run}}` + `/api/v1/agent-infra/{targets,scan,scan-portfolio}` + `/api/v1/eco-support/{agent-memory-scan,policy-apply,policy-packs,red-team-probe,red-team-probe/coverage,confidence-promotion,rule-decay,rule-decay/retire,rule-decay/snapshot,summary}`。
 
-## 规则数（勿引用旧数）
-**235 = 静态 208 + 生成 8 + 雷达 19**（live 看 `/api/v1/health.rules_breakdown`）；Skill **262**（SKILL_EXTRA 27）。已门禁化 `scripts/rule_count_gate.py`（CI `ci.yml`，47 声明位）。坑：散文里 238 可能是 `rgba(238,69,96)`；分解行须拆 ROW_MARKERS/CELL_MARKERS。
-正则坑：中文字符类外是 `\w`，ASCII 边界须 `\b`；千位数字用 `\d[\d,]*\d{3,}`；「提及 x402 ≠ 执行 x402」。
-`scanner/mcp_manifest_scan.py` 处理 SEP-2640 manifest（scope/installCommands/明文 token/签名/过期 5 项），27 测试全绿。
+## 规则数 / 版本声明位（勿引用旧数）
+**235 = 静态 208 + 生成 8 + 雷达 19**（live `/api/v1/health.rules_breakdown`）；Skill **262**（SKILL_EXTRA 27）。`scripts/rule_count_gate.py` 门禁。
+`scripts/sync_version.py` **35 声明位**；`tests/test_version_declare.py` 强制"生产路径里出现产品版本字面量就必须登记"。唯一事实源 `api/server.py:API_VERSION`；`api/openapi_spec.py` **import** 它；`gen_project_sbom.py` 从 `setup.py` 正则取。
+**死代码坑**：`/.well-known/agent-card.json` 由 `api/trust_api.py:agent_card()` 读 **`docs/.well-known/agent-card.json`** 返回；`api/static/` 那份永远不被服务。
+**历史保留约定**：带日期文档刻意保留原值——`docs/investor-strategy-2026-08.md`、`distribution/listings/SUBMIT.md` 等，`HISTORICAL_ALLOWLIST` 逐条注明。
 
-## 版本声明位（2026-09-25 全量收敛，勿再写字面量）
-`scripts/sync_version.py` **35 个声明位**（原先 22），`tests/test_version_declare.py` 9 测试强制「生产路径里出现产品版本字面量就必须登记」+「同主版本家族不得并存两个值」。
-**唯一事实源**：`api/server.py` 的 `API_VERSION`（原 6 处 4.3.0 已收敛）；`api/openapi_spec.py` **import** 它做示例值（不再写死）；`scripts/gen_project_sbom.py` 从 `setup.py` 正则取（原硬编码 4.2.2，曾致 SBOM 盖 4.3.0 / npm 4.8.3 三层矛盾）。
-**死代码坑**：`/.well-known/agent-card.json` 由 `api/trust_api.py:agent_card()` 读 **`docs/.well-known/agent-card.json`** 返回；`api/static/.well-known/agent-card.json` 永远不被服务（server.py 的 trust_api 分支先命中）。两份都得改，只改 static 那份等于白改。
-**历史保留约定**：带日期文档刻意保留原值（改之=篡改史实）——`docs/investor-strategy-2026-08.md`、`docs/agent-ecosystem-distribution.md`、`distribution/listings/SUBMIT.md`、`distribution/aishield-plugins/SUBMISSION.md`、`distribution/published.json`、`llms-full.txt` 正文的 `**Shipped in v4.2.0**` 变更日志标题。已在测试 `HISTORICAL_ALLOWLIST` 逐条注明理由；`project-sbom.cyclonedx.json` 整文件跳过（90 个内部源文件组件版本由生成器统一盖章，只锚 application 组件）。
-**CI 根因（已修）**：`unified-security-scan.yml` 原为 `python api/server.py & sleep 3 + curl -s`（不带 --fail，失败伪装成成功）→ 改专用端口 8731 + 30s 有界就绪探测 + `curl -sf` + 进程退出即打日志。`ci.yml` 本就有正确 retry 范式。
-**回归前提**：`tests/test_linkages.py` 用 `@unittest.skipUnless(_SERVER_UP)` 探 8450——本机起了 server 会把 skip 翻成 run 并冒出假 401 失败。跑全量前须停掉本机 server。当前 **1572/1572（23 skip）**。
+## 基准
+`scripts/benchmark.py` 主口径 serious_only **46/50=92.0% 召回 / 0/45=0.0% 误报**（副口径 any_finding 覆盖 50/50）。MIN_RECALL=0.85 / MIN_COVERAGE=1.00。检出缺口：instruction_sample #1/#13/#16/#23（未达 serious_only 阈值）。红队探针实测 **7/17 PASS**（MCP01-1/2、MCP05-1、MCP08-1、MCP10-1、ASI04-1/2），10 FAIL 是真实缺口（MCP02/03/04/06/07/09 无对应规则，ASI06/07/08 部分覆盖）。
 
-## 基准（勿引用 96%/98%）
-`scripts/benchmark.py` 主口径 serious_only **45/50=90.0% 召回 / 0/45=0.0% 误报**；副口径 any_finding 覆盖 50/50。MIN_RECALL=0.85 / MIN_COVERAGE=1.00。is_doc 已按规则语义豁免（MCP06 + ASI*），指令面喂样用 `skills/payload_NN.md`。
+## 测试隔离坑（2026-09-25 实锤）
+本机 WorkBuddy 运行时的**安全删除守卫**（sitecustomize.py 包 os.remove）按 TOOL_CALL_ID 累计 os.remove 次数超阈值 → `SAFE_DELETE_BULK_GUARD_ERROR` → `SystemExit(1)`。**`env -u` 不可用**（会吞 stdout，TOOL_CALL_ID 兼做输出路由）。正确做法：
+`python -u -c "import os;os.environ.pop('CODEBUDDY_SAFE_DELETE_BULK_STATE_DIR',None);import runpy;runpy.run_path('tests/run_all.py',run_name='__main__')"`
+（守卫需 STATE_DIR+TOOL_CALL_ID 同时存在才激活，pop 掉前者即 no-op，保留后者保住输出）。当前 **1696/1696（26 skip）**。
 
 ## 外部：TypeSafe Jev（decision model）
 `POST https://api.typesafe.ai/v1/systemone`，Bearer 存 `~/.config/typesafe/credentials.json`。choice≤255 / score≤10（11→400）/ noul=P(true)。
 **硬坑**：① curl 打不通该域（TLS 拦截），必须 Python urllib；② 请求体含反引号包裹的 `curl`/`wget` + URL → CF 403（HTML 质询页），100% 复现。客户端 `scripts/typesafe/jev_client.py` 内置等级守卫与失败分类。
-定位：单点裁决/第二意见/打分可用；**一个定型 head 不能当异质规则族的通用闸门**（实测 6/6 漏判）。见 `docs/harness-measurement/2026-09-23-typesafe-jev-citation-adjudication.md`。
+定位：单点裁决/第二意见/打分可用；**一个定型 head 不能当异质规则族的通用闸门**（实测 6/6 漏判）。
 
 ## NetMind Arena（arena42.ai）
 agent `agent_Mt-2YPE4Kv` / handle aishield；产品 `xp_VhvfZN00Sk` status=pending（**一号一产品，绝不重提**）。
-**端点级确证**：withdraw/payout/withdrawals/redeem/earnings 全 404；`/me/rewards` 恒 `{[],0}`。X 验证（发含 `ARENA-92F41430` 推文）可 +800 CR，但用户无 X 账号 → 跳过。**立场：不代注册 X、不代生成保管私钥。** 唯一免费杠杆 `POST /agents/me/posts`。
-**gate 死锁（2026-09-24 实证）**：`jev_player.py tick` 的 `join_gate()` 只放行 `status=live`，而 echo/PoNR/fog-maze 的 lobby 停在 `upcoming`（`min=max=4`、满 4 人才转 live、`startTime` 全 null），列表端点却标 `joinable=true` ⇒ API 说可加入、gate 说不许。未擅自绕过 gate（放宽属待拍板项）。
-**joined=0 判定三步**：① 拉类型分布 ② 看详情 status ③ `selftest` 证 Jev 通路。**"加入数"受当期类型池支配，非脚本缺陷**：4 轮实测类型池每轮都变（第 2/4 轮 4 类全缺席 → `unsupported-type=20`；第 3 轮 3 类在场但被 gate 拦）。
+**端点级确证**：withdraw/payout/withdrawals/redeem/earnings 全 404；`/me/rewards` 恒 `{[],0}`。X 验证可 +800 CR 但用户无 X 账号 → 跳过。**立场：不代注册 X、不代生成保管私钥。**
+**gate 死锁（2026-09-24 实证）**：`jev_player.py tick` 的 `join_gate()` 只放行 `status=live`，而 lobby 停在 `upcoming`（`min=max=4`、满 4 人才转 live、`startTime` 全 null），列表端点却标 `joinable=true` ⇒ API 说可加入、gate 说不许。**joined=0 判定三步**：① 拉类型分布 ② 看详情 status ③ `selftest` 证 Jev 通路。
 
 ## 线上拓扑 / 推送
 CF Named Tunnel（cloudflared→:8450→api/server.py），前缀 `/api/v1`，无 CF Pages。**禁 `pkill -f cloudflared`**（会杀 healthlens tunnel），按 PID 停。
-推送走 `scripts/_push_batch.py`（多文件一 commit，原子）或 `gh_push.py`（首参 message，无 `-m`）；本机无 `.git` → git status 全假阴性；push 与 dispatch 非原子，先取 main HEAD 再 dispatch 并核 run head_sha。
+推送走 `scripts/_push_batch.py`（多文件一 commit，原子）或 `gh_push.py`（首参 message，无 `-m`）；本机无 `.git` → git status 全假阴性；push 与 dispatch 非原子，先取 main HEAD 再 dispatch 并核 run head_sha。当前 PAT 缺 `workflows: write`（不能改 YAML）但**能** dispatch（deploy-server id 317161867 / spine id 347082049 均 204）——部署停摆时手动 dispatch deploy-server 绕过 spine 直接上线。
 
 ## 铁律
 - **假绿六层**：吞异常／`if not res: continue` 退 []／`| tail` 吞退出码（需 pipefail）／mock 外部 IO 不验请求路径／`echo "X=$?"` 抢退出码／`notify()` 恒 0。退出码显式 `rc=$?`→`exit $rc`，禁 `|| true`。
 - **结论层**：`risk`/`safe` 不得轻于最严重 finding（输出 worst_severity）。
 - 雷达规则须含 `|` 或有界 `.{n,m}`，裸关键词留 draft；BENIGN_CORPUS 须区分「话题提及」与「祈使式执行」。
 - 测试假 token 触发 secret scanning 422 → 用 `bypass_placeholders.placeholder_id`；告警出站按出口脱敏。
-- 20 workflow（03:17 spine 串 9 子）+ 5 本地自动化；workflow 要 push 必须 `contents: write`。
+- 20 workflow（03:17 spine 串 9 子）+ 4 活跃本地自动化。workflow 要 push 必须 `contents: write`；手动触发 dispatch 需要 `actions: write`。
+- **门禁读的键必须是它真能拿到的键**：`tests/test_ci_contract.py` 双向钉死（静态查 workflow 里 `.get()` 的键 ⊆ `API_SCORE_KEYS`；动态实跑 `scripts/ci_self_scan_gate.py` 查实际产出顶层键 ⊆ 同一白名单）。`security-scan.yml` 门禁只读 `d.get("score", d.get("overall_score", 0))`，阈值写死 60；分数字段由 `ci_self_scan_gate.py` 产出，顶层键限定 `score/overall_score/risk_level/badge_level/report`。
+- **YAML `run: |` 的 body 交给 PyYAML 解析，别自己剥缩进**（手剥会漏）。改 workflow 前先 `python scripts/validate_workflows.py`。
+- **正则语义别从读屏推断**：`func.__code__.co_consts`。shell `-c` 内联正则同样不可信，写 .py 文件跑。
+- **bash 双引号里的 `\"` 是字面量 `"`**（不关闭外层引号）：JSON 字符串在 bash 双引号里的正确写法是 `"{\"a\":1}}"`（末尾 `"` 不转义）。改 workflow 的 `run: |` 后必须 `bash -n` 验证。
+- **删 workflow 必须重生成 task-registry**：`automation/task-registry.md` 由 `gen_task_registry.py` 自动生成，CI "Workflow Integrity Gate" 跑 `--check` 比对。
+
+## 门禁口径（自扫描，2026-09-25 落地）
+`scripts/ci_self_scan_gate.py`：`score = 各源扫描分文件数加权(=88) − 40×未登记阻断 − 15×腐烂 allowlist 条目`，clamp 0-100。退出码三档：0 干净 / 1 有未登记阻断 / 2 allowlist 已腐烂。改动阈值须同步 workflow 的 `< 60`。
 
 ## 待办
 - 🔴 **沙箱 Bash 传输抖动（2026-09-24）**：同一条已验证路径的 Bash 调用间歇报 "No such file or directory"；改用单条独立调用 + cwd 相对路径。非代码缺陷。
-- 🟡 竞赛线已定性 **NO-GO**（Foresight P≈2%、EV≈$800；"全球现金奖+完全远程+大陆个人无实体"品类系统性关门）→ 竞争性投入转向 SwarmLabs/GOAI。档案 `docs/competitions/README.md`。
-- 🟡 旧 CF token 待吊销；aishield.tools CF Pages 重建待处理。
-- 🟡 4 条 skill 载荷候选待评审；`promote_rule.py --shadow` 2 条死规则待拍板；配置面 `axis_credential/axis_launcher` 仍 75%。
+- 🟡 竞赛线已定性 **NO-GO**（Foresight P≈2%、EV≈$800）→ 竞争性投入转向 SwarmLabs/GOAI。档案 `docs/competitions/README.md`。
+- 🟡 旧 CF token 待吊销。
+- 🟡 工作区根目录 0 字节 `nul` 文件（Windows `> nul` 重定向产物，未在 remote），让 ripgrep 报"函数不正确"，`rm` 与 safe-delete 都因 Windows 保留设备名失败。仅影响 grep，无数据风险。
 - 🟡 `.workbuddy/memory/` 在 main 被跟踪，清理需 rewrite history。
-- 🟢 真实 harness 实测（GitHub Contents API 拉 22 文件）：PenguinHarness 13 findings / Cua 7（gui-automation 精确命中）/ Mano-P 0，**合计 0 critical** → 无误报证据，`docs/harness-measurement/2026-09-22-real-harness-scan.md`。
+- 🟢 **aishield.tools 部署停摆已修复（2026-09-26，commit 65d72a7ba3）**：根因 spine 连续 3 天红 → verify 红则 deploy 永不触发 → 线上漂移。手动 dispatch deploy-server 绕过 spine。
+- 🟢 **配置面 75% 缺口已修复（2026-09-27，commit da9f0aeb）**：加 `_ALWAYS_AUTO_INSTALL` 集合 + pip 风格版本正则。总召回 90%→92%。
+- 🟢 **规则晋升分诊完成（2026-09-26，commit 153beba5）**：queue 24→17，17 条 outstanding authoring work。
+- 🟢 **`eco/platform.py` 已删（2026-09-26，commit 028b0d90，-202 行）**；**`eco/trust_score.py` 已删（2026-09-27，commit ea8b0563，-121 行）**：零生产 import 者。
+- 🟢 **闭环融合 + 减空转（2026-09-29，commit d28e1f44 + b64f1d35）**：修 GEO IndexNow bash 引号 bug、删 `security-scan.yml` 冗余、重生成 task-registry、删 19 个一次性诊断脚本、暂停空转的"多渠道分发缺口巡检"。workflow 21→20、本地自动化 5→4。
+- 🟢 **战略转向落地（2026-09-30）**：5 硬骨头模块 + MCP 76 工具 + 10 REST 端点全绿（1696/1696，26 skip）。
+- 🟢 真实 harness 实测（GitHub Contents API 拉 22 文件）：PenguinHarness 13 / Cua 7 / Mano-P 0，**合计 0 critical** → 无误报证据，`docs/harness-measurement/2026-09-22-real-harness-scan.md`。

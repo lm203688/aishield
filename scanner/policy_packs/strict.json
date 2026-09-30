@@ -1,0 +1,12 @@
+{
+  "name": "strict",
+  "description": "严格策略：任何 medium 及以上都触发 CI 失败。适合生产 MCP 部署前审查。",
+  "context": "生产部署前必须用。宁严勿松。",
+  "config": {
+    "severity_min": "low",
+    "fail_on": "medium",
+    "excluded_categories": [],
+    "required_categories": [],
+    "excluded_files": []
+  }
+}

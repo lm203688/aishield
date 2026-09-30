@@ -455,6 +455,18 @@ class AIShieldHandler(BaseHTTPRequestHandler):
             _record_usage("connectors-api", self.client_address[0])
             return
 
+        # ── Ecosystem Support API (2026-09-30 战略转向): Agent 生态支持体系 5 硬骨头模块 ──
+        # Agent Memory 深度扫描 / Policy Pack / Red-team probe / confidence 晋升 / rule decay
+        if path.startswith("/api/v1/eco-support"):
+            try:
+                import ecosystem_support_api
+                payload, status = ecosystem_support_api.handle_get(path, parsed.query)
+                self._send_json(payload, status)
+            except Exception as e:
+                self._send_json({"error": str(e)}, 500)
+            _record_usage("eco-support-api", self.client_address[0])
+            return
+
         # Landing Page — Agent SEO
         if path == "/agent.html":
             html_path = os.path.join(BASE, "static", "agent.html")
@@ -1404,6 +1416,26 @@ class AIShieldHandler(BaseHTTPRequestHandler):
             except Exception as e:
                 self._send_json({"error": str(e)}, 500)
             _record_usage("connectors-api", self.client_address[0])
+            return
+
+        # ── Ecosystem Support API (2026-09-30 战略转向): Agent 生态支持体系 5 硬骨头模块 ──
+        # Agent Memory 深度扫描 / Policy Pack / Red-team probe / confidence 晋升 / rule decay
+        if path.startswith("/api/v1/eco-support"):
+            try:
+                body = self._read_body()
+                if body is None:
+                    return
+                data = json.loads(body) if body else {}
+            except json.JSONDecodeError:
+                self._send_json({"error": "Invalid JSON"}, 400)
+                return
+            try:
+                import ecosystem_support_api
+                payload, status = ecosystem_support_api.handle_post(path, data)
+                self._send_json(payload, status)
+            except Exception as e:
+                self._send_json({"error": str(e)}, 500)
+            _record_usage("eco-support-api", self.client_address[0])
             return
 
         # ── SBOM / SARIF 导出 (P2) ──

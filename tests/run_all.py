@@ -216,6 +216,14 @@ def main():
         # 2026-09-25 v4.8.3：三平台双形态联调（开发者身份形态 + MCP 桥形态）
         'tests.test_dual_form_integration',
         'tests.test_arena_join_gate',
+        # 2026-09-30 战略转向：从"agent 安全扫描器"→"agent 生态支持体系基础设施"
+        # 5 项硬骨头 P0/P1 落地（117 新增测试）：Agent Memory 深度扫描 + confidence 晋升
+        # + 独立 rule decay + Policy Pack + Red-team probe
+        'tests.test_agent_memory_scan',
+        'tests.test_confidence_promotion',
+        'tests.test_rule_decay',
+        'tests.test_policy_pack',
+        'tests.test_red_team_probe',
     ]
 
     loaded = 0

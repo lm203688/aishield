@@ -197,6 +197,24 @@ Meta Muse、xAI Grok Bot 与 NVIDIA Developer Platform 的真实 REST 接入，�
 | `aishield_agent_infra_targets` | List all agent-infrastructure / developer-platform scan targets (`family=infrastructure|developer`: nvidia-dev, laya, nasiko, agent-desktop, …). |
 | `aishield_agent_infra_scan` | Scan one project and return `report` + `mcp_adapter_skeleton` + `secondary_rd_checklist`. Input is one of `repo_url` / `local_path` / `files` (in-memory dict, fully offline and deterministic). |
 
+### Ecosystem Support — Agent 生态支持体系 (v4.10.0, 2026-09-30)
+
+战略转向：AIShield 从"agent 安全扫描器"演进到"agent 生态支持体系基础设施"。
+以下 7 个工具把 5 硬骨头模块统一装进 MCP 入口 —— Agent Memory 深度扫描 /
+Policy Pack / Red-team probe / confidence 晋升 / rule decay。全部走
+`/api/v1/eco-support/*` 前缀，纯静态、零依赖、离线可跑。
+
+| Tool | Description |
+|---|---|
+| `aishield_eco_support_summary` | Capability overview: 5 modules, endpoints, thresholds, principles. Use first to figure out which tool fits a need. |
+| `aishield_agent_memory_scan` | Agent Memory 深度扫描 — 8 frameworks (Hermes / Hindsight / Innate / Letta / Mem0 / Zep / Memobase / Cognee) + 4 attack categories (framework_specific_api / cross_session_accumulation / memory_recall_injection / persistent_goal_injection). Aligns OWASP ASI06 + MCP06. Input is a `files` dict (path → content), fully offline. |
+| `aishield_list_policy_packs` | List 5 built-in policy packs (default / strict / mcp-only / personal-agent / red-team) and their six-dimension policy config (severity_min / fail_on / excluded_categories / required_categories / excluded_files / description). |
+| `aishield_apply_policy_pack` | Apply a policy pack to a scan report: filter findings + return pass/fail verdict. Semgrep policy-as-code / agentshield six-dimension alignment. |
+| `aishield_red_team_probes` | Run the 17 red-team probes aligned with OWASP MCP Top 10 + Agentic AI Top 10. `include_failed=true` exposes real coverage gaps. |
+| `aishield_red_team_coverage` | OWASP coverage matrix aggregated by MCP01-10 / ASI01-10 with per-category pass/fail counts. |
+| `aishield_confidence_promotion` | Confidence-based rule promotion check (instinct-aligned): SEED=1 → DRAFT=5 → RULE=10+. Decay: 90d STALE / 180d DEAD. BENIGN_CORPUS red line blocks promotion. `enforce=true` writes back to radar_rules.json. |
+| `aishield_rule_decay` | Independent rule decay state (exit mechanism, distinct from promotion entry). Computes dormant (14-day zero-hit) and retire_suggested (30-day ≤1 hit) from 90-day rolling snapshots. |
+
 ### Ship Gate (10-state release lifecycle)
 
 | Tool | Description |

@@ -1,0 +1,26 @@
+{
+  "name": "personal-agent",
+  "description": "个人 Agent 治理层：关注身份/工具/记忆，忽略供应链（个人用户不装第三方包）。",
+  "context": "AIShield 个人 Agent 治理层预设，用于 eco/personal_agent.py 相关扫描。",
+  "config": {
+    "severity_min": "low",
+    "fail_on": "high",
+    "excluded_categories": [
+      "MCP04"
+    ],
+    "required_categories": [
+      "MCP01",
+      "MCP02",
+      "MCP03",
+      "MCP05",
+      "MCP06",
+      "MCP07",
+      "ASI01",
+      "ASI04",
+      "ASI05",
+      "ASI06",
+      "ASI07"
+    ],
+    "excluded_files": []
+  }
+}

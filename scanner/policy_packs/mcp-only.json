@@ -1,0 +1,34 @@
+{
+  "name": "mcp-only",
+  "description": "MCP 服务专用：只关心 MCP01-MCP10，忽略 agent 生态特有的类别。",
+  "context": "扫描 MCP 服务器配置和代码。",
+  "config": {
+    "severity_min": "info",
+    "fail_on": "high",
+    "excluded_categories": [
+      "ASI01",
+      "ASI02",
+      "ASI03",
+      "ASI04",
+      "ASI05",
+      "ASI06",
+      "ASI07",
+      "ASI08",
+      "ASI09",
+      "ASI10"
+    ],
+    "required_categories": [
+      "MCP01",
+      "MCP02",
+      "MCP03",
+      "MCP04",
+      "MCP05",
+      "MCP06",
+      "MCP07",
+      "MCP08",
+      "MCP09",
+      "MCP10"
+    ],
+    "excluded_files": []
+  }
+}

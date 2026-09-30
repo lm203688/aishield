@@ -1,0 +1,12 @@
+{
+  "name": "red-team",
+  "description": "红队模式：不阻塞任何 finding，只报告全部作为观察。",
+  "context": "红队扫描不应 fail，所有结果都是观察信号。",
+  "config": {
+    "severity_min": "info",
+    "fail_on": "impossible",
+    "excluded_categories": [],
+    "required_categories": [],
+    "excluded_files": []
+  }
+}

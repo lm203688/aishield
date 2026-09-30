@@ -1,0 +1,12 @@
+{
+  "name": "default",
+  "description": "平衡策略：报告全部 severity，CI 只对 critical 触发失败。",
+  "context": "AIShield 默认策略。适合绝大多数场景。",
+  "config": {
+    "severity_min": "info",
+    "fail_on": "critical",
+    "excluded_categories": [],
+    "required_categories": [],
+    "excluded_files": []
+  }
+}

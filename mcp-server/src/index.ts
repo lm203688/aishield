@@ -2070,6 +2070,124 @@ server.tool(
             { name, repo_url, local_path, files, platform_id, tool_type })
 );
 
+// ══════════════════════════════════════════════════════════════
+// Ecosystem Support Tools (v4.10.0, 2026-09-30)
+// 战略转向：从"agent 安全扫描器"→"agent 生态支持体系基础设施"
+// 5 硬骨头模块统一 API 入口：Agent Memory / Policy Pack / Red-team probe
+//   / confidence 晋升 / rule decay。全部走 /api/v1/eco-support/*。
+// ══════════════════════════════════════════════════════════════
+
+server.tool(
+  'aishield_eco_support_summary',
+  `AIShield Agent 生态支持体系能力总览 — 5 硬骨头模块 + 端点清单 + 阈值参数。
+
+用于快速判断"这个需求该走哪个 API / MCP 工具"。`,
+  {},
+  () => callEcoGet('/api/v1/eco-support/summary')
+);
+
+server.tool(
+  'aishield_agent_memory_scan',
+  `Agent Memory 深度扫描 — 覆盖 8 个主流 memory 框架（Hermes / Hindsight / Innate /
+Letta / Mem0 / Zep / Memobase / Cognee）+ 4 类新品类攻击面：
+
+  * framework_specific_api   框架 API 缺 version pin / scope / audit log 等约束
+  * cross_session_accumulation  跨 session 累积污染（无 timestamp / 无 session 边界）
+  * memory_recall_injection     检索结果直接拼进 system prompt
+  * persistent_goal_injection   "从此刻起 / 永久 / always" 跨 session 语义
+
+输入 files = {"path": "content"} 内存字典（离线、确定性、可复现）。
+对齐 OWASP Agentic AI Top 10 ASI06 + MCP Top 10 MCP06。`,
+  {
+    files: z.record(z.string()).describe('{"path":"content"} 内存文件字典'),
+    framework_focus: z.string().optional().describe('仅返回某框架相关 finding，如 "hermes"'),
+  },
+  ({ files, framework_focus }) => callEco('/api/v1/eco-support/agent-memory-scan', { files, framework_focus })
+);
+
+server.tool(
+  'aishield_list_policy_packs',
+  `列出 AIShield 内置策略包（Policy Pack）及其六维策略配置。
+
+5 内置：default（生产基线）/ strict（CI 阻断）/ mcp-only（MCP 类工具专项）/
+personal-agent（个人 Agent 治理）/ red-team（探针自检，永不 fail）。
+
+六维：severity_min / fail_on / excluded_categories / required_categories /
+excluded_files / description。`,
+  {},
+  () => callEcoGet('/api/v1/eco-support/policy-packs')
+);
+
+server.tool(
+  'aishield_apply_policy_pack',
+  `用 Policy Pack 过滤一份 AIShield 扫描报告并给出 CI pass/fail 判定。
+
+输入：pack_name（默认 "default"）+ report 或 findings。
+返回：过滤后 findings + pass 判定 + 六维策略应用明细。
+
+对齐 Semgrep policy-as-code / agentshield 的六维策略语义。`,
+  {
+    pack_name: z.string().optional().default('default').describe('策略包名，如 default / strict / red-team'),
+    report: z.record(z.any()).optional().describe('AIShield 扫描报告对象'),
+    findings: z.array(z.record(z.any())).optional().describe('或只传 findings 数组（简写）'),
+    overall_score: z.number().optional().default(100),
+  },
+  ({ pack_name, report, findings, overall_score }) =>
+    callEco('/api/v1/eco-support/policy-apply',
+            { pack_name, report, findings, overall_score })
+);
+
+server.tool(
+  'aishield_red_team_probes',
+  `AIShield Red-team 探针集（17 个）— 覆盖 OWASP MCP Top 10 (2025 v0.1) +
+Agentic AI Top 10 (2025) 双维。
+
+用于回归测试：给每条规则喂一个精心构造的攻击 payload，检查是否被命中。
+返回每 probe 的 passed 判定 + 命中 rule_id 列表 + OWASP 类别。
+
+include_failed=true 时返回未通过的 probe（默认隐藏，避免噪音）。`,
+  {
+    include_failed: z.boolean().optional().default(false).describe('是否返回未通过的 probe（缺口清单）'),
+    probe_ids: z.array(z.string()).optional().describe('仅运行指定 probe id，如 ["MCP01-1", "ASI04-2"]'),
+  },
+  ({ include_failed, probe_ids }) => callEco('/api/v1/eco-support/red-team-probe', { include_failed, probe_ids })
+);
+
+server.tool(
+  'aishield_red_team_coverage',
+  `AIShield Red-team 探针 OWASP 覆盖矩阵 — 按 MCP01-10 / ASI01-10 汇总 pass/fail 数。`,
+  {},
+  () => callEcoGet('/api/v1/eco-support/red-team-probe/coverage')
+);
+
+server.tool(
+  'aishield_confidence_promotion',
+  `AIShield Confidence-based 规则晋升检查 — 对齐 instinct 项目三态累积机制。
+
+阈值：SEED=1（种子）→ DRAFT=5（草稿）→ RULE=10+（正式规则）。
+衰减：90 天未观察 → STALE / 180 天未观察 → DEAD（自动降级）。
+红线：任何命中 BENIGN_CORPUS 的候选立即被标记 false_positive 阻断晋升。
+
+enforce=true 时自动写回 radar_rules.json（生产用）；默认只读检查。`,
+  {
+    write_back: z.boolean().optional().default(false).describe('是否把判定结果写回 radar_rules.json'),
+    enforce: z.boolean().optional().default(false).describe('enforce=true 时自动落晋升/降级决策'),
+  },
+  ({ write_back, enforce }) => callEco('/api/v1/eco-support/confidence-promotion', { write_back, enforce })
+);
+
+server.tool(
+  'aishield_rule_decay',
+  `AIShield 规则衰减状态报告 — 独立于 confidence 晋升的出口机制。
+
+从 90 天滑动窗口历史快照计算 dormant/retire_suggested 集合。
+dormant = 14 天窗口内 0 命中；retire_suggested = 30 天窗口内 ≤1 命中。
+
+配合 POST /rule-decay/retire 执行实际退役（改 radar_rules.json）。`,
+  {},
+  () => callEcoGet('/api/v1/eco-support/rule-decay')
+);
+
 // ── Start ──
 async function main() {
   const transport = new StdioServerTransport();
