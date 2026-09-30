@@ -15,6 +15,12 @@
       "reason": "同一文件同时出现凭证读取与网络检测字样，属检测器定义（工具会读待扫文件并发本地请求），非真实外泄链路"
     },
     {
+      "source": "mcp-server/src",
+      "file": "index.ts",
+      "type": "ai_slop_evasion",
+      "reason": "ai_slop_evasion(jailbreak_roleplay) 命中 index.ts 中 aishield_prompt_check 工具描述里枚举的检测词表（越狱指令/身份切换/系统提示窃取/数据外传/角色扮演注入/零宽字符）。这是扫描器自身暴露给 LLM 的『检测类别清单』，与已登记的 dangerous_pattern 条目同源——属检测器定义文本，非绕过内容分类器的真实越狱载荷。逐条核验：全部匹配集中在工具描述注释（256/258 行等），无嵌入的 jailbreak 指令、无 roleplay 注入执行链路。"
+    },
+    {
       "source": "distribution/github-marketplace",
       "file": "action_entrypoint.py",
       "type": "dangerous_pattern",
