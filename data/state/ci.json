@@ -1,13 +1,13 @@
 {
-  "updated": "2026-09-30T00:42:37Z",
-  "run_id": "36651572533",
-  "sha": "a04874af3654e36522e5fe45697d2d1d6e396cdc",
+  "updated": "2026-09-30T02:37:34Z",
+  "run_id": "36660648467",
+  "sha": "509594ec8d2d3e1ce63bca39a162222462187978",
   "overall": "failure",
   "source": "ci.yml",
   "jobs": {
-    "workflow-lint": "failure",
+    "workflow-lint": "success",
     "distribution-gate": "success",
-    "test": "success",
+    "test": "failure",
     "security-scan": "success",
     "dependency-check": "success",
     "performance-test": "success",
