@@ -19,18 +19,22 @@ Agent 生态支持体系基础设施（原 agent 安全扫描器，2026-09-30 �
 **API**：`/api/v1/connectors/{plat}/{self-check,oauth/*,agents/register,actions/{preflight,run}}` + `/api/v1/agent-infra/{targets,scan,scan-portfolio}` + `/api/v1/eco-support/{agent-memory-scan,policy-apply,policy-packs,red-team-probe,red-team-probe/coverage,confidence-promotion,rule-decay,rule-decay/retire,rule-decay/snapshot,summary}`。
 
 ## 规则数 / 版本声明位（勿引用旧数）
-**235 = 静态 208 + 生成 8 + 雷达 19**（live `/api/v1/health.rules_breakdown`）；Skill **262**（SKILL_EXTRA 27）。`scripts/rule_count_gate.py` 门禁。
-`scripts/sync_version.py` **35 声明位**；`tests/test_version_declare.py` 强制"生产路径里出现产品版本字面量就必须登记"。唯一事实源 `api/server.py:API_VERSION`；`api/openapi_spec.py` **import** 它；`gen_project_sbom.py` 从 `setup.py` 正则取。
+**253 = 静态 226 + 生成 8 + 雷达 19**（live `/api/v1/health.rules_breakdown`）；Skill **280**（SKILL_EXTRA 45）。`scripts/rule_count_gate.py` 门禁，**47 个受约束声明位**。
+`scripts/sync_version.py` 另有 **47 个版本声明位**；`tests/test_version_declare.py` 强制"生产路径里出现产品版本字面量就必须登记"。唯一事实源 `api/server.py:API_VERSION`；`api/openapi_spec.py` **import** 它；`gen_project_sbom.py` 从 `setup.py` 正则取。
+**规则晋升后必须 `rule_count_gate.py --sync`，再把 collect_files() 全量文件推 main**——只推规则文件不够，CI "Workflow Integrity Gate" 会在其他 N 个声明位上红（2026-10-02 实证：本地 `--sync` 改了 20+ 文件，push 批次只带 8 个，CI 立刻报 8 处 235）。
+**英文 pair 陷阱（2026-10-02 修）**：`llms.txt` 写 `253 / 280 rules`，第二个数是 Skill 口径，但门禁只有中文 `/N条规则` 是 pair → 英文落到单值兜底被判成 MCP 声明 → `sync` 把 280 改成 253，静默篡改对外文档而 `--check` 仍绿。已补 pattern `(\d+)\s*/\s*(\d+)\s*(?:security\s+)?rules\b` + 4 条回归测试（scan 侧 pair 不重复报、sync 侧保持 MCP/Skill 顺序）。
 **死代码坑**：`/.well-known/agent-card.json` 由 `api/trust_api.py:agent_card()` 读 **`docs/.well-known/agent-card.json`** 返回；`api/static/` 那份永远不被服务。
 **历史保留约定**：带日期文档刻意保留原值——`docs/investor-strategy-2026-08.md`、`distribution/listings/SUBMIT.md` 等，`HISTORICAL_ALLOWLIST` 逐条注明。
 
 ## 基准
-`scripts/benchmark.py` 主口径 serious_only **46/50=92.0% 召回 / 0/45=0.0% 误报**（副口径 any_finding 覆盖 50/50）。MIN_RECALL=0.85 / MIN_COVERAGE=1.00。检出缺口：instruction_sample #1/#13/#16/#23（未达 serious_only 阈值）。红队探针实测 **7/17 PASS**（MCP01-1/2、MCP05-1、MCP08-1、MCP10-1、ASI04-1/2），10 FAIL 是真实缺口（MCP02/03/04/06/07/09 无对应规则，ASI06/07/08 部分覆盖）。
+`scripts/benchmark.py` 主口径 serious_only **46/50=92.0% 召回 / 0/45=0.0% 误报**（副口径 any_finding 覆盖 50/50）。MIN_RECALL=0.85 / MIN_COVERAGE=1.00。检出缺口：instruction_sample #1/#13/#16/#23（未达 serious_only 阈值）。
+**红队探针 7/17 → 17/17 全 PASS（2026-10-02）**：10 个 FAIL 是真实规则缺口（非探针 bug），一次补齐——MCP02 +1、MCP03 +8（零宽字符/HTML+块注释藏指令/超长 description/Unicode 转义/HTML 实体/隐藏指令关键词）、MCP04 +1、MCP06 +1、MCP07 +1（通配 CORS）、MCP09 +1、ASI06 +2、ASI07 +1（递归 prompt 耗尽上下文 / 工具名占用 agent 命名空间）、ASI08 +1。规则 235→253。
+探针匹配：`run_probes(engine)` 的 engine 须返回 `analyze(...)['findings']`（不是整个 dict）；期望值是 OWASP 类别（`{"MCP03"}`）不是自定义 type 名。
 
 ## 测试隔离坑（2026-09-25 实锤）
 本机 WorkBuddy 运行时的**安全删除守卫**（sitecustomize.py 包 os.remove）按 TOOL_CALL_ID 累计 os.remove 次数超阈值 → `SAFE_DELETE_BULK_GUARD_ERROR` → `SystemExit(1)`。**`env -u` 不可用**（会吞 stdout，TOOL_CALL_ID 兼做输出路由）。正确做法：
 `python -u -c "import os;os.environ.pop('CODEBUDDY_SAFE_DELETE_BULK_STATE_DIR',None);import runpy;runpy.run_path('tests/run_all.py',run_name='__main__')"`
-（守卫需 STATE_DIR+TOOL_CALL_ID 同时存在才激活，pop 掉前者即 no-op，保留后者保住输出）。当前 **1696/1696（26 skip）**。
+（守卫需 STATE_DIR+TOOL_CALL_ID 同时存在才激活，pop 掉前者即 no-op，保留后者保住输出）。当前 **1700/1700（26 skip）**。
 
 ## 外部：TypeSafe Jev（decision model）
 `POST https://api.typesafe.ai/v1/systemone`，Bearer 存 `~/.config/typesafe/credentials.json`。choice≤255 / score≤10（11→400）/ noul=P(true)。
@@ -72,5 +76,7 @@ CF Named Tunnel（cloudflared→:8450→api/server.py），前缀 `/api/v1`，�
 - 🟢 **规则晋升分诊完成（2026-09-26，commit 153beba5）**：queue 24→17，17 条 outstanding authoring work。
 - 🟢 **`eco/platform.py` 已删（2026-09-26，commit 028b0d90，-202 行）**；**`eco/trust_score.py` 已删（2026-09-27，commit ea8b0563，-121 行）**：零生产 import 者。
 - 🟢 **闭环融合 + 减空转（2026-09-29，commit d28e1f44 + b64f1d35）**：修 GEO IndexNow bash 引号 bug、删 `security-scan.yml` 冗余、重生成 task-registry、删 19 个一次性诊断脚本、暂停空转的"多渠道分发缺口巡检"。workflow 21→20、本地自动化 5→4。
-- 🟢 **战略转向落地（2026-09-30）**：5 硬骨头模块 + MCP 76 工具 + 10 REST 端点全绿（1696/1696，26 skip）。
+- 🟢 **战略转向落地（2026-09-30）**：5 硬骨头模块 + MCP 76 工具 + 10 REST 端点全绿（当时 1696/1696，26 skip）。
+- 🟢 **红队缺口全清 + 声明位全同步（2026-10-02，commit a9f4b463 / 6b6d01be / 2b87a287）**：探针 7/17→17/17；规则 253/280；47 声明位全推；line 上 `/api/v1/health` = 4.10.0 / 253 rules / commit a9f4b463；CI/CD 绿。1700/1700。
+- 🟢 **线上 API 域名是根域不是子域（2026-10-02 修正）**：`https://api.aishield.tools` **不解析**，正确路径 `https://aishield.tools/api/v1/health`（CF Named Tunnel，前缀 `/api/v1`）。探活别再打错子域。
 - 🟢 真实 harness 实测（GitHub Contents API 拉 22 文件）：PenguinHarness 13 / Cua 7 / Mano-P 0，**合计 0 critical** → 无误报证据，`docs/harness-measurement/2026-09-22-real-harness-scan.md`。
