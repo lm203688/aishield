@@ -89,6 +89,12 @@ def _patterns() -> List[Tuple[re.Pattern, str]]:
         (re.compile(r"(?<!\d)(\d+)\s*条\s*MCP\s*/\s*(\d+)\s*条\s*Skill"), "pair"),
         (re.compile(r"(?<!\d)(\d+)\s*MCP\s*/\s*(\d+)\s*Skill"), "pair"),
         (re.compile(r"(?<!\d)(\d+)\s*/\s*(\d+)\s*条\s*(?:安全)?(?:检测)?规则"), "pair"),
+        # 英文双值。缺这条会踩一次真实的"同步写坏数据"事故：llms.txt 写的是
+        # `the OWASP MCP + ASI01-10 dual taxonomy with 253 / 280 rules.`，
+        # 第二个数是 Skill 口径，但只有中文的 `/N条规则` 是 pair，英文那边
+        # 落到兜底单值模式上被判成 MCP 声明 —— 于是 sync 把 280 改写成 253，
+        # 一份对外文档的规则总数被静默篡改。
+        (re.compile(r"(?<!\d)(\d+)\s*/\s*(\d+)\s*(?:security\s+)?rules\b", re.I), "pair"),
         # 中文单值
         (re.compile(r"(?<!\d)(\d+)\s*条\s*MCP\s*(?:安全)?规则"), "mcp"),
         (re.compile(r"(?<!\d)(\d+)\s*条\s*Skill\s*(?:安全)?规则"), "skill"),

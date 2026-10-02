@@ -297,6 +297,43 @@ class TestFalsePositiveGuard(unittest.TestCase):
         got = _drifts('238 安全规则')
         self.assertEqual([g for _, g, _ in got], ['238'])
 
+    def test_english_pair_not_reported_twice(self):
+        """`253 / 280 rules` 是 pair（MCP/Skill），中文有 `/N条规则` 这一条
+        pair 模式，英文一直缺 —— 于是第二个数字落到兜底单值模式上被判成
+        MCP 声明。sync 照单执行就把 llms.txt 的 280 改写成 253，对外文档的
+        规则总数被静默篡改，而 --check 又是绿的。"""
+        self.assertEqual(_drifts(_fill('{mcp} / {skill} rules')), [],
+                         '英文 pair 被单值兜底模式重复报')
+
+    def test_english_pair_drift_is_reported_once_as_pair(self):
+        got = _drifts('227 / 241 rules')
+        self.assertEqual(len(got), 1, f'重复报：{got}')
+        self.assertEqual(got[0][0], 'pair')
+
+    def test_english_pair_sync_preserves_skill_number(self):
+        """回归：sync 必须只改漂移的那一半，不能把合法的一半一起改坏。
+
+        这次事故的形态就是"合法声明被 sync 改写"——门禁只测 scan ，
+        sync 走的是另一条替换路径（sync_text），两边共用解析但
+        替换逻辑各自独立，所以必须在 sync 侧也钉住。
+        """
+        auth = G.authority()
+        # 两个数字都写成历史值：sync 必须两个都改成权威值，且顺序不能颠倒。
+        new, n = G.sync_text('the dual taxonomy with 227 / 241 rules.',
+                             auth, G._patterns())
+        # n 是“改了几行”不是“改了几个数字”，两个数字在同一行只计 1。
+        self.assertEqual(n, 1, f'改动行数不对：{n}')
+        self.assertEqual(
+            new,
+            f"the dual taxonomy with {auth['mcp']} / {auth['skill']} rules.",
+            'sync 把英文 pair 改坏了 —— 两个数字的顺序必须保持 MCP/Skill')
+
+    def test_english_pair_with_security_word(self):
+        """`security` 插在两个数字与 rules 之间时，pair 仍要认出来。"""
+        got = _drifts('227 / 241 security rules')
+        self.assertEqual(len(got), 1, f'重复报：{got}')
+        self.assertEqual(got[0][0], 'pair')
+
 
 class TestAuthority(unittest.TestCase):
     """权威数字必须来自运行时，不许在门禁里写死。"""
