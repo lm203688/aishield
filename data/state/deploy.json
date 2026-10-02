@@ -2,9 +2,9 @@
   "domain": "deploy",
   "current": {
     "last_deploy_verify": "success",
-    "deploy_run_id": "36991260117",
+    "deploy_run_id": "37029669297",
     "_source": "deploy-server",
-    "_ts": "2026-10-02T09:50:01.236379+00:00"
+    "_ts": "2026-10-02T15:57:24.960627+00:00"
   },
   "history": [
     {
@@ -318,8 +318,16 @@
         "last_deploy_verify": "success",
         "deploy_run_id": "36991260117"
       }
+    },
+    {
+      "ts": "2026-10-02T15:57:24.960639+00:00",
+      "source": "deploy-server",
+      "state": {
+        "last_deploy_verify": "success",
+        "deploy_run_id": "37029669297"
+      }
     }
   ],
-  "updated": "2026-10-02T09:50:01.236398+00:00",
+  "updated": "2026-10-02T15:57:24.960642+00:00",
   "desc": "部署与上线验证结果（deploy-server 独占写入）"
 }
