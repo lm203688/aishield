@@ -1,7 +1,87 @@
 {
-  "generated_at": "2026-09-28T09:42:54.877753+00:00",
-  "source_intel_count": 445,
+  "generated_at": "2026-10-02T04:11:50.371058+00:00",
+  "source_intel_count": 479,
   "package_blacklist": {
+    "npm:vm2": {
+      "ecosystem": "npm",
+      "package": "vm2",
+      "severity": "critical",
+      "advisories": [
+        "GHSA-qhwx-74w5-xhxq",
+        "GHSA-jxxv-8r27-vm4p",
+        "GHSA-h85j-hv3c-qfgq",
+        "GHSA-c48m-32m9-vx93",
+        "GHSA-6rh5-qq4q-97xh",
+        "GHSA-8686-vhfx-7r3j",
+        "GHSA-8hr7-r645-pc6w",
+        "GHSA-647f-g98j-qq25",
+        "GHSA-6w8r-xxw2-g3hx",
+        "GHSA-46pr-c5wc-xffx",
+        "GHSA-27g9-p43v-cw3v",
+        "GHSA-98xx-8mx4-x7cm",
+        "GHSA-v836-6xw4-9cx3",
+        "GHSA-m5w8-4gq2-6f8x",
+        "GHSA-cfcw-xp6x-25gj",
+        "GHSA-m283-3h24-438v",
+        "GHSA-gmc2-2x9w-cgh9"
+      ]
+    },
+    "pip:virtualenv": {
+      "ecosystem": "pip",
+      "package": "virtualenv",
+      "severity": "high",
+      "advisories": [
+        "GHSA-x78j-v8h9-3j2q",
+        "GHSA-94p9-xgh2-xp45"
+      ]
+    },
+    "pip:tornado": {
+      "ecosystem": "pip",
+      "package": "tornado",
+      "severity": "high",
+      "advisories": [
+        "GHSA-chx6-46f5-w4vp",
+        "GHSA-c2m8-h5v5-343r"
+      ]
+    },
+    "pip:GitPython": {
+      "ecosystem": "pip",
+      "package": "GitPython",
+      "severity": "critical",
+      "advisories": [
+        "GHSA-g5vv-9gxw-82hx",
+        "GHSA-8mcc-hrx5-hvxc",
+        "GHSA-284h-m62q-gf8w",
+        "GHSA-7833-fr7j-v32q",
+        "GHSA-hmq2-w58f-27jc",
+        "GHSA-3f7w-8rr8-f37f"
+      ]
+    },
+    "pip:gitpython": {
+      "ecosystem": "pip",
+      "package": "gitpython",
+      "severity": "high",
+      "advisories": [
+        "GHSA-239g-whfq-7xj9"
+      ]
+    },
+    "npm:axios": {
+      "ecosystem": "npm",
+      "package": "axios",
+      "severity": "high",
+      "advisories": [
+        "GHSA-m8m8-qj5v-23w3",
+        "GHSA-3pq3-5fj3-cg6v"
+      ]
+    },
+    "pip:PyJWT": {
+      "ecosystem": "pip",
+      "package": "PyJWT",
+      "severity": "critical",
+      "advisories": [
+        "GHSA-ffc3-869f-jxw9"
+      ]
+    },
     "pip:scbe-aethermoore": {
       "ecosystem": "pip",
       "package": "scbe-aethermoore",
@@ -369,18 +449,6 @@
         "GHSA-fg7f-2386-8897",
         "GHSA-6hm5-jgcp-p838",
         "GHSA-xh95-f55m-82fw"
-      ]
-    },
-    "pip:GitPython": {
-      "ecosystem": "pip",
-      "package": "GitPython",
-      "severity": "critical",
-      "advisories": [
-        "GHSA-8mcc-hrx5-hvxc",
-        "GHSA-284h-m62q-gf8w",
-        "GHSA-7833-fr7j-v32q",
-        "GHSA-hmq2-w58f-27jc",
-        "GHSA-3f7w-8rr8-f37f"
       ]
     },
     "npm:@typespec/spector": {
@@ -835,18 +903,6 @@
         "GHSA-f2ff-p2ww-7p4p"
       ]
     },
-    "npm:vm2": {
-      "ecosystem": "npm",
-      "package": "vm2",
-      "severity": "critical",
-      "advisories": [
-        "GHSA-v836-6xw4-9cx3",
-        "GHSA-m5w8-4gq2-6f8x",
-        "GHSA-cfcw-xp6x-25gj",
-        "GHSA-m283-3h24-438v",
-        "GHSA-gmc2-2x9w-cgh9"
-      ]
-    },
     "pip:glances": {
       "ecosystem": "pip",
       "package": "glances",
@@ -1035,6 +1091,81 @@
     }
   },
   "pattern_rules": {
+    "(?i)(\\.\\./){2,}|(%2e%2e%2f)": {
+      "description": "路径遍历: 越权访问上级目录",
+      "severity": "high",
+      "owasp": "LLM06",
+      "owasp_name": "过度代理权限 (Excessive Agency)",
+      "derived_from": "path traversal",
+      "intel_hits": 32,
+      "evidence": [
+        "CVE-2025-71427",
+        "GHSA-c2m8-h5v5-343r",
+        "GHSA-9gfj-28hw-jchp",
+        "GHSA-rr49-f9g6-c9r5",
+        "GHSA-6vmq-24h2-pj7j"
+      ]
+    },
+    "(?i)(docker\\.sock|/proc/self/|privileged\\s*[:=]\\s*true|--cap-add\\s*=?\\s*SYS_ADMIN)": {
+      "description": "沙箱逃逸: 容器高危配置",
+      "severity": "critical",
+      "owasp": "LLM05",
+      "owasp_name": "不当输出处理 (Improper Output Handling)",
+      "derived_from": "sandbox escape",
+      "intel_hits": 13,
+      "evidence": [
+        "GHSA-qhwx-74w5-xhxq",
+        "GHSA-27g9-p43v-cw3v",
+        "GHSA-hp3v-5vw7-fx9w",
+        "GHSA-6xcw-7xm6-48c6",
+        "GHSA-hw8v-xxg5-vvvx"
+      ]
+    },
+    "(?i)(os\\.system|subprocess\\.(call|run|Popen)|child_process\\.exec)\\s*\\(\\s*[^)]*(\\+|%|\\$\\{|f['\\\"])": {
+      "description": "命令注入: 动态拼接系统命令",
+      "severity": "critical",
+      "owasp": "LLM05",
+      "owasp_name": "不当输出处理 (Improper Output Handling)",
+      "derived_from": "command injection",
+      "intel_hits": 15,
+      "evidence": [
+        "GHSA-x78j-v8h9-3j2q",
+        "CVE-2026-100368",
+        "CVE-2026-95660",
+        "GHSA-q69g-4hcv-6jg4",
+        "GHSA-79wm-x847-7cvg"
+      ]
+    },
+    "(?i)(requests\\.(get|post)|urllib\\.request\\.urlopen|fetch)\\s*\\(\\s*[^)]*(user|input|param|req\\.)": {
+      "description": "SSRF: 请求目标来自不可信输入",
+      "severity": "high",
+      "owasp": "LLM06",
+      "owasp_name": "过度代理权限 (Excessive Agency)",
+      "derived_from": "ssrf",
+      "intel_hits": 39,
+      "evidence": [
+        "GHSA-3cv6-jpf6-8222",
+        "GHSA-v9m3-wfh8-5646",
+        "GHSA-hgcf-4mq8-5266",
+        "GHSA-5wf4-jqxh-8gm3",
+        "GHSA-6529-c226-h328"
+      ]
+    },
+    "(?i)(session|token)\\s*[:=]\\s*['\\\"][^'\\\"]{0,8}['\\\"]": {
+      "description": "会话安全: 会话标识过短或硬编码",
+      "severity": "high",
+      "owasp": "LLM07",
+      "owasp_name": "系统提示泄露 (System Prompt Leakage)",
+      "derived_from": "session",
+      "intel_hits": 41,
+      "evidence": [
+        "GHSA-3pq3-5fj3-cg6v",
+        "CVE-2026-102697",
+        "GHSA-vf2x-4v53-pm7v",
+        "GHSA-gvf2-2rh5-mpgf",
+        "GHSA-v9m3-wfh8-5646"
+      ]
+    },
     "(?i)(Access-Control-Allow-Origin['\\\"]?\\s*[:,]\\s*['\\\"]\\*|cors\\s*\\(\\s*\\)\\s*)": {
       "description": "跨域校验缺失: 允许任意来源",
       "severity": "high",
@@ -1065,66 +1196,6 @@
         "GHSA-p6hp-93wp-fh6p"
       ]
     },
-    "(?i)(os\\.system|subprocess\\.(call|run|Popen)|child_process\\.exec)\\s*\\(\\s*[^)]*(\\+|%|\\$\\{|f['\\\"])": {
-      "description": "命令注入: 动态拼接系统命令",
-      "severity": "critical",
-      "owasp": "LLM05",
-      "owasp_name": "不当输出处理 (Improper Output Handling)",
-      "derived_from": "command injection",
-      "intel_hits": 14,
-      "evidence": [
-        "CVE-2026-100368",
-        "CVE-2026-95660",
-        "GHSA-q69g-4hcv-6jg4",
-        "GHSA-79wm-x847-7cvg",
-        "GHSA-w3fx-mc44-mf6j"
-      ]
-    },
-    "(?i)(\\.\\./){2,}|(%2e%2e%2f)": {
-      "description": "路径遍历: 越权访问上级目录",
-      "severity": "high",
-      "owasp": "LLM06",
-      "owasp_name": "过度代理权限 (Excessive Agency)",
-      "derived_from": "path traversal",
-      "intel_hits": 30,
-      "evidence": [
-        "GHSA-9gfj-28hw-jchp",
-        "GHSA-rr49-f9g6-c9r5",
-        "GHSA-6vmq-24h2-pj7j",
-        "GHSA-p6hp-93wp-fh6p",
-        "GHSA-f26r-j276-ggg4"
-      ]
-    },
-    "(?i)(session|token)\\s*[:=]\\s*['\\\"][^'\\\"]{0,8}['\\\"]": {
-      "description": "会话安全: 会话标识过短或硬编码",
-      "severity": "high",
-      "owasp": "LLM07",
-      "owasp_name": "系统提示泄露 (System Prompt Leakage)",
-      "derived_from": "session",
-      "intel_hits": 39,
-      "evidence": [
-        "GHSA-vf2x-4v53-pm7v",
-        "GHSA-gvf2-2rh5-mpgf",
-        "GHSA-v9m3-wfh8-5646",
-        "GHSA-6529-c226-h328",
-        "GHSA-5648-rgj9-v224"
-      ]
-    },
-    "(?i)(requests\\.(get|post)|urllib\\.request\\.urlopen|fetch)\\s*\\(\\s*[^)]*(user|input|param|req\\.)": {
-      "description": "SSRF: 请求目标来自不可信输入",
-      "severity": "high",
-      "owasp": "LLM06",
-      "owasp_name": "过度代理权限 (Excessive Agency)",
-      "derived_from": "ssrf",
-      "intel_hits": 38,
-      "evidence": [
-        "GHSA-v9m3-wfh8-5646",
-        "GHSA-hgcf-4mq8-5266",
-        "GHSA-5wf4-jqxh-8gm3",
-        "GHSA-6529-c226-h328",
-        "GHSA-49xv-9743-pw8w"
-      ]
-    },
     "(?i)(pickle\\.loads|yaml\\.load\\s*\\((?![^)]*Loader)|node-serialize)": {
       "description": "不安全反序列化",
       "severity": "critical",
@@ -1138,27 +1209,12 @@
         "GHSA-wg9g-w2j2-8pgr",
         "GHSA-qxq5-qhx6-94qw"
       ]
-    },
-    "(?i)(docker\\.sock|/proc/self/|privileged\\s*[:=]\\s*true|--cap-add\\s*=?\\s*SYS_ADMIN)": {
-      "description": "沙箱逃逸: 容器高危配置",
-      "severity": "critical",
-      "owasp": "LLM05",
-      "owasp_name": "不当输出处理 (Improper Output Handling)",
-      "derived_from": "sandbox escape",
-      "intel_hits": 11,
-      "evidence": [
-        "GHSA-hp3v-5vw7-fx9w",
-        "GHSA-6xcw-7xm6-48c6",
-        "GHSA-hw8v-xxg5-vvvx",
-        "GHSA-89v8-rhwq-hf77",
-        "GHSA-9w56-46f6-3qhx"
-      ]
     }
   },
   "owasp_distribution": {
-    "LLM07": 3,
+    "LLM06": 2,
     "LLM05": 3,
-    "LLM06": 2
+    "LLM07": 3
   },
-  "total_rules": 120
+  "total_rules": 125
 }

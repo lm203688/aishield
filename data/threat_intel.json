@@ -1,6 +1,495 @@
 {
   "intel": [
     {
+      "id": "CVE-2025-71427",
+      "source": "nvd",
+      "severity": "medium",
+      "cvss": 6.8,
+      "title": "Office-PowerPoint-MCP-Server through 2.0.7 contains a path traversal vulnerability that allows MCP callers to write and read files outside the working directory by supplying absolute paths or ../ sequ",
+      "summary": "Office-PowerPoint-MCP-Server through 2.0.7 contains a path traversal vulnerability that allows MCP callers to write and read files outside the working directory by supplying absolute paths or ../ sequences. Attackers can steer an AI agent via prompt injection to abuse save_presentation, open_presentation, or manage_image output_path to overwrite any server-writable file or load external files.",
+      "affected": "prompt injection",
+      "references": [
+        "https://github.com/GongRzhe/Office-PowerPoint-MCP-Server",
+        "https://github.com/GongRzhe/Office-PowerPoint-MCP-Server/blob/3631ba2ec0c24504476f78bf74d329c9be11caaa/tools/presentation_tools.py#L127-L141",
+        "https://github.com/GongRzhe/Office-PowerPoint-MCP-Server/blob/3631ba2ec0c24504476f78bf74d329c9be11caaa/utils/presentation_utils.py#L61-L73",
+        "https://github.com/GongRzhe/Office-PowerPoint-MCP-Server/pull/33",
+        "https://www.vulncheck.com/advisories/office-powerpoint-mcp-server-through-2.0.7-path-traversal-via-save-presentation-and-manage-image"
+      ],
+      "published": "2026-10-01T23:16:46.613",
+      "fetched": "2026-10-02T04:11:13.512511+00:00"
+    },
+    {
+      "id": "GHSA-jf8q-945g-9q4c",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 6.8,
+      "title": "vm2: Incomplete nodejs.* symbol filtering lets sandbox override host WebStream state checks",
+      "summary": "## Summary\n\nvm2 current head (`v3.11.5`, commit `7a1f5100b96f48d34e0fe104ab37c0acc5944f92`) still exposes registered Node.js internal symbols from host WebStream prototypes to sandbox code.\n\nThe prior `nodejs.*` symbol hardening blocks `Symbol.for('nodejs.<name>')` at the source, but the extraction filters and bridge write traps still enumerate a fixed set of known registered symbols. On Node.js `v25.8.0`, `stream/web` exposes two additional registered symbols:\n\n- `nodejs.stream.disturbed`\n- `no",
+      "affected": "npm:vm2",
+      "references": [
+        "https://github.com/advisories/GHSA-jf8q-945g-9q4c"
+      ],
+      "published": "2026-10-01T15:42:15Z",
+      "fetched": "2026-10-02T04:11:33.593046+00:00"
+    },
+    {
+      "id": "GHSA-qhwx-74w5-xhxq",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": 9.9,
+      "title": "vm2: NodeVM builtin allowlist bypass via node:test.run() execArgv allows sandbox escape",
+      "summary": "## Summary\n\nOn Node.js 24 and newer, `vm2` can expose the host `node:test` module to sandboxed `NodeVM` code when the embedder explicitly allows the `node:test` builtin. Sandbox code can reach that module through `require('node:node:test')` and call `run()` with attacker-controlled `execArgv`.\n\n`node:test.run()` starts a separate Node process for process-isolated test execution and forwards the supplied `execArgv` values to that process. Supplying `--eval=<JavaScript>` therefore executes arbitra",
+      "affected": "npm:vm2",
+      "references": [
+        "https://github.com/advisories/GHSA-qhwx-74w5-xhxq"
+      ],
+      "published": "2026-10-01T15:41:31Z",
+      "fetched": "2026-10-02T04:11:33.593088+00:00"
+    },
+    {
+      "id": "GHSA-jxxv-8r27-vm4p",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 8.6,
+      "title": "vm2 CLI provides no sandbox isolation - host-realm require() is reachable from sandboxed scripts",
+      "summary": "### Summary\nThe `vm2` command-line tool installed by `npm install -g vm2` and documented in the README's \"CLI\" section runs the supplied script under `NodeVM` with `require:{external:true}` and no `root` / `context` / `builtin` configured. With these defaults the resolver loads every relative or absolute `require()` target through the **host** `require()` function, executing the attacker's module body in the host Node.js process before the result is ever proxied back into the sandbox. A single a",
+      "affected": "npm:vm2",
+      "references": [
+        "https://github.com/advisories/GHSA-jxxv-8r27-vm4p"
+      ],
+      "published": "2026-10-01T15:40:45Z",
+      "fetched": "2026-10-02T04:11:33.593133+00:00"
+    },
+    {
+      "id": "GHSA-h85j-hv3c-qfgq",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": 10.0,
+      "title": "vm2 exposes host HTTPS credentials and TLS traffic through globalAgent",
+      "summary": "Summary\n\nvm2 3.11.6 exposes the host process's real `https.globalAgent` when a `NodeVM` is explicitly allowed to require `https`. The module is wrapped as read-only, but calls to methods on the shared agent still mutate the host object. Sandbox code can register a `free` listener and receive host request options and the host TLS socket whenever an unrelated host HTTPS request releases a pooled connection.\n\nIn a contained test, sandbox code allowed only the `https` builtin:\n\n- read the host reque",
+      "affected": "npm:vm2",
+      "references": [
+        "https://github.com/advisories/GHSA-h85j-hv3c-qfgq"
+      ],
+      "published": "2026-10-01T15:38:26Z",
+      "fetched": "2026-10-02T04:11:33.593147+00:00"
+    },
+    {
+      "id": "GHSA-c48m-32m9-vx93",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": 9.9,
+      "title": "vm2 Custom Module Resolver Can Bypass the External Package Allowlist by Loading a Colliding Host Package",
+      "summary": "### Summary\n\nvm2 is a sandbox library for isolating and executing untrusted JavaScript code inside a Node.js process. It can restrict access to built-in modules and external packages.\n\nWhen `NodeVM` enables an `external` allowlist together with a custom `resolve` callback, vm2 checks the requested package name with a non-exact match. For example, if the allowlist only permits `left-pad`, an attacker can still bypass the check with a colliding package name such as `evil-left-pad`, because it cont",
+      "affected": "npm:vm2",
+      "references": [
+        "https://github.com/advisories/GHSA-c48m-32m9-vx93"
+      ],
+      "published": "2026-10-01T15:37:19Z",
+      "fetched": "2026-10-02T04:11:33.593181+00:00"
+    },
+    {
+      "id": "GHSA-6rh5-qq4q-97xh",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 8.5,
+      "title": "vm2: NodeVM builtin denylist bypass via fs/promises despite -fs, allowing host filesystem writes",
+      "summary": "## Summary\n\nNodeVM's builtin wildcard policy can allow sandboxed code to access `fs/promises` even when the embedder denies `fs`.\n\nWith the following configuration:\n\n```js\nrequire: {\n  builtin: ['*', '-fs', '-child_process']\n}\n```\n\n`require('fs')` and `require('child_process')` are blocked, but `require('fs/promises')` and `require('node:fs/promises')` are still available. This allows sandboxed code to create and write files on the host filesystem through the promise-based filesystem API.\n\n## Af",
+      "affected": "npm:vm2",
+      "references": [
+        "https://github.com/advisories/GHSA-6rh5-qq4q-97xh"
+      ],
+      "published": "2026-10-01T15:36:48Z",
+      "fetched": "2026-10-02T04:11:33.593208+00:00"
+    },
+    {
+      "id": "GHSA-8686-vhfx-7r3j",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": 9.9,
+      "title": "vm2: NodeVM node:-prefixed negative builtin deny bypass exposes child_process",
+      "summary": "## Summary\n\nNodeVM normalizes `node:`-prefixed builtin specifiers during `require()` resolution, but it does not normalize user-provided negative builtin entries in wildcard policy.\n\nAs a result, this configuration:\n\n```js\nnew NodeVM({\n  require: {\n    builtin: ['*', '-node:child_process']\n  }\n});\n```\n\ndoes not deny the canonical `child_process` builtin. Sandboxed code can require both `child_process` and `node:child_process`, and receives the host module with process-spawning APIs such as `exec",
+      "affected": "npm:vm2",
+      "references": [
+        "https://github.com/advisories/GHSA-8686-vhfx-7r3j"
+      ],
+      "published": "2026-10-01T15:36:01Z",
+      "fetched": "2026-10-02T04:11:33.593237+00:00"
+    },
+    {
+      "id": "GHSA-633r-hq9m-c4ff",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 4.0,
+      "title": "vm2: vm.freeze()/vm.readonly() bypass via accessor descriptor",
+      "summary": "### Summary\nUntrusted JavaScript running inside `new VM().run()` / `new NodeVM().run()` can bypass `vm.freeze()` / `vm.readonly()` and mutate a host object the embedder explicitly marked read-only - the documented contract is \"prevent sandboxed scripts from adding, changing, or deleting properties\". If the frozen host object has an accessor (get/set) own-property, the sandbox can read the host setter back out via `Object.getOwnPropertyDescriptor()` and call it directly; the call lands in `BaseHa",
+      "affected": "npm:vm2",
+      "references": [
+        "https://github.com/advisories/GHSA-633r-hq9m-c4ff"
+      ],
+      "published": "2026-10-01T15:35:25Z",
+      "fetched": "2026-10-02T04:11:33.593265+00:00"
+    },
+    {
+      "id": "GHSA-8hr7-r645-pc6w",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": 9.0,
+      "title": "vm2: NodeVM nesting guard accepts array-shaped require and permits host RCE",
+      "summary": "## Summary\n\nThe `NodeVM` constructor computes `hasRealRequireConfig` using `typeof requireOpts === 'object' && requireOpts !== null`, so `require: []` bypasses the guard intended to reject `nesting` without an explicit require configuration. `makeResolverFromLegacyOptions()` then destructures the array to undefined option fields and returns a resolver containing only `NESTING_OVERRIDE.vm2`. Any attacker whose JavaScript is executed by a downstream `NodeVM` configured with `{nesting: true, requir",
+      "affected": "npm:vm2",
+      "references": [
+        "https://github.com/advisories/GHSA-8hr7-r645-pc6w"
+      ],
+      "published": "2026-10-01T15:34:58Z",
+      "fetched": "2026-10-02T04:11:33.593281+00:00"
+    },
+    {
+      "id": "GHSA-647f-g98j-qq25",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": 10.0,
+      "title": "vm2: GHSA-m283-3h24-438v fix bypass leads to host RCE via call/apply indirection",
+      "summary": "## Summary\n\nUntrusted JavaScript run by vm2 can escape the sandbox and execute arbitrary commands in the host Node.js process when an embedder-exposed host Promise rejects. This is an incomplete fix for GHSA-m283-3h24-438v: the advisory's capability-bearing rejection rebuild runs only through this direct Promise-handler path, so call/apply indirection bypasses the protection it introduced. The bridge sanitises host rejection values before sandbox callbacks run, but the gate at `lib/bridge.js:162",
+      "affected": "npm:vm2",
+      "references": [
+        "https://github.com/advisories/GHSA-647f-g98j-qq25"
+      ],
+      "published": "2026-10-01T15:32:10Z",
+      "fetched": "2026-10-02T04:11:33.593299+00:00"
+    },
+    {
+      "id": "GHSA-6w8r-xxw2-g3hx",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": 9.9,
+      "title": "vm2 allows a sandboxed plugin to execute native code through `node:sqlite`",
+      "summary": "### Summary\n\nvm2 3.11.6 exposes Node.js's host `node:sqlite` module to `NodeVM` code when that builtin is allowed explicitly or through `builtin: ['*']`. The module is wrapped as read-only, but callable methods retain host-process authority. A sandboxed plugin can construct an in-memory database with extension loading enabled and call `DatabaseSync.loadExtension()` on a native library bundled in the plugin directory.\n\nSQLite loads the library into the Node.js host process and invokes its native ",
+      "affected": "npm:vm2",
+      "references": [
+        "https://github.com/advisories/GHSA-6w8r-xxw2-g3hx"
+      ],
+      "published": "2026-10-01T15:29:04Z",
+      "fetched": "2026-10-02T04:11:33.593328+00:00"
+    },
+    {
+      "id": "GHSA-46pr-c5wc-xffx",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": 9.9,
+      "title": "vm2 crypto builtin loads attacker native code through setEngine",
+      "summary": "Summary\n\nvm2 3.11.6 exposes the host `crypto` module to a `NodeVM` when that single builtin is allowed. The module is presented through a read-only bridge, but its functions still execute with host-process authority. `crypto.setEngine()` accepts a filesystem path and asks OpenSSL to dynamically load the referenced native library.\n\nAn attacker whose untrusted plugin package contains a native library can therefore load that library into the host process by calling `crypto.setEngine()` from sandbox",
+      "affected": "npm:vm2",
+      "references": [
+        "https://github.com/advisories/GHSA-46pr-c5wc-xffx"
+      ],
+      "published": "2026-10-01T15:28:36Z",
+      "fetched": "2026-10-02T04:11:33.593355+00:00"
+    },
+    {
+      "id": "GHSA-27g9-p43v-cw3v",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": 9.8,
+      "title": "vm2 sandbox escape on Node.js 26 through a stale PromiseThenLookupChain protector",
+      "summary": "## Reporter\n\n- Name or handle: `[YMsora]`\n- Report date: 2026-08-14\n\n## Summary\n\nThe latest published vm2 release, **3.11.5**, and the current `main` branch are vulnerable to a sandbox escape when used on Node.js 26. An ordinary fulfilled Promise created by an async function can retain an attacker-controlled `constructor[Symbol.species]` across `Promise.prototype.finally()`.\n\nvm2 installs wrappers on the intrinsic `Promise.prototype.then` and `catch` methods. On Node.js 26 / V8 14.6, V8's `SetPr",
+      "affected": "npm:vm2",
+      "references": [
+        "https://github.com/advisories/GHSA-27g9-p43v-cw3v"
+      ],
+      "published": "2026-10-01T15:28:07Z",
+      "fetched": "2026-10-02T04:11:33.593406+00:00"
+    },
+    {
+      "id": "GHSA-98xx-8mx4-x7cm",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": 10.0,
+      "title": "vm2 NodeVM can replace the host process TLS trust store",
+      "summary": "Summary\n\nvm2 3.11.6 exposes the host `tls` module to a `NodeVM` when that builtin is explicitly allowed. Although the module object is wrapped as read-only, its functions still execute against process-wide host state. On Node.js versions that provide `tls.setDefaultCACertificates()`, sandbox code can replace the certificate authorities trusted by subsequent host-realm TLS clients.\n\nThe exploit needs only the narrowly allowed `tls` and `url` builtins. It does not require `fs`, `process`, `module`",
+      "affected": "npm:vm2",
+      "references": [
+        "https://github.com/advisories/GHSA-98xx-8mx4-x7cm"
+      ],
+      "published": "2026-10-01T15:27:28Z",
+      "fetched": "2026-10-02T04:11:33.593435+00:00"
+    },
+    {
+      "id": "GHSA-7q3f-wx44-378m",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 4.2,
+      "title": "vm2: External module allowlist uses a raw prefix test, so a prefix-sharing sibling package is treated as allowlisted",
+      "summary": "## Summary\n\n`isPathAllowedForModule` decides whether a resolved path belongs to an allowlisted external module using a raw string prefix test. `node_modules/foo2` starts with `node_modules/foo`, so a package whose name merely shares a prefix with an allowlisted one is treated as being inside it, and a relative require from the allowlisted package reaches it even with transitive loading disabled.\n\n## Where it is\n\n`lib/resolver-compat.js`, lines 122 to 132, quoted from HEAD `7a1f5100b96f48d34e0fe1",
+      "affected": "npm:vm2",
+      "references": [
+        "https://github.com/advisories/GHSA-7q3f-wx44-378m"
+      ],
+      "published": "2026-10-01T15:26:45Z",
+      "fetched": "2026-10-02T04:11:33.593452+00:00"
+    },
+    {
+      "id": "GHSA-3jqq-pw4j-pqcj",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 6.8,
+      "title": "JupyterLab: Cross-site scripting (XSS) in JupyterLab via crafted language package (jupyterlab.json)",
+      "summary": "## Description\n\nA language pack ships a `Plural-Forms` header saying how the language counts, for example `nplurals=2; plural=(n != 1);`. JupyterLab turns that string into a function with `new Function`, so the header gets executed. The check that meant to keep it safe was a regular expression. The regex was anchored at the start but not at the end, so it accepted any string that began with a valid plural rule and ignored everything after it.\n\nA header such as the following passed the check, and",
+      "affected": "pip:jupyterlab, pip:jupyterlab, pip:jupyterlite-core",
+      "references": [
+        "https://github.com/advisories/GHSA-3jqq-pw4j-pqcj"
+      ],
+      "published": "2026-10-01T15:22:17Z",
+      "fetched": "2026-10-02T04:11:34.982893+00:00"
+    },
+    {
+      "id": "GHSA-x78j-v8h9-3j2q",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": null,
+      "title": "virtualenv: Command injection via --prompt in activate.bat (batch activator)",
+      "summary": "`BatchActivator.quote()` returned its input unchanged, the only activator with no escaping at all. `--prompt`, the `VIRTUALENV_PROMPT` environment variable, and the config file all set the prompt, and `activate.bat` writes it straight into `@set \"VAR=value\"`. A prompt containing a double quote closes that string early, and whatever follows runs as live cmd.exe syntax:\n\n```console\n$ virtualenv --prompt 'x\" & calc & \"' venv\n$ venv\\Scripts\\activate.bat\n```\n\nruns `calc` the moment someone activates ",
+      "affected": "pip:virtualenv",
+      "references": [
+        "https://github.com/advisories/GHSA-x78j-v8h9-3j2q"
+      ],
+      "published": "2026-10-01T15:08:29Z",
+      "fetched": "2026-10-02T04:11:34.982979+00:00"
+    },
+    {
+      "id": "CVE-2026-96561",
+      "source": "nvd",
+      "severity": "high",
+      "cvss": 7.2,
+      "title": "The AI Engine – The Chatbot, AI Framework & MCP for WordPress plugin for WordPress is vulnerable to Stored Cross-Site Scripting in versions up to, and including, 3.8.0 This is due to a chain of missin",
+      "summary": "The AI Engine – The Chatbot, AI Framework & MCP for WordPress plugin for WordPress is vulnerable to Stored Cross-Site Scripting in versions up to, and including, 3.8.0 This is due to a chain of missing input neutralization and output escaping across the /mwai-ui/v1/chats/submit REST endpoint, the PHP error-log parser (MeowKit_MWAI_Helpers::php_error_logs), the Advisor task (Meow_MWAI_Modules_Advisor::run_advisor), and the Advisor dashboard widget (advisor_metabox): the server-parameter denylist ",
+      "affected": "prompt injection",
+      "references": [
+        "https://plugins.trac.wordpress.org/browser/ai-engine/tags/3.8.0/classes/engines/core.php#L533",
+        "https://plugins.trac.wordpress.org/browser/ai-engine/tags/3.8.0/classes/modules/advisor.php#L156",
+        "https://plugins.trac.wordpress.org/browser/ai-engine/tags/3.8.0/classes/modules/advisor.php#L162",
+        "https://plugins.trac.wordpress.org/browser/ai-engine/tags/3.8.0/classes/modules/advisor.php#L216",
+        "https://plugins.trac.wordpress.org/browser/ai-engine/tags/3.8.0/classes/modules/chatbot.php#L122"
+      ],
+      "published": "2026-10-01T04:18:22.110",
+      "fetched": "2026-10-02T04:11:13.512509+00:00"
+    },
+    {
+      "id": "GHSA-94p9-xgh2-xp45",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": null,
+      "title": "virtualenv: Downloaded seed wheels (pip/setuptools) are not integrity-checked before use",
+      "summary": "`download_wheel()` runs `pip download` and hands the result straight to the seeder, with nothing checking the bytes it gets back. The embedded pip and setuptools wheels carry a `BUNDLE_SHA256` that virtualenv checks on every load, but a wheel fetched over the network for the periodic-update feature or the `--download` flag had no equivalent verification.\n\nA compromised index, a stale mirror, or a MITM'd download (when TLS is intercepted, e.g. via a misconfigured or malicious CA) could substitute",
+      "affected": "pip:virtualenv",
+      "references": [
+        "https://github.com/advisories/GHSA-94p9-xgh2-xp45"
+      ],
+      "published": "2026-09-30T23:54:13Z",
+      "fetched": "2026-10-02T04:11:34.983039+00:00"
+    },
+    {
+      "id": "GHSA-9h9j-4vrj-gf7g",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": null,
+      "title": "virtualenv writes prompt values into pyvenv.cfg without sanitizing line boundaries, allowing configuration injection",
+      "summary": "### Summary\n\n`pyvenv.cfg` is a line-based format with no escape syntax. `PyEnvCfg.write()` wrote values verbatim, while `PyEnvCfg._read_values()` parses the file with `str.splitlines()`. A value containing a line boundary therefore became additional configuration lines, and because reading is last-wins, the injected keys replaced any key written earlier in the file.\n\n### Impact\n\nThe `prompt` value is the reachable input: it is set by `--prompt`, by the `VIRTUALENV_PROMPT` environment variable, o",
+      "affected": "pip:virtualenv",
+      "references": [
+        "https://github.com/advisories/GHSA-9h9j-4vrj-gf7g"
+      ],
+      "published": "2026-09-30T23:53:58Z",
+      "fetched": "2026-10-02T04:11:34.983046+00:00"
+    },
+    {
+      "id": "GHSA-chx6-46f5-w4vp",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.5,
+      "title": "tornado: CurlAsyncHTTPClient enforces no response-size limit — decompression bomb drives unbounded memory accumulation to OOM",
+      "summary": "An unbounded memory accumulation (decompression bomb) in `tornado.curl_httpclient.CurlAsyncHTTPClient` — the client-side sibling gap of CVE-2026-49855 — verified end-to-end on the 2026-08-15 master snapshot (`6.6.dev1`) and present unchanged in the latest release tag `v6.5.8` and on master (checked 2026-08-17). When a Tornado application configures the curl client (the documented deployment for proxy support / advanced TLS options) and `fetch()`es an attacker-chosen or attacker-compromised URL w",
+      "affected": "pip:tornado",
+      "references": [
+        "https://github.com/advisories/GHSA-chx6-46f5-w4vp"
+      ],
+      "published": "2026-09-30T23:49:13Z",
+      "fetched": "2026-10-02T04:11:34.983217+00:00"
+    },
+    {
+      "id": "GHSA-c2m8-h5v5-343r",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": null,
+      "title": "Tornado: StaticFileHandler follows symlinks outside static root (path traversal)",
+      "summary": "### Summary\nStaticFileHandler allows an unauthenticated attacker to read arbitrary files from the server's filesystem by requesting a path that resolves to a symbolic link placed inside the static root directory. Any application that serves user-uploadable content, or whose static directory is populated by a build/deploy pipeline that creates symlinks (e.g. npm link, webpack, Docker volume mounts, CDN sync tools), is affected. An attacker who can trigger the creation of a symlink pointing outsid",
+      "affected": "pip:tornado",
+      "references": [
+        "https://github.com/advisories/GHSA-c2m8-h5v5-343r"
+      ],
+      "published": "2026-09-30T23:48:55Z",
+      "fetched": "2026-10-02T04:11:34.983252+00:00"
+    },
+    {
+      "id": "GHSA-g5vv-9gxw-82hx",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.5,
+      "title": "GitPython: Denial of Service via catastrophic backtracking (ReDoS) in Actor.name_email_regex — commit author/committer field parsing",
+      "summary": "### Summary\n\nGitPython's `Actor.name_email_regex` regular expression (`git/util.py`, line 863)\nis vulnerable to catastrophic backtracking (ReDoS — Regular Expression Denial of\nService). When GitPython parses the `author` or `committer` header of a git commit\nobject that contains a long string with an unterminated `<` (no matching `>`), the\nPython regex engine enters quadratic backtracking, causing complete single-threaded\nCPU exhaustion proportional to the square of the input length.\n\nA single c",
+      "affected": "pip:GitPython",
+      "references": [
+        "https://github.com/advisories/GHSA-g5vv-9gxw-82hx"
+      ],
+      "published": "2026-09-30T23:29:14Z",
+      "fetched": "2026-10-02T04:11:34.983405+00:00"
+    },
+    {
+      "id": "GHSA-239g-whfq-7xj9",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 8.8,
+      "title": "GitPython: Repository content can impersonate the git directory, leading to arbitrary code execution",
+      "summary": "### Summary\n\n`Repo.__init__` decides which directory is the git directory by testing candidate paths in an order that\nconsiders the real `.git` **last**. Two earlier tests can be satisfied by ordinary tracked files. Git\nreserves only the literal name `.git`, so `HEAD`, `objects/`, `refs/`, `config`, `gitdir`, `commondir`\nand `hooks/` at a repository root are all legal tracked content.\n\nConsequently, after a victim opens or clones an attacker's repository, GitPython resolves `git_dir` to\nthe **wo",
+      "affected": "pip:gitpython",
+      "references": [
+        "https://github.com/advisories/GHSA-239g-whfq-7xj9"
+      ],
+      "published": "2026-09-30T23:27:59Z",
+      "fetched": "2026-10-02T04:11:34.983464+00:00"
+    },
+    {
+      "id": "GHSA-3cv6-jpf6-8222",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 6.5,
+      "title": "LiteLLM: Authenticated SSRF and provider-credential exfiltration via unvalidated request-body routing parameters",
+      "summary": "### Impact\n\nAny authenticated LiteLLM proxy user could redirect an outbound provider call to a destination they control and cause the proxy to send its own configured provider credentials to that destination. The proxy's request-body validation was a denylist that did not cover every sensitive parameter and did not inspect parameters nested inside other request fields, so a caller could supply a routing or credential value that the proxy applied without clearing the operator's stored key. Any au",
+      "affected": "pip:litellm, pip:litellm, pip:litellm, pip:litellm, pip:litellm",
+      "references": [
+        "https://github.com/advisories/GHSA-3cv6-jpf6-8222"
+      ],
+      "published": "2026-09-30T21:11:25Z",
+      "fetched": "2026-10-02T04:11:34.983471+00:00"
+    },
+    {
+      "id": "GHSA-42vr-xj54-vc7v",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 5.3,
+      "title": "PyJWT: Unauthenticated RecursionError DoS in pre-verification payload parse (PyJWKClient.get_signing_key_from_jwt / verify_signature=False)",
+      "summary": "## Summary\n\n`PyJWKClient.get_signing_key_from_jwt(token)` — the first step of the JWKS\nverification flow documented in `docs/usage.rst` — must decode a token's\npayload before its signature can be checked, via\n`jwt.api_jwt.decode_complete(token, options={\"verify_signature\": False})`.\nThat call parses the payload with `json.loads` in `PyJWT._decode_payload`\n(`jwt/api_jwt.py:297-300`), whose `except` clause catches only `ValueError`.\nA payload that is valid JSON but nested ~20,000 levels deep makes",
+      "affected": "pip:PyJWT",
+      "references": [
+        "https://github.com/advisories/GHSA-42vr-xj54-vc7v"
+      ],
+      "published": "2026-09-30T15:41:05Z",
+      "fetched": "2026-10-02T04:11:34.983519+00:00"
+    },
+    {
+      "id": "GHSA-j8rh-479h-cp32",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": null,
+      "title": "Axios: Header Injection via Inherited headers After Minimal Interceptor",
+      "summary": "## Summary\n\nAxios request interceptors may return a replacement config object. If an interceptor returns a plain object without an own `headers` property, `dispatchRequest()` later evaluates `config.headers` and can resolve an inherited `Object.prototype.headers` value. In a process where another vulnerability has polluted `Object.prototype.headers`, axios can send attacker-controlled headers.\n\nAxios does not create the prototype pollution source, and the interceptor itself is trusted caller cod",
+      "affected": "npm:axios",
+      "references": [
+        "https://github.com/advisories/GHSA-j8rh-479h-cp32"
+      ],
+      "published": "2026-09-30T15:35:14Z",
+      "fetched": "2026-10-02T04:11:33.593768+00:00"
+    },
+    {
+      "id": "GHSA-m8m8-qj5v-23w3",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": null,
+      "title": "Axios: Node HTTP adapter prototype-pollution gadget allows request socket hijack via inherited createConnection",
+      "summary": "## Summary\n\nAxios' Node HTTP adapter can act as a read-side prototype-pollution gadget for Node's sensitive `createConnection` request option. The adapter creates a null-prototype options object, but Node's HTTP client can copy or normalize request options into ordinary objects before connection creation. If `Object.prototype.createConnection` has been polluted elsewhere in the same process, Node can call the inherited function and create a socket to an attacker-controlled endpoint.\n\nAxios does ",
+      "affected": "npm:axios",
+      "references": [
+        "https://github.com/advisories/GHSA-m8m8-qj5v-23w3"
+      ],
+      "published": "2026-09-30T15:32:51Z",
+      "fetched": "2026-10-02T04:11:33.593819+00:00"
+    },
+    {
+      "id": "GHSA-3pq3-5fj3-cg6v",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": null,
+      "title": "Axios: HTTP/2 adapter bypasses configured DNS lookup and proxy controls",
+      "summary": "## Summary\n\nAxios for Node.js does not apply configured DNS lookup or proxy controls when a request uses `httpVersion: 2`. The HTTP/1 adapter path wraps and forwards `config.lookup`, builds normal request options, and applies proxy routing through `setProxy()`. The HTTP/2 path builds a session with `http2.connect()` using only `options.http2Options`, which drops the top-level `lookup`, `agent`, and proxy state.\n\nApplications are affected when they allow a user to influence request destinations, ",
+      "affected": "npm:axios",
+      "references": [
+        "https://github.com/advisories/GHSA-3pq3-5fj3-cg6v"
+      ],
+      "published": "2026-09-30T15:02:14Z",
+      "fetched": "2026-10-02T04:11:33.594387+00:00"
+    },
+    {
+      "id": "GHSA-ffc3-869f-jxw9",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": 9.1,
+      "title": "PyJWT: Asymmetric-PEM detection bypass: whitespace/line-ending-mutated public keys skip the HS/asymmetric confusion guard",
+      "summary": "**Prerequisites** (both conditions must hold; both are deployment properties, not attacker-controlled at request time):\n\n- The `jwt.decode` allow-list mixes an HMAC algorithm with an asymmetric one, e.g. `algorithms=[\"ES256\", \"HS256\"]` (the RFC 8725 footgun the guard exists to backstop).\n- The verification key is passed as raw PEM text/bytes on the non-`PyJWK` path, in a byte-form that `cryptography`'s loader accepts but PyJWT's `is_pem_format` regex does not recognize (marker-adjacent whitespac",
+      "affected": "pip:PyJWT",
+      "references": [
+        "https://github.com/advisories/GHSA-ffc3-869f-jxw9"
+      ],
+      "published": "2026-09-29T23:17:33Z",
+      "fetched": "2026-10-02T04:11:34.983886+00:00"
+    },
+    {
+      "id": "GHSA-w6j9-cwv2-h6wq",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 5.9,
+      "title": "PyJWT: Malformed RSA JWK aborts parsing of an entire JWK Set",
+      "summary": "## Summary\n\nA malformed RSA JWK inside a JWK Set aborts parsing of the entire set instead of being skipped, because `RSAAlgorithm.from_jwk` can raise a plain `ValueError` that isn't caught by `PyJWKSet`'s per-key error-skipping logic.\n\n## Affected component / version\n\n- Package: `PyJWT` (PyPI, ecosystem `pip`)\n- Files: `jwt/api_jwk.py` (`PyJWK.__init__`, `PyJWKSet.__init__`), `jwt/algorithms.py` (`RSAAlgorithm.from_jwk`)\n- Confirmed present in the `master` branch as of 2026-09-05 (commit `7144e4",
+      "affected": "pip:PyJWT",
+      "references": [
+        "https://github.com/advisories/GHSA-w6j9-cwv2-h6wq"
+      ],
+      "published": "2026-09-29T18:23:01Z",
+      "fetched": "2026-10-02T04:11:34.984155+00:00"
+    },
+    {
+      "id": "CVE-2026-102697",
+      "source": "nvd",
+      "severity": "high",
+      "cvss": 7.8,
+      "title": "Ollama versions 0.14.0 before 0.31.2 contain an incorrect authorization vulnerability in the experimental agent mode Bash tool approval mechanism that fails to properly parse shell syntax. Attackers w",
+      "summary": "Ollama versions 0.14.0 before 0.31.2 contain an incorrect authorization vulnerability in the experimental agent mode Bash tool approval mechanism that fails to properly parse shell syntax. Attackers who can influence model output through prompt injection can execute additional shell commands by appending control operators like semicolons or logical operators to approved commands, bypassing the session approval requirement.",
+      "affected": "prompt injection",
+      "references": [
+        "https://github.com/ollama/ollama",
+        "https://github.com/ollama/ollama/blob/v0.31.1/x/agent/approval.go#L204-L206",
+        "https://github.com/ollama/ollama/blob/v0.31.1/x/agent/approval.go#L389",
+        "https://github.com/ollama/ollama/commit/a2b3a5e9a3956bc0700a8505580c11faf4da09b5",
+        "https://github.com/ollama/ollama/releases/tag/v0.31.2"
+      ],
+      "published": "2026-09-29T17:17:08.150",
+      "fetched": "2026-10-02T04:11:13.512505+00:00"
+    },
+    {
+      "id": "CVE-2026-77177",
+      "source": "nvd",
+      "severity": "critical",
+      "cvss": 9.8,
+      "title": "Open GenAI Stack (aka ogx-ai) 2026-06-11, as used in the Meta AI backend for WhatsApp and other products, allows code execution because prompt injection (with Jinja2 template syntax) can be used to ac",
+      "summary": "Open GenAI Stack (aka ogx-ai) 2026-06-11, as used in the Meta AI backend for WhatsApp and other products, allows code execution because prompt injection (with Jinja2 template syntax) can be used to achieve server-side expression evaluation without sanitization.",
+      "affected": "prompt injection",
+      "references": [
+        "https://gist.github.com/abhi04anon/8ce0b68a5a7dda8a0501cbaf933173eb",
+        "https://gist.github.com/abhi04anon/8ce0b68a5a7dda8a0501cbaf933173eb"
+      ],
+      "published": "2026-09-29T16:17:11.363",
+      "fetched": "2026-10-02T04:11:13.512502+00:00"
+    },
+    {
       "id": "GHSA-q986-4x7x-gx39",
       "source": "github-advisory",
       "severity": "high",
@@ -6551,7 +7040,7 @@
       "fetched": "2026-08-04T06:34:53.913899+00:00"
     }
   ],
-  "updated": "2026-09-28T09:42:40.232314+00:00",
+  "updated": "2026-10-02T04:11:35.485261+00:00",
   "sources": [
     "osv",
     "nvd",
@@ -6570,40 +7059,40 @@
         "items": 0,
         "attempts": 1,
         "error": null,
-        "checked_at": "2026-09-28T09:42:18.517677+00:00",
+        "checked_at": "2026-10-02T04:11:13.061370+00:00",
         "consecutive_failures": 0,
         "degraded_since": null
       },
       "nvd": {
         "ok": true,
-        "items": 38,
+        "items": 39,
         "attempts": 1,
         "error": null,
-        "checked_at": "2026-09-28T09:42:37.282750+00:00",
+        "checked_at": "2026-10-02T04:11:32.433067+00:00",
         "consecutive_failures": 0,
         "degraded_since": null
       },
       "github-advisory": {
         "ok": true,
-        "items": 44,
+        "items": 32,
         "attempts": 1,
         "error": null,
-        "checked_at": "2026-09-28T09:42:40.231939+00:00",
+        "checked_at": "2026-10-02T04:11:35.484966+00:00",
         "consecutive_failures": 0,
         "degraded_since": null
       }
     },
     "degraded": [],
-    "last_success": "2026-09-28T09:42:40.232314+00:00",
-    "last_attempt": "2026-09-28T09:42:40.232314+00:00"
+    "last_success": "2026-10-02T04:11:35.485261+00:00",
+    "last_attempt": "2026-10-02T04:11:35.485261+00:00"
   },
   "stats": {
-    "high": 211,
+    "medium": 139,
+    "critical": 74,
+    "high": 223,
     "low": 6,
-    "critical": 62,
     "unknown": 36,
-    "medium": 129,
     "moderate": 1
   },
-  "total": 445
+  "total": 479
 }
