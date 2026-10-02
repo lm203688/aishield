@@ -49,6 +49,10 @@ MIN_COVERAGE = 1.00
 MIN_POSITIVES = 50
 MIN_NEGATIVES = 30
 
+# 祈使式良性样本（运维手册 / 流水线步骤）规模下限。它与 MIN_NEGATIVES 分开设：
+# 这两组样本喂的路径不同、要防的失效也不同，共用一个下限等于没下限。
+MIN_IMPERATIVE_BENIGN = 5
+
 
 class TestDeterminism(unittest.TestCase):
     def test_two_runs_produce_identical_json(self):
@@ -149,6 +153,70 @@ class TestQualityGates(unittest.TestCase):
         self.assertGreaterEqual(self.summary["recall_any"], self.summary["recall"],
                                 '规则覆盖率 %.4f 低于召回率 %.4f —— 口径可能又分裂了'
                                 % (self.summary["recall_any"], self.summary["recall"]))
+
+
+class TestImperativeBenignNegativesAreIndependentlyCounted(unittest.TestCase):
+    """祈使式良性样本（运维手册里的 curl|sh）必须单独记账，且零 serious 误报。
+
+    2026-10-02 补。此前 Plane A 的 `negatives` 只跑 BENIGN_CORPUS —— 那里全是
+    「防御自述 / 讲概念的散文」，`fp=0.0` 只证明了"规则不会把散文判成攻击"。
+    运维手册里那句**看起来完全像攻击**的 `curl https://... | bash` 从没被测过，
+    于是这条只数字段就是当时唯一的出口。
+
+    独立记账的意思是：它不能被并进 `false_positive_indices`，也不能让
+    `false_positive_rate` 把它算成负分 —— 口径与 negatives 一致（只算
+    critical/high），是一组**受检但不参与主误报率**的对照。
+    """
+
+    @staticmethod
+    def _plane_a():
+        for p in B.run()["planes"]:
+            if p.get("name") == "instruction_plane":
+                return p
+        raise AssertionError('基准里没有 instruction_plane —— 指令面没有证据')
+
+    def test_fields_exist_and_are_populated(self):
+        """空列表也能通过 len()==0 的断言，所以先钉"真的有样本"。"""
+        p = self._plane_a()
+        n = p.get("imperative_benign_negatives")
+        self.assertIsInstance(n, int)
+        self.assertGreaterEqual(n, MIN_IMPERATIVE_BENIGN,
+                                '祈使式良性样本只剩 %d 条（下限 %d）—— 对照组被删小了'
+                                % (n, MIN_IMPERATIVE_BENIGN))
+        self.assertEqual(p.get("imperative_benign_false_positives"), [],
+                         '运维手册样本被判出 critical/high，规则把「流水线步骤」'
+                         '当成了「攻击指令」：%s'
+                         % (p.get("imperative_benign_findings"),))
+
+    def test_every_negative_has_a_finding_record(self):
+        """给几条入账必须与样本一一对应，否则 fields 可能整个是空壳。"""
+        p = self._plane_a()
+        self.assertEqual(len(p.get("imperative_benign_findings") or []),
+                         p["imperative_benign_negatives"],
+                         'findings 与样本数不一一对应，记账口径分裂了')
+
+    def test_only_informational_hits_survive(self):
+        """low/info 命中是信息性标注，允许；critical/high 一律不许。"""
+        p = self._plane_a()
+        serious = [rid for group in (p.get("imperative_benign_findings") or [])
+                   for rid, sev in group
+                   if sev in ("critical", "high")]
+        self.assertEqual(serious, [],
+                         '祈使式良性样本上出现可处理严重度：%s' % serious)
+
+    def test_samples_are_fed_as_human_docs_not_agent_instructions(self):
+        """喂样路径错了，这组样本就变成「拿标注错误凑数据」。
+
+        同一句 `curl | bash` 喂在 skills/ 下会走 is_agent_instruction_doc=True、
+        跳过文档降级，MCP04-008 直接判 critical —— 那测的就不是生产行为了。
+        """
+        src = open(os.path.join(os.path.dirname(__file__), '..', 'scripts',
+                                'benchmark.py'), encoding='utf-8').read()
+        self.assertIn('analyze({"docs/op_%02d.md"', src,
+                      '祈使式良性样本改回了非 docs 路径 —— 会被当 agent 指令喂，'
+                      '测到的是文档降级逻辑而不是误报行为')
+        self.assertIn('IMPERATIVE_BENIGN_SAMPLES', src,
+                      'IMPERATIVE_BENIGN_SAMPLES 没被 benchmark 消费 —— 语料白加了')
 
 
 class TestInstructionPlaneFeedsAgentInstructions(unittest.TestCase):

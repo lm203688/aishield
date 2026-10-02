@@ -419,12 +419,66 @@ class TestPromotedRulesAreLive(unittest.TestCase):
         self.assertIsNotNone(m)
         self.assertEqual(int(m.group(1)), self.R.get_rule_count('mcp'))
 
+
+class TestSyncReadmeCountsIsIdempotent(unittest.TestCase):
+    """`sync_readme_counts()` 会就地改写 mcp-server/README.md。
+
+    这个测试此前直接调真实文件 —— 一旦 README 数字与引擎有漂移，第一次调用就
+    把生产文件改写了，被 `tests/run_all.py` 的 hermetic guard 抓成脏数据泄漏
+    （受保护清单里就有 `mcp-server/README.md`）。因此这里一律跑副本。
+
+    顺带补一条「真的会修漂移」的断言：只看幂等的话，函数中途 return False
+    （比如读引擎失败）也会"两次都不改"，测试照样绿 —— 那是一条空转的假绿。
+    """
+
+    def setUp(self):
+        from scanner import rules as R
+        self.R = R
+        real = os.path.join(ROOT, 'mcp-server', 'README.md')
+        if not os.path.exists(real):
+            self.skipTest('mcp-server/README.md 不存在')
+        self.tmp = tempfile.mkdtemp(prefix='aishield_readme_')
+        self.path = os.path.join(self.tmp, 'README.md')
+        shutil.copyfile(real, self.path)
+
+    def tearDown(self):
+        shutil.rmtree(self.tmp, ignore_errors=True)
+
+    def _text(self):
+        with open(self.path, encoding='utf-8') as f:
+            return f.read()
+
+    def _stale_totals(self):
+        """把副本里的总数字改成明显错的值（保留真实数字以外的行不动）。"""
+        stale = re.sub(r'(\*\*Total:\s*)\d+(\s*rules\*\*\s*\(MCP type\)\s*/\s*\*\*)'
+                       r'\d+(\s*rules\*\*\s*\(Skill type\))',
+                       lambda m: '%s1%s1%s' % m.groups(), self._text())
+        with open(self.path, 'w', encoding='utf-8') as f:
+            f.write(stale)
+
     def test_sync_readme_is_idempotent(self):
-        changed_first = promote_rule.sync_readme_counts()
-        changed_again = promote_rule.sync_readme_counts()
+        changed_first = promote_rule.sync_readme_counts(self.path)
+        changed_again = promote_rule.sync_readme_counts(self.path)
         self.assertFalse(changed_again,
                          '同步应当幂等，重复执行不该反复改写文件')
         del changed_first
+
+    def test_sync_actually_fixes_drifted_totals(self):
+        self._stale_totals()
+        self.assertTrue(promote_rule.sync_readme_counts(self.path),
+                        '目标数字已经错了一倍，同步却没报告改动')
+
+        m = re.search(r'\*\*Total:\s*(\d+)\s*rules\*\*', self._text())
+        self.assertIsNotNone(m, '同步后仍找不到 Total 行')
+        self.assertEqual(int(m.group(1)), self.R.get_rule_count('mcp'),
+                         '同步没有把 README 总数字对齐到引擎真值')
+
+    def test_sync_is_declared_as_non_destructive_in_source(self):
+        """默认路径仍指向真实 npm 页面，别让可选参数把调用方带偏。"""
+        src = open(os.path.join(ROOT, 'scripts', 'promote_rule.py'),
+                   encoding='utf-8').read()
+        self.assertIn('readme = readme or os.path.join(ROOT, "mcp-server", "README.md")',
+                      src)
 
 
 # ══════════════════════════════════════════════════════════════

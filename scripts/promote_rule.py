@@ -573,15 +573,19 @@ def promote(path, data):
 # ---------------------------------------------------------------------------
 # Keep published docs honest
 # ---------------------------------------------------------------------------
-def sync_readme_counts():
+def sync_readme_counts(readme=None):
     """Rewrite the rule totals in mcp-server/README.md to the live values.
 
     That README is the npmjs.com package page -- the first thing a user reads.
     `tests/test_mcp_contract.py` binds its numbers to the engine, so promoting
     a rule without updating it turns CI red. Doing it here means the docs can
     never drift behind a promotion.
+
+    `readme` 可指定任意路径（默认真实 npm 页面）。测试必须传副本：直接跑真实
+    README 会被 `tests/run_all.py` 的 hermetic guard 判为脏数据写入
+    （`mcp-server/README.md` 在其受保护清单里）。
     """
-    readme = os.path.join(ROOT, "mcp-server", "README.md")
+    readme = readme or os.path.join(ROOT, "mcp-server", "README.md")
     if not os.path.exists(readme):
         return False
     try:
@@ -610,7 +614,8 @@ def sync_readme_counts():
     if n and new_text != text:
         with open(readme, "w", encoding="utf-8") as f:
             f.write(new_text)
-        print(f"  synced mcp-server/README.md -> {mcp_n} MCP / {skill_n} Skill rules")
+        print(f"  synced {os.path.basename(readme)} ({readme}) "
+              f"-> {mcp_n} MCP / {skill_n} Skill rules")
         return True
     return False
 
