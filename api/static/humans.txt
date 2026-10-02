@@ -17,4 +17,4 @@ Version: 4.10.0
 Language: Python
 Framework: Python Standard Library (zero dependencies)
 Security: OWASP MCP Top 10 aligned
-Rules: 253 security rules
+Rules: 256 security rules

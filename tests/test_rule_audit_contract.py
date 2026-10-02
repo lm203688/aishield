@@ -79,8 +79,15 @@ class TestBaselineAuditContract(unittest.TestCase):
                       '良性语料缺少 fixture 语境样本')
 
     def test_attack_samples_cannot_be_shrunk(self):
-        self.assertGreaterEqual(len(rule_corpus.ATTACK_SAMPLES), 28,
-                                'ATTACK_SAMPLES 被缩小 —— 每条雷达规则的覆盖断言会同时失效')
+        # 2026-10-02：ATTACK_SAMPLES[1]（叙述体，描述一场越狱而非越狱指令）被
+        # 移到 DESCRIPTION_SAMPLES。重分类不算缩水，所以这里按「攻击语料总量」
+        # 计（两类之和），下限保持 28 不动 —— 下限一旦跟着样本走，这条断言
+        # 三年后就只会记录一次历史，防不住真正的删除。
+        total = (len(rule_corpus.ATTACK_SAMPLES)
+                 + len(getattr(rule_corpus, "DESCRIPTION_SAMPLES", ())))
+        self.assertGreaterEqual(total, 28,
+                                '攻击语料被缩小到 %d 条 —— 每条雷达规则的覆盖断言会同时失效'
+                                % total)
 
     def test_no_uncovered_radar_rule(self):
         """每条线上雷达规则至少命中一条正样本。"""

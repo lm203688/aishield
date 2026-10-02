@@ -1,3 +1,4 @@
+import argparse
 import base64, json, os, subprocess, sys, tempfile
 
 REPO = "lm203688/aishield"
@@ -6,10 +7,63 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PAT_FILE = os.path.join(ROOT, ".workbuddy", "schedule-revert-pat.txt")
 TOKEN = open(PAT_FILE, encoding="utf-8").read().strip()
 
-FILES = sys.argv[2:]
-MESSAGE = sys.argv[1]
+_SCRIPTS = os.path.join(ROOT, "scripts")
+if _SCRIPTS not in sys.path:
+    sys.path.insert(0, _SCRIPTS)
+
+# 本轮检出的规则数漂移声明位。由 _auto_declaration_files 填充，供 commit
+# 循环里的"本地与远端一致但仍漂移"告警使用。
+_DRIFTED = set()
+
+
+def _auto_declaration_files(batch: list) -> list:
+    """把规则数漂移的声明位并进本批推送（可用 --no-auto-decl 关闭）。
+
+    为什么是机制而不是纪律：规则晋升后 ``rule_count_gate --sync`` 一次会改
+    20+ 个声明位（README / agent.html / agent-card.json / smithery.yaml …），
+    人工挑文件推送必然只带一部分，CI 的 "Workflow Integrity Gate" 就在剩下
+    那些文件上红 —— 红的是"本地已改、远端未同步"的半推状态。2026-10-02 的
+    实证是：本地 --sync 改了 20+ 文件，push 批次只带 8 个，CI 立刻报 8 处。
+
+    漂移文件本身的 blob 循环会自己跳过"本地与远端一致"的条目，所以这里
+    多带几个文件不会造出空提交。
+    """
+    if "--no-auto-decl" in sys.argv or os.environ.get("PUSH_NO_AUTO_DECL"):
+        return []
+    global _DRIFTED  # noqa: PLW0603
+    try:
+        import rule_count_gate as g
+        _DRIFTED = set(g.drifted_files())
+        drifted = _DRIFTED
+    except Exception as exc:                      # noqa: BLE001
+        # 拿不到门禁 ≠ 没漂移。降级放行而不是阻断：网关类故障不该挡住
+        # 正常代码推送，CI 里该红的门禁仍会自己报。
+        print(f"  ! 自动带漂移声明位失败（不阻断本次推送）：{exc}")
+        return []
+    have = set()
+    for rel in batch:
+        have.add(os.path.relpath(os.path.abspath(rel), ROOT).replace(os.sep, "/"))
+    extras = [r for r in sorted(drifted - have)
+              if os.path.isfile(os.path.join(ROOT, r))]
+    for r in extras:
+        print(f"  + auto drift decl: {r}")
+    return extras
+
+
+ap = argparse.ArgumentParser(description="多文件单提交推送（Contents API）")
+ap.add_argument("message")
+ap.add_argument("files", nargs="*")
+ap.add_argument("--no-auto-decl", action="store_true",
+                help="不自动带上规则数漂移的声明位")
+ap.add_argument("--dry-run", action="store_true",
+                help="算完 blob 就打印将提交的文件清单并退出，不写远端")
+ARGS = ap.parse_args()
+
+MESSAGE = ARGS.message
+FILES = list(ARGS.files)
 if not FILES:
     raise SystemExit("usage: _push_batch.py <msg> <file>...")
+FILES += _auto_declaration_files(FILES)
 
 
 def req(method, url, payload=None):
@@ -67,13 +121,26 @@ for rel in FILES:
     s, cur = req("GET", f"https://api.github.com/repos/{REPO}/contents/{rel}?ref={BRANCH}")
     cur_b64 = cur.get("content", "").replace("\n", "") if s == 200 else None
     if cur_b64 == content:
-        print(f"  unchanged: {rel}")
+        # 本地与远端一致时直接跳过是对的，但如果这个文件仍在漂移名单里，
+        # 说明"没人改过它"——推送再多次也修不掉远端那个错数字。这种
+        # 静默跳过最容易被误读成"已同步"，必须显式喊出来。
+        if rel in _DRIFTED:
+            print(f"  unchanged BUT STILL DRIFTED: {rel} "
+                  f"（先跑 rule_count_gate.py --sync 再推）")
+        else:
+            print(f"  unchanged: {rel}")
         continue
     s, blob = req("POST", f"https://api.github.com/repos/{REPO}/git/blobs",
                   {"content": content, "encoding": "base64"})
     assert s in (200, 201), f"blob failed {rel}: {s} {blob}"
     blobs.append((rel, blob["sha"]))
     print(f"  blob: {rel}")
+
+if ARGS.dry_run:
+    print(f"[dry-run] 将提交 {len(blobs)} 个 blob（删除 {len(deletes)} 个）：")
+    for rel, _sha in blobs:
+        print(f"    M {rel}")
+    raise SystemExit(0)
 
 if not blobs and not deletes:
     print("Nothing changed. Aborting.")

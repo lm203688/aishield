@@ -124,11 +124,11 @@
     "OWASP Agentic AI Top 10 (ASI01-ASI10)"
   ],
   "rules": {
-    "total": 235,
-    "static": 208,
+    "total": 256,
+    "static": 229,
     "generated": 8,
     "radar": 19,
-    "skill_categories": 241
+    "skill_categories": 283
   },
   "contact": "61960005@qq.com",
   "links": [

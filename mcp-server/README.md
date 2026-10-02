@@ -48,7 +48,7 @@ npx aishield-mcp-server
 
 | Tool | Description |
 |------|-------------|
-| `aishield_scan` | Full security scan — OWASP MCP Top 10 + Agentic AI Top 10, 253 rules, 5-dimension scoring |
+| `aishield_scan` | Full security scan — OWASP MCP Top 10 + Agentic AI Top 10, 256 rules, 5-dimension scoring |
 | `aishield_guardrail` | Pre-install safety check — pass/block verdict with score |
 | `aishield_prompt_check` | Prompt injection detection — Chinese + English |
 | `aishield_banned_words` | Chinese content compliance — 6 platform rules |
@@ -235,7 +235,8 @@ Policy Pack / Red-team probe / confidence 晋升 / rule decay。全部走
 |----------|-------|-------------|
 | MCP01 | 16 | Improper Token & Secret Management |
 | MCP02 | 14 | Privilege Scope Creep |
-| MCP03 | 10 | Tool Poisoning |
+| MCP03 | 11 | Tool Poisoning |
+ Tool Poisoning |
 | MCP04 | 13 | Supply Chain Attack & Dependency Tampering |
 | MCP05 | 27 | Command Injection & Execution |
 | MCP06 | 13 | Intent Flow Subversion / Prompt Injection |
@@ -250,7 +251,8 @@ Subtotal: **235 rules**
 
 | Category | Rules | Description |
 |----------|-------|-------------|
-| ASI01 | 6 | Goal and Instruction Manipulation |
+| ASI01 | 8 | Goal and Instruction Manipulation |
+ Goal and Instruction Manipulation |
 | ASI02 | 6 | Tool Misuse |
 | ASI03 | 8 | Excessive Agency |
 | ASI04 | 6 | Memory Manipulation |
@@ -274,7 +276,7 @@ Subtotal: **235 rules**
 
 Static baseline: **235 rules** (113 MCP + 62 ASI + 11 sandbox + 22 Chinese)
 
-**Total: 253 rules** (MCP type) / **280 rules** (Skill type)
+**Total: 256 rules** (MCP type) / **283 rules** (Skill type)
 
 The Skill total adds 27 skill-specific rules on top of the MCP set.
 

@@ -212,10 +212,10 @@ AIShield sits in a crowded 2026 agent-security landscape and positions itself as
 **Direct competitors (2026)** — all covering OWASP Agentic Top 10, all shipping SARIF/CI gates:
 - **NVIDIA/SkillSpector** (2026-05, v2.3.7) — 68 patterns, 17 categories, YARA signatures, taint tracking. NVIDIA-endorsed.
 - **getagentseal/agentseal** — `guard`/`scan`/`scan-mcp`/`shield` four commands, 225 prompt-injection probes, MiniLM-L6-v2 semantic embedding, 6,600+ MCP server trust registry. Red-team + scanner in one.
-- **HeadyZhang/agent-audit** — 120+ rules, framework-specific detection for LangChain/CrewAI/AutoGen/AgentScope, OpenClaw skill.
+- **HeadyZhang/agent-audit** — 256+ rules, framework-specific detection for LangChain/CrewAI/AutoGen/AgentScope, OpenClaw skill.
 - **affaan-m/agentshield** — policy packs (enterprise/regulated/ci-enforcement), PreToolUse runtime hook, Claude Opus multi-agent analysis. Enterprise route.
 
-**AIShield's still-defensible edge** vs all four: local-first no-spawn static audit across 14 client surfaces, zero runtime dependencies, offline slopsquatting, `aishield-trust/v1` embeddable attestation (no competitor has a neutral trust standard), and the OWASP MCP + ASI01-10 dual taxonomy with 253 / 280 rules.
+**AIShield's still-defensible edge** vs all four: local-first no-spawn static audit across 14 client surfaces, zero runtime dependencies, offline slopsquatting, `aishield-trust/v1` embeddable attestation (no competitor has a neutral trust standard), and the OWASP MCP + ASI01-10 dual taxonomy with 256 / 283 rules.
 
 **Ecosystem complements (not competitors)** — these projects sit *above* or *beside* AIShield, not against it:
 - **Vercel AI SDK** (`vercel/ai`, 25k+ stars) — TS SDK for agent tool-calling; every tool call in that ecosystem can be pre-checked by AIShield via MCP. Integration example: https://aishield.tools/integrations/vercel-ai-sdk

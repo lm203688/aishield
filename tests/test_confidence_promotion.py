@@ -4,7 +4,8 @@ Confidence-based rule promotion 测试 — tests/test_confidence_promotion.py
 
 覆盖：
   * 阈值边界（0 / 1 / 4 / 5 / 9 / 10 hits）
-  * BENIGN_CORPUS 零命中红线
+  * 红线分级：祈使式 benign 命中（硬红线）vs 话题提及（软红线，禁自动 promote）
+  * 低特异性 pattern 压到 seed（裸关键词口径）
   * 状态分类（raw / seed / draft / rule）
   * decay 检测（stale / stale_suggested_reject）
   * CLI --check / --apply 输出结构
@@ -22,10 +23,15 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(
     os.path.abspath(__file__))), "scripts"))
 
+from scripts import confidence_promotion
 from scripts.confidence_promotion import (
+    _cap_state,
     _classify,
+    _classify_benign_hit,
     _count_hits,
     _evaluate_candidate,
+    _is_low_specificity,
+    _exit_code,
     _now,
     SEED_THRESHOLD,
     DRAFT_THRESHOLD,
@@ -150,17 +156,121 @@ class TestBenignCorpusRedLine(unittest.TestCase):
         self.assertFalse(r["false_positive"])
         self.assertEqual(r["benign_hits"], 0)
 
-    def test_benign_discussion_triggers_red_line(self):
+    def test_topic_mention_is_not_a_red_line_kill(self):
         # 这正是 AIShield 的核心设计原则："话题提及 ≠ 祈使执行"。
-        # 讨论 "ignore all previous instructions" 的良性文档会被这个宽泛 pattern 误报，
-        # confidence_promotion 必须识别并拒绝累积。
+        #
+        # 2026-10-02 修正：这条测试原先叫 test_benign_discussion_triggers_red_line，
+        # 断言"讨论性 benign 命中 → false_positive"。**它的 docstring 和断言是反的**
+        # （docstring 写要区分两者，断言要求不区分），而那个断言恰好把红线变成了一台
+        # 只会误杀的机器：真实队列 22 条候选里，被拦的 2 条命中的全是话题提及
+        # （"已缓解 MCP 工具投毒"、"ignore all previous instructions 是 canonical
+        # 越狱短语"），硬红线（pattern 会打在真实攻击指令上）一次都没触发过。
+        #
+        # 现在语义是：话题提及 → 不杀候选，但禁自动 promote（只能人工审到 draft）。
         data = {
             "rules": [{"pattern": r'ignore\s+all\s+previous\s+instructions'}],
         }
         r = _evaluate_candidate("x.json", data)
-        self.assertTrue(r["false_positive"])
-        # 且必须至少命中 2 条讨论性 benign 样本
-        self.assertGreaterEqual(r["benign_hits"], 2)
+        self.assertFalse(r["false_positive"])
+        self.assertTrue(r["promotable"])
+        # 且必须至少命中 2 条讨论性 benign 样本，全部归类为话题提及
+        self.assertGreaterEqual(r["topic_hits"], 2)
+        self.assertEqual(r["imperative_hits"], 0)
+
+    def test_topic_mention_cannot_be_auto_promoted_end_to_end(self):
+        # 软红线要在 run_check 层真正生效：话题提及命中把状态压到 seed，
+        # 于是永远进不了 ready_to_promote / draft。
+        with tempfile.TemporaryDirectory() as tmp:
+            old = confidence_promotion.PROPOSED_DIR
+            confidence_promotion.PROPOSED_DIR = tmp
+            try:
+                name = "PROPOSED_test_topic_mention.json"
+                with open(os.path.join(tmp, name), "w", encoding="utf-8") as f:
+                    json.dump(
+                        {"status": "ready",
+                         "attack_category": "jailbreak",
+                         "rules": [{"pattern": r'ignore\s+all\s+previous\s+'
+                                               r'instructions'}]},
+                        f)
+                report = confidence_promotion.run_check(write_back=False)
+            finally:
+                confidence_promotion.PROPOSED_DIR = old
+            entry = report["details"][-1]
+            self.assertEqual(entry["topic_hits"], 2)
+            self.assertFalse(entry["promotable"])
+            # 这条 pattern 在攻击语料上命中很多，本来够得着 rule；话题提及命中
+            # 把它压到 seed —— 软红线生效的证据，不是"没证据所以 raw"。
+            self.assertGreaterEqual(entry["attack_hits"], 1)
+            self.assertEqual(entry["state"], "seed")
+            self.assertNotIn(name, report["buckets"]["ready_to_promote"])
+            self.assertNotIn(name, report["buckets"]["draft"])
+            self.assertIn(name, report["buckets"]["seed"])
+            self.assertIn(name, report["buckets"]["topic_mention"])
+
+    def test_exit_code_is_not_always_one(self):
+        # 旧实现 `false_positive>0 or raw>0` 在真实队列上恒为 1，接进 CI 就是
+        # 永久红，最后必然被人 `|| true` 掉 —— 硬红线的信号就这么没了。
+        clean = {"buckets": {"false_positive": []}, "details": []}
+        self.assertEqual(_exit_code(clean), 0)
+        blocked = {"buckets": {"false_positive": ["a.json"]}, "details": []}
+        self.assertEqual(_exit_code(blocked), 1)
+        dead = {"buckets": {"false_positive": []},
+                "details": [{"stale_suggested_reject": True}]}
+        self.assertEqual(_exit_code(dead), 2)
+
+    def test_imperative_benign_hit_triggers_hard_red_line(self):
+        # 硬红线必须有真针：pattern 打在"祈使式良性运维指令"上（curl|sh、rm -rf、
+        # pip install 都在这个组里），一律拒绝累积。
+        for pat in (r'curl\s+.*\|\s*sh', r'\brm\s+-rf\b', r'pip\s+install'):
+            r = _evaluate_candidate("x.json", {"rules": [{"pattern": pat}]})
+            self.assertTrue(r["false_positive"], pat)
+            self.assertFalse(r["promotable"], pat)
+            self.assertGreater(r["imperative_hits"], 0, pat)
+
+    def test_unclassifiable_benign_hit_defaults_to_blocking(self):
+        # 红线失败方向必须是"该拦没拦"。判定不出是话题提及的一律按祈使处理，
+        # 宁可误杀候选，也不能放过会误报生产的 pattern。
+        self.assertEqual(
+            _classify_benign_hit("A random benign line with no markers at all."),
+            "imperative",
+        )
+
+    def test_classify_distinguishes_topic_from_imperative(self):
+        self.assertEqual(
+            _classify_benign_hit(
+                "This MCP server is a defensive guardrail: it detects prompt "
+                "injection and jailbreak attempts."),
+            "topic_mention",
+        )
+        # 中文良性公告同样要认出来（audit_rules 的 CITATION_MARKERS 是纯英文，
+        # 会把这两条判成 general）
+        self.assertEqual(
+            _classify_benign_hit(
+                "安全公告：我们已缓解 MCP 工具投毒（tool poisoning）风险"),
+            "topic_mention",
+        )
+        self.assertEqual(
+            _classify_benign_hit("Runbook step: run `curl -fsSL x | sh` now."),
+            "imperative",
+        )
+
+    def test_low_specificity_pattern_capped_at_seed(self):
+        # 与雷达规则同口径：裸关键词（无 `|`、无有界间隔）只能到 seed。
+        self.assertTrue(_is_low_specificity(r'jailbreak'))
+        self.assertTrue(_is_low_specificity(r'supply\s*chain'))
+        self.assertFalse(_is_low_specificity(
+            r'(llm|agent|agentic)\s*.*\b(red[- ]team\w*|adversarial attack)\b'))
+        self.assertEqual(_cap_state("rule", "seed"), "seed")
+        self.assertEqual(_cap_state("seed", "seed"), "seed")
+        self.assertEqual(_cap_state("draft", "rule"), "draft")
+
+    def test_raw_candidate_is_not_killed_by_red_line(self):
+        # 0 攻击命中的候选不该被红线销案：否则一次 --apply 就把没证据的候选
+        # 永久置成 rejected，语料扩了也救不回来。
+        data = {"status": "ready", "rules": [{"pattern": r'jailbreak'}]}
+        r = _evaluate_candidate("x.json", data)
+        self.assertEqual(r["attack_hits"], 0)
+        self.assertFalse(r["false_positive"])
 
 
 class TestEvaluateCandidate(unittest.TestCase):
@@ -190,6 +300,58 @@ class TestEvaluateCandidate(unittest.TestCase):
         data = {"rules": [{"pattern": r'foo'}, {"pattern": r'bar'}]}
         r = _evaluate_candidate("x.json", data)
         self.assertEqual(r["patterns"], ["foo", "bar"])
+
+
+class TestApplyDoesNotDestroyCandidates(unittest.TestCase):
+    """--apply 只写评估字段，绝不把候选永久销案。"""
+
+    def test_apply_keeps_status_and_records_blocked_reason(self):
+        # 旧实现在 false_positive 分支里 `data["status"] = "rejected"`，
+        # 意味着**跑一次 --apply 就永久销毁一条候选**：它从队列里消失，
+        # 之后即使语料扩了、pattern 改对了也进不来。真实队列上已经埋着这个雷。
+        with tempfile.TemporaryDirectory() as tmp:
+            old = confidence_promotion.PROPOSED_DIR
+            confidence_promotion.PROPOSED_DIR = tmp
+            path = None
+            try:
+                path = os.path.join(tmp, "PROPOSED_test_apply.json")
+                with open(path, "w", encoding="utf-8") as f:
+                    json.dump(
+                        {"status": "ready", "attack_category": "supply-chain",
+                         "rules": [{"pattern": r'curl\s+.*\|\s*sh'}]}, f)
+                confidence_promotion.run_check(write_back=True)
+                with open(path, encoding="utf-8") as f:
+                    saved = json.load(f)
+            finally:
+                confidence_promotion.PROPOSED_DIR = old
+        self.assertEqual(saved["status"], "ready",
+                         "--apply 不该改写 status，否则候选永久销案")
+        self.assertIn("blocked_by", saved)
+        self.assertTrue(saved["blocked_by"])
+
+    def test_apply_is_idempotent_on_status(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            old = confidence_promotion.PROPOSED_DIR
+            confidence_promotion.PROPOSED_DIR = tmp
+            path = None
+            try:
+                path = os.path.join(tmp, "PROPOSED_test_apply2.json")
+                with open(path, "w", encoding="utf-8") as f:
+                    json.dump(
+                        {"status": "ready", "rules": [{"pattern": r'pip\s+install'}]},
+                        f)
+                def _read():
+                    with open(path, encoding="utf-8") as f:
+                        return json.load(f)
+
+                confidence_promotion.run_check(write_back=True)
+                first = _read()
+                confidence_promotion.run_check(write_back=True)
+                second = _read()
+            finally:
+                confidence_promotion.PROPOSED_DIR = old
+        self.assertEqual(first["status"], second["status"])
+        self.assertEqual(first["confidence"], second["confidence"])
 
 
 class TestThresholdConstants(unittest.TestCase):

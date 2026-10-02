@@ -104,6 +104,33 @@ def _patterns() -> List[Tuple[re.Pattern, str]]:
         # Top 后顾用于排除 "OWASP MCP Top 10检测规则" —— 那里的 10 是
         # 风险类别数，不是规则数。
         (re.compile(r"(?<!\d)(?<!Top )(?<!Top)(\d+)\s*(?:安全|检测)\s*规则"), "mcp"),
+        # `235 / 241 条 (OWASP 双维对齐)` —— 括号里是口径说明、后面没有"规则"
+        # 二字。缺这条盲区是实测出来的：README.md 就长期停在这一形态上，
+        # 门禁一路绿灯，是 tests/test_mcp_contract 把它掀出来的。
+        (re.compile(r"(?<!\d)(\d+)\s*/\s*(\d+)\s*条\s*[（(]"), "pair"),
+        # `253 类规则`：JSON/散文里拿"类"当量词时同样是在声明规则总数。
+        (re.compile(r"(?<!\d)(\d+)\s*类\s*规则"), "mcp"),
+        # `235+ 规则扫描`：带加号的写法。action.yml 的描述就一直是这个形态
+        # （"235+ 规则扫描"），缺这条时它连同 action.yml 一起在门禁外待着。
+        (re.compile(r"(?<!\d)(\d+)\s*\+\s*(?:条)?(?:安全|检测)?规则"), "mcp"),
+        (re.compile(r"(?<!\d)(\d+)\s*\+\s*(?:security\s+)?rules\b", re.I),
+         "mcp"),
+        # 结构化声明：`"total": 253` / `"skill_categories": 280`。
+        # agent-discovery.json 的 rules 块是机器读的契约字段，散文模式看不见它，
+        # 而它恰恰是 /api/v1/health 会被外部比对的那一份。
+        # agent.json / agent-discovery.json 的 rules 块把构成也拆开写了：
+        # 只校 total 是不够的 —— total 已经是 256、static 还停在 226 时，
+        # 这份文件对外报出的构成自相矛盾（256 = 226+8+19 根本不成立）。
+        (re.compile(r'"total"\s*:\s*(\d+)'), "mcp"),
+        (re.compile(r'"skill_?categori[a-z]*"\s*:\s*(\d+)', re.I), "skill"),
+        (re.compile(r'"static"\s*:\s*(\d+)'), "static"),
+        (re.compile(r'"radar"\s*:\s*(\d+)'), "radar"),
+        (re.compile(r'"generated"\s*:\s*(\d+)'), "generated"),
+        # 散文里的构成写法："静态 208 + 情报 8 + 雷达 19"。
+        # AGENTS.md / CLAUDE.md 的这条等式是给 AI agent 读的项目手册，
+        # 它自己写着"勿引用过期规则计数"，而它自己的 208 已经过期 ——
+        # 只校验 JSON 的 "static" 看不见散文里的"静态 N"。
+        (re.compile(r"(?:静态|static)\s*(\d+)"), "static"),
         # 英文
         (re.compile(r"(?<!\d)(\d+)\s*MCP\s*(?:security\s+)?rules", re.I), "mcp"),
         (re.compile(r"(?<!\d)\+?(\d+)\s*skill\s*rules", re.I), "skill"),
@@ -162,7 +189,10 @@ def _is_breakdown_context(line: str, start: int) -> bool:
 
 
 # ── 声明位范围 ───────────────────────────────────────────────────────
-TEXT_EXT = (".md", ".json", ".yaml", ".yml", ".html", ".htm", ".txt")
+# 必须含 .ts：MCP server 的工具描述里写着"N 条规则"，而工具描述是**每一次
+# 调用都展示给用户**的东西（比 README 更直白）。它此前因为不是 TEXT_EXT 里
+# 的后缀而完全逃过门禁，是 tests/test_finding_anchor 抓到的。
+TEXT_EXT = (".md", ".json", ".yaml", ".yml", ".html", ".htm", ".txt", ".ts")
 
 EXCLUDE_DIR_PARTS = (
     ".git", ".workbuddy", "node_modules", "__pycache__", "tests",
@@ -178,12 +208,20 @@ EXCLUDE_FILES = {
 }
 
 
+# docs/ 下的特例。docs/ 根级文档是带日期的历史快照，理应豁免；但 llms.txt
+# 是机器读的实时产物（与 api/static/llms.txt 成对出现，二者必须字节一致），
+# 把它当历史文档豁免，等于给"两份 llms.txt 已经吵起来了"留了门。
+ALLOWED_DOCS = ("docs/llms.txt",)
+
+
 def _is_declared_surface(rel: str) -> bool:
     """判定一个文件是否属于"对外声明面"。
 
     刻意收窄范围：门禁的代价是每次晋升规则都要改一堆文件，所以只覆盖
     用户/Agent 真会读到的地方，而不是全仓库 grep。
     """
+    if rel in ALLOWED_DOCS:
+        return True
     if rel.startswith("api/static/"):
         return True
     if rel.startswith("mcp-server/") and "dist" not in rel:
@@ -200,8 +238,11 @@ def _is_declared_surface(rel: str) -> bool:
         return False
     root = os.path.basename(rel)
     if "/" not in rel:
+        # action.yml 是 GitHub Marketplace 的插件描述 —— 用户点进去第一眼
+        # 看见的那句话，写的是"235+ 规则扫描"。此前它不在声明面里，
+        # 于是这份对外描述停了两代规则数没人管。
         return root in ("README.md", "AGENTS.md", "CLAUDE.md", "smithery.yaml",
-                        ".mcp.json", "SECURITY.md")
+                        ".mcp.json", "SECURITY.md", "action.yml")
     return False
 
 
@@ -302,9 +343,10 @@ def scan(rel: str, auth: Dict[str, str],
     except OSError:
         return []
 
+    lines = text.splitlines(keepends=True)
     findings: List[Dict[str, Any]] = []
     for lineno, m, kind, got, expected, ok in iter_declarations(
-            text.splitlines(keepends=True), patterns, auth):
+            lines, patterns, auth):
         if ok:
             continue
         if kind == "pair":
@@ -319,7 +361,66 @@ def scan(rel: str, auth: Dict[str, str],
                 "file": rel, "line": lineno, "kind": kind,
                 "match": m.group(0), "got": got, "expected": expected,
             })
+
+    # 逐类小计单独查一遍：它们所在的行已被 breakdown 豁免，永远走不到
+    # iter_declarations。用引擎真值直接比对，不再依赖散文模式。
+    cats = category_counts()
+    for lineno, line in enumerate(lines, 1):
+        for m in _CATEGORY_ROW.finditer(line):
+            key = m.group(1) + m.group(2)
+            if key not in cats:
+                continue
+            if m.group(3) != str(cats[key]):
+                findings.append({
+                    "file": rel, "line": lineno, "kind": "category",
+                    "match": m.group(0), "got": m.group(3),
+                    "expected": str(cats[key]), "category": key,
+                })
     return findings
+
+
+# ── 逐类小计 ─────────────────────────────────────────────────────────
+# 表格行 `| MCP03 | 工具投毒 | Critical | 11 |` 上的分类编号与数字。
+# 这类行被 `_is_breakdown_row` 整行豁免（它们不是"总计"声明，豁免是对的），
+# 但豁免的同时把它们**完全**丢出了视线，于是 README 里的逐类分布可以漂
+# （实测 MCP03 写着 10、引擎 11）而门禁零反应。逐类累计同样是对外承诺：
+# 选型的人看的是"你这一类覆盖了多少"，不是只看个总数。
+_CATEGORY_ROW = re.compile(r"\|\s*\*{0,2}(MCP|ASI)(\d{2})\*{0,2}\s*\|"
+                           r"\s*\*{0,2}(\d+)\*{0,2}\s*\|")
+
+
+def category_counts() -> Dict[str, int]:
+    """逐类规则数真值，直接问引擎要，不在门禁里写死。"""
+    from scanner import rules as R
+    out: Dict[str, int] = {}
+    for prefix in ("MCP", "ASI"):
+        for i in range(1, 11):
+            key = f"{prefix}{i:02d}"
+            if hasattr(R, key + "_RULES"):
+                out[key] = len(getattr(R, key + "_RULES"))
+    return out
+
+
+def drifted_files() -> List[str]:
+    """当前存在规则数漂移的声明位文件（仓库相对路径，已排序）。
+
+    这是给**推送链路**用的出口：规则晋升后本地 ``--sync`` 会改掉几十个声明位
+    （2026-10-02 实测一次 20+ 个文件），而人工挑文件推送只会带其中几个，
+    CI 的 "Workflow Integrity Gate" 立刻在没推的那些文件上红 —— 红的是
+    "本地已改、远端未同步"，不是"代码有问题"。人肉挑文件这件事本身不可靠，
+    所以由 `_push_batch.py` 调用本函数，把漂移文件并进同一批提交。
+
+    与 ``main()`` 的区别：main 是给人看的报告 + 给 CI 的退出码，本函数只
+    要"哪些文件漂了"这一个事实，供机器消费。两者共用 authority / scan，
+    不存在"门禁报干净但推送带上了别的东西"的口径分裂。
+    """
+    auth = authority()
+    pats = _patterns()
+    bad: set = set()
+    for rel in collect_files():
+        if scan(rel, auth, pats):
+            bad.add(rel)
+    return sorted(bad)
 
 
 # ── 同步 ─────────────────────────────────────────────────────────────
@@ -333,8 +434,20 @@ def sync_text(text: str, auth: Dict[str, str],
     lines = text.splitlines(keepends=True)
     out: List[str] = []
     n = 0
+    cats = category_counts()
     for lineno, line in enumerate(lines, 1):
         edits: List[Tuple[int, int, str]] = []
+        # 逐类小计：这些行被 breakdown 规则整行豁免，prose 模式根本不会
+        # 产生 edit，所以必须单独补。少了这一段，新增的分类漂移就是
+        # "--check 永远红" —— 门禁第一次报真问题时就卡死自己。
+        for m in _CATEGORY_ROW.finditer(line):
+            key = m.group(1) + m.group(2)
+            want = str(cats.get(key, ""))
+            if not want or m.group(3) == want:
+                continue
+            edits.append((m.start(), m.end(),
+                          line[:m.start(3)] + want + line[m.end(3):],
+                          -1))                      # priority -1：最具体
         for ln, m, kind, got, expected, ok in iter_declarations(
                 lines, patterns, auth):
             if ok or ln != lineno:
@@ -352,12 +465,47 @@ def sync_text(text: str, auth: Dict[str, str],
                 new = frag[:s1] + expected[0] + frag[e1:s2] + expected[1] + frag[e2:]
             else:
                 new = m.group(0).replace(got, expected, 1)
-            edits.append((m.start(), m.end(), new))
-        for start, end, new in sorted(edits, reverse=True):
+            # priorities：position in _patterns() —— 越靠前越具体。
+            # pair > 类型标注((MCP / (Skill) > 裸单值兜底。
+            edits.append((m.start(), m.end(), new, _priority_of(m, patterns)))
+        # 同一行里**重叠**的 edit 必须先定性再替换，不能直接按位置倒序打。
+        # 2026-10-02 实证：`**253 rules** (MCP type) / **253 rules** (Skill type)`
+        # 这一行上，`rules\b` 兜底模式与 `(Skill` 标注模式同时覆盖第二处的
+        # "253 rules"，两条 edit 落进同一段文本：先按 (Skill) 写成
+        # "283 rules** (Skill"，紧接的兜底 edit 又把它整体替换成 "283 rules"
+        # —— 加粗符与类型括号被抹掉、长度变化还会让后续落点错位。
+        # 结果：第一次 --sync 只改了 MCP 那一半，Skill 那半留着旧值，
+        # 必须再跑一遍才对（对外文档上就是「一半新一半旧」）。
+        for start, end, new in sorted(_resolve_overlaps(edits), reverse=True):
             line = line[:start] + new + line[end:]
             n += 1
         out.append(line)
     return "".join(out), n
+
+
+def _priority_of(m, patterns) -> int:
+    """这条 match 来自 patterns 表里的第几条 —— 越靠前越具体。"""
+    for i, (p, _kind) in enumerate(patterns):
+        if m.re is p:
+            return i
+    return len(patterns)
+
+
+def _resolve_overlaps(edits):
+    """重叠 edit 定胜负：具体模式胜出，被覆盖的丢弃。
+
+    edits 形如 (start, end, new, priority)。priority 小者优先；同优先级时
+    长匹配（覆盖字符多）优先，否则会留下半截改写。
+    """
+    kept = []
+    spans = []  # [(start, end), ...] 已被具体 edit 占用的区间
+    for start, end, new, prio in sorted(
+            edits, key=lambda t: (t[3], t[0], -(t[1] - t[0]))):
+        if any(start < ke and end > ks for ks, ke in spans):
+            continue
+        spans.append((start, end))
+        kept.append((start, end, new))
+    return kept
 
 
 def main() -> int:

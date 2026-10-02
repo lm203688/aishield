@@ -2,7 +2,7 @@
 name: aishield
 description: >
   AIShield Security Scanner — 对齐 OWASP MCP Top 10 (2025 v0.1) 的 AI Agent 安全扫描工具。
-  253条检测规则，5维评分体系（安全性/权限/数据处理/供应链/可靠性）。
+  256条检测规则，5维评分体系（安全性/权限/数据处理/供应链/可靠性）。
   检测能力：工具投毒、命令注入、Prompt注入（中英文）、供应链攻击、
   SSRF、密钥泄露、权限提升、违禁词合规等。
 version: "4.10.0"

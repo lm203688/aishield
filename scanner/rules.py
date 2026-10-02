@@ -157,6 +157,14 @@ MCP03_RULES = {
     r'(?i)\b(?:continue\s+prompt(?:ing)?|keep\s+prompt(?:ing)?|loop\s+prompt(?:ing)?|recur(?:sive|sively)\s+call|prompt\s+until)\b.{0,80}\b(?:context|token|budget)\b': ("递归prompt耗尽上下文(资源消耗)", "high"),
     # 工具名占用 agent 系统命名空间（system_prompt / tool_use / message_start 等）
     r'(?i)\bname\s*[:=]\s*["\'](?:system[_\s-]?prompt|tool[_\s-]?use|message[_\s-]?start|system[_\s-]?instructions?|assistant[_\s-]?turn)\b': ("工具名与agent内建冲突", "medium"),
+    # 2026-10-02：能力自声明式投毒。工具/技能对外宣称"能生成 exploit / shellcode"，
+    # 这类描述会被下游 agent 当作可信能力清单读走（tool poisoning 的一个变体：
+    # 不藏指令，而是把攻击能力包装成卖点）。
+    # 只认**祈使式生成动词 + 攻击宾语**，与「扫描器自述检测能力」严格区分 ——
+    # BENIGN_CORPUS 里 "Generates SSH key pairs…"(#28) / "Scans uploaded files for
+    # malware signatures"(#20) 都带攻击宾语但动词不是生成类，不命中。
+    # 中英文都要覆盖：仓库自身与 distribution 文档大量使用中文。
+    r'(?i)\b(?:generate|generates|generating|produce|produces|producing|creates?|creating|build|builds|building)\b[^.\n]{0,32}?\b(?:working\s+)?(?:exploit|shellcode|payload|0[- ]?day|rce|reverse\s+shell|keylogger|malware|ransomware|botnet|trojan|后门|木马|漏洞利用|-shellcode|利用代码)\b': ("工具/技能自声明可生成攻击载荷(投毒式能力声明,供应链双用途)", "high"),
 }
 
 # ============================================================
@@ -697,6 +705,18 @@ ASI01_RULES = {
     r'\b(plan|replan|strategy)\s*[:=]\s*["\'].*?(without|skip).{0,20}(validation|approval|check)': ("计划生成跳过校验", "high"),
     r'instruction_override\s*[:=]': ("指令覆盖参数", "critical"),
     r'prompt_injection_protection\s*[:=]\s*(false|off|disabled|0)': ("提示注入防护被显式关闭", "high"),
+    # 2026-10-02：agent 自述具备「无人值守自主攻击」能力（autonomous vuln hunting /
+    # automated fuzzing / pentest across the fleet）。这是能力边界失控的判据：
+    # 防御语境（harness / evaluate / benchmark）与攻击动词共现时是正常测试描述，
+    # 这里只抓**自治副词 + 攻击动词直接相邻**，靠 _is_citation_context 兜防御文档。
+    r'(?i)\b(?:autonomous\w*|self[\s-]?directed|unattended|fully\s+automated)\b[^.\n]{0,32}?\b(?:vulnerabilit\w*\s+(?:hunt\w*|scann?\w*|research\w*)|fuzz\w*|pentest\w*|pen[\s-]?test\w*|exploit\s+hunt\w*|red[\s-]team\w*|渗透|漏洞扫描|自动化攻击)\b': ("Agent自声明具备无人值守自主攻击能力(能力边界失控)", "high"),
+    # 2026-10-02：agent 生命周期配置（.claude/settings.json hooks、.cursorrules、
+    # CLAUDE.md、.mcp.json）里挂外部下载/解释器执行 —— 「配置即执行面」。
+    # 这类文件平时被当作纯文本配置，审计时最容易整类跳过，但 hook 里的
+    # `runs curl … | sh` 与代码等价。
+    # 窗口限 120 字符且禁跨句号（`[^.\n]`），避免把「settings.json 里那段 curl
+    # 示例 exp 在文档第 3 节」这类跨句描述串进来。
+    r'(?i)(?:settings\.json|settings\.local\.json|\.cursorrules|\.claude|claude\.md|\.codeium|\.windsurfrules|mcp\.json)[^.\n]{0,120}?\b(?:runs?\s+(?:curl|wget|sh|bash)\b|(?:curl|wget)[^\n]{0,60}?\s*\|\s*(?:sh|bash)\b|bash\s+-\s*c\b|python\s+-\s*c\b|eval\s*\(|subprocess\s*\()': ("Agent配置文件/hook中声明外部命令执行(配置即执行面)", "high"),
 }
 
 # ============================================================
@@ -1896,6 +1916,15 @@ def analyze(files, tool_type="mcp"):
         if is_doc and is_agent_instruction_doc(filepath, content):
             is_doc = False
 
+        # 同文件内的「同规则族 + 同一行」去重表。
+        # 2026-10-02 实证：雷达规则会生成**描述完全相同**的多条 pattern（GEN-B9BB
+        # 就同时存在两条），同一句文本因此产出两条逐字重复的 finding；同一 pattern
+        # 的 `matches[:3]` 也会在同一个位置附近报出三条近似结果。报告推送与
+        # ci_self_scan_gate 的计数都按 finding 条数走，重复会同时污染两者。
+        # 去重键取「原始严重度档以下的稳定身份」：rule_id + 原始描述 + 行号。
+        # 同一行但描述不同的两条攻击互不干扰（例如一行里既有注入又有 SSRF）。
+        seen_findings = {}
+
         for pattern, (desc, severity) in rules.items():
             try:
                 matches = list(re.finditer(pattern, content, re.IGNORECASE))
@@ -1931,6 +1960,20 @@ def analyze(files, tool_type="mcp"):
                         suffix += " (文档示例)"
                     if citation:
                         suffix += " (引用上下文)"
+
+                    # 同规则族 + 同行 → 合并进已有 finding，不再新增一条。
+                    # 被合并的 rule_id 记在 related_rule_ids 上，rid 信息不丢。
+                    dedup_key = (rid, desc, line_num)
+                    existing = seen_findings.get(dedup_key)
+                    if existing is not None:
+                        rel = existing.setdefault("related_rule_ids", [])
+                        # 只记录与该条主 finding **不同** 的 rid：雷达规则里出现过
+                        # 两条 pattern 摘要撞到同一个 GEN-xxxx 的情况，把自身 rid
+                        # 写进去会让「重复来源」看起来像有一条真实来源。
+                        if rid != existing.get("rule_id") and rid not in rel:
+                            rel.append(rid)
+                        continue
+
                     findings.append({
                         "type": "dangerous_pattern",
                         "rule_id": rid,
@@ -1944,6 +1987,7 @@ def analyze(files, tool_type="mcp"):
                         "remediation": fix,
                         "citation_context": citation,
                     })
+                    seen_findings[dedup_key] = findings[-1]
 
     return {
         "findings": findings,

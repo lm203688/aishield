@@ -155,6 +155,22 @@ _WRITE_CALL = re.compile(
     r'INSERT\s+INTO\s+[`"\']?(memories?|memory|history|session|context|traces)[`"\']?\s*\()',
     re.I)
 
+# 「客户端变量持有」写入形态（2026-10-02 补）
+#
+# 实证来源：给 Agent Memory 面建基准语料时，mem0 的一条标准写法
+#     client = mem0.MemoryClient(...); client.add(messages, user_id="alice")
+# 全类零命中 —— 各框架的 risk 正则只写死 `mem0.add(` / `zep.add(` 这种
+# **模块直调**形态，而这三个框架的官方示例恰恰都是「先建 client 再
+# client.add」。结果是扫描器号称支持 8 个框架，实际对其中 3 个的主流
+# 用法是瞎的。
+#
+# 判定纪律：客户端变量只放宽**写操作**语义（add/update/record/save/...），
+# 不放宽读操作；良性侧靠各框架 guards（user_id= / session_id= / audit 等）
+# 与邻近锚点（timestamp / session_id）抑制，负样本见 _diag_mem 及其保留版。
+_CLIENT_VAR_WRITE = re.compile(
+    r'\b(?:mem|mem0|zep|store|client|memory|memory_store)\s*\.\s*'
+    r'(add|update|record|save|set|append|replace|store|write|put)\s*\(', re.I)
+
 # ── 3. Memory recall injection ─────────────────────────────────────────
 # 用户输入直接拼进向量检索 query，检索结果直接拼进 system prompt。
 # 特征：query 字符串包含 f-string 或 .format / % 拼接用户输入；
@@ -228,7 +244,11 @@ def agent_memory_analysis(files):
             if not fw["api"].search(content):
                 continue
             framework_hits[fw_name] += 1
-            if fw["risk"].search(content) and not fw["guards"].search(content):
+            # 框架 risk 优先；未命中时再试「客户端变量持有」形态
+            # （client.add(...)）。guards 抑制对两条路径同时生效 ——
+            # 有 version= / user_id= / audit_log= 的写法不算缺约束。
+            if ((fw["risk"].search(content) or _CLIENT_VAR_WRITE.search(content))
+                    and not fw["guards"].search(content)):
                 add(
                     f"memory_framework_{fw_name}_risky_api",
                     "high",

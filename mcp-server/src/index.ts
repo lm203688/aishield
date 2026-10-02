@@ -166,7 +166,7 @@ function toNum(v: unknown, fallback: number): number {
 const server = new McpServer({
   name: 'AIShield Security Scanner',
   version: SERVER_VERSION,
-  description: 'OWASP MCP Top 10 + Agentic AI Top 10 aligned security scanner — 253 rules, 5-dimension scoring, tool poisoning & supply chain detection, per-finding file:line:col anchors with remediation',
+  description: 'OWASP MCP Top 10 + Agentic AI Top 10 aligned security scanner — 256 rules, 5-dimension scoring, tool poisoning & supply chain detection, per-finding file:line:col anchors with remediation',
 });
 
 // ══════════════════════════════════════════════════════════════
@@ -177,7 +177,7 @@ server.tool(
   'aishield_scan',
   `AIShield安全扫描 — 扫描MCP Server/AI工具的安全风险。
 
-对齐OWASP MCP Top 10 (2025 v0.1) 与 Agentic AI Top 10，253条规则覆盖两套风险分类。
+对齐OWASP MCP Top 10 (2025 v0.1) 与 Agentic AI Top 10，256条规则覆盖两套风险分类。
 5维评分: 安全(40%)/权限(20%)/数据处理(20%)/供应链(10%)/可靠性(10%)
 返回: 评分 + 风险等级 + OWASP合规矩阵 + 修复建议
 每条 finding 带 file:line:col 精确锚点 + 证据片段 + 稳定 rule_id + 具体修复动作`,

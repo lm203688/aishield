@@ -32,7 +32,9 @@ tests/test_rule_count_gate.py — 规则数一致性门禁的契约测试
 
 import os
 import re
+import shutil
 import sys
+import tempfile
 import unittest
 import unittest.mock as mock
 
@@ -164,6 +166,33 @@ class TestPairReplacement(unittest.TestCase):
                                ('227 MCP / 233 Skill', ' MCP / ')):
             new, _ = G.sync_text(text, _auth(), _pats())
             self.assertIn(want_mid, new, f'分隔符丢失：{text} -> {new!r}')
+
+    def test_typed_pair_line_syncs_in_one_pass(self):
+        """回归（2026-10-02）：`**253 rules** (MCP type) / **253 rules** (Skill type)`
+        必须**一次** --sync 改对两个数。
+
+        旧实现把同一行里重叠的 edit 直接按位置倒序打补丁：第 2 处的
+        `rules\\b` 兜底模式会覆盖 `(Skill` 标注模式刚写好的结果（加粗符与
+        类型括号一起被抹掉、长度变化让后续落点错位），于是第一次 sync 只改
+        MCP 那一半、Skill 那半留着旧值，得再跑一遍才正确 —— 对外文档上就是
+        「一半新一半旧」。_resolve_overlaps 修掉它。
+        """
+        text = '**253 rules** (MCP type) / **253 rules** (Skill type)'
+        new, n = G.sync_text(text, _auth(), _pats())
+        self.assertEqual(n, 2, f'一次 sync 应改两处，实际改了 {n} 处：{new!r}')
+        self.assertIn('**%s rules** (MCP type)' % _auth()['mcp'], new)
+        self.assertIn('**%s rules** (Skill type)' % _auth()['skill'], new)
+        # 幂等：再跑一次不许动
+        again, n2 = G.sync_text(new, _auth(), _pats())
+        self.assertEqual(n2, 0, f'sync 不幂等：{again!r}')
+
+    def test_overlapping_edits_resolve_to_specific_pattern(self):
+        """重叠区间只保留具体模式：兜底 edit 不许抹掉 (Skill 标注的括号。"""
+        edits = [(10, 20, 'X', 0), (12, 18, 'Y', 3)]
+        kept = G._resolve_overlaps(edits)
+        self.assertEqual([(s, e) for s, e, _ in kept], [(10, 20)])
+        # 完全不重叠的两条都保留
+        self.assertEqual(len(G._resolve_overlaps([(0, 5, 'a', 0), (6, 9, 'b', 1)])), 2)
 
     def test_corrupted_pair_text_is_detected(self):
         """回归：`233条Sk241安全规则` 这种损坏必须被检出，不许漏过。"""
@@ -398,6 +427,201 @@ class TestAuthority(unittest.TestCase):
         for lit in ('235', '241', '208', '238', '244'):
             self.assertNotIn(f'"{lit}"', body,
                              f'门禁源码硬编码了规则数字 {lit}')
+
+
+class TestDriftedFilesForPush(unittest.TestCase):
+    """`drifted_files()` 是给推送链路用的机器出口。
+
+    为什么需要它不是镀金：规则晋升后 `--sync` 会一次改掉 20+ 个声明位，
+    人工挑文件推送必然只带一部分，CI 立刻在没推的那些文件上红。人肉挑文件
+    靠不住，所以推送脚本要能问门禁"哪些漂移"，把差集并进同一批提交。
+
+    这里用临时 REPO 把 monkeypatch 掉 `G.REPO`，避免真的写坏仓库里的声明位。
+    """
+
+    @staticmethod
+    def _tmp_repo(text):
+        d = tempfile.mkdtemp(prefix="gate_drift_")
+        os.makedirs(os.path.join(d, "api", "static"), exist_ok=True)
+        with open(os.path.join(d, "api", "static", "drift.md"), "w",
+                  encoding="utf-8") as f:
+            f.write(text)
+        return d
+
+    def _drifted(self, text):
+        d = self._tmp_repo(text)
+        old = G.REPO
+        G.REPO = d
+        try:
+            return G.drifted_files()
+        finally:
+            G.REPO = old
+            shutil.rmtree(d, ignore_errors=True)
+
+    def test_drifted_decl_file_is_reported(self):
+        """写了错数字的文件必须出现在列表里 —— 这是推送脚本唯一的事实来源。"""
+        self.assertEqual(self._drifted('AIShield 提供 238 条规则。\n'),
+                         ['api/static/drift.md'])
+
+    def test_clean_decl_file_is_not_reported(self):
+        """合法声明不得进列表 —— 否则推送会无谓地带上一堆文件。"""
+        self.assertEqual(self._drifted(_fill('提供 {mcp} 条规则。\n')), [])
+
+    def test_result_is_sorted_subset_of_collected(self):
+        """返回值必须是 collect_files() 的有序子集，且只含漂移项。"""
+        d = self._tmp_repo(_fill('提供 {mcp} 条规则。\n')
+                           + '旧文 238 条规则\n')
+        old = G.REPO
+        G.REPO = d
+        try:
+            collected = set(G.collect_files())
+            drifted = G.drifted_files()
+            self.assertTrue(drifted)
+            self.assertLessEqual(set(drifted), collected)
+            self.assertEqual(drifted, sorted(drifted))
+            # 同一份文末的漂移与门禁 --check 的口径必须一致
+            self.assertEqual(drifted,
+                             [f["file"] for f in G.scan(
+                                 drifted[0], G.authority(), _pats())])
+        finally:
+            G.REPO = old
+            shutil.rmtree(d, ignore_errors=True)
+
+
+class TestBlindSpotsClosed(unittest.TestCase):
+    """门禁看不见的声明位，等于没有声明位。
+
+    下面五条都是**先有一次真实漂移、被测试抓到、才回头补上门禁**的。
+    补门禁而不是删测试的道理很简单：测试只在本地跑，门禁跑在 CI 的每个
+    commit 上；能被 CI 拦住的才是机制，能被本地拦住的只是记忆。
+
+    这五条盲区有一个共同形态：门禁的覆盖面是"散文 + 人工挑的文件"，
+    而真实声明面还包括源码里的工具描述、JSON 契约字段、机器读的 llms.txt，
+    以及被 breakdown 豁免掉的分类表格。
+    """
+
+    @staticmethod
+    def _scan_in(rel, text, cats=None, auth=None):
+        """把 text 写进临时 REPO 的 rel 路径，返回该文件的 drift 列表。
+
+        auth / cats 都可以外部指定。这不是洁癖：套件里 promote_rule 的
+        shadow 用例会往 data/radar_rules.json 落一条真实雷达规则，扫描顺序
+        不同时 `G.authority()` 返回的雷达数就会差 1 —— 一个只依赖全局
+        状态的断言，在单跑时绿、在套件里红，那是最难查的那类假失败。
+        """
+        d = tempfile.mkdtemp(prefix="gate_blind_")
+        full = os.path.join(d, rel)
+        os.makedirs(os.path.dirname(full), exist_ok=True)
+        with open(full, "w", encoding="utf-8") as f:
+            f.write(text)
+        old = G.REPO
+        G.REPO = d
+        try:
+            auth = auth or G.authority()
+            if cats is None:
+                return G.scan(rel, auth, _pats())
+            real = G.category_counts
+            G.category_counts = lambda: cats
+            try:
+                return G.scan(rel, auth, _pats())
+            finally:
+                G.category_counts = real
+        finally:
+            G.REPO = old
+            shutil.rmtree(d, ignore_errors=True)
+
+    def test_category_table_row_is_checked(self):
+        """`| MCP03 | 11 | Tool Poisoning |` 必须与引擎逐类真值一致。
+
+        这类行原本被 breakdown 规则**整行**豁免（`_is_breakdown_row` 只判
+        是不是"总计"，不判"逐类小计也要准"），于是 README 的逐类分布可以
+        漂（实测 MCP03 写 10、引擎 11）而门禁零反应。
+        """
+        # 真实形态是"编号 | 条数 | 名称"（见 mcp-server/README.md 的表格）
+        row = '| MCP03 | 11 | Tool Poisoning |\n'
+        found = self._scan_in(
+            'mcp-server/README.md', row, cats={'MCP03': 12})
+        self.assertTrue(found, '逐类表格行未被校验 —— 门禁盲区')
+        self.assertEqual([f['kind'] for f in found], ['category'])
+        self.assertEqual(found[0]['category'], 'MCP03')
+        self.assertEqual(found[0]['got'], '11')
+        self.assertEqual(found[0]['expected'], '12')
+
+    def test_matching_category_row_is_not_reported(self):
+        """行内数字与引擎一致时不得报 —— 否则每次跑门禁都是一堆假红。"""
+        row = '| MCP03 | 11 | Tool Poisoning |\n'
+        self.assertEqual(self._scan_in('mcp-server/README.md', row,
+                                       cats={'MCP03': 11}), [])
+
+    def test_category_row_is_fixed_by_sync(self):
+        """只查不改等于把门禁变成永远红的摆设。"""
+        row = '| MCP03 | 10 | Tool Poisoning |\n'
+        found = self._scan_in('mcp-server/README.md', row,
+                              cats={'MCP03': 11})
+        self.assertTrue(found)
+        new, _ = G.sync_text(row, _auth(), _pats())
+        self.assertIn('| MCP03 | 11 | Tool Poisoning |', new,
+                      f'sync 未修逐类小计：{new!r}')
+
+    def test_tool_source_belongs_to_declared_surface(self):
+        """index.ts 是 TEXT_EXT —— 工具描述是每一次调用都展示给用户的。"""
+        self.assertIn('.ts', G.TEXT_EXT, 'index.ts 不在门禁视野内')
+        self.assertTrue(G._is_declared_surface('mcp-server/src/index.ts'))
+
+    def test_docs_llms_txt_is_not_treated_as_historical(self):
+        """/docs/llms.txt 与 api/static/llms.txt 必须成对维护。
+
+        门禁把 docs/ 整体当历史快照豁免，但 llms.txt 是**机器读的实时产物**
+        —— 豁免它之后两份文件各自漂移（实测 253/280 对 256/283），
+        是 tests/test_compliance 比出来的差异。
+        """
+        self.assertEqual(G._is_declared_surface('docs/llms.txt'), True)
+
+    def test_json_contract_fields_are_checked(self):
+        """`"total"` / `"static"` 这类 JSON 字段是契约，不是散文。
+
+        只校 total 也不够：total 已是 256 而 static 还停 226 时，这份
+        agent.json 报出的构成自相矛盾（256 ≠ 226+8+19）。
+        """
+        text = '{\n  "rules": {\n    "total": 256,\n    "static": 226,\n' \
+               '    "generated": 8,\n    "radar": 19\n  }\n}\n'
+        auth = {'mcp': '256', 'skill': '283', 'static': '229',
+                'generated': '8', 'radar': '19'}
+        found = self._scan_in('api/static/agent.json', text, auth=auth)
+        kinds = sorted((f['kind'], f['got'], f['expected']) for f in found)
+        self.assertEqual(kinds, [('static', '226', '229')],
+                         'JSON 构成字段只应报出漂移的 static 一项')
+
+
+class TestPushWiring(unittest.TestCase):
+    """推送脚本必须真的接上 drifted_files()。"""
+
+    @staticmethod
+    def _push_src():
+        p = os.path.join(os.path.dirname(__file__), '..', 'scripts',
+                         '_push_batch.py')
+        with open(p, encoding='utf-8') as f:
+            return f.read()
+
+    def test_push_script_consumes_drifted_files(self):
+        src = self._push_src()
+        self.assertIn('drifted_files', src,
+                      '_push_batch.py 未接上 rule_count_gate.drifted_files')
+        # 差集而不是"全部声明位都带上"：否则每次推送都硬塞 47 个文件
+        self.assertIn('- have', src, '自动带入未做差集')
+
+    def test_auto_include_can_be_disabled(self):
+        src = self._push_src()
+        self.assertIn('--no-auto-decl', src, '缺少关闭开关')
+
+    def test_dry_run_does_not_touch_remote(self):
+        """--dry-run 必须停在写远端之前，否则没法在不推送的情况下验证。"""
+        src = self._push_src()
+        dry = src.split('if ARGS.dry_run:')[1].split('if not blobs')[0]
+        self.assertNotIn('git/commits', dry,
+                         '--dry-run 分支里出现了提交动作')
+        self.assertIn('raise SystemExit(0)', dry,
+                      '--dry-run 未显式退出，会继续往下推')
 
 
 class TestGateCli(unittest.TestCase):

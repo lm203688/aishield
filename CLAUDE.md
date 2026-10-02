@@ -8,7 +8,7 @@ Agent 原生项目手册见 **[AGENTS.md](./AGENTS.md)** —— 架构、核心�
    自证：`python scripts/prove_isolation.py`
 2. **代码与配置绝不上传云端** —— 本地优先、零依赖、可离线。
 3. **勿引用过期规则计数**（227/215/133/228）。真值看 `/api/v1/health` 的 `rules_breakdown`；
-   当前 235 = 静态 208 + 情报 8 + 雷达 19。
+   当前 256 = 静态 229 + 情报 8 + 雷达 19。
 4. **本地绿 ≠ CI 绿**；多文件推送走 `scripts/_push_batch.py`，推完 API 复验。
 
 ## 一键启动

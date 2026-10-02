@@ -85,6 +85,30 @@ class TestQualityGates(unittest.TestCase):
             self.summary["false_positive_rate"], MAX_FALSE_POSITIVE_RATE,
             '误报率上升到 %.4f —— 误报比漏报更伤信任' % self.summary["false_positive_rate"])
 
+    def test_memory_plane_is_not_a_figurehead(self):
+        """Plane D（Agent Memory）必须真跑、真被断言。
+
+        这一面走的是 `agent_memory_analysis()` 另一条引擎（框架 API + 跨
+        session 语义），不在 rules.analyze 的统计里。它只在单测中跑过、基准
+        里没有，等于**宣称支持 8 个记忆框架但拿不出检出证据** —— 2026-10-02
+        建这一面时立刻戳出真缺口：mem0 的官方写法 `client = mem0.MemoryClient();
+        client.add(...)` 全类漏检（扫描器当时只认 `mem0.add(` 模块直调）。
+        所以这里不只要它在，还要守住 recall=1.0 / fp=0，否则它会悄悄退化成
+        一个永远绿的空壳。
+        """
+        planes = [p for p in self.result["planes"] if p.get("name") == "memory_plane"]
+        self.assertEqual(len(planes), 1,
+                         '基准里没有 memory_plane —— Agent Memory 面没有证据')
+        m = planes[0]
+        self.assertEqual(m["recall"], 1.0,
+                         'Agent Memory 面漏检 %d/%d：%s'
+                         % (len(m["missed"]), m["positives"], m["missed"]))
+        self.assertEqual(m["false_positive_rate"], 0.0,
+                         'Agent Memory 面误报：%s' % m["false_positive_ids"])
+        # 四个攻击面必须有各自的检出记录，不能靠一条样本刷满
+        self.assertEqual(len(m["by_axis"]) >= 4, True,
+                         'Agent Memory 面的攻击面分轴不足，样本可能同质：%s' % sorted(m["by_axis"]))
+
     def test_no_serious_finding_fires_on_any_negative(self):
         """逐条点名：任何负样本上的 critical/high 都是缺陷，不是"统计噪声"。"""
         offenders = []
@@ -95,8 +119,18 @@ class TestQualityGates(unittest.TestCase):
         self.assertEqual(offenders, [], '负样本被误判：%s' % offenders)
 
     def test_corpus_has_not_been_shrunk(self):
-        self.assertGreaterEqual(self.summary["positives"], MIN_POSITIVES,
-                                '正样本被删到 %d 条（下限 %d）' % (self.summary["positives"], MIN_POSITIVES))
+        # 2026-10-02：DESCRIPTION_SAMPLES（讨论性描述，描述攻击而非攻击本身）
+        # 从 positive 分母剔出。重分类**不计入缩水**，但必须**留痕** ——
+        # 把 description_samples_excluded 加回分母，等价于「总语料量不得减少」：
+        # 想抵消这条，只能老老实实往 DESCRIPTION_SAMPLES 里放样本，而那条
+        # 样本随后还要过 description_serious_hits 的误报检查。偷偷删一条正样本
+        # 不留痕的写法，在这个断言下会直接掉到下限以下。
+        excluded = 0
+        for p in self.result["planes"]:
+            excluded += p.get("description_samples_excluded") or 0
+        self.assertGreaterEqual(self.summary["positives"] + excluded, MIN_POSITIVES,
+                                '正样本被删到 %d 条且未留痕（下限 %d，含剔除 %d）'
+                                % (self.summary["positives"], MIN_POSITIVES, excluded))
         self.assertGreaterEqual(self.summary["negatives"], MIN_NEGATIVES,
                                 '负样本被删到 %d 条（下限 %d）' % (self.summary["negatives"], MIN_NEGATIVES))
 

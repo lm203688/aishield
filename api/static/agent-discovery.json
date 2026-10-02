@@ -12,14 +12,14 @@
     "OWASP Agentic AI Top 10 (ASI01-ASI10)"
   ],
   "rules": {
-    "total": 253,
-    "static": 226,
+    "total": 256,
+    "static": 229,
     "generated": 8,
     "radar": 19,
-    "skill_categories": 280
+    "skill_categories": 283
   },
   "key_capabilities": [
-    "MCP / AI skill / Agent 静态安全扫描（253 类规则，不执行被扫配置）",
+    "MCP / AI skill / Agent 静态安全扫描（256 类规则，不执行被扫配置）",
     "14 类客户端面自动发现（Claude Desktop / Cursor / VS Code / Windsurf / Gemini CLI 等）",
     "Prompt 注入检测（中英双语，200+ 模式）",
     "6 大中文平台违禁词与合规检测",

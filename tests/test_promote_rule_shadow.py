@@ -19,6 +19,7 @@
 import copy
 import json
 import os
+import re
 import shutil
 import sys
 import tempfile
@@ -33,7 +34,8 @@ import radar_effect  # noqa: E402
 import rule_corpus  # noqa: E402
 
 # 三条候选规则，各覆盖一个判定档。
-CATCH_PATTERN = "credential theft"       # 命中 ATTACK_SAMPLES[2]，不误报良性语料
+CATCH_PATTERN = "credential theft"       # 命中 ATTACK_SAMPLES[1]，不误报良性语料
+CATCH_PATTERN2 = r"evil\.sh"             # 命中 ATTACK_SAMPLES[10,11]，同样零误报
 DEAD_PATTERN = "backdoor\\s*(trigger|hook)"  # 结构上合法，但攻击语料里不存在
 FP_PATTERN = "npm install"               # 命中良性语料里的 README 安装说明
 
@@ -142,9 +144,23 @@ class TestShadowVerdicts(_Isolated):
         self.assertEqual(len(verdicts), 2)
         self.assertEqual(code, 1, "存在 warn 候选时必须非零退出，才能当 CI 门用")
 
+    def test_catch_patterns_really_catch(self):
+        """前置条件自检：两个"干净候选"必须真的命中攻击语料。
+
+        这条前置断言是被一次真实失败逼出来的：clean 用例原来给第二条候选
+        写的是 `jailbreak\\s+prompt`，而它**在攻击语料里一条都打不中** ——
+        shadow 按定义把它判成 warn（零命中 = 死规则），于是"全干净应当
+        exit 0"这个断言就挂了。挂的原因是数据、不是逻辑，但在没这条
+        前置断言时，症状看起来完全像"shadow 的退出码算错了"。
+        """
+        for pattern in (CATCH_PATTERN, CATCH_PATTERN2):
+            hits = [s for s in rule_corpus.ATTACK_SAMPLES
+                    if re.search(pattern, s, re.I)]
+            self.assertTrue(hits, f'候选模式在攻击语料里零命中：{pattern}')
+
     def test_shadow_all_exit_code_zero_when_everything_is_clean(self):
         _candidate(self.tmp, "catch", CATCH_PATTERN)
-        _candidate(self.tmp, "catch2", "jailbreak\\s+prompt")
+        _candidate(self.tmp, "catch2", CATCH_PATTERN2)
         verdicts, code = promote_rule.shadow_all()
         self.assertEqual(code, 0, verdicts)
         self.assertEqual(len(verdicts), 2)
