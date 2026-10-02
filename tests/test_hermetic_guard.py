@@ -138,6 +138,32 @@ class TestNoTestWritesProductionData(unittest.TestCase):
             '测试用 FleetService() 未指定 path，会写真实的 data/fleet.json：\n  '
             + '\n  '.join(offenders))
 
+    def test_sync_readme_counts_is_never_called_on_the_real_readme(self):
+        """静态契约：`promote_rule.sync_readme_counts()` 会改写 npm 页面 README。
+
+        这条是 2026-10-02 实测出来的泄漏 —— 一个测试直接调它，跑一次套件就改一次
+        `mcp-server/README.md`，被守卫在事后兜住（受保护清单里有这个文件）。
+        事后兜住仍要修数据，这里改成事前拦住：只要有人再写无参调用就红。
+
+        该函数的正确用法是**传副本路径**：`sync_readme_counts(tmp/README.md)`。
+        """
+        tests_dir = os.path.dirname(__file__)
+        offenders = []
+        for name in sorted(os.listdir(tests_dir)):
+            if not name.startswith('test_') or not name.endswith('.py'):
+                continue
+            raw = open(os.path.join(tests_dir, name), encoding='utf-8',
+                       errors='replace').read()
+            code = _strip_comments_and_strings(raw)
+            for m in re.finditer(r'sync_readme_counts\s*\(\s*\)', code):
+                line = code[:m.start()].count('\n') + 1
+                offenders.append('%s:~%d' % (name, line))
+
+        self.assertEqual(
+            offenders, [],
+            '测试无参调用 sync_readme_counts()，会改写真实的 mcp-server/README.md：\n  '
+            + '\n  '.join(offenders))
+
     def test_the_stripper_itself_does_not_swallow_real_code(self):
         """剥注释的辅助函数不能把真代码也剥掉，否则上面那条测试是空转。"""
         sample = (
