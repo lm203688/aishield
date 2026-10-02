@@ -129,6 +129,9 @@ MCP02_RULES = {
     r'\b(os\.environ|process\.env)\b': ("完整环境变量访问", "low"),
     r'\bprocess\.env\.(HOME|USERPATH|PATH)\b': ("系统路径环境变量访问", "medium"),
     r'\bcredentials?\s*[:=]': ("凭据处理(需最小权限)", "medium"),
+    # 工具级"任何文件/任何路径"访问（无边界声明）
+    r'(?i)\bdescription\s*[:=]\s*["\'][^"\']*\bany\s+file\b[^"\']*["\']': ("工具声明any file访问(权限范围过宽)", "high"),
+    r'(?i)\b(?:read|write|list|scan|access)\b[^{};\n"]{0,30}\bany\s+(?:file|path|file[^\"]*)\b': ("访问任意文件/路径的过宽声明", "high"),
 }
 
 # ============================================================
@@ -150,6 +153,10 @@ MCP03_RULES = {
     r'\bhidden\s+(instruction|command|prompt)\b': ("隐藏指令关键词", "critical"),
     # HTML实体编码
     r'&#\d+;.*?(ignore|exec|eval|system|fetch|forget|bypass)': ("HTML实体编码隐藏指令", "critical"),
+    # 递归/自我扩展式 prompt（消耗 LLM 上下文）
+    r'(?i)\b(?:continue\s+prompt(?:ing)?|keep\s+prompt(?:ing)?|loop\s+prompt(?:ing)?|recur(?:sive|sively)\s+call|prompt\s+until)\b.{0,80}\b(?:context|token|budget)\b': ("递归prompt耗尽上下文(资源消耗)", "high"),
+    # 工具名占用 agent 系统命名空间（system_prompt / tool_use / message_start 等）
+    r'(?i)\bname\s*[:=]\s*["\'](?:system[_\s-]?prompt|tool[_\s-]?use|message[_\s-]?start|system[_\s-]?instructions?|assistant[_\s-]?turn)\b': ("工具名与agent内建冲突", "medium"),
 }
 
 # ============================================================
@@ -178,6 +185,8 @@ MCP04_RULES = {
     r'\b(npx|npm\s+exec)\s+[^"\']*https?://': ("npx执行远程URL包", "high"),
     # 通配符版本
     r'"(dependencies|devDependencies)".*?"(\w+)"\s*:\s*["\'](\*|latest|>\s*\d)\s*["\']': ("依赖使用通配符版本(供应链风险)", "medium"),
+    # pip/npm install 命令行中携带可疑包名（大小写混淆 / 数字冒充字母）
+    r'(?i)\b(pip3?\s+install|npm\s+install|yarn\s+add|pnpm\s+add|uv\s+add|poetry\s+add)\s+[a-z0-9_\-]*[c1]\w[a-z0-9_\-]*\b': ("install命令携带可疑包名(大小写混淆)", "high"),
 }
 
 # ============================================================
@@ -213,6 +222,10 @@ MCP05_RULES = {
     r'\bexecute\s*\(\s*["\'].*\+\s*': ("字符串拼接SQL注入风险", "high"),
     # 弱加密
     r'\b(Crypto|Cryptodome)\.Cipher\.(DES|ARC4|RC4)\b': ("弱加密算法", "high"),
+    # SSRF：工具 fetch 任意 URL + 云元数据端点
+    r'(?i)\bdescription\s*[:=]\s*["\'][^"\']*\bfetch[^"\']*any\s+url\b[^"\']*["\']': ("工具声明任意URL抓取(SSRF风险)", "high"),
+    r'(?i)(http|https)://169\.254\.169\.254(?:/[^"\s\]}]*)?': ("访问云元数据端点(SSRF泄露凭证)", "critical"),
+    r'(?i)(http|https)?://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?:/[^"\s\]}]*)?(?=/latest/meta-data/)': ("内网元数据路径访问(SSRF)", "critical"),
 }
 
 # ============================================================
@@ -268,6 +281,9 @@ MCP07_RULES = {
     r'INSECURE\s*=\s*True': ("不安全模式启用", "high"),
     # CORS通配
     r'(Access-Control-Allow-Origin|cors)\s*[:=]\s*["\']?\*["\']?': ("CORS设置为通配符(无跨域限制)", "high"),
+    # 无大小上限的上传/处理（DoS 入口）
+    r'(?i)\b(max_?(?:size|bytes|body|length)|body_?limit|upload_?limit|file_?size_?limit|payload_?limit|request_?body_?limit|transfer_?size)\s*[:=]\s*["\']?(?:unlimited|-1|0|null|infinity|inf)\b': ("上传/处理无大小上限(DoS风险)", "high"),
+    r'(?i)\bdescription\s*[:=]\s*["\'][^"\']*\bany\s+(?:size|length|number)\b[^"\']*["\']': ("工具声明无上限(DoS风险)", "high"),
 }
 
 # ============================================================
@@ -299,6 +315,9 @@ MCP09_RULES = {
     r':\d{4,5}\b': ("非标准端口服务(检查是否为未授权MCP)", "low"),
     # stdio传输的外部进程
     r'StdioServerTransport\s*\(\s*\w+\.\s*(spawn|exec|Popen)': ("MCP stdio传输启动外部进程", "medium"),
+    # 影子/未认证的外部 MCP 服务器（http 明文 + 无鉴权）
+    r'(?i)"url"\s*:\s*"http://[^"]*"\s*[,}]': ("明文HTTP连接MCP服务器(无传输加密)", "high"),
+    r'(?i)(mcpServers|servers)\s*:\s*\{[^{}]*"url"\s*:\s*"http://[^"]*"[^{}]*\}': ("明文HTTP部署MCP服务器清单", "high"),
 }
 
 # ============================================================
@@ -741,6 +760,9 @@ ASI06_RULES = {
     r'(install|load|import)\s+(mcp|skill|plugin|tool)\s+from\s+https?://': ("从远程加载工具/插件(供应链)", "high"),
     r'(checksum|signature|integrity)\s*[:=]\s*(null|""|false|none)': ("缺少完整性校验(供应链)", "high"),
     r'(pin|lock).{0,20}(version|dependency|tool)\b': ("建议锁定依赖版本(检查)", "info"),
+    # 跨 session 记忆持久化祈使式指令（记忆投毒）
+    r'(?i)\b(save|commit|store|persist|remember)\b[^{};"\']{0,50}\b(remember|notes|persistent|permanent|long.?term|memory)\b': ("记忆持久化祈使式指令(投毒风险)", "high"),
+    r'(?i)\b(from\s+now\s+on|always|never)\b[^{};"\']{0,100}\b(recommend|choose|prioritize|ignore|skip|send|post)\b': ("记忆持久化祈使式指令(always/never 目标操纵)", "medium"),
 }
 
 # ============================================================
@@ -753,6 +775,9 @@ ASI07_RULES = {
     r'(timeout|deadline|ttl)\s*[:=]\s*(null|0|None|inf)': ("超时缺失(可能挂起)", "medium"),
     r'while\s*\(?\s*true|for\s*\(;;\)': ("无限循环风险", "high"),
     r'(no|without).{0,20}(rate.?limit|throttl|cost_?budget)': ("缺少速率/预算限制", "medium"),
+    # Agent 间 RPC 无认证（横向移动入口）
+    r'(?i)\bauth\?\s*[:=]\s*(none|null|false|""|"")\s*[,}]?.{0,200}agent://': ("Agent间RPC无认证", "critical"),
+    r'(?i)agent://[^\s"]*[*][^\s"]*/': ("Agent间通配端点(无授权)", "high"),
 }
 
 # ============================================================
@@ -765,6 +790,9 @@ ASI08_RULES = {
     r'(log|logging)\s*[:=]\s*(false|off|null|disabled)': ("日志被禁用", "medium"),
     r'#\s*(todo|fixme|xxx).{0,20}(log|trace|monitor|audit)': ("可观测性待实现(占位)", "medium"),
     r'(decision|tool_call|reasoning)\s*[:=]\s*["\'].*?(no|without).{0,20}(log|record)': ("决策/工具调用未记录", "high"),
+    # 身份伪造 / 冒充管理员
+    r'(?i)\b(?:impersonate|impersonation|spoof|masquerade|fake_identity|pretend_to_be)\b.{0,80}\b(?:admin|root|owner|system.?admin|superuser|privileged)\b': ("身份伪造(冒充管理员)", "critical"),
+    r'(?i)"claims?"\s*[:=]\s*\{[^{}]*"sub"\s*[:=]\s*"[^"@]*@evil[^"]*"[^{}]*"(admin|root|owner)"': ("身份声明伪造(邮箱+组双重异常)", "critical"),
 }
 
 # ============================================================

@@ -48,7 +48,7 @@ npx aishield-mcp-server
 
 | Tool | Description |
 |------|-------------|
-| `aishield_scan` | Full security scan — OWASP MCP Top 10 + Agentic AI Top 10, 235 rules, 5-dimension scoring |
+| `aishield_scan` | Full security scan — OWASP MCP Top 10 + Agentic AI Top 10, 253 rules, 5-dimension scoring |
 | `aishield_guardrail` | Pre-install safety check — pass/block verdict with score |
 | `aishield_prompt_check` | Prompt injection detection — Chinese + English |
 | `aishield_banned_words` | Chinese content compliance — 6 platform rules |
@@ -234,14 +234,14 @@ Policy Pack / Red-team probe / confidence 晋升 / rule decay。全部走
 | Category | Rules | Description |
 |----------|-------|-------------|
 | MCP01 | 16 | Improper Token & Secret Management |
-| MCP02 | 12 | Privilege Scope Creep |
-| MCP03 | 8 | Tool Poisoning |
-| MCP04 | 12 | Supply Chain Attack & Dependency Tampering |
-| MCP05 | 24 | Command Injection & Execution |
+| MCP02 | 14 | Privilege Scope Creep |
+| MCP03 | 10 | Tool Poisoning |
+| MCP04 | 13 | Supply Chain Attack & Dependency Tampering |
+| MCP05 | 27 | Command Injection & Execution |
 | MCP06 | 13 | Intent Flow Subversion / Prompt Injection |
-| MCP07 | 8 | Insufficient Authentication & Authorization |
+| MCP07 | 10 | Insufficient Authentication & Authorization |
 | MCP08 | 6 | Lack of Audit & Observability |
-| MCP09 | 6 | Shadow MCP Servers |
+| MCP09 | 8 | Shadow MCP Servers |
 | MCP10 | 8 | Context Injection & Over-Sharing |
 
 Subtotal: **235 rules**
@@ -255,9 +255,9 @@ Subtotal: **235 rules**
 | ASI03 | 8 | Excessive Agency |
 | ASI04 | 6 | Memory Manipulation |
 | ASI05 | 6 | Agent Identity and Trust |
-| ASI06 | 6 | Agent Communication and Supply Chain |
-| ASI07 | 6 | Unbounded Resource Consumption |
-| ASI08 | 6 | Observability and Monitoring Gaps |
+| ASI06 | 8 | Agent Communication and Supply Chain |
+| ASI07 | 8 | Unbounded Resource Consumption |
+| ASI08 | 8 | Observability and Monitoring Gaps |
 | ASI09 | 6 | Cascading Failures & Multi-Agent Risks |
 | ASI10 | 6 | Rogue Agent & Human-Autonomy Boundary |
 
@@ -274,7 +274,7 @@ Subtotal: **235 rules**
 
 Static baseline: **235 rules** (113 MCP + 62 ASI + 11 sandbox + 22 Chinese)
 
-**Total: 235 rules** (MCP type) / **262 rules** (Skill type)
+**Total: 253 rules** (MCP type) / **280 rules** (Skill type)
 
 The Skill total adds 27 skill-specific rules on top of the MCP set.
 
