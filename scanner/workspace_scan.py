@@ -52,6 +52,7 @@ from .dark_pattern_scan import dark_pattern_analysis
 from .mcp_oauth_scan import mcp_oauth_analysis
 from .computeruse_scan import computeruse_analysis
 from .memory_integrity_scan import memory_integrity_analysis
+from .agent_memory_scan import agent_memory_analysis
 from .mcp_manifest_scan import mcp_manifest_analysis
 
 TZ = timezone(timedelta(hours=8))
@@ -66,7 +67,7 @@ ENGINES_REUSED = [
     "tool_integrity_analysis", "registry_supply_analysis", "provenance_analysis",
     "memory_analysis", "antitamper_analysis", "least_agency_analysis",
     "scope_composition_analysis", "goal_hijack_analysis", "dark_pattern_analysis",
-    "mcp_oauth_analysis", "computeruse_analysis", "memory_integrity_analysis",
+    "mcp_oauth_analysis", "computeruse_analysis",     "memory_integrity_analysis", "agent_memory_analysis",
     "mcp_manifest_analysis",
 ]
 
@@ -422,6 +423,7 @@ def _local_pipeline(files, name, tool_type="mcp"):
     mcp_oauth = mcp_oauth_analysis(files)
     computeruse = computeruse_analysis(files)
     memory_integrity = memory_integrity_analysis(files)
+    agent_memory = agent_memory_analysis(files)
     mcp_manifest = mcp_manifest_analysis(files)
     extra_findings = (identity.get("findings", []) + network.get("findings", [])
                       + agentcard.get("findings", []) + authentik.get("findings", [])
@@ -433,6 +435,7 @@ def _local_pipeline(files, name, tool_type="mcp"):
                       + dark_pattern.get("findings", []) + mcp_oauth.get("findings", [])
                       + computeruse.get("findings", [])
                       + memory_integrity.get("findings", [])
+                      + agent_memory.get("findings", [])
                       + mcp_manifest.get("findings", []))
     scores = calculate_scores(static, dependency, secrets, poisoning, taint, total_files,
                               extra_findings=extra_findings)
@@ -484,6 +487,10 @@ def _local_pipeline(files, name, tool_type="mcp"):
         all_findings.append(f)
     for f in memory_integrity.get("findings", []):
         all_findings.append(f)
+    for f in agent_memory.get("findings", []):
+        all_findings.append(f)
+    for f in mcp_manifest.get("findings", []):
+        all_findings.append(f)
 
     seen = set()
     unique = []
@@ -522,6 +529,7 @@ def _local_pipeline(files, name, tool_type="mcp"):
         "mcp_oauth_scan": mcp_oauth,
         "computeruse_scan": computeruse,
         "memory_integrity_scan": memory_integrity,
+        "agent_memory_scan": agent_memory,
         "mcp_manifest_scan": mcp_manifest,
         "recommendations": recommendations,
         # 不变量声明（与顶层报告同源，供门禁测试断言）
