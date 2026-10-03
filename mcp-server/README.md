@@ -48,7 +48,7 @@ npx aishield-mcp-server
 
 | Tool | Description |
 |------|-------------|
-| `aishield_scan` | Full security scan — OWASP MCP Top 10 + Agentic AI Top 10, 256 rules, 5-dimension scoring |
+| `aishield_scan` | Full security scan — OWASP MCP Top 10 + Agentic AI Top 10, 264 rules, 5-dimension scoring |
 | `aishield_guardrail` | Pre-install safety check — pass/block verdict with score |
 | `aishield_prompt_check` | Prompt injection detection — Chinese + English |
 | `aishield_banned_words` | Chinese content compliance — 6 platform rules |
@@ -239,7 +239,8 @@ Policy Pack / Red-team probe / confidence 晋升 / rule decay。全部走
  Tool Poisoning |
 | MCP04 | 13 | Supply Chain Attack & Dependency Tampering |
 | MCP05 | 27 | Command Injection & Execution |
-| MCP06 | 13 | Intent Flow Subversion / Prompt Injection |
+| MCP06 | 15 | Intent Flow Subversion / Prompt Injection |
+ Intent Flow Subversion / Prompt Injection |
 | MCP07 | 10 | Insufficient Authentication & Authorization |
 | MCP08 | 6 | Lack of Audit & Observability |
 | MCP09 | 8 | Shadow MCP Servers |
@@ -257,7 +258,8 @@ Subtotal: **235 rules**
 | ASI03 | 8 | Excessive Agency |
 | ASI04 | 6 | Memory Manipulation |
 | ASI05 | 6 | Agent Identity and Trust |
-| ASI06 | 8 | Agent Communication and Supply Chain |
+| ASI06 | 13 | Agent Communication and Supply Chain |
+ Agent Communication and Supply Chain |
 | ASI07 | 8 | Unbounded Resource Consumption |
 | ASI08 | 8 | Observability and Monitoring Gaps |
 | ASI09 | 6 | Cascading Failures & Multi-Agent Risks |
@@ -276,7 +278,7 @@ Subtotal: **235 rules**
 
 Static baseline: **235 rules** (113 MCP + 62 ASI + 11 sandbox + 22 Chinese)
 
-**Total: 256 rules** (MCP type) / **283 rules** (Skill type)
+**Total: 264 rules** (MCP type) / **291 rules** (Skill type)
 
 The Skill total adds 27 skill-specific rules on top of the MCP set.
 
@@ -298,7 +300,7 @@ commit of `github.com/lm203688/aishield` that ran on GitHub Actions, and is
 signed by sigstore. Verify it rather than trusting the version number:
 
 ```bash
-npm install aishield-mcp-server@4.10.0
+npm install aishield-mcp-server@4.11.0
 npm audit signatures          # npm >= 9.5
 ```
 

@@ -1,7 +1,7 @@
 # Glama MCP submission
 # https://glama.ai/mcp/servers
 name: AIShield Security Scanner
-description: OWASP MCP Top 10 aligned security scanner for MCP servers and AI tools. 256+ rules, 5-dimension scoring, tool poisoning detection.
+description: OWASP MCP Top 10 aligned security scanner for MCP servers and AI tools. 264+ rules, 5-dimension scoring, tool poisoning detection.
 url: https://github.com/lm203688/aishield
 installCommand: npx aishield-mcp-server
 category: security

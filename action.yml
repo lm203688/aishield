@@ -1,5 +1,5 @@
 name: "AIShield Security Scan"
-description: "AI Agent 安全生态基础设施 - 256+ 规则扫描 Trust Attestation 生成，OWASP MCP Top 10 + Agentic ASI01-10 对齐"
+description: "AI Agent 安全生态基础设施 - 264+ 规则扫描 Trust Attestation 生成，OWASP MCP Top 10 + Agentic ASI01-10 对齐"
 author: "lm203688"
 branding:
   icon: "shield"

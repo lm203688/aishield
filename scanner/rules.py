@@ -272,6 +272,12 @@ MCP06_RULES = {
     r'(persist|autostart|launch.?agent|cron|systemd)\b': ("持久化/自启动指令", "high"),
     # 安全防护禁用
     r'(disable|bypass|turn.?off)\s+(firewall|antivirus|security|defender|protection)': ("安全防护禁用指令", "critical"),
+    # 2026-10-03 补齐 KNOWN_GAP_SAMPLES 盲区。此前这两条攻击面整族 0 检出：
+    # 库里 English "developer override" 有规则、中文「不再受安全策略约束」没有；
+    # 工具描述外传 ~/.ssh/id_rsa 也没有规则（既有外传规则强制要求 to https:// 收尾，
+    # 而投毒描述里只有"上传到工具作者的服务器"这类无 URL 措辞，必定漏）。
+    r'不再(受|接受|遵守)[^。；\n]{0,16}(安全|策略|防护|约束|限制)': ("开发者覆盖声明: 声称不再受安全策略约束", "high"),
+    r'\.ssh/id_[a-z0-9]+|\.ssh/config|\.ssh/known_hosts|\.aws/credentials': ("私钥/凭据路径出现在指令载荷里(工具投毒外传)", "high"),
 }
 
 # ============================================================
@@ -783,6 +789,15 @@ ASI06_RULES = {
     # 跨 session 记忆持久化祈使式指令（记忆投毒）
     r'(?i)\b(save|commit|store|persist|remember)\b[^{};"\']{0,50}\b(remember|notes|persistent|permanent|long.?term|memory)\b': ("记忆持久化祈使式指令(投毒风险)", "high"),
     r'(?i)\b(from\s+now\s+on|always|never)\b[^{};"\']{0,100}\b(recommend|choose|prioritize|ignore|skip|send|post)\b': ("记忆持久化祈使式指令(always/never 目标操纵)", "medium"),
+    # 2026-10-03 补齐 KNOWN_GAP_SAMPLES 的供应链盲区。四句都是真实攻击面，
+    # 2026-09 的规则库里一条都没有：安装期钩子执行外部脚本、pip 信任未知镜像、
+    # 模型加载器开启远程代码执行（trust_remote_code）、权重反序列化走 pickle。
+    # 前两条按「供应链投毒」critical/high；后两条是典型的 RCE-on-load，critical。
+    r'\b(postinstall|preinstall|postuninstall|prepublishonly)\b.{0,80}?(\|\s*(ba|z)?sh\b|(ba|z)?sh\s+-c\b|eval\s*\(|python\s+-c\b)': ("包管理器安装钩子执行外部脚本(供应链)", "critical"),
+    r'--trusted-host\s+[A-Za-z0-9._-]+': ("pip 显式信任未知镜像源(--trusted-host)", "high"),
+    r'pip\s+install\s+[^.\n]{0,48}(--index-url|-i)\s+https?://': ("pip 指向外部索引源(供应链)", "high"),
+    r'trust_remote_code\s*[:=]\s*(true|1)': ("模型加载器开启远程代码执行(trust_remote_code)", "critical"),
+    r'torch\.load\s*\([^)\n]{0,80}(pickle|pickle_module|weights_only\s*[:=]\s*(false|0))': ("权重反序列化走 pickle / 关闭 weights_only", "critical"),
 }
 
 # ============================================================
@@ -867,6 +882,11 @@ SANDBOX_RULES = {
     r'hostNetwork:\s*true|hostPID:\s*true|hostIPC:\s*true': ("k8s 共享宿主网络/PID/IPC 命名空间", "high"),
     # k8s hostPath 挂载宿主文件系统
     r'hostPath:': ("k8s hostPath 挂载宿主文件系统", "high"),
+    # 2026-10-03 补齐：K8s 安全上下文里显式关掉 seccomp/apparmor 这类内核级沙箱，
+    # 与上面的 unconfined（容器运行时开关）是两个不同落点，后者是 docker 参数。
+    # 语料样本 "seccomp filters disabled and sandbox bypassed for this session."
+    # 此前整条漏检——引擎里只有 "unconfined" 一条覆盖这条面。
+    r'(seccomp|apparmor|selinux).{0,24}(disable|disabled|off|unconfined)|(disable|disabled|bypass|bypassed).{0,24}(seccomp|apparmor|selinux|sandbox)': ("关闭/绕过 OS 级沙箱(seccomp/apparmor)", "high"),
 }
 
 # ============================================================

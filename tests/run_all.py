@@ -224,6 +224,10 @@ def main():
         'tests.test_rule_decay',
         'tests.test_policy_pack',
         'tests.test_red_team_probe',
+        # 2026-10-03 攻击语料攻击面族覆盖度：recall=1.0 必须在 17 个攻击面上
+        # 分别站得住，族级 0 检出要报出来而不是被总数摊平；KNOWN_GAP_SAMPLES
+        # 记账当前规则真覆盖不到的攻击面（补上规则即要求把样本移出名单）。
+        'tests.test_corpus_family_coverage',
     ]
 
     loaded = 0

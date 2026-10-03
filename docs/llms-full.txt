@@ -1,6 +1,6 @@
 # AIShield — Full LLM Briefing
 
-*Canonical: https://aishield.tools · GitHub: https://github.com/lm203688/aishield · Version: 4.10.0*
+*Canonical: https://aishield.tools · GitHub: https://github.com/lm203688/aishield · Version: 4.11.0*
 
 AIShield is an open-source, local-first **AI Agent security scanner and trust authority** for the MCP / Agentic AI economy. This file is the long-form, machine-readable briefing for LLMs and agents (paired with the short `/llms.txt`).
 

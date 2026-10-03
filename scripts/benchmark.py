@@ -310,12 +310,20 @@ def _plane_a():
     hit = 0
     hit_any = 0
     missed = []
+    # 攻击面族级召回（2026-10-03）。recall=1.0 单独看没有说服力：2026-09 的
+    # 27 条语料里 curl|sh 只 2 条、jailbreak 家族 0 条，读数是在窄样本上量的。
+    # 按族拆开后，「某一攻击面整族 0 检出」才会从总数里冒出来，而不是被 1.0 吃掉。
+    by_family = {}
     for i, text in enumerate(attacks):
+        fam = rule_corpus.SAMPLE_FAMILY.get(text, "unlabeled")
+        bk = by_family.setdefault(fam, {"total": 0, "detected": 0})
+        bk["total"] += 1
         findings = analyze({_path(i, "payload"): text}, "mcp").get("findings", [])
         if findings:
             hit_any += 1
         if [f for f in findings if f.get("severity") in ("critical", "high")]:
             hit += 1
+            bk["detected"] += 1
         else:
             missed.append(i)
 
@@ -355,6 +363,22 @@ def _plane_a():
         if serious:
             desc_detected.append({"index": i, "rules": [f.get("rule_id") for f in serious]})
 
+    # 已知缺口记账（2026-10-03）。KNOWN_GAP_SAMPLES 里每一条都是"规则库此前
+    # 整族 0 检出"的真实攻击面。原先它只是一份注释清单：往里加一条而不补规则，
+    # 没有任何环节会拦。这里把它升级成回归口径——任一仍未检出即进
+    # known_gap_missed，由测试断言为 0。
+    #
+    # 方向是 fail-closed：想新记一个盲区，先得把它扫出来；扫不出来就别记。
+    # 否则这份清单会退化成"把扫不出的攻击面登记为已知"的垃圾桶，而 recall=1.0
+    # 继续在看不见的地方虚高——那正是 2026-09 那 27 条窄语料犯的错。
+    gap_total = 0
+    gap_missed = []
+    for text in rule_corpus.KNOWN_GAP_SAMPLES:
+        gap_total += 1
+        find = analyze({"skills/payload_gap.md": text}, "mcp").get("findings", [])
+        if not [x for x in find if x.get("severity") in ("critical", "high")]:
+            gap_missed.append(text)
+
     return {
         "name": "instruction_plane",
         "positives": len(attacks),
@@ -373,6 +397,14 @@ def _plane_a():
         "recall_any": round(hit_any / len(attacks), 4) if attacks else None,
         "coverage_bar": "any_finding",
         "missed_indices": missed,
+        "family_coverage": {k: by_family[k] for k in sorted(by_family)},
+        # 整族 0 检出的攻击面 = 规则库在这些面上的真实盲区。
+        "family_gaps": sorted(k for k, v in by_family.items()
+                              if v["detected"] == 0),
+        # 已知盲区（此前 0 检出、现已补规则的攻击面）。未检出者在这里露出，
+        # 由 tests/test_corpus_family_coverage.py 断言为空。
+        "known_gap_samples": gap_total,
+        "known_gap_missed": gap_missed,
         "negatives": len(benign),
         "false_positives": len(fp),
         "false_positive_rate": round(len(fp) / len(benign), 4) if benign else None,

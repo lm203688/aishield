@@ -1,0 +1,37 @@
+{
+  "orders": {
+    "cert_10a502ca878b": {
+      "order_id": "cert_10a502ca878b",
+      "type": "cert",
+      "source_url": "https://github.com/acme/gold",
+      "badge_level": "gold",
+      "amount_usd": 0.05,
+      "payer_id": "anonymous",
+      "status": "pending_payment",
+      "scan_report": {
+        "overall_score": 92,
+        "badge_level": "gold",
+        "risk_level": "safe",
+        "total_findings": 0
+      },
+      "payment_requirements": {
+        "x402Version": 1,
+        "facilitator": "https://x402.org/facilitator",
+        "paymentRequirements": [
+          {
+            "scheme": "exact",
+            "network": "base",
+            "maxAmountRequired": "0.05",
+            "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+            "payTo": "0xAIShieldTreasuryPlaceholderAddress",
+            "maxTimeoutSeconds": 60,
+            "resource": "order:cert_10a502ca878b",
+            "description": "AIShield gold 认证 · https://github.com/acme/gold"
+          }
+        ]
+      },
+      "facilitator": "https://x402.org/facilitator",
+      "created_at": "2026-10-03T15:44:12.709610+08:00"
+    }
+  }
+}

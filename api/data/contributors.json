@@ -1,0 +1,95 @@
+{
+  "version": 1,
+  "contributors": {
+    "aishield-core": {
+      "contributor_id": "aishield-core",
+      "registered_at": "2026-10-03T15:44:30.644779+08:00",
+      "updated_at": "2026-10-03T15:44:30.658291+08:00",
+      "name": "AIShield Core Team",
+      "email": "",
+      "github": "AIShield",
+      "bio": "AIShield 官方维护者",
+      "score": 45,
+      "rules_matured": 3,
+      "events": [
+        {
+          "type": "rule_matured",
+          "delta": 15,
+          "rule_id": "MCP01",
+          "rule_name": "OWASP MCP Top 10 (MCP01)",
+          "description": "初始基线：235 条规则库的种子维护",
+          "ts": "2026-10-03T15:44:30.645654+08:00",
+          "fingerprint": "8619bd5b4d05",
+          "extra": {}
+        },
+        {
+          "type": "rule_matured",
+          "delta": 15,
+          "rule_id": "MCP05",
+          "rule_name": "Prompt Injection (MCP05)",
+          "description": "初始基线：Prompt 注入规则族",
+          "ts": "2026-10-03T15:44:30.650880+08:00",
+          "fingerprint": "e9d7f69dc5ca",
+          "extra": {}
+        },
+        {
+          "type": "rule_matured",
+          "delta": 15,
+          "rule_id": "ASI01",
+          "rule_name": "OWASP Agentic ASI01",
+          "description": "初始基线：ASI 规则族",
+          "ts": "2026-10-03T15:44:30.658291+08:00",
+          "fingerprint": "d8e2ed62cdc3",
+          "extra": {}
+        }
+      ]
+    },
+    "api-user-2": {
+      "contributor_id": "api-user-2",
+      "registered_at": "2026-10-03T15:44:30.676922+08:00",
+      "updated_at": "2026-10-03T15:44:30.678237+08:00",
+      "name": "U2",
+      "email": "",
+      "github": "",
+      "bio": "",
+      "score": 15,
+      "rules_matured": 1,
+      "events": [
+        {
+          "type": "rule_matured",
+          "delta": 15,
+          "rule_id": "MCP99",
+          "rule_name": "x",
+          "description": "",
+          "ts": "2026-10-03T15:44:30.678237+08:00",
+          "fingerprint": "759b7fe6d70d",
+          "extra": {}
+        }
+      ]
+    },
+    "api-user-3": {
+      "contributor_id": "api-user-3",
+      "registered_at": "2026-10-03T15:44:30.685663+08:00",
+      "updated_at": "2026-10-03T15:44:30.685663+08:00",
+      "name": "api-user-3",
+      "email": "",
+      "github": "",
+      "bio": "",
+      "score": 0,
+      "rules_matured": 0,
+      "events": []
+    },
+    "api-user-1": {
+      "contributor_id": "api-user-1",
+      "registered_at": "2026-10-03T15:44:30.691086+08:00",
+      "updated_at": "2026-10-03T15:44:30.691086+08:00",
+      "name": "API User",
+      "email": "",
+      "github": "api-user-1",
+      "bio": "created via API test",
+      "score": 0,
+      "rules_matured": 0,
+      "events": []
+    }
+  }
+}

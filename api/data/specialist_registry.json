@@ -1,0 +1,70 @@
+{
+  "version": 1,
+  "agents": {
+    "aishield-scanner": {
+      "agent_id": "aishield-scanner",
+      "name": "AIShield Security Scanner",
+      "domain": "engineering",
+      "capabilities": [
+        "security-scan",
+        "compliance-check",
+        "mcp-audit"
+      ],
+      "certs": [],
+      "url": "https://aishield.tools",
+      "provider": "AIShield",
+      "description": "OWASP MCP Top10 + ASI01-10 安全扫描，235+ 规则，零依赖",
+      "publisher_did": "did:aishield:trust-service",
+      "registered_at": "2026-10-03T15:44:31.033243+08:00",
+      "updated_at": "2026-10-03T15:44:31.033243+08:00",
+      "expires_at": "2026-10-03T15:44:31.033243+08:00",
+      "expires_ts": 1798789471.0332572,
+      "state": "active",
+      "fingerprint": "566951abde1ee4fe",
+      "extra": {}
+    },
+    "aishield-prober": {
+      "agent_id": "aishield-prober",
+      "name": "AIShield Live Probe",
+      "domain": "engineering",
+      "capabilities": [
+        "live-probe",
+        "regression-scan"
+      ],
+      "certs": [],
+      "url": "https://aishield.tools",
+      "provider": "AIShield",
+      "description": "对已上线 agent / MCP 做持续复扫，检测 rug-pull",
+      "publisher_did": "did:aishield:trust-service",
+      "registered_at": "2026-10-03T15:44:31.034310+08:00",
+      "updated_at": "2026-10-03T15:44:31.034310+08:00",
+      "expires_at": "2026-10-03T15:44:31.034310+08:00",
+      "expires_ts": 1798789471.0343213,
+      "state": "active",
+      "fingerprint": "6375985523aef4ee",
+      "extra": {}
+    },
+    "test-x-1": {
+      "agent_id": "test-x-1",
+      "name": "X",
+      "domain": "legal",
+      "capabilities": [
+        "review"
+      ],
+      "certs": [],
+      "url": "",
+      "provider": "",
+      "description": "",
+      "publisher_did": "did:aishield:trust-service",
+      "registered_at": "2026-10-03T15:44:31.040637+08:00",
+      "updated_at": "2026-10-03T15:44:31.053609+08:00",
+      "expires_at": "2026-10-03T15:44:31.053609+08:00",
+      "expires_ts": 1798789471.0536249,
+      "state": "revoked",
+      "fingerprint": "1276e9ef13929421",
+      "extra": {},
+      "revoked_at": "2026-10-03T15:44:31.060262+08:00",
+      "revoke_reason": "test"
+    }
+  }
+}

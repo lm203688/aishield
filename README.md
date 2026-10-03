@@ -9,7 +9,7 @@
   <a href="https://github.com/lm203688/aishield/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT License"></a>
   <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/Python-3.9%2B-green.svg" alt="Python 3.9+"></a>
   <a href="https://owasp.org/www-project-mcp-security-top-10/"><img src="https://img.shields.io/badge/OWASP-MCP%20Top%2010-orange.svg" alt="OWASP MCP Top 10"></a>
-  <img src="https://img.shields.io/badge/Rules-235-blue.svg" alt="256 Rules (static 229 + intel 8 + radar 19)">
+  <img src="https://img.shields.io/badge/Rules-235-blue.svg" alt="264 Rules (static 237 + intel 8 + radar 19)">
   <img src="https://img.shields.io/badge/Dependencies-0-9cf.svg" alt="Zero Dependencies">
   <img src="https://img.shields.io/badge/Version-v4.3.0-brightgreen.svg" alt="v4.3.0">
 </p>
@@ -37,7 +37,7 @@
 
 ## 核心特性
 
-🛡️ **256 条规则（静态 229 + 情报 8 + 雷达 19）** — 对齐 OWASP MCP Top 10 (2025 v0.1) 与 OWASP Agentic AI Top 10 (2026) 的全部 10 类风险，覆盖 Prompt 注入、越权访问、数据泄露、协议攻击、供应链风险、沙箱逃逸 6 大维度
+🛡️ **264 条规则（静态 237 + 情报 8 + 雷达 19）** — 对齐 OWASP MCP Top 10 (2025 v0.1) 与 OWASP Agentic AI Top 10 (2026) 的全部 10 类风险，覆盖 Prompt 注入、越权访问、数据泄露、协议攻击、供应链风险、沙箱逃逸 6 大维度
 
 > **编号体系说明（重要）**：报告中 `owasp_category` 字段的 `ASI01–ASI10` 是**本库内部归纳编号**，
 > 与 OWASP 官方 *Top 10 for Agentic Applications 2026* 的编号**不是同一套**——仅 ASI01/ASI02/ASI03
@@ -89,7 +89,7 @@
 | | AIShield | 纯扫描工具 | 闭源商业方案 | 无交易的平台 |
 |:---|:---:|:---:|:---:|:---:|
 | 开源透明 | **MIT 全开源** | 部分开源 | ❌ 黑盒 | 部分开源 |
-| 安全规则覆盖 | **256 / 283 条 (OWASP 双维对齐)** | 10-60 条 | 依赖厂商 | 有限 |
+| 安全规则覆盖 | **264 / 291 条 (OWASP 双维对齐)** | 10-60 条 | 依赖厂商 | 有限 |
 | 中文 Prompt 检测 | **6 平台违禁词覆盖** | ❌ | 依赖厂商 | ❌ |
 | Agent 身份与信任 | **DID + 信誉 + 徽章** | ❌ | 商业附加 | ❌ |
 | Agent 身份 / 网络层扫描 | **扫身份缺陷 + 组网过宽** | ❌ | 有限 | ❌ |
@@ -311,7 +311,7 @@ graph TB
             RP["Rug Pull 检测"]
             AS["API 安全扫描"]
             BW["违禁词检测"]
-            SC["5 维评分引擎<br/>256/283 条规则"]
+            SC["5 维评分引擎<br/>264/291 条规则"]
         end
 
         subgraph Eco["生态模块"]
@@ -383,7 +383,7 @@ AIShield 会根据最新扫描结果动态渲染徽章颜色和状态。
 
 ### Phase 1 — 安全扫描引擎 ✅ (当前)
 
-- [x] 256 MCP / 283 Skill 条 OWASP MCP Top 10 + Agentic ASI01–10 对齐检测规则
+- [x] 264 MCP / 291 Skill 条 OWASP MCP Top 10 + Agentic ASI01–10 对齐检测规则
 - [x] 5 维安全评分引擎
 - [x] 中文 Prompt 注入检测（拼音 / 谐音 / 拆字）
 - [x] 零宽字符 / 隐写术 / Rug Pull 检测

@@ -1,0 +1,118 @@
+{
+  "score": 88,
+  "overall_score": 88,
+  "risk_level": "low",
+  "badge_level": "B",
+  "report": {
+    "totals": {
+      "findings": 56,
+      "suppressed": 28,
+      "blocking_unsuppressed": 0
+    },
+    "sources": [
+      {
+        "source": "distribution/agensi/chinese-seo-compliance",
+        "files": 2,
+        "overall_score": 97,
+        "findings": 1,
+        "suppressed": 0,
+        "blocking_unsuppressed": []
+      },
+      {
+        "source": "distribution/claude-skill",
+        "files": 1,
+        "overall_score": 96,
+        "findings": 2,
+        "suppressed": 0,
+        "blocking_unsuppressed": []
+      },
+      {
+        "source": "distribution/gpt-store",
+        "files": 1,
+        "overall_score": 95,
+        "findings": 2,
+        "suppressed": 0,
+        "blocking_unsuppressed": []
+      },
+      {
+        "source": "distribution/huggingface",
+        "files": 1,
+        "overall_score": 94,
+        "findings": 6,
+        "suppressed": 0,
+        "blocking_unsuppressed": []
+      },
+      {
+        "source": "distribution/clawhub",
+        "files": 1,
+        "overall_score": 94,
+        "findings": 2,
+        "suppressed": 0,
+        "blocking_unsuppressed": []
+      },
+      {
+        "source": "mcp-server/src",
+        "files": 1,
+        "overall_score": 51,
+        "findings": 13,
+        "suppressed": 11,
+        "blocking_unsuppressed": []
+      },
+      {
+        "source": "distribution/deepseek-harness",
+        "files": 5,
+        "overall_score": 95,
+        "findings": 4,
+        "suppressed": 0,
+        "blocking_unsuppressed": []
+      },
+      {
+        "source": "distribution/guardrail-harness",
+        "files": 4,
+        "overall_score": 74,
+        "findings": 16,
+        "suppressed": 11,
+        "blocking_unsuppressed": []
+      },
+      {
+        "source": "distribution/github-marketplace",
+        "files": 3,
+        "overall_score": 87,
+        "findings": 4,
+        "suppressed": 3,
+        "blocking_unsuppressed": []
+      },
+      {
+        "source": "distribution/listings",
+        "files": 1,
+        "overall_score": 95,
+        "findings": 3,
+        "suppressed": 0,
+        "blocking_unsuppressed": []
+      },
+      {
+        "source": "action_entrypoint.py",
+        "files": 1,
+        "overall_score": 88,
+        "findings": 3,
+        "suppressed": 3,
+        "blocking_unsuppressed": []
+      }
+    ],
+    "stale_allowlist_entries": [],
+    "allowlist_version": 1,
+    "invariants": {
+      "no_execute": true,
+      "no_network": true
+    },
+    "deductions": {
+      "blocking_findings": 0,
+      "blocking_penalty_each": 40,
+      "stale_allowlist_entries": 0,
+      "stale_penalty_each": 15,
+      "total": 0
+    },
+    "gate_threshold": 60,
+    "clean": true
+  }
+}

@@ -18,7 +18,7 @@ TOOL_NAME = "AIShield"
 # SARIF runs[].tool.driver.version 与 CycloneDX metadata.tools[].version 都引用它，
 # 会直接出现在用户的 CI 产物里。曾长期停在 4.3.0 而 npm 已到 4.8.3，导致用户
 # 拿 SARIF 里的版本号去比对发版记录永远对不上。由 scripts/sync_version.py 门禁。
-TOOL_VERSION = "4.10.0"
+TOOL_VERSION = "4.11.0"
 
 _SEV_TO_SARIF = {
     "critical": "error", "high": "error",

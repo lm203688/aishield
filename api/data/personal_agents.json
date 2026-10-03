@@ -1,0 +1,22 @@
+{
+  "users": {
+    "u_alice": {
+      "user_id": "u_alice",
+      "did": "did:aishield:pa:r7jpvskrrekbe",
+      "display_name": "Alice",
+      "email": null,
+      "created_at": "2026-10-03T15:45:03.867829+08:00",
+      "version": 1
+    }
+  },
+  "agent_instances": {},
+  "tickets": {},
+  "consent_ledger": {},
+  "budget_ledger": {},
+  "action_ledger": {},
+  "connector_reviews": {},
+  "disputes": {},
+  "meta": {
+    "created_at": "2026-10-03T15:45:03.867736+08:00"
+  }
+}

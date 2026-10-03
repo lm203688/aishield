@@ -1,0 +1,2058 @@
+{
+  "policies": {
+    "smoke:agent": {
+      "limits": {
+        "CNY": {
+          "per_tx": 1.0
+        }
+      },
+      "updated_at": "2026-08-07T11:57:37.400437+08:00"
+    }
+  },
+  "ledger": {
+    "anonymous": {
+      "USD": {
+        "daily": {
+          "2026-08-07": 0.2,
+          "2026-08-09": 0.15,
+          "2026-08-10": 0.45,
+          "2026-08-11": 0.25,
+          "2026-08-12": 0.35,
+          "2026-08-13": 0.1,
+          "2026-08-16": 0.3,
+          "2026-08-17": 0.05,
+          "2026-08-18": 0.6,
+          "2026-08-19": 0.15,
+          "2026-08-20": 0.1,
+          "2026-08-21": 0.05,
+          "2026-08-22": 0.05,
+          "2026-08-23": 0.05,
+          "2026-08-24": 0.15,
+          "2026-08-25": 0.3,
+          "2026-08-26": 0.05,
+          "2026-08-27": 0.35,
+          "2026-08-28": 0.2,
+          "2026-08-29": 0.25,
+          "2026-08-30": 0.1,
+          "2026-08-31": 0.05,
+          "2026-09-01": 0.1,
+          "2026-09-02": 0.05,
+          "2026-09-03": 0.1,
+          "2026-09-04": 0.05,
+          "2026-09-05": 0.25,
+          "2026-09-06": 0.1,
+          "2026-09-07": 0.25,
+          "2026-09-08": 0.1,
+          "2026-09-09": 0.05,
+          "2026-09-10": 0.35,
+          "2026-09-11": 0.1,
+          "2026-09-12": 0.2,
+          "2026-09-13": 0.25,
+          "2026-09-14": 0.05,
+          "2026-09-15": 0.55,
+          "2026-09-16": 0.45,
+          "2026-09-17": 0.3,
+          "2026-09-18": 1.05,
+          "2026-09-19": 0.5,
+          "2026-09-20": 0.75,
+          "2026-09-21": 0.2,
+          "2026-09-22": 0.75,
+          "2026-09-23": 0.1,
+          "2026-09-24": 1.9,
+          "2026-09-25": 0.8,
+          "2026-09-26": 0.6,
+          "2026-09-27": 0.15,
+          "2026-09-28": 0.05,
+          "2026-09-29": 0.1,
+          "2026-09-30": 0.4,
+          "2026-10-01": 0.05,
+          "2026-10-02": 0.9,
+          "2026-10-03": 0.4
+        },
+        "monthly": {
+          "2026-08": 4.3,
+          "2026-09": 10.65,
+          "2026-10": 1.35
+        }
+      }
+    }
+  },
+  "reservations": {
+    "rsv_8fefd9810de2": {
+      "reservation_id": "rsv_8fefd9810de2",
+      "payer_id": "anonymous",
+      "order_id": "cert_b8f4311907f1",
+      "amount": 0.02,
+      "currency": "USD",
+      "created_at": "2026-10-03T15:44:12.633033+08:00",
+      "expires_at": "2026-10-03T15:59:12.633040+08:00"
+    },
+    "rsv_8b0961940af0": {
+      "reservation_id": "rsv_8b0961940af0",
+      "payer_id": "anonymous",
+      "order_id": "cert_10a502ca878b",
+      "amount": 0.05,
+      "currency": "USD",
+      "created_at": "2026-10-03T15:44:12.706978+08:00",
+      "expires_at": "2026-10-03T15:59:12.706984+08:00"
+    }
+  },
+  "committed": {
+    "cert_f053424ee813": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-07T11:56:48.760616+08:00"
+    },
+    "cert_8c965139334d": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-07T11:59:40.011836+08:00"
+    },
+    "cert_89b466b36a00": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-07T20:46:34.352751+08:00"
+    },
+    "cert_074690e2db99": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-07T20:49:22.843275+08:00"
+    },
+    "cert_a49e740d3f95": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-09T16:40:14.721198+08:00"
+    },
+    "cert_a08995c60b13": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-09T16:41:27.660738+08:00"
+    },
+    "cert_fc8ad40e0eb5": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-09T16:51:59.908172+08:00"
+    },
+    "cert_83daaeb77826": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-10T12:28:56.583897+08:00"
+    },
+    "cert_35011dbd309f": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-10T13:07:01.884977+08:00"
+    },
+    "cert_3f8e5c8b3eeb": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-10T13:07:27.954642+08:00"
+    },
+    "cert_2f9bdfaaf687": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-10T13:51:21.187543+08:00"
+    },
+    "cert_d50e33035fdb": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-10T13:51:47.929482+08:00"
+    },
+    "cert_1afaa3b1e28d": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-10T13:58:25.777839+08:00"
+    },
+    "cert_a471c78b3c9a": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-10T13:59:27.853183+08:00"
+    },
+    "cert_39c3f329c9be": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-10T17:17:07.887305+08:00"
+    },
+    "cert_f03868117f95": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-10T18:48:48.607622+08:00"
+    },
+    "cert_c7b18498b750": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-11T06:07:37.980758+08:00"
+    },
+    "cert_44085eaf6d58": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-11T06:08:30.822490+08:00"
+    },
+    "cert_c4dd642badd9": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-11T08:49:12.620498+08:00"
+    },
+    "cert_a3ca8faeb651": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-11T08:52:44.274302+08:00"
+    },
+    "cert_dea64d5e5498": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-11T08:53:52.679321+08:00"
+    },
+    "cert_a6f7fef7f938": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-12T15:22:28.083471+08:00"
+    },
+    "cert_8b4d2d64cf69": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-12T15:26:28.608212+08:00"
+    },
+    "cert_1545d20acfad": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-12T15:27:25.769349+08:00"
+    },
+    "cert_4aaddd137dfc": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-12T22:25:15.286172+08:00"
+    },
+    "cert_ea0fd7b5cc32": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-12T22:27:32.584482+08:00"
+    },
+    "cert_76f8d86f3bb1": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-12T23:09:47.867264+08:00"
+    },
+    "cert_357b99d8475d": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-12T23:12:57.022156+08:00"
+    },
+    "cert_6adf6877b1fc": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-13T13:13:09.738148+08:00"
+    },
+    "cert_df87ca45aa4a": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-13T13:15:17.212078+08:00"
+    },
+    "cert_7ad56e4aba02": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-16T08:31:19.969643+08:00"
+    },
+    "cert_43faac79d6ec": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-16T08:34:43.524618+08:00"
+    },
+    "cert_5d51652cb517": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-16T09:00:39.024415+08:00"
+    },
+    "cert_fd6c283f837b": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-16T10:51:38.363167+08:00"
+    },
+    "cert_7d449fd96ad9": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-16T10:52:52.361908+08:00"
+    },
+    "cert_e8a3677a6d37": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-16T10:55:37.065010+08:00"
+    },
+    "cert_7256d3dc4333": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-17T08:22:16.293290+08:00"
+    },
+    "cert_d9aa6329ebd3": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-18T07:29:50.931981+08:00"
+    },
+    "cert_2b0992beb32b": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-18T07:30:29.320537+08:00"
+    },
+    "cert_b71a8dd5fc83": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-18T08:12:47.345070+08:00"
+    },
+    "cert_7d490f7f2109": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-18T08:20:26.708360+08:00"
+    },
+    "cert_692d31175cd6": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-18T17:50:52.991103+08:00"
+    },
+    "cert_7ed2c8dfe4c9": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-18T17:56:24.848915+08:00"
+    },
+    "cert_0e7fc0c92929": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-18T18:00:37.804975+08:00"
+    },
+    "cert_c69c4bf7defc": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-18T18:02:45.241638+08:00"
+    },
+    "cert_c2cc8879ad2c": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-18T18:04:52.694734+08:00"
+    },
+    "cert_ba30c389a86e": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-18T18:07:01.895496+08:00"
+    },
+    "cert_e61465bbf7d2": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-18T18:09:25.382324+08:00"
+    },
+    "cert_9878fbe1d3c8": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-18T18:18:06.414343+08:00"
+    },
+    "cert_2f93a29da102": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-19T08:20:45.140815+08:00"
+    },
+    "cert_544a1e8f90bf": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-19T08:31:12.678865+08:00"
+    },
+    "cert_eb9fc5be0419": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-19T16:35:19.125626+08:00"
+    },
+    "cert_7c3271bd0315": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-20T08:30:57.641411+08:00"
+    },
+    "cert_044dafab8689": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-20T08:34:07.378509+08:00"
+    },
+    "cert_6fa8a25131b7": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-21T08:31:07.225717+08:00"
+    },
+    "cert_474b91ba0e46": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-22T08:30:59.512866+08:00"
+    },
+    "cert_3711757f783f": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-23T08:30:47.920289+08:00"
+    },
+    "cert_900902728d14": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-24T08:31:23.259312+08:00"
+    },
+    "cert_4c864e81e157": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-24T17:48:54.645913+08:00"
+    },
+    "cert_ec3a1f2ed4c6": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-24T23:10:33.355148+08:00"
+    },
+    "cert_712c80146ad2": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-25T08:30:42.910724+08:00"
+    },
+    "cert_24465e96b9b4": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-25T09:33:43.481980+08:00"
+    },
+    "cert_a73b73c8bd23": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-25T09:35:09.676493+08:00"
+    },
+    "cert_092e59dc66e3": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-25T09:35:36.246399+08:00"
+    },
+    "cert_24dfa108127f": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-25T09:44:55.209083+08:00"
+    },
+    "cert_c38c75839789": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-25T09:47:54.728581+08:00"
+    },
+    "cert_5e69ffb67575": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-26T08:31:02.985994+08:00"
+    },
+    "cert_618b68ff5077": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-27T08:31:31.608742+08:00"
+    },
+    "cert_ce5f55ed11cc": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-27T12:13:17.989341+08:00"
+    },
+    "cert_5fbd78482e2a": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-27T12:37:42.755282+08:00"
+    },
+    "cert_804cd4b9ee13": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-27T13:23:14.064752+08:00"
+    },
+    "cert_651b1cc70d5b": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-27T13:25:08.668107+08:00"
+    },
+    "cert_685218f4cb32": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-27T13:26:39.235446+08:00"
+    },
+    "cert_fa028e091af1": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-27T16:10:28.338542+08:00"
+    },
+    "cert_b009b50e0b65": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-28T06:36:11.936941+08:00"
+    },
+    "cert_632c6cceae0f": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-28T08:31:04.894381+08:00"
+    },
+    "cert_ec2d84640c81": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-28T12:23:18.353663+08:00"
+    },
+    "cert_5c79ba263ee7": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-28T12:32:46.377525+08:00"
+    },
+    "cert_9cee2ca660c7": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-29T08:31:01.920252+08:00"
+    },
+    "cert_419d4acd96dd": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-29T09:57:21.359666+08:00"
+    },
+    "cert_80c18441cf18": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-29T10:41:11.786750+08:00"
+    },
+    "cert_94b4f5329fb7": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-29T10:44:07.971570+08:00"
+    },
+    "cert_617391e6fc98": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-29T12:36:35.452246+08:00"
+    },
+    "cert_d5502f7a2814": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-30T08:19:08.501285+08:00"
+    },
+    "cert_b9f4bf7bf736": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-30T08:31:20.957297+08:00"
+    },
+    "cert_459307bba65d": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-08-31T08:30:48.864397+08:00"
+    },
+    "cert_227a7199ead9": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-01T08:32:02.011243+08:00"
+    },
+    "cert_f11dd4fa5ebe": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-01T08:42:22.325040+08:00"
+    },
+    "cert_5e7fdbd92c24": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-02T08:31:31.353728+08:00"
+    },
+    "cert_c5eb4a4c511d": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-03T02:19:50.611386+08:00"
+    },
+    "cert_837b8a8b34a2": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-03T08:30:53.546496+08:00"
+    },
+    "cert_336f36b2692b": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-04T08:31:22.502581+08:00"
+    },
+    "cert_4a197173e92d": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-05T03:40:27.124537+08:00"
+    },
+    "cert_720ffbb9feac": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-05T03:40:37.376266+08:00"
+    },
+    "cert_f838192c55f5": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-05T04:00:26.850334+08:00"
+    },
+    "cert_53910aa10cb2": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-05T09:27:21.557118+08:00"
+    },
+    "cert_bfe141df58d6": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-05T15:33:34.937550+08:00"
+    },
+    "cert_d2dbe05970cd": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-06T09:32:54.147694+08:00"
+    },
+    "cert_f2a202e63465": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-06T21:36:33.125964+08:00"
+    },
+    "cert_652102ba7dc8": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-07T08:31:48.357535+08:00"
+    },
+    "cert_1114ed36ebe5": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-07T22:08:45.024254+08:00"
+    },
+    "cert_cdcaa6c38cca": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-07T22:09:08.683023+08:00"
+    },
+    "cert_7dcd1a334cb2": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-07T22:11:07.108890+08:00"
+    },
+    "cert_6cc643e0000e": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-07T22:11:32.649781+08:00"
+    },
+    "cert_9609a0f4daea": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-08T08:35:18.901315+08:00"
+    },
+    "cert_8e57a87d775d": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-08T08:41:30.392455+08:00"
+    },
+    "cert_d8bb3fb928b6": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-09T08:31:48.993103+08:00"
+    },
+    "cert_8da6b4a22f51": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-10T08:32:57.281672+08:00"
+    },
+    "cert_f5e1b0b9323d": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-10T18:36:35.693030+08:00"
+    },
+    "cert_243b9dd9c9c4": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-10T23:18:16.971501+08:00"
+    },
+    "cert_a2b2d1b1d6dd": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-10T23:39:59.074442+08:00"
+    },
+    "cert_95ae3b673e96": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-10T23:44:25.627411+08:00"
+    },
+    "cert_36347bce57e9": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-10T23:46:40.868925+08:00"
+    },
+    "cert_8f70c08355e2": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-10T23:56:23.722300+08:00"
+    },
+    "cert_86e4349e051f": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-11T08:31:09.909788+08:00"
+    },
+    "cert_7a50f296e6c3": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-11T13:11:04.422295+08:00"
+    },
+    "cert_a8649d89e42f": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-12T08:31:57.875310+08:00"
+    },
+    "cert_7710672cc087": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-12T09:35:25.611923+08:00"
+    },
+    "cert_580a3f290479": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-12T12:49:46.794789+08:00"
+    },
+    "cert_645f2cb459e3": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-12T12:51:17.323925+08:00"
+    },
+    "cert_1ae256f85eaa": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-13T08:31:08.509743+08:00"
+    },
+    "cert_e27cd8a539b1": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-13T10:28:22.017166+08:00"
+    },
+    "cert_1f39a31012b6": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-13T10:30:44.469619+08:00"
+    },
+    "cert_1dbaaefa952e": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-13T10:34:47.528715+08:00"
+    },
+    "cert_86c07491215d": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-13T10:36:32.919422+08:00"
+    },
+    "cert_fcb6473143e1": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-14T08:31:28.079482+08:00"
+    },
+    "cert_a36ebfbe217e": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-15T08:31:57.471234+08:00"
+    },
+    "cert_4d380e66c8b6": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-15T15:32:23.268549+08:00"
+    },
+    "cert_b5ad0fcfb9ac": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-15T16:43:06.196981+08:00"
+    },
+    "cert_3629bc7467e3": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-15T16:46:45.138667+08:00"
+    },
+    "cert_ec47a5fcacb0": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-15T16:59:05.271213+08:00"
+    },
+    "cert_14062b064372": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-15T17:04:59.756484+08:00"
+    },
+    "cert_388d6665aba6": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-15T17:05:37.423320+08:00"
+    },
+    "cert_efb39c4796ec": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-15T17:49:45.863087+08:00"
+    },
+    "cert_e7d55cc062a3": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-15T18:02:35.489376+08:00"
+    },
+    "cert_14cc9640115a": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-15T21:12:02.470271+08:00"
+    },
+    "cert_726a998f2515": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-15T21:43:25.672109+08:00"
+    },
+    "cert_e1ca2b6f9b6b": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-16T06:57:51.692286+08:00"
+    },
+    "cert_5018818d869d": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-16T07:21:48.254287+08:00"
+    },
+    "cert_a1ad7ce47d16": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-16T08:10:40.914905+08:00"
+    },
+    "cert_0cdf7d4b0c68": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-16T08:18:24.975802+08:00"
+    },
+    "cert_0d775ab11c86": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-16T08:20:54.252830+08:00"
+    },
+    "cert_f38fbbfa135f": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-16T08:26:13.230957+08:00"
+    },
+    "cert_0b1f5ac65556": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-16T08:28:34.010139+08:00"
+    },
+    "cert_6e7f7adf250c": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-16T08:32:14.182656+08:00"
+    },
+    "cert_f37e8195844d": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-16T08:32:35.230131+08:00"
+    },
+    "cert_f2de54a264d6": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-17T08:35:35.879484+08:00"
+    },
+    "cert_3281676e2c18": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-17T10:29:05.283445+08:00"
+    },
+    "cert_06fbf403ec52": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-17T10:35:33.929113+08:00"
+    },
+    "cert_8ce1149307ac": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-17T15:09:52.909922+08:00"
+    },
+    "cert_b2a899399e07": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-17T15:33:40.430001+08:00"
+    },
+    "cert_806c00bfab05": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-17T15:41:16.296713+08:00"
+    },
+    "cert_f616b11b2c6d": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-18T06:52:20.882588+08:00"
+    },
+    "cert_caab1c032f08": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-18T06:53:54.115378+08:00"
+    },
+    "cert_63f9cb6cebb6": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-18T06:54:37.527738+08:00"
+    },
+    "cert_87bee1c7c834": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-18T08:33:56.486511+08:00"
+    },
+    "cert_8b6ed0d389fa": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-18T09:00:16.690284+08:00"
+    },
+    "cert_7461b9ae9f02": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-18T09:56:58.969767+08:00"
+    },
+    "cert_d88e194b6ce9": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-18T10:14:48.802709+08:00"
+    },
+    "cert_773e872f7c03": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-18T13:52:34.762437+08:00"
+    },
+    "cert_b8ea4e8dd8e1": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-18T14:02:21.467243+08:00"
+    },
+    "cert_3ce485811f46": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-18T17:51:57.666747+08:00"
+    },
+    "cert_43530d68bad0": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-18T17:55:30.222354+08:00"
+    },
+    "cert_afb932800bff": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-18T18:03:00.178621+08:00"
+    },
+    "cert_85fcc4079882": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-18T18:05:26.367015+08:00"
+    },
+    "cert_a4a1d8f47343": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-18T23:27:21.693212+08:00"
+    },
+    "cert_f1ce8cafa4a9": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-18T23:35:17.252172+08:00"
+    },
+    "cert_4bf8ec80e08b": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-18T23:35:43.524239+08:00"
+    },
+    "cert_dfe564ff32bc": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-18T23:46:22.715313+08:00"
+    },
+    "cert_f223a3285347": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-18T23:47:42.502068+08:00"
+    },
+    "cert_c63043aa0f1f": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-18T23:48:35.611884+08:00"
+    },
+    "cert_dc7a91487051": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-18T23:50:15.438725+08:00"
+    },
+    "cert_d62d685c8a7b": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-18T23:59:13.509268+08:00"
+    },
+    "cert_c8c6e6e78557": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-19T00:31:28.027999+08:00"
+    },
+    "cert_ae7304222890": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-19T08:31:48.152271+08:00"
+    },
+    "cert_5ca261fb0e1e": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-19T10:11:12.476139+08:00"
+    },
+    "cert_911be9cdc249": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-19T15:48:25.242598+08:00"
+    },
+    "cert_a883c5f98d2e": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-19T15:50:09.033768+08:00"
+    },
+    "cert_52bca93dea0e": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-19T21:18:12.629237+08:00"
+    },
+    "cert_739b063941b7": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-19T21:20:12.846146+08:00"
+    },
+    "cert_c6633c6296b6": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-19T21:33:18.808653+08:00"
+    },
+    "cert_1a8e3d8da0ca": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-19T21:52:20.129436+08:00"
+    },
+    "cert_7e4b16178af0": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-19T21:53:27.093121+08:00"
+    },
+    "cert_33e8eb2d9d7a": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-20T08:31:34.090506+08:00"
+    },
+    "cert_0eedc4257adf": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-20T15:09:51.620215+08:00"
+    },
+    "cert_1bc5b5be5d72": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-20T15:15:12.050995+08:00"
+    },
+    "cert_7afcbbb97e82": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-20T15:15:49.725116+08:00"
+    },
+    "cert_5be6c638797a": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-20T15:18:03.303840+08:00"
+    },
+    "cert_011e7871649d": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-20T15:26:57.986004+08:00"
+    },
+    "cert_394af726db19": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-20T15:38:37.963963+08:00"
+    },
+    "cert_cb9e5fb27a21": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-20T15:51:03.154593+08:00"
+    },
+    "cert_8159d27475a4": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-20T15:54:03.058545+08:00"
+    },
+    "cert_89ec203a8d4b": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-20T15:56:32.821030+08:00"
+    },
+    "cert_8ee69b79d637": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-20T15:58:49.244501+08:00"
+    },
+    "cert_affa5b94a6de": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-20T21:42:08.233065+08:00"
+    },
+    "cert_9a5885dde712": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-20T21:54:04.154273+08:00"
+    },
+    "cert_d51ae039f141": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-20T21:57:25.013206+08:00"
+    },
+    "cert_de605376a53f": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-20T22:02:41.450859+08:00"
+    },
+    "cert_11f6c80fab1c": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-21T08:31:06.236956+08:00"
+    },
+    "cert_5972e8f67756": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-21T21:00:39.003936+08:00"
+    },
+    "cert_8d7427bc8b09": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-21T21:15:16.082635+08:00"
+    },
+    "cert_9b45a0f34c8c": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-21T22:46:31.750418+08:00"
+    },
+    "cert_9fd8bb611f3e": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-22T08:31:20.148333+08:00"
+    },
+    "cert_a1e9a83cccb2": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-22T10:31:10.884522+08:00"
+    },
+    "cert_8993c662bb75": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-22T12:25:45.581554+08:00"
+    },
+    "cert_f2df0fdcd874": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-22T12:26:11.196024+08:00"
+    },
+    "cert_320e87a07d6b": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-22T12:26:37.701244+08:00"
+    },
+    "cert_8e5764f8f242": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-22T12:27:04.412546+08:00"
+    },
+    "cert_559428bbe1e4": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-22T12:28:13.672890+08:00"
+    },
+    "cert_c4d7ecd86a06": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-22T12:29:26.009196+08:00"
+    },
+    "cert_93200faa2fb8": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-22T12:30:06.364685+08:00"
+    },
+    "cert_8df120613403": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-22T13:13:32.584865+08:00"
+    },
+    "cert_7bf601ea98fd": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-22T13:17:20.742715+08:00"
+    },
+    "cert_b5194d6d83aa": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-22T13:18:21.496699+08:00"
+    },
+    "cert_5d88de062660": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-22T13:28:01.774746+08:00"
+    },
+    "cert_489dd87a1ff3": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-22T23:01:01.063035+08:00"
+    },
+    "cert_499c7e0e7683": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-22T23:03:03.492553+08:00"
+    },
+    "cert_0f4747cff4bb": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-23T08:31:41.886686+08:00"
+    },
+    "cert_cfae4540f02a": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-23T09:43:04.652864+08:00"
+    },
+    "cert_bda3c7e94b9a": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-24T09:22:58.245992+08:00"
+    },
+    "cert_0fe84ac869b9": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-24T09:23:59.388167+08:00"
+    },
+    "cert_89005adc0ec5": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-24T10:01:15.619254+08:00"
+    },
+    "cert_57225c7fdfb5": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-24T10:03:19.459533+08:00"
+    },
+    "cert_300b4b9cd897": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-24T10:06:21.015433+08:00"
+    },
+    "cert_74b9d95e5724": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-24T10:15:58.456031+08:00"
+    },
+    "cert_4838f765d032": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-24T10:24:24.695306+08:00"
+    },
+    "cert_399823c164cc": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-24T10:34:44.996238+08:00"
+    },
+    "cert_651eaa38a719": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-24T10:37:26.647792+08:00"
+    },
+    "cert_5a7e40fea0ac": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-24T10:40:40.781189+08:00"
+    },
+    "cert_d8d72e28380a": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-24T13:33:20.641241+08:00"
+    },
+    "cert_4d54494003d6": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-24T13:37:50.159682+08:00"
+    },
+    "cert_82eeab2499c9": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-24T13:40:37.028437+08:00"
+    },
+    "cert_36ac49858f24": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-24T16:05:44.646757+08:00"
+    },
+    "cert_144019119029": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-24T16:15:25.542850+08:00"
+    },
+    "cert_89d72db5ac46": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-24T19:05:50.959672+08:00"
+    },
+    "cert_145036426759": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-24T19:07:04.942049+08:00"
+    },
+    "cert_4792f7f56bd4": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-24T19:14:48.907661+08:00"
+    },
+    "cert_fdf854f1c45d": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-24T19:15:47.260709+08:00"
+    },
+    "cert_6de4c1e4f8fb": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-24T19:16:15.628691+08:00"
+    },
+    "cert_4e6d05f20a7b": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-24T20:01:14.451662+08:00"
+    },
+    "cert_192e353da675": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-24T20:01:52.574093+08:00"
+    },
+    "cert_d72f28b6fd2e": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-24T20:04:48.408400+08:00"
+    },
+    "cert_d2ca969e4e56": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-24T20:05:19.946926+08:00"
+    },
+    "cert_a13c0eb62ac6": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-24T21:34:42.828479+08:00"
+    },
+    "cert_0ac8a7209a56": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-24T21:36:47.373308+08:00"
+    },
+    "cert_25d2ff857385": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-24T21:39:44.693094+08:00"
+    },
+    "cert_d3d9d7639095": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-24T21:41:18.018654+08:00"
+    },
+    "cert_7441ac91a70a": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-24T21:44:44.185506+08:00"
+    },
+    "cert_a235e7f15f5a": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-24T21:46:09.007227+08:00"
+    },
+    "cert_4b0578e67819": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-24T21:49:34.261406+08:00"
+    },
+    "cert_1e63024ec188": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-24T21:59:04.408407+08:00"
+    },
+    "cert_d0f13e99ee5a": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-24T22:02:25.793368+08:00"
+    },
+    "cert_03abbadc347a": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-24T22:08:38.365730+08:00"
+    },
+    "cert_247ad7f23df8": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-24T22:12:13.931070+08:00"
+    },
+    "cert_a6f5a2249dd1": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-24T22:14:08.580571+08:00"
+    },
+    "cert_731d263f08c0": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-24T22:27:52.737464+08:00"
+    },
+    "cert_87c8aaad948e": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-24T22:35:53.706596+08:00"
+    },
+    "cert_92e93b1cf257": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-25T06:36:03.836725+08:00"
+    },
+    "cert_31381109f3d0": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-25T11:20:51.044943+08:00"
+    },
+    "cert_2bc8353563ae": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-25T12:03:19.673770+08:00"
+    },
+    "cert_826ef9ea2a63": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-25T12:06:08.479395+08:00"
+    },
+    "cert_e155d7e5d954": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-25T12:10:11.686075+08:00"
+    },
+    "cert_24372356b9af": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-25T17:13:03.063443+08:00"
+    },
+    "cert_963d04cf659f": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-25T17:17:25.462656+08:00"
+    },
+    "cert_82171bfd3009": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-25T17:18:26.961439+08:00"
+    },
+    "cert_036b511115ca": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-25T17:20:58.488008+08:00"
+    },
+    "cert_a5382c4c8b1d": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-25T17:22:00.358530+08:00"
+    },
+    "cert_a062b592bd9f": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-25T17:22:55.789940+08:00"
+    },
+    "cert_0f696458b8ca": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-25T17:23:07.391870+08:00"
+    },
+    "cert_047c75730702": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-25T17:38:33.011542+08:00"
+    },
+    "cert_7a784a541426": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-25T18:26:59.189199+08:00"
+    },
+    "cert_32b445f1a301": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-25T18:58:41.660337+08:00"
+    },
+    "cert_dabd1ede9e0b": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-25T19:01:28.244370+08:00"
+    },
+    "cert_5d5e4f88023d": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-26T08:38:02.948920+08:00"
+    },
+    "cert_915bbe8571b2": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-26T08:39:03.216805+08:00"
+    },
+    "cert_cc82fa9af967": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-26T08:39:42.138961+08:00"
+    },
+    "cert_8ceaf601556b": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-26T08:40:15.260265+08:00"
+    },
+    "cert_a567c7987263": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-26T08:41:34.846510+08:00"
+    },
+    "cert_f485575a51cb": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-26T08:42:38.247136+08:00"
+    },
+    "cert_d6f88780667b": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-26T08:43:19.401139+08:00"
+    },
+    "cert_fbfb018bc18b": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-26T09:02:20.690334+08:00"
+    },
+    "cert_d553b431b876": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-26T09:08:33.037659+08:00"
+    },
+    "cert_d5f82fb057f5": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-26T22:06:09.209651+08:00"
+    },
+    "cert_b43648b70e0e": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-26T22:11:45.461576+08:00"
+    },
+    "cert_250e48c15ac4": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-26T22:16:26.793638+08:00"
+    },
+    "cert_fcf131ce1292": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-27T05:41:29.190227+08:00"
+    },
+    "cert_7475d0f27e66": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-27T08:10:53.644495+08:00"
+    },
+    "cert_fd9502d79eec": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-27T08:22:46.222297+08:00"
+    },
+    "cert_aed90c3d23d1": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-28T08:32:40.731031+08:00"
+    },
+    "cert_a29ba8b4a71c": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-29T08:31:53.070755+08:00"
+    },
+    "cert_83d0e0f880f1": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-29T11:22:48.883555+08:00"
+    },
+    "cert_0485bbfd9b0b": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-30T08:35:02.646399+08:00"
+    },
+    "cert_44bfaa083140": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-30T08:38:19.453630+08:00"
+    },
+    "cert_b7183ee16134": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-30T10:15:42.479171+08:00"
+    },
+    "cert_ff7c4945271e": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-30T10:19:43.084337+08:00"
+    },
+    "cert_657dacbad642": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-30T10:26:22.660292+08:00"
+    },
+    "cert_0733c694845e": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-30T10:28:34.263365+08:00"
+    },
+    "cert_3495fc2ac9ae": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-30T10:31:46.830061+08:00"
+    },
+    "cert_58afcdfea637": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-09-30T10:33:30.497194+08:00"
+    },
+    "cert_ed509026f7c6": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-10-01T08:32:12.563414+08:00"
+    },
+    "cert_bf7400b1226f": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-10-02T08:32:05.494090+08:00"
+    },
+    "cert_2f608cbc482e": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-10-02T08:33:07.093261+08:00"
+    },
+    "cert_05f1550e340c": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-10-02T08:33:44.940932+08:00"
+    },
+    "cert_ee82e152f74e": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-10-02T08:36:00.121352+08:00"
+    },
+    "cert_065d6f646212": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-10-02T08:36:33.431098+08:00"
+    },
+    "cert_5021f323bb96": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-10-02T09:23:22.487904+08:00"
+    },
+    "cert_675594d92691": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-10-02T09:40:07.592356+08:00"
+    },
+    "cert_cd4fbe5579da": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-10-02T09:43:23.707902+08:00"
+    },
+    "cert_bdc66b72ee6a": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-10-02T09:50:55.615911+08:00"
+    },
+    "cert_2ba5a5f26adf": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-10-02T09:53:37.145722+08:00"
+    },
+    "cert_b6cdfc4762cb": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-10-02T12:06:58.893228+08:00"
+    },
+    "cert_a534c4e02852": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-10-02T12:15:25.166575+08:00"
+    },
+    "cert_717909a40b16": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-10-02T12:27:41.947279+08:00"
+    },
+    "cert_0df913865653": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-10-02T23:11:16.908196+08:00"
+    },
+    "cert_6f10396b103d": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-10-02T23:28:49.421300+08:00"
+    },
+    "cert_72d0991b6fd3": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-10-02T23:35:53.504327+08:00"
+    },
+    "cert_467892baf693": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-10-02T23:39:10.340781+08:00"
+    },
+    "cert_e8fbd62b7273": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-10-02T23:41:14.424900+08:00"
+    },
+    "cert_8f601cad96cc": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-10-03T00:04:45.812910+08:00"
+    },
+    "cert_4836dfa6b5f5": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-10-03T00:06:29.619705+08:00"
+    },
+    "cert_6b55f7e0efac": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-10-03T00:11:22.054665+08:00"
+    },
+    "cert_27835de42ba8": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-10-03T08:31:13.980459+08:00"
+    },
+    "cert_c506f3fe3c62": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-10-03T08:32:20.073763+08:00"
+    },
+    "cert_1d85770663d2": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-10-03T08:33:03.261061+08:00"
+    },
+    "cert_bd7483e20423": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-10-03T15:02:41.939721+08:00"
+    },
+    "cert_7131ead2a662": {
+      "payer_id": "anonymous",
+      "amount": 0.05,
+      "currency": "USD",
+      "committed_at": "2026-10-03T15:44:12.670062+08:00"
+    }
+  }
+}

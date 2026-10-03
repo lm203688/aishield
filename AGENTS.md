@@ -12,7 +12,7 @@ prompt，对齐 **OWASP MCP Top 10 (2025)** 与 **OWASP Agentic AI Top 10 (ASI01
 零第三方依赖、可 100% 离线运行。
 
 - 仓库入口：`lm203688/aishield`（public）
-- npm 包：`aishield-mcp-server`（v4.8.3，256 条规则 = 静态 229 + 情报 8 + 雷达 19）
+- npm 包：`aishield-mcp-server`（v4.8.3，264 条规则 = 静态 237 + 情报 8 + 雷达 19）
 - 线上站：`aishield.tools`（Cloudflare Named Tunnel → VPS `:8450` → `api/server.py`）
 - 后端 API 前缀：`/api/v1`（注意：`/api/health` 会 404）
 

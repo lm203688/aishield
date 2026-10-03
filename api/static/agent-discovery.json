@@ -4,7 +4,7 @@
   "full_name": "AIShield — AI Agent 安全扫描与可信工具认证",
   "domain": "aishield.tools",
   "tagline": "Agent 原生 AI 工具安全扫描器 / MCP 与 Agent 可信基础设施",
-  "service_version": "4.10.0",
+  "service_version": "4.11.0",
   "license": "MIT",
   "last_updated": "2026-09-15T12:45:00Z",
   "standards": [
@@ -12,14 +12,14 @@
     "OWASP Agentic AI Top 10 (ASI01-ASI10)"
   ],
   "rules": {
-    "total": 256,
-    "static": 229,
+    "total": 264,
+    "static": 237,
     "generated": 8,
     "radar": 19,
-    "skill_categories": 283
+    "skill_categories": 291
   },
   "key_capabilities": [
-    "MCP / AI skill / Agent 静态安全扫描（256 类规则，不执行被扫配置）",
+    "MCP / AI skill / Agent 静态安全扫描（264 类规则，不执行被扫配置）",
     "14 类客户端面自动发现（Claude Desktop / Cursor / VS Code / Windsurf / Gemini CLI 等）",
     "Prompt 注入检测（中英双语，200+ 模式）",
     "6 大中文平台违禁词与合规检测",
