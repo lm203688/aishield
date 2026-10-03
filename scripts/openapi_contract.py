@@ -243,6 +243,205 @@ def _is_miss(status: int, body: str) -> bool:
     return bool(_MISS_WITH_NON404.search(body)) and status == 404
 
 
+# 405（方法不允许）/ 501（未实现）：方法本身选错了，不代表路径不存在
+_UNSUPPORTED = (405, 501)
+
+
+def _is_hit(status: int, body: str) -> bool:
+    """"这条 (verb, path) 是真实实现"的统一判定 —— 门禁与生成器必须共用它。
+
+    2026-10-03 踩过：两边各写了一份，生成器把 **所有 404 都排除**，门禁却把
+    "404 且没命中未命中措辞"算命中，于是 4 条（如 GET /api/v1/platforms/recommend，
+    返回 ``{"error": "platform 不存在", "error_code": "NOT_FOUND"}``）被门禁记为
+    已实现、被生成器漏登记 —— 同一套探针两种口径，差集永远对不上，门禁一开就
+    天天假红。
+
+    判据（与代理层一致）：404 且响应里没有"路由不存在"措辞 = **路由匹配了但
+    资源不存在**（比如查一个不存在的平台），这恰恰证明路由是真的；只有 405/501
+    才说明方法选错。
+    """
+    if status in _UNSUPPORTED:
+        return False
+    return not _is_miss(status, body)
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# 2b. 可复用探针 API（scripts/gen_openapi_spec.py 直接 import 这一层）
+# ────────────────────────────────────────────────────────────────────────────
+# 门禁只是"算缺口"，要修根还得有东西去**生成**契约。生成器不该再写一套会写状态
+# 的探针（历史上就是这么把 data/fleet.json 写脏的），所以这里把能力摊成可复用
+# 的模块级 API：hermetic_state / probe / runtime_path_records / schema_from_sample。
+# ════════════════════════════════════════════════════════════════════════════
+
+LAST_STATE_REPORT: Dict[str, Any] = {}
+
+
+@contextlib.contextmanager
+def hermetic_state() -> Any:
+    """探针 hermetic 上下文：进时快照状态根，出时逐字节还原（连新建文件也删）。
+
+    生成器每次 import 都会跑一遍探针，所以这个上下文必须能反复用 —— 不能靠
+    "记得调还原函数"这种口头约定（2026-10-03 第一版探针就是漏了它才污染仓库，
+    而且是在 CI 上才炸出来的）。
+    """
+    snap = _state_files()
+    report: Dict[str, Any] = {"created": [], "restored": [], "failed": []}
+    LAST_STATE_REPORT.clear()
+    LAST_STATE_REPORT.update(report)
+    try:
+        yield report
+    finally:
+        fixed, failed = _restore_state(snap)
+        report["restored"] = fixed
+        report["failed"] = failed
+        for p in _state_files():
+            if p not in snap:
+                report["created"].append(p)
+        LAST_STATE_REPORT.clear()
+        LAST_STATE_REPORT.update(report)
+
+
+def probe(path: str, verb: str) -> Dict[str, Any]:
+    """探一条路由，返回结构化结果（生成器消费的量裁接口）。
+
+    永远不抛：路由实现炸了要被当成"探针异常"报出来，而不是让生成脚本悄悄断在
+    半途、产出一个只有半份路由的契约 —— 那等于用漏报换来的绿。
+    """
+    try:
+        status, body = _probe_one(path, verb)
+    except Exception as e:  # noqa: BLE001
+        return {"verb": verb, "path": path, "status": -1, "error": repr(e), "miss": True}
+    return {
+        "verb": verb,
+        "path": path,
+        "status": status,
+        "body": body[:4096],
+        "miss": _is_miss(status, body),
+        "error": "",
+    }
+
+
+# 路由分派表：顺序 = server.py do_GET/do_POST 里的 if 链顺序，命中最先匹配的前缀。
+# 表里没有的走 tag_for_path 的兜底分支，宁可打个杂 tag 也别漏登记。
+_DISPATCH = (
+    (("/api/v1/trust", "/api/v1/registry"), "trust", "Trust API 认证与信任评分"),
+    (("/api/v1/ecosystem", "/api/v1/agent-card", "/api/v1/specialist", "/api/v1/chain",
+      "/api/v1/identity", "/api/v1/protocol", "/api/v1/leaderboard", "/api/v1/contributors",
+      "/api/v1/sandbox/backend"), "ecosystem", "Agent 生态 API"),
+    (("/api/v1/personal-agents", "/api/v1/platforms"), "personal-agent", "个人 Agent 治理层与平台注册表"),
+    (("/api/v1/connectors", "/api/v1/agent-infra"), "connectors", "海外平台接入与 Agent 基础设施扫描"),
+    (("/api/v1/eco-support",), "eco-support", "Agent 生态支持体系：记忆扫描/策略包/红队探针/晋升/衰减"),
+)
+
+
+def tag_for_path(path: str) -> str:
+    """给运行时路径定 OpenAPI tag（跟 server.py 的分派前缀对齐）。"""
+    for prefixes, tag, _ in _DISPATCH:
+        if any(path.startswith(p) for p in prefixes):
+            return tag
+    seg = path.strip("/").split("/")
+    if len(seg) > 2:
+        return seg[2] if seg[0] == "api" and seg[1] == "v1" and len(seg) > 2 else seg[0]
+    return seg[0] if seg else "default"
+
+
+def summary_for_path(path: str, verb: str) -> str:
+    """操作摘要。
+
+    摘要是给人看的元数据，不是要害 —— 要害是"这条路径到底存在不存在"（那个由
+    探针自动判定）。所以这里允许用前缀表兜底，取不到就拼段落，绝不因为凑不出
+    漂亮文案就跳过登记。
+    """
+    for prefixes, _tag, desc in _DISPATCH:
+        if any(path.startswith(p) for p in prefixes):
+            tail = path.strip("/").split("/")[-1] or desc
+            return f"{desc} · {tail}"
+    return f"{verb} {path}（运行时探得；schema 由真实响应推导）"
+
+
+def schema_from_sample(sample: Any, max_depth: int = 3) -> Dict[str, Any]:
+    """从**真实响应样本**推最小 JSON Schema（不手写、不臆造字段）。
+
+    深度截断是必要的：agent-card 之类的响应里嵌着整棵树，全量铺开会得到一份
+    没人看得完的 spec，反而把真正要害的端点淹掉。
+    """
+    if max_depth <= 0:
+        return {"type": "object"}
+    if isinstance(sample, dict):
+        props: Dict[str, Any] = {}
+        for k, v in list(sample.items())[:24]:
+            props[k] = schema_from_sample(v, max_depth - 1)
+        return {"type": "object", "properties": props,
+                "additionalProperties": True}
+    if isinstance(sample, list):
+        return {"type": "array",
+                "items": schema_from_sample(sample[0] if sample else {}, max_depth - 1)}
+    if isinstance(sample, bool):
+        return {"type": "boolean"}
+    if isinstance(sample, int):
+        return {"type": "integer"}
+    if isinstance(sample, float):
+        return {"type": "number"}
+    if isinstance(sample, str):
+        return {"type": "string"}
+    if sample is None:
+        return {"type": "null"}
+    return {}
+
+
+def runtime_path_records(do_probe: bool = True) -> Tuple[List[Dict[str, Any]],
+                                                         List[Tuple[str, str, str]],
+                                                         Dict[str, Any]]:
+    """运行时命中的路由**全量记录**（不只是 (verb, path) 二元组）。
+
+    返回 (records, errors, state_report)。records 每项::
+
+        {"verb": "GET", "path": "...", "tag": "...", "summary": "...",
+         "status": 200, "sample": {...}, "sample_truncated": bool}
+
+    ``sample`` 是响应体原样的裁剪版 —— schema 一律从它推导，绝不凭空编字段。
+    """
+    records: List[Dict[str, Any]] = []
+    errors: List[Tuple[str, str, str]] = []
+    if not do_probe:
+        return records, errors, {}
+    with hermetic_state() as rep:
+        for path in iter_route_candidates():
+            for verb in _VERBS:
+                r = probe(path, verb)
+                if r["status"] == -1 or r["error"]:
+                    errors.append(("probe", path, r["error"][:160]))
+                    continue
+                # 两个动词都探、都记：eco-support 这类模块 GET/POST 各挂一堆端点，
+                # 探到一个就 break 会把另一半动词吞掉（2026-10-03 实测 109 路径只
+                # 出 109 个操作，一下子少登记了几十条真实现）。判定口径一律走
+                # _is_hit，别在这里另写一份条件。
+                if not _is_hit(r["status"], r["body"]):
+                    continue
+                sample, truncated = _sample_of(r["body"])
+                records.append({
+                    "verb": verb,
+                    "path": path,
+                    "tag": tag_for_path(path),
+                    "summary": summary_for_path(path, verb),
+                    "status": r["status"],
+                    "sample": sample,
+                    "sample_truncated": truncated,
+                })
+    return records, errors, rep
+
+
+def _sample_of(body: str, limit: int = 4000) -> Tuple[Any, bool]:
+    """把响应体解析成样本；解析不了（纯文本/HTML）就报 None + 已裁剪标记。"""
+    txt = (body or "").strip()
+    if not txt or len(txt) > limit:
+        return None, True
+    try:
+        return json.loads(txt), False
+    except (ValueError, TypeError):
+        return None, True
+
+
 def runtime_routes(probe: bool = True) -> Tuple[
     List[Tuple[str, str]], List[Tuple[str, str, str]], List[str], List[str]
 ]:
@@ -271,14 +470,10 @@ def runtime_routes(probe: bool = True) -> Tuple[
                     if status == -1:
                         errors.append(("error", path, body[:120]))
                         continue
-                    hit = (_is_miss(status, body) is False) and status not in (404,)
-                    if hit:
+                    # 两个动词都记，不要 break：GET 命中就 break 会把同一路径的
+                    # POST 吞掉（实测少记 10 条真实现 —— 门禁少报，假绿方向）。
+                    if _is_hit(status, body):
                         hits.append((verb, path))
-                        break
-                    # 404 但要确认不是"路由不存在"
-                    if status == 404 and not _is_miss(status, body):
-                        hits.append((verb, path))
-                        break
     finally:
         restored, failed = _restore_state(snap)
         restored += failed
@@ -312,6 +507,29 @@ def contract_routes() -> Set[Tuple[str, str]]:
 # 4. diff + 基线
 # ════════════════════════════════════════════════════════════════════════════
 
+MANIFEST = os.path.join(REPO, "api", "openapi_runtime_paths.json")
+
+
+def manifest_routes() -> Set[Tuple[str, str]]:
+    """读运行时清单 ``api/openapi_runtime_paths.json`` 的 (verb, path)。
+
+    方法键**大小写归一**：清单里是小写 ``get/post``（OpenAPI 约定），运行时探针
+    给的是大写 —— 不归一会得到"清单和运行时差 119 条"的假漂移，比没有门禁还糟。
+    """
+    if not os.path.exists(MANIFEST):
+        return set()
+    try:
+        with open(MANIFEST, encoding="utf-8") as f:
+            data = json.load(f)
+    except (OSError, ValueError):
+        return set()
+    out: Set[Tuple[str, str]] = set()
+    for r in (data or {}).get("routes", []):
+        for o in r.get("operations", []):
+            out.add((str(o.get("verb", "")).upper(), r["path"]))
+    return out
+
+
 def load_baseline() -> Set[Tuple[str, str]]:
     if not os.path.exists(BASELINE):
         return set()
@@ -339,17 +557,24 @@ def diff(probe: bool = True) -> Dict[str, Any]:
     hits, errors, state_created, state_restored = runtime_routes(probe=probe)
     implemented = set(hits)
     contract = contract_routes()
+    manifest = manifest_routes()
     baseline = load_baseline()
     unknown_all = sorted(implemented - contract)
     phantom_all = sorted(contract - implemented)
+    # 清单 vs 运行时：清单过期（加路由没重跑生成器）或清单残留（路由删了没重生成）
+    manifest_missing = sorted(implemented - manifest)
+    manifest_extra = sorted(manifest - implemented)
     return {
         "implemented_count": len(implemented),
         "contract_count": len(contract),
+        "manifest_count": len(manifest),
         "baseline_count": len(baseline),
         "unknown": unknown_all,          # 实现了但没在契约里
         "phantom": phantom_all,          # 契约里有但跑不通
         "unknown_new": sorted(set(unknown_all) - baseline),
         "phantom_new": sorted(set(phantom_all) - baseline),
+        "manifest_missing": manifest_missing,   # 运行时有、清单没有 → 生成器没重跑
+        "manifest_extra": manifest_extra,       # 清单里有、运行时没了 → 清单陈旧
         "probe_errors": errors,
         "unknown_baselined": len(unknown_all) - len(set(unknown_all) - baseline),
         "state_created": state_created,
@@ -398,11 +623,29 @@ def main() -> int:
         print("=" * 64)
 
     if args.check:
-        bad = bool(d["unknown_new"] or d["phantom_new"] or d["probe_errors"])
+        # 双向漂移，四个方向一个都不放行：
+        #   unknown  —— 实现了没进契约（智能体按契约发现会扑空）
+        #   phantom  —— 契约里写了跑不通（文档与实现分家），**一律零容忍**，不进基线
+        #   manifest_missing / manifest_extra —— 运行时清单与实现不一致（生成器没重跑）
+        blocks = [
+            ("契约缺失", d["unknown_new"]),
+            ("清单缺失（跑一遍 scripts/gen_openapi_spec.py）", d["manifest_missing"]),
+            ("清单残留（路由已删除，重跑生成器）", d["manifest_extra"]),
+        ]
+        if d["phantom"]:
+            blocks.append(("契约里有跑不通的路由", d["phantom"]))
+        if d["probe_errors"]:
+            blocks.append(("探针自身报错", [e[1] for e in d["probe_errors"]]))
+        bad = any(rows for _label, rows in blocks)
+        for label, rows in blocks:
+            for r in rows[:20]:
+                print(f"  FAIL[{label}] {r[0]} {r[1]}")
         if bad:
-            print("FAIL：出现新增契约漂移（基线之外）—— 新路由必须同步进 api/openapi_spec.py")
+            print("FAIL：契约与运行时实现漂移 —— 契约必须是实现的投影，"
+                  "新增路由要跑 scripts/gen_openapi_spec.py 并连清单一起入库")
             return 1
-        print("OK：无新增契约漂移")
+        print(f"OK：契约与运行时一致（实现 {d['implemented_count']} / "
+              f"契约 {d['contract_count']} / 清单 {d['manifest_count']}，无 phantom）")
         return 0
     if args.json:
         return 0

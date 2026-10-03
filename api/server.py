@@ -467,6 +467,20 @@ class AIShieldHandler(BaseHTTPRequestHandler):
             _record_usage("eco-support-api", self.client_address[0])
             return
 
+        # ── Billing（套餐）：agent card 已挂 GET /api/v1/billing/plans，2026-10-03 补接线 ──
+        if path.startswith("/api/v1/billing"):
+            try:
+                from eco import payment
+            except Exception as e:  # noqa: BLE001
+                self._send_json({"error": str(e)}, 500)
+                return
+            if path != "/api/v1/billing/plans":
+                self._send_json({"error": "unknown billing endpoint",
+                                 "hint": "GET /api/v1/billing/plans"}, 404)
+                return
+            self._send_json({"success": True, "plans": payment.PLANS}, 200)
+            return
+
         # Landing Page — Agent SEO
         if path == "/agent.html":
             html_path = os.path.join(BASE, "static", "agent.html")

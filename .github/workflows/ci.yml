@@ -60,6 +60,18 @@ jobs:
           exit 1
         fi
 
+    # 契约曾只有手工 10 条，运行时实测 100+ 条 —— 九成端点对智能体不可发现。
+    # 所以契约必须当**实现的投影**来守：清单过期 / 契约里有跑不通的路径，
+    # 一律零容忍（不进存量基线）。
+    - name: Assert API contract matches runtime
+      run: |
+        if ! python scripts/openapi_contract.py --check; then
+          echo "::error::契约与运行时实现漂移"
+          echo "修复方式：本地运行 python scripts/gen_openapi_spec.py 提交清单，"
+          echo "再跑 python scripts/openapi_contract.py --check"
+          exit 1
+        fi
+
     # server.json 的 description 上限 100 字符这类约束，
     # 服务端只回一句笼统的 400，必须在提交前校验
     - name: Validate MCP registry manifest

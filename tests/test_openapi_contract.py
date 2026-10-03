@@ -8,12 +8,15 @@
 ``api/openapi_spec.py`` 是手工维护的 curated 清单，加路由没人会想起改它 ——
 所以这里要的是"不许再漂移"，不是一次性把 100+ 条手写完（那是表面工作）。
 
-本文件钉死四件事：
-  1. 门禁在当前仓库上是**绿的**（存量缺口都在基线里）；
-  2. 门禁**不是空转**：往契约里塞一条不存在的路由，它必须报 phantom_new；
+本文件钉死五件事：
+  1. 门禁在当前仓库上是**绿的**（零 phantom、零 unknown、清单与实现一致）；
+  2. 门禁**不是空转**：往契约里塞一条不存在的路由，它必须报 phantom；再加一条
+     运行时有、清单里没有的路由，它必须报 manifest_missing；
   3. 路由分类逻辑对"未命中措辞"零误判（状态行里的 404 Not Found 曾把 128 条
      真路由全判成未实现 —— 假红和假绿一样要堵）；
-  4. 探针 hermetic：写状态端点被探到也要还原，``state_created`` 必须为空。
+  4. **门禁与生成器共用一套判定**（``_is_hit``）：曾经各写一份，生成器排除所有
+     404、门禁算 404 命中，于是 4 条"路由存在但资源不存在"的端点被来回误判；
+  5. 探针 hermetic：写状态端点被探到也要还原，``state_created`` 必须为空。
 """
 import json
 import os
@@ -119,6 +122,64 @@ class TestGateNotVacuous(unittest.TestCase):
         self.assertEqual(d["phantom_new"], [], f"契约里出现跑不通的路由：{d['phantom_new']}")
         self.assertEqual(d["probe_errors"], [], "探针自身报错，结论不可信")
         self.assertGreater(d["implemented_count"], 50)
+
+    # 这两个用例注入固定的命中集：diff(probe=False) 时 implemented 是空的，差集
+    # 自然算不出来（第一版就这么写，结果是"断言永远拿不到东西还假装测过"）。
+    _FAKE_HITS = [("GET", "/api/v1/health"), ("POST", "/api/v1/prompt-check")]
+
+    def _diff_with_manifest(self, manifest: set):
+        real_routes, real_manifest = oc.runtime_routes, oc.manifest_routes
+        oc.runtime_routes = lambda probe=True: (
+            list(self._FAKE_HITS), [], [], [])
+        oc.manifest_routes = lambda: manifest
+        try:
+            return oc.diff(probe=False)
+        finally:
+            oc.runtime_routes, oc.manifest_routes = real_routes, real_manifest
+
+    def test_manifest_drift_is_caught(self):
+        """加了一条路由却没重跑生成器 —— 运行时有、清单没有，门禁必须红。"""
+        d = self._diff_with_manifest({("GET", "/api/v1/health")})
+        self.assertEqual(
+            d["manifest_missing"], [("POST", "/api/v1/prompt-check")],
+            "运行时有、清单没有，门禁却没报 —— 清单过期会一路漏到契约里",
+        )
+
+    def test_manifest_extra_is_caught(self):
+        """路由删了但清单还留着 —— 相反方向的漂移。"""
+        d = self._diff_with_manifest(
+            {("GET", "/api/v1/health"), ("GET", "/api/v1/route-gone")})
+        self.assertEqual(d["manifest_extra"], [("GET", "/api/v1/route-gone")])
+
+    def test_manifest_and_runtime_agree_in_repo(self):
+        """仓库当前状态：运行时命中的每一条都得在清单里（生成器跑过了就该是 0）。"""
+        d = gate_json()
+        self.assertEqual(d["manifest_missing"], [],
+                         f"清单比实现少这些：{d['manifest_missing'][:5]}")
+        self.assertEqual(d["manifest_extra"], [])
+        self.assertEqual(d["phantom"], [], "契约里还有跑不通的路由")
+
+
+class TestHitClassification(unittest.TestCase):
+    """``_is_hit`` 是门禁与生成器共用的唯一判定，必须把三类 404 分开。"""
+
+    def test_resource_not_found_is_a_hit(self):
+        """路由匹配、资源不存在：``{"error": "platform 不存在", ...}`` 恰恰证明
+        路由是真的（2026-10-03 因生成器把 404 一律排除而漏登记了 4 条）。"""
+        self.assertTrue(oc._is_hit(404, '{"error": "platform 不存在", "error_code": "NOT_FOUND"}'))
+        self.assertTrue(oc._is_hit(404, '{"success": false, "reason": "unsigned"}'))
+
+    def test_route_not_found_is_not_a_hit(self):
+        for body in ('{"error": "unknown ecosystem endpoint"}',
+                     '{"error": "Not found"}',
+                     '未知路由'):
+            with self.subTest(body=body[:30]):
+                self.assertFalse(oc._is_hit(404, body))
+
+    def test_method_not_allowed_is_not_a_hit(self):
+        """405/501 是方法选错，不是路径不存在 —— 别把路径一起抹掉。"""
+        self.assertFalse(oc._is_hit(405, ""))
+        self.assertFalse(oc._is_hit(501, ""))
 
 
 class TestProbeHermetic(unittest.TestCase):

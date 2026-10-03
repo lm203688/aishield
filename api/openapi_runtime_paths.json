@@ -1,0 +1,5542 @@
+{
+  "note": "运行时路由清单：进程内直调 api.server.AIShieldHandler.do_GET/do_POST 探得，与 curated 规范合并后即线上 /openapi.json。",
+  "source": "runtime probe (scripts/gen_openapi_spec.py)",
+  "generated_at": "2026-10-03T23:26:18",
+  "route_count": 113,
+  "operation_count": 123,
+  "probe_errors": [],
+  "state_audit": {
+    "created": [],
+    "restored": [
+      "C:\\Users\\xing\\Desktop\\aishield\\data\\fleet.json",
+      "C:\\Users\\xing\\Desktop\\aishield\\data\\monitored_tools.json"
+    ],
+    "failed": []
+  },
+  "routes": [
+    {
+      "path": "/api/v1/account/balance",
+      "tag": "account",
+      "summary": "GET /api/v1/account/balance（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "GET /api/v1/account/balance（运行时探得；schema 由真实响应推导）",
+          "status": 401,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 401
+        }
+      ],
+      "operation_ids": [
+        "getAccountBalance"
+      ]
+    },
+    {
+      "path": "/api/v1/account/login",
+      "tag": "account",
+      "summary": "POST /api/v1/account/login（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/account/login（运行时探得；schema 由真实响应推导）",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "postAccountLogin"
+      ]
+    },
+    {
+      "path": "/api/v1/account/me",
+      "tag": "account",
+      "summary": "GET /api/v1/account/me（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "GET /api/v1/account/me（运行时探得；schema 由真实响应推导）",
+          "status": 401,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 401
+        }
+      ],
+      "operation_ids": [
+        "getAccountMe"
+      ]
+    },
+    {
+      "path": "/api/v1/account/recharge",
+      "tag": "account",
+      "summary": "POST /api/v1/account/recharge（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/account/recharge（运行时探得；schema 由真实响应推导）",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "postAccountRecharge"
+      ]
+    },
+    {
+      "path": "/api/v1/account/register",
+      "tag": "account",
+      "summary": "POST /api/v1/account/register（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/account/register（运行时探得；schema 由真实响应推导）",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "postAccountRegister"
+      ]
+    },
+    {
+      "path": "/api/v1/agent-card/identity",
+      "tag": "ecosystem",
+      "summary": "Agent 生态 API · identity",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "Agent 生态 API · identity",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "agent_id": {
+                "type": "string"
+              },
+              "kya": {
+                "type": "object",
+                "properties": {
+                  "kid": {
+                    "type": "string"
+                  },
+                  "alg": {
+                    "type": "string"
+                  },
+                  "iat": {
+                    "type": "string"
+                  },
+                  "schema": {
+                    "type": "string"
+                  },
+                  "claims": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "constraints": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "namespace": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": true
+              },
+              "kya_sd_jwt_compact": {
+                "type": "string"
+              },
+              "web_bot_auth": {
+                "type": "object",
+                "properties": {
+                  "headers": {
+                    "type": "object",
+                    "properties": {
+                      "Date": {
+                        "type": "object"
+                      },
+                      "(request-target)": {
+                        "type": "object"
+                      },
+                      "Content-Digest": {
+                        "type": "object"
+                      },
+                      "X-Web-Bot-Auth-Agent": {
+                        "type": "object"
+                      },
+                      "X-Web-Bot-Auth-URL": {
+                        "type": "object"
+                      },
+                      "X-Web-Bot-Auth-Timestamp": {
+                        "type": "object"
+                      }
+                    },
+                    "additionalProperties": true
+                  },
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": true
+              },
+              "erc8004": {
+                "type": "null"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "postAgentCardIdentity"
+      ]
+    },
+    {
+      "path": "/api/v1/agent-card/pubkey",
+      "tag": "ecosystem",
+      "summary": "Agent 生态 API · pubkey",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "Agent 生态 API · pubkey",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "signer_did": {
+                "type": "string"
+              },
+              "key_id": {
+                "type": "string"
+              },
+              "alg": {
+                "type": "string"
+              },
+              "public_key": {
+                "type": "string"
+              },
+              "endpoint": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "getAgentCardPubkey"
+      ]
+    },
+    {
+      "path": "/api/v1/agent-card/sign",
+      "tag": "ecosystem",
+      "summary": "Agent 生态 API · sign",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "Agent 生态 API · sign",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "aishield": {
+                "type": "object",
+                "properties": {
+                  "signature": {
+                    "type": "string"
+                  },
+                  "signer_did": {
+                    "type": "string"
+                  },
+                  "signed_at": {
+                    "type": "string"
+                  },
+                  "key_id": {
+                    "type": "string"
+                  },
+                  "alg": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": true
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "postAgentCardSign"
+      ]
+    },
+    {
+      "path": "/api/v1/agent-card/verify",
+      "tag": "ecosystem",
+      "summary": "Agent 生态 API · verify",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "Agent 生态 API · verify",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "valid": {
+                "type": "boolean"
+              },
+              "reason": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "postAgentCardVerify"
+      ]
+    },
+    {
+      "path": "/api/v1/agent-infra/scan",
+      "tag": "connectors",
+      "summary": "海外平台接入与 Agent 基础设施扫描 · scan",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "海外平台接入与 Agent 基础设施扫描 · scan",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "type": "boolean"
+              },
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "postAgentInfraScan"
+      ]
+    },
+    {
+      "path": "/api/v1/agent-infra/scan-portfolio",
+      "tag": "connectors",
+      "summary": "海外平台接入与 Agent 基础设施扫描 · scan-portfolio",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "海外平台接入与 Agent 基础设施扫描 · scan-portfolio",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "type": "boolean"
+              },
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "postAgentInfraScanPortfolio"
+      ]
+    },
+    {
+      "path": "/api/v1/agent-infra/targets",
+      "tag": "connectors",
+      "summary": "海外平台接入与 Agent 基础设施扫描 · targets",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "海外平台接入与 Agent 基础设施扫描 · targets",
+          "status": 200,
+          "sample_present": false,
+          "sample_truncated": true,
+          "schema": {},
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "getAgentInfraTargets"
+      ]
+    },
+    {
+      "path": "/api/v1/agent/scan",
+      "tag": "agent",
+      "summary": "POST /api/v1/agent/scan（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/agent/scan（运行时探得；schema 由真实响应推导）",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "success": {
+                "type": "boolean"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              },
+              "detail": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "postAgentScan"
+      ]
+    },
+    {
+      "path": "/api/v1/agent/setup",
+      "tag": "agent",
+      "summary": "POST /api/v1/agent/setup（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/agent/setup（运行时探得；schema 由真实响应推导）",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "success": {
+                "type": "boolean"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              },
+              "detail": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "postAgentSetup"
+      ]
+    },
+    {
+      "path": "/api/v1/arena/health",
+      "tag": "arena",
+      "summary": "GET /api/v1/arena/health（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "GET /api/v1/arena/health（运行时探得；schema 由真实响应推导）",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "type": "boolean"
+              },
+              "version": {
+                "type": "string"
+              },
+              "scanner_available": {
+                "type": "boolean"
+              },
+              "mcp_rules": {
+                "type": "integer"
+              },
+              "skill_rules": {
+                "type": "integer"
+              },
+              "timestamp": {
+                "type": "number"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "getArenaHealth"
+      ]
+    },
+    {
+      "path": "/api/v1/arena/scan",
+      "tag": "arena",
+      "summary": "POST /api/v1/arena/scan（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/arena/scan（运行时探得；schema 由真实响应推导）",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "scan_id": {
+                "type": "string"
+              },
+              "timestamp": {
+                "type": "number"
+              },
+              "verdict": {
+                "type": "string"
+              },
+              "fingerprint": {
+                "type": "string"
+              },
+              "rule_counts": {
+                "type": "object",
+                "properties": {
+                  "info": {
+                    "type": "integer"
+                  },
+                  "low": {
+                    "type": "integer"
+                  },
+                  "medium": {
+                    "type": "integer"
+                  },
+                  "high": {
+                    "type": "integer"
+                  },
+                  "critical": {
+                    "type": "integer"
+                  }
+                },
+                "additionalProperties": true
+              },
+              "findings": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {},
+                  "additionalProperties": true
+                }
+              },
+              "scanner_version": {
+                "type": "string"
+              },
+              "metadata": {
+                "type": "object",
+                "properties": {
+                  "mcp_rules": {
+                    "type": "integer"
+                  },
+                  "skill_rules": {
+                    "type": "integer"
+                  },
+                  "files_scanned": {
+                    "type": "integer"
+                  }
+                },
+                "additionalProperties": true
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "postArenaScan"
+      ]
+    },
+    {
+      "path": "/api/v1/attestation/cancel",
+      "tag": "attestation",
+      "summary": "POST /api/v1/attestation/cancel（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/attestation/cancel（运行时探得；schema 由真实响应推导）",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "success": {
+                "type": "boolean"
+              },
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "postAttestationCancel"
+      ]
+    },
+    {
+      "path": "/api/v1/attestation/expiring",
+      "tag": "attestation",
+      "summary": "GET /api/v1/attestation/expiring（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "GET /api/v1/attestation/expiring（运行时探得；schema 由真实响应推导）",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "success": {
+                "type": "boolean"
+              },
+              "total": {
+                "type": "integer"
+              },
+              "subscriptions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {},
+                  "additionalProperties": true
+                }
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "getAttestationExpiring"
+      ]
+    },
+    {
+      "path": "/api/v1/attestation/list",
+      "tag": "attestation",
+      "summary": "GET /api/v1/attestation/list（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "GET /api/v1/attestation/list（运行时探得；schema 由真实响应推导）",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "success": {
+                "type": "boolean"
+              },
+              "total": {
+                "type": "integer"
+              },
+              "subscriptions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "subscription_id": {
+                      "type": "object"
+                    },
+                    "source_url": {
+                      "type": "object"
+                    },
+                    "plan": {
+                      "type": "object"
+                    },
+                    "plan_label": {
+                      "type": "object"
+                    },
+                    "payer_id": {
+                      "type": "object"
+                    },
+                    "cert_id": {
+                      "type": "object"
+                    },
+                    "status": {
+                      "type": "object"
+                    },
+                    "price_cny": {
+                      "type": "object"
+                    },
+                    "price_usd": {
+                      "type": "object"
+                    },
+                    "attest_interval_days": {
+                      "type": "object"
+                    },
+                    "grace_days": {
+                      "type": "object"
+                    },
+                    "created_at": {
+                      "type": "object"
+                    },
+                    "started_at": {
+                      "type": "object"
+                    },
+                    "expires_at": {
+                      "type": "object"
+                    },
+                    "next_attest_at": {
+                      "type": "object"
+                    },
+                    "last_attest_at": {
+                      "type": "object"
+                    },
+                    "renewals": {
+                      "type": "object"
+                    },
+                    "cancelled_at": {
+                      "type": "object"
+                    },
+                    "cancel_reason": {
+                      "type": "object"
+                    },
+                    "effective_status": {
+                      "type": "object"
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "getAttestationList"
+      ]
+    },
+    {
+      "path": "/api/v1/attestation/plans",
+      "tag": "attestation",
+      "summary": "GET /api/v1/attestation/plans（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "GET /api/v1/attestation/plans（运行时探得；schema 由真实响应推导）",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "success": {
+                "type": "boolean"
+              },
+              "plans": {
+                "type": "object",
+                "properties": {
+                  "monthly": {
+                    "type": "object",
+                    "properties": {
+                      "days": {
+                        "type": "object"
+                      },
+                      "CNY": {
+                        "type": "object"
+                      },
+                      "USD": {
+                        "type": "object"
+                      },
+                      "label": {
+                        "type": "object"
+                      }
+                    },
+                    "additionalProperties": true
+                  },
+                  "quarterly": {
+                    "type": "object",
+                    "properties": {
+                      "days": {
+                        "type": "object"
+                      },
+                      "CNY": {
+                        "type": "object"
+                      },
+                      "USD": {
+                        "type": "object"
+                      },
+                      "label": {
+                        "type": "object"
+                      }
+                    },
+                    "additionalProperties": true
+                  },
+                  "annual": {
+                    "type": "object",
+                    "properties": {
+                      "days": {
+                        "type": "object"
+                      },
+                      "CNY": {
+                        "type": "object"
+                      },
+                      "USD": {
+                        "type": "object"
+                      },
+                      "label": {
+                        "type": "object"
+                      }
+                    },
+                    "additionalProperties": true
+                  }
+                },
+                "additionalProperties": true
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "getAttestationPlans"
+      ]
+    },
+    {
+      "path": "/api/v1/attestation/renew",
+      "tag": "attestation",
+      "summary": "POST /api/v1/attestation/renew（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/attestation/renew（运行时探得；schema 由真实响应推导）",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "success": {
+                "type": "boolean"
+              },
+              "error": {
+                "type": "string"
+              },
+              "subscription_id": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "postAttestationRenew"
+      ]
+    },
+    {
+      "path": "/api/v1/attestation/run-cycle",
+      "tag": "attestation",
+      "summary": "POST /api/v1/attestation/run-cycle（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/attestation/run-cycle（运行时探得；schema 由真实响应推导）",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "success": {
+                "type": "boolean"
+              },
+              "total": {
+                "type": "integer"
+              },
+              "attested": {
+                "type": "integer"
+              },
+              "skipped": {
+                "type": "integer"
+              },
+              "failed": {
+                "type": "integer"
+              },
+              "errors": {
+                "type": "integer"
+              },
+              "results": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "object"
+                    },
+                    "error": {
+                      "type": "object"
+                    },
+                    "subscription_id": {
+                      "type": "object"
+                    },
+                    "status": {
+                      "type": "object"
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              },
+              "ran_at": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "postAttestationRunCycle"
+      ]
+    },
+    {
+      "path": "/api/v1/attestation/subscribe",
+      "tag": "attestation",
+      "summary": "POST /api/v1/attestation/subscribe（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/attestation/subscribe（运行时探得；schema 由真实响应推导）",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "success": {
+                "type": "boolean"
+              },
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "postAttestationSubscribe"
+      ]
+    },
+    {
+      "path": "/api/v1/attestation/trust",
+      "tag": "attestation",
+      "summary": "GET /api/v1/attestation/trust（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "GET /api/v1/attestation/trust（运行时探得；schema 由真实响应推导）",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "success": {
+                "type": "boolean"
+              },
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "getAttestationTrust"
+      ]
+    },
+    {
+      "path": "/api/v1/audit",
+      "tag": "audit",
+      "summary": "POST /api/v1/audit（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/audit（运行时探得；schema 由真实响应推导）",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "postAudit"
+      ]
+    },
+    {
+      "path": "/api/v1/banned-words",
+      "tag": "banned-words",
+      "summary": "POST /api/v1/banned-words（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/banned-words（运行时探得；schema 由真实响应推导）",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "postBannedWords"
+      ]
+    },
+    {
+      "path": "/api/v1/billing/plans",
+      "tag": "billing",
+      "summary": "GET /api/v1/billing/plans（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "GET /api/v1/billing/plans（运行时探得；schema 由真实响应推导）",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "success": {
+                "type": "boolean"
+              },
+              "plans": {
+                "type": "object",
+                "properties": {
+                  "free": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "object"
+                      },
+                      "price": {
+                        "type": "object"
+                      },
+                      "currency": {
+                        "type": "object"
+                      },
+                      "billing_cycle": {
+                        "type": "object"
+                      },
+                      "daily_limit": {
+                        "type": "object"
+                      },
+                      "monthly_limit": {
+                        "type": "object"
+                      },
+                      "features": {
+                        "type": "object"
+                      }
+                    },
+                    "additionalProperties": true
+                  },
+                  "pro": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "object"
+                      },
+                      "price": {
+                        "type": "object"
+                      },
+                      "currency": {
+                        "type": "object"
+                      },
+                      "billing_cycle": {
+                        "type": "object"
+                      },
+                      "daily_limit": {
+                        "type": "object"
+                      },
+                      "monthly_limit": {
+                        "type": "object"
+                      },
+                      "features": {
+                        "type": "object"
+                      }
+                    },
+                    "additionalProperties": true
+                  },
+                  "enterprise": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "object"
+                      },
+                      "price": {
+                        "type": "object"
+                      },
+                      "currency": {
+                        "type": "object"
+                      },
+                      "billing_cycle": {
+                        "type": "object"
+                      },
+                      "daily_limit": {
+                        "type": "object"
+                      },
+                      "monthly_limit": {
+                        "type": "object"
+                      },
+                      "features": {
+                        "type": "object"
+                      }
+                    },
+                    "additionalProperties": true
+                  }
+                },
+                "additionalProperties": true
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "getBillingPlans"
+      ]
+    },
+    {
+      "path": "/api/v1/certify/fulfill",
+      "tag": "certify",
+      "summary": "POST /api/v1/certify/fulfill（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/certify/fulfill（运行时探得；schema 由真实响应推导）",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "success": {
+                "type": "boolean"
+              },
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "postCertifyFulfill"
+      ]
+    },
+    {
+      "path": "/api/v1/certify/list",
+      "tag": "certify",
+      "summary": "GET /api/v1/certify/list（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "GET /api/v1/certify/list（运行时探得；schema 由真实响应推导）",
+          "status": 200,
+          "sample_present": false,
+          "sample_truncated": true,
+          "schema": {},
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "getCertifyList"
+      ]
+    },
+    {
+      "path": "/api/v1/certify/request-payment",
+      "tag": "certify",
+      "summary": "POST /api/v1/certify/request-payment（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/certify/request-payment（运行时探得；schema 由真实响应推导）",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "success": {
+                "type": "boolean"
+              },
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "postCertifyRequestPayment"
+      ]
+    },
+    {
+      "path": "/api/v1/certify/request-payment-cny",
+      "tag": "certify",
+      "summary": "POST /api/v1/certify/request-payment-cny（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/certify/request-payment-cny（运行时探得；schema 由真实响应推导）",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "success": {
+                "type": "boolean"
+              },
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "postCertifyRequestPaymentCny"
+      ]
+    },
+    {
+      "path": "/api/v1/chain",
+      "tag": "ecosystem",
+      "summary": "Agent 生态 API · chain",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "Agent 生态 API · chain",
+          "status": 201,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "schema": {
+                "type": "string"
+              },
+              "chain_id": {
+                "type": "string"
+              },
+              "entries": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {},
+                  "additionalProperties": true
+                }
+              },
+              "head_hash": {
+                "type": "string"
+              },
+              "hmac": {
+                "type": "boolean"
+              },
+              "verified": {
+                "type": "boolean"
+              },
+              "stats": {
+                "type": "object",
+                "properties": {
+                  "total": {
+                    "type": "integer"
+                  },
+                  "by_state": {
+                    "type": "object",
+                    "properties": {},
+                    "additionalProperties": true
+                  },
+                  "hmac": {
+                    "type": "boolean"
+                  },
+                  "depth": {
+                    "type": "integer"
+                  }
+                },
+                "additionalProperties": true
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 201
+        }
+      ],
+      "operation_ids": [
+        "postChain"
+      ]
+    },
+    {
+      "path": "/api/v1/checkout/create",
+      "tag": "checkout",
+      "summary": "POST /api/v1/checkout/create（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/checkout/create（运行时探得；schema 由真实响应推导）",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "postCheckoutCreate"
+      ]
+    },
+    {
+      "path": "/api/v1/connectors",
+      "tag": "connectors",
+      "summary": "海外平台接入与 Agent 基础设施扫描 · connectors",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "海外平台接入与 Agent 基础设施扫描 · connectors",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "type": "boolean"
+              },
+              "platforms": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "count": {
+                "type": "integer"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        },
+        {
+          "verb": "post",
+          "summary": "海外平台接入与 Agent 基础设施扫描 · connectors",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "type": "boolean"
+              },
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "getConnectors",
+        "postConnectors"
+      ]
+    },
+    {
+      "path": "/api/v1/connectors/{plat}/self-check",
+      "tag": "connectors",
+      "summary": "海外平台接入与 Agent 基础设施扫描 · self-check",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "海外平台接入与 Agent 基础设施扫描 · self-check",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "type": "boolean"
+              },
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "getConnectorsSelfCheck"
+      ]
+    },
+    {
+      "path": "/api/v1/connectors/{plat}/state",
+      "tag": "connectors",
+      "summary": "海外平台接入与 Agent 基础设施扫描 · state",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "海外平台接入与 Agent 基础设施扫描 · state",
+          "status": 500,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 500
+        }
+      ],
+      "operation_ids": [
+        "getConnectorsState"
+      ]
+    },
+    {
+      "path": "/api/v1/contributors",
+      "tag": "ecosystem",
+      "summary": "Agent 生态 API · contributors",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "Agent 生态 API · contributors",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "count": {
+                "type": "integer"
+              },
+              "contributors": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "contributor_id": {
+                      "type": "object"
+                    },
+                    "registered_at": {
+                      "type": "object"
+                    },
+                    "updated_at": {
+                      "type": "object"
+                    },
+                    "name": {
+                      "type": "object"
+                    },
+                    "email": {
+                      "type": "object"
+                    },
+                    "github": {
+                      "type": "object"
+                    },
+                    "bio": {
+                      "type": "object"
+                    },
+                    "score": {
+                      "type": "object"
+                    },
+                    "rules_matured": {
+                      "type": "object"
+                    },
+                    "events": {
+                      "type": "object"
+                    },
+                    "tier_info": {
+                      "type": "object"
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        },
+        {
+          "verb": "post",
+          "summary": "Agent 生态 API · contributors",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "getContributors",
+        "postContributors"
+      ]
+    },
+    {
+      "path": "/api/v1/contributors/leaderboard",
+      "tag": "ecosystem",
+      "summary": "Agent 生态 API · leaderboard",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "Agent 生态 API · leaderboard",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "leaderboard": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "contributor_id": {
+                      "type": "object"
+                    },
+                    "name": {
+                      "type": "object"
+                    },
+                    "github": {
+                      "type": "object"
+                    },
+                    "score": {
+                      "type": "object"
+                    },
+                    "rules_matured": {
+                      "type": "object"
+                    },
+                    "tier": {
+                      "type": "object"
+                    },
+                    "next_tier": {
+                      "type": "object"
+                    },
+                    "events_count": {
+                      "type": "object"
+                    },
+                    "last_contribution": {
+                      "type": "object"
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "getContributorsLeaderboard"
+      ]
+    },
+    {
+      "path": "/api/v1/contributors/tiers",
+      "tag": "ecosystem",
+      "summary": "Agent 生态 API · tiers",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "Agent 生态 API · tiers",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "tiers": {
+                "type": "object",
+                "properties": {
+                  "Contributor": {
+                    "type": "integer"
+                  },
+                  "Reviewer": {
+                    "type": "integer"
+                  },
+                  "Maintainer": {
+                    "type": "integer"
+                  },
+                  "Trustee": {
+                    "type": "integer"
+                  }
+                },
+                "additionalProperties": true
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "getContributorsTiers"
+      ]
+    },
+    {
+      "path": "/api/v1/export/nucleus",
+      "tag": "export",
+      "summary": "POST /api/v1/export/nucleus（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/export/nucleus（运行时探得；schema 由真实响应推导）",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "schema": {
+                "type": "string"
+              },
+              "asset_name": {
+                "type": "string"
+              },
+              "asset_type": {
+                "type": "string"
+              },
+              "scanner": {
+                "type": "string"
+              },
+              "findings": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {},
+                  "additionalProperties": true
+                }
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "postExportNucleus"
+      ]
+    },
+    {
+      "path": "/api/v1/export/sarif",
+      "tag": "export",
+      "summary": "POST /api/v1/export/sarif（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/export/sarif（运行时探得；schema 由真实响应推导）",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "$schema": {
+                "type": "string"
+              },
+              "version": {
+                "type": "string"
+              },
+              "runs": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "tool": {
+                      "type": "object"
+                    },
+                    "originalUriBaseIds": {
+                      "type": "object"
+                    },
+                    "results": {
+                      "type": "object"
+                    },
+                    "properties": {
+                      "type": "object"
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "postExportSarif"
+      ]
+    },
+    {
+      "path": "/api/v1/export/sbom",
+      "tag": "export",
+      "summary": "POST /api/v1/export/sbom（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/export/sbom（运行时探得；schema 由真实响应推导）",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "bomFormat": {
+                "type": "string"
+              },
+              "specVersion": {
+                "type": "string"
+              },
+              "serialNumber": {
+                "type": "string"
+              },
+              "version": {
+                "type": "integer"
+              },
+              "metadata": {
+                "type": "object",
+                "properties": {
+                  "timestamp": {
+                    "type": "string"
+                  },
+                  "authors": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "component": {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "object"
+                      },
+                      "name": {
+                        "type": "object"
+                      },
+                      "version": {
+                        "type": "object"
+                      }
+                    },
+                    "additionalProperties": true
+                  },
+                  "tools": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  }
+                },
+                "additionalProperties": true
+              },
+              "components": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {},
+                  "additionalProperties": true
+                }
+              },
+              "vulnerabilities": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {},
+                  "additionalProperties": true
+                }
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "postExportSbom"
+      ]
+    },
+    {
+      "path": "/api/v1/export/splunk",
+      "tag": "export",
+      "summary": "POST /api/v1/export/splunk（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/export/splunk（运行时探得；schema 由真实响应推导）",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "event_count": {
+                "type": "integer"
+              },
+              "events": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {},
+                  "additionalProperties": true
+                }
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "postExportSplunk"
+      ]
+    },
+    {
+      "path": "/api/v1/fleet",
+      "tag": "fleet",
+      "summary": "GET /api/v1/fleet（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "GET /api/v1/fleet（运行时探得；schema 由真实响应推导）",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "success": {
+                "type": "boolean"
+              },
+              "total": {
+                "type": "integer"
+              },
+              "pass": {
+                "type": "integer"
+              },
+              "fail": {
+                "type": "integer"
+              },
+              "pass_rate": {
+                "type": "number"
+              },
+              "avg_score": {
+                "type": "number"
+              },
+              "severity_hist": {
+                "type": "object",
+                "properties": {
+                  "critical": {
+                    "type": "integer"
+                  },
+                  "high": {
+                    "type": "integer"
+                  },
+                  "medium": {
+                    "type": "integer"
+                  },
+                  "low": {
+                    "type": "integer"
+                  },
+                  "info": {
+                    "type": "integer"
+                  }
+                },
+                "additionalProperties": true
+              },
+              "owasp_hist": {
+                "type": "object",
+                "properties": {
+                  "MCP03": {
+                    "type": "integer"
+                  },
+                  "MCP05": {
+                    "type": "integer"
+                  },
+                  "MCP08": {
+                    "type": "integer"
+                  },
+                  "MCP01": {
+                    "type": "integer"
+                  }
+                },
+                "additionalProperties": true
+              },
+              "score_buckets": {
+                "type": "object",
+                "properties": {
+                  "0-49": {
+                    "type": "integer"
+                  },
+                  "50-69": {
+                    "type": "integer"
+                  },
+                  "70-89": {
+                    "type": "integer"
+                  },
+                  "90-100": {
+                    "type": "integer"
+                  }
+                },
+                "additionalProperties": true
+              },
+              "worst_offenders": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "identity": {
+                      "type": "object"
+                    },
+                    "name": {
+                      "type": "object"
+                    },
+                    "overall_score": {
+                      "type": "object"
+                    },
+                    "risk_level": {
+                      "type": "object"
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              },
+              "updated_at": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "getFleet"
+      ]
+    },
+    {
+      "path": "/api/v1/fleet/ingest",
+      "tag": "fleet",
+      "summary": "POST /api/v1/fleet/ingest（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/fleet/ingest（运行时探得；schema 由真实响应推导）",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "success": {
+                "type": "boolean"
+              },
+              "member": {
+                "type": "object",
+                "properties": {
+                  "identity": {
+                    "type": "string"
+                  },
+                  "source_url": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "version": {
+                    "type": "string"
+                  },
+                  "overall_score": {
+                    "type": "integer"
+                  },
+                  "badge_level": {
+                    "type": "string"
+                  },
+                  "risk_level": {
+                    "type": "string"
+                  },
+                  "total_findings": {
+                    "type": "integer"
+                  },
+                  "severity_hist": {
+                    "type": "object",
+                    "properties": {
+                      "critical": {
+                        "type": "object"
+                      },
+                      "high": {
+                        "type": "object"
+                      },
+                      "medium": {
+                        "type": "object"
+                      },
+                      "low": {
+                        "type": "object"
+                      },
+                      "info": {
+                        "type": "object"
+                      }
+                    },
+                    "additionalProperties": true
+                  },
+                  "owasp_hist": {
+                    "type": "object",
+                    "properties": {},
+                    "additionalProperties": true
+                  },
+                  "ingested_at": {
+                    "type": "string"
+                  },
+                  "pass": {
+                    "type": "boolean"
+                  }
+                },
+                "additionalProperties": true
+              },
+              "fleet_size": {
+                "type": "integer"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "postFleetIngest"
+      ]
+    },
+    {
+      "path": "/api/v1/fleet/list",
+      "tag": "fleet",
+      "summary": "GET /api/v1/fleet/list（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "GET /api/v1/fleet/list（运行时探得；schema 由真实响应推导）",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "success": {
+                "type": "boolean"
+              },
+              "members": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "identity": {
+                      "type": "object"
+                    },
+                    "source_url": {
+                      "type": "object"
+                    },
+                    "name": {
+                      "type": "object"
+                    },
+                    "version": {
+                      "type": "object"
+                    },
+                    "overall_score": {
+                      "type": "object"
+                    },
+                    "badge_level": {
+                      "type": "object"
+                    },
+                    "risk_level": {
+                      "type": "object"
+                    },
+                    "total_findings": {
+                      "type": "object"
+                    },
+                    "severity_hist": {
+                      "type": "object"
+                    },
+                    "owasp_hist": {
+                      "type": "object"
+                    },
+                    "ingested_at": {
+                      "type": "object"
+                    },
+                    "pass": {
+                      "type": "object"
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "getFleetList"
+      ]
+    },
+    {
+      "path": "/api/v1/governance/audit",
+      "tag": "governance",
+      "summary": "GET /api/v1/governance/audit（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "GET /api/v1/governance/audit（运行时探得；schema 由真实响应推导）",
+          "status": 200,
+          "sample_present": false,
+          "sample_truncated": true,
+          "schema": {},
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "getGovernanceAudit"
+      ]
+    },
+    {
+      "path": "/api/v1/governance/evaluate",
+      "tag": "governance",
+      "summary": "POST /api/v1/governance/evaluate（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/governance/evaluate（运行时探得；schema 由真实响应推导）",
+          "status": 403,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "success": {
+                "type": "boolean"
+              },
+              "decision": {
+                "type": "string"
+              },
+              "allowed": {
+                "type": "boolean"
+              },
+              "server": {
+                "type": "string"
+              },
+              "tool": {
+                "type": "string"
+              },
+              "reason": {
+                "type": "string"
+              },
+              "policy_hit": {
+                "type": "string"
+              },
+              "ts": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 403
+        }
+      ],
+      "operation_ids": [
+        "postGovernanceEvaluate"
+      ]
+    },
+    {
+      "path": "/api/v1/governance/incident",
+      "tag": "governance",
+      "summary": "POST /api/v1/governance/incident（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/governance/incident（运行时探得；schema 由真实响应推导）",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "success": {
+                "type": "boolean"
+              },
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "postGovernanceIncident"
+      ]
+    },
+    {
+      "path": "/api/v1/governance/kill",
+      "tag": "governance",
+      "summary": "POST /api/v1/governance/kill（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/governance/kill（运行时探得；schema 由真实响应推导）",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "success": {
+                "type": "boolean"
+              },
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "postGovernanceKill"
+      ]
+    },
+    {
+      "path": "/api/v1/governance/policy",
+      "tag": "governance",
+      "summary": "POST /api/v1/governance/policy（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/governance/policy（运行时探得；schema 由真实响应推导）",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "success": {
+                "type": "boolean"
+              },
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "postGovernancePolicy"
+      ]
+    },
+    {
+      "path": "/api/v1/governance/revive",
+      "tag": "governance",
+      "summary": "POST /api/v1/governance/revive（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/governance/revive（运行时探得；schema 由真实响应推导）",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "success": {
+                "type": "boolean"
+              },
+              "error": {
+                "type": "string"
+              },
+              "server": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "postGovernanceRevive"
+      ]
+    },
+    {
+      "path": "/api/v1/governance/status",
+      "tag": "governance",
+      "summary": "GET /api/v1/governance/status（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "GET /api/v1/governance/status（运行时探得；schema 由真实响应推导）",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "success": {
+                "type": "boolean"
+              },
+              "default_deny": {
+                "type": "boolean"
+              },
+              "killed": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": true
+              },
+              "killed_count": {
+                "type": "integer"
+              },
+              "allow_rules": {
+                "type": "integer"
+              },
+              "deny_rules": {
+                "type": "integer"
+              },
+              "incident_threshold": {
+                "type": "integer"
+              },
+              "incidents": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": true
+              },
+              "policy_healthy": {
+                "type": "boolean"
+              },
+              "audit_chain": {
+                "type": "object",
+                "properties": {
+                  "valid": {
+                    "type": "boolean"
+                  },
+                  "entries": {
+                    "type": "integer"
+                  },
+                  "head_hash": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": true
+              },
+              "updated_at": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "getGovernanceStatus"
+      ]
+    },
+    {
+      "path": "/api/v1/handshake",
+      "tag": "handshake",
+      "summary": "POST /api/v1/handshake（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/handshake（运行时探得；schema 由真实响应推导）",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "postHandshake"
+      ]
+    },
+    {
+      "path": "/api/v1/health",
+      "tag": "health",
+      "summary": "GET /api/v1/health（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "GET /api/v1/health（运行时探得；schema 由真实响应推导）",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string"
+              },
+              "version": {
+                "type": "string"
+              },
+              "owasp_standard": {
+                "type": "string"
+              },
+              "rules_count": {
+                "type": "integer"
+              },
+              "rules_breakdown": {
+                "type": "object",
+                "properties": {
+                  "static": {
+                    "type": "integer"
+                  },
+                  "generated": {
+                    "type": "integer"
+                  },
+                  "radar": {
+                    "type": "integer"
+                  },
+                  "total": {
+                    "type": "integer"
+                  }
+                },
+                "additionalProperties": true
+              },
+              "uptime": {
+                "type": "number"
+              },
+              "agent_first": {
+                "type": "boolean"
+              },
+              "openapi": {
+                "type": "string"
+              },
+              "agent_setup": {
+                "type": "string"
+              },
+              "commit": {
+                "type": "null"
+              },
+              "deployed_at": {
+                "type": "null"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "getHealth"
+      ]
+    },
+    {
+      "path": "/api/v1/identity/agents",
+      "tag": "ecosystem",
+      "summary": "Agent 生态 API · agents",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "Agent 生态 API · agents",
+          "status": 200,
+          "sample_present": false,
+          "sample_truncated": true,
+          "schema": {},
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "getIdentityAgents"
+      ]
+    },
+    {
+      "path": "/api/v1/identity/erc8004/wrap",
+      "tag": "ecosystem",
+      "summary": "Agent 生态 API · wrap",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "Agent 生态 API · wrap",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "postIdentityErc8004Wrap"
+      ]
+    },
+    {
+      "path": "/api/v1/identity/kyad/export",
+      "tag": "ecosystem",
+      "summary": "Agent 生态 API · export",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "Agent 生态 API · export",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "agent_id": {
+                "type": "string"
+              },
+              "kya": {
+                "type": "object",
+                "properties": {
+                  "kid": {
+                    "type": "string"
+                  },
+                  "alg": {
+                    "type": "string"
+                  },
+                  "iat": {
+                    "type": "string"
+                  },
+                  "schema": {
+                    "type": "string"
+                  },
+                  "claims": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "constraints": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "namespace": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": true
+              },
+              "kya_sd_jwt_compact": {
+                "type": "string"
+              },
+              "web_bot_auth": {
+                "type": "object",
+                "properties": {
+                  "headers": {
+                    "type": "object",
+                    "properties": {
+                      "Date": {
+                        "type": "object"
+                      },
+                      "(request-target)": {
+                        "type": "object"
+                      },
+                      "Content-Digest": {
+                        "type": "object"
+                      },
+                      "X-Web-Bot-Auth-Agent": {
+                        "type": "object"
+                      },
+                      "X-Web-Bot-Auth-URL": {
+                        "type": "object"
+                      },
+                      "X-Web-Bot-Auth-Timestamp": {
+                        "type": "object"
+                      }
+                    },
+                    "additionalProperties": true
+                  },
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": true
+              },
+              "erc8004": {
+                "type": "null"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "postIdentityKyadExport"
+      ]
+    },
+    {
+      "path": "/api/v1/identity/register",
+      "tag": "ecosystem",
+      "summary": "Agent 生态 API · register",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "Agent 生态 API · register",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "postIdentityRegister"
+      ]
+    },
+    {
+      "path": "/api/v1/identity/wallets",
+      "tag": "ecosystem",
+      "summary": "Agent 生态 API · wallets",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "Agent 生态 API · wallets",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "docs": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "getIdentityWallets"
+      ]
+    },
+    {
+      "path": "/api/v1/leaderboard/providers",
+      "tag": "ecosystem",
+      "summary": "Agent 生态 API · providers",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "Agent 生态 API · providers",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "providers": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "provider": {
+                      "type": "object"
+                    },
+                    "count": {
+                      "type": "object"
+                    },
+                    "mean_score": {
+                      "type": "object"
+                    },
+                    "max_score": {
+                      "type": "object"
+                    },
+                    "cert_ids": {
+                      "type": "object"
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "getLeaderboardProviders"
+      ]
+    },
+    {
+      "path": "/api/v1/leaderboard/snapshot",
+      "tag": "ecosystem",
+      "summary": "Agent 生态 API · snapshot",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "Agent 生态 API · snapshot",
+          "status": 200,
+          "sample_present": false,
+          "sample_truncated": true,
+          "schema": {},
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "getLeaderboardSnapshot"
+      ]
+    },
+    {
+      "path": "/api/v1/leaderboard/top",
+      "tag": "ecosystem",
+      "summary": "Agent 生态 API · top",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "Agent 生态 API · top",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "schema": {
+                "type": "string"
+              },
+              "top": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "cert_id": {
+                      "type": "object"
+                    },
+                    "source_url": {
+                      "type": "object"
+                    },
+                    "name": {
+                      "type": "object"
+                    },
+                    "score": {
+                      "type": "object"
+                    },
+                    "badge_level": {
+                      "type": "object"
+                    },
+                    "risk_level": {
+                      "type": "object"
+                    },
+                    "findings_count": {
+                      "type": "object"
+                    },
+                    "issued_at": {
+                      "type": "object"
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "getLeaderboardTop"
+      ]
+    },
+    {
+      "path": "/api/v1/mcp",
+      "tag": "mcp",
+      "summary": "POST /api/v1/mcp（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/mcp（运行时探得；schema 由真实响应推导）",
+          "status": 200,
+          "sample_present": false,
+          "sample_truncated": true,
+          "schema": {},
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "postMcp"
+      ]
+    },
+    {
+      "path": "/api/v1/monitor/add",
+      "tag": "monitor",
+      "summary": "POST /api/v1/monitor/add（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/monitor/add（运行时探得；schema 由真实响应推导）",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "postMonitorAdd"
+      ]
+    },
+    {
+      "path": "/api/v1/monitor/check",
+      "tag": "monitor",
+      "summary": "POST /api/v1/monitor/check（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/monitor/check（运行时探得；schema 由真实响应推导）",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "success": {
+                "type": "boolean"
+              },
+              "results": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "tool": {
+                      "type": "object"
+                    },
+                    "source_url": {
+                      "type": "object"
+                    },
+                    "previous_version": {
+                      "type": "object"
+                    },
+                    "current_version": {
+                      "type": "object"
+                    },
+                    "previous_commit": {
+                      "type": "object"
+                    },
+                    "last_commit": {
+                      "type": "object"
+                    },
+                    "has_changes": {
+                      "type": "object"
+                    },
+                    "checked_at": {
+                      "type": "object"
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              },
+              "total": {
+                "type": "integer"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "postMonitorCheck"
+      ]
+    },
+    {
+      "path": "/api/v1/monitor/list",
+      "tag": "monitor",
+      "summary": "GET /api/v1/monitor/list（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "GET /api/v1/monitor/list（运行时探得；schema 由真实响应推导）",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "success": {
+                "type": "boolean"
+              },
+              "total": {
+                "type": "integer"
+              },
+              "tools": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "source_url": {
+                      "type": "object"
+                    },
+                    "name": {
+                      "type": "object"
+                    },
+                    "last_version": {
+                      "type": "object"
+                    },
+                    "last_commit": {
+                      "type": "object"
+                    },
+                    "added_at": {
+                      "type": "object"
+                    },
+                    "last_checked": {
+                      "type": "object"
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "getMonitorList"
+      ]
+    },
+    {
+      "path": "/api/v1/osv",
+      "tag": "osv",
+      "summary": "POST /api/v1/osv（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/osv（运行时探得；schema 由真实响应推导）",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "findings": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {},
+                  "additionalProperties": true
+                }
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "postOsv"
+      ]
+    },
+    {
+      "path": "/api/v1/pay/hupijiao/create",
+      "tag": "pay",
+      "summary": "POST /api/v1/pay/hupijiao/create（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/pay/hupijiao/create（运行时探得；schema 由真实响应推导）",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "success": {
+                "type": "boolean"
+              },
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "postPayHupijiaoCreate"
+      ]
+    },
+    {
+      "path": "/api/v1/pay/hupijiao/notify",
+      "tag": "pay",
+      "summary": "POST /api/v1/pay/hupijiao/notify（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/pay/hupijiao/notify（运行时探得；schema 由真实响应推导）",
+          "status": 400,
+          "sample_present": false,
+          "sample_truncated": true,
+          "schema": {},
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "postPayHupijiaoNotify"
+      ]
+    },
+    {
+      "path": "/api/v1/pay/hupijiao/orders",
+      "tag": "pay",
+      "summary": "GET /api/v1/pay/hupijiao/orders（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "GET /api/v1/pay/hupijiao/orders（运行时探得；schema 由真实响应推导）",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "success": {
+                "type": "boolean"
+              },
+              "total": {
+                "type": "integer"
+              },
+              "orders": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "trade_order_id": {
+                      "type": "object"
+                    },
+                    "gateway": {
+                      "type": "object"
+                    },
+                    "payment": {
+                      "type": "object"
+                    },
+                    "amount_cny": {
+                      "type": "object"
+                    },
+                    "total_fee": {
+                      "type": "object"
+                    },
+                    "title": {
+                      "type": "object"
+                    },
+                    "attach": {
+                      "type": "object"
+                    },
+                    "status": {
+                      "type": "object"
+                    },
+                    "open_order_id": {
+                      "type": "object"
+                    },
+                    "pay_url": {
+                      "type": "object"
+                    },
+                    "qrcode_url": {
+                      "type": "object"
+                    },
+                    "metadata": {
+                      "type": "object"
+                    },
+                    "created_at": {
+                      "type": "object"
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "getPayHupijiaoOrders"
+      ]
+    },
+    {
+      "path": "/api/v1/pay/hupijiao/query",
+      "tag": "pay",
+      "summary": "GET /api/v1/pay/hupijiao/query（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "GET /api/v1/pay/hupijiao/query（运行时探得；schema 由真实响应推导）",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "success": {
+                "type": "boolean"
+              },
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "getPayHupijiaoQuery"
+      ]
+    },
+    {
+      "path": "/api/v1/pay/hupijiao/status",
+      "tag": "pay",
+      "summary": "GET /api/v1/pay/hupijiao/status（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "GET /api/v1/pay/hupijiao/status（运行时探得；schema 由真实响应推导）",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "success": {
+                "type": "boolean"
+              },
+              "gateway": {
+                "type": "string"
+              },
+              "configured": {
+                "type": "boolean"
+              },
+              "appid": {
+                "type": "string"
+              },
+              "app_secret": {
+                "type": "string"
+              },
+              "secret_fingerprint": {
+                "type": "string"
+              },
+              "api_base": {
+                "type": "string"
+              },
+              "api_base_allowed": {
+                "type": "boolean"
+              },
+              "notify_url": {
+                "type": "string"
+              },
+              "supported_payments": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "getPayHupijiaoStatus"
+      ]
+    },
+    {
+      "path": "/api/v1/personal-agents/budget/check",
+      "tag": "personal-agent",
+      "summary": "个人 Agent 治理层与平台注册表 · check",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "个人 Agent 治理层与平台注册表 · check",
+          "status": 500,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 500
+        }
+      ],
+      "operation_ids": [
+        "postPersonalAgentsBudgetCheck"
+      ]
+    },
+    {
+      "path": "/api/v1/personal-agents/budget/commit",
+      "tag": "personal-agent",
+      "summary": "个人 Agent 治理层与平台注册表 · commit",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "个人 Agent 治理层与平台注册表 · commit",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "postPersonalAgentsBudgetCommit"
+      ]
+    },
+    {
+      "path": "/api/v1/personal-agents/budget/release",
+      "tag": "personal-agent",
+      "summary": "个人 Agent 治理层与平台注册表 · release",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "个人 Agent 治理层与平台注册表 · release",
+          "status": 404,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 404
+        }
+      ],
+      "operation_ids": [
+        "postPersonalAgentsBudgetRelease"
+      ]
+    },
+    {
+      "path": "/api/v1/personal-agents/budget/reserve",
+      "tag": "personal-agent",
+      "summary": "个人 Agent 治理层与平台注册表 · reserve",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "个人 Agent 治理层与平台注册表 · reserve",
+          "status": 500,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 500
+        }
+      ],
+      "operation_ids": [
+        "postPersonalAgentsBudgetReserve"
+      ]
+    },
+    {
+      "path": "/api/v1/personal-agents/stats",
+      "tag": "personal-agent",
+      "summary": "个人 Agent 治理层与平台注册表 · stats",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "个人 Agent 治理层与平台注册表 · stats",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "users_total": {
+                "type": "integer"
+              },
+              "agent_instances_total": {
+                "type": "integer"
+              },
+              "active_tickets_total": {
+                "type": "integer"
+              },
+              "actions_total": {
+                "type": "integer"
+              },
+              "open_disputes_total": {
+                "type": "integer"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "getPersonalAgentsStats"
+      ]
+    },
+    {
+      "path": "/api/v1/personal-agents/tickets/consume",
+      "tag": "personal-agent",
+      "summary": "个人 Agent 治理层与平台注册表 · consume",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "个人 Agent 治理层与平台注册表 · consume",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "allowed": {
+                "type": "boolean"
+              },
+              "valid": {
+                "type": "boolean"
+              },
+              "reason": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "postPersonalAgentsTicketsConsume"
+      ]
+    },
+    {
+      "path": "/api/v1/personal-agents/tickets/verify",
+      "tag": "personal-agent",
+      "summary": "个人 Agent 治理层与平台注册表 · verify",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "个人 Agent 治理层与平台注册表 · verify",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "valid": {
+                "type": "boolean"
+              },
+              "reason": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "postPersonalAgentsTicketsVerify"
+      ]
+    },
+    {
+      "path": "/api/v1/personal-agents/users",
+      "tag": "personal-agent",
+      "summary": "个人 Agent 治理层与平台注册表 · users",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "个人 Agent 治理层与平台注册表 · users",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "users": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        },
+        {
+          "verb": "post",
+          "summary": "个人 Agent 治理层与平台注册表 · users",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "getPersonalAgentsUsers",
+        "postPersonalAgentsUsers"
+      ]
+    },
+    {
+      "path": "/api/v1/platforms",
+      "tag": "personal-agent",
+      "summary": "个人 Agent 治理层与平台注册表 · platforms",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "个人 Agent 治理层与平台注册表 · platforms",
+          "status": 200,
+          "sample_present": false,
+          "sample_truncated": true,
+          "schema": {},
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "getPlatforms"
+      ]
+    },
+    {
+      "path": "/api/v1/platforms/gap-matrix",
+      "tag": "personal-agent",
+      "summary": "个人 Agent 治理层与平台注册表 · gap-matrix",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "个人 Agent 治理层与平台注册表 · gap-matrix",
+          "status": 200,
+          "sample_present": false,
+          "sample_truncated": true,
+          "schema": {},
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "getPlatformsGapMatrix"
+      ]
+    },
+    {
+      "path": "/api/v1/platforms/recommend",
+      "tag": "personal-agent",
+      "summary": "个人 Agent 治理层与平台注册表 · recommend",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "个人 Agent 治理层与平台注册表 · recommend",
+          "status": 404,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 404
+        },
+        {
+          "verb": "post",
+          "summary": "个人 Agent 治理层与平台注册表 · recommend",
+          "status": 200,
+          "sample_present": false,
+          "sample_truncated": true,
+          "schema": {},
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "getPlatformsRecommend",
+        "postPlatformsRecommend"
+      ]
+    },
+    {
+      "path": "/api/v1/platforms/register",
+      "tag": "personal-agent",
+      "summary": "个人 Agent 治理层与平台注册表 · register",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "个人 Agent 治理层与平台注册表 · register",
+          "status": 404,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 404
+        },
+        {
+          "verb": "post",
+          "summary": "个人 Agent 治理层与平台注册表 · register",
+          "status": 500,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 500
+        }
+      ],
+      "operation_ids": [
+        "getPlatformsRegister",
+        "postPlatformsRegister"
+      ]
+    },
+    {
+      "path": "/api/v1/platforms/stats",
+      "tag": "personal-agent",
+      "summary": "个人 Agent 治理层与平台注册表 · stats",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "个人 Agent 治理层与平台注册表 · stats",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "total_platforms": {
+                "type": "integer"
+              },
+              "by_family": {
+                "type": "object",
+                "properties": {
+                  "consumer": {
+                    "type": "integer"
+                  },
+                  "developer": {
+                    "type": "integer"
+                  },
+                  "infrastructure": {
+                    "type": "integer"
+                  }
+                },
+                "additionalProperties": true
+              },
+              "by_cny_accessible": {
+                "type": "object",
+                "properties": {
+                  "verified_blocked": {
+                    "type": "integer"
+                  },
+                  "regional_only": {
+                    "type": "integer"
+                  },
+                  "reachable": {
+                    "type": "integer"
+                  }
+                },
+                "additionalProperties": true
+              },
+              "by_access_path": {
+                "type": "object",
+                "properties": {
+                  "connector_official": {
+                    "type": "integer"
+                  },
+                  "mcp": {
+                    "type": "integer"
+                  },
+                  "openai_compat": {
+                    "type": "integer"
+                  },
+                  "browser_agent": {
+                    "type": "integer"
+                  },
+                  "native_sdk": {
+                    "type": "integer"
+                  }
+                },
+                "additionalProperties": true
+              },
+              "governance_provisions_count": {
+                "type": "integer"
+              },
+              "access_paths_defined": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "snapshot_at": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "getPlatformsStats"
+      ]
+    },
+    {
+      "path": "/api/v1/policy/check",
+      "tag": "policy",
+      "summary": "POST /api/v1/policy/check（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/policy/check（运行时探得；schema 由真实响应推导）",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "passed": {
+                "type": "boolean"
+              },
+              "score": {
+                "type": "integer"
+              },
+              "violations": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "rule": {
+                      "type": "object"
+                    },
+                    "detail": {
+                      "type": "object"
+                    },
+                    "severity": {
+                      "type": "object"
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              },
+              "policy_name": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "postPolicyCheck"
+      ]
+    },
+    {
+      "path": "/api/v1/prompt-check",
+      "tag": "prompt-check",
+      "summary": "POST /api/v1/prompt-check（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/prompt-check（运行时探得；schema 由真实响应推导）",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "postPromptCheck"
+      ]
+    },
+    {
+      "path": "/api/v1/protocol/normalize",
+      "tag": "ecosystem",
+      "summary": "Agent 生态 API · normalize",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "Agent 生态 API · normalize",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "postProtocolNormalize"
+      ]
+    },
+    {
+      "path": "/api/v1/protocol/translate",
+      "tag": "ecosystem",
+      "summary": "Agent 生态 API · translate",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "Agent 生态 API · translate",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "postProtocolTranslate"
+      ]
+    },
+    {
+      "path": "/api/v1/proxy/call",
+      "tag": "proxy",
+      "summary": "POST /api/v1/proxy/call（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/proxy/call（运行时探得；schema 由真实响应推导）",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "postProxyCall"
+      ]
+    },
+    {
+      "path": "/api/v1/proxy/stats",
+      "tag": "proxy",
+      "summary": "GET /api/v1/proxy/stats（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "GET /api/v1/proxy/stats（运行时探得；schema 由真实响应推导）",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "total_calls": {
+                "type": "integer"
+              },
+              "success_calls": {
+                "type": "integer"
+              },
+              "blocked_calls": {
+                "type": "integer"
+              },
+              "error_calls": {
+                "type": "integer"
+              },
+              "by_tool": {
+                "type": "object",
+                "properties": {
+                  "hack": {
+                    "type": "integer"
+                  }
+                },
+                "additionalProperties": true
+              },
+              "by_agent": {
+                "type": "object",
+                "properties": {
+                  "null": {
+                    "type": "integer"
+                  }
+                },
+                "additionalProperties": true
+              },
+              "daily": {
+                "type": "object",
+                "properties": {
+                  "2026-07-19": {
+                    "type": "object",
+                    "properties": {
+                      "total": {
+                        "type": "object"
+                      },
+                      "success": {
+                        "type": "object"
+                      },
+                      "blocked": {
+                        "type": "object"
+                      },
+                      "error": {
+                        "type": "object"
+                      }
+                    },
+                    "additionalProperties": true
+                  },
+                  "2026-07-20": {
+                    "type": "object",
+                    "properties": {
+                      "total": {
+                        "type": "object"
+                      },
+                      "success": {
+                        "type": "object"
+                      },
+                      "blocked": {
+                        "type": "object"
+                      },
+                      "error": {
+                        "type": "object"
+                      }
+                    },
+                    "additionalProperties": true
+                  }
+                },
+                "additionalProperties": true
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "getProxyStats"
+      ]
+    },
+    {
+      "path": "/api/v1/proxy/tools",
+      "tag": "proxy",
+      "summary": "GET /api/v1/proxy/tools（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "GET /api/v1/proxy/tools（运行时探得；schema 由真实响应推导）",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "total": {
+                "type": "integer"
+              },
+              "tools": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {},
+                  "additionalProperties": true
+                }
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "getProxyTools"
+      ]
+    },
+    {
+      "path": "/api/v1/registry",
+      "tag": "trust",
+      "summary": "Trust API 认证与信任评分 · registry",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "Trust API 认证与信任评分 · registry",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "count": {
+                "type": "integer"
+              },
+              "agents": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "agent_id": {
+                      "type": "object"
+                    },
+                    "name": {
+                      "type": "object"
+                    },
+                    "description": {
+                      "type": "object"
+                    },
+                    "url": {
+                      "type": "object"
+                    },
+                    "version": {
+                      "type": "object"
+                    },
+                    "skills": {
+                      "type": "object"
+                    },
+                    "authentication": {
+                      "type": "object"
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "getRegistry"
+      ]
+    },
+    {
+      "path": "/api/v1/registry/discover",
+      "tag": "trust",
+      "summary": "Trust API 认证与信任评分 · discover",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "Trust API 认证与信任评分 · discover",
+          "status": 404,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "agent_id": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 404
+        },
+        {
+          "verb": "post",
+          "summary": "Trust API 认证与信任评分 · discover",
+          "status": 200,
+          "sample_present": false,
+          "sample_truncated": true,
+          "schema": {},
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "getRegistryDiscover",
+        "postRegistryDiscover"
+      ]
+    },
+    {
+      "path": "/api/v1/rug-pull",
+      "tag": "rug-pull",
+      "summary": "POST /api/v1/rug-pull（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/rug-pull（运行时探得；schema 由真实响应推导）",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "postRugPull"
+      ]
+    },
+    {
+      "path": "/api/v1/sandbox/backend/current",
+      "tag": "ecosystem",
+      "summary": "Agent 生态 API · current",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "Agent 生态 API · current",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "recommended": {
+                "type": "string"
+              },
+              "system": {
+                "type": "string"
+              },
+              "python_version": {
+                "type": "string"
+              },
+              "backends": {
+                "type": "object",
+                "properties": {
+                  "openshell": {
+                    "type": "boolean"
+                  },
+                  "mcpguard": {
+                    "type": "boolean"
+                  },
+                  "meclaw": {
+                    "type": "boolean"
+                  },
+                  "cloudflare-isolate": {
+                    "type": "boolean"
+                  },
+                  "python-subprocess": {
+                    "type": "boolean"
+                  }
+                },
+                "additionalProperties": true
+              },
+              "recommended_info": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "label": {
+                    "type": "string"
+                  },
+                  "available": {
+                    "type": "boolean"
+                  },
+                  "mechanism_count": {
+                    "type": "integer"
+                  },
+                  "block_rate": {
+                    "type": "number"
+                  },
+                  "false_positive_rate": {
+                    "type": "number"
+                  },
+                  "mechanisms": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "reason": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": true
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "getSandboxBackendCurrent"
+      ]
+    },
+    {
+      "path": "/api/v1/sandbox/backend/matrix",
+      "tag": "ecosystem",
+      "summary": "Agent 生态 API · matrix",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "Agent 生态 API · matrix",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "system": {
+                "type": "string"
+              },
+              "recommended": {
+                "type": "string"
+              },
+              "matrix": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "object"
+                    },
+                    "label": {
+                      "type": "object"
+                    },
+                    "available": {
+                      "type": "object"
+                    },
+                    "mechanisms": {
+                      "type": "object"
+                    },
+                    "kernel_features_required": {
+                      "type": "object"
+                    },
+                    "block_rate": {
+                      "type": "object"
+                    },
+                    "false_positive_rate": {
+                      "type": "object"
+                    },
+                    "paper": {
+                      "type": "object"
+                    },
+                    "reason": {
+                      "type": "object"
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "getSandboxBackendMatrix"
+      ]
+    },
+    {
+      "path": "/api/v1/scan/attack-path",
+      "tag": "scan",
+      "summary": "POST /api/v1/scan/attack-path（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/scan/attack-path（运行时探得；schema 由真实响应推导）",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "recommendation": {
+                "type": "object",
+                "properties": {
+                  "removed_servers": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "total_flows": {
+                    "type": "integer"
+                  },
+                  "broken_flows": {
+                    "type": "integer"
+                  },
+                  "remaining_flows": {
+                    "type": "integer"
+                  },
+                  "iterations": {
+                    "type": "integer"
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": true
+              },
+              "graph": {
+                "type": "object",
+                "properties": {
+                  "nodes": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "links": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  }
+                },
+                "additionalProperties": true
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "postScanAttackPath"
+      ]
+    },
+    {
+      "path": "/api/v1/scan/client-config",
+      "tag": "scan",
+      "summary": "POST /api/v1/scan/client-config（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/scan/client-config（运行时探得；schema 由真实响应推导）",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "hint": {
+                "type": "string"
+              },
+              "clients_supported": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "postScanClientConfig"
+      ]
+    },
+    {
+      "path": "/api/v1/specialist/agents",
+      "tag": "ecosystem",
+      "summary": "Agent 生态 API · agents",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "Agent 生态 API · agents",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "count": {
+                "type": "integer"
+              },
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "agent_id": {
+                      "type": "object"
+                    },
+                    "name": {
+                      "type": "object"
+                    },
+                    "domain": {
+                      "type": "object"
+                    },
+                    "capabilities": {
+                      "type": "object"
+                    },
+                    "certs": {
+                      "type": "object"
+                    },
+                    "url": {
+                      "type": "object"
+                    },
+                    "provider": {
+                      "type": "object"
+                    },
+                    "description": {
+                      "type": "object"
+                    },
+                    "publisher_did": {
+                      "type": "object"
+                    },
+                    "registered_at": {
+                      "type": "object"
+                    },
+                    "updated_at": {
+                      "type": "object"
+                    },
+                    "expires_at": {
+                      "type": "object"
+                    },
+                    "expires_ts": {
+                      "type": "object"
+                    },
+                    "state": {
+                      "type": "object"
+                    },
+                    "fingerprint": {
+                      "type": "object"
+                    },
+                    "extra": {
+                      "type": "object"
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        },
+        {
+          "verb": "post",
+          "summary": "Agent 生态 API · agents",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "getSpecialistAgents",
+        "postSpecialistAgents"
+      ]
+    },
+    {
+      "path": "/api/v1/specialist/domains",
+      "tag": "ecosystem",
+      "summary": "Agent 生态 API · domains",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "Agent 生态 API · domains",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "label": {
+                  "type": "string"
+                },
+                "tags": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                },
+                "active": {
+                  "type": "integer"
+                },
+                "lapsed": {
+                  "type": "integer"
+                },
+                "revoked": {
+                  "type": "integer"
+                }
+              },
+              "additionalProperties": true
+            }
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "getSpecialistDomains"
+      ]
+    },
+    {
+      "path": "/api/v1/spend-cap/policy",
+      "tag": "spend-cap",
+      "summary": "POST /api/v1/spend-cap/policy（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/spend-cap/policy（运行时探得；schema 由真实响应推导）",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "success": {
+                "type": "boolean"
+              },
+              "payer_id": {
+                "type": "string"
+              },
+              "currency": {
+                "type": "string"
+              },
+              "limits": {
+                "type": "object",
+                "properties": {
+                  "per_tx": {
+                    "type": "number"
+                  },
+                  "daily": {
+                    "type": "number"
+                  },
+                  "monthly": {
+                    "type": "number"
+                  }
+                },
+                "additionalProperties": true
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "postSpendCapPolicy"
+      ]
+    },
+    {
+      "path": "/api/v1/spend-cap/usage",
+      "tag": "spend-cap",
+      "summary": "GET /api/v1/spend-cap/usage（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "GET /api/v1/spend-cap/usage（运行时探得；schema 由真实响应推导）",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "success": {
+                "type": "boolean"
+              },
+              "payer_id": {
+                "type": "string"
+              },
+              "currency": {
+                "type": "string"
+              },
+              "enabled": {
+                "type": "boolean"
+              },
+              "limits": {
+                "type": "object",
+                "properties": {
+                  "per_tx": {
+                    "type": "number"
+                  },
+                  "daily": {
+                    "type": "number"
+                  },
+                  "monthly": {
+                    "type": "number"
+                  }
+                },
+                "additionalProperties": true
+              },
+              "daily_spent": {
+                "type": "number"
+              },
+              "monthly_spent": {
+                "type": "number"
+              },
+              "reserved": {
+                "type": "number"
+              },
+              "daily_remaining": {
+                "type": "number"
+              },
+              "monthly_remaining": {
+                "type": "number"
+              },
+              "day": {
+                "type": "string"
+              },
+              "month": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "getSpendCapUsage"
+      ]
+    },
+    {
+      "path": "/api/v1/stats",
+      "tag": "stats",
+      "summary": "GET /api/v1/stats（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "GET /api/v1/stats（运行时探得；schema 由真实响应推导）",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "total_scans": {
+                "type": "integer"
+              },
+              "total_api_calls": {
+                "type": "integer"
+              },
+              "today": {
+                "type": "integer"
+              },
+              "owasp_categories": {
+                "type": "integer"
+              },
+              "rules_count": {
+                "type": "integer"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "getStats"
+      ]
+    },
+    {
+      "path": "/api/v1/trust",
+      "tag": "trust",
+      "summary": "Trust API 认证与信任评分 · trust",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "Trust API 认证与信任评分 · trust",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        },
+        {
+          "verb": "post",
+          "summary": "Trust API 认证与信任评分 · trust",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "getTrust",
+        "postTrust"
+      ]
+    },
+    {
+      "path": "/api/v1/trust/auto",
+      "tag": "trust",
+      "summary": "Trust API 认证与信任评分 · auto",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "Trust API 认证与信任评分 · auto",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "postTrustAuto"
+      ]
+    },
+    {
+      "path": "/api/v1/trust/cert",
+      "tag": "trust",
+      "summary": "Trust API 认证与信任评分 · cert",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "Trust API 认证与信任评分 · cert",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "getTrustCert"
+      ]
+    },
+    {
+      "path": "/api/v1/trust/certify",
+      "tag": "trust",
+      "summary": "Trust API 认证与信任评分 · certify",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "Trust API 认证与信任评分 · certify",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "postTrustCertify"
+      ]
+    },
+    {
+      "path": "/api/v1/trust/digest",
+      "tag": "trust",
+      "summary": "Trust API 认证与信任评分 · digest",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "Trust API 认证与信任评分 · digest",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "hint": {
+                "type": "string"
+              },
+              "schema": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        },
+        {
+          "verb": "post",
+          "summary": "Trust API 认证与信任评分 · digest",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "hint": {
+                "type": "string"
+              },
+              "schema": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "getTrustDigest",
+        "postTrustDigest"
+      ]
+    },
+    {
+      "path": "/api/v1/trust/score",
+      "tag": "trust",
+      "summary": "Trust API 认证与信任评分 · score",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "Trust API 认证与信任评分 · score",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "getTrustScore"
+      ]
+    },
+    {
+      "path": "/api/v1/trust/verify",
+      "tag": "trust",
+      "summary": "Trust API 认证与信任评分 · verify",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "Trust API 认证与信任评分 · verify",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        },
+        {
+          "verb": "post",
+          "summary": "Trust API 认证与信任评分 · verify",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "getTrustVerify",
+        "postTrustVerify"
+      ]
+    },
+    {
+      "path": "/api/v1/webhooks/creem",
+      "tag": "webhooks",
+      "summary": "POST /api/v1/webhooks/creem（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/webhooks/creem（运行时探得；schema 由真实响应推导）",
+          "status": 500,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 500
+        }
+      ],
+      "operation_ids": [
+        "postWebhooksCreem"
+      ]
+    }
+  ]
+}

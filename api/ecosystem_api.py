@@ -84,6 +84,11 @@ def _import_kyad():
     return kyad_compat
 
 
+def _import_identity():
+    from eco import identity
+    return identity
+
+
 def _import_evidence_bundle():
     from eco import evidence_bundle
     return evidence_bundle
@@ -239,6 +244,51 @@ def _specialist_register(data: dict) -> dict:
         return rec, 201
     except ValueError as e:
         return {"error": str(e)}, 400
+
+
+def _identity_register(data: dict) -> dict:
+    """POST /api/v1/identity/register —— Agent 身份注册。
+
+    2026-10-03：``api/static/.well-known/agent.json``（对外发布的 agent card）里
+    就挂着这个端点，但 server.py 的 do_POST 分发链上从来没有它 —— 外部 agent 照
+    卡调用只会吃 404。eco/identity.py 的 AgentRegistration 一直是好的，缺的只是
+    接线。这里补上，契约与卡片才不会再次撒谎。
+    """
+    ident = _import_identity()
+    reg = ident.AgentRegistration()
+    name = (data.get("name") or "").strip()
+    if not name:
+        return {"error": "missing required field: name"}, 400
+    did = (data.get("did") or "").strip() or None
+    if did is not None and not isinstance(did, str):
+        return {"error": "did must be a string"}, 400
+    try:
+        agent = reg.register(
+            name=name,
+            did=did,
+            public_key=data.get("public_key"),
+            capabilities=data.get("capabilities") or [],
+            owner=data.get("owner") or data.get("agent_id") or "",
+        )
+    except ValueError as e:
+        return {"error": str(e)}, 409
+    return {"success": True, "agent": agent}, 201
+
+
+def _identity_list() -> dict:
+    """GET /api/v1/identity/agents —— 已注册 Agent 列表。"""
+    ident = _import_identity()
+    items = ident.AgentRegistration().list_agents()
+    return {"success": True, "count": len(items), "agents": items}, 200
+
+
+def _identity_get(did: str) -> dict:
+    """GET /api/v1/identity/agents/{did} —— 单个 Agent 身份详情。"""
+    ident = _import_identity()
+    agent = ident.AgentRegistration().get_agent(did)
+    if not agent:
+        return {"success": False, "error": "Agent not found", "did": did}, 404
+    return {"success": True, "agent": agent}, 200
 
 
 def _specialist_renew(agent_id: str) -> dict:
@@ -508,6 +558,14 @@ def handle_get(path: str, query: str = ""):
                 "transitions": {k: sorted(v) for k, v in sg.STATE_TRANSITIONS.items()},
                 "schema": "ship-gate/1.0"}, 200
 
+    # ── Identity Registry（agent card 承诺过的端点，2026-10-03 补接线）──
+    if path == "/api/v1/identity/agents":
+        return _identity_list()
+
+    m = re.match(r"^/api/v1/identity/agents/([^/]+)$", path)
+    if m:
+        return _identity_get(m.group(1))
+
     # ── ERC-8004 查询 ──
     if path == "/api/v1/identity/wallets":
         return {"docs": "POST /api/v1/identity/erc8004/wrap to wrap wallet into DID"}, 200
@@ -623,6 +681,10 @@ def handle_post(path: str, data: dict):
     m = re.match(r"^/api/v1/specialist/agents/([^/]+)/revoke$", path)
     if m:
         return _specialist_revoke(m.group(1), data.get("reason", ""))
+
+    # ── Identity Registry（agent card 承诺过的端点，2026-10-03 补接线）──
+    if path == "/api/v1/identity/register":
+        return _identity_register(data)
 
     # ── KYA / ERC-8004 ──
     if path == "/api/v1/identity/kyad/export":

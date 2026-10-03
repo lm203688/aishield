@@ -6,7 +6,7 @@ api/openapi_spec.py — 自动生成 OpenAPI 3.0.3 规范
   - 仅覆盖 Agent 最常用的 10 个核心端点
   - 可供 /api/v1/openapi.json 或 /api/v1/docs 端点直接返回
 
-覆盖端点:
+Curated 端点（手写，带完整 schema / 错误码 / 示例）:
   1. POST /api/v1/agent/setup       — Agent 一键入驻（无认证）
   2. POST /api/v1/audit             — 安全扫描（无认证/可选认证）
   3. POST /api/v1/prompt-check      — Prompt 检测（无认证）
@@ -17,11 +17,24 @@ api/openapi_spec.py — 自动生成 OpenAPI 3.0.3 规范
   8. GET  /api/v1/identity/agents   — Agent 列表
   9. POST /api/v1/identity/register — 注册 Agent（需认证）
   10. GET /api/v1/billing/plans     — 套餐列表
+
+运行时端点（自动并入，与上面 curated 合并输出）:
+  api/openapi_runtime_paths.json 是 scripts/gen_openapi_spec.py 用进程内探针
+  直调 do_GET/do_POST 探出来的真实路由清单。get_openapi_spec() 把它并进来，
+  于是契约 = curated（完整 schema）∪ runtime（最小 schema）。
+
+  这样做的起因是实测：契约原本只有手工 10 条，运行时却命中 100+ 条 —— 九成
+  端点对智能体不可发现。再手抄一次只是把同步负担往后推，所以改成让契约当
+  实现的投影：新增路由跑一次生成器即可进 spec，curated 与 runtime 冲突时
+  curated 优先。
 """
 
 # 版本号唯一事实源：api/server.py 的 API_VERSION（受 scripts/sync_version.py 门禁）。
 # 不在此处再写一个字面量——下面 HealthResponse 的示例值就是靠这种方式消除漂移的，
 # 复制一份版本号等于复制一个将来必然过期的副本。
+import json  # noqa: E402
+import os  # noqa: E402
+
 from api.server import API_VERSION  # noqa: E402
 
 # ══════════════════════════════════════════════
@@ -57,6 +70,93 @@ _REF_ERROR = {"$ref": "#/components/schemas/Error"}
 # 需要认证的安全声明
 _SECURITY_BEARER = [{"BearerAuth": []}]
 
+# 运行时路由清单（scripts/gen_openapi_spec.py 探运行时生成）
+_RUNTIME_MANIFEST = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "openapi_runtime_paths.json")
+_RUNTIME_CACHE: dict | None = None
+
+_RUNTIME_TAG_DESC = {
+    "eco-support": "Agent 生态支持体系：记忆扫描 / 策略包 / 红队探针 / 置信度晋升 / 规则衰减",
+    "connectors": "海外平台接入与 Agent 基础设施开源扫描",
+    "personal-agent": "个人 Agent 治理层与平台注册表",
+    "trust": "Trust API 认证与信任评分",
+    "ecosystem": "Agent 生态 API（模块注册 / 责任链 / 证据包 / 榜单）",
+}
+
+
+def _runtime_manifest() -> dict | None:
+    """读运行时路由清单；读不到就返回 None（契约退化成 curated 单份真相，不炸）。"""
+    global _RUNTIME_CACHE
+    if _RUNTIME_CACHE is None:
+        try:
+            with open(_RUNTIME_MANIFEST, encoding="utf-8") as f:
+                data = json.load(f)
+            data = data if data.get("routes") else None
+        except Exception:  # noqa: BLE001 —— 清单缺失不该让 /openapi.json 500
+            data = None
+        _RUNTIME_CACHE = data
+    return _RUNTIME_CACHE
+
+
+def _merge_runtime_paths(spec: dict) -> dict:
+    """把运行时探得的路径并进契约：**curated 优先**。
+
+    优先级必须写死，否则手工写好的 schema / 错误码 / 示例会被自动产物冲掉 ——
+    质量分层是 curated（完整 schema）在上，runtime（最小 schema）在下，合并只是
+    补**缺口**，不是替换。
+
+    这条改动的由来（2026-10-03 一手实测）：契约原本是纯手工 10 条，而运行时实
+    测命中 110+ 条，103 条对智能体不可发现。手工再抄 103 条是表面工作（加第
+    104 条又回到原点），所以让契约成为**实现的投影**：清单由
+    scripts/gen_openapi_spec.py 探运行时生成，这里只负责并进来。
+    """
+    man = _runtime_manifest()
+    if not man:
+        return spec
+    paths = spec.setdefault("paths", {})
+    for route in man.get("routes", []):
+        item = paths.get(route["path"])
+        if item is None:
+            item = {}
+            paths[route["path"]] = item
+        verbs = sorted(o["verb"] for o in route["operations"])
+        oids = route.get("operation_ids") or []
+        for i, op in enumerate(route["operations"]):
+            verb = op["verb"]
+            if verb in item:
+                continue
+            oid = oids[i] if i < len(oids) else f"{verb}{route['path']}"
+            item[verb] = {
+                "operationId": oid,
+                "tags": [route.get("tag") or "runtime"],
+                "summary": op.get("summary") or verb.upper(),
+                "description": (
+                    "本端点由运行时探针自动登记（清单：api/openapi_runtime_paths.json），"
+                    "schema 由真实响应反推，非手工编写。"
+                ),
+                "responses": {
+                    "200": {
+                        "description": op.get("status") or 200,
+                        "content": {
+                            "application/json": {
+                                "schema": op.get("schema") or {"type": "object"},
+                            }
+                        },
+                    }
+                },
+                "x-aishield-generated": True,
+                "x-aishield-probe-status": op.get("status"),
+            }
+    tags = spec.setdefault("tags", [])
+    have = {t.get("name") for t in tags}
+    for t in {r.get("tag") for r in man.get("routes", [])}:
+        if t and t not in have:
+            tags.append({
+                "name": t,
+                "description": _RUNTIME_TAG_DESC.get(t, "运行时自动登记的端点"),
+            })
+    return spec
+
 
 def get_openapi_spec():
     """
@@ -65,7 +165,7 @@ def get_openapi_spec():
     Returns:
         dict: OpenAPI 3.0.3 JSON 规范
     """
-    return {
+    spec = {
         "openapi": "3.0.3",
         "info": {
             "title": "AIShield API",
@@ -1023,3 +1123,6 @@ def get_openapi_spec():
             },
         },
     }
+
+    _merge_runtime_paths(spec)
+    return spec
