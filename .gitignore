@@ -78,6 +78,8 @@ Thumbs.db
 # Project specific
 # =====================
 api/data/*.json
+# 身份审计事件流（append-only，含归属与注销记录，不进仓库）
+api/data/identity_events.jsonl
 # 数据飞轮核心自建库必须入库（否则每个周期扫描结果无法持久化，before 永远为 0）
 # data/batch_scans.json
 # guard 巡检存活信号经 Contents API 直写 main，不受 gitignore 影响；

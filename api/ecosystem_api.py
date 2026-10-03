@@ -23,6 +23,7 @@ import sys
 import sysconfig
 import threading
 from urllib.parse import parse_qs
+import urllib.parse
 
 _BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -87,6 +88,19 @@ def _import_kyad():
 def _import_identity():
     from eco import identity
     return identity
+
+
+def _append_event_safe(event: str, did: str = "", actor: str = "",
+                       result: str = "ok", reason: str = ""):
+    """在 API 层留一条身份审计事件；审计写不进绝不能拖垮主流程。"""
+    try:
+        ident = _import_identity()
+        return ident._append_event(event, did, actor=actor,
+                                   result=result, reason=reason)
+    except Exception as exc:                       # pragma: no cover
+        return {"ts": "", "event": event, "did": did, "actor": actor,
+                "result": "event_write_failed",
+                "reason": f"{type(exc).__name__}: {exc}"}
 
 
 def _import_evidence_bundle():
@@ -246,49 +260,127 @@ def _specialist_register(data: dict) -> dict:
         return {"error": str(e)}, 400
 
 
+def _identity_token_issue(data: dict) -> dict:
+    """POST /api/v1/identity/registration-token —— 领一枚注册凭据（绑定 owner）。
+
+    身份注册必须可归属、可撤销；裸端点注册只会留下一堆谁也删不掉的脏 DID。
+    凭据明文只在响应里出现一次，服务端只存 sha256。
+    """
+    ident = _import_identity()
+    owner = (data.get("owner") or data.get("agent_id") or "").strip()
+    if not owner:
+        return {"error": "missing required field: owner"}, 400
+    ttl = data.get("ttl_seconds")
+    if ttl is not None:
+        try:
+            ttl = int(ttl)
+        except (TypeError, ValueError):
+            return {"error": "ttl_seconds must be an int"}, 400
+    try:
+        issued = ident.RegistrationTokenAuthority().issue(owner, ttl=ttl)
+    except ValueError as e:
+        return {"error": str(e)}, 400
+    _append_event_safe("registration_token.issue", actor=owner)
+    return {"token": issued["token"], "token_id": issued["token_id"],
+            "owner": issued["owner"], "expires_at": issued["expires_at"]}, 201
+
+
 def _identity_register(data: dict) -> dict:
-    """POST /api/v1/identity/register —— Agent 身份注册。
+    """POST /api/v1/identity/register —— Agent 身份注册（必须带注册凭据）。
 
     2026-10-03：``api/static/.well-known/agent.json``（对外发布的 agent card）里
     就挂着这个端点，但 server.py 的 do_POST 分发链上从来没有它 —— 外部 agent 照
     卡调用只会吃 404。eco/identity.py 的 AgentRegistration 一直是好的，缺的只是
     接线。这里补上，契约与卡片才不会再次撒谎。
+
+    同一轮里把「裸注册」也堵上了：现在必须先领 registration-token（绑定 owner），
+    注册时凭据一次性消费。否则注册表永远只有写入没有回收。
     """
     ident = _import_identity()
     reg = ident.AgentRegistration()
     name = (data.get("name") or "").strip()
     if not name:
         return {"error": "missing required field: name"}, 400
+    owner = (data.get("owner") or data.get("agent_id") or "").strip()
     did = (data.get("did") or "").strip() or None
     if did is not None and not isinstance(did, str):
         return {"error": "did must be a string"}, 400
+    token = data.get("registration_token") or data.get("token")
+    if not token or not isinstance(token, str):
+        return {"error": "missing required field: registration_token"}, 401
     try:
         agent = reg.register(
             name=name,
             did=did,
             public_key=data.get("public_key"),
             capabilities=data.get("capabilities") or [],
-            owner=data.get("owner") or data.get("agent_id") or "",
+            owner=owner,
+            registration_token=token,
         )
+    except ident.IdentityAuthError as e:
+        return {"error": str(e)}, 401
+    except ident.IdentityForbidden as e:
+        return {"error": str(e)}, 403
     except ValueError as e:
         return {"error": str(e)}, 409
     return {"success": True, "agent": agent}, 201
+
+
+def _identity_revoke(did: str, owner: str = "", revoke_token: str = "") -> dict:
+    """DELETE /api/v1/identity/agents/{did} —— 注销自己的身份锚点。"""
+    ident = _import_identity()
+    try:
+        ok = ident.AgentRegistration().revoke_agent(
+            did, owner=owner, revoke_token=revoke_token)
+    except ident.IdentityForbidden as e:
+        return {"error": str(e)}, 403
+    if ok is None:
+        return {"error": "Agent not found", "did": did}, 404
+    if not ok:
+        return {"success": True, "did": did, "status": "inactive",
+                "result": "already inactive"}, 200
+    return {"success": True, "did": did, "status": "inactive"}, 200
 
 
 def _identity_list() -> dict:
     """GET /api/v1/identity/agents —— 已注册 Agent 列表。"""
     ident = _import_identity()
     items = ident.AgentRegistration().list_agents()
+    # 对外只给 public_view：revoke_token_hash 漏出去等于把注销权送人
+    items = [ident.AgentRegistration().public_view(a) for a in items]
     return {"success": True, "count": len(items), "agents": items}, 200
 
 
 def _identity_get(did: str) -> dict:
-    """GET /api/v1/identity/agents/{did} —— 单个 Agent 身份详情。"""
+    """GET /api/v1/identity/agents/{did} —— 单个 Agent 身份详情（脱敏视图）。"""
     ident = _import_identity()
     agent = ident.AgentRegistration().get_agent(did)
     if not agent:
         return {"success": False, "error": "Agent not found", "did": did}, 404
-    return {"success": True, "agent": agent}, 200
+    return {"success": True,
+            "agent": ident.AgentRegistration().public_view(agent)}, 200
+
+
+def handle_delete(path: str, query: dict | None = None) -> tuple[dict, int]:
+    """DELETE 分发入口（__DELETE__，2026-10-03 随身份注销闭环新增）。
+
+    目前只承载身份注销：``DELETE /api/v1/identity/agents/{did}``。归属参数
+    可以从 query（``?owner=``）或 JSON body 取，命令行 curl 不带 body 也能用。
+    """
+    q = query or {}
+    m = re.match(r"^/api/v1/identity/agents/([^/]+)$", path)
+    if not m:
+        return {"error": "Not found", "path": path}, 404
+    did = urllib.parse.unquote(m.group(1))
+    return _identity_revoke(did, _first(q, "owner"), _first(q, "revoke_token"))
+
+
+def _first(q: dict, key: str) -> str:
+    """query 取值：?owner=a 或 ?owner=a&owner=b 都取第一个。"""
+    v = q.get(key) if isinstance(q, dict) else None
+    if isinstance(v, list):
+        v = v[0] if v else ""
+    return v if isinstance(v, str) else ("" if v is None else str(v))
 
 
 def _specialist_renew(agent_id: str) -> dict:
@@ -561,6 +653,8 @@ def handle_get(path: str, query: str = ""):
     # ── Identity Registry（agent card 承诺过的端点，2026-10-03 补接线）──
     if path == "/api/v1/identity/agents":
         return _identity_list()
+    if path == "/api/v1/identity/registration-token":
+        return {"error": "POST /api/v1/identity/registration-token"}, 405
 
     m = re.match(r"^/api/v1/identity/agents/([^/]+)$", path)
     if m:
@@ -683,6 +777,9 @@ def handle_post(path: str, data: dict):
         return _specialist_revoke(m.group(1), data.get("reason", ""))
 
     # ── Identity Registry（agent card 承诺过的端点，2026-10-03 补接线）──
+    if path == "/api/v1/identity/registration-token":
+        return _identity_token_issue(data)
+
     if path == "/api/v1/identity/register":
         return _identity_register(data)
 

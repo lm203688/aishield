@@ -51,15 +51,27 @@
         "content_type": "application/json"
       },
       {
+        "path": "/api/v1/identity/registration-token",
+        "method": "POST",
+        "description": "Claim a one-time registration credential bound to an owner (required before /api/v1/identity/register)",
+        "content_type": "application/json"
+      },
+      {
         "path": "/api/v1/identity/register",
         "method": "POST",
-        "description": "Register an agent and receive a trust attestation (aishield-trust/v1)",
+        "description": "Register an agent with a registration credential and receive a trust attestation (aishield-trust/v1); returns a revoke_token",
         "content_type": "application/json"
       },
       {
         "path": "/api/v1/identity/agents",
         "method": "GET",
         "description": "List registered agents and their trust scores",
+        "content_type": "application/json"
+      },
+      {
+        "path": "/api/v1/identity/agents/{did}",
+        "method": "DELETE",
+        "description": "Revoke your own identity anchor (provide owner or the revoke_token returned at registration; other agents get 403)",
         "content_type": "application/json"
       },
       {

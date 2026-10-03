@@ -1,15 +1,18 @@
 {
   "note": "运行时路由清单：进程内直调 api.server.AIShieldHandler.do_GET/do_POST 探得，与 curated 规范合并后即线上 /openapi.json。",
   "source": "runtime probe (scripts/gen_openapi_spec.py)",
-  "generated_at": "2026-10-03T23:26:18",
-  "route_count": 113,
-  "operation_count": 123,
+  "generated_at": "2026-10-04T06:37:03",
+  "route_count": 114,
+  "operation_count": 124,
   "probe_errors": [],
   "state_audit": {
     "created": [],
     "restored": [
       "C:\\Users\\xing\\Desktop\\aishield\\data\\fleet.json",
-      "C:\\Users\\xing\\Desktop\\aishield\\data\\monitored_tools.json"
+      "C:\\Users\\xing\\Desktop\\aishield\\data\\monitored_tools.json",
+      "C:\\Users\\xing\\Desktop\\aishield\\api/data\\governance_audit.jsonl",
+      "C:\\Users\\xing\\Desktop\\aishield\\api/data\\spend_caps.json",
+      "C:\\Users\\xing\\Desktop\\aishield\\api/data\\usage.json"
     ],
     "failed": []
   },
@@ -2997,6 +3000,40 @@
       ],
       "operation_ids": [
         "postIdentityRegister"
+      ]
+    },
+    {
+      "path": "/api/v1/identity/registration-token",
+      "tag": "ecosystem",
+      "summary": "Agent 生态 API · registration-token",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "Agent 生态 API · registration-token",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "postIdentityRegistrationToken"
       ]
     },
     {

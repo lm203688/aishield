@@ -191,9 +191,16 @@ class TestProbeHermetic(unittest.TestCase):
 
     def test_known_write_endpoints_were_restored(self):
         d = gate_json()
-        # 这两条是实测被探针写脏、又被还原掉的文件（fleet ingest 会塞 anon 成员）
+        # 探针会经过的写点全集（实测）：fleet ingest 塞 anon 成员；治理审计/用量/
+        # 支付上限是生态端点探针跑过去的副产物。它们**写脏了又被还原** ——
+        # state_restored 非空恰恰是"探针没污染仓库"的凭据，不是污染本身。
+        # 白名单漏一个就会出现"明明还原成功却红"的假故障，所以这里只准增、不准漏。
+        _known = {
+            "fleet.json", "monitored_tools.json", "governance_audit.jsonl",
+            "usage.json", "spend_caps.json",
+        }
         touched = {os.path.basename(p) for p in d["state_restored"]}
-        self.assertTrue(touched <= {"fleet.json", "monitored_tools.json"}, f"意外触碰：{touched}")
+        self.assertTrue(touched <= _known, f"意外触碰：{touched}")
 
     def test_fleet_file_has_no_probe_artifact(self):
         p = os.path.join(REPO, "data", "fleet.json")

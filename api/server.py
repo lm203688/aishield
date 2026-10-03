@@ -401,6 +401,38 @@ class AIShieldHandler(BaseHTTPRequestHandler):
             self.wfile = _real_wfile
             self.end_headers = _orig_end_headers
 
+    def do_DELETE(self):
+        """DELETE 分发（2026-10-03 随身份注销闭环新增）。
+
+        BaseHTTPRequestHandler 默认对未实现的方法回 501 —— 也就是说"加了
+        DELETE 路由但忘了实现 do_DELETE"根本不可能悄悄发生，客户端立刻吃 501。
+        这里只转发到生态 API 的 delete 入口：能跑通说明端点真在，跑不通（501/404）
+        就是没接线，两者都不该被当成绿。
+        """
+        parsed = urlparse(self.path)
+        path = parsed.path
+        try:
+            body = self.rfile.read(int(self.headers.get("Content-Length") or 0)) \
+                if (self.headers.get("Content-Length") or "0") != "0" else b""
+        except (OSError, ValueError, TypeError):
+            body = b""
+        data = {}
+        if body:
+            try:
+                loaded = json.loads(body.decode("utf-8", "replace"))
+                if isinstance(loaded, dict):
+                    data = loaded
+            except (ValueError, UnicodeDecodeError):
+                data = {}
+        query = parse_qs(parsed.query)
+        try:
+            from api import ecosystem_api
+            payload, status = ecosystem_api.handle_delete(path, query)
+        except Exception as exc:  # noqa: BLE001
+            self._send_json({"error": f"DELETE handler failed: {type(exc).__name__}: {exc}"}, 500)
+            return
+        self._send_json(payload, status)
+
     def do_GET(self):
         parsed = urlparse(self.path)
         path = parsed.path

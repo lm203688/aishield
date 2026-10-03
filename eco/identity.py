@@ -70,6 +70,169 @@ def _now_iso():
     return datetime.now(TZ).isoformat()
 
 
+def _append_event(event: str, did: str, actor: str = "", result: str = "ok",
+                  reason: str = "") -> dict:
+    """
+    追加一条身份审计事件到 data/identity_events.jsonl。
+
+    「注册 → 撤销」必须可回放，否则注销就只是把记录改了个 status，事后无从
+    追究是谁在什么时候把哪个 DID 摘掉的。事件文件是 append-only：写不进也要
+    不能让主流程挂掉，所以吞异常但绝不静默伪造成功。
+    """
+    rec = {"ts": _now_iso(), "event": event, "did": did,
+           "actor": actor, "result": result, "reason": reason}
+    try:
+        _ensure_data_dir()
+        os.makedirs(os.path.dirname(EVENTS_FILE) or ".", exist_ok=True)
+        with open(EVENTS_FILE, "a", encoding="utf-8") as f:
+            f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+    except Exception as exc:                      # pragma: no cover - 磁盘异常
+        rec["result"] = "event_write_failed"
+        rec["reason"] = f"{type(exc).__name__}: {exc}"
+    return rec
+
+
+# ══════════════════════════════════════════════
+#  身份鉴权错误（语义化异常，HTTP 层按码映射）
+# ══════════════════════════════════════════════
+
+class IdentityAuthError(Exception):
+    """注册凭据缺失 / 失效 → HTTP 401。"""
+
+
+class IdentityForbidden(Exception):
+    """凭据有效但不属于该 Agent 的归属方 → HTTP 403。"""
+
+
+# ══════════════════════════════════════════════
+#  注册凭据（Registration Token）
+# ══════════════════════════════════════════════
+
+TOKENS_FILE = os.path.join(_DATA_DIR, "registration_tokens.json")
+EVENTS_FILE = os.path.join(_DATA_DIR, "identity_events.jsonl")
+_TOKEN_TTL_SECONDS = 3600          # 默认 1 小时有效期
+_REVOKE_TOKEN_BYTES = 16           # 撤销码熵度
+
+_TOKEN_PREFIX = "rt_"
+
+
+class RegistrationTokenAuthority:
+    """
+    注册凭据签发 / 校验 / 撤销。
+
+    为什么需要它（2026-10-03 身份锚点闭环）：
+    ``POST /api/v1/identity/register`` 原来是**裸端点** —— 任何人都能往公开注册表里
+    写一个 DID，却没有办法把它取回来或注销掉。核线脚本一句话就留下了
+    ``did:aishield:f3a4f5cec744``（name=probe）这种谁也删不掉的脏记录。
+    这里引入「注册凭据 → 归属 → 撤销码」三段式：
+
+        issue(owner)  → 一次性凭据，绑定 owner（明文只出现这一次，只存 sha256）
+        consume(tok)  → 注册时消费，token 立即失效；owner 必须与 body 的 owner 一致
+        revoke(owner) → 凭据可提前作废
+
+    凭据不存明文，owner 不匹配一律 403，过期/已用一律 401。
+
+    持久化: data/registration_tokens.json（该文件在 .gitignore 内，不进仓库）
+    """
+
+    def __init__(self, ttl: int = _TOKEN_TTL_SECONDS):
+        self.ttl = ttl
+
+    # ── 存储 ──
+    def _load(self):
+        return _load_json(TOKENS_FILE, {"tokens": {}}) or {"tokens": {}}
+
+    def _save(self, data):
+        _ensure_data_dir()
+        _save_json(TOKENS_FILE, data)
+
+    # ── 对外 API ──
+    def issue(self, owner: str, ttl: int | None = None) -> dict:
+        """签发一枚注册凭据。明文 token 只在这一次返回里出现。"""
+        owner = (owner or "").strip()
+        if not owner:
+            raise ValueError("owner is required to issue a registration token")
+        ttl = self.ttl if ttl is None else ttl
+        token_id = uuid.uuid4().hex[:16]
+        raw = _TOKEN_PREFIX + uuid.uuid4().hex
+        expires = datetime.now(TZ) + timedelta(seconds=max(1, int(ttl)))
+        record = {
+            "token_id": token_id,
+            "token_hash": hashlib.sha256(raw.encode()).hexdigest(),
+            "owner": owner,
+            "issued_at": _now_iso(),
+            "expires_at": expires.isoformat(),
+            "consumed_at": None,
+            "revoked_at": None,
+        }
+        data = self._load()
+        data.setdefault("tokens", {})[token_id] = record
+        self._save(data)
+        return {
+            "token": raw,
+            "token_id": token_id,
+            "owner": owner,
+            "expires_at": record["expires_at"],
+        }
+
+    def _live(self, record: dict) -> bool:
+        if record.get("revoked_at"):
+            return False
+        if record.get("consumed_at"):
+            return False
+        exp = record.get("expires_at", "")
+        if exp:
+            try:
+                return datetime.fromisoformat(exp) > datetime.now(TZ)
+            except ValueError:
+                return False
+        return True
+
+    def consume(self, token: str, owner: str | None = None) -> str:
+        """
+        校验并消费一枚注册凭据，返回被消费的 ``token_id``。
+
+        失败抛 IdentityAuthError（401 语义）；owner 对不上抛 IdentityForbidden（403）。
+        """
+        if not token or not isinstance(token, str):
+            raise IdentityAuthError("registration_token required")
+        digest = hashlib.sha256(token.encode()).hexdigest()
+        data = self._load()
+        found = None
+        token_id = None
+        for tid, rec in data.get("tokens", {}).items():
+            if rec.get("token_hash") == digest:
+                found = rec
+                token_id = tid
+                break
+        if found is None:
+            raise IdentityAuthError("registration_token is not valid")
+        if not self._live(found):
+            reason = "already used" if found.get("consumed_at") else (
+                "revoked" if found.get("revoked_at") else "expired")
+            raise IdentityAuthError(f"registration_token is {reason}")
+        if owner is not None and (owner or "").strip() != found.get("owner"):
+            raise IdentityForbidden(
+                "registration_token does not belong to this owner")
+        found["consumed_at"] = _now_iso()
+        self._save(data)
+        return token_id
+
+    def revoke(self, token_id: str, owner: str | None = None) -> bool:
+        """提前作废一枚凭据（owner 可选校验，对不上返回 False）。"""
+        data = self._load()
+        rec = data.get("tokens", {}).get(token_id)
+        if not rec:
+            return False
+        if owner is not None and (owner or "").strip() != rec.get("owner"):
+            return False
+        if rec.get("revoked_at") or rec.get("consumed_at"):
+            return False
+        rec["revoked_at"] = _now_iso()
+        self._save(data)
+        return True
+
+
 # ══════════════════════════════════════════════
 #  DID 生成
 # ══════════════════════════════════════════════
@@ -112,23 +275,38 @@ class AgentRegistration:
         _save_json(AGENTS_FILE, {"agents": self._agents})
 
     def register(self, name, did=None, public_key=None,
-                capabilities=None, owner=None):
+                capabilities=None, owner=None, registration_token=None):
         """
         注册一个新的Agent
 
         Args:
-            name (str):        Agent名称
-            did (str, opt):    去中心化身份（为空则自动生成）
-            public_key (str):  公钥
-            capabilities (list): 能力列表
-            owner (str):       所有者
+            name (str):            Agent名称
+            did (str, opt):        去中心化身份（为空则自动生成）
+            public_key (str):      公钥
+            capabilities (list):    能力列表
+            owner (str):            所有者（必须与注册凭据的 owner 一致）
+            registration_token (str): 一次性注册凭据，见 RegistrationTokenAuthority
+
+        无注册凭据 → IdentityAuthError（401）。凭据过期/已用/不属于该 owner
+        → IdentityAuthError / IdentityForbidden。DID 重复仍是 ValueError（409）。
 
         Returns:
-            dict: Agent注册信息
+            dict: Agent注册信息（含明文 ``revoke_token``，仅此一次；
+                  内部只落它的 sha256）
         """
         self._load()
 
-        # 生成DID（如果未提供）
+        owner = (owner or "").strip()
+
+        # ── 归属校验：裸端点注册是不允许的（test_linkages 长期期望 401）──
+        if not owner:
+            raise IdentityAuthError("owner is required")
+        authority = RegistrationTokenAuthority()
+        if not registration_token:
+            raise IdentityAuthError("registration_token required")
+        token_id = authority.consume(registration_token, owner=owner)
+
+        # 校验通过才生成 DID，避免「凭据失效但 DID 已被占用」的脏半状态
         if not did:
             did = generate_did()
 
@@ -136,24 +314,31 @@ class AgentRegistration:
         if did in self._agents:
             raise ValueError(f"Agent DID '{did}' 已注册")
 
+        # 撤销码：明文只在返回值里出现一次，库里只留 hash
+        revoke_plain = uuid.uuid4().hex[:_REVOKE_TOKEN_BYTES * 2]
+
         # 构建Agent信息
         agent_info = {
             "name": name,
             "did": did,
             "public_key": public_key or "",
             "capabilities": capabilities or [],
-            "owner": owner or "",
+            "owner": owner,
             "reputation_score": 50,         # 初始信誉分
             "reputation_level": "standard", # 初始等级
             "registered_at": _now_iso(),
             "updated_at": _now_iso(),
             "status": "active",
+            "revoked_at": None,
+            "revoke_token_hash": hashlib.sha256(revoke_plain.encode()).hexdigest(),
+            "registration_token_id": token_id,
         }
 
         self._agents[did] = agent_info
         self._save()
+        _append_event("register", did, actor=owner, result="ok")
 
-        return agent_info
+        return dict(agent_info, revoke_token=revoke_plain)
 
     def get_agent(self, did):
         """
@@ -205,7 +390,7 @@ class AgentRegistration:
 
     def deactivate_agent(self, did):
         """
-        停用Agent
+        停用Agent（内部使用，不带归属校验；对外请走 revoke_agent）
 
         Args:
             did (str): Agent DID
@@ -220,6 +405,82 @@ class AgentRegistration:
         self._agents[did]["status"] = "inactive"
         self._agents[did]["updated_at"] = _now_iso()
         self._save()
+        return True
+
+    @staticmethod
+    def public_view(agent: dict) -> dict:
+        """
+        对外可见视图：剥掉所有「能当凭据复用」的字段。
+
+        ``revoke_token_hash`` / ``registration_token_id`` 一旦漏出去，注册表
+        就被别人拿去越权注销了 —— 这是身份系统的致命伤，不是洁癖。
+        """
+        if not isinstance(agent, dict):
+            return {}
+        return {k: v for k, v in agent.items()
+                if k not in ("revoke_token_hash", "registration_token_id")}
+
+    def purge_inactive(self, keep_active: bool = False) -> int:
+        """
+        运维清理：删除已 inactive / 已 revoked 的记录，返回删除条数。
+
+        给脚本用（``scripts/identity_maintenance.py``），不是 HTTP 端点 ——
+        身份注册表有删除能力就等于有破坏能力，不该裸奔在公网。
+        """
+        self._load()
+        before = len(self._agents)
+        if keep_active:
+            self._agents = {d: a for d, a in self._agents.items()
+                            if a.get("status") == "active"}
+        else:
+            self._agents = {}
+        removed = before - len(self._agents)
+        if removed:
+            self._save()
+        return removed
+
+    def revoke_agent(self, did, owner=None, revoke_token=None):
+        """
+        注销（撤销）一个 Agent —— 身份锚点闭环的收口动作。
+
+        三档结果：
+          不存在            → None                      （HTTP 404）
+          归属/撤销码不匹配   → IdentityForbidden          （HTTP 403，越权必拦）
+          已是 inactive      → False                     （幂等，不再写审计）
+          成功              → True                      （status=inactive + revoked_at + 事件）
+
+        匹配判定：``owner`` 与记录的 owner 相等，或 ``revoke_token`` 的 sha256
+        与记录的 ``revoke_token_hash`` 相等（两者任一即可，满足不同调用形态）。
+        """
+        self._load()
+        agent = self._agents.get(did)
+        if agent is None:
+            return None
+
+        owner = (owner or "").strip()
+        matched = False
+        if owner and owner == (agent.get("owner") or ""):
+            matched = True
+        elif revoke_token and agent.get("revoke_token_hash") == \
+                hashlib.sha256(str(revoke_token).encode()).hexdigest():
+            matched = True
+
+        if not matched:
+            raise IdentityForbidden(
+                "not the owner of this agent; provide owner or revoke_token")
+
+        if agent.get("status") == "inactive":
+            _append_event("revoke", did, actor=owner or "revoke_token",
+                          result="noop", reason="already inactive")
+            return False
+
+        agent["status"] = "inactive"
+        agent["revoked_at"] = _now_iso()
+        agent["updated_at"] = _now_iso()
+        self._agents[did] = agent
+        self._save()
+        _append_event("revoke", did, actor=owner or "revoke_token",
+                      result="ok")
         return True
 
 
@@ -449,11 +710,16 @@ def register_routes(handler):
             self._send_json({"error": "Invalid JSON"}, 400)
             return
 
-        # ── POST /api/v1/identity/register — 注册Agent ──
+        # ── POST /api/v1/identity/register — 注册Agent（须带注册凭据）──
         if path == "/api/v1/identity/register":
             name = data.get("name", "").strip()
             if not name:
                 self._send_json({"error": "name is required"}, 400)
+                return
+            token = data.get("registration_token") or data.get("token")
+            if not token:
+                self._send_json(
+                    {"error": "missing required field: registration_token"}, 401)
                 return
 
             try:
@@ -464,8 +730,15 @@ def register_routes(handler):
                     public_key=data.get("public_key"),
                     capabilities=data.get("capabilities"),
                     owner=data.get("owner"),
+                    registration_token=token,
                 )
                 self._send_json({"success": True, "agent": agent}, 201)
+            except IdentityAuthError as e:
+                self._send_json({"error": str(e)}, 401)
+                return
+            except IdentityForbidden as e:
+                self._send_json({"error": str(e)}, 403)
+                return
             except ValueError as e:
                 self._send_json({"error": str(e)}, 409)
             return

@@ -231,6 +231,9 @@ def main():
         # 2026-10-03 API 契约一致性门禁：运行时路由 vs /openapi.json 双向 diff。
         # 存量 103 条未登记 + 3 条跑不通进基线（只拦新增）；探针带状态快照/还原。
         'tests.test_openapi_contract',
+        # 2026-10-03 身份锚点闭环：注册凭据 → 归属 → 注销 → 审计事件（可回放）。
+        # 裸注册 401 / 越权注销 403 是硬边界，不是洁癖。
+        'tests.test_identity_revocation',
     ]
 
     loaded = 0

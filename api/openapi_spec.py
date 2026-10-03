@@ -588,9 +588,14 @@ def get_openapi_spec():
                         },
                         "owner": {
                             "type": "string",
-                            "description": "所有者标识",
+                            "description": "所有者标识（必须与该注册凭据签发的 owner 一致）",
+                        },
+                        "registration_token": {
+                            "type": "string",
+                            "description": "一次性注册凭据（先调 POST /api/v1/identity/registration-token 领取）",
                         },
                     },
+                    "required": ["name", "owner", "registration_token"],
                 },
             },
         },
@@ -1016,11 +1021,16 @@ def get_openapi_spec():
                 "post": {
                     "operationId": "registerAgent",
                     "tags": ["Agent Onboarding"],
-                    "summary": "注册 Agent（需认证）",
+                    "summary": "注册 Agent（需注册凭据）",
                     "description": (
-                        "通过标准流程注册新的 Agent。需要 API Key 认证。\n\n"
-                        "如需无认证一键入驻，请使用 `POST /api/v1/agent/setup`。"
+                        "通过标准流程注册新的 Agent，必须先领取一枚绑定 owner 的注册"
+                        "凭据（`POST /api/v1/identity/registration-token`），凭据一次性消费。\n\n"
+                        "归属与注销闭环：注册成功时一并返回 ``revoke_token``（明文仅此一次），"
+                        "配合 `DELETE /api/v1/identity/agents/{did}`（需 owner 或该撤销码）"
+                        "才能摘掉身份锚点 —— 没有凭据就没有写入，没有归属就没有回收。\n\n"
+                        "如需无凭据一键入驻，请使用 `POST /api/v1/agent/setup`。"
                     ),
+                    "security": [{"apiKey": []}],
                     "requestBody": {
                         "required": True,
                         "content": {
@@ -1030,6 +1040,7 @@ def get_openapi_spec():
                                     "name": "MyAgent",
                                     "capabilities": ["scan", "audit"],
                                     "owner": "team-alpha",
+                                    "registration_token": "rt_...",
                                 },
                             },
                         },

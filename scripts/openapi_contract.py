@@ -66,7 +66,10 @@ if REPO not in sys.path:
 BASELINE = os.path.join(REPO, "scripts", "openapi_contract_baseline.json")
 
 # 探针会碰到的状态根（历史上的敏感位置：data/ 已被 hermetic guard 盯过）
-STATE_ROOTS = ("data", ".state", "state", "var")
+# ``api/data`` 是身份注册表（agents.json / registration_tokens.json / identity_events.jsonl）
+# 的落盘位置 —— DELETE 探针一旦真跑进注销分支就会改写它。不快照这一根，探针就有
+# 正当理由污染身份数据（"探针绿的"和"生产身份被写脏了"可以同时成立，这是最坏的一种绿）。
+STATE_ROOTS = ("data", ".state", "state", "var", "api/data")
 
 # ── 各 handler 的"路由不存在"措辞（抓全了才不会把 miss 误判成 hit） ──────────
 # server.py 兜底：do_GET / do_POST 收尾都是 {"error": "Not found"}, 404
@@ -84,7 +87,11 @@ _MISS_RE = re.compile(
 )
 _MISS_WITH_NON404 = re.compile(_UNKNOWN, re.I)
 
-_VERBS = ("GET", "POST")
+# DELETE 也在列：身份注销是 DELETE /api/v1/identity/agents/{did}。不探 DELETE 就
+# 等于默认"这个动词永远不存在"，注销这种破坏性端点会一路绕过契约与门禁（写在了
+# 代码里、没写在契约里、也没人拦）。资源不存在的 404 仍是 miss（_is_miss 正确
+# 判定），所以探到的多是 501/404，不是"少登记"。
+_VERBS = ("GET", "POST", "DELETE")
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -220,8 +227,10 @@ def _probe_one(path: str, verb: str) -> Tuple[int, str]:
     h.headers = msg
 
     # 429 之类的限流会干扰分类，探针自持一份"免打扰"标记不生效就照实报
+    _handler_for = {"GET": "do_GET", "POST": "do_POST",
+                    "DELETE": "do_DELETE"}.get(verb, "do_GET")
     try:
-        (h.do_POST if verb == "POST" else h.do_GET)()
+        getattr(h, _handler_for)()
     except Exception as e:  # noqa: BLE001
         return -1, repr(e)
 

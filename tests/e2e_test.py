@@ -36,7 +36,11 @@ print('Server started.\n')
 BASE = 'http://127.0.0.1:18450'
 errors = []
 
+_last_result = {}
+
 def test(name, method, path, body=None, expect=200):
+    global _last_result
+    _last_result = {}
     try:
         url = BASE + path
         data = json.dumps(body).encode() if body else None
@@ -53,6 +57,7 @@ def test(name, method, path, body=None, expect=200):
         status = 0
         result = {'error': str(e)}
     
+    _last_result = result
     ok = 'OK' if status == expect else 'FAIL'
     if status != expect:
         errors.append(name)
@@ -102,9 +107,20 @@ test('Handshake', 'POST', '/api/v1/handshake', {'source_url': 'https://github.co
 
 # === Eco Modules (correct routes) ===
 print('\n=== Eco: Identity ===')
+# 2026-10-03 起注册必须有注册凭据：先领一枚（绑定 owner），再注册。
+# 裸 POST 现在会真吃 401 —— 这不是把测试改绿，是端点本来就该这样。
+test('Issue Registration Token', 'POST', '/api/v1/identity/registration-token', {
+    'owner': 'tester'
+}, expect=201)
+REG_TOKEN = _last_result.get('token', '') \
+    if isinstance(_last_result, dict) else ''
+test('Register Agent (no token must 401)', 'POST', '/api/v1/identity/register', {
+    'name': 'test-agent-e2e', 'owner': 'tester',
+}, expect=401)
 test('Register Agent', 'POST', '/api/v1/identity/register', {
-    'name': 'test-agent-e2e', 'owner': 'tester', 'capabilities': ['security-scan']
-})
+    'name': 'test-agent-e2e', 'owner': 'tester', 'capabilities': ['security-scan'],
+    'registration_token': REG_TOKEN
+}, expect=201)
 test('List Agents', 'GET', '/api/v1/identity/agents')
 
 print('\n=== Eco: Badge ===')
