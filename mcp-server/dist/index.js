@@ -25,7 +25,7 @@ const promises_1 = require("node:fs/promises");
 const zod_1 = require("zod");
 // 版本单一真源。由 scripts/sync_version.py 统一维护，CI 的版本一致性门禁会校验它，
 // 因此这里不再手写数字 —— 硬编码的 '3.0.0' 曾与已发布的 4.2.x 差了一个大版本。
-const SERVER_VERSION = '4.10.0';
+const SERVER_VERSION = '4.11.0';
 const API_BASE = process.env.AISHIELD_API_URL || 'https://api.aishield.tools';
 const API_KEY = process.env.AISHIELD_API_KEY || '';
 // ── Laya 本地决策模型集成 (可选) ──
