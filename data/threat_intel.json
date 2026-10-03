@@ -1,6 +1,118 @@
 {
   "intel": [
     {
+      "id": "GHSA-h46j-26q3-rggf",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 8.8,
+      "title": "Headroom vulnerable to Cross-Site WebSocket Hijacking (CSWSH)",
+      "summary": "### Summary\nThe Headroom WebSocket server does not validate the `Origin` header of incoming client WebSocket requests before forwarding the request to the upstream server, allowing malicious WebSocket clients to perform arbitrary LLM requests without authentication. This can be exploited by a malicious WebSocket client executed in a traditional or headless browser such as lightpanda, if the browser has access to the Headroom proxy and the OpenAI API key is stored in the `OPENAI_API_KEY` environm",
+      "affected": "pip:headroom-ai",
+      "references": [
+        "https://github.com/advisories/GHSA-h46j-26q3-rggf"
+      ],
+      "published": "2026-10-02T23:09:15Z",
+      "fetched": "2026-10-03T09:06:59.829350+00:00"
+    },
+    {
+      "id": "GHSA-72qq-p3r5-f7wq",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": 9.3,
+      "title": "@a2ui/web_core: `openUrl` permits `javascript:` URI execution via agent-supplied button actions",
+      "summary": "### Summary\n\nThe `openUrl` function in `@a2ui/web_core` passes an agent-controlled URL directly to `window.open()` without validating the URI scheme. A malicious agent can supply a `javascript:` URI as the `url` argument of a `Button` component's `functionCall` action. When the user clicks the rendered button, arbitrary JavaScript executes in the victim application's browser origin, constituting a stored/reflected XSS. No non-default configuration is required; the Basic Catalog is enabled by def",
+      "affected": "npm:@a2ui/web_core",
+      "references": [
+        "https://github.com/advisories/GHSA-72qq-p3r5-f7wq"
+      ],
+      "published": "2026-10-02T22:55:49Z",
+      "fetched": "2026-10-03T09:06:58.707039+00:00"
+    },
+    {
+      "id": "GHSA-fj2x-mqqp-3v2w",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 5.5,
+      "title": "Trigger.dev: Trigger CLI debug deployment logs expose resolved environment secret values",
+      "summary": "Affected version: trigger.dev 4.5.3 (4.5.6 was advertised by the CLI but was not tested).\n\nA staging dry-run executed with `trigger.dev deploy --env staging --dry-run --log-level debug`. The debug output logged the complete build-worker options object. Its `envVars` property contained unredacted values for every resolved staging variable, including database connection strings and service credentials. The non-debug environment listing correctly hides values, so users can reasonably expect deploym",
+      "affected": "npm:trigger.dev",
+      "references": [
+        "https://github.com/advisories/GHSA-fj2x-mqqp-3v2w"
+      ],
+      "published": "2026-10-02T22:45:12Z",
+      "fetched": "2026-10-03T09:06:58.707060+00:00"
+    },
+    {
+      "id": "GHSA-v2f8-6655-7grj",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": 10.0,
+      "title": "Vibe-Trading FastAPI endpoints permit unauthenticated access, file upload, and an RCE chain",
+      "summary": "### Summary: \n5 findings — unauthenticated full-API exposure (F1, lead Critical), read-side authorization gap that persists even with `API_AUTH_KEY` set (F2), unauthenticated file write of `.py`/`.sh`/`.yaml` to a server-returned path (F3), default-permissive CORS that combines with a loopback-only check to grant any browser page on whitelisted localhost ports credentialed cross-origin access (F-A4), and partial API-key disclosure via `_mask_secret()` (F-A5).\n\n---\n\n### Shared baseline (applies t",
+      "affected": "pip:vibe-trading-ai",
+      "references": [
+        "https://github.com/advisories/GHSA-v2f8-6655-7grj"
+      ],
+      "published": "2026-10-02T22:44:26Z",
+      "fetched": "2026-10-03T09:06:59.829477+00:00"
+    },
+    {
+      "id": "GHSA-5rmq-chc7-m22f",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.5,
+      "title": "Vibe-Trading file-read tools expose arbitrary server-readable files",
+      "summary": "### Summary: \n2 findings — `safe_user_path()` accepts any path under `Path.home()` or `Path.cwd()`, which inside the shipped root container resolves to `/root` and `/app` (so all of root's home, including `/root/.ssh/id_rsa`, `/root/.aws/credentials`, `/root/.kube/config`, and `/app/agent/.env`, passes the check) (F9). `read_document()` has no sandbox call at all and returns the full content of any path the FastAPI process can read, including `/etc/shadow`, `/etc/passwd`, `/proc/self/environ`, a",
+      "affected": "pip:vibe-trading-ai",
+      "references": [
+        "https://github.com/advisories/GHSA-5rmq-chc7-m22f"
+      ],
+      "published": "2026-10-02T22:44:12Z",
+      "fetched": "2026-10-03T09:06:59.829540+00:00"
+    },
+    {
+      "id": "GHSA-jqmf-mx4f-hfr6",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": 10.0,
+      "title": "Vibe-Trading LLM-callable tools permit command execution, code injection, and SSRF",
+      "summary": "### Summary: \n5 findings — `BashTool` shell-injection sink (F6, the canonical RCE primitive), `BackgroundRunTool` async shell-injection sink (F7), backtest `exec_module()` runs top-level statements before the `SignalEngine` class check (F8 — independent RCE path that does not match BashTool signatures), `read_url` outbound HTTP forwarding without schema/host validation (F-B4 SSRF), and Jinja2 codegen with autoescape disabled for `.py.j2` templates (F-B5, defense-in-depth code-injection sink).\n\n-",
+      "affected": "pip:vibe-trading-ai",
+      "references": [
+        "https://github.com/advisories/GHSA-jqmf-mx4f-hfr6"
+      ],
+      "published": "2026-10-02T22:44:03Z",
+      "fetched": "2026-10-03T09:06:59.829654+00:00"
+    },
+    {
+      "id": "GHSA-q567-cr4x-96w4",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 5.4,
+      "title": "Trigger.dev: Blind SSRF via alert-channel webhook",
+      "summary": "### Summary\n\nA WEBHOOK alert channel stores a user-supplied `url`. When an alert fires (deployment/run failure, error groups), the webapp server (`alertsWorker` -> `DeliverAlertService`) POSTs the HMAC-signed alert payload to that URL via `fetch(webhook.url, ...)`. The URL is never validated against a host allowlist or private-IP/metadata blocklist (a repo-wide search for `169.254`, `isPrivate`, `isLoopback`, `net.isIP`, `ssrf` returns ZERO hits), and the API route's URL field is just `z.string(",
+      "affected": "npm:trigger.dev",
+      "references": [
+        "https://github.com/advisories/GHSA-q567-cr4x-96w4"
+      ],
+      "published": "2026-10-02T22:35:31Z",
+      "fetched": "2026-10-03T09:06:58.707306+00:00"
+    },
+    {
+      "id": "GHSA-xxv7-2vv3-h682",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.7,
+      "title": "Trigger.dev: Server-side request forgery via unvalidated webhook alert-channel URL",
+      "summary": "### Summary\nA project member can create a webhook alert channel whose delivery URL points at an internal address, and trigger.dev's control plane will send the alert there with no SSRF protection. The webhook URL is stored as an unvalidated string and is fetched directly from the webapp server, so a low-privilege authenticated user can make the server issue POST requests to internal-only services and cloud metadata endpoints (for example http://169.254.169.254/). No private-IP, scheme, or redire",
+      "affected": "npm:trigger.dev",
+      "references": [
+        "https://github.com/advisories/GHSA-xxv7-2vv3-h682"
+      ],
+      "published": "2026-10-02T19:31:33Z",
+      "fetched": "2026-10-03T09:06:58.707379+00:00"
+    },
+    {
       "id": "CVE-2025-71427",
       "source": "nvd",
       "severity": "medium",
@@ -7040,7 +7152,7 @@
       "fetched": "2026-08-04T06:34:53.913899+00:00"
     }
   ],
-  "updated": "2026-10-02T09:43:11.351056+00:00",
+  "updated": "2026-10-03T09:07:00.332230+00:00",
   "sources": [
     "osv",
     "nvd",
@@ -7059,7 +7171,7 @@
         "items": 0,
         "attempts": 1,
         "error": null,
-        "checked_at": "2026-10-02T09:42:49.806368+00:00",
+        "checked_at": "2026-10-03T09:06:39.214005+00:00",
         "consecutive_failures": 0,
         "degraded_since": null
       },
@@ -7068,31 +7180,31 @@
         "items": 39,
         "attempts": 1,
         "error": null,
-        "checked_at": "2026-10-02T09:43:08.495860+00:00",
+        "checked_at": "2026-10-03T09:06:57.873111+00:00",
         "consecutive_failures": 0,
         "degraded_since": null
       },
       "github-advisory": {
         "ok": true,
-        "items": 32,
+        "items": 35,
         "attempts": 1,
         "error": null,
-        "checked_at": "2026-10-02T09:43:11.350785+00:00",
+        "checked_at": "2026-10-03T09:07:00.331834+00:00",
         "consecutive_failures": 0,
         "degraded_since": null
       }
     },
     "degraded": [],
-    "last_success": "2026-10-02T09:43:11.351056+00:00",
-    "last_attempt": "2026-10-02T09:43:11.351056+00:00"
+    "last_success": "2026-10-03T09:07:00.332230+00:00",
+    "last_attempt": "2026-10-03T09:07:00.332230+00:00"
   },
   "stats": {
-    "medium": 139,
-    "critical": 74,
-    "high": 223,
+    "high": 226,
+    "critical": 77,
+    "medium": 141,
     "low": 6,
     "unknown": 36,
     "moderate": 1
   },
-  "total": 479
+  "total": 487
 }
