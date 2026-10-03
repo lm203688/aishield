@@ -121,7 +121,17 @@ test('Register Agent', 'POST', '/api/v1/identity/register', {
     'name': 'test-agent-e2e', 'owner': 'tester', 'capabilities': ['security-scan'],
     'registration_token': REG_TOKEN
 }, expect=201)
+_reg_did = _last_result.get('agent', {}).get('did') if isinstance(_last_result, dict) else None
 test('List Agents', 'GET', '/api/v1/identity/agents')
+# 自己造的自己清（身份锚点闭环的收尾）：每次跑 e2e 都会在注册表留一条，不注销
+# 就又变成"只写不收"的脏记录 —— 正是本轮要治的那个病。
+if _reg_did:
+    test('Revoke Agent (cross-owner must 403)', 'DELETE',
+         f'/api/v1/identity/agents/{_reg_did}?owner=mallory', None, 403)
+    test('Revoke Agent', 'DELETE', f'/api/v1/identity/agents/{_reg_did}?owner=tester',
+         None, 200)
+else:
+    print('  [WARN] 未取到注册 DID，跳过注销收尾')
 
 print('\n=== Eco: Badge ===')
 # Badge返回SVG，不是JSON
