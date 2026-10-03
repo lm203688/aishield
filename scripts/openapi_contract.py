@@ -141,7 +141,14 @@ def _state_files() -> Dict[str, bytes]:
 
 
 def _restore_state(snap: Dict[str, bytes]) -> Tuple[List[str], List[str]]:
-    """还原快照；返回 (已还原, 还原失败)。"""
+    """还原快照：改过的写回，**探针新建的删掉**。
+
+    只删"快照里根本不存在"的文件，所以不会误伤仓库既有数据；但这一段不能省 ——
+    2026-10-03 CI 上就栽在这：干净 checkout 里 ``data/fleet.json`` 原本不存在，
+    探针 POST /api/v1/fleet/ingest 给它造了一条 ``anon-*`` 成员，而只做"写回"
+    的还原对这种新文件束手无束，于是探针污染一路留到了套件结束（CI 的 test job
+    红在 test_fleet_file_has_no_probe_artifact）。
+    """
     fixed: List[str] = []
     failed: List[str] = []
     for p, blob in snap.items():
@@ -156,6 +163,14 @@ def _restore_state(snap: Dict[str, bytes]) -> Tuple[List[str], List[str]]:
                     with open(p, "wb") as f:
                         f.write(blob)
                     fixed.append(p)
+        except OSError as e:  # noqa: BLE001
+            failed.append(f"{p}: {e}")
+    for p in _state_files():
+        if p in snap:
+            continue
+        try:
+            os.remove(p)
+            fixed.append(f"(已删除探针新建) {p}")
         except OSError as e:  # noqa: BLE001
             failed.append(f"{p}: {e}")
     return fixed, failed
