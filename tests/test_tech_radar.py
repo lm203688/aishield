@@ -43,11 +43,28 @@ class TestArxivEndpointChain(unittest.TestCase):
         self._orig = (tech_radar._arxiv_via_api,
                       tech_radar._arxiv_via_rss,
                       tech_radar._arxiv_via_listing)
+        # 状态落盘必须挪到临时文件。
+        #
+        # scan_arxiv 一旦命中某个端点，就会把该端点名写回 STATE_FILE
+        # （scripts/tech_radar.py::_save_endpoint_hint）。那是一个**生产状态
+        # 文件**，落在 run_all._DataGuard 的受保护面里，写了就算数据泄漏。
+        #
+        # 为什么本地测不出来、CI 每次都红：CI 每次都是新鲜 checkout，文件里
+        # 的初始 arxiv_endpoint 与本轮运行命中的端点不同 → 必触发一次写盘；
+        # 本地那份文件已被前几轮跑成同值 → 不写 → 守卫沉默。同一份代码
+        # 两种结论，典型的「窄状态上的假绿」。
+        self._orig_state = tech_radar.STATE_FILE
+        fd, self._tmp_state = tempfile.mkstemp(prefix='radar_state_', suffix='.json')
+        os.close(fd)
+        tech_radar.STATE_FILE = self._tmp_state
 
     def tearDown(self):
         (tech_radar._arxiv_via_api,
          tech_radar._arxiv_via_rss,
          tech_radar._arxiv_via_listing) = self._orig
+        tech_radar.STATE_FILE = self._orig_state
+        if os.path.exists(self._tmp_state):
+            os.remove(self._tmp_state)
 
     @staticmethod
     def _sig(title):
