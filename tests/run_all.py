@@ -228,6 +228,9 @@ def main():
         # 分别站得住，族级 0 检出要报出来而不是被总数摊平；KNOWN_GAP_SAMPLES
         # 记账当前规则真覆盖不到的攻击面（补上规则即要求把样本移出名单）。
         'tests.test_corpus_family_coverage',
+        # 2026-10-03 API 契约一致性门禁：运行时路由 vs /openapi.json 双向 diff。
+        # 存量 103 条未登记 + 3 条跑不通进基线（只拦新增）；探针带状态快照/还原。
+        'tests.test_openapi_contract',
     ]
 
     loaded = 0

@@ -1,0 +1,430 @@
+{
+  "note": "存量缺口基线（只拦新增；补齐靠逐次迭代）",
+  "generated_at": "2026-10-03T16:48:33",
+  "routes": [
+    {
+      "verb": "GET",
+      "path": "/api/v1/account/balance"
+    },
+    {
+      "verb": "GET",
+      "path": "/api/v1/account/me"
+    },
+    {
+      "verb": "GET",
+      "path": "/api/v1/agent-card/pubkey"
+    },
+    {
+      "verb": "GET",
+      "path": "/api/v1/agent-infra/targets"
+    },
+    {
+      "verb": "GET",
+      "path": "/api/v1/arena/health"
+    },
+    {
+      "verb": "GET",
+      "path": "/api/v1/attestation/expiring"
+    },
+    {
+      "verb": "GET",
+      "path": "/api/v1/attestation/list"
+    },
+    {
+      "verb": "GET",
+      "path": "/api/v1/attestation/plans"
+    },
+    {
+      "verb": "GET",
+      "path": "/api/v1/attestation/trust"
+    },
+    {
+      "verb": "GET",
+      "path": "/api/v1/billing/plans"
+    },
+    {
+      "verb": "GET",
+      "path": "/api/v1/certify/list"
+    },
+    {
+      "verb": "GET",
+      "path": "/api/v1/connectors"
+    },
+    {
+      "verb": "GET",
+      "path": "/api/v1/connectors/{plat}/self-check"
+    },
+    {
+      "verb": "GET",
+      "path": "/api/v1/connectors/{plat}/state"
+    },
+    {
+      "verb": "GET",
+      "path": "/api/v1/contributors"
+    },
+    {
+      "verb": "GET",
+      "path": "/api/v1/contributors/leaderboard"
+    },
+    {
+      "verb": "GET",
+      "path": "/api/v1/contributors/tiers"
+    },
+    {
+      "verb": "GET",
+      "path": "/api/v1/fleet"
+    },
+    {
+      "verb": "GET",
+      "path": "/api/v1/fleet/list"
+    },
+    {
+      "verb": "GET",
+      "path": "/api/v1/governance/audit"
+    },
+    {
+      "verb": "GET",
+      "path": "/api/v1/governance/status"
+    },
+    {
+      "verb": "GET",
+      "path": "/api/v1/identity/agents"
+    },
+    {
+      "verb": "GET",
+      "path": "/api/v1/identity/wallets"
+    },
+    {
+      "verb": "GET",
+      "path": "/api/v1/leaderboard/providers"
+    },
+    {
+      "verb": "GET",
+      "path": "/api/v1/leaderboard/snapshot"
+    },
+    {
+      "verb": "GET",
+      "path": "/api/v1/leaderboard/top"
+    },
+    {
+      "verb": "GET",
+      "path": "/api/v1/monitor/list"
+    },
+    {
+      "verb": "GET",
+      "path": "/api/v1/pay/hupijiao/orders"
+    },
+    {
+      "verb": "GET",
+      "path": "/api/v1/pay/hupijiao/query"
+    },
+    {
+      "verb": "GET",
+      "path": "/api/v1/pay/hupijiao/status"
+    },
+    {
+      "verb": "GET",
+      "path": "/api/v1/personal-agents/stats"
+    },
+    {
+      "verb": "GET",
+      "path": "/api/v1/personal-agents/users"
+    },
+    {
+      "verb": "GET",
+      "path": "/api/v1/platforms"
+    },
+    {
+      "verb": "GET",
+      "path": "/api/v1/platforms/gap-matrix"
+    },
+    {
+      "verb": "GET",
+      "path": "/api/v1/platforms/recommend"
+    },
+    {
+      "verb": "GET",
+      "path": "/api/v1/platforms/register"
+    },
+    {
+      "verb": "GET",
+      "path": "/api/v1/platforms/stats"
+    },
+    {
+      "verb": "GET",
+      "path": "/api/v1/proxy/stats"
+    },
+    {
+      "verb": "GET",
+      "path": "/api/v1/proxy/tools"
+    },
+    {
+      "verb": "GET",
+      "path": "/api/v1/registry"
+    },
+    {
+      "verb": "GET",
+      "path": "/api/v1/registry/discover"
+    },
+    {
+      "verb": "GET",
+      "path": "/api/v1/sandbox/backend/current"
+    },
+    {
+      "verb": "GET",
+      "path": "/api/v1/sandbox/backend/matrix"
+    },
+    {
+      "verb": "GET",
+      "path": "/api/v1/specialist/agents"
+    },
+    {
+      "verb": "GET",
+      "path": "/api/v1/specialist/domains"
+    },
+    {
+      "verb": "GET",
+      "path": "/api/v1/spend-cap/usage"
+    },
+    {
+      "verb": "GET",
+      "path": "/api/v1/stats"
+    },
+    {
+      "verb": "GET",
+      "path": "/api/v1/trust"
+    },
+    {
+      "verb": "GET",
+      "path": "/api/v1/trust/cert"
+    },
+    {
+      "verb": "GET",
+      "path": "/api/v1/trust/digest"
+    },
+    {
+      "verb": "GET",
+      "path": "/api/v1/trust/score"
+    },
+    {
+      "verb": "GET",
+      "path": "/api/v1/trust/verify"
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/account/login"
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/account/recharge"
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/account/register"
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/agent-card/identity"
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/agent-card/sign"
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/agent-card/verify"
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/agent-infra/scan"
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/agent-infra/scan-portfolio"
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/agent/scan"
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/arena/scan"
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/attestation/cancel"
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/attestation/renew"
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/attestation/run-cycle"
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/attestation/subscribe"
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/certify/fulfill"
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/certify/request-payment"
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/certify/request-payment-cny"
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/chain"
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/checkout/create"
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/export/nucleus"
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/export/sarif"
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/export/sbom"
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/export/splunk"
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/fleet/ingest"
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/governance/evaluate"
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/governance/incident"
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/governance/kill"
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/governance/policy"
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/governance/revive"
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/identity/erc8004/wrap"
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/identity/kyad/export"
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/identity/register"
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/monitor/add"
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/monitor/check"
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/osv"
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/pay/hupijiao/create"
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/pay/hupijiao/notify"
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/personal-agents/budget/check"
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/personal-agents/budget/commit"
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/personal-agents/budget/release"
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/personal-agents/budget/reserve"
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/personal-agents/tickets/consume"
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/personal-agents/tickets/verify"
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/policy/check"
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/protocol/normalize"
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/protocol/translate"
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/proxy/call"
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/rug-pull"
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/scan/attack-path"
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/scan/client-config"
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/spend-cap/policy"
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/trust/auto"
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/trust/certify"
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/webhooks/creem"
+    }
+  ]
+}
