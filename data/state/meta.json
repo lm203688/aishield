@@ -5,27 +5,12 @@
     "passed": 9,
     "total": 9,
     "problems": [],
-    "checked_at": "2026-10-03T08:57:46.030543+00:00",
+    "checked_at": "2026-10-03T09:03:39.391144+00:00",
     "_source": "meta_monitor",
-    "_ts": "2026-10-03T08:57:46.030762+00:00",
+    "_ts": "2026-10-03T09:03:39.391365+00:00",
     "level": "healthy"
   },
   "history": [
-    {
-      "ts": "2026-09-23T07:07:02.153307+00:00",
-      "source": "meta_monitor",
-      "state": {
-        "score": 78,
-        "passed": 7,
-        "total": 9,
-        "problems": [
-          "M2 运行活性: 0 个任务超期未执行，1 个最近运行失败 —— 这是静默失效的典型信号",
-          "M3 状态新鲜度: 状态域 ['distribution', 'intel', 'rules', 'flywheel', 'feature'] 的归属 workflow 超过阈值未成功运行 —— 对应环节可能已停摆"
-        ],
-        "checked_at": "2026-09-23T07:07:02.153059+00:00",
-        "level": "degraded"
-      }
-    },
     {
       "ts": "2026-09-23T07:15:25.842053+00:00",
       "source": "meta_monitor",
@@ -720,8 +705,20 @@
         "checked_at": "2026-10-03T08:57:46.030543+00:00",
         "level": "healthy"
       }
+    },
+    {
+      "ts": "2026-10-03T09:03:39.391376+00:00",
+      "source": "meta_monitor",
+      "state": {
+        "score": 100,
+        "passed": 9,
+        "total": 9,
+        "problems": [],
+        "checked_at": "2026-10-03T09:03:39.391144+00:00",
+        "level": "healthy"
+      }
     }
   ],
-  "updated": "2026-10-03T08:57:46.030778+00:00",
+  "updated": "2026-10-03T09:03:39.391380+00:00",
   "desc": "元监控：自动化体系自身的健康度"
 }
