@@ -134,6 +134,14 @@ def _patterns() -> List[Tuple[re.Pattern, str]]:
         # 英文
         (re.compile(r"(?<!\d)(\d+)\s*MCP\s*(?:security\s+)?rules", re.I), "mcp"),
         (re.compile(r"(?<!\d)\+?(\d+)\s*skill\s*rules", re.I), "skill"),
+        # `235 MCP rule categories / 241 skill rule categories`。
+        # 上一两条要求名词是 `rules`，这里写的是 `rule categories` —— 一个复数
+        # 变形就把它推出门禁。直出位置是 .well-known/agent.json 的 description
+        # 字段：机器读的 agent 名片，却长期停在线上 235/241 而 rules 块已是
+        # 264/291，同一份文件自相矛盾。
+        (re.compile(r"(?<!\d)(\d+)\s*MCP\s*rule\s*categor(?:y|ies)", re.I), "mcp"),
+        (re.compile(r"(?<!\d)(\d+)\s*(?:skill|SKILL)\s*rule\s*categor(?:y|ies)",
+                    re.I), "skill"),
         # "**Total: 235 rules** (MCP type) / **241 rules** (Skill type)"：
         # 数字与类型标注之间隔着 markdown 加粗符，靠 `(MCP` / `(Skill` 锚定。
         (re.compile(r"(?<!\d)(\d+)\s*rules?\s*\*{0,2}\s*\(Skill", re.I), "skill"),

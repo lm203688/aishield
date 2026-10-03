@@ -13,7 +13,7 @@
     {
       "category": "What is AIShield",
       "question": "How many rules does AIShield have?",
-      "answer": "AIShield ships 235 MCP rule categories and 241 skill rule categories. The 235 break down as 208 static rules, 8 generated rules, and 19 radar rules. The breakdown is served live at https://aishield.tools/api/v1/health under rules_breakdown, so the number is verifiable at runtime rather than only stated in documentation.",
+      "answer": "AIShield ships 264 MCP rule categories and 291 skill rule categories. The 235 break down as 208 static rules, 8 generated rules, and 19 radar rules. The breakdown is served live at https://aishield.tools/api/v1/health under rules_breakdown, so the number is verifiable at runtime rather than only stated in documentation.",
       "sources": ["https://aishield.tools/api/v1/health"]
     },
     {

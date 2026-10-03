@@ -1077,6 +1077,23 @@ def _load_radar_rules():
     if not isinstance(data, dict):
         return
 
+    # 重载语义（第三版）：先撤下一轮并入 ALL_RULES 的键，再清空 RADAR_RULES，
+    # 最后才从文件重新载入 —— 于是本函数是**幂等**的：任意次数 reload 都
+    # 得到同一份集合，而不是"每次都比上一次多一条"。
+    #
+    # 此前它是累加的：调用方只要忘了先清空，内存里的 radar 就永久多留一份
+    # （实测 tests/test_provenance_audit.py 的 tearDown reload 真仓文件后，
+    # 把测试期间注入的 tmp 规则一并留下，radar 19→20、total 264→265），
+    # 此后所有读 get_rule_breakdown() 的地方（G.authority()、规则数门禁、
+    # /api/v1/health 的 rules_breakdown）都整体差 1 —— 计数虚高，而且
+    # 只在"套件里跑"才出现，单跑任何单个文件都绿。
+    #
+    # 幂等不能靠调用方自觉：这是"重载 = 重新读文件"的语义，读文件本来就是
+    # 唯一真相；让每个调用点记住先 clear 一次，等于把正确性外包给五处代码。
+    for _k in _RADAR_IN_ALL_RULES:
+        ALL_RULES.pop(_k, None)
+    RADAR_RULES.clear()
+
     for pattern, meta in (data.get("rules") or {}).items():
         problems = _validate_radar_entry(pattern, meta)
         if problems:
@@ -1092,14 +1109,9 @@ def _load_radar_rules():
         "quarantined": len(_RADAR_QUARANTINE),
     }
 
-    # 重载语义：撤下上一轮并入 ALL_RULES 的键，再并入本轮。
-    # 此前这行 update 只写在模块顶层，import 之后任何一次
-    # _load_radar_rules()（测试隔离、promote 后热重载）都只改 RADAR_RULES、
-    # 不碰 ALL_RULES —— get_rule_breakdown() 随即报出
-    # 「208 + 9 + 19 = 236 却 total = 235」这种自相矛盾的数字，
-    # 而 rules_breakdown 正是部署校验的判据之一。
-    for _k in _RADAR_IN_ALL_RULES:
-        ALL_RULES.pop(_k, None)
+    # 上一轮已撤下 + 清空，这里只需并入本轮载入结果。
+    # 与上面那次自相矛盾的数字（「208 + 9 + 19 = 236 却 total = 235」）一起
+    # 被 /api/v1/health 的 rules_breakdown 依赖 —— 这里是部署校验的判据之一。
     ALL_RULES.update(RADAR_RULES)
     _RADAR_IN_ALL_RULES = set(RADAR_RULES)
 

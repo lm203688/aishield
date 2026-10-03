@@ -394,6 +394,28 @@ class TestAuthority(unittest.TestCase):
             RULES.RADAR_RULES = saved
             RULES._load_radar_rules()
 
+    def test_radar_reload_is_idempotent(self):
+        """`_load_radar_rules()` 重载 N 次必须得到同一份集合，不是叠加 N 份。
+
+        这条钉的是一次真实的内存态污染：重载只 merge 不清空，于是
+        tests/test_provenance_audit.py 的 tearDown（把 __file__ 指回真仓后
+        reload）把测试期间注入 tmp 的那条 `legacy\\s*rule` 一并留在了
+        RADAR_RULES 里 —— radar 19→20、total 264→265，而且这条污染会活到
+        整个套件结束。此后任何读 authority() 的断言都整体差 1，属于
+        "单跑绿、套件里红"那一类最难查的假失败（真身是测试污染，不是
+        测试写错 —— 修断言没用，修重载才有用）。
+        """
+        before = RULES.get_rule_breakdown()
+        try:
+            for _ in range(3):
+                RULES._load_radar_rules()
+        finally:
+            RULES.RADAR_RULES = {}
+            RULES._load_radar_rules()
+        self.assertEqual(RULES.get_rule_breakdown(), before,
+                         '重载改变了 radar 计数 —— 重载是累加的')
+        self.assertEqual(len(RULES.ALL_RULES), before["total"])
+
     def test_authority_values_are_positive_ints(self):
         auth = G.authority()
         for k in ("mcp", "skill", "static", "generated", "radar"):
@@ -591,6 +613,39 @@ class TestBlindSpotsClosed(unittest.TestCase):
         kinds = sorted((f['kind'], f['got'], f['expected']) for f in found)
         self.assertEqual(kinds, [('static', '226', '229')],
                          'JSON 构成字段只应报出漂移的 static 一项')
+
+    def test_mcp_rule_categories_prose_is_checked(self):
+        """`.well-known/agent.json` 的 description 写 `235 MCP rule categories`。
+
+        门禁那条英文 pattern 要求名词是 `rules`，遇到 `rule categories` 就
+        认不出来 —— 一个复数变形把整份机器读的 agent 名片推出视野。实测后果：
+        线上名片 rules 块已是 264/291，description 仍对外宣称 235/241，
+        同一份文件自相矛盾，而门禁一路绿灯。
+        """
+        text = ('"description": "... aligned, 235 MCP rule categories / '
+                '241 skill rule categories. Static analysis only ...")')
+        # 期望值照样取运行时真值，绝不写死 264/291：写死的话规则晋升当天
+        # 这条测试自己就会变成新的假失败，而它本该只验证"这类散文有没有被
+        # 门禁看见"。真正的稳定化来自 scanner/rules.py 把 _load_radar_rules()
+        # 改成幂等（详见 TestAuthority.test_radar_reload_is_idempotent）——
+        # 之前那 +1 是测试污染，不是测试写错。
+        a = _auth()
+        found = self._scan_in('api/static/.well-known/agent.json', text)
+        kinds = sorted((f['kind'], f['got'], f['expected']) for f in found)
+        self.assertEqual(
+            kinds,
+            [('mcp', '235', a['mcp']), ('skill', '241', a['skill'])],
+            'MCP/skill rule categories 散文未被校验 —— 门禁盲区')
+
+    def test_mcp_rule_categories_prose_survives_sync(self):
+        """查得到还得改得动，否则门禁就是一条永远红的规则。"""
+        text = ('"description": "... aligned, 235 MCP rule categories / '
+                '241 skill rule categories. Static ...")')
+        a = _auth()
+        new, _ = G.sync_text(text, a, _pats())
+        self.assertIn(f'{a["mcp"]} MCP rule categories', new,
+                      f'sync 未修 rule categories 散文：{new!r}')
+        self.assertIn(f'{a["skill"]} skill rule categories', new)
 
 
 class TestPushWiring(unittest.TestCase):
