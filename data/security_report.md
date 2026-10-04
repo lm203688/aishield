@@ -1,9 +1,9 @@
 # AIShield MCP安全扫描报告
 
-生成时间: 2026-10-03 17:06:12
+生成时间: 2026-10-04 17:43:50
 扫描引擎版本: 4.1
 扫描工具总数: 73
-平均安全评分: 72.1/100
+平均安全评分: 72.0/100
 
 ## 评分分布
 
@@ -31,13 +31,13 @@
 
 - **arcadeai-labs/smithery-cli** — 36/100, 25 issues
 - **BeehiveInnovations/pal-mcp-server** — 37/100, 44 issues
+- **reactive-resume/reactive-resume** — 38/100, 35 issues
 - **OpenByteInc/QuantDinger** — 39/100, 58 issues
 - **zylon-ai/private-gpt** — 40/100, 27 issues
 - **assafelovic/gpt-researcher** — 40/100, 40 issues
 - **ruvnet/ruflo** — 42/100, 37 issues
 - **amruthpillai/reactive-resume** — 42/100, 31 issues
 - **reactive-resume/app** — 42/100, 32 issues
-- **reactive-resume/reactive-resume** — 42/100, 33 issues
 - **czlonkowski/n8n-mcp** — 46/100, 25 issues
 - **microsoft/playwright-mcp** — 47/100, 24 issues
 - **sansan0/TrendRadar** — 49/100, 37 issues
