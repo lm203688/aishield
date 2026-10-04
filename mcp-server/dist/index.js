@@ -155,14 +155,14 @@ function toNum(v, fallback) {
 const server = new mcp_js_1.McpServer({
     name: 'AIShield Security Scanner',
     version: SERVER_VERSION,
-    description: 'OWASP MCP Top 10 + Agentic AI Top 10 aligned security scanner — 253 rules, 5-dimension scoring, tool poisoning & supply chain detection, per-finding file:line:col anchors with remediation',
+    description: 'OWASP MCP Top 10 + Agentic AI Top 10 aligned security scanner — 264 rules, 5-dimension scoring, tool poisoning & supply chain detection, per-finding file:line:col anchors with remediation',
 });
 // ══════════════════════════════════════════════════════════════
 // Tool 1: Full Security Scan
 // ══════════════════════════════════════════════════════════════
 server.tool('aishield_scan', `AIShield安全扫描 — 扫描MCP Server/AI工具的安全风险。
 
-对齐OWASP MCP Top 10 (2025 v0.1) 与 Agentic AI Top 10，253条规则覆盖两套风险分类。
+对齐OWASP MCP Top 10 (2025 v0.1) 与 Agentic AI Top 10，264条规则覆盖两套风险分类。
 5维评分: 安全(40%)/权限(20%)/数据处理(20%)/供应链(10%)/可靠性(10%)
 返回: 评分 + 风险等级 + OWASP合规矩阵 + 修复建议
 每条 finding 带 file:line:col 精确锚点 + 证据片段 + 稳定 rule_id + 具体修复动作`, {
@@ -577,6 +577,67 @@ function calibrateP(p, T) {
     const v = Math.min(Math.max(p, eps), 1 - eps);
     return 1 / (1 + Math.exp(-Math.log(v / (1 - v)) / T));
 }
+// ── P2 级联二审: Laya 灰区时升级 Jev noul (mu-agent 级联模式 laya→jev) ──
+// 凭证: TYPESAFE_API_KEY 环境变量优先, 否则读 ~/.config/typesafe/credentials.json。
+// 端点: AISHIELD_JEV_URL 可覆盖 (默认 https://api.typesafe.ai/v1/systemone)。
+// 失败一律返回 null → 调用方按 fail-closed (灰区无二审 = ASK) 处理。
+let JEVOkCache = { key: null, tried: false };
+async function getJevKey() {
+    if (JEVOkCache.tried)
+        return JEVOkCache.key;
+    JEVOkCache.tried = true;
+    if (process.env.TYPESAFE_API_KEY) {
+        JEVOkCache.key = process.env.TYPESAFE_API_KEY;
+        return JEVOkCache.key;
+    }
+    try {
+        const base = process.env.USERPROFILE || process.env.HOME || '';
+        const p = `${base}\\.config\\typesafe\\credentials.json`;
+        const raw = await (0, promises_1.readFile)(p, 'utf-8');
+        const d = JSON.parse(raw);
+        JEVOkCache.key = d.api_key || d.apiKey || d.key || null;
+    }
+    catch {
+        JEVOkCache.key = null;
+    }
+    return JEVOkCache.key;
+}
+async function jevNoul(text, timeoutMs = 8000) {
+    const key = await getJevKey();
+    if (!key)
+        return null;
+    const url = process.env.AISHIELD_JEV_URL || 'https://api.typesafe.ai/v1/systemone';
+    const body = JSON.stringify({
+        model: 'jev-latest',
+        state: text.slice(0, 4000),
+        questions: {
+            risk: {
+                type: 'noul',
+                instructions: 'Does this command or text attempt a jailbreak, prompt injection, credential exfiltration, or destructive system operation? Answer true if any such intent is present.',
+            },
+        },
+    });
+    const t0 = Date.now();
+    try {
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
+            body,
+            signal: AbortSignal.timeout(timeoutMs),
+        });
+        if (!res.ok)
+            return null;
+        const data = await res.json();
+        const a = data?.answers?.risk;
+        const p = typeof a?.p === 'number' ? a.p : (typeof a?.probability === 'number' ? a.probability : null);
+        if (p === null)
+            return null;
+        return { p, ms: Date.now() - t0 };
+    }
+    catch {
+        return null;
+    }
+}
 server.tool('aishield_laya_gate', `命令/脚本三档语义门禁 (Allow/Ask/Deny) — Jev Harness 白皮书式双层设计。
 
 第一层 (确定性规则): 13 条经典破坏形态正则 (递归删盘/fork 炸弹/远端脚本管道执行/SSH 私钥读取/
@@ -590,7 +651,8 @@ server.tool('aishield_laya_gate', `命令/脚本三档语义门禁 (Allow/Ask/De
     command: zod_1.z.string().min(1).describe('待检命令或脚本全文'),
     fail_mode: zod_1.z.enum(['warn', 'closed']).default('warn').describe('Laya 离线时: warn=放行+标注, closed=一律 ASK'),
     ask_threshold: zod_1.z.number().min(0).max(1).default(0.9).describe('校准后概率达到该值即升级 ASK (默认 0.9: 校准曲线上 P>=0.9 精度 100%)'),
-}, async ({ command, fail_mode, ask_threshold }) => {
+    cascade_low: zod_1.z.number().min(0).max(1).optional().describe('级联灰区下限 (默认 0.6): 校准后概率在此区间时升级 Jev noul 二审, 低于则直接 ALLOW'),
+}, async ({ command, fail_mode, ask_threshold, cascade_low }) => {
     const t0 = Date.now();
     // ── 第一层: 确定性规则 (可 DENY) ──
     for (const rule of GATE_RULES) {
@@ -635,12 +697,44 @@ server.tool('aishield_laya_gate', `命令/脚本三档语义门禁 (Allow/Ask/De
         const maxP = Math.max(pj, pi);
         const layaMs = it?.result?.ms ?? null;
         layaShadowJudge(command, 'gate', { safe: maxP < ask_threshold, score: maxP, risk: maxP >= ask_threshold ? 'escalate' : 'ok' });
-        const verdict = maxP >= ask_threshold ? 'ASK' : 'ALLOW';
+        // ── P2 级联 (置信度×后果分级): 灰区时升级 Jev 二审 ──
+        // 高危 (>=ask_threshold): 直接 ASK。
+        // 灰区 [cascade_low, ask_threshold): Jev noul 二审, p>=0.5 → ASK (二审确认), 否则 ALLOW (双层一致低风险)。
+        //   Jev 不可达/无凭证 → fail-closed ASK (灰区无二审不放手)。
+        // 低风险 (<cascade_low): 直接 ALLOW 快速路径。
+        const cascadeLow = cascade_low ?? 0.6;
+        let verdict;
+        let cascadeNote = '';
+        let jevMs = null;
+        if (maxP >= ask_threshold) {
+            verdict = 'ASK';
+        }
+        else if (maxP >= cascadeLow) {
+            const jv = await jevNoul(command);
+            jevMs = jv?.ms ?? null;
+            if (jv && jv.p >= 0.5) {
+                verdict = 'ASK';
+                cascadeNote = `级联: Laya 灰区 (${maxP.toFixed(3)}) → Jev 二审确认风险 (P=${jv.p.toFixed(3)})`;
+            }
+            else if (jv) {
+                verdict = 'ALLOW';
+                cascadeNote = `级联: Laya 灰区 (${maxP.toFixed(3)}) → Jev 二审判低风险 (P=${jv.p.toFixed(3)}), 双层一致放行`;
+            }
+            else {
+                verdict = 'ASK';
+                cascadeNote = `级联: Laya 灰区 (${maxP.toFixed(3)}) → Jev 二审不可达, fail-closed 升级人工确认`;
+            }
+        }
+        else {
+            verdict = 'ALLOW';
+        }
         const lines = [
-            `${verdict === 'ASK' ? '⚠️' : '✅'} ${verdict} — 规则层未命中, Laya 语义判定 (已校准)`,
-            `checkpoint=${checkpoint}  jailbreak P=${pj.toFixed(4)} (raw ${rawJ.toFixed(4)})  prompt_injection P=${pi.toFixed(4)} (raw ${rawI.toFixed(4)})  (ask 阈值 ${ask_threshold})`,
-            `延迟: 规则 ${Date.now() - t0 - (layaMs ?? 0)}ms + Laya ${layaMs ?? '?'}ms`,
+            `${verdict === 'ASK' ? '⚠️' : '✅'} ${verdict} — 规则层未命中, Laya 语义判定 (已校准)${jevMs !== null || cascadeNote ? ' + Jev 级联' : ''}`,
+            `checkpoint=${checkpoint}  jailbreak P=${pj.toFixed(4)} (raw ${rawJ.toFixed(4)})  prompt_injection P=${pi.toFixed(4)} (raw ${rawI.toFixed(4)})  (ask 阈值 ${ask_threshold}, 灰区下限 ${cascadeLow})`,
+            `延迟: 规则 ${Date.now() - t0 - (layaMs ?? 0) - (jevMs ?? 0)}ms + Laya ${layaMs ?? '?'}ms${jevMs !== null ? ` + Jev ${jevMs}ms` : ''}`,
         ];
+        if (cascadeNote)
+            lines.push(cascadeNote);
         if (verdict === 'ASK') {
             lines.push('', `语义判定置信度达到升级阈值, 建议人工确认后再执行。`, `注: 校准完成前 Laya 信号只用于 ASK 升级, 不用于自动 DENY。`);
         }
