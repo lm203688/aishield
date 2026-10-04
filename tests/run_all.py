@@ -234,6 +234,14 @@ def main():
         # 2026-10-03 身份锚点闭环：注册凭据 → 归属 → 注销 → 审计事件（可回放）。
         # 裸注册 401 / 越权注销 403 是硬边界，不是洁癖。
         'tests.test_identity_revocation',
+        # 2026-10-04 L2 策略贯通：扫描期 policy pack 编译为运行时 PEP 策略。
+        # 未绑 pack 的 server 行为必须与贯通前逐字一致（不误伤存量）；
+        # red-team 编译后绝不能获得任何运行时拒绝能力（永不 fail 语义）。
+        'tests.test_policy_bridge',
+        # 2026-10-04 L1 可移植身份：JWKS 公钥发现 + VC 签发/验签/除销。
+        # 对称密钥永不进 JWKS 是红线；除销必须实时读盘（缓存=攻击复用窗口）；
+        # 第三方仅凭 JWKS 的 x 就能离线验签，这才是「别家能不能验我」。
+        'tests.test_verifiable_identity',
     ]
 
     loaded = 0

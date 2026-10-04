@@ -57,6 +57,9 @@ def _default_policy():
         "deny": {},          # server -> {"tools": [...] | "*"}
         "incidents": {},     # server -> {"count": n, "last": iso, "events": [...]}
         "incident_threshold": DEFAULT_INCIDENT_THRESHOLD,
+        # L2 策略贯通：server -> {"source_pack", "runtime", "bound_at", "strict_runtime"}
+        # 由 eco/policy_bridge.py 编译写入；扫描期 pack 的 excluded_categories 在此生效。
+        "packs": {},         # server -> 绑定的 policy pack 及其运行时投影
         "updated_at": _now_iso(),
     }
 
@@ -356,6 +359,118 @@ def _matches(entry, tool):
     return False
 
 
+_SEVERITY_RANK = {"info": 0, "low": 1, "medium": 2, "high": 3, "critical": 4}
+
+
+def _cat_match(category: str, patterns) -> bool:
+    """类别匹配（精确 + 前缀）。patterns 为空时永不命中。
+
+    前缀匹配让 pack 里的「排除 ASI 整个族」在运行时成立：ASI03 命中 ASI01。
+    """
+    cat = (category or "").strip().upper()
+    if not cat:
+        return False
+    try:
+        pats = list(patterns or [])
+    except TypeError:
+        pats = []
+    if not pats:
+        return False
+    if cat in pats:
+        return True
+    for p in pats:
+        p = str(p or "").strip().upper()
+        if p and cat.startswith(p.rstrip("*")):
+            return True
+    return False
+
+
+def _pack_verdict(server: str, policy: dict, context=None) -> dict:
+    """评估本次调用是否被已绑定的 policy pack 拦下。
+
+    不拦时返回观察标记（schema 见下），放行判定不受任何影响 ——
+    表外未知类别一律放行，绝不因为 pack 没覆盖就拒。
+    """
+    bound = (policy.get("packs") or {}).get(server) or {}
+    if not bound:
+        return {}
+    rt = bound.get("runtime") or {}
+    deny_cats = rt.get("deny_categories") or []
+    allow_cats = rt.get("allow_categories") or []
+    ctx = context or {}
+    cat = str(ctx.get("category") or "").strip().upper()
+
+    if deny_cats and cat and _cat_match(cat, deny_cats):
+        return {
+            "decision": DECISION_DENY,
+            "reason": f"命中 policy pack「{bound.get('source_pack', '?')}」排除的类别 {cat}",
+            "policy_hit": "pack_excluded_category",
+            "source_pack": bound.get("source_pack"),
+        }
+
+    obs = {"source_pack": bound.get("source_pack"),
+           "strictness": rt.get("strictness"),
+           "severity_floor": rt.get("severity_floor")}
+    sev = str(ctx.get("severity") or "").strip().lower()
+    floor = str(rt.get("severity_floor") or "").strip().lower()
+    if sev in _SEVERITY_RANK and floor in _SEVERITY_RANK:
+        if _SEVERITY_RANK[sev] < _SEVERITY_RANK[floor]:
+            obs["below_severity_floor"] = True
+    if cat and allow_cats and not _cat_match(cat, allow_cats):
+        obs["unlisted_category"] = True
+    return obs
+
+
+def bind_pack(server: str, pack_name: str, strict_runtime: bool = False) -> dict:
+    """把一个扫描期 policy pack 绑定到某 server 的运行时网关（L2 策略贯通）。
+
+    绑定后：pack 的 excluded_categories 在运行时产生**真拒绝**，
+    required_categories 产生观察标记，severity_min 成为审计阈值。
+    返回编译产物（含 rationale），调用方可直接呈现给运维。
+
+    策略损坏（加载失败）时抛 RuntimeError —— 此时按 fail-closed 收紧，
+    但拒绝在损坏状态下写入归属是危险的，必须先修策略。
+    """
+    from eco import policy_bridge  # noqa: PLC0415（延迟导入，运行时热路径不背扫描期依赖）
+
+    compiled = policy_bridge.compile_pack(pack_name, strict_runtime=bool(strict_runtime))
+    policy, ok = _load_policy()
+    if not ok:
+        raise RuntimeError("策略文件损坏且已按 fail-closed 收紧；请先修复策略再绑定 pack")
+    policy.setdefault("packs", {})
+    policy["packs"][(server or "").strip()] = {
+        "source_pack": compiled["source_pack"],
+        "runtime": compiled["runtime"],
+        "rationale": compiled["rationale"],
+        "strict_runtime": bool(strict_runtime),
+        "bound_at": _now_iso(),
+    }
+    _save_policy(policy)
+    return compiled
+
+
+def unbind_pack(server: str) -> bool:
+    """解绑某个 server 的 policy pack。解绑后回到纯默认运行时行为。"""
+    policy, ok = _load_policy()
+    if not ok:
+        return False
+    packs = policy.get("packs") or {}
+    server = (server or "").strip()
+    if server not in packs:
+        return False
+    del packs[server]
+    policy["packs"] = packs
+    _save_policy(policy)
+    return True
+
+
+def bound_pack(server: str) -> dict | None:
+    """查某个 server 当前绑定的 pack 及其运行时投影。未绑定返回 None。"""
+    policy, _ = _load_policy()
+    ent = (policy.get("packs") or {}).get((server or "").strip())
+    return ent or None
+
+
 class RuntimeGovernor:
     """运行时治理网关。evaluate() 是唯一的准入判定入口。"""
 
@@ -375,7 +490,9 @@ class RuntimeGovernor:
         def _result(decision, reason, policy_hit):
             res = {"decision": decision, "allowed": decision == DECISION_ALLOW,
                    "server": server, "tool": tool, "reason": reason,
-                   "policy_hit": policy_hit, "ts": _now_iso()}
+                   "policy_hit": policy_hit, "ts": _now_iso(),
+                   # 策略贯通信息：未绑 pack 时为空 dict（保持键一致，消费方不必判存在）
+                   "pack": {}}
             if not ok:
                 res["policy_load_error"] = True
             if log:
@@ -410,10 +527,19 @@ class RuntimeGovernor:
         if server in allow and _matches(allow[server], tool):
             return _result(DECISION_ALLOW, "命中放行规则", "allow_list")
 
-        # 4) 兜底：fail-closed 模式下未知实体一律拒绝
+        # 4) policy pack 贯通（L2）：扫描期 pack 的 excluded_categories → 运行时真拒绝。
+        #    未绑 pack 的 server 在这里原样继续，行为与贯通前完全一致（不误伤存量）。
+        pack_ctx = _pack_verdict(server, policy, context)
+        if pack_ctx.get("decision") == DECISION_DENY:
+            return _result(DECISION_DENY, pack_ctx["reason"], pack_ctx["policy_hit"])
+
+        # 5) 兜底：fail-closed 模式下未知实体一律拒绝
         if policy.get("default_deny"):
             return _result(DECISION_DENY, "未在放行名单内（fail-closed 默认拒绝）", "default_deny")
-        return _result(DECISION_ALLOW, "默认放行（未开启 fail-closed）", "default_allow")
+        res = _result(DECISION_ALLOW, "默认放行（未开启 fail-closed）", "default_allow")
+        if pack_ctx:
+            res["pack"] = pack_ctx
+        return res
 
     # ── kill switch ──
     def kill(self, server, reason="manual kill switch"):

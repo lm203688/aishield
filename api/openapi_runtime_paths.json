@@ -1,9 +1,9 @@
 {
   "note": "运行时路由清单：进程内直调 api.server.AIShieldHandler.do_GET/do_POST 探得，与 curated 规范合并后即线上 /openapi.json。",
   "source": "runtime probe (scripts/gen_openapi_spec.py)",
-  "generated_at": "2026-10-04T06:37:03",
-  "route_count": 114,
-  "operation_count": 124,
+  "generated_at": "2026-10-04T16:51:47",
+  "route_count": 118,
+  "operation_count": 129,
   "probe_errors": [],
   "state_audit": {
     "created": [],
@@ -2470,6 +2470,11 @@
               },
               "ts": {
                 "type": "string"
+              },
+              "pack": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": true
               }
             },
             "additionalProperties": true
@@ -2559,8 +2564,35 @@
     {
       "path": "/api/v1/governance/policy",
       "tag": "governance",
-      "summary": "POST /api/v1/governance/policy（运行时探得；schema 由真实响应推导）",
+      "summary": "GET /api/v1/governance/policy（运行时探得；schema 由真实响应推导）",
       "operations": [
+        {
+          "verb": "get",
+          "summary": "GET /api/v1/governance/policy（运行时探得；schema 由真实响应推导）",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "success": {
+                "type": "boolean"
+              },
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        },
         {
           "verb": "post",
           "summary": "POST /api/v1/governance/policy（运行时探得；schema 由真实响应推导）",
@@ -2590,6 +2622,7 @@
         }
       ],
       "operation_ids": [
+        "getGovernancePolicy",
         "postGovernancePolicy"
       ]
     },
@@ -2823,15 +2856,182 @@
           "verb": "get",
           "summary": "Agent 生态 API · agents",
           "status": 200,
-          "sample_present": false,
-          "sample_truncated": true,
-          "schema": {},
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "success": {
+                "type": "boolean"
+              },
+              "count": {
+                "type": "integer"
+              },
+              "agents": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "object"
+                    },
+                    "did": {
+                      "type": "object"
+                    },
+                    "public_key": {
+                      "type": "object"
+                    },
+                    "capabilities": {
+                      "type": "object"
+                    },
+                    "owner": {
+                      "type": "object"
+                    },
+                    "reputation_score": {
+                      "type": "object"
+                    },
+                    "reputation_level": {
+                      "type": "object"
+                    },
+                    "registered_at": {
+                      "type": "object"
+                    },
+                    "updated_at": {
+                      "type": "object"
+                    },
+                    "status": {
+                      "type": "object"
+                    },
+                    "revoked_at": {
+                      "type": "object"
+                    },
+                    "identity_token_expires": {
+                      "type": "object"
+                    },
+                    "identity_token_consumed_at": {
+                      "type": "object"
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              }
+            },
+            "additionalProperties": true
+          },
           "x-aishield-generated": true,
           "x-aishield-probe-status": 200
         }
       ],
       "operation_ids": [
         "getIdentityAgents"
+      ]
+    },
+    {
+      "path": "/api/v1/identity/credentials/issue",
+      "tag": "ecosystem",
+      "summary": "Agent 生态 API · issue",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "Agent 生态 API · issue",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "postIdentityCredentialsIssue"
+      ]
+    },
+    {
+      "path": "/api/v1/identity/credentials/revoke",
+      "tag": "ecosystem",
+      "summary": "Agent 生态 API · revoke",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "Agent 生态 API · revoke",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "success": {
+                "type": "boolean"
+              },
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "postIdentityCredentialsRevoke"
+      ]
+    },
+    {
+      "path": "/api/v1/identity/credentials/verify",
+      "tag": "ecosystem",
+      "summary": "Agent 生态 API · verify",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "Agent 生态 API · verify",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "success": {
+                "type": "boolean"
+              },
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "postIdentityCredentialsVerify"
       ]
     },
     {
@@ -2866,6 +3066,48 @@
       ],
       "operation_ids": [
         "postIdentityErc8004Wrap"
+      ]
+    },
+    {
+      "path": "/api/v1/identity/jwks",
+      "tag": "ecosystem",
+      "summary": "Agent 生态 API · jwks",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "Agent 生态 API · jwks",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "keys": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {},
+                  "additionalProperties": true
+                }
+              },
+              "ready": {
+                "type": "boolean"
+              },
+              "algorithm": {
+                "type": "string"
+              },
+              "reason": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "getIdentityJwks"
       ]
     },
     {

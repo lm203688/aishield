@@ -51,7 +51,17 @@ def _b64e(b: bytes) -> str:
 
 
 def _b64d(s: str) -> bytes:
-    return base64.urlsafe_b64decode(s.encode("ascii"))
+    """解码 base64url，**容忍缺 padding**（JWT / JWKS 的惯例是不写 '='）。
+
+    严格 base64 要求长度是 4 的倍数；而 compact token 的每一段都是把 padding
+    去掉之后发出去的。校验端若笨到要求 padding，等于把别人按 RFC 7515 解出来的
+    签名字节直接判成「验不过」——协议层写着能验，实际谁也验不了。
+    """
+    s = (s or "").strip()
+    if not s:
+        raise ValueError("empty base64 payload")
+    pad = "=" * (-len(s) % 4)
+    return base64.urlsafe_b64decode(s.encode("ascii") + pad.encode("ascii"))
 
 
 def generate_keypair():

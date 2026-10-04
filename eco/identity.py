@@ -114,6 +114,12 @@ _TOKEN_TTL_SECONDS = 3600          # 默认 1 小时有效期
 _REVOKE_TOKEN_BYTES = 16           # 撤销码熵度
 
 _TOKEN_PREFIX = "rt_"
+_IDENTITY_TOKEN_TTL_SECONDS = 3600  # 身份凭证签发令牌有效期（#367 L1）
+_IDENTITY_TOKEN_PREFIX = "idt_"
+
+
+def _hash_identity_token(token) -> str:
+    return hashlib.sha256(str(token or "").encode()).hexdigest()
 
 
 class RegistrationTokenAuthority:
@@ -314,8 +320,14 @@ class AgentRegistration:
         if did in self._agents:
             raise ValueError(f"Agent DID '{did}' 已注册")
 
-        # 撤销码：明文只在返回值里出现一次，库里只留 hash
+        # 撤销码 + 身份凭证签发令牌：明文只在返回值里出现一次，库里只留 hash
         revoke_plain = uuid.uuid4().hex[:_REVOKE_TOKEN_BYTES * 2]
+        # 注册「不直接」签发可验证凭证：注册凭据是一次性的、注册时已消费，
+        # 拿它去换 VC 必然 401（#367 第一版就栽在这）。所以注册成功时顺带签一枚
+        # **身份凭证签发令牌**，把「注册 → 签发 VC」两步分开且各自一次性。
+        idt_plain = _IDENTITY_TOKEN_PREFIX + uuid.uuid4().hex
+        idt_expires = datetime.now(TZ) + timedelta(
+            seconds=_IDENTITY_TOKEN_TTL_SECONDS)
 
         # 构建Agent信息
         agent_info = {
@@ -332,13 +344,79 @@ class AgentRegistration:
             "revoked_at": None,
             "revoke_token_hash": hashlib.sha256(revoke_plain.encode()).hexdigest(),
             "registration_token_id": token_id,
+            "identity_token_id": uuid.uuid4().hex[:16],
+            "identity_token_hash": hashlib.sha256(idt_plain.encode()).hexdigest(),
+            "identity_token_expires": idt_expires.isoformat(),
+            "identity_token_consumed_at": None,
         }
 
         self._agents[did] = agent_info
         self._save()
         _append_event("register", did, actor=owner, result="ok")
 
-        return dict(agent_info, revoke_token=revoke_plain)
+        return dict(agent_info, revoke_token=revoke_plain,
+                    identity_token=idt_plain)
+
+    # ── 身份凭证签发令牌（#367 L1 可移植身份）──────────────────────
+    def issue_identity_token(self, did: str, owner: str | None = None,
+                             ttl: int | None = None) -> dict:
+        """为已注册的 agent 签一枚**身份凭证签发令牌**（一次性，绑定 did+owner）。
+
+        这是「注册凭据 → 归属 → 签发可验证凭证」链条的第三环。它不能复用
+        registration_token：那个凭据在 register() 里已经被 consume 掉了，再拿
+        来换 VC 一定 401；语义上两件事也不该共用一枚凭据（共用 = 一枚凭据打通
+        两个动作，任何一步的重放都会同时贯通两步）。
+
+        返回 {"token", "token_id", "did", "owner", "expires_at"}；明文只出现在
+        这一次，库里只留 sha256。
+        """
+        self._load()
+        agent = self._agents.get(did)
+        if not isinstance(agent, dict):
+            raise ValueError(f"Agent DID '{did}' 未注册")
+        if owner is not None and (owner or "").strip() != (agent.get("owner") or ""):
+            raise IdentityForbidden("identity token does not belong to this owner")
+        ttl = _IDENTITY_TOKEN_TTL_SECONDS if ttl is None else ttl
+        plain = _IDENTITY_TOKEN_PREFIX + uuid.uuid4().hex
+        expires = datetime.now(TZ) + timedelta(seconds=max(1, int(ttl)))
+        agent["identity_token_id"] = uuid.uuid4().hex[:16]
+        agent["identity_token_hash"] = hashlib.sha256(plain.encode()).hexdigest()
+        agent["identity_token_expires"] = expires.isoformat()
+        agent["identity_token_consumed_at"] = None
+        self._save()
+        _append_event("identity_token", did, actor=owner or agent.get("owner"),
+                      result="ok")
+        return {"token": plain, "token_id": agent["identity_token_id"],
+                "did": did, "owner": agent.get("owner"),
+                "expires_at": expires.isoformat()}
+
+    def consume_identity_token(self, did: str, token,
+                              owner: str | None = None) -> str:
+        """校验并消费一枚身份凭证签发令牌，返回 token_id。
+
+        无效/已用/过期抛 IdentityAuthError（401 语义），归属不符抛
+        IdentityForbidden（403）。
+        """
+        self._load()
+        agent = self._agents.get(did)
+        if not isinstance(agent, dict):
+            raise IdentityAuthError("agent not found")
+        if owner is not None and (owner or "").strip() != (agent.get("owner") or ""):
+            raise IdentityForbidden("identity token does not belong to this owner")
+        if _hash_identity_token(token) != agent.get("identity_token_hash"):
+            raise IdentityAuthError("identity_token is not valid")
+        if agent.get("identity_token_consumed_at"):
+            raise IdentityAuthError("identity_token is already used")
+        exp = agent.get("identity_token_expires") or ""
+        if exp:
+            try:
+                if datetime.fromisoformat(exp) <= datetime.now(TZ):
+                    raise IdentityAuthError("identity_token is expired")
+            except ValueError:
+                raise IdentityAuthError("identity_token expiry is malformed")
+        agent["identity_token_consumed_at"] = _now_iso()
+        self._save()
+        return agent["identity_token_id"]
 
     def get_agent(self, did):
         """
@@ -413,12 +491,14 @@ class AgentRegistration:
         对外可见视图：剥掉所有「能当凭据复用」的字段。
 
         ``revoke_token_hash`` / ``registration_token_id`` 一旦漏出去，注册表
-        就被别人拿去越权注销了 —— 这是身份系统的致命伤，不是洁癖。
+        就被别人拿去越权注销了；``identity_token_hash`` / ``identity_token_id``
+        漏出去则等于把「替这个 agent 签身份凭证」的能力送人 —— 同样是致命伤。
         """
         if not isinstance(agent, dict):
             return {}
         return {k: v for k, v in agent.items()
-                if k not in ("revoke_token_hash", "registration_token_id")}
+                if k not in ("revoke_token_hash", "registration_token_id",
+                             "identity_token_hash", "identity_token_id")}
 
     def purge_inactive(self, keep_active: bool = False) -> int:
         """

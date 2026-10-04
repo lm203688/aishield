@@ -361,6 +361,88 @@ def _identity_get(did: str) -> dict:
             "agent": ident.AgentRegistration().public_view(agent)}, 200
 
 
+def _identity_jwks() -> tuple[dict, int]:
+    """GET /api/v1/identity/jwks —— 对外公钥发现（RFC 7517 JWKS）。
+
+    只输出非对称 Ed25519 公钥。当前活跃密钥若是 HMAC 对称密钥，按安全红线
+    拒绝发布（返回 keys=[] + 诊断），**绝不**把那个 "public_key" 当公钥发出去
+    —— 它其实是签名密钥本身。
+    """
+    from eco import verifiable_identity as vi
+    try:
+        return vi.jwks(), 200
+    except Exception as e:
+        return {"error": str(e)}, 500
+
+
+def _identity_credential_issue(data: dict) -> tuple[dict, int]:
+    """POST /api/v1/identity/credentials/issue —— 签发 agent 可验证身份凭证。
+
+    鉴权沿用身份锚点闭环的三段式，第三环是**身份凭证签发令牌**（注册成功时
+    由 register 一并返回，一次性、绑定 did+owner）。
+
+    为什么不是 registration_token：注册凭据在 register() 里就已经 consume 掉
+    了，拿它来换 VC 必然 401（#367 第一版实测复现）；而且「注册」和「签发身份
+    凭证」是两件事，共用一枚凭据等于让一枚凭据同时打通两个动作。
+
+    裸端点签发 = 任何人都能冒充任意 agent 拿一张"官方"凭证。
+    """
+    ident = _import_identity()
+    did = str(data.get("did") or "").strip()
+    owner = str(data.get("owner") or "").strip()
+    token = str(data.get("identity_token") or "").strip()
+    if not did or not owner or not token:
+        return {"error": "did, owner and identity_token are required"}, 400
+    agent = ident.AgentRegistration().get_agent(did)
+    if not agent:
+        return {"success": False, "error": f"agent not found: {did}"}, 404
+    if str(agent.get("owner") or "") != owner:
+        return {"success": False, "error": "owner does not match the agent record"}, 403
+    try:
+        ident.AgentRegistration().consume_identity_token(did, token, owner=owner)
+    except ident.IdentityAuthError as e:
+        return {"success": False, "error": str(e)}, 401
+    except ident.IdentityForbidden as e:
+        return {"success": False, "error": str(e)}, 403
+    from eco import verifiable_identity as vi
+    try:
+        cred = vi.issue_credential(did, data.get("claims") or {},
+                                   int(data.get("ttl") or 86400))
+    except RuntimeError as e:
+        return {"success": False, "error": str(e)}, 503
+    return {"success": True, **cred}, 201
+
+
+def _identity_credential_verify(data: dict) -> tuple[dict, int]:
+    """POST /api/v1/identity/credentials/verify —— 公开验证一枚凭证。
+
+    验签离线可完成；除销是唯一在线依赖，且实时读盘（不做进程内缓存）。
+    """
+    token = str(data.get("token") or "").strip()
+    if not token:
+        return {"success": False, "error": "token is required"}, 400
+    from eco import verifiable_identity as vi
+    return {"success": True, **vi.verify(token)}, 200
+
+
+def _identity_credential_revoke(data: dict) -> tuple[dict, int]:
+    """POST /api/v1/identity/credentials/revoke —— 除销一枚凭证（仅属主）。"""
+    ident = _import_identity()
+    did = str(data.get("did") or "").strip()
+    owner = str(data.get("owner") or "").strip()
+    cid = str(data.get("credential_id") or "").strip()
+    if not did or not owner or not cid:
+        return {"success": False, "error": "did, owner and credential_id are required"}, 400
+    agent = ident.AgentRegistration().get_agent(did)
+    if not agent:
+        return {"success": False, "error": f"agent not found: {did}"}, 404
+    if str(agent.get("owner") or "") != owner:
+        return {"success": False, "error": "owner does not match the agent record"}, 403
+    from eco import verifiable_identity as vi
+    if vi.revoke(cid):
+        return {"success": True, "revoked": True, "credential_id": cid}, 200
+    return {"success": True, "already_revoked": True, "credential_id": cid}, 200
+
 def handle_delete(path: str, query: dict | None = None) -> tuple[dict, int]:
     """DELETE 分发入口（__DELETE__，2026-10-03 随身份注销闭环新增）。
 
@@ -653,6 +735,8 @@ def handle_get(path: str, query: str = ""):
     # ── Identity Registry（agent card 承诺过的端点，2026-10-03 补接线）──
     if path == "/api/v1/identity/agents":
         return _identity_list()
+    if path == "/api/v1/identity/jwks":
+        return _identity_jwks()
     if path == "/api/v1/identity/registration-token":
         return {"error": "POST /api/v1/identity/registration-token"}, 405
 
@@ -782,6 +866,12 @@ def handle_post(path: str, data: dict):
 
     if path == "/api/v1/identity/register":
         return _identity_register(data)
+    if path == "/api/v1/identity/credentials/issue":
+        return _identity_credential_issue(data)
+    if path == "/api/v1/identity/credentials/verify":
+        return _identity_credential_verify(data)
+    elif path == "/api/v1/identity/credentials/revoke":
+        return _identity_credential_revoke(data)
 
     # ── KYA / ERC-8004 ──
     if path == "/api/v1/identity/kyad/export":
