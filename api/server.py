@@ -437,6 +437,17 @@ class AIShieldHandler(BaseHTTPRequestHandler):
         parsed = urlparse(self.path)
         path = parsed.path
 
+        # ── 标准发现路径：/.well-known/jwks.json（RFC 7517 公钥发现）──
+        # 第三方按 IETF 约定会去根路径找公钥；只发 /api/v1/identity/jwks
+        # 等于让"别家验不了我"。两条路径同一个数据源。
+        if path == "/.well-known/jwks.json":
+            try:
+                from eco import verifiable_identity as vi
+                self._send_json(vi.jwks(), 200)
+            except Exception as e:
+                self._send_json({"error": str(e)}, 500)
+            return
+
         # ── Trust API (P1): 认证/信任评分/注册中心/Agent Card ──
         if (path.startswith("/api/v1/trust") or path.startswith("/api/v1/registry")
                 or path == "/.well-known/agent-card.json"):
@@ -1291,6 +1302,24 @@ class AIShieldHandler(BaseHTTPRequestHandler):
                 self._send_json({"error": str(e)}, 500)
             return
 
+        # ── L2 策略贯通：查看某 server 绑定的 policy pack 及其运行时投影 ──
+        if path == "/api/v1/governance/policy":
+            try:
+                from eco import runtime_governance as rg
+                server = (parse_qs(parsed.query).get("server") or [""])[0].strip()
+                if not server:
+                    self._send_json({"success": False, "error": "server is required"}, 400)
+                    return
+                ent = rg.bound_pack(server)
+                if ent is None:
+                    self._send_json({"success": True, "server": server,
+                                     "bound": False, "pack": None}, 200)
+                else:
+                    self._send_json({"success": True, "server": server, "bound": True, **ent}, 200)
+            except Exception as e:
+                self._send_json({"error": str(e)}, 500)
+            return
+
         # ── 运行时治理：不可篡改审计日志 ──
         if path == "/api/v1/governance/audit":
             try:
@@ -1794,6 +1823,39 @@ class AIShieldHandler(BaseHTTPRequestHandler):
                 from eco import runtime_governance as rg
                 res = rg.revive(data.get("server", ""), data.get("reason", "manual revive"))
                 self._send_json(res, 200 if res.get("success") else 400)
+            except Exception as e:
+                self._send_json({"error": str(e)}, 500)
+            return
+
+        # ── L2 策略贯通：把扫描期 policy pack 绑定到运行时网关 ──
+        #   "unbind" 解绑（回到纯默认运行时行为）；其余按 pack 名绑定。
+        if path == "/api/v1/governance/policy":
+            try:
+                from eco import runtime_governance as rg
+                server = str(data.get("server") or "").strip()
+                if not server:
+                    self._send_json({"success": False, "error": "server is required"}, 400)
+                    return
+                action = str(data.get("action") or "bind").strip().lower()
+                if action == "unbind":
+                    self._send_json({"success": True, "server": server,
+                                     "bound": rg.unbind_pack(server)}, 200)
+                    return
+                from eco import policy_bridge  # noqa: PLC0415
+                names = policy_bridge.pack_names()
+                pack = str(data.get("pack") or "").strip()
+                if pack not in names:
+                    self._send_json({"success": False,
+                                     "error": f"unknown policy pack: {pack}",
+                                     "available": names}, 400)
+                    return
+                compiled = rg.bind_pack(server, pack,
+                                        strict_runtime=bool(data.get("strict_runtime")))
+                self._send_json({"success": True, "server": server, "bound": True,
+                                 **compiled}, 200)
+            except RuntimeError as e:
+                # 策略损坏：fail-closed 下拒绝写入归属，不能静默放行
+                self._send_json({"error": str(e)}, 503)
             except Exception as e:
                 self._send_json({"error": str(e)}, 500)
             return
