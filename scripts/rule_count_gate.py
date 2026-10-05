@@ -221,13 +221,53 @@ EXCLUDE_DIR_PARTS = (
     "scanner", "eco", "dist", "archive",
 )
 EXCLUDE_PATH_PARTS = ("docs/blog", "docs/intel", "docs/eco")
-EXCLUDE_FILES = {
+
+# ── 豁免台账：路径 → **非空理由** ─────────────────────────────────────
+# 为什么不是裸 set：豁免就是"把一个对外资产从门禁里拿出去"，是一种特权。
+# 特权集合若能凭空变大，门禁就等于关掉了一半（假绿的第 2 层）。所以每一处
+# 豁免都必须写明"为什么这里的数字不该被同步"，由
+# scripts/declaration_surface_gate.py 的第 5 项检查强制非空；且豁免的文件
+# 必须真实存在 —— 死豁免会掩盖将来同路径的新漏网，与"死台账"同理。
+#
+# 保持 dict 而非换类型是刻意的：消费方只做 `rel in EXCLUDE_FILES` 的键
+# 成员判定，dict 的键判定与之兼容，改动不会波及其他模块（已核对全仓
+# 四个消费点，均为成员判定）。
+EXCLUDE_FILES: Dict[str, str] = {
     # 历史发布日志：llms-full.txt 的 "Shipped in v4.2.0 … 214-rule base"
     # 记录的是那个版本当时的真实基线。把它改成当前数字等于伪造历史，
     # 对一个以真实性为卖点的扫描器来说是不可接受的失真。
-    "api/static/llms-full.txt",
-    "docs/llms-full.txt",
+    "api/static/llms-full.txt": (
+        "历史发布日志：'Shipped in v4.2.0 … 214-rule base' 是那一版当时的真实"
+        "基线，同步成当前数字等于伪造历史。"),
+    "docs/llms-full.txt": (
+        "api/static/llms-full.txt 的 docs 侧镜像，同一份历史发布日志。"),
 }
+
+
+def exempt_reason(rel: str) -> str:
+    """该路径的豁免理由；未豁免返回空串。"""
+    return EXCLUDE_FILES.get(rel.replace(os.sep, "/"), "")
+
+
+def exempt_table_errors():
+    """豁免台账自身的问题，返回 ``[(severity, message), ...]``。
+
+    刻意放在台账所在的模块：校验跟着台账走，消费方 import 即可，避免两处
+    各自维护一份判断（那正是本仓库反复吃亏的"判据复写掉一半"）。
+    """
+    out = []
+    for rel, reason in EXCLUDE_FILES.items():
+        if not (reason or "").strip():
+            out.append((
+                "error",
+                f"{rel} 在 EXCLUDE_FILES 里却没有写豁免理由 —— "
+                f"豁免是特权，必须能自证为什么这里的数字不该被同步"))
+        if not os.path.isfile(os.path.join(REPO, rel.replace("/", os.sep))):
+            out.append((
+                "warn",
+                f"{rel} 在 EXCLUDE_FILES 里但文件已不存在（死豁免）—— "
+                f"请删除，否则会掩盖将来同路径的新漏网"))
+    return out
 
 
 # docs/ 下的特例。docs/ 根级文档是带日期的历史快照，理应豁免；但 llms.txt

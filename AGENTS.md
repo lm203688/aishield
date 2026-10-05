@@ -62,6 +62,24 @@ prompt，对齐 **OWASP MCP Top 10 (2025)** 与 **OWASP Agentic AI Top 10 (ASI01
    加新条目：先确认该文件**只有一个** Python 写入者且是整体重写（可跑
    `python -c "import scripts.validate_workflows as V; print(V._write_map(['<文件名>']))"`），
    再把 glob 加进声明；门禁会替你复核。
+8. **门禁的"覆盖面"本身也必须是派生的，不能是两处白名单里手抄的一半。**
+   规则数门禁的覆盖面 = `TEXT_EXT`（后缀）∧ `_is_declared_surface`（路径）
+   的**合取**。`scripts/declaration_surface_gate.py` 的「4. 门禁覆盖闭合」必须
+   **直接问 `rule_count_gate.collect_files()` 要集合**，不得就地重算这两个条件；
+   由 `test_gate_asks_the_authoritative_collector` 用源码级断言钉死。
+   **豁免**（`rule_count_gate.EXCLUDE_FILES`）是特权：必须是 `路径 → 非空理由`
+   的字典，无理由 = error、文件不存在 = 死豁免 = warn，由第 5 项
+   `check_exempt_ledger()` 强制 —— 能悄悄变大的豁免表等于把门禁关掉一半。
+   历史事故（2026-10-06，同型第 5 处）：旧实现只抄了路径白名单、漏了后缀白名单，
+   `api/static/feeds.xml` 因此**在门禁外躺了两代**（门禁注释自承"仅仅因为 `.xml`
+   不在元组里"），最后靠运行时探针才发现。补一个 `.xml` 只是治标：只要还有人
+   手抄一半条件，下一个 `.css` / `.js` 会以同样的方式漏。
+9. **跨模块可变状态必须经统一出口取模块对象。**
+   `scripts.rule_count_gate`（按包名 import）与 `rule_count_gate`（按模块名 import，
+   因为它既要能当脚本跑又要能被 import）是**同一份源码的两个模块实例**。
+   改前者而门禁读后者 → 改动对门禁不可见；断言恰好是"应当为空"时就会得到**假绿**。
+   凡需要注入/观察的模块级状态，一律走已抽出的访问器（如
+   `declaration_surface_gate._rule_gate()`），并用 `is` 断言同一对象。
 
 ## 架构速览
 

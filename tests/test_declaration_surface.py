@@ -425,5 +425,283 @@ class TestGateIsNotDecoration(unittest.TestCase):
             self.assertIn("✅", proc.stdout)
 
 
+class TestCoverageDerivation(unittest.TestCase):
+    """覆盖面必须是**派生**的，不能手抄门禁条件的一半。
+
+    事故形状：旧 `check_gate_coverage` 只验了 `_is_declared_surface`（路径
+    白名单），没验 `TEXT_EXT`（后缀白名单）。于是对一个位于 `api/static/`
+    下、却用非白名单后缀的对外资产，"声明了数字但不在覆盖面内"这件事完全
+    不可见 —— `api/static/feeds.xml`（`.xml` 当时不在元组里）因此停了两代，
+    最后靠运行时探针才发现。修法不是补一个后缀，而是**改问权威函数要集合**。
+    """
+
+    DECL = "Scans an MCP server against 264 MCP / 291 skill rule categories."
+
+    def setUp(self):
+        self.patterns = rcg._patterns()
+
+    def _run(self, entries, collected=None, exempt=None):
+        return dsg.coverage_findings(
+            entries,
+            set(collected) if collected is not None else set(),
+            dict(exempt or {}),
+            self.patterns,
+        )
+
+    # ── 反向用例：门禁不是空转 ──────────────────────────────────────
+    def test_non_text_ext_served_file_is_caught(self):
+        """`.css`：路径白名单收它、后缀白名单不收它 —— 旧实现在此放行。"""
+        rel = "api/static/promo.css"
+        self.assertTrue(rcg._is_declared_surface(rel),
+                        "前提失效：该路径已不被路径白名单接受，"
+                        "本用例就不再代表旧实现放行的那一类")
+        self.assertFalse(rel.endswith(tuple(rcg.TEXT_EXT)),
+                         "前提失效：该后缀已在 TEXT_EXT 里")
+        found = self._run([("https://aishield.tools/promo.css", rel, self.DECL)])
+        self.assertEqual(len(found), 1, "非 TEXT_EXT 的对外声明资产没被抓住")
+        self.assertIn("TEXT_EXT", found[0].detail)
+        self.assertIn("promo.css", found[0].detail)
+
+    def test_surface_outside_all_whitelists_is_caught(self):
+        """后缀在白名单里、路径不在 —— 另一半条件同样要能报。"""
+        found = self._run([("https://aishield.tools/deep",
+                            "docs/deep/thing.json", self.DECL)])
+        self.assertEqual(len(found), 1)
+        self.assertIn("_is_declared_surface", found[0].detail)
+
+    def test_both_whitelists_missing_names_both_reasons(self):
+        """两半都不满足时，诊断必须把两个缺口都写出来。"""
+        found = self._run([("https://aishield.tools/x",
+                            "docs/deep/thing.css", self.DECL)])
+        self.assertEqual(len(found), 1)
+        self.assertIn("TEXT_EXT", found[0].detail)
+        self.assertIn("_is_declared_surface", found[0].detail)
+
+    # ── 正向用例：不该被误伤 ────────────────────────────────────────
+    def test_covered_file_is_silent(self):
+        rel = "api/static/llms.txt"
+        self.assertIn(rel, set(rcg.collect_files()), "前提：它真在覆盖面内")
+        self.assertEqual(
+            self._run([("https://aishield.tools/llms.txt", rel, self.DECL)],
+                      collected=rcg.collect_files()),
+            [])
+
+    def test_non_declaring_served_file_is_silent(self):
+        """robots.txt 之类不承载规则数的资产不该被要求覆盖（否则噪音化）。"""
+        self.assertEqual(
+            self._run([("https://aishield.tools/nope.css",
+                        "api/static/nope.css", "User-agent: *\nAllow: /")]),
+            [])
+
+    def test_exempt_file_is_silent_even_if_uncovered(self):
+        """豁免是合法出口 —— 但必须由台账（带理由）承载，不能靠条件漏判。"""
+        rel = "api/static/promo.css"
+        self.assertEqual(
+            self._run([("u", rel, self.DECL)], exempt={rel: "历史基线，不改写"}),
+            [])
+
+    def test_real_repo_served_surfaces_are_covered(self):
+        """真实在册服务面：凡声明数字的，必须在覆盖面内或有豁免 —— 无裸奔。"""
+        from api.declaration_surface import SERVED, abs_path
+        entries = []
+        for url, s in sorted(SERVED.items()):
+            if s.kind == "computed" or not s.rel:
+                continue
+            rel = s.rel.replace(os.sep, "/")
+            with open(abs_path(rel), encoding="utf-8-sig", errors="replace") as f:
+                entries.append((url, rel, f.read()))
+        found = self._run(entries, collected=rcg.collect_files(),
+                          exempt=rcg.EXCLUDE_FILES)
+        self.assertEqual(
+            found, [],
+            "在册服务面掉出覆盖面: " + "; ".join(f.detail for f in found))
+
+    def test_gate_asks_the_authoritative_collector(self):
+        """反"重抄一半"：门禁必须调用权威收集函数。
+
+        这不是风格洁癖 —— 只要有人把 ext/surface 条件手抄回来，两处白名单
+        的任何一次扩缩都会重新分叉，而分叉正是 feeds.xml 的根因。用源码级
+        断言把"问权威函数要集合"这件事钉死。
+        """
+        import inspect
+        src = inspect.getsource(dsg.check_gate_coverage)
+        self.assertIn("collect_files()", src,
+                      "check_gate_coverage 没调用权威收集函数 —— "
+                      "覆盖面又被手抄成本地条件了（会掉一半）")
+
+
+class TestExemptLedger(unittest.TestCase):
+    """豁免 = 把某资产从门禁里拿出去。特权必须自证，否则门禁能悄悄关掉一半。
+
+    注意：这里一律经 ``dsg._rule_gate()`` 改台账，而不是改测试自己 import 的
+    ``scripts.rule_count_gate``。两者是**同一份源码的两个模块对象**，改错那个
+    门禁看不见 —— 断言的"绿"会变成假的。
+    """
+
+    def setUp(self):
+        self.gate_rcg = dsg._rule_gate()
+        self._saved = dict(self.gate_rcg.EXCLUDE_FILES)
+
+    def tearDown(self):
+        # 模块级可变状态：跑完必须逐字还原，否则会污染同进程的后续用例。
+        self.gate_rcg.EXCLUDE_FILES.clear()
+        self.gate_rcg.EXCLUDE_FILES.update(self._saved)
+
+    def _replace(self, mapping):
+        self.gate_rcg.EXCLUDE_FILES.clear()
+        self.gate_rcg.EXCLUDE_FILES.update(mapping)
+
+    def test_gate_and_test_share_one_module_object(self):
+        """钉死"两个模块实例"这个陷阱：读侧数据必须一致，写侧必须经统一出口。"""
+        self.assertEqual(set(self.gate_rcg.EXCLUDE_FILES), set(rcg.EXCLUDE_FILES))
+        self.assertEqual(tuple(self.gate_rcg.TEXT_EXT), tuple(rcg.TEXT_EXT))
+        self.assertIs(self.gate_rcg, dsg._rule_gate(),
+                      "_rule_gate() 每次返回的必须是同一个模块对象")
+
+    def test_real_ledger_is_clean(self):
+        self.assertEqual(self.gate_rcg.exempt_table_errors(), [])
+
+    def test_reason_is_required(self):
+        self._replace({"api/static/llms-full.txt": "   "})
+        errs = self.gate_rcg.exempt_table_errors()
+        self.assertTrue(any(sev == "error" and "理由" in msg for sev, msg in errs),
+                        f"无理由的豁免没被报错: {errs}")
+
+    def test_dead_exemption_is_warned(self):
+        self._replace({**self._saved, "api/static/ghost.txt": "某理由"})
+        errs = self.gate_rcg.exempt_table_errors()
+        self.assertTrue(any(sev == "warn" and "死豁免" in msg for sev, msg in errs),
+                        f"死豁免没被提示: {errs}")
+
+    def test_ledger_entries_exist_on_disk(self):
+        for rel in self.gate_rcg.EXCLUDE_FILES:
+            self.assertTrue(
+                os.path.isfile(os.path.join(_REPO, rel.replace("/", os.sep))),
+                f"豁免台账里的 {rel} 不存在 —— 死豁免会掩盖同路径的新漏网")
+
+    def test_exempt_reason_is_readable(self):
+        self.assertTrue(
+            self.gate_rcg.exempt_reason("api/static/llms-full.txt").strip())
+        self.assertEqual(self.gate_rcg.exempt_reason("api/static/llms.txt"), "")
+
+    def test_exempt_marker_survives_membership_use(self):
+        """EXCLUDE_FILES 从 set 变 dict 后，成员判定语义必须不变。
+
+        `runtime_rules_findings(..., excluded_files=rcg.EXCLUDE_FILES)` 用的是
+        `rel in excluded_files` —— dict 的键判定与 set 一致。这条不变式值得
+        钉住，否则将来有人把它改成 list[tuple] 就静默失效。
+        """
+        rel = "api/static/llms-full.txt"
+        self.assertIn(rel, self.gate_rcg.EXCLUDE_FILES)
+        self.assertEqual(self.gate_rcg.exempt_reason(rel),
+                         self.gate_rcg.EXCLUDE_FILES[rel])
+
+
+class TestExemptLedgerFindings(unittest.TestCase):
+    """台账问题必须变成 findings（可见），而不是只活在辅助函数里。"""
+
+    def setUp(self):
+        self.gate_rcg = dsg._rule_gate()
+        self._saved = dict(self.gate_rcg.EXCLUDE_FILES)
+
+    def tearDown(self):
+        self.gate_rcg.EXCLUDE_FILES.clear()
+        self.gate_rcg.EXCLUDE_FILES.update(self._saved)
+
+    def test_clean_ledger_yields_no_findings(self):
+        self.assertEqual(dsg.check_exempt_ledger(), [])
+
+    def test_error_severity_propagates(self):
+        self.gate_rcg.EXCLUDE_FILES.clear()
+        self.gate_rcg.EXCLUDE_FILES["api/static/llms-full.txt"] = ""
+        finds = dsg.check_exempt_ledger()
+        self.assertTrue(finds, "空理由的豁免没有产出 finding")
+        self.assertEqual(finds[0].severity, "error")
+
+    def test_check_names_are_all_registered(self):
+        """新检查必须真的挂进 _CHECK_ORDER/_CHECK_TITLES，否则是装饰。"""
+        self.assertIn("exempt_ledger", dsg._CHECK_ORDER)
+        self.assertEqual(set(dsg._CHECK_ORDER), set(dsg._CHECK_TITLES),
+                         "_CHECK_ORDER 与 _CHECK_TITLES 必须一一对应")
+        produced = {f.check for f in dsg.run_checks(do_probe=False)}
+        self.assertTrue(
+            produced <= set(dsg._CHECK_ORDER),
+            f"产出了未注册的检查名（会被静默漏印）: {produced - set(dsg._CHECK_ORDER)}")
+
+
+class TestDispatchModuleDerivation(unittest.TestCase):
+    """分派唯一性的**扫描范围**必须是派生的，不能是手工文件清单。
+
+    手工清单的代价：新增一个 `api/xxx_api.py` 会掉在扫描之外，而"掉在外面"
+    没有任何信号 —— 同一块门禁里，"覆盖面靠人维护"这件事本身就是漏点。
+    """
+
+    def test_real_api_tree_is_derived_and_nonempty(self):
+        mods = dsg._dispatch_modules()
+        self.assertTrue(mods, "派生集合为空 —— 检查会在全绿里空转（分母为零）")
+        for rel in mods:
+            self.assertTrue(
+                os.path.isfile(os.path.join(_REPO, rel)),
+                f"{rel} 被派生出来但文件不存在")
+        # 已知的真实分派模块必须在集合里（否则派生逻辑被改坏了）
+        self.assertIn("api/server.py", mods)
+
+    def test_helpers_without_dispatch_names_are_not_derived(self):
+        """只是 import 了 open 之类、但没定义 do_*/handle_* 的模块不该被收。"""
+        mods = dsg._dispatch_modules()
+        self.assertNotIn("api/declaration_surface.py", mods)
+        self.assertNotIn("api/openapi_spec.py", mods)
+
+    def test_new_dispatcher_module_is_picked_up_from_a_root(self):
+        """新模块会被**自动**纳入 —— 用临时目录验证，不动真实 api/。"""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            pkg = os.path.join(td, "api")
+            os.makedirs(os.path.join(pkg, "nested"))
+            with open(os.path.join(pkg, "zzz_new_api.py"), "w",
+                      encoding="utf-8", newline="") as fh:
+                fh.write("def handle_get(self, path):\n"
+                         "    if path == '/x':\n        return 1\n"
+                         "    if path == '/x':\n        return 2\n")
+            with open(os.path.join(pkg, "nested", "inner_api.py"), "w",
+                      encoding="utf-8", newline="") as fh:
+                fh.write("def do_POST(self, path):\n"
+                         "    if path == '/y':\n        return 1\n")
+            with open(os.path.join(pkg, "not_a_dispatcher.py"), "w",
+                      encoding="utf-8", newline="") as fh:
+                fh.write("def helper(x):\n    return x\n")
+            mods = dsg._dispatch_modules(root=pkg)
+        names = [os.path.basename(m) for m in mods]
+        self.assertIn("zzz_new_api.py", names, "新增分派模块没被自动纳入")
+        self.assertIn("inner_api.py", names, "子目录里的分派模块没被纳入")
+        self.assertNotIn("not_a_dispatcher.py", names)
+
+    def test_derived_module_with_duplicate_is_actually_flagged(self):
+        """端到端：临时目录里的新模块有重复 URL → dispatch_duplicates 必须报。"""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            pkg = os.path.join(td, "api")
+            os.makedirs(pkg)
+            src = ("def handle_get(self, path):\n"
+                   "    if path == '/dup':\n        return 1\n"
+                   "    if path == '/dup':\n        return 2\n")
+            with open(os.path.join(pkg, "zzz_new_api.py"), "w",
+                      encoding="utf-8", newline="") as fh:
+                fh.write(src)
+            mods = dsg._dispatch_modules(root=pkg)
+            self.assertTrue(mods, "前提：临时模块应被派生出来")
+        found = dsg.dispatch_duplicates(src, "zzz_new_api.py")
+        self.assertEqual(len(found), 1, "派生出来的模块里的重复 URL 没被报出")
+        self.assertIn("/dup", found[0].detail)
+
+    def test_empty_root_is_reported_not_silently_green(self):
+        """分母为零必须报错，不能退化成"没找到问题"。"""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            pkg = os.path.join(td, "empty_api")
+            os.makedirs(pkg)
+            self.assertEqual(dsg._dispatch_modules(root=pkg), ())
+
+
 if __name__ == "__main__":
     unittest.main()

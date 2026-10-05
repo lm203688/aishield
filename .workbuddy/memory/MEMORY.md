@@ -66,7 +66,7 @@ agent `agent_Mt-2YPE4Kv` / handle aishield；产品 `xp_VhvfZN00Sk` **status=pen
 ## 待办
 - 🔴 沙箱 Bash 传输抖动：同路径间歇 "No such file or directory"；用单条独立调用 + cwd 相对路径。
 - 🟡 竞赛线 NO-GO（Foresight P≈2%）转向 SwarmLabs/GOAI；旧 CF token 待吊销；根目录 0 字节 `nul` 仅影响 ripgrep；`.workbuddy/memory/` 在 main 被跟踪。
-- 🟢 **2026-10-05 闭环（最新，三轮）**：① **E11 改派生 + 新增 E12**（统一前置的依赖声明必须被"从 import 图推导"校验，见铁律 10）；修掉 3 个此前未知的同类 job（其中 `unified-security-scan::self-scan` 一直在降级环境里跑）；`run_all.py` 预检扩展为"按 action 声明自查"、缺依赖退 2；`geo-indexnow-submit.yml` 纳入受监清单；`meta_monitor` M10 覆盖面自检 + M2/M3 归因收敛。② ③ **新增 E13/W7 + `.github/auto-resolvable-paths.txt`**：并发 push 的"可自动解决冲突"判据从路径前缀换成**派生的"写入者唯一"**（见铁律 11），并修掉判据自身 45s 的子进程开销（58.5s→14.6s）。全量 **2004 全绿（3 skip）**、六门禁全绿（规则 264/291、版本 4.11.0、契约 148/148 零 phantom、声明面 7/7、53 声明位零漂移），校验器 0 错 0 警。**已取得**：feed `37330943912` 上 `3-Verify Scanner Integrity` → success，其 `Run full test suite` step **success**（本轮前为 failure），即上一轮的硬验收标准在干净 runner 上成立。**唯一待验**：spine 全链 —— 本轮 spine `37330950116` 在 job 2 转绿后**卡在 job 4** `Restore and commit`（即 E13 要修的冲突）；需**单独** dispatch spine（不再同时 dispatch feed）观察 job 4 及其后 8 个 job。
+- 🟢 **2026-10-05 闭环（最新，三轮）**：① **E11 改派生 + 新增 E12**（统一前置的依赖声明必须被"从 import 图推导"校验，见铁律 10）；修掉 3 个此前未知的同类 job（其中 `unified-security-scan::self-scan` 一直在降级环境里跑）；`run_all.py` 预检扩展为"按 action 声明自查"、缺依赖退 2；`geo-indexnow-submit.yml` 纳入受监清单；`meta_monitor` M10 覆盖面自检 + M2/M3 归因收敛。② ③ **新增 E13/W7 + `.github/auto-resolvable-paths.txt`**：并发 push 的"可自动解决冲突"判据从路径前缀换成**派生的"写入者唯一"**（见铁律 11），并修掉判据自身 45s 的子进程开销（58.5s→14.6s）。全量 **2004 全绿（3 skip）**、六门禁全绿（规则 264/291、版本 4.11.0、契约 148/148 零 phantom、声明面 7/7、53 声明位零漂移），校验器 0 错 0 警。**已取得**：feed `37330943912` 上 `3-Verify Scanner Integrity` → success，其 `Run full test suite` step **success**（本轮前为 failure），即上一轮的硬验收标准在干净 runner 上成立。**✅ 已闭环（2026-10-06）**：spine `37338172156`（`69f6d595`）→ **`conclusion=success`**，`4-Commit Intel & Rules` OK，其后 `5. CI 验证`(9)/`6. 部署+Post-Deploy Gate`/`7. 反馈采纳`(5)/`8. 对外分发`(6)/`9. 迭代汇报` **全部真实执行并 OK**（仅 2 处设计内的 `Alert on Failure` 条件分支 skipped）；线上 health **4.11.0 / 264 / commit `69f6d595`**，名片+llms+geo-faqs 散文均 **264/291**。**判据**：单独 dispatch spine（**不并发** dispatch feed），否则同一生产者各写一份快照。
 - 🟡 规则数门禁仍有两类"文件清单"级盲区未做通用化：非 `TEXT_EXT` 后缀（如 `.js`/`.css` 里若写声明）与新声明面文件未入注册表。当前靠声明面门禁的运行时探针兜底，**新增对外资产时应同时更新 `api/declaration_surface.py`**。
 - 🟡 生产孤儿 DID：线上仍有 `did:aishield:f3a4f5cec744`(probe)；`DELETE` 返 403 是**正确越权防护**（非故障），真清理须在 VPS 上跑 `scripts/identity_maintenance.py --purge-orphan --yes`，未擅自加后门。
 - 🟢 2026-10-03 闭环：50 声明位零漂移、全量 **1756 全绿**（26 skip）、CI 全 success、7 条已知漏报由 8 条新规则全部检出。
@@ -104,4 +104,13 @@ append-only `api/data/identity_events.jsonl`、运维脚本 `scripts/identity_ma
 1. **解释器**：托管 3.13.12 **无 cryptography** → 密钥环降级 hmac → `issue_credential` fail-closed → 身份/意图授权集体红（11 FAIL+17 ERROR，看着像回归）。正解 **`C:\Python314\python.exe`**（cryptography 50.0.1）。`run_all.py` 已加预检（缺则 rc=2 并指路；`AISHIELD_ALLOW_DEGRADED_CRYPTO=1` 降级）。底部已补 `sys.exit(main())`（此前返回码被吞成 0）。
 2. **沙箱删除守卫**：WorkBuddy `sitecustomize` 包 `os.remove` 累计超阈值 `SystemExit(1)`；`test_personal_agent._clean_store()` 触发 → **连锁 169 条假 ERROR**。`run_all.py` 启动即进程内中和（`AISHIELD_KEEP_DELETE_GUARD=1` 保留）。
 3. **并发**：同机并发跑两个套件互踩 `api/data/*.json.tmp` → `PermissionError` + 互相造假 ERROR。判定结果前先确认没有第二个套件。
+4. **同源码的两个模块对象（2026-10-06 实测，**假绿源**）**：`scripts.rule_count_gate`（测试按包名 import）与 `rule_count_gate`（门禁按模块名 import，因它既要当脚本跑又要被 import）**是两个模块实例**。测试改前者、门禁读后者 → 改动对门禁不可见；断言"应当为空"时就得**假绿**。做法：跨模块可变状态一律经统一出口取对象（`declaration_surface_gate._rule_gate()`），并用 `is` 断言同一对象（`test_gate_and_test_share_one_module_object`）。
 - 另：`data/fleet.json` **gitignore（远端 404）但会被探针写入 `anon-2026-*`**；守卫中途 SystemExit 会让探针还原跑不完留残渣 → 需精准清 anon 成员（`tests/test_openapi_contract` 有断言盯它）。
+
+## 声明面门禁覆盖面派生（2026-10-06，同型第 5 处）
+**形状**：`declaration_surface_gate` 的「4. 门禁覆盖闭合」只验了 `_is_declared_surface`（路径白名单），漏验 `TEXT_EXT`（后缀白名单）—— 而复写一半条件 = 掉一半。实测代价：`api/static/feeds.xml` 在门禁外躺了两代（`rule_count_gate` 注释自承"仅仅因为 `.xml` 不在元组里"），靠运行时探针才掀出来。
+**修法（判据派生）**：`coverage_findings(entries, collected, exempt, patterns)` 纯函数只做集合运算，`collected` 只能来自 `rcg.collect_files()`；报错时诊断**哪一半**漏了。
+**豁免台账**：`rule_count_gate.EXCLUDE_FILES` 由 set → **`Dict[str,str]`（路径→非空理由）**（`rel in` 键判定兼容全部 4 个消费点）；新增第 5 项 `check_exempt_ledger()`：无理由=error、文件不存在=死豁免=warn。**豁免是特权，能悄悄变大的豁免表 = 门禁关掉一半**。
+**反装饰**：`test_gate_asks_the_authoritative_collector` 源码级断言 `check_gate_coverage` 必须调 `collect_files()`；反向用例 `api/static/promo.css`（ext 不收 / surface 收）先断言两个前提再断言被抓。`_CHECK_ORDER` 必须与 `_CHECK_TITLES` 一一对应。
+门禁现为 **8 项**：1 注册表 / 2 孪生 / 3 分派唯一(AST) / 4 覆盖闭合(派生) / 5 豁免台账自证 / 6 运行时规则数 / 7 运行时版本 / 8 运行时可达。测试 39→**49** 全绿。
+

@@ -28,9 +28,16 @@
   1. 注册表完整性     每个在册 URL 的服务文件存在
   2. 孪生身份审计     两根下的同名文件必须显式登记身份（拦死副本复生）
   3. 分派唯一性(AST)  同一 URL 在**同一个分派函数**里不得声明两次
-                      （拦"同 URL 双 if、靠先后顺序隐式决定谁生效"）
+                      （拦"同 URL 双 if、靠先后顺序隐式决定谁生效"）。
+                      扫描范围**从 api/ 派生**（凡定义 do_*/handle_* 的模块），
+                      不是手工文件清单 —— 清单会漏掉新增的 api/xxx_api.py
   4. 门禁覆盖闭合     被服务的声明面文件必须落在规则数/版本门禁的覆盖范围内
-  5. 运行时内容断言   直调 handler 取真实响应 → 规则数/版本必须等于权威值
+                      —— 判据**派生自** `rule_count_gate.collect_files()`，
+                      不再手抄它的条件（旧实现只抄了路径白名单，漏掉后缀
+                      白名单，`.xml` 因此两代无人发现）
+  5. 豁免台账自证     每处门禁豁免必须写明理由且文件真实存在
+                      （豁免=特权；能悄悄变大的豁免表 = 门禁关掉一半）
+  6. 运行时内容断言   直调 handler 取真实响应 → 规则数/版本必须等于权威值
                       （**这一条才是根治**：服务面错了就红，不管代码怎么重构）
 
 判据与出口
@@ -67,15 +74,46 @@ _DISPATCH_FUNCS = (
     "handle_get", "handle_post", "handle_delete",
 )
 
-# 参与分派唯一性扫描的模块。
-_DISPATCH_MODULES = (
-    "api/server.py",
-    "api/trust_api.py",
-    "api/ecosystem_api.py",
-    "api/ecosystem_support_api.py",
-    "api/personal_agent_api.py",
-    "api/connectors_api.py",
-)
+# 参与分派唯一性扫描的模块 —— **从 api/ 派生，不是手工清单**。
+# 手工清单的代价（2026-10-06 点明，见 AGENTS.md 不变量 8）：覆盖面只要靠人
+# 维护，新增一个 `api/xxx_api.py` 就会掉在外面，而"掉在外面"没有任何信号。
+# 判据改为：凡在 api/ 下、且定义了任一 _DISPATCH_FUNCS 的模块，一律纳入。
+# 实测（2026-10-06）派生结果与原手工清单**完全一致**（6/6，零缺失零多余），
+# 因此这是一次零行为变化的净改进。
+_DISPATCH_SCAN_ROOT = "api"
+
+
+def _dispatch_modules(root=None):
+    """派生参与分派唯一性扫描的模块（仓库相对 POSIX 路径，已排序）。
+
+    ``root`` 默认 ``REPO/api``；测试传临时目录即可验证"新模块会被自动纳入"，
+    不必往真实 api/ 里写文件。
+
+    返回空集合是**异常**而非"没问题"：分母为零意味着这项检查会在全绿里
+    空转（假绿的一层）。调用方 check_dispatch_uniqueness 据此报错。
+    """
+    api_root = root or os.path.join(REPO, _DISPATCH_SCAN_ROOT)
+    out = []
+    for dirpath, dirnames, filenames in os.walk(api_root):
+        dirnames[:] = [d for d in dirnames if d != "__pycache__"]
+        for fn in sorted(filenames):
+            if not fn.endswith(".py"):
+                continue
+            full = os.path.join(dirpath, fn)
+            try:
+                with open(full, encoding="utf-8") as f:
+                    tree = ast.parse(f.read(), filename=fn)
+            except (OSError, SyntaxError):
+                continue
+            names = {n.name for n in ast.walk(tree)
+                     if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))}
+            if names & set(_DISPATCH_FUNCS):
+                try:
+                    label = os.path.relpath(full, REPO).replace(os.sep, "/")
+                except ValueError:            # 跨盘符（Windows 上可能）
+                    label = full.replace(os.sep, "/")
+                out.append(label)
+    return tuple(sorted(out))
 
 
 class Finding:
@@ -90,6 +128,19 @@ class Finding:
     def as_dict(self):
         return {"check": self.check, "target": self.target,
                 "detail": self.detail, "severity": self.severity}
+
+
+def _rule_gate():
+    """门禁使用的规则数门禁模块对象。
+
+    抽成函数是刻意的：本仓库里 ``scripts.rule_count_gate``（测试按包名导入）
+    与 ``rule_count_gate``（门禁按模块名导入，因为它既要能当脚本跑、又要能被
+    import）**是两个不同的模块实例**。测试若改了错的那一个，被改的状态对
+    门禁不可见，断言的"绿"就是假的 —— 这正是假绿的一层，且极难自查。
+    统一从这里取，测试注入与生产运行才面对同一个对象。
+    """
+    import rule_count_gate as rcg
+    return rcg
 
 
 # ════════════════════════════════════════════════════════════════════════
@@ -231,7 +282,15 @@ def check_dispatch_uniqueness():
     URL —— 后者永远不可达，且门禁覆盖的恰好是后者的文件。
     """
     out = []
-    for rel in _DISPATCH_MODULES:
+    modules = _dispatch_modules()
+    if not modules:
+        # 分母为零 ≠ 没问题：这一项会变成永远绿的装饰。
+        out.append(Finding(
+            "dispatch_unique", f"{_DISPATCH_SCAN_ROOT}/",
+            "派生出的分派模块集合为空 —— 本项检查会在全绿里空转。"
+            "先确认 api/ 可读、且 _DISPATCH_FUNCS 未被改坏。"))
+        return out
+    for rel in modules:
         full = os.path.join(REPO, rel)
         if not os.path.isfile(full):
             continue
@@ -248,34 +307,91 @@ def check_dispatch_uniqueness():
 # ════════════════════════════════════════════════════════════════════════
 # 4. 门禁覆盖闭合
 # ════════════════════════════════════════════════════════════════════════
+def coverage_findings(entries, collected, exempt, patterns):
+    """纯函数：在册服务面里，哪些**声明了数字却掉在门禁覆盖面外**。
+
+    判据必须是**派生的** —— ``collected`` 只能来自
+    ``rule_count_gate.collect_files()`` 本身，不能在这里复写它的条件。
+
+    为什么把这条单拎出来：覆盖面由**两处手工白名单**合成（``TEXT_EXT`` 后缀
+    表 ∧ ``_is_declared_surface`` 路径表）。旧实现只复写了后一半，于是
+    ``.xml`` 不在元组里这件事整整两代无人发现 —— `api/static/feeds.xml`
+    一直被别人扫、被服务、却从不被门禁扫，最终是运行时探针掀出来的。
+    只要还有人"手抄一半条件"，这类漏网就会以别的扩展名/目录重演。
+    因此这里改为：**问权威函数要集合，只对它做集合运算。**
+
+    参数
+    ----
+    entries   ``[(url, rel, text), ...]`` 在册的非计算型服务面
+    collected 规则数门禁真正会扫的文件集合
+    exempt    豁免台账（路径 → 理由）
+    patterns  规则数声明模式（来自 ``rule_count_gate._patterns()``）
+    """
+    out = []
+    rcg = _rule_gate()
+    for url, rel, text in entries:
+        if rel in collected or rel in exempt:
+            continue
+        if not any(p.search(text) for p, _ in patterns):
+            # 不承载声明数字的资产（robots.txt / manifest.json …）本来就
+            # 不需要被规则数门禁覆盖，强行纳入只会把门禁噪音化。
+            continue
+        why = []
+        if not rel.endswith(tuple(rcg.TEXT_EXT)):
+            why.append(f"后缀不在 TEXT_EXT {tuple(rcg.TEXT_EXT)}")
+        if not rcg._is_declared_surface(rel):
+            why.append("路径不在 _is_declared_surface 白名单")
+        out.append(Finding(
+            "gate_coverage", url,
+            f"{rel} 对外服务且声明了规则数，却不在 rule_count_gate 的覆盖面内"
+            f"（{'; '.join(why) or 'collect_files() 未收录，原因需查'}）"
+            f"—— 服务面漏出验证面：该 URL 的数字将来漂移时没有任何门禁会报警。"))
+    return out
+
+
 def check_gate_coverage():
     """被服务的声明面文件必须落在规则数门禁的覆盖范围内。
 
     "服务面 ⊆ 验证面"是这套体系的最低要求：服务出去的东西没人管，
     等于对外承诺失去了任何一致性保证。
     """
-    import rule_count_gate as rcg
-    from api.declaration_surface import SERVED
+    rcg = _rule_gate()
+    from api.declaration_surface import SERVED, abs_path
     out = []
+    entries = []
     for url, s in sorted(SERVED.items()):
         if s.kind == "computed" or not s.rel:
             continue
         rel = s.rel.replace(os.sep, "/")
-        # 只有"承载规则数声明"的文件才需要规则数门禁覆盖：
-        # robots.txt/sitemap.xml 这类不含规则数，强行纳入会让门禁噪音化。
         try:
-            with open(os.path.join(REPO, rel), encoding="utf-8-sig",
-                      errors="replace") as f:
+            with open(abs_path(rel), encoding="utf-8-sig", errors="replace") as f:
                 text = f.read()
         except OSError as e:
             out.append(Finding("gate_coverage", url, f"读取失败: {e}"))
             continue
-        declares = any(p.search(text) for p, _ in rcg._patterns())
-        if declares and not rcg._is_declared_surface(rel):
-            out.append(Finding(
-                "gate_coverage", url,
-                f"{rel} 对外声明了规则数，但不在 rule_count_gate 的覆盖范围内 "
-                f"（_is_declared_surface=False）—— 服务面漏出验证面"))
+        entries.append((url, rel, text))
+
+    # 唯一判据来源：门禁自己的收集函数。刻意不在这里重算 ext/surface 条件。
+    out += coverage_findings(entries, set(rcg.collect_files()),
+                             dict(rcg.EXCLUDE_FILES), rcg._patterns())
+    return out
+
+
+# ════════════════════════════════════════════════════════════════════════
+# 5. 豁免台账自证
+# ════════════════════════════════════════════════════════════════════════
+def check_exempt_ledger():
+    """EXCLUDE_FILES 的每一处豁免都必须写明理由，且文件真实存在。
+
+    豁免 = 把某个对外资产从门禁里拿出去。若豁免表能悄悄变大，门禁就等于
+    被关掉一半 —— 这是假绿的第 2 层（"退化成空集合"的孪生形态）。
+    因此豁免必须自证，死豁免必须清掉（死豁免会掩盖同路径的新漏网）。
+    """
+    rcg = _rule_gate()
+    out = []
+    for severity, msg in rcg.exempt_table_errors():
+        out.append(Finding("exempt_ledger", "rule_count_gate.EXCLUDE_FILES",
+                           msg, severity=severity))
     return out
 
 
@@ -306,7 +422,7 @@ def runtime_rules_findings(url: str, rel: str, body: str, auth, patterns,
     豁免，这里必须沿用同一份名单，否则"运行时口径比文件口径更严"会制造一批
     改不掉的假红 —— 而改不掉的假红，最终会被人用豁免抹掉，等于没有门禁。
     """
-    import rule_count_gate as rcg
+    rcg = _rule_gate()
     rel = (rel or "").replace(os.sep, "/")
     if rel and rel in excluded_files:
         return []
@@ -353,7 +469,7 @@ def check_runtime(do_probe: bool = True):
     这是本门禁存在的理由：前四条都在"仓库里"，只有这条在"服务出去之后"。
     """
     from api.declaration_surface import SERVED
-    import rule_count_gate as rcg
+    rcg = _rule_gate()
     import openapi_contract as oc
 
     out = []
@@ -399,21 +515,24 @@ def run_checks(do_probe: bool = True):
     findings += check_twin_identity()
     findings += check_dispatch_uniqueness()
     findings += check_gate_coverage()
+    findings += check_exempt_ledger()
     findings += check_runtime(do_probe=do_probe)
     return findings
 
 
 _CHECK_ORDER = ("registry_files", "twin_identity", "dispatch_unique",
-                "gate_coverage", "runtime_rules", "runtime_version", "runtime")
+                "gate_coverage", "exempt_ledger",
+                "runtime_rules", "runtime_version", "runtime")
 
 _CHECK_TITLES = {
     "registry_files": "1. 注册表完整性",
     "twin_identity": "2. 孪生副本身份",
     "dispatch_unique": "3. 分派唯一性（AST）",
-    "gate_coverage": "4. 门禁覆盖闭合",
-    "runtime_rules": "5. 运行时规则数断言",
-    "runtime_version": "6. 运行时版本断言",
-    "runtime": "7. 运行时可达性",
+    "gate_coverage": "4. 门禁覆盖闭合（派生）",
+    "exempt_ledger": "5. 豁免台账自证",
+    "runtime_rules": "6. 运行时规则数断言",
+    "runtime_version": "7. 运行时版本断言",
+    "runtime": "8. 运行时可达性",
 }
 
 
