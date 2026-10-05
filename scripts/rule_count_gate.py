@@ -338,6 +338,28 @@ def _is_declared_surface(rel: str) -> bool:
     return False
 
 
+def declared_surface_changed(paths) -> List[str]:
+    """从一批改动路径里筛出"对外声明面"的那些。
+
+    供 ``scripts/git_push_safe.sh`` 在**推送前**调用：本仓 16 个推送点全部经过
+    那个脚本，所以"自动提交改写了对外资产却没有验证"只需要在那里堵一次。
+
+    判据必须**派生**（``_is_declared_surface`` + ``EXCLUDE_FILES``），不在这里
+    手抄路径前缀 —— 两处白名单一扩缩就会分叉，而那正是 feeds.xml 的根因形状。
+    豁免文件不算宣言面：它们本就是"数字不该被同步"的历史资产。
+    """
+    out: List[str] = []
+    for p in paths:
+        rel = (p or "").strip().replace(os.sep, "/")
+        while rel.startswith("./"):
+            rel = rel[2:]
+        if not rel or rel in EXCLUDE_FILES:
+            continue
+        if _is_declared_surface(rel):
+            out.append(rel)
+    return out
+
+
 def collect_files() -> List[str]:
     """列出所有受门禁约束的声明位文件。"""
     out: List[str] = []
@@ -616,7 +638,16 @@ def main() -> int:
     ap.add_argument("--check", action="store_true", help="不一致则退出码 1（CI 门禁）")
     ap.add_argument("--sync", action="store_true", help="把声明位对齐权威值")
     ap.add_argument("--json", action="store_true")
+    ap.add_argument("--declared-surface", action="store_true",
+                    help="从 stdin 读改动路径，打印其中属于对外声明面的那些"
+                         "（供 git_push_safe.sh 推送前预检）")
     args = ap.parse_args()
+
+    if args.declared_surface:
+        # 刻意早退：这是被 shell 高频调用的窄出口，不该顺带走一遍全仓扫描。
+        for rel in declared_surface_changed(sys.stdin.read().splitlines()):
+            print(rel)
+        return 0
 
     auth = authority()
     pats = _patterns()

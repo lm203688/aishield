@@ -50,6 +50,41 @@ def _auto_declaration_files(batch: list) -> list:
     return extras
 
 
+def _surface_precheck(files: list) -> None:
+    """本批推送若改动对外声明面，先跑规则数门禁；不一致即中止（退出码 5）。
+
+    与 ``scripts/git_push_safe.sh`` 的推送前预检**对称**：CI 侧的推送走那个
+    脚本，人/agent 侧的推送走本脚本 —— 两条入口都必须守卫，否则"收敛到一处"
+    只是把漏点从 16 个变成 2 个。
+
+    为什么不给逃生开关：真需要推的就跑 ``rule_count_gate.py --sync``。
+    多一个环境变量开关，就等于多一条没人复核的绕过路径。
+    """
+    rels = []
+    for f in files:
+        if f.startswith("!"):
+            f = f[1:]
+        rels.append(os.path.relpath(os.path.abspath(f), ROOT).replace(os.sep, "/"))
+    try:
+        import rule_count_gate as g
+        surface = g.declared_surface_changed(rels)
+    except Exception as exc:                      # noqa: BLE001
+        print(f"  ! 声明面预检不可用（不阻断本批）：{exc}")
+        return
+    if not surface:
+        return
+    p = subprocess.run(
+        [sys.executable, os.path.join(_SCRIPTS, "rule_count_gate.py"), "--check"],
+        capture_output=True, text=True, timeout=300)
+    if p.returncode != 0:
+        print(p.stdout or "")
+        print(p.stderr or "")
+        raise SystemExit(
+            f"声明面预检失败（本批改动 {', '.join(surface)}）：规则数声明不一致。\n"
+            f"先跑 python scripts/rule_count_gate.py --sync 再推。")
+    print(f"  ✓ 声明面预检通过：{', '.join(surface)}")
+
+
 ap = argparse.ArgumentParser(description="多文件单提交推送（Contents API）")
 ap.add_argument("message")
 ap.add_argument("files", nargs="*")
@@ -64,6 +99,7 @@ FILES = list(ARGS.files)
 if not FILES:
     raise SystemExit("usage: _push_batch.py <msg> <file>...")
 FILES += _auto_declaration_files(FILES)
+_surface_precheck(FILES)
 
 
 def req(method, url, payload=None):

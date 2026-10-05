@@ -12,7 +12,7 @@ job 4 终止，其后 8 个 job 全部 skipped，并报一次假警。
 根因不是那次重叠，而是**分类判据用了路径前缀这个代理**。因此本轮的修法是：
 把判据从"路径长什么样"换成"写入者是否唯一"，并让声明受 E13 派生校验。
 
-本文件锁死三件事
+本文件锁死四件事
 ----------------
 1. 派生器**按调用对象**解析写入者，而不是"文件里出现了该字面量且有写调用"。
    后者会把 scripts/rule_decay.py 误判成 data/generated_rules.json 的写入者
@@ -23,9 +23,14 @@ job 4 终止，其后 8 个 job 全部 skipped，并报一次假警。
 3. E10 必须守住**统一 push 入口**的退出码。原先 `if "git_push_safe" in s: continue`
    让入口整行免检，而门禁自己的报错信息又叫人改用这个入口 —— 「推荐了入口却不守
    入口」，与 E11/E12/E13 同型；刻意降级必须有 `allow-push-degrade: <理由>` 声明。
+4. 带 `[skip ci]` 的自动提交若改写**对外声明面**，其推送必须经被验证的路径：
+   `git_push_safe.sh` 在推送前跑声明面预检（`--declared-surface` 派生判据 +
+   `rule_count_gate --check`），不一致即 **exit 4 拒绝推送**；E14 守住这条。
+   实测事故：自动分发用写死的 133 覆盖了 feeds.xml 里刚修好的 264，全程零报警。
 """
 
 import ast
+import os
 import re
 import shutil
 import subprocess
@@ -482,6 +487,305 @@ class TestPushSwallowGate(unittest.TestCase):
         marker = re.search(r"allow-push-degrade\s*:\s*(\S.*)", src)
         self.assertIsNotNone(marker, "该例外必须带 allow-push-degrade 声明")
         self.assertTrue(marker.group(1).strip(), "声明必须写理由")
+
+
+class TestSkipCiDeclaredSurface(unittest.TestCase):
+    """E14：带 CI-skip 的自动提交若改写对外声明面，其推送必须经**被验证的**路径。
+
+    实测事故（2026-10-06）：channel-distribution 的 publish job 会重写
+    `api/static/feeds.xml` 与 `README.md`，提交信息带 `[skip ci]`（ci.yml 完全不跑），
+    于是它用生成脚本里写死的 133 覆盖了当天刚修好的 264，全程零报警。
+    闭环的写入者恰是唯一能绕过全部门禁的人 —— 所以这条必须单独钉住。
+    """
+
+    def _jobs(self, script):
+        return {"a": {"runs-on": "ubuntu-latest",
+                      "steps": [{"run": script}]}}
+
+    def _errors(self, script, entry_ok=True):
+        return V.skip_ci_declared_surface_errors(self._jobs(script), entry_ok)
+
+    # ── 反向用例：门禁不是空转 ──────────────────────────────────────
+    def test_declared_write_behind_skip_ci_without_verification_is_caught(self):
+        errs = self._errors(
+            "git add README.md\n"
+            'git commit -m "auto: x [skip ci]"\n'
+            "git push origin main\n")
+        self.assertEqual(len(errs), 1, f"应当报错，实际 {errs}")
+        self.assertIn("没有任何验证", errs[0][1])
+        self.assertIn("README.md", errs[0][1])
+
+    def test_real_channel_distribution_shape_is_caught(self):
+        """拿**真实**的 workflow 结构做验证：把入口换掉就必须报。
+
+        这条是"把测试写在自己想象的结构上"的解药 —— 上面那些是合成样例，
+        这条喂的是仓库里真跑的那份（`channel-distribution.yml` 的 publish job，
+        它 staged 了 `api/static/feeds.xml` + `README.md`）。
+        """
+        data, err = V._load(ROOT / ".github" / "workflows" / "channel-distribution.yml")
+        self.assertEqual(err, "", f"读取真实 workflow 失败: {err}")
+        publish = data["jobs"]["publish"]
+        staged = set()
+        for b in V._run_texts(publish):
+            for m in V._GIT_ADD_RE.finditer(b):
+                staged.update(m.group(1).split())
+        self.assertIn("api/static/feeds.xml", staged,
+                      "前提失效：该 job 不再暂存声明面，本用例已不代表真实结构")
+        self.assertEqual(
+            V.skip_ci_declared_surface_errors({"publish": publish}, True), [],
+            "真实 job 走了统一入口且入口有预检，不该报")
+
+        import copy
+        broken = copy.deepcopy(publish)
+        for step in broken["steps"]:
+            if isinstance(step, dict) and "run" in step:
+                step["run"] = step["run"].replace(
+                    "bash scripts/git_push_safe.sh", "git push origin main")
+        errs = V.skip_ci_declared_surface_errors({"publish": broken}, True)
+        self.assertEqual(len(errs), 1,
+                         "把统一入口换成裸 git push 后必须报 E14（真实结构）")
+
+    def test_entry_script_losing_its_precheck_is_caught(self):
+        """入口在、但预检被摘掉 → 报"收敛到一处在这一处失守"。"""
+        errs = self._errors(
+            "git add README.md\n"
+            'git commit -m "auto: x [skip ci]"\n'
+            "bash scripts/git_push_safe.sh\n", entry_ok=False)
+        self.assertEqual(len(errs), 1)
+        self.assertIn("预检被摘掉", errs[0][1])
+
+    # ── 正向用例：不该被误伤 ────────────────────────────────────────
+    def test_push_via_entry_with_precheck_passes(self):
+        self.assertEqual(self._errors(
+            "git add README.md\n"
+            'git commit -m "auto: x [skip ci]"\n'
+            "bash scripts/git_push_safe.sh\n"), [])
+
+    def test_in_job_self_check_passes(self):
+        """没走入口但在本 job 内自检 —— 也算验证发生过。"""
+        self.assertEqual(self._errors(
+            "git add api/static/feeds.xml\n"
+            "python scripts/rule_count_gate.py --check\n"
+            'git commit -m "auto: x [skip ci]"\n'
+            "git push origin main\n"), [])
+
+    def test_non_declared_staged_paths_are_ignored(self):
+        self.assertEqual(self._errors(
+            "git add data/state/x.json docs/blog/y.md\n"
+            'git commit -m "auto: x [skip ci]"\n'
+            "git push origin main\n"), [])
+
+    def test_commit_without_skip_marker_is_ignored(self):
+        """不带 CI-skip → ci.yml 会跑，不需要额外要求。"""
+        self.assertEqual(self._errors(
+            "git add README.md\n"
+            'git commit -m "chore: x"\n'
+            "git push origin main\n"), [])
+
+    def test_real_repo_entry_has_the_precheck(self):
+        self.assertIn("rule_count_gate", V._push_script_text(),
+                      "git_push_safe.sh 里的声明面预检不见了 —— E14 的前提失效")
+
+    def test_real_repo_workflows_are_clean(self):
+        files = sorted(list(V.WF_DIR.glob("*.yml")) + list(V.WF_DIR.glob("*.yaml")))
+        bad = []
+        for f in files:
+            data, err = V._load(f)
+            if err or not isinstance(data, dict):
+                continue
+            for jname, msg in V.skip_ci_declared_surface_errors(
+                    data.get("jobs") or {}, True):
+                bad.append(f"{f.name}:{jname} {msg}")
+        self.assertEqual(bad, [],
+                         "真实 workflow 有未验证的对外声明面写入: " + " | ".join(bad))
+
+
+class TestDeclaredSurfaceChanged(unittest.TestCase):
+    """`rule_count_gate.declared_surface_changed()` —— push 前预检用的窄出口。
+
+    判据必须**派生**（复用 `_is_declared_surface` + `EXCLUDE_FILES`），
+    不在这里手抄路径前缀；否则两处白名单一扩缩就又分叉。
+    """
+
+    def setUp(self):
+        import importlib
+        self.rcg = importlib.import_module("scripts.rule_count_gate")
+
+    def test_real_surfaces_are_recognized(self):
+        got = set(self.rcg.declared_surface_changed(
+            ["README.md", "api/static/llms.txt", "mcp-server/README.md",
+             "registry/x.json", "docs/benchmark/a.md"]))
+        for rel in ("README.md", "api/static/llms.txt", "mcp-server/README.md"):
+            self.assertIn(rel, got, f"{rel} 是对外声明面，却被判成非声明面")
+
+    def test_non_surfaces_are_excluded(self):
+        got = self.rcg.declared_surface_changed(
+            ["scripts/foo.py", "data/state/ci.json", "docs/old-doc.md",
+             "docs/blog/x.md", "scanner/rules.py", "tests/test_x.py"])
+        self.assertEqual(got, [], f"非声明面被误判为声明面: {got}")
+
+    def test_exempt_files_are_not_surfaces(self):
+        """豁免文件本就是"数字不该被同步"的资产 —— 不该触发推送前预检。"""
+        self.assertEqual(
+            self.rcg.declared_surface_changed(["api/static/llms-full.txt"]), [])
+
+    def test_leading_dot_slash_is_normalized(self):
+        self.assertEqual(self.rcg.declared_surface_changed(["./README.md"]),
+                         ["README.md"])
+
+    def test_blank_lines_are_ignored(self):
+        self.assertEqual(
+            self.rcg.declared_surface_changed(["", "   ", "\t"]), [])
+
+    def test_cli_export_is_usable(self):
+        """shell 侧靠 `--declared-surface` 读 stdin —— 出口必须真能跑。"""
+        p = subprocess.run(
+            [sys.executable, str(ROOT / "scripts" / "rule_count_gate.py"),
+             "--declared-surface"],
+            cwd=str(ROOT), input="README.md\nscripts/x.py\napi/static/llms.txt\n",
+            capture_output=True, text=True, timeout=120)
+        self.assertEqual(p.returncode, 0, f"出口失败: {p.stderr}")
+        self.assertEqual(p.stdout.split(), ["README.md", "api/static/llms.txt"])
+
+
+# ── 推送前声明面预检：真跑 git，验证脚本**真的会拒绝推送** ────────────────
+# 夹具里的 scripts/rule_count_gate.py 是**替身**：它的 `--declared-surface`
+# 委派给真模块（保证判据仍是派生的），`--check` 的退出码由 FAKE_GATE_RC 控制。
+# 这样既能构造"声明不一致"，又不用把整个仓库搬进临时目录。
+_FAKE_GATE = '''\
+import importlib.util, os, sys
+_spec = importlib.util.spec_from_file_location("rcg_real", os.environ["AISHIELD_REAL_GATE"])
+_m = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_m)
+if "--declared-surface" in sys.argv:
+    for p in _m.declared_surface_changed(sys.stdin.read().splitlines()):
+        print(p)
+    sys.exit(0)
+sys.exit(int(os.environ.get("FAKE_GATE_RC", "0")))
+'''
+
+
+def _build_surface_seed():
+    """裸 origin + 一份带 README/状态文件/替身门禁的种子提交。"""
+    seed = Path(tempfile.mkdtemp(prefix="aishield_surface_seed_"))
+    bare = seed / "origin.git"
+    _git_raw(seed, "init", "-q", "--bare", "--initial-branch=main", str(bare))
+    work = seed / "work"
+    _git_raw(seed, "clone", "-q", str(bare), str(work))
+    _git_raw(work, "config", "user.email", "seed@t")
+    _git_raw(work, "config", "user.name", "seed")
+    (work / "scripts").mkdir(parents=True, exist_ok=True)
+    (work / "data" / "state").mkdir(parents=True, exist_ok=True)
+    (work / "scripts" / "rule_count_gate.py").write_text(_FAKE_GATE, encoding="utf-8")
+    (work / "README.md").write_text("# seed\n", encoding="utf-8")
+    (work / "data" / "state" / "x.json").write_text('{"v":0}\n', encoding="utf-8")
+    _git_raw(work, "add", "-A")
+    _git_raw(work, "commit", "-qm", "seed")
+    _git_raw(work, "push", "-q", "origin", "main")
+    return seed
+
+
+@unittest.skipUnless(shutil.which("git") and shutil.which("bash"),
+                     "需要 git 与 bash")
+class TestPushSurfacePrecheck(unittest.TestCase):
+    """`git_push_safe.sh` 在推送前必须挡住"改写了对外声明面但数字不一致"的提交。
+
+    实测事故：自动分发的 `[skip ci]` 提交把 feeds.xml 的 264 覆盖回 133。
+    `[skip ci]` 让 ci.yml 完全不跑，所以唯一的补救时机就是**推送之前**。
+    """
+
+    _CLONE_CFG = ("-c", "gc.auto=0", "-c", "maintenance.auto=false",
+                  "-c", "core.autocrlf=false", "-c", "advice.detachedHead=false",
+                  "-c", "core.fsmonitor=false")
+
+    @classmethod
+    def setUpClass(cls):
+        cls._seed = _build_surface_seed()
+
+    @classmethod
+    def tearDownClass(cls):
+        shutil.rmtree(cls._seed, ignore_errors=True)
+
+    def setUp(self):
+        self.tmp = Path(tempfile.mkdtemp(prefix="aishield_surface_"))
+        self.addCleanup(shutil.rmtree, self.tmp, ignore_errors=True)
+
+    def _git(self, cwd, *args):
+        p = subprocess.run(("git",) + args, cwd=str(cwd), check=False,
+                           capture_output=True, text=True, timeout=60)
+        return p
+
+    def _clone_b(self):
+        origin = self.tmp / "origin.git"
+        shutil.copytree(self._seed / "origin.git", origin)
+        b = self.tmp / "B"
+        self._git(self.tmp, "clone", "-q", *self._CLONE_CFG,
+                  "-c", "user.email=b@t", "-c", "user.name=b",
+                  str(origin), str(b))
+        return b
+
+    def _commit(self, repo, rel, content, msg="local"):
+        (repo / rel).write_text(content, encoding="utf-8")
+        self._git(repo, "add", "-A")
+        self._git(repo, "commit", "-qm", msg)
+
+    def _remote_head(self, repo):
+        p = self._git(repo, "ls-remote", "origin", "main")
+        return p.stdout.split()[0] if p.stdout.strip() else ""
+
+    def _run_script(self, repo, **env_extra):
+        env = dict(os.environ)
+        env["AISHIELD_REAL_GATE"] = str(ROOT / "scripts" / "rule_count_gate.py")
+        env.update({k: str(v) for k, v in env_extra.items()})
+        p = subprocess.run(["bash", str(PUSH_SH), "1", "1", "main"],
+                           cwd=str(repo), check=False, capture_output=True,
+                           text=True, timeout=300, env=env)
+        return p.returncode, (p.stdout or "") + (p.stderr or "")
+
+    # ── 核心反向用例 ─────────────────────────────────────────────────
+    def test_declared_surface_with_inconsistent_rules_is_refused(self):
+        b = self._clone_b()
+        before = self._remote_head(b)
+        self._commit(b, "README.md", "# changed\n")
+        rc, out = self._run_script(b, FAKE_GATE_RC=1)
+        self.assertEqual(rc, 4, f"必须拒绝推送（exit 4），实际 rc={rc}\n{out}")
+        self.assertIn("拒绝推送", out)
+        self.assertIn("README.md", out)
+        self.assertEqual(self._remote_head(b), before,
+                         "被拒绝的提交不得出现在远端")
+
+    def test_declared_surface_with_consistent_rules_pushes(self):
+        b = self._clone_b()
+        before = self._remote_head(b)
+        self._commit(b, "README.md", "# changed\n")
+        rc, out = self._run_script(b, FAKE_GATE_RC=0)
+        self.assertEqual(rc, 0, f"数字一致就该放行，实际 rc={rc}\n{out}")
+        self.assertIn("声明面预检通过", out)
+        self.assertNotEqual(self._remote_head(b), before, "远端应已前进")
+
+    def test_non_surface_change_never_runs_the_gate(self):
+        """没碰声明面就不该多跑一次门禁 —— 用 rc=99 证明它确实没被调用。"""
+        b = self._clone_b()
+        self._commit(b, "data/state/x.json", '{"v":1}\n')
+        rc, out = self._run_script(b, FAKE_GATE_RC=99)
+        self.assertEqual(rc, 0, f"非声明面改动不该被拦，实际 rc={rc}\n{out}")
+        self.assertNotIn("声明面预检", out)
+
+    def test_repo_without_the_gate_is_unaffected(self):
+        """复用本脚本的其他仓库（没有 scripts/rule_count_gate.py）行为不变。"""
+        b = self._clone_b()
+        (b / "scripts" / "rule_count_gate.py").unlink()
+        self._commit(b, "README.md", "# changed\n")
+        rc, out = self._run_script(b)
+        self.assertEqual(rc, 0, f"非本仓不该受影响，实际 rc={rc}\n{out}")
+
+    def test_lookalike_paths_are_not_treated_as_surface(self):
+        """路径判定不是"名字像不像" —— 故意起个 api_static_probe.txt 来钉住。"""
+        b = self._clone_b()
+        self._commit(b, "api_static_probe.txt", "x\n")
+        rc, out = self._run_script(b, FAKE_GATE_RC=1)
+        self.assertEqual(rc, 0,
+                         f"api_static_probe.txt 不是声明面，不该被拦，实际 rc={rc}\n{out}")
 
 
 if __name__ == "__main__":

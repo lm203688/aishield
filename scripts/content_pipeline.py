@@ -60,6 +60,34 @@ def _save_text(path, text):
         f.write(text)
 
 
+_RULE_COUNT_CACHE = ""
+
+
+def _rule_count() -> str:
+    """对外文案里的规则数**必须派生自权威源**，不得写死。
+
+    2026-10-06 事故：本文件第 271 行曾写死 ``133 条安全规则``。它位于
+    ``scripts/*.py`` —— 既不在 ``TEXT_EXT`` 里、也落在 ``_is_declared_surface``
+    白名单之外，所以规则数门禁从未看到它。而它每天会把 ``api/static/feeds.xml``
+    重新生成一遍：``8d35a9f8``（2026-10-05 14:05）刚把它修成 264，
+    当晚自动分发提交 ``4819625d``（2026-10-05 16:25，带 ``[skip ci]``）
+    就用这里的 133 覆盖了回去，且**不触发任何 CI**。
+    线上当时仍是 264（部署 16:23 早于该提交），下一次部署才会把 133 发出去。
+
+    刻意 **fail closed**：拿不到权威值就抛异常、让 job 红。宁可分发失败，
+    也不能把过期的对外承诺发出去 —— "退化成默认值"正是假绿的第 2 层。
+    """
+    global _RULE_COUNT_CACHE
+    if _RULE_COUNT_CACHE:
+        return _RULE_COUNT_CACHE
+    _here = os.path.dirname(os.path.abspath(__file__))
+    if _here not in sys.path:
+        sys.path.insert(0, _here)
+    from rule_count_gate import authority  # 唯一真相源，不复制数字
+    _RULE_COUNT_CACHE = str(authority()["mcp"])
+    return _RULE_COUNT_CACHE
+
+
 def _now_iso():
     return datetime.now(TZ).isoformat()
 
@@ -268,7 +296,7 @@ tags: ["case-study", "MCP", "security-scan"]
 
 ## 风险分析
 
-基于 AIShield 133 条安全规则扫描，该工具存在以下问题：
+基于 AIShield {_rule_count()} 条安全规则扫描，该工具存在以下问题：
 
 - **总分**: {score}/100（{"🟢 优良" if score >= 80 else "🟡 中等" if score >= 50 else "🔴 高危"}）
 - **主要风险**: {risk}

@@ -30,11 +30,28 @@
 #   写入者必须存在且唯一（唯一生产者 = last-writer-wins 成立的前提）。
 #   声明文件不存在时退回内置前缀 data/state/*，与本修正之前的行为一致。
 #
+# 【2026-10-06 修正】推送前**声明面预检**：若本次提交改动了对外声明面
+#   （README / api/static/* / mcp-server/* / registry/* 等），推送前必须先跑
+#   `rule_count_gate.py --check`，不一致就拒绝推送（退出码 4）。
+#
+#   为什么堵在这里而不是各个 workflow：本仓 16 个推送点**全部**经过本脚本
+#   （`validate_workflows.py` 的 E10 盯着这一点），所以这是一次性收口。
+#   为什么必须有：自动闭环的写入者恰是唯一绕过所有门禁的人 ——
+#   channel-distribution 的 publish job 会重写 api/static/feeds.xml，提交信息
+#   带 `[skip ci]`（不触发 ci.yml），于是 2026-10-05 当晚它用生成脚本里写死的
+#   133 覆盖了当天 14:05 刚修好的 264，**全程零报警**；直到下一次 CI 才炸，
+#   而线上仍是 264（部署早于那次提交）—— 下一次部署就会把 133 发出去。
+#
+#   判据**派生自** `rule_count_gate.declared_surface_changed()`（不在这里手抄
+#   路径前缀），且只对「本次提交真正改动的文件」取交集：没碰声明面就不多跑一次。
+#   被复用的其他仓库（没有 scripts/rule_count_gate.py）→ 整段跳过，行为不变。
+#
 # 退出码:
 #   0 = push 成功
 #   1 = 重试耗尽仍失败(真失败，上游 job 应转 failure)
 #   2 = 本地没有待 push 的提交(调用方已自行判断)
 #   3 = 非状态文件出现内容冲突，需人工处理
+#   4 = 本次提交改动了对外声明面，但规则数声明不一致 / 无法验证 —— 拒绝推送
 #
 # 注意: 行尾必须保持 LF。workflow 内嵌 heredoc 与本脚本配合时，CRLF 会让定界符
 # 永不匹配(见 scripts/validate_workflows.py E9)。
@@ -89,6 +106,45 @@ is_snapshot() {
 }
 
 _load_auto_patterns
+
+# ── 声明面预检（见文件头 2026-10-06 修正）─────────────────────────────
+# 取「本 run 将要 push 的提交」相对远端改动过的文件；浅克隆下 merge-base
+# 可能失败，退回只列 HEAD 这一个提交（自动化作普遍是单提交推送）。
+_declared_surface_of_commit() {
+  local base changed
+  base="$(git merge-base "origin/$BRANCH" HEAD 2>/dev/null || true)"
+  if [ -n "$base" ]; then
+    changed="$(git diff --name-only "$base" HEAD 2>/dev/null || true)"
+  fi
+  if [ -z "${changed:-}" ]; then
+    changed="$(git show --name-only --pretty=format: HEAD 2>/dev/null || true)"
+  fi
+  [ -n "$changed" ] || return 0
+  printf '%s\n' "$changed" | "$1" scripts/rule_count_gate.py --declared-surface 2>/dev/null || true
+}
+
+# 只在"本仓"（存在规则数门禁）上生效：本脚本被复用时行为必须不变。
+if [ -f scripts/rule_count_gate.py ]; then
+  PY=""
+  for _c in python3 python; do
+    if command -v "$_c" >/dev/null 2>&1; then PY="$_c"; break; fi
+  done
+  if [ -z "$PY" ]; then
+    # 无法验证 = 不能把可能过期的对外声明发出去（fail closed）。
+    echo "::error::git_push_safe: 找不到 python，无法做声明面预检 —— 拒绝推送（退出码 4）"
+    exit 4
+  fi
+  SURFACE="$(_declared_surface_of_commit "$PY")"
+  if [ -n "$SURFACE" ]; then
+    if ! "$PY" scripts/rule_count_gate.py --check >/tmp/gps_surface.log 2>&1; then
+      echo "::error::提交改动了对外声明面，但规则数声明不一致 —— 拒绝推送"
+      echo "  改动: $(echo "$SURFACE" | tr '\n' ' ')"
+      sed -n '1,20p' /tmp/gps_surface.log
+      exit 4
+    fi
+    echo "git_push_safe: 声明面预检通过 ($(echo "$SURFACE" | tr '\n' ' '))"
+  fi
+fi
 
 for i in $(seq 1 "$ATTEMPTS"); do
   # rebase 阶段：把本 run 的提交重放到最新 origin/$BRANCH 之上。

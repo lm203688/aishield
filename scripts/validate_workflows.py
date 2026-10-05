@@ -22,6 +22,9 @@ step id 而非 job id，GitHub Actions 解析期直接报错，整个 workflow 4
   E11 有第三方依赖的本仓入口却没引用统一前置 prepare-tests（派生判据，不写死名单）
   E12 统一前置没装齐测试套件**真正**依赖的第三方包（从 import 图推导，不用人工清单）
   E13 声明为"并发冲突可自动解决"的数据文件不是单一生产者（快照语义前提不成立）
+  E14 用带 CI-skip（`[skip ci]`）的提交改写了对外声明面，却既没走统一推送入口
+      `git_push_safe.sh`（其内置推送前声明面预检）、也没在本 job 内自检
+      `rule_count_gate` —— ci.yml 被跳过，这次对外写入没有任何验证
   W1 关键步骤使用 continue-on-error（测试形同虚设）
   W2 workflow 无任何触发器
   W3 cron 表达式字段数不合法
@@ -269,6 +272,133 @@ def _push_script_text() -> str:
         return p.read_text(encoding="utf-8") if p.exists() else ""
     except OSError:
         return ""
+
+
+# ── E14：带 CI-skip 的自动提交改写了对外声明面 ⇒ 必须经被验证的路径推送 ────
+# 起因（2026-10-06，实测）：channel-distribution.yml 的 publish job 执行
+#
+#     git add docs/blog/ api/static/feeds.xml README.md data/state/...
+#     git commit -m "auto: 内容多渠道分发 [skip ci]"
+#     bash scripts/git_push_safe.sh
+#
+# `[skip ci]` 让 ci.yml **完全不跑**，所以这一次"写入对外资产"的操作没有任何
+# 验证。当晚它就用 scripts/content_pipeline.py 里写死的 133 覆盖了
+# api/static/feeds.xml 中当天 14:05 刚修好的 264 —— 全程零报警；下一次 CI 才炸，
+# 而那时线上仍是 264（部署早于该提交），**下一次部署才会把 133 发出去**。
+#
+# 这与 E10 的分工：E10 管"失败不许被吞"，E14 管"**验证根本没发生**"。
+# 后者更隐蔽 —— jobs 全绿、文件确实推上去了，只是推上去的内容把门禁的结论
+# 推翻了。闭环的写入者恰是唯一能绕过全部门禁的人，所以必须单独钉一条。
+SKIP_CI_MARK = re.compile(r"\[(?:skip ci|ci skip|no ci)\]", re.I)
+_GIT_ADD_RE = re.compile(r"git\s+add\s+([^\n|;&]+)")
+_GIT_COMMIT_MSG_RE = re.compile(
+    r"git\s+commit\s[^\n]*?-m\s*(?:\"([^\"]*)\"|'([^']*)')")
+_PUSH_ENTRY_RE = re.compile(r"git_push_safe\.sh")
+_RULE_GATE_RE = re.compile(r"rule_count_gate\.py")
+
+
+def _run_texts(node) -> Iterable[str]:
+    """产出一段 workflow/action 结构里所有 run 脚本文本。"""
+    if isinstance(node, dict):
+        for k, v in node.items():
+            if k == "run" and isinstance(v, str):
+                yield v
+            else:
+                yield from _run_texts(v)
+    elif isinstance(node, list):
+        for i in node:
+            yield from _run_texts(i)
+
+
+def _rule_gate_module():
+    """规则数门禁模块（唯一真相源），只用于**读**纯函数。
+
+    刻意用与 shell 侧一致的方式导入同一个模块名；注意本仓
+    `scripts.rule_count_gate` 与 `rule_count_gate` 是两个模块对象，
+    任何**可变状态**都不能从这里取（见 tests/test_declaration_surface.py
+    的 test_gate_and_test_share_one_module_object）。
+    """
+    scripts_dir = str(REPO_ROOT / "scripts")
+    if scripts_dir not in sys.path:
+        sys.path.insert(0, scripts_dir)
+    import rule_count_gate  # noqa: PLC0415
+    return rule_count_gate
+
+
+def _declared_surface_of(paths: Iterable[str]) -> List[str]:
+    """这批路径里属于"对外声明面"的那些 —— 判据来自规则数门禁，不手抄前缀。"""
+    try:
+        rcg = _rule_gate_module()
+        return list(rcg.declared_surface_changed(sorted(set(paths))))
+    except Exception:                                  # noqa: BLE001
+        # 取不到就返回空会**把这条检查变成装饰**，所以宁可不报也不要报错：
+        # 真正的兜底是 git_push_safe.sh 推送前的预检（它失败即拒推）。
+        return []
+
+
+def skip_ci_declared_surface_errors(jobs, entry_has_precheck: bool):
+    """纯函数：给定 jobs 结构，产出 ``[(job_name, 错误信息), ...]``（E14）。
+
+    抽成纯函数是为了让测试能喂**合成 jobs** 做反向验证 —— 否则"门禁不是空转"
+    就只能靠改真实 workflow 来证明，而那种验证在 CI 里做不了。
+    对外声明面的判定走 `_declared_surface_of()`（派生自规则数门禁，不手抄前缀）。
+    """
+    out = []
+    for jname, jbody in (jobs or {}).items():
+        if not isinstance(jbody, dict):
+            continue
+        blocks = list(_run_texts(jbody))
+        whole = "\n".join(blocks)
+        staged, skip_msgs = set(), []
+        for b in blocks:
+            for m in _GIT_ADD_RE.finditer(b):
+                for tok in m.group(1).split():
+                    tok = tok.strip().rstrip("/")
+                    if tok:
+                        staged.add(tok)
+            for m in _GIT_COMMIT_MSG_RE.finditer(b):
+                msg = m.group(1) or m.group(2) or ""
+                if SKIP_CI_MARK.search(msg):
+                    skip_msgs.append(msg)
+        if not staged or not skip_msgs:
+            continue
+        decl = _declared_surface_of(staged)
+        if not decl:
+            continue
+        via_entry = bool(_PUSH_ENTRY_RE.search(whole))
+        self_checked = bool(_RULE_GATE_RE.search(whole))
+        if via_entry and entry_has_precheck:
+            continue
+        if via_entry and not entry_has_precheck:
+            out.append((jname,
+                        "依赖统一推送入口做声明面验证，但入口 git_push_safe.sh 里"
+                        "已经找不到 rule_count_gate —— 预检被摘掉了，"
+                        "「收敛到一处」在这一处失守"))
+        elif not self_checked:
+            out.append((jname,
+                        "用带 CI-skip 的提交改写了对外声明面"
+                        f"（{', '.join(sorted(decl))}），却既没走统一推送入口 "
+                        "git_push_safe.sh、也没在本 job 内自检 rule_count_gate —— "
+                        "ci.yml 被 `[skip ci]` 跳过，这次对外写入**没有任何验证**"))
+    return out
+
+
+def _check_skip_ci_declared_surface(results: List[Dict[str, Any]]) -> None:
+    """E14：见上方常量区注释。"""
+    push_text = _push_script_text()
+    entry_has_precheck = "rule_count_gate" in (push_text or "")
+    for r in results:
+        if r.get("kind") in ("action", "policy"):
+            continue
+        path = WF_DIR / r["file"]
+        if not path.exists():
+            continue
+        data, err = _load(path)
+        if err or not isinstance(data, dict):
+            continue
+        for jname, msg in skip_ci_declared_surface_errors(
+                data.get("jobs") or {}, entry_has_precheck):
+            r["errors"].append(f"E14 job '{jname}' {msg}")
 
 
 def _check_auto_resolvable_paths(results: List[Dict[str, Any]]) -> None:
@@ -1034,6 +1164,7 @@ def cross_check(results: List[Dict[str, Any]]) -> None:
     """
     _check_prereq_covers_suite_deps(results)
     _check_auto_resolvable_paths(results)
+    _check_skip_ci_declared_surface(results)
 
     known = {r["name"] for r in results if r.get("name")}
     for r in results:
