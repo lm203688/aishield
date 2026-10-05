@@ -141,8 +141,12 @@ def _print_status(ring, key_file: str) -> None:
 
 
 # ── 迁移后自检：过不了就回滚 ──────────────────────────────────────────
-def _selfcheck(ring) -> list[str]:
-    """迁移后必须全过的四道检查。返回失败清单（空 = 全过）。"""
+def _selfcheck(ring, had_old: bool) -> list[str]:
+    """迁移后必须全过的四道检查。返回失败清单（空 = 全过）。
+
+    ``had_old`` 表示**迁移前是否真的有一把旧 active 密钥**。冷启动（生产从来没
+    签发过密钥，api/data 全部被 gitignore、tarball 也不带）时它是 False。
+    """
     fails: list[str] = []
 
     active = ring.active()
@@ -195,11 +199,22 @@ def _selfcheck(ring) -> list[str]:
     except Exception as e:                       # noqa: BLE001
         fails.append(f"自测凭证签发失败：{e}")
 
-    # 4) 双窗口：旧密钥必须还在 deprecated（否则历史凭证一夜之间全部验不过）
-    if not ring.deprecated():
-        fails.append("旧密钥未进入 deprecated（双窗口丢失，历史凭证将验不过）")
-    if ring.deprecated() and not ring.is_ed25519_ready():
-        fails.append("迁移后 active 仍不是 Ed25519")
+    # 4) 双窗口：迁前有旧密钥时，旧密钥必须还在 deprecated（否则历史凭证一夜
+    #    之间全部验不过）。
+    #    这里必须区分冷启动：2026-10-05 线上是**从没有过签发密钥**的状态
+    #    （api/data/*.json 全被 gitignore、runner 投递的 tarball 也不含它），
+    #    old_alg=None。第一版把「deprecated 非空」写成无条件断言，于是冷启动
+    #    迁移被自己这条检查判失败、立刻回滚，线上永远冷启动、永远 ready=false ——
+    #    门禁报红但没人知道是自检写错了。宁可检查松一档，也不能让自检把正确
+    #    的动作判成错误。
+    if had_old:
+        if not ring.deprecated():
+            fails.append("旧密钥未进入 deprecated（双窗口丢失，历史凭证将验不过）")
+        elif not ring.is_ed25519_ready():
+            fails.append("迁移后 active 仍不是 Ed25519")
+    else:
+        if not ring.is_ed25519_ready():
+            fails.append("迁移后 active 不是 Ed25519（冷启动也必须拿到非对称密钥）")
 
     return fails
 
@@ -269,7 +284,10 @@ def main(argv: list[str] | None = None) -> int:
     # ── 3) 自检，不过就回滚 ──
     ring3 = vi.SigningKeyRing(path=key_file)
     ring3.load()
-    fails = _selfcheck(ring3)
+    had_old = res.get("old_alg") is not None
+    print(f"[selfcheck] 冷启动={not had_old}（迁移前无旧密钥，不要求 deprecated 双窗口）"
+          if not had_old else "[selfcheck] 迁移前存在旧密钥，按双窗口校验 deprecated")
+    fails = _selfcheck(ring3, had_old)
     if fails:
         print("[自检失败] 以下检查未通过：")
         for f in fails:
