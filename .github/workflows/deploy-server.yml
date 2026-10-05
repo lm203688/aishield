@@ -394,11 +394,34 @@ jobs:
             # 规则构成明细（信息性输出，便于事后对照）
             print(f"线上规则构成: {live.get('rules_breakdown')}")
 
+            # 6) 身份签名后端可用（L1 可移植身份 / L3 意图授权的唯一前提）
+            # 前五条断言证明「代码和规则真的上去了」，第六条证明「上去了还能用」。
+            # 缺 cryptography 时 eco/crypto_sign.py 静默降级 hmac-sha256，JWKS
+            # 发不出公钥 —— 单测与 CI 因为都装了而全绿，生产却是死能力。没有这条
+            # 断言，这次缺口会一直静默到某天有人拿 JWKS 去验凭证才发现验不过。
+            ir = live.get("identity_ready")
+            sb = live.get("signing_backend")
+            print(f"identity    : ready={ir}  签名后端={sb or '—'}")
+            if ir is not True:
+                reason = live.get("identity_reason")
+                failures.append(
+                    f"身份签名后端不可用：identity_ready={ir!r}，signing_backend={sb!r}"
+                    f"（{reason or '无诊断'}）。L1 可移植身份与 L3 意图授权在生产签不出"
+                    f"任何可被第三方验证的东西。在 VPS 上执行："
+                    f"`python3 -m pip install cryptography && python3 "
+                    f"scripts/rotate_signing_key.py --yes`，本条断言下一次部署即转绿。")
+            if sb == "hmac-sha256":
+                # 后端本身对称 —— 即便 identity_ready 侥幸为 True 也不放行：
+                # 对称密钥绝不该是对外签发用的活跃密钥。
+                failures.append(
+                    f"签名后端是 hmac-sha256（对称）：对称密钥绝不能作为对外签发用的"
+                    f"活跃密钥，请跑 scripts/rotate_signing_key.py 迁移到 Ed25519。")
+
         for msg in failures:
             print("❌ " + msg)
         if failures:
             sys.exit(1)
-        print("✅ 五项断言全部通过：线上与磁盘一致，且磁盘与触发 commit 一致")
+        print("✅ 六项断言全部通过：线上与磁盘一致、磁盘与触发 commit 一致、身份签名后端可用")
         PYVERDICT
         verdict=$?
 
