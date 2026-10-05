@@ -38,6 +38,8 @@ class _HermeticMandate(unittest.TestCase):
         self._snap = {}
         for name in ("agents.json", "registration_tokens.json"):
             p = os.path.join(vi.BASE, "api", "data", name)
+            # 顺序必须反（与 test_verifiable_identity 同源 bug）：exists 先求，
+            # 否则 CI 干净 checkout（无 api/data/*.json）setUp 直接崩。
             self._snap[name] = (p, open(p, "rb").read() if os.path.exists(p) else None)
 
     def tearDown(self):

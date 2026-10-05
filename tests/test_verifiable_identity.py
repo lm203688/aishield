@@ -35,8 +35,15 @@ class _HermeticIdentity(unittest.TestCase):
         self._snap = {}
         for name in ("agents.json", "registration_tokens.json"):
             p = os.path.join(vi.BASE, "api", "data", name)
-            with open(p, "rb") as f:
-                self._snap[name] = (p, f.read() if os.path.exists(p) else None)
+            # exists 必须先于 open。顺序写反过（open 在外、exists 在三元里）会让
+            # 干净环境（CI 只有 checkout，api/data/*.json 全被 gitignore）在 setUp
+            # 直接抛 FileNotFoundError，27 个用例集体 error；而本地 api/data 有种子
+            # 数据、这条分支永远走不到 —— 又一次「本地绿 ≠ 干净环境绿」。
+            raw = None
+            if os.path.exists(p):
+                with open(p, "rb") as f:
+                    raw = f.read()
+            self._snap[name] = (p, raw)
 
     def tearDown(self):
         for name, (p, raw) in self._snap.items():
