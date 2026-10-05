@@ -72,6 +72,21 @@ jobs:
           exit 1
         fi
 
+    # 契约管"路由能不能被发现"，但**发现得到 ≠ 服务得对**。
+    # 2026-10-05 实测：线上 /.well-known/agent-card.json 返回 235/241 规则
+    # （真值 264/291），而 rule_count_gate --check 全绿 —— 门禁扫的是不可达
+    # 分支引用的副本。这条步骤把验证对象上移到**运行时响应**：直调 handler
+    # 取真实字节，比对规则数/版本，同时断言分派唯一性（AST）与孪生副本身份。
+    - name: Assert declaration surfaces are served correctly
+      run: |
+        if ! python scripts/declaration_surface_gate.py --check; then
+          echo "::error::公开声明面的服务内容与权威值不一致"
+          echo "修复方式：先看门禁列出的 URL —— 服务面与验证面已脱节。"
+          echo "规则数类：python scripts/rule_count_gate.py --sync"
+          echo "路由/孪生类：改 api/declaration_surface.py 的注册表并同步实现"
+          exit 1
+        fi
+
     # server.json 的 description 上限 100 字符这类约束，
     # 服务端只回一句笼统的 400，必须在提交前校验
     - name: Validate MCP registry manifest

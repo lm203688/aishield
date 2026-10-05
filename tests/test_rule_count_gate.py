@@ -272,8 +272,32 @@ class TestBreakdownExclusion(unittest.TestCase):
                 '238 MCP / 244 skill rules. Your code never leaves your machine."')
         got = _drifts(line)
         self.assertTrue(got, '含话题提及的行被整行豁免，真声明位漏检')
-        self.assertEqual([g for _, g, _ in got], ["244"],
-                         f'应检出 skill 漂移 244，实得 {got}')
+        # 必须判成 **pair**（两个数一起报），不能只抓 skill 一侧。
+        # 2026-10-05 实测：pair 模式当时要求大写 `Skill`，而这里是小写，
+        # 于是整个 pair 不匹配、只剩单值的 `244 skill rules` 被抓住 ——
+        # `--sync` 便把 244 改对、把 238 原样留下，产出"半对文件"，
+        # 而 238 因为不匹配任何模式，门禁随后一路绿灯。smithery.yaml 里
+        # 那句 `238 MCP / 291 skill rules` 就是这么躺了两个多月的。
+        kinds = {g for _, g, _ in got}
+        self.assertEqual(kinds, {('238', '244')},
+                         f'双值声明必须整体判为 pair 漂移，实得 {got}')
+
+    def test_lowercase_skill_pair_is_not_half_fixed(self):
+        """小写 `skill` 的 `N MCP / M skill rules` 必须整体识别为 pair。
+
+        这是上一条的产品化版本：只要 pair 因大小写漏匹配，`--sync` 就会
+        写出半对文件。判据用最终产物 —— sync 后必须**两个数都对**。
+        """
+        auth = G.authority()
+        patterns = G._patterns()
+        line = 'x. 238 MCP / 244 skill rules. y.'
+        fixed, changes = G.sync_text(line, auth, patterns)
+        mcp = auth['mcp']
+        skill = auth['skill']
+        self.assertEqual(changes, 1, f'应记录 1 处修正，实得 {changes}')
+        self.assertIn(f'{mcp} MCP', fixed, f'sync 未修正 MCP 一侧：{fixed!r}')
+        self.assertIn(f'{skill} skill', fixed, f'sync 未修正 skill 一侧：{fixed!r}')
+        self.assertNotIn('238', fixed, f'sync 后残留旧值：{fixed!r}')
 
     def test_cell_marker_only_exempts_neighbouring_number(self):
         """紧邻分类编号的数字豁免，远端的仍须校验。

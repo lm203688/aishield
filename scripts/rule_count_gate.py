@@ -87,7 +87,14 @@ def _patterns() -> List[Tuple[re.Pattern, str]]:
         #   "227 条 MCP / 233 条 Skill"   "235 MCP / 241 Skill"
         #   "235/241 条规则"（README mermaid 里的紧凑写法）
         (re.compile(r"(?<!\d)(\d+)\s*条\s*MCP\s*/\s*(\d+)\s*条\s*Skill"), "pair"),
-        (re.compile(r"(?<!\d)(\d+)\s*MCP\s*/\s*(\d+)\s*Skill"), "pair"),
+        # re.I 不是风格问题：2026-10-05 实测 `docs/.well-known/agent-card.json`
+        # 写的是 `against 235 MCP / 241 skill rule categories`（小写 skill）。
+        # 上面这条要求大写 `Skill`，于是**整个 pair 不匹配**，只剩单值的
+        # `241 skill rule categories` 被抓住 —— 235 一侧无任何模式覆盖。
+        # 后果不是"漏报一条"，而是 **sync 会写出半对的文件**：把 241 改成 291、
+        # 把 235 原样留下，得到 `235 MCP / 291 skill`，而门禁因为 235 不匹配
+        # 任何模式、一路绿灯。假阳性 + 静默篡改 + 假绿再次连环。
+        (re.compile(r"(?<!\d)(\d+)\s*MCP\s*/\s*(\d+)\s*Skill", re.I), "pair"),
         (re.compile(r"(?<!\d)(\d+)\s*/\s*(\d+)\s*条\s*(?:安全)?(?:检测)?规则"), "pair"),
         # 英文双值。缺这条会踩一次真实的"同步写坏数据"事故：llms.txt 写的是
         # `the OWASP MCP + ASI01-10 dual taxonomy with 253 / 280 rules.`，
@@ -200,7 +207,14 @@ def _is_breakdown_context(line: str, start: int) -> bool:
 # 必须含 .ts：MCP server 的工具描述里写着"N 条规则"，而工具描述是**每一次
 # 调用都展示给用户**的东西（比 README 更直白）。它此前因为不是 TEXT_EXT 里
 # 的后缀而完全逃过门禁，是 tests/test_finding_anchor 抓到的。
-TEXT_EXT = (".md", ".json", ".yaml", ".yml", ".html", ".htm", ".txt", ".ts")
+#
+# 必须含 .xml（2026-10-05 补）：api/static/feeds.xml 是对外发布的 Atom 订阅源，
+# 第 28 行写着"基于 AIShield 227 条安全规则扫描"，227 停在两代之前。它被漏掉
+# 的原因不是模式不全，而**仅仅因为 .xml 不在这个元组里** —— 声明面门禁的运行时
+# 探针（scripts/declaration_surface_gate.py）扫响应文本时才掀出来。
+# 教训：静态门禁的"文件清单"本身就是一处盲区来源，扩展名白名单必须与
+# "对外真会服务的资产"对齐。
+TEXT_EXT = (".md", ".json", ".yaml", ".yml", ".html", ".htm", ".txt", ".ts", ".xml")
 
 EXCLUDE_DIR_PARTS = (
     ".git", ".workbuddy", "node_modules", "__pycache__", "tests",
@@ -222,6 +236,31 @@ EXCLUDE_FILES = {
 ALLOWED_DOCS = ("docs/llms.txt",)
 
 
+def _served_docs_surfaces() -> Tuple[str, ...]:
+    """docs/ 下**真正被服务的**声明面文件（从注册表现算，不硬编码）。
+
+    为什么必须算出来而不能只靠 ALLOWED_DOCS 手写：2026-10-05 实测线上
+    `https://aishield.tools/.well-known/agent-card.json` 返回 235/241，
+    而 `--check` 报"无漂移"。根因就是这个函数当时**不存在** ——
+    docs/ 被整体当作"带日期的历史快照"豁免，而该 URL 服务的恰是
+    `docs/.well-known/agent-card.json`；门禁覆盖的 `api/static/` 那份
+    反而被一段不可达代码引用、永不服务。门禁扫死副本、放行活副本，
+    于是"检查全绿 + 线上全错"。
+
+    刻意不加 try/except 兜底：注册表导入失败就必须炸，退化成空元组等于
+    把上一次的假绿原样搬回来。假绿的第 2 层就是"吞异常/退化成空集合"。
+    """
+    from api.declaration_surface import ROOT_DOCS, SERVED
+    return tuple(
+        s.rel.replace(os.sep, "/")
+        for s in SERVED.values()
+        if s.rel and s.rel.replace(os.sep, "/").startswith(ROOT_DOCS + "/")
+    )
+
+
+SERVED_DOCS = _served_docs_surfaces()
+
+
 def _is_declared_surface(rel: str) -> bool:
     """判定一个文件是否属于"对外声明面"。
 
@@ -229,6 +268,11 @@ def _is_declared_surface(rel: str) -> bool:
     用户/Agent 真会读到的地方，而不是全仓库 grep。
     """
     if rel in ALLOWED_DOCS:
+        return True
+    # 被服务的 docs 声明面（当前是 docs/.well-known/agent-card.json）。
+    # 它们和 api/static 下的副本**同样对外**，只因历史遗留的"两个根"而
+    # 分居两处；门禁必须两边都覆盖，否则又回到"扫死副本、放行活副本"。
+    if rel in SERVED_DOCS:
         return True
     if rel.startswith("api/static/"):
         return True
@@ -339,18 +383,15 @@ def iter_declarations(lines: List[str], patterns: List[Tuple[re.Pattern, str]],
                 yield lineno, m, kind, got, expected, ok
 
 
-def scan(rel: str, auth: Dict[str, str],
-         patterns: List[Tuple[re.Pattern, str]]) -> List[Dict[str, Any]]:
-    """返回该文件的漂移条目。"""
-    full = os.path.join(REPO, rel)
-    if not os.path.isfile(full):
-        return []
-    try:
-        with open(full, "r", encoding="utf-8-sig", errors="replace") as f:
-            text = f.read()
-    except OSError:
-        return []
+def scan_text(label: str, text: str, auth: Dict[str, str],
+              patterns: List[Tuple[re.Pattern, str]]) -> List[Dict[str, Any]]:
+    """扫描**任意文本**的规则数漂移条目。
 
+    与 `scan()` 分开是为了让"服务出去的字节"也能被同一套模式校验：
+    声明面门禁（scripts/declaration_surface_gate.py）拿运行时响应当输入，
+    不需要先把响应写成临时文件再扫。两处共用同一套模式与同一份权威值，
+    避免"文件里用一套口径、线上用另一套"的老问题重演。
+    """
     lines = text.splitlines(keepends=True)
     findings: List[Dict[str, Any]] = []
     for lineno, m, kind, got, expected, ok in iter_declarations(
@@ -359,14 +400,14 @@ def scan(rel: str, auth: Dict[str, str],
             continue
         if kind == "pair":
             findings.append({
-                "file": rel, "line": lineno, "kind": "pair",
+                "file": label, "line": lineno, "kind": "pair",
                 "match": m.group(0),
                 "got": {"mcp": got[0], "skill": got[1]},
                 "expected": {"mcp": expected[0], "skill": expected[1]},
             })
         else:
             findings.append({
-                "file": rel, "line": lineno, "kind": kind,
+                "file": label, "line": lineno, "kind": kind,
                 "match": m.group(0), "got": got, "expected": expected,
             })
 
@@ -380,11 +421,25 @@ def scan(rel: str, auth: Dict[str, str],
                 continue
             if m.group(3) != str(cats[key]):
                 findings.append({
-                    "file": rel, "line": lineno, "kind": "category",
+                    "file": label, "line": lineno, "kind": "category",
                     "match": m.group(0), "got": m.group(3),
                     "expected": str(cats[key]), "category": key,
                 })
     return findings
+
+
+def scan(rel: str, auth: Dict[str, str],
+         patterns: List[Tuple[re.Pattern, str]]) -> List[Dict[str, Any]]:
+    """返回该文件的漂移条目。"""
+    full = os.path.join(REPO, rel)
+    if not os.path.isfile(full):
+        return []
+    try:
+        with open(full, "r", encoding="utf-8-sig", errors="replace") as f:
+            text = f.read()
+    except OSError:
+        return []
+    return scan_text(rel, text, auth, patterns)
 
 
 # ── 逐类小计 ─────────────────────────────────────────────────────────

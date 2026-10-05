@@ -764,21 +764,19 @@ class AIShieldHandler(BaseHTTPRequestHandler):
             _record_usage("smithery-server-card", self.client_address[0])
             return
 
-        # Agent Card (A2A discovery)
-        if path == "/.well-known/agent-card.json":
-            agent_card_path = os.path.join(BASE, "static", ".well-known", "agent-card.json")
-            if os.path.exists(agent_card_path):
-                with open(agent_card_path, "r", encoding="utf-8") as f:
-                    json_data = f.read()
-                body = json_data.encode("utf-8")
-                self.send_response(200)
-                self.send_header("Content-Type", "application/json; charset=utf-8")
-                self.send_header("Content-Length", str(len(body)))
-                self.send_header("Access-Control-Allow-Origin", "*")
-                self.end_headers()
-                self.wfile.write(body)
-                _record_usage("agent-card", self.client_address[0])
-                return
+        # ── 原 [agent-card 静态分支] 已删除（2026-10-05）────────────────
+        # 此处曾读取 BASE/static/.well-known/agent-card.json 直出静态字节。
+        # 它是**不可达死代码**：do_GET 开头的 Trust API 分支已对同一 path
+        # 先 return（先命中者胜），这一段永远执行不到。
+        #
+        # 危害不是"多写了几行"，而是**门禁验证了错的副本**：规则数门禁扫的
+        # 正是这个 static 副本，而线上真正服务的是 trust_api 读的 docs 副本，
+        # 于是门禁全绿、线上 agent card 长期报 235/241（真值 264/291）。
+        # 服务面与验证面一旦脱节，"一致性检查通过"就不再构成任何证据。
+        #
+        # 现在该 URL 在 do_GET 中**只有一处声明**；该不变量由
+        # scripts/declaration_surface_gate.py 以 AST 断言钉死，
+        # 并由 tests/test_declaration_surface.py 回归。
 
         # GEO: Atom Feed
         if path == "/feeds.xml":
@@ -810,8 +808,13 @@ class AIShieldHandler(BaseHTTPRequestHandler):
                 self.wfile.write(body)
                 return
 
-        # GEO: Security Contact
-        if path == "/security.txt":
+        # GEO: Security Contact（RFC 9116）
+        # 规范规定的**规范路径**是 /.well-known/security.txt；/security.txt 是
+        # 历史兼容写法。robots.txt 第 17、39 行把两条都写成 Allow，而这里此前
+        # 只实现了 /security.txt —— 于是我们一边向爬虫/安全研究者"允许"规范路径，
+        # 一边对规范路径 404。这是对外承诺与服务能力的直接矛盾，由声明面门禁的
+        # 运行时探针（scripts/declaration_surface_gate.py）实测抓出。
+        if path in ("/security.txt", "/.well-known/security.txt"):
             security_path = os.path.join(BASE, "static", ".well-known", "security.txt")
             if os.path.exists(security_path):
                 with open(security_path, "r", encoding="utf-8") as f:
@@ -1926,16 +1929,53 @@ class AIShieldHandler(BaseHTTPRequestHandler):
                 self._send_json({"error": str(e)}, 500)
             return
 
-        # ── L2 策略贯通：把扫描期 policy pack 绑定到运行时网关 ──
-        #   "unbind" 解绑（回到纯默认运行时行为）；其余按 pack 名绑定。
+        # ── L2 策略贯通 + 工具级运行时治理：/api/v1/governance/policy ──
+        # 这一个端点承载两类动作，历史上却写成**两个同路径 if**，后者永不
+        # 可达（2026-10-05 由 scripts/declaration_surface_gate.py 的 AST
+        # 唯一性检查抓出，此前无人察觉）。后果不是"少一个接口"，而是：
+        # 请求 `{"action":"deny"}` 落到"策略包绑定"分支后，deny 被当成 pack 名，
+        # 返回 `unknown policy pack: ` —— 一个降级成**误导性错误**的安全控制，
+        # 比缺失更危险：调用方会以为是自己参数写错了。
+        #
+        #   action=bind   (默认) → 绑定扫描期 policy pack（需 pack）
+        #   action=unbind        → 解绑，回到纯默认运行时行为
+        #   action=allow / deny  → 工具级放行/拒绝（需 server，可选 tools）
+        #   action=default_deny  → 全局默认拒绝开关（需 enabled）
         if path == "/api/v1/governance/policy":
             try:
                 from eco import runtime_governance as rg
+                action = str(data.get("action") or "bind").strip().lower()
+
+                # ── 工具级动作：不需要 pack，也可能不需要 server ──
+                if action in ("allow", "deny"):
+                    server = str(data.get("server") or "").strip()
+                    if not server:
+                        self._send_json({"success": False,
+                                         "error": "server is required"}, 400)
+                        return
+                    fn = rg.allow_tool if action == "allow" else rg.deny_tool
+                    res = fn(server, data.get("tools", "*"))
+                    self._send_json(res, 200 if res.get("success") else 400)
+                    return
+                if action == "default_deny":
+                    res = rg.set_default_deny(bool(data.get("enabled", True)))
+                    self._send_json(res, 200 if res.get("success") else 400)
+                    return
+                if action not in ("bind", "unbind"):
+                    # 明确回绝未知 action，而不是悄悄按 bind 处理 ——
+                    # 静默降级正是让上面那个死分支存活至今的原因。
+                    self._send_json({
+                        "success": False,
+                        "error": "action 必须是 bind / unbind / allow / deny / default_deny",
+                    }, 400)
+                    return
+
+                # ── 策略包动作 ──
                 server = str(data.get("server") or "").strip()
                 if not server:
-                    self._send_json({"success": False, "error": "server is required"}, 400)
+                    self._send_json({"success": False,
+                                     "error": "server is required"}, 400)
                     return
-                action = str(data.get("action") or "bind").strip().lower()
                 if action == "unbind":
                     self._send_json({"success": True, "server": server,
                                      "bound": rg.unbind_pack(server)}, 200)
@@ -1965,24 +2005,6 @@ class AIShieldHandler(BaseHTTPRequestHandler):
                 res = rg.record_incident(data.get("server", ""),
                                          data.get("severity", "high"),
                                          data.get("detail"))
-                self._send_json(res, 200 if res.get("success") else 400)
-            except Exception as e:
-                self._send_json({"error": str(e)}, 500)
-            return
-
-        if path == "/api/v1/governance/policy":
-            try:
-                from eco import runtime_governance as rg
-                action = (data.get("action") or "").strip()
-                if action == "allow":
-                    res = rg.allow_tool(data.get("server", ""), data.get("tools", "*"))
-                elif action == "deny":
-                    res = rg.deny_tool(data.get("server", ""), data.get("tools", "*"))
-                elif action == "default_deny":
-                    res = rg.set_default_deny(bool(data.get("enabled", True)))
-                else:
-                    res = {"success": False,
-                           "error": "action 必须是 allow / deny / default_deny"}
                 self._send_json(res, 200 if res.get("success") else 400)
             except Exception as e:
                 self._send_json({"error": str(e)}, 500)

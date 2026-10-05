@@ -260,8 +260,13 @@ class TestPublicNamespaceDisclosure(unittest.TestCase):
 
     def test_two_llms_txt_copies_are_byte_identical(self):
         """两份 llms.txt 历史上多次漂移，改动必须同步。"""
-        a = open("api/static/llms.txt", "rb").read()
-        b = open("docs/llms.txt", "rb").read()
+        # 用 with 读：Windows 上未关闭的句柄会拖住文件锁，后续用例改写该文件
+        # （规则数同步、_push_batch 等）就可能撞上 PermissionError —— 那会被
+        # 当成"产品回归"，而真因只是测试自己没关文件。
+        with open("api/static/llms.txt", "rb") as fa:
+            a = fa.read()
+        with open("docs/llms.txt", "rb") as fb:
+            b = fb.read()
         self.assertEqual(a, b)
 
     def test_alignment_doc_exists_and_records_divergence(self):
