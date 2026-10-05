@@ -117,6 +117,35 @@ _DEPLOY_META = _load_json(DEPLOY_META_FILE, {})
 _git_meta_fallback = {}
 
 
+def _identity_backend_fact() -> dict:
+    """把「身份/意图签名到底是不是 Ed25519」变成一条可查事实。
+
+    为什么要为一条 health 字段写这么长的注释：2026-10-05 发现线上 JWKS 是
+    ``keys=[] ready=false``，根因是**运行环境没装 cryptography**，
+    eco/crypto_sign.py 静默降级成 hmac-sha256。而本机与 CI 都装了，
+    于是 1865 个测试、148 条契约路由全绿 —— 绿的是代码，不是生产。
+
+    这条字段就是给这种分裂装的一个探头：以后再出现「代码没问题但生产是死的」，
+    ``curl /api/v1/health | jq .signing_backend`` 第一眼就能看见。
+    """
+    try:
+        from eco import crypto_sign as _cs
+        from eco import verifiable_identity as _vi
+        return {
+            "signing_backend": _cs.backend(),
+            "identity_ready": bool(_vi.jwks().get("ready")),
+            # 后端与身份是否 ready 不一致时（例如后端已是 ed25519 但密钥环里
+            # .active 还是 hmac），即便件两侧也都在，仍要给出可定位的成因。
+            "identity_reason": (_vi.jwks().get("reason")
+                                if not _vi.jwks().get("ready") else None),
+        }
+    except Exception:                                   # noqa: BLE001
+        # health 本身绝不能因为身份探针而 500 —— 探针失败就报 unknown，
+        # 让「探不到」和「探到 HMAC」区分开，别把两者混成同一种「似乎没事」。
+        return {"signing_backend": "unknown", "identity_ready": None,
+                "identity_reason": "身份探针异常，未能确定后端"}
+
+
 def _git_meta():
     """返回 {commit, deployed_at}；.deploy_meta.json 缺失时回退到实时 git 查询。"""
     meta = {
@@ -1049,6 +1078,14 @@ class AIShieldHandler(BaseHTTPRequestHandler):
                 # 此时 commit 是 git 实时回退值（可能比磁盘落后）。
                 "commit": _meta["commit"],
                 "deployed_at": _meta["deployed_at"],
+                # 2026-10-05：把「签名后端」写成可查事实，而不是留给人去猜。
+                # 线上 JWKS 一度是 keys=[] ready=false —— 根因是运行环境没装
+                # cryptography，eco/crypto_sign.py 静默降级成 hmac-sha256，
+                # 于是 L1 可移植身份、L3 意图授权在生产全部签不出可验的东西。
+                # 这是「跑测试的那台机器有装 cryptography / 线上那台没装」造成的
+                # 典型分裂：单测与 CI 全绿，生产是死能力。health 里不暴露它，
+                # 就只能在某次事故复盘时才发现。
+                **_identity_backend_fact(),
             })
             _record_usage("health", self.client_address[0])
             return
