@@ -1,8 +1,8 @@
 name: Prepare test environment
 description: >-
-  跑本仓测试套件的**唯一**前置入口：Python + Ed25519 签名后端 + （可选）MCP 依赖。
-  任何执行 `python tests/run_all.py` 的 job 都必须先引用本 action —— 由
-  scripts/validate_workflows.py 的 E11 强制。
+  跑本仓测试套件的**唯一**前置入口：Python + 第三方依赖（cryptography / pyyaml）
+  + （可选）MCP 依赖。任何执行 `python tests/run_all.py` 的 job 都必须先引用本
+  action —— 由 scripts/validate_workflows.py 的 E11 强制。
 
 # ── 为什么需要这个 action ──────────────────────────────────────────────
 # 【2026-10-05 事故】同一件事（"跑全量测试要装什么"）在 6 个 workflow 里各自
@@ -33,7 +33,33 @@ description: >-
 # 实际是"这台机器没装包"。这类"测试存在与否取决于环境"的状态，比测试失败更危险。
 # 故此处 fail-closed：装不上就明确报错退出，绝不降级为 skip（skip 就是假绿）。
 
+# ── 为什么 pyyaml 也在里面（2026-10-05 同日，同一类缺陷的第二次复现）───────
+# 把前置收敛到本 action 之后，同一轮里测试新增了 31 个用例（解析 YAML 结构、
+# 断言 action 的键与默认值），测试套件因此多出一个第三方依赖 pyyaml —— 而本
+# action 只声明了 cryptography。后果与上次同型，只是换了个包：
+#
+#   threat-intel-feed 的 verify job 在干净 runner 上
+#     → Ran 1968 tests / failures=10 / errors=1 / skipped=29（本地只有 3 skip）
+#     → 差额正好是那 31 个新用例：yaml 缺失时它们不是失败而是**静默跳过**
+#     → spine 再次停在 job 2
+#
+# 教训：**收敛到一处之后，那一处的内容必须是派生出来的，而不是靠人记得同步。**
+# 否则收敛只是把「N 个漏点」换成「1 个漏点」，漏的形式从"改 6 个文件"变成
+# "改 1 个文件但没人提醒你"。所以 scripts/validate_workflows.py 增加了 E12：
+# 从 tests/ 出发沿本仓 import 图做闭包，**推导**测试真正依赖的第三方包，再与
+# 下面这行 pip install 做双向 diff（漏装 = E12 报错，多装 = W6 警告）。
+# 换言之：下面这行是**被门禁读取的声明**，改依赖时改它，E12 会立刻告诉你有没有漏。
+
 inputs:
+  python-version:
+    description: >-
+      Python 版本，默认 3.13（本仓绝大多数 job 用的版本，也是 ci.yml 测试 job 的版本）。
+      之所以留这个入参：少数 job（meta-monitor / unified-security-scan）刻意用 3.11
+      做兼容性覆盖，把它们硬改成 3.13 等于顺手改掉别人的验证范围。
+      入参是为了**保留既有意图**，不是鼓励各 job 各自定版本。
+    required: false
+    default: '3.13'
+
   install-node-deps:
     description: >-
       是否安装 mcp-server 的 npm 依赖。stdio 端到端测试要真的启动 node 子进程，
@@ -50,32 +76,32 @@ runs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.13'
+        python-version: ${{ inputs.python-version }}
 
-    - name: Install Ed25519 signing backend (hard requirement)
+    - name: Install Python test dependencies (hard requirements)
       shell: bash
       run: |
-        set -o pipefail
-        if python -c "import cryptography" 2>/dev/null; then
-          echo "cryptography 已就位"
-        else
-          echo "装 cryptography —— L1 可移植身份 / L3 意图授权用例依赖真实的非对称签名路径"
-          python -m pip install --quiet cryptography
-        fi
+        # ↓↓↓ 这一行是 E12 读取的声明：测试套件 import 的第三方包必须都在这里 ↓↓↓
+        # pip 对已满足的包会短路，不会重复下载，所以无需 `if 已装 then 跳过` 分支
+        # —— 分支会让「声明」与「实际安装」两件事分叉，正是本 action 要消灭的形态。
+        python -m pip install --quiet --disable-pip-version-check cryptography pyyaml
 
-    - name: Assert signing backend is Ed25519 (fail-closed)
+    - name: Assert prerequisites are really in effect (fail-closed)
       shell: bash
       run: |
         # 装完还不够：必须验证**当前进程真的用上了**它。
         # eco/crypto_sign.py 是在 import 时按 cryptography 是否可用来定后端的，
         # 若这一步拿到的仍是 hmac-sha256，说明装的东西没生效（例如装到了别的解释器 /
         # 被 PYTHONPATH 遮蔽），此时继续跑测试只会产出误导性红。
+        # 同理 yaml 若 import 不到，run_all.py 里依赖 YAML 的用例会静默跳过 —— 跳过即假绿。
         python - <<'PY'
         import sys
         sys.path.insert(0, '.')
+        import yaml  # noqa: F401  （声明即断言：装不上就抛，不降级为 skip）
         from eco import crypto_sign as cs
         backend = cs.backend()
-        print(f"签名后端: {backend} | cryptography 可用: {cs.have_crypto()}")
+        print(f"pyyaml {yaml.__version__} | 签名后端: {backend} | "
+              f"cryptography 可用: {cs.have_crypto()}")
         if backend != cs.ALG_ED25519:
             print("::error::签名后端仍为 %s —— 测试将在错误前提下运行" % backend)
             sys.exit(1)

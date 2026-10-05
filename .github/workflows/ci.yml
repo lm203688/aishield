@@ -28,13 +28,15 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
+    # 这里原先自带 `Set up Python` + `pip install pyyaml` —— 那是「跑门禁要装什么」
+    # 的**第二处**实现（第一处是 test job）。同一件事两处各自实现，迟早只剩一处
+    # 是对的：本 job 后来还要跑 declaration_surface_gate / gen_openapi_spec /
+    # gen_task_registry，它们会 import cryptography，而 pyyaml 那一行并不管加密。
+    # 现在统一走 prepare-tests（E11 会把这类绕过直接判红）。
+    - name: Prepare gate environment
+      uses: ./.github/actions/prepare-tests
       with:
-        python-version: '3.13'
-
-    - name: Install YAML parser
-      run: pip install pyyaml
+        install-node-deps: 'false'      # 本 job 只跑 Python 门禁，不需要 mcp-server 依赖
 
     - name: Validate all workflows
       run: python scripts/validate_workflows.py

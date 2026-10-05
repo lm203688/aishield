@@ -187,6 +187,41 @@ def _crypto_backend_guard() -> str:
     return 'abort'
 
 
+def _declared_missing_deps() -> list:
+    """统一前置声明的测试依赖里，当前**不可用**的那些（cryptography 除外）。
+
+    为什么去读 `.github/actions/prepare-tests` 而不是在本地再列一遍清单：
+    在这里再列一遍就是「同一件事的第二处实现」，而本仓为此已经出过两次事故
+    （6 处各自实现、5 处漏装依赖；收敛之后新依赖 pyyaml 又漏同步）。声明只留一处，
+    这里只做「按声明自查」。
+
+    cryptography 不算在内：它的缺失由 `_crypto_backend_guard` 按降级语义处理
+    （有 AISHIELD_ALLOW_DEGRADED_CRYPTO 这个显式出口），不在这里重复报。
+    """
+    try:
+        from scripts.validate_workflows import (  # noqa: WPS433
+            declared_pip_deps, import_name_to_dist)
+        action = os.path.join(_ROOT, '.github', 'actions', 'prepare-tests',
+                              'action.yml')
+        with open(action, 'r', encoding='utf-8') as fh:
+            names = declared_pip_deps(fh.read())
+    except Exception:
+        # 读不到声明（例如只拷了 tests/ 目录）不该让整套测试跑不起来
+        return []
+    import importlib
+    missing = []
+    for name in names:
+        if name == 'cryptography':
+            continue
+        try:
+            importlib.import_module(name)
+        except Exception:
+            # 返回值用**发行名**：提示里的 `pip install X` 必须能照着做。
+            # 写导入名会装错（`pip install yaml` 装到的是 PyPI 上另一个同名的历史遗留包）。
+            missing.append(import_name_to_dist(name))
+    return missing
+
+
 def main():
     loader = unittest.TestLoader()
     suite = unittest.TestSuite()
@@ -203,6 +238,18 @@ def main():
         print("已中止：换用带 cryptography 的解释器重跑（见上面的提示）。")
         return 2
     degraded = crypto_state == 'degraded'
+
+    # 其余声明的依赖（如 pyyaml）缺了同样属于「环境不满足」，必须退 2 而不是让
+    # 依赖它的用例静默跳过（跳过即假绿），更不是把「该装包」混成「该改代码」的 1。
+    missing_deps = _declared_missing_deps()
+    if missing_deps:
+        print("=" * 68)
+        print("⚠  统一前置声明的测试依赖缺失: %s" % ", ".join(missing_deps))
+        print("   .github/actions/prepare-tests 是本仓**唯一**的依赖声明处；")
+        print("   缺包时依赖它的用例会静默跳过 —— 跳过就是假绿，所以在此中止。")
+        print("   修复：python -m pip install %s" % " ".join(missing_deps))
+        print("=" * 68)
+        return 2
 
     # 加载所有测试文件
     test_files = [

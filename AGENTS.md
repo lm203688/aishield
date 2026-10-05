@@ -29,12 +29,20 @@ prompt，对齐 **OWASP MCP Top 10 (2025)** 与 **OWASP Agentic AI Top 10 (ASI01
    推完必须 API 复验。
 5. **事件型告警必须能销案。** "本轮新增 N 条漏洞" 类告警不会自动恢复，零新增即 resolve；
    不要把它当健康型告警只在恢复时 `--resolve`。
-6. **跑测试的前提只能来自一处。** 任何 job 执行 `python tests/run_all.py` 都必须先引用
-   `.github/actions/prepare-tests` —— 由 `scripts/validate_workflows.py` 的 **E11** 强制。
-   历史事故（2026-10-05）：同一件事在 6 个 workflow 里各自实现，5 个漏装签名后端依赖 →
-   干净 runner 上 L1/L3 用例成片报假回归 → spine 在 job 2 终止、其后 8 个 job 全 skipped。
-   注意这是**递进式**的：spine 串行，修好一个 job，下一个同型 job 当天就会以同样方式失败。
-   逐个补没用，只能靠统一入口 + 门禁。
+6. **跑测试/门禁的前提只能来自一处，且那一处必须是被派生校验的。**
+   凡运行本仓入口（`tests/run_all.py` 或任何依赖闭包含第三方包的 `scripts/*.py`）
+   的 job，都必须先引用 `.github/actions/prepare-tests` —— 由
+   `scripts/validate_workflows.py` 的 **E11** 强制；该 action 里 `pip install`
+   声明的包是否覆盖测试真实依赖，由 **E12** 双向 diff 强制（依赖从 import 图推导，
+   不是人工清单）。
+   历史事故（2026-10-05，**同一天两次**）：第一次是同一件事在 6 个 workflow 里各自
+   实现、5 个漏装签名后端依赖 → 干净 runner 上 L1/L3 用例成片报假回归 → spine 在
+   job 2 终止、其后 8 个 job 全 skipped；第二次是**刚收敛完**、新用例引入 pyyaml 而
+   前置漏装 → 同型再挂一次（另外还有 3 个 job 属于同一类：各自 `pip install pyyaml`
+   或什么都不装，其中自扫描 job 一直在降级环境下跑）。
+   两个教训：① 这是**递进式**的，逐个补没用，只能靠统一入口 + 门禁；
+   ② 收敛到一处之后，那一处的内容必须**派生**出来 —— 否则只是把「N 个漏点」换成
+   「1 个漏点」，漏的形式从"改 6 个文件"变成"改 1 个文件但没人提醒你"。
 
 ## 架构速览
 
@@ -58,7 +66,7 @@ prompt，对齐 **OWASP MCP Top 10 (2025)** 与 **OWASP Agentic AI Top 10 (ASI01
 # 1. 克隆并准备
 git clone https://github.com/lm203688/aishield.git && cd aishield
 python -m venv .venv && source .venv/bin/activate
-pip install pytest cryptography     # cryptography 是**必需**的，不是可选增强
+pip install pytest cryptography pyyaml   # cryptography / pyyaml 都是**必需**的，不是可选增强
 
 # 2. 跑全量测试
 python tests/run_all.py
@@ -71,6 +79,11 @@ python scripts/prove_isolation.py
 > 与 L3 意图授权（AP2 Intent Mandate）建立在 Ed25519 上。缺它时 `eco/crypto_sign.py`
 > 会静默降级成 hmac-sha256，那两组用例 fail-closed 成片报红，**看起来像产品回归**。
 > `tests/run_all.py` 会在开跑前预检并中止（退出码 2），让你不必对着一屏误导性红找根因。
+> `pyyaml` 为什么必需：`scripts/validate_workflows.py` 与 `scripts/meta_monitor.py`
+> 靠它解析 workflow / 体检配置；缺它时校验器会报 `E1 PyYAML 未安装`，而依赖 YAML 的
+> 用例会**静默跳过** —— 跳过即假绿（2026-10-05 第二次事故正是如此：本地 3 skip、
+> CI 29 skip，没人发现那 31 个用例其实没在跑）。
+> 这两个包由 `E12` 从 import 图**推导**校验，不是靠人记得同步。
 > CI 侧由 `.github/actions/prepare-tests` 统一保证，本地无需对应 workflow 做任何事。
 
 > 把上面这段贴进 Claude Code / Codex 即可启动，无需额外讲解。

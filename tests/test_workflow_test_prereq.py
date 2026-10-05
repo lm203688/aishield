@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-"""E11 测试前置门禁 —— 「同一件事多处各自实现」这一类的封堵验证。
+"""E11 / E12 测试前置门禁 —— 「同一件事多处各自实现」这一类的封堵验证。
 
-背景（2026-10-05 事故）
-----------------------
-`python tests/run_all.py` 在 **6 个 workflow** 里各自实现，只有 ci.yml 装了
+背景（2026-10-05，**同日两次**同一类事故）
+------------------------------------------
+第一次：`python tests/run_all.py` 在 **6 个 workflow** 里各自实现，只有 ci.yml 装了
 cryptography。另外 5 个在干净 runner 上跑 → `eco/crypto_sign.py` 静默降级
 hmac-sha256 → L1 可移植身份 / L3 意图授权用例 fail-closed 成片报红 →
 threat-intel-feed 的 verify job 失败 → spine 在 job 2 终止 → **后 8 个 job
@@ -11,13 +11,21 @@ threat-intel-feed 的 verify job 失败 → spine 在 job 2 终止 → **后 8 �
 
 修法不是「补那 5 处 pip install」：spine 是串行的，修好 job 2 之后 job 3
 （rule-promoter，同样裸跑）当天就会以完全相同的方式失败。**逐个补 = 一天推进
-一格**。所以真正要钉死的是「没有人可以绕过统一前置」——那才是本文件的测试对象。
+一格**。所以真正要钉死的是「没有人可以绕过统一前置」—— E11。
 
-本组测试守三件事：
+第二次（E11 上线同一轮）：把前置收敛到 prepare-tests 之后，同一轮新增的 31 个
+用例让测试套件多出一个第三方依赖 pyyaml，而前置只声明了 cryptography。干净
+runner 上 Ran 1968 tests → failures=10 / errors=1 / skipped=29（本地 3 skip），
+spine 再次停在 job 2。教训是**收敛到一处之后，那一处的内容必须是被派生出来的**：
+于是有了 E12（从 import 图推导测试真实依赖，与 action 声明双向 diff）。
+
+本组测试守四件事：
   1. 统一前置 action 本身存在、是 composite、且**真的断言** Ed25519 后端
      （只装包不断言，等于把「装上了」和「用上了」混为一谈）；
   2. 全仓每一个跑全量套件的 job 都引用了它（正向）；
-  3. 门禁不是空转：漏引用必须报 E11，注释里提一句 run_all.py 不得误报（反向）。
+  3. 门禁不是空转：漏引用必须报 E11，注释里提一句 run_all.py 不得误报（反向）；
+  4. E12 的依赖推导必须**穿到本仓脚本里**（yaml 藏在 scripts/*.py），
+     且用「回到事故当天只声明 cryptography」来验证它当时会响（反向）。
 """
 from __future__ import annotations
 
@@ -50,8 +58,28 @@ SUITE_RUNNERS = (
 
 try:
     import yaml  # type: ignore
-except ImportError:  # 零依赖环境下跳过结构断言（文本断言仍然照跑）
+except ImportError:  # 见 _NeedsYaml：这里只记录缺失，不静默跳过
     yaml = None
+
+
+class _NeedsYaml:
+    """需要 PyYAML 才能做结构断言的测试基类。
+
+    缺失时**失败**而不是跳过。跳过等于「这条门禁今天不存在」，而它恰恰是
+    2026-10-05 一天内两次 CI 事故的同一形态：本地全绿、CI 红了一整天没人看见。
+    环境不满足时要让信号响亮 —— 这正是 run_all.py 对 cryptography 采取 abort(2)
+    的同一条理由，只是这里没有必要中止整套测试。
+    """
+
+    def setUp(self):
+        super().setUp()
+        if yaml is None:
+            self.fail(
+                "本测试需要 PyYAML；统一前置 .github/actions/prepare-tests 会安装它，"
+                "本地请 `python -m pip install pyyaml`。**不做静默跳过** —— "
+                "「测试是否运行取决于环境」正是 2026-10-05 两次事故的共同形态。"
+            )
+
 
 
 def _mk_probe(body: str) -> Path:
@@ -70,7 +98,7 @@ def _e11(errors):
     return [e for e in errors if e.startswith("E11")]
 
 
-class TestPrepareTestsAction(unittest.TestCase):
+class TestPrepareTestsAction(_NeedsYaml, unittest.TestCase):
     """统一前置 action 自身的质量。"""
 
     def test_action_file_exists(self):
@@ -88,6 +116,16 @@ class TestPrepareTestsAction(unittest.TestCase):
         self.assertIn("cryptography", text)
         self.assertIn("pip install", text)
 
+    def test_action_installs_pyyaml(self):
+        """pyyaml 的位置与 cryptography 同等重要。
+
+        2026-10-05 第二次事故就是漏了它：新用例解析 YAML，缺包时**静默跳过**
+        （本地 3 skip / CI 29 skip），于是没人看见它其实没在跑。E12 现在会把
+        「测试依赖但前置没装」变成硬错误，这里再加一道直接断言。
+        """
+        declared = V.declared_pip_deps(PREP_ACTION_PATH.read_text(encoding="utf-8"))
+        self.assertIn("yaml", declared, f"前置未声明 pyyaml：{declared}")
+
     def test_action_asserts_backend_not_just_installs(self):
         """装上了 ≠ 用上了。
 
@@ -100,12 +138,16 @@ class TestPrepareTestsAction(unittest.TestCase):
         self.assertIn("ALG_ED25519", text)
         self.assertIn("sys.exit(1)", text, "断言失败必须 fail-closed，不能只打印")
 
+    def test_action_asserts_yaml_importable(self):
+        """yaml 同样要断言：只写进 pip install 不等于当前进程真的能 import 到。"""
+        text = PREP_ACTION_PATH.read_text(encoding="utf-8")
+        self.assertIn("import yaml", text)
+
     def test_action_never_degrades_to_skip(self):
         """降级成 skip 就是假绿：L1/L3 是产品核心能力，不是可选增强。"""
         text = PREP_ACTION_PATH.read_text(encoding="utf-8")
         self.assertNotIn("continue-on-error: true", text)
 
-    @unittest.skipIf(yaml is None, "pyyaml 未安装，跳过结构断言")
     def test_node_deps_default_on(self):
         """node 依赖默认**开**。
 
@@ -117,7 +159,7 @@ class TestPrepareTestsAction(unittest.TestCase):
         self.assertEqual(str(d["inputs"]["install-node-deps"]["default"]), "true")
 
 
-class TestEverySuiteRunnerHasPrereq(unittest.TestCase):
+class TestEverySuiteRunnerHasPrereq(_NeedsYaml, unittest.TestCase):
     """正向：全仓每一个跑全量套件的 job 都必须引用统一前置。"""
 
     def test_all_workflows_pass_e11(self):
@@ -158,7 +200,7 @@ class TestEverySuiteRunnerHasPrereq(unittest.TestCase):
         )
 
 
-class TestGateCatchesMissingPrereq(unittest.TestCase):
+class TestGateCatchesMissingPrereq(_NeedsYaml, unittest.TestCase):
     """反向：一个永远不报错的门禁和没有门禁是一样的。"""
 
     def test_missing_prereq_is_flagged(self):
@@ -214,6 +256,53 @@ class TestGateCatchesMissingPrereq(unittest.TestCase):
                 f"命令写法 '{cmd}' 绕过了 E11 —— 门禁有后门",
             )
 
+    def test_script_entry_with_deps_requires_prereq(self):
+        """跑本仓**脚本**（其依赖闭包含第三方包）同样必须走统一前置。
+
+        判据是派生的，不是「盯着 run_all.py」：本仓实测另有 3 个 job 属于同一类
+        漏洞而全都不叫 run_all —— ci.yml 的 workflow-lint、meta-monitor 的
+        inspect（各自 `pip install pyyaml`），以及 unified-security-scan 的
+        self-scan（干脆什么都不装，YAML 策略与签名后端双双静默降级）。
+        写死名单的检查永远追不上下一个入口。
+        """
+        body = (_HEAD + "  lint:\n    runs-on: ubuntu-latest\n    steps:\n"
+                + _CHECKOUT
+                + "      - name: Gate\n        run: python scripts/validate_workflows.py\n")
+        p = _mk_probe(body)
+        self.addCleanup(shutil.rmtree, p.parent, ignore_errors=True)
+        errs = _e11(V.check_file(p).get("errors", []))
+        self.assertEqual(len(errs), 1, f"跑有依赖的脚本却没前置，应报 E11：{errs}")
+        self.assertIn("lint", errs[0])
+
+    def test_script_entry_without_deps_is_not_flagged(self):
+        """没有第三方依赖的脚本不该被要求装前置 —— 噪音会淹掉真信号。"""
+        body = (_HEAD + "  ver:\n    runs-on: ubuntu-latest\n    steps:\n"
+                + _CHECKOUT
+                + "      - name: Sync\n        run: python scripts/sync_version.py --check\n")
+        p = _mk_probe(body)
+        self.addCleanup(shutil.rmtree, p.parent, ignore_errors=True)
+        self.assertEqual(_e11(V.check_file(p).get("errors", [])), [])
+
+    def test_py_compile_and_docker_are_not_host_entries(self):
+        """py_compile 只编译不 import；docker 入口跑在容器里 —— 都不需要 host 装包。
+
+        两条都是实测踩出来的误报：不排除的话 ci.yml 的 docker-test（`docker run
+        --entrypoint python aishield:test /app/api/server.py`）与 self-heal 的
+        repair（`python -m py_compile api/server.py`）都会被判缺前置。
+        一个爱误报的门禁，很快会被整体无视。
+        """
+        for cmd in ("python -m py_compile api/server.py",
+                    "docker run --entrypoint python aishield:test /app/api/server.py"):
+            body = (_HEAD + "  j:\n    runs-on: ubuntu-latest\n    steps:\n"
+                    + _CHECKOUT
+                    + f"      - name: X\n        run: {cmd}\n")
+            p = _mk_probe(body)
+            self.addCleanup(shutil.rmtree, p.parent, ignore_errors=True)
+            self.assertEqual(
+                _e11(V.check_file(p).get("errors", [])), [],
+                f"'{cmd}' 被误判为需要 host 侧依赖",
+            )
+
     def test_nonexistent_local_action_is_flagged(self):
         body = (_HEAD + "  x:\n    runs-on: ubuntu-latest\n    steps:\n"
                 + "      - uses: ./.github/actions/does-not-exist\n")
@@ -224,7 +313,7 @@ class TestGateCatchesMissingPrereq(unittest.TestCase):
         self.assertEqual(len(errs), 1, f"本地 action 路径打错必须报 E4，实际 {errs}")
 
 
-class TestCompositeActionIsValidated(unittest.TestCase):
+class TestCompositeActionIsValidated(_NeedsYaml, unittest.TestCase):
     """composite action 必须和 workflow 一样受检。
 
     把前置集中到一处之后，那一处就成了 **6 个 job 的单点依赖**：它本身若 CRLF
@@ -316,6 +405,121 @@ class TestCompositeActionIsValidated(unittest.TestCase):
         self.assertIn("action.yml", names, "CLI 没有扫描 .github/actions/ 下的 action.yml")
 
 
+class TestPrereqCoversSuiteDeps(_NeedsYaml, unittest.TestCase):
+    """E12：统一前置声明的依赖必须与测试套件**真实**依赖一致。
+
+    E11 保证「所有入口都走同一个前置」，E12 保证「那个前置里装的东西是对的」——
+    两者缺一不可。少了 E12，E11 只是把「N 个漏点」收敛成「1 个漏点」：
+    2026-10-05 当天就是这么在收敛之后立刻又挂了一次（漏 pyyaml）。
+    """
+
+    def test_real_repo_is_consistent(self):
+        """正向：本仓**从前置推导出的集合**与**从 action 读出的声明**必须完全相等。"""
+        derived = set(V.third_party_imports(V._test_suite_entry_files()))
+        declared = set(V.declared_pip_deps(
+            PREP_ACTION_PATH.read_text(encoding="utf-8")))
+        self.assertEqual(
+            derived, declared,
+            f"前置声明 {sorted(declared)} 与测试真实依赖 {sorted(derived)} 不一致 —— "
+            f"漏装会让用例静默跳过（假绿），多装是死声明",
+        )
+        self.assertIn("cryptography", derived)
+        self.assertIn("yaml", derived)
+
+    def test_gate_reports_missing_dep(self):
+        """反向：测试依赖里出现前置没装的包 → 必须报 E12。"""
+        res = self._run_gate([self._entry("import totally_missing_pkg_xyz\n")])
+        e12 = [e for e in res["errors"] if e.startswith("E12")]
+        self.assertEqual(len(e12), 1, f"漏装必须报 E12，实际 {res['errors']}")
+        self.assertIn("totally_missing_pkg_xyz", e12[0])
+
+    def test_gate_reports_unused_declaration(self):
+        """反向：前置装了但测试已不依赖 → W6（声明与依赖的反向漂移）。"""
+        res = self._run_gate([self._entry("import json\nimport os\n")])
+        self.assertEqual([e for e in res["errors"] if e.startswith("E12")], [])
+        w6 = [w for w in res["warnings"] if w.startswith("W6")]
+        self.assertEqual(len(w6), 2, f"两个声明都该被判为未使用，实际 {res['warnings']}")
+
+    def test_would_have_caught_the_real_incident(self):
+        """回到事故当天：前置只声明 cryptography → E12 必须当场报 yaml。
+
+        这条防的是「门禁看起来在跑，但这个场景它不报」。
+        """
+        orig = V.declared_pip_deps
+        V.declared_pip_deps = lambda text: ["cryptography"]  # type: ignore[assignment]
+        try:
+            res = V.check_file(PREP_ACTION_PATH)
+            V._check_prereq_covers_suite_deps([res])
+        finally:
+            V.declared_pip_deps = orig
+        e12 = [e for e in res["errors"] if e.startswith("E12")]
+        self.assertEqual(len(e12), 1, f"事故当天该报 E12，实际 {res['errors']}")
+        self.assertIn("'yaml'", e12[0])
+
+    def test_derivation_follows_into_repo_scripts(self):
+        """推导必须**穿到本仓脚本里** —— yaml 就藏在 scripts/*.py。
+
+        只扫 tests/ 表层 import 的实现会漏掉它（本文件虽然自己 import yaml，
+        但 meta_monitor / policy 不是），故用一个「自己不 import yaml」的入口
+        来验证闭包真的跟进去了。
+        """
+        entry = ROOT / "tests" / "test_vuln_feed_health.py"
+        self.assertNotIn("import yaml", entry.read_text(encoding="utf-8"),
+                         "样本选错了：该入口自己就 import yaml，证明不了传递性")
+        derived = V.third_party_imports([entry])
+        self.assertIn("yaml", derived)
+        self.assertTrue(
+            any(p.startswith("scripts/") for p in derived["yaml"]),
+            f"yaml 应当由 scripts/*.py 引入，实际来源 {derived['yaml']}",
+        )
+
+    def test_stdlib_only_entry_has_no_third_party(self):
+        probe = self._entry("import json\nimport os\nimport sys\n"
+                            "from pathlib import Path\n")
+        self.assertEqual(V.third_party_imports([probe]), {})
+
+    def test_namespace_packages_count_as_local(self):
+        """api / scripts / distribution 都没有 __init__.py，但它们**是本仓模块**。
+
+        漏判会把它们报成第三方包 → E12 一上线就满屏假红 → 门禁失去信誉被无视
+        （这正是首版实现的真实缺陷，故立此回归）。
+        """
+        roots = V._module_roots()
+        for name in ("api", "scripts", "distribution", "scanner", "eco", "tests"):
+            self.assertIsNotNone(
+                V._resolve_module(name, roots), f"{name} 未被识别为本仓模块")
+        self.assertIsNone(V._resolve_module("totally_missing_pkg_xyz", roots))
+
+    def test_pip_specs_are_normalised_to_import_names(self):
+        """发行名 → 导入名的归一：PyYAML→yaml、带版本号/环境标记都要能解析。"""
+        self.assertEqual(V.declared_pip_deps("run: pip install PyYAML==6.0"), ["yaml"])
+        self.assertEqual(V.declared_pip_deps("run: pip install 'requests>=2.0'"),
+                         ["requests"])
+        self.assertEqual(
+            V.declared_pip_deps("run: python -m pip install --quiet cryptography"),
+            ["cryptography"])
+        self.assertEqual(V.declared_pip_deps("# pip install nowhere"), [])
+
+    # ── 辅助 ─────────────────────────────────────────────────────────
+    def _entry(self, body: str) -> Path:
+        d = tempfile.mkdtemp(prefix="aishield_e12_")
+        self.addCleanup(shutil.rmtree, d, ignore_errors=True)
+        p = Path(d) / "entry_probe.py"
+        p.write_text(body, encoding="utf-8")
+        return p
+
+    def _run_gate(self, entries) -> dict:
+        """用给定的入口集合跑一次 E12 比对（只替换入口，其余保持真实）。"""
+        orig = V._test_suite_entry_files
+        V._test_suite_entry_files = lambda: list(entries)  # type: ignore[assignment]
+        try:
+            res = V.check_file(PREP_ACTION_PATH)
+            V._check_prereq_covers_suite_deps([res])
+        finally:
+            V._test_suite_entry_files = orig
+        return res
+
+
 class TestRunAllPrereqMessage(unittest.TestCase):
     """预检提示必须跨平台可用。
 
@@ -328,8 +532,10 @@ class TestRunAllPrereqMessage(unittest.TestCase):
     def setUpClass(cls):
         cls._src = ""
         cls._main_src = ""
+        cls._RA = None
         try:
             from tests import run_all as RA  # noqa: WPS433
+            cls._RA = RA
             cls._src = inspect.getsource(RA._crypto_backend_guard)
             cls._main_src = inspect.getsource(RA.main)
         except Exception:  # pragma: no cover - 仅在导入失败时走到
@@ -364,6 +570,45 @@ class TestRunAllPrereqMessage(unittest.TestCase):
         """
         self.assertIn("crypto_state == 'abort'", self._main_src)
         self.assertIn("return 2", self._main_src)
+
+    def test_preflight_reads_deps_from_the_single_declaration(self):
+        """预检必须**按统一前置的声明**自查，而不是在 run_all 里再列一份清单。
+
+        再列一份就是「同一件事的第二处实现」—— 本仓为此已出过两次事故。
+        """
+        src = inspect.getsource(self._RA._declared_missing_deps)
+        self.assertIn("declared_pip_deps", src)
+        self.assertIn("prepare-tests", src)
+        # 当前解释器装了声明里的全部依赖 → 不该报缺失
+        self.assertEqual(self._RA._declared_missing_deps(), [])
+
+    def test_missing_non_crypto_dep_is_reported(self):
+        """缺 pyyaml 这类依赖要被点名（cryptography 另走降级语义，不重复报）。"""
+        orig = V.declared_pip_deps
+        V.declared_pip_deps = lambda text: ["cryptography", "totally_missing_pkg_xyz"]
+        try:
+            missing = self._RA._declared_missing_deps()
+        finally:
+            V.declared_pip_deps = orig
+        self.assertEqual(missing, ["totally_missing_pkg_xyz"])
+
+    def test_missing_dep_hint_uses_distribution_name(self):
+        """提示里的 `pip install X` 必须写**发行名**（= action 里声明的那串）。
+
+        实测踩过：写导入名 yaml 会让人 `pip install yaml` —— PyPI 上那是另一个
+        历史遗留包，照着做反而装错。发行名是 pyyaml（pip 对大小写不敏感）。
+        """
+        self.assertEqual(V.import_name_to_dist("yaml"), "pyyaml")
+        self.assertEqual(V.import_name_to_dist("PIL"), "pillow")
+        self.assertEqual(V.import_name_to_dist("requests"), "requests")
+        # 报告路径必须真的走这层换算（只测映射函数会漏掉「没接上去」的情况）
+        src = inspect.getsource(self._RA._declared_missing_deps)
+        self.assertIn("import_name_to_dist", src)
+
+    def test_main_aborts_on_missing_non_crypto_dep(self):
+        """缺非加密依赖同样必须退 2（环境不满足），不能混成「测试失败 = 1」。"""
+        self.assertIn("_declared_missing_deps()", self._main_src)
+        self.assertIn("missing_deps", self._main_src)
 
 
 if __name__ == "__main__":

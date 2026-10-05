@@ -32,12 +32,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+      # 原先是自带的 `setup-python 3.11` + `pip install pyyaml` —— 「跑门禁要装
+      # 什么」的第三处实现。统一走 prepare-tests，版本仍固定 3.11（本 job 刻意
+      # 用 3.11 做覆盖，不属于本次要动的范围）。
+      - name: Prepare monitor environment
+        uses: ./.github/actions/prepare-tests
         with:
           python-version: '3.11'
-
-      - name: Install YAML parser
-        run: pip install pyyaml
+          install-node-deps: 'false'    # 只跑 Python 门禁，不需要 mcp-server 依赖
 
       # 门禁 1：语法必须先过，语法错的工作流永远不会运行
       - name: Gate - workflow syntax must be valid

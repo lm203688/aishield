@@ -17,10 +17,12 @@ step id 而非 job id，GitHub Actions 解析期直接报错，整个 workflow 4
   E8 表达式含 shell 变量插值 / 注释里写坏表达式（workflow 无法加载）
   E9 CRLF(\\r) 行尾（破坏 heredoc 定界符导致 bash 语法错）/ 命令替换内嵌 heredoc（脆弱写法）
   E10 并发 push 假绿吞错（`git push || echo`）/ `git add data/state/` 整目录提交
-  E11 跑全量测试却没引用统一前置 prepare-tests（同一件事多处各自实现的必然漂移）
+  E11 有第三方依赖的本仓入口却没引用统一前置 prepare-tests（派生判据，不写死名单）
+  E12 统一前置没装齐测试套件**真正**依赖的第三方包（从 import 图推导，不用人工清单）
   W1 关键步骤使用 continue-on-error（测试形同虚设）
   W2 workflow 无任何触发器
   W3 cron 表达式字段数不合法
+  W6 统一前置装了测试套件已不再依赖的包（声明与依赖反向漂移）
 
 退出码：0=全部通过，1=存在错误(E)
 用法：
@@ -31,11 +33,13 @@ step id 而非 job id，GitHub Actions 解析期直接报错，整个 workflow 4
 from __future__ import annotations
 
 import argparse
+import ast
 import json
 import re
+import shlex
 import sys
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, Iterable, List
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 WF_DIR = REPO_ROOT / ".github" / "workflows"
@@ -48,18 +52,70 @@ EXPRESSION_RE = re.compile(r"\$\{\{(.*?)\}\}")
 # 表达式里的 shell 变量插值：$ 紧跟标识符。Actions 表达式不支持这个。
 SHELL_VAR_IN_EXPR = re.compile(r"\$[A-Za-z_][A-Za-z0-9_.]*")
 
-# ── E11：跑全量测试必须引用统一前置 ────────────────────────────────────
+# ── E11：有第三方依赖的入口必须走统一前置（派生，不维护名单）────────────
 # 起因（2026-10-05 事故）：`python tests/run_all.py` 在 6 个 workflow 里各自
 # 实现，只有 ci.yml 装了 cryptography。另外 5 个在干净 runner 上跑 → 签名后端
 # 降级 hmac-sha256 → L1/L3 用例 fail-closed 成片报红（实测 18F/9E）→
 # threat-intel-feed 的 verify job 失败 → spine 在 job 2 终止 → 后 8 个 job 全跳过。
 #
 # 关键在于这是**递进式**的：spine 串行，修好 job 2 后 job 3（rule-promoter）
-# 当天就会以同样方式失败。逐个补 = 一天推进一格，永远追不上。所以必须靠门禁
-# 把"绕不过去"钉死 —— 这条检查比修那 5 处引用重要得多。
+# 当天就会以同样方式失败。逐个补 = 一天推进一格，永远追不上。
+#
+# 判据不写死名单：**凡是运行本仓入口（脚本 / 全量套件）且其依赖闭包含第三方包的
+# job，就必须引用统一前置**。这样第 7、第 8 个入口出现时会自动被拦下 —— 而
+# 「同一件事多处各自实现」正是本轮事故的根因形态。
 PREP_ACTION = "./.github/actions/prepare-tests"
+PREP_ACTION_FILE = PREP_ACTION.removeprefix("./") + "/action.yml"
 # 真在跑全量套件的命令行（允许 python / python3 / 带 -u 等开关）。
 FULL_SUITE_RE = re.compile(r"\bpython[0-9.]*\b[^\n|;&]*\btests/run_all\.py\b")
+# 命令行里**真的执行**本仓入口脚本（python 后跟 scripts/…、tests/… 等路径）。
+# 前置的 (?<![\w./-]) 很关键：`docker run --entrypoint python aishield:test
+# /app/api/server.py` 里的 `api/server.py` 只是容器内路径的子串，不是 host 上的入口。
+RUN_REPO_PY_RE = re.compile(
+    r"\bpython[0-9.]*\b[^\n|;&]*?(?<![\w./-])"
+    r"((?:scripts|tests|api|scanner|eco|connectors|collector)/[\w./-]+\.py)\b")
+# 这些命令行**不产生 host 侧依赖**，必须排除，否则门禁会满屏假红：
+#   · py_compile —— 只编译不 import，第三方依赖根本不会被加载；
+#   · docker …   —— 入口跑在容器里，host 装不装包与它无关。
+_NO_HOST_DEP_MARKERS = ("py_compile", "docker")
+
+
+# ── E12：统一前置必须装齐测试套件**真正**依赖的第三方包 ──────────────────
+# 起因（2026-10-05 同日，E11 的第二次复现）：刚把「跑测试要装什么」收敛到
+# prepare-tests 之后，同一轮里测试新增了 31 个用例（解析 YAML 结构 / 断言 action
+# 的键），测试套件因此多出一个第三方依赖 pyyaml —— 而前置里只声明了 cryptography。
+# 后果与上次同型：threat-intel-feed 的 verify job 在干净 runner 上
+# Ran 1968 tests → failures=10 / errors=1 / skipped=29（本地 3 skip），spine 再停 job 2。
+#
+# 教训：**收敛到一处之后，那一处的内容必须是派生出来的，而不是靠人记得同步。**
+# 否则收敛只是把「N 个漏点」换成「1 个漏点」。
+#
+# 所以本检查不维护任何清单：
+#   左手：从 tests/ 出发沿**本仓** import 图做闭包，收集非 stdlib / 非本仓的顶层名；
+#   右手：解析 prepare-tests 里 `pip install` 的包名；
+#   双向 diff —— 漏装=E12(错误)，多装=W6(警告)。
+#
+# 边界（已知且刻意）：闭包只覆盖「测试套件可达」的模块。workflow 直接调用、
+# 而测试又不碰的脚本（若有）不在此列 —— 那属于另一类入口，需要时另开检查。
+TEST_DIR = REPO_ROOT / "tests"
+PIP_INSTALL_RE = re.compile(r"\bpip\s+install\b(.*)")
+# 发行名 → 导入名。默认同名（cryptography / requests 之类都不需要映射），
+# 只列真实不一致的；不在此表内的按 lower + '-'→'_' 归一。
+DIST_TO_IMPORT: Dict[str, str] = {
+    "pyyaml": "yaml",
+    "pillow": "PIL",
+    "beautifulsoup4": "bs4",
+    "python-dateutil": "dateutil",
+    "pycryptodome": "Crypto",
+    "msgpack-python": "msgpack",
+}
+# 反向表：报错时给用户的应当是**发行名**（pip install PyYAML），
+# 而不是导入名 —— 本仓 self-check 实测过：写 `pip install yaml` 会去装 PyPI 上
+# 另一个同名的历史遗留包，照着提示做反而装错。所以两个方向都要有。
+IMPORT_TO_DIST: Dict[str, str] = {v: k for k, v in DIST_TO_IMPORT.items()}
+# import 图遍历时要跳过的目录（第三方包 / 本机沙箱 / 打包产物，都不算「本仓模块」）
+_GRAPH_SKIP = {".git", ".workbuddy", "node_modules", "__pycache__", ".venv",
+               "venv", "site-packages", "build", "dist", "outputs", ".mypy_cache"}
 
 
 def _command_lines(script: str):
@@ -155,6 +211,204 @@ def _check_local_refs(text: str, res: Dict[str, Any]) -> None:
             rel = rel[2:]
         if not (REPO_ROOT / rel).exists():
             res["errors"].append(f"E4 引用了不存在的本地 action: {rel}")
+
+
+def import_name_to_dist(name: str) -> str:
+    """导入名 → pip 用的发行名（yaml→PyYAML、PIL→pillow…）。"""
+    return IMPORT_TO_DIST.get(name, name)
+
+
+def declared_pip_deps(text: str) -> List[str]:
+    """从（action 的）原始文本里取出 `pip install` 声明的包，返回**导入名**列表。
+
+    只在本仓 action 上调用，所以不需要处理 requirements 文件 / 约束文件：
+    出现 `-r/-c` 这类参数说明有人把声明搬到了别处，那本身就该被 review 拦下。
+    """
+    deps: set[str] = set()
+    for line in text.splitlines():
+        s = line.strip()
+        if not s or s.startswith("#"):
+            continue
+        m = PIP_INSTALL_RE.search(s)
+        if not m:
+            continue
+        try:
+            tokens = shlex.split(m.group(1))
+        except ValueError:
+            tokens = m.group(1).split()
+        for tok in tokens:
+            if tok.startswith("-"):
+                continue
+            name = re.split(r"[<>=!~\[;@ ]", tok, maxsplit=1)[0].strip()
+            if not name:
+                continue
+            low = name.lower()
+            deps.add(DIST_TO_IMPORT.get(low, low.replace("-", "_")))
+    return sorted(deps)
+
+
+_ROOTS_CACHE: List[Path] | None = None
+
+
+def _module_roots() -> List[Path]:
+    """候选解析根：仓库根 + 仓库内所有目录（进程内缓存）。
+
+    为什么要全给：本仓测试靠 `sys.path.insert` 直接引 scripts/api/scanner 等目录，
+    甚至 scripts/arena 这种二级目录（`import jev_player`）。把根给全，解析就只需要
+    看「这个 dotted 路径能不能落在某个根下」，无需复刻每个测试的 sys.path 拼装逻辑。
+    """
+    global _ROOTS_CACHE
+    if _ROOTS_CACHE is None:
+        roots = [REPO_ROOT]
+        for d in REPO_ROOT.rglob("*"):
+            if not d.is_dir():
+                continue
+            if set(d.relative_to(REPO_ROOT).parts) & _GRAPH_SKIP:
+                continue
+            roots.append(d)
+        _ROOTS_CACHE = roots
+    return _ROOTS_CACHE
+
+
+def _rel(path: Path) -> str:
+    """尽量给相对路径；探针文件可能在仓库外（单测会这么用）。"""
+    try:
+        return path.relative_to(REPO_ROOT).as_posix()
+    except ValueError:
+        return path.as_posix()
+
+
+def _resolve_module(dotted: str, roots: List[Path]) -> Path | None:
+    """dotted 模块路径 → 文件或目录（取最浅的一个）。解析不到 = 第三方包。"""
+    rel = Path(*dotted.split("."))
+    files: List[Path] = []
+    dirs: List[Path] = []
+    for r in roots:
+        pkg = r / rel
+        for cand in (r / (dotted.replace(".", "/") + ".py"), pkg / "__init__.py"):
+            if cand.is_file():
+                files.append(cand)
+        if pkg.is_dir():
+            dirs.append(pkg)
+    pool = files or dirs          # 同名文件优先于同名目录
+    return min(pool, key=lambda x: len(x.parts)) if pool else None
+
+
+_RESOLVE_CACHE: Dict[str, Path | None] = {}
+
+
+def third_party_imports(entry_files: Iterable[Path]) -> Dict[str, List[str]]:
+    """从入口文件出发沿**本仓** import 图做闭包，返回 {第三方顶层名: [引用它的文件]}。
+
+    为什么不能只扫 tests/ 表层 import：测试通过 `from scripts import meta_monitor`
+    之类引用本仓脚本，而 yaml 这类依赖**藏在那些脚本里** —— 只扫表层就会漏掉真正的
+    漏装（本次事故正是如此：yaml 在 scripts/validate_workflows.py 与
+    scripts/meta_monitor.py 里）。
+
+    为什么要按 dotted 路径**精确到文件**、而不是把命中的目录整体递归扫掉：
+    scanner/integrations/、scripts/arena/ 里有大量**可选**集成依赖
+    （neo4j / kafka / langchain / seccomp …），它们是 try/except 守卫的可选路径，
+    一旦被当成"测试必需"就会逼着统一前置安装十几个包 —— 门禁会因此变成笑话。
+    所以：包目录只走它的 __init__.py，其余按实际 import 到的子模块逐个跟进。
+    """
+    std = set(sys.stdlib_module_names)
+    roots = _module_roots()
+    seen: set[Path] = set()
+    third: Dict[str, List[str]] = {}
+
+    def _resolve_cached(dotted: str) -> Path | None:
+        # 进程级缓存：一次校验里解析会被问上千次（每个 job 各跑一遍闭包），
+        # 不缓存的话整个门禁要多花十秒以上 —— 门禁一慢就会被绕过。
+        if dotted not in _RESOLVE_CACHE:
+            _RESOLVE_CACHE[dotted] = _resolve_module(dotted, roots)
+        return _RESOLVE_CACHE[dotted]
+
+    def walk(path: Path, depth: int) -> None:
+        if depth > 12 or path in seen:
+            return
+        seen.add(path)
+        if path.is_dir():                       # 命名空间包：只跟进 __init__.py
+            init = path / "__init__.py"
+            if init.is_file():
+                walk(init, depth + 1)
+            return
+        try:
+            # utf-8-sig：本仓有文件带 BOM（tests/test_geo.py 实测），
+            # 直接 utf-8 读进来 ast.parse 会报 non-printable character。
+            text = path.read_text(encoding="utf-8-sig")
+        except OSError:
+            return
+        try:
+            tree = ast.parse(text)
+        except SyntaxError:
+            return
+        where = _rel(path)
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                targets = [a.name for a in node.names]
+            elif isinstance(node, ast.ImportFrom):
+                if node.level or not node.module:
+                    continue
+                # `from m import a, b` 既可能依赖 m，也可能真的依赖 m.a / m.b
+                targets = [node.module] + [f"{node.module}.{a.name}"
+                                           for a in node.names if a.name != "*"]
+            else:
+                continue
+            for t in targets:
+                top = t.split(".")[0]
+                if top in std:
+                    continue
+                hit = _resolve_cached(t)
+                if hit is not None:
+                    walk(hit, depth + 1)
+                    continue
+                # 子模块路径没解析出来，但顶层是本仓模块 → 不算第三方
+                if _resolve_cached(top) is not None:
+                    continue
+                third.setdefault(top, []).append(where)
+
+    for f in entry_files:
+        walk(f, 0)
+    return third
+
+
+def _test_suite_entry_files() -> List[Path]:
+    """全量套件的入口集合 = tests/*.py（run_all.py 就是逐个加载它们的）。"""
+    return sorted(p for p in TEST_DIR.glob("*.py") if p.name != "__init__.py")
+
+
+def _job_entry_files(job_body: Dict[str, Any]) -> List[Path]:
+    """一个 job 实际运行的**本仓入口**文件（供 E11 派生依赖闭包）。
+
+    跑全量套件展开成整套 tests/*.py —— 只看 run_all.py 自己的 import 会漏掉
+    测试间接引入的依赖（yaml 就是这么漏掉的）。
+    """
+    files: List[Path] = []
+    for st in (job_body.get("steps") or []):
+        if not isinstance(st, dict):
+            continue
+        for line in _command_lines(st.get("run") or ""):
+            if any(mk in line for mk in _NO_HOST_DEP_MARKERS):
+                continue
+            if FULL_SUITE_RE.search(line):
+                files.extend(_test_suite_entry_files())
+                continue
+            for m in RUN_REPO_PY_RE.finditer(line):
+                p = REPO_ROOT / m.group(1)
+                if p.is_file():
+                    files.append(p)
+    return files
+
+
+_DEP_CACHE: Dict[tuple, Dict[str, List[str]]] = {}
+
+
+def _third_party_of(entries: Iterable[Path]) -> Dict[str, List[str]]:
+    """带缓存的依赖闭包（同一份入口集合在一次运行里会被问多次）。"""
+    key = tuple(sorted(str(p) for p in entries))
+    if key not in _DEP_CACHE:
+        _DEP_CACHE[key] = third_party_imports(entries)
+    return _DEP_CACHE[key]
 
 
 def check_file(path: Path) -> Dict[str, Any]:
@@ -333,6 +587,11 @@ def check_file(path: Path) -> Dict[str, Any]:
         res["kind"] = "action"
         res["crons"] = []
         res["workflow_run_refs"] = []
+        # 记录相对路径（同名 action.yml 会有多个）与**声明的 pip 依赖**，
+        # 供 cross_check 的 E12 做双向 diff —— 声明处只有这一处，所以这里读到的
+        # 就是「本仓声称跑测试要装什么」的唯一事实源。
+        res["path"] = _rel(path)
+        res["pip_deps"] = declared_pip_deps(text)
         _check_local_refs(text, res)
         return res
 
@@ -442,30 +701,73 @@ def check_file(path: Path) -> Dict[str, Any]:
                     f"跑了测试却设 continue-on-error，测试无法阻断发布"
                 )
 
-    # ── E11 跑全量测试的 job 必须引用统一前置 ────────────────────────────
-    # 判据：job 内出现真正的 `python tests/run_all.py` 命令行（注释不算），
-    # 但该 job 的任一步骤都没有 uses 这个 composite action → 报错。
+    # ── E11 有第三方依赖的入口必须引用统一前置（派生判据）────────────────
+    # 判据：job 内出现真正的命令行（注释不算）——
+    #   · 跑全量套件（python tests/run_all.py）→ 入口 = 整套 tests/*.py；
+    #   · 跑本仓脚本（python scripts/xxx.py）→ 入口 = 该脚本；
+    # 沿这些入口做第三方依赖闭包，非空却没用统一前置 → 报错。
+    #
+    # 为什么是派生的而不是「盯着 run_all.py」：本仓曾有三处**同类**漏洞，
+    # 全都不是 run_all.py —— ci.yml 的 workflow-lint 与 meta-monitor 的 inspect
+    # 各自 `pip install pyyaml`（同一件事的第二、第三处实现），
+    # unified-security-scan 的 self-scan 则干脆什么都没装（YAML 策略静默退回
+    # 极简解析器、签名后端退回 hmac）。写死名单的检查永远追不上下一个入口。
     for jname, jbody in jobs.items():
         if not isinstance(jbody, dict):
             continue
         steps = [st for st in (jbody.get("steps") or []) if isinstance(st, dict)]
-        runs_suite = any(
-            FULL_SUITE_RE.search(line)
-            for st in steps
-            for line in _command_lines(st.get("run") or "")
-        )
-        if not runs_suite:
+        entries = _job_entry_files(jbody)
+        if not entries:
+            continue
+        deps = sorted(_third_party_of(entries))
+        if not deps:
             continue
         has_prep = any((st.get("uses") or "").strip().startswith(PREP_ACTION)
                        for st in steps)
-        if not has_prep:
-            res["errors"].append(
-                f"E11 job '{jname}' 执行了全量测试却没有引用 {PREP_ACTION} —— "
-                f"缺前置时签名后端会降级为 hmac-sha256，L1/L3 用例将以"
-                f"「看起来像回归」的方式成片报红（实测 18F/9E），而真实原因只是"
-                f"这台机器少装一个包"
-            )
+        if has_prep:
+            continue
+        shown = sorted({_rel(p) for p in entries})
+        res["errors"].append(
+            f"E11 job '{jname}' 运行了本仓入口 {shown[:3]}{' 等' if len(shown) > 3 else ''}，"
+            f"其依赖闭包含第三方包 {deps}，却没有引用 {PREP_ACTION} —— "
+            f"缺包时轻则用例成片报红（看起来像产品回归），重则**静默降级**："
+            f"签名后端退回 hmac-sha256、YAML 策略退回极简解析器。"
+            f"请改用该 action 统一安装（不需要 node 依赖就传 install-node-deps: 'false'）"
+        )
     return res
+
+
+def _check_prereq_covers_suite_deps(results: List[Dict[str, Any]]) -> None:
+    """E12 / W6：统一前置声明的依赖必须与测试套件的真实依赖一致（双向 diff）。
+
+    这条检查的价值不在于"抓到这一次" —— 而在于它**不需要人来维护清单**：
+    依赖是从代码里推导出来的，前置是从 action 里解析出来的，任何一侧变了，
+    下一次运行就会报出来。这正是"收敛到一处之后必须更严格地守住那一处"。
+    """
+    if yaml is None:
+        # 没有 PyYAML 时连 action 都解析不了（E1 会报出来），不必再叠加噪音
+        return
+    prep = next((r for r in results
+                 if r.get("path") == PREP_ACTION_FILE), None)
+    if prep is None:
+        return  # action 不存在 / 未被扫描 —— 由 E4 与测试兜底，这里不重复报
+
+    derived = _third_party_of(_test_suite_entry_files())
+    declared = set(prep.get("pip_deps") or ())
+
+    for name in sorted(set(derived) - declared):
+        users = sorted(set(derived[name]))[:3]
+        prep["errors"].append(
+            f"E12 测试套件依赖第三方包 '{name}'（{', '.join(users)}），"
+            f"但 {PREP_ACTION_FILE} 没有安装它 —— 干净 runner 上这些用例会以"
+            f"「ImportError / 静默跳过」的形式失败，看起来像产品回归"
+            f"（2026-10-05 因此让 spine 连停两天）。请在该 action 的 pip install 行补上"
+        )
+    for name in sorted(declared - set(derived)):
+        prep["warnings"].append(
+            f"W6 统一前置安装了 '{name}'，但测试套件已不再依赖它 —— "
+            f"要么删掉这行声明，要么在注释里说明它是给调用方脚本用的"
+        )
 
 
 def cross_check(results: List[Dict[str, Any]]) -> None:
@@ -475,6 +777,8 @@ def cross_check(results: List[Dict[str, Any]]) -> None:
     这与当初 self-heal 静默死亡 48 天是同一类故障：
     配置看起来完全正常，实际从未生效，且没有任何信号告诉你。
     """
+    _check_prereq_covers_suite_deps(results)
+
     known = {r["name"] for r in results if r.get("name")}
     for r in results:
         for ref in r.get("workflow_run_refs", []):

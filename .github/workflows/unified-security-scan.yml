@@ -47,10 +47,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - name: Prepare scan environment
+        uses: ./.github/actions/prepare-tests
         with:
-          python-version: '3.11'
+          python-version: '3.11'        # 保留本 job 原有的版本覆盖范围
+          install-node-deps: 'false'    # 自扫描不需要 mcp-server 依赖
+        # ↑ 本 job 原先**什么都不装**：server 起来后 YAML 策略会静默退回极简
+        #   解析器（scanner/policy.py 的 _mini_yaml）、签名后端退回 hmac-sha256。
+        #   也就是说「安全门禁自己跑在一个降级环境里」，而它看起来是绿的。
+        #   统一走 prepare-tests 后这一层不再依赖调用方的自觉。
 
       - name: Start AIShield Server
         env:
