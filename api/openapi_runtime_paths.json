@@ -1,9 +1,9 @@
 {
   "note": "运行时路由清单：进程内直调 api.server.AIShieldHandler.do_GET/do_POST 探得，与 curated 规范合并后即线上 /openapi.json。",
   "source": "runtime probe (scripts/gen_openapi_spec.py)",
-  "generated_at": "2026-10-04T16:51:47",
-  "route_count": 118,
-  "operation_count": 129,
+  "generated_at": "2026-10-05T10:50:32",
+  "route_count": 132,
+  "operation_count": 148,
   "probe_errors": [],
   "state_audit": {
     "created": [],
@@ -1151,6 +1151,285 @@
       ]
     },
     {
+      "path": "/api/v1/attestations",
+      "tag": "attestations",
+      "summary": "GET /api/v1/attestations（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "GET /api/v1/attestations（运行时探得；schema 由真实响应推导）",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "count": {
+                "type": "integer"
+              },
+              "attestations": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "sub_9e2c76b42fb3": {
+                      "type": "object"
+                    },
+                    "status": {
+                      "type": "object"
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        },
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/attestations（运行时探得；schema 由真实响应推导）",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "getAttestations",
+        "postAttestations"
+      ]
+    },
+    {
+      "path": "/api/v1/attestations/from-scan",
+      "tag": "attestations",
+      "summary": "GET /api/v1/attestations/from-scan（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "GET /api/v1/attestations/from-scan（运行时探得；schema 由真实响应推导）",
+          "status": 404,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 404
+        },
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/attestations/from-scan（运行时探得；schema 由真实响应推导）",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "getAttestationsFromScan",
+        "postAttestationsFromScan"
+      ]
+    },
+    {
+      "path": "/api/v1/attestations/revoke",
+      "tag": "attestations",
+      "summary": "GET /api/v1/attestations/revoke（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "GET /api/v1/attestations/revoke（运行时探得；schema 由真实响应推导）",
+          "status": 404,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 404
+        },
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/attestations/revoke（运行时探得；schema 由真实响应推导）",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "getAttestationsRevoke",
+        "postAttestationsRevoke"
+      ]
+    },
+    {
+      "path": "/api/v1/attestations/schema",
+      "tag": "attestations",
+      "summary": "GET /api/v1/attestations/schema（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "GET /api/v1/attestations/schema（运行时探得；schema 由真实响应推导）",
+          "status": 404,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 404
+        }
+      ],
+      "operation_ids": [
+        "getAttestationsSchema"
+      ]
+    },
+    {
+      "path": "/api/v1/attestations/verify",
+      "tag": "attestations",
+      "summary": "GET /api/v1/attestations/verify（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "GET /api/v1/attestations/verify（运行时探得；schema 由真实响应推导）",
+          "status": 404,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 404
+        },
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/attestations/verify（运行时探得；schema 由真实响应推导）",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "getAttestationsVerify",
+        "postAttestationsVerify"
+      ]
+    },
+    {
       "path": "/api/v1/audit",
       "tag": "audit",
       "summary": "POST /api/v1/audit（运行时探得；schema 由真实响应推导）",
@@ -1899,6 +2178,512 @@
       ],
       "operation_ids": [
         "getContributorsTiers"
+      ]
+    },
+    {
+      "path": "/api/v1/digest",
+      "tag": "digest",
+      "summary": "GET /api/v1/digest（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "GET /api/v1/digest（运行时探得；schema 由真实响应推导）",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "hint": {
+                "type": "string"
+              },
+              "schema": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "getDigest"
+      ]
+    },
+    {
+      "path": "/api/v1/evidence",
+      "tag": "evidence",
+      "summary": "POST /api/v1/evidence（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/evidence（运行时探得；schema 由真实响应推导）",
+          "status": 201,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "run_id": {
+                "type": "string"
+              },
+              "hmac": {
+                "type": "boolean"
+              },
+              "created_at": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 201
+        }
+      ],
+      "operation_ids": [
+        "postEvidence"
+      ]
+    },
+    {
+      "path": "/api/v1/evidence/schemas",
+      "tag": "evidence",
+      "summary": "GET /api/v1/evidence/schemas（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "GET /api/v1/evidence/schemas（运行时探得；schema 由真实响应推导）",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "schema": {
+                "type": "string"
+              },
+              "ocsf_classes": {
+                "type": "object",
+                "properties": {
+                  "investigation.open": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "investigation.update": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "investigation.close": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "report.publish": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "proposal.create": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "proposal.approve": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "proposal.reject": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "executor.dispatch": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "executor.complete": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "executor.fail": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "probe.execute": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "probe.verify": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "verification.result": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "audit.record": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "audit.rollback": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  }
+                },
+                "additionalProperties": true
+              },
+              "stix_observable_types": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "attack_ttps": {
+                "type": "object",
+                "properties": {
+                  "supply_chain": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "prompt_injection": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "credential_theft": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "privilege_escalation": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "mcp_tool_abuse": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "guardrail_bypass": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "data_exfiltration": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "agent_manipulation": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  }
+                },
+                "additionalProperties": true
+              },
+              "states": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "transitions": {
+                "type": "object",
+                "properties": {
+                  "pending": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "proposed": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "approved": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "executing": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "executed": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "observing": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "inconclusive": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "failed": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "verified": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "rolled_back": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "rejected": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "archived": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  }
+                },
+                "additionalProperties": true
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "getEvidenceSchemas"
+      ]
+    },
+    {
+      "path": "/api/v1/evidence/verify-payload",
+      "tag": "evidence",
+      "summary": "GET /api/v1/evidence/verify-payload（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "GET /api/v1/evidence/verify-payload（运行时探得；schema 由真实响应推导）",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "schema": {
+                "type": "string"
+              },
+              "run_id": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "created_at": {
+                "type": "string"
+              },
+              "hmac": {
+                "type": "boolean"
+              },
+              "head_hash": {
+                "type": "string"
+              },
+              "verification": {
+                "type": "object",
+                "properties": {
+                  "run_id": {
+                    "type": "string"
+                  },
+                  "hmac": {
+                    "type": "boolean"
+                  },
+                  "events": {
+                    "type": "integer"
+                  },
+                  "proposals": {
+                    "type": "integer"
+                  },
+                  "approvals": {
+                    "type": "integer"
+                  },
+                  "probes": {
+                    "type": "integer"
+                  },
+                  "rollbacks": {
+                    "type": "integer"
+                  },
+                  "valid": {
+                    "type": "boolean"
+                  },
+                  "broken_at": {
+                    "type": "null"
+                  },
+                  "reason": {
+                    "type": "string"
+                  },
+                  "head_hash": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": true
+              },
+              "events": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {},
+                  "additionalProperties": true
+                }
+              },
+              "proposals": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {},
+                  "additionalProperties": true
+                }
+              },
+              "approvals": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {},
+                  "additionalProperties": true
+                }
+              },
+              "probes": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {},
+                  "additionalProperties": true
+                }
+              },
+              "rollbacks": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {},
+                  "additionalProperties": true
+                }
+              },
+              "signatures": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {},
+                  "additionalProperties": true
+                }
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        },
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/evidence/verify-payload（运行时探得；schema 由真实响应推导）",
+          "status": 422,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "verification": {
+                "type": "object",
+                "properties": {
+                  "valid": {
+                    "type": "boolean"
+                  },
+                  "reason": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": true
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 422
+        }
+      ],
+      "operation_ids": [
+        "getEvidenceVerifyPayload",
+        "postEvidenceVerifyPayload"
       ]
     },
     {
@@ -3304,6 +4089,108 @@
       ],
       "operation_ids": [
         "getIdentityWallets"
+      ]
+    },
+    {
+      "path": "/api/v1/intent/mandates",
+      "tag": "intent",
+      "summary": "POST /api/v1/intent/mandates（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/intent/mandates（运行时探得；schema 由真实响应推导）",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "postIntentMandates"
+      ]
+    },
+    {
+      "path": "/api/v1/intent/mandates/evaluate",
+      "tag": "intent",
+      "summary": "POST /api/v1/intent/mandates/evaluate（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/intent/mandates/evaluate（运行时探得；schema 由真实响应推导）",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "postIntentMandatesEvaluate"
+      ]
+    },
+    {
+      "path": "/api/v1/intent/mandates/verify",
+      "tag": "intent",
+      "summary": "POST /api/v1/intent/mandates/verify（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/intent/mandates/verify（运行时探得；schema 由真实响应推导）",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "postIntentMandatesVerify"
       ]
     },
     {
@@ -5135,6 +6022,200 @@
       ],
       "operation_ids": [
         "postScanClientConfig"
+      ]
+    },
+    {
+      "path": "/api/v1/ship-gate/run",
+      "tag": "ship-gate",
+      "summary": "POST /api/v1/ship-gate/run（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/ship-gate/run（运行时探得；schema 由真实响应推导）",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "postShipGateRun"
+      ]
+    },
+    {
+      "path": "/api/v1/ship-gate/states",
+      "tag": "ship-gate",
+      "summary": "GET /api/v1/ship-gate/states（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "GET /api/v1/ship-gate/states（运行时探得；schema 由真实响应推导）",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "states": {
+                "type": "object",
+                "properties": {
+                  "ANALYZE": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "BLIND_TEST": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "CHALLENGE": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "GATE": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "PREPARE": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "RELEASE": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "OBSERVE": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "ROLLBACK": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "ARCHIVE": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "REJECT": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  }
+                },
+                "additionalProperties": true
+              },
+              "transitions": {
+                "type": "object",
+                "properties": {
+                  "ANALYZE": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "BLIND_TEST": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "CHALLENGE": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "GATE": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "PREPARE": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "RELEASE": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "OBSERVE": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "ROLLBACK": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "ARCHIVE": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "REJECT": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  }
+                },
+                "additionalProperties": true
+              },
+              "schema": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "getShipGateStates"
       ]
     },
     {

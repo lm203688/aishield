@@ -238,6 +238,13 @@ def main():
         # 未绑 pack 的 server 行为必须与贯通前逐字一致（不误伤存量）；
         # red-team 编译后绝不能获得任何运行时拒绝能力（永不 fail 语义）。
         'tests.test_policy_bridge',
+        # 2026-10-05 L3 意图授权：AP2 对齐的 Intent Mandate —— 行动前先签字，
+        # 过期/超上限/越动作/换 DID/重放五道必须拒，账本损坏 fail-closed。
+        'tests.test_intent_mandate',
+        # 2026-10-05 路由可达性门禁：代码里写下的每条 /api/v1/... 都必须被
+        # server.py 的分派分支接住（曾经 intent/attestations/digest/evidence/
+        # ship-gate 全是「handler 写了、入口没接」的死路由，两个门禁都绿）。
+        'tests.test_server_prefix_gate',
         # 2026-10-04 L1 可移植身份：JWKS 公钥发现 + VC 签发/验签/除销。
         # 对称密钥永不进 JWKS 是红线；除销必须实时读盘（缓存=攻击复用窗口）；
         # 第三方仅凭 JWKS 的 x 就能离线验签，这才是「别家能不能验我」。

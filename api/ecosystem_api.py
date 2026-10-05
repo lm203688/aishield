@@ -361,6 +361,88 @@ def _identity_get(did: str) -> dict:
             "agent": ident.AgentRegistration().public_view(agent)}, 200
 
 
+def _intent_mandate_issue(data: dict) -> tuple[dict, int]:
+    """POST /api/v1/intent/mandates —— 签一张 agent 意图授权 mandate。
+
+    对齐 AP2 的 Intent/Cart/Payment 三段式里最前面的那段：agent 在**行动之前**
+    先签下一张有时效、有上限、有资源边界的意图券，执行方拿着券才能放行。
+    没有这张券，agent 的每个动作都是"黑箱自证"。
+
+    鉴权沿用 L1 的凭据：did 必须已注册、owner 必须一致 —— 否则任何人都能拿
+    别人的 DID 签一张"授权转账 10 万"的券。
+    """
+    from eco import intent_mandate as im
+
+    did = str(data.get("agent_did") or "").strip()
+    owner = str(data.get("owner") or "").strip()
+    action = str(data.get("action") or "").strip()
+    if not did or not owner or not action:
+        return {"error": "agent_did, owner and action are required"}, 400
+    agent = _import_identity().AgentRegistration().get_agent(did)
+    if not agent:
+        return {"success": False, "error": f"agent not found: {did}"}, 404
+    if str(agent.get("owner") or "") != owner:
+        return {"success": False, "error": "owner does not match the agent record"}, 403
+    constraints = data.get("constraints") or {}
+    if not isinstance(constraints, dict):
+        return {"error": "constraints must be an object"}, 400
+    # ttl 严格解析：0 / 负数 / 非数字都必须 400。
+    # 拿 int(v, default=300) 那种兜底写法会把 ttl=0 静默改成 300 ——
+    # 等于把"拒绝一个空窗授权"变成"签出一张有效期 300 秒的券"，拒绝必须真拒绝。
+    try:
+        ttl = int(data.get("ttl", 300))
+    except (TypeError, ValueError):
+        return {"error": "ttl must be an integer second within (0, 86400]"}, 400
+    if ttl <= 0 or ttl > 86400:
+        return {"error": "ttl must be within (0, 86400]"}, 400
+    try:
+        res = im.IntentMandate().issue(
+            did, action, constraints=constraints, ttl=ttl,
+            request=data.get("request") or {})
+    except RuntimeError as e:
+        # 签名密钥没备好（生产默认还是 hmac 对称密钥）→ 503 而不是 200 空壳
+        return {"success": False, "error": str(e)}, 503
+    except ValueError as e:
+        return {"success": False, "error": str(e)}, 400
+    return {"success": True, "mandate_id": res["mandate_id"], "token": res["token"],
+            "kid": res["kid"], "subject": res["subject"], "action": res["action"],
+            "constraints": res["constraints"], "expires_at": res["expires_at"]}, 201
+
+
+def _intent_mandate_verify(data: dict) -> tuple[dict, int]:
+    """POST /api/v1/intent/mandates/verify —— 公开验一张 mandate 的签名。
+
+    只验签名与结构，不查重放、不看约束：这一档给"离线对账"用 —— 执行方手里
+    有 JWKS 就能自己判真伪，不必来回问服务端。
+    """
+    from eco import intent_mandate as im
+
+    token = str(data.get("token") or "").strip()
+    if not token:
+        return {"error": "token is required"}, 400
+    return im.IntentMandate().verify(token), 200
+
+
+def _intent_mandate_evaluate(data: dict) -> tuple[dict, int]:
+    """POST /api/v1/intent/mandates/evaluate —— 完整五道闸门后再放行。
+
+    签名 → 结构 → 过期 → 约束 → 重放。执行侧真正该调的是这个：只验签名等于
+    允许一张过期/超上限/已被用过的券继续花钱。
+    """
+    from eco import intent_mandate as im
+
+    token = str(data.get("token") or "").strip()
+    if not token:
+        return {"error": "token is required"}, 400
+    res = im.IntentMandate().evaluate(token, data.get("request") or {})
+    if res.get("_load_error"):
+        return {"success": False, "error": res["_load_error"]}, 503
+    # 账本损坏 = 服务端自己 hasn't determined，不是券有问题 → 503 而非 403
+    if res.get("code") == im.CODE_LEDGER_ERROR:
+        return {"success": False, "error": res["reason"]}, 503
+    return res, 200 if res.get("valid") else 403
+
+
 def _identity_jwks() -> tuple[dict, int]:
     """GET /api/v1/identity/jwks —— 对外公钥发现（RFC 7517 JWKS）。
 
@@ -872,6 +954,14 @@ def handle_post(path: str, data: dict):
         return _identity_credential_verify(data)
     elif path == "/api/v1/identity/credentials/revoke":
         return _identity_credential_revoke(data)
+
+    # ── L3 意图授权（Intent Mandate，对齐 AP2 / Verifiable Intent）──
+    if path == "/api/v1/intent/mandates":
+        return _intent_mandate_issue(data)
+    if path == "/api/v1/intent/mandates/verify":
+        return _intent_mandate_verify(data)
+    elif path == "/api/v1/intent/mandates/evaluate":
+        return _intent_mandate_evaluate(data)
 
     # ── KYA / ERC-8004 ──
     if path == "/api/v1/identity/kyad/export":

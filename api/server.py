@@ -450,6 +450,7 @@ class AIShieldHandler(BaseHTTPRequestHandler):
 
         # ── Trust API (P1): 认证/信任评分/注册中心/Agent Card ──
         if (path.startswith("/api/v1/trust") or path.startswith("/api/v1/registry")
+                or path.startswith("/api/v1/attestations") or path == "/api/v1/digest"
                 or path == "/.well-known/agent-card.json"):
             try:
                 import trust_api
@@ -465,7 +466,9 @@ class AIShieldHandler(BaseHTTPRequestHandler):
                 or path.startswith("/api/v1/specialist") or path.startswith("/api/v1/chain")
                 or path.startswith("/api/v1/identity") or path.startswith("/api/v1/protocol")
                 or path.startswith("/api/v1/leaderboard") or path.startswith("/api/v1/contributors")
-                or path.startswith("/api/v1/sandbox/backend")):
+                or path.startswith("/api/v1/sandbox/backend")
+                or path.startswith("/api/v1/evidence") or path.startswith("/api/v1/ship-gate")
+                or path.startswith("/api/v1/intent")):  # L3 意图授权（见 tests/test_server_prefix_gate.py）
             try:
                 import ecosystem_api
                 payload, status = ecosystem_api.handle_get(path, parsed.query)
@@ -1414,7 +1417,8 @@ class AIShieldHandler(BaseHTTPRequestHandler):
         path = parsed.path
 
         # ── Trust API (P1): 自动认证 / 显式认证 ──
-        if path.startswith("/api/v1/trust"):
+        if (path.startswith("/api/v1/trust")
+                or path.startswith("/api/v1/attestations")):
             try:
                 body = self._read_body()
                 if body is None:
@@ -1436,7 +1440,9 @@ class AIShieldHandler(BaseHTTPRequestHandler):
         if (path.startswith("/api/v1/agent-card") or path.startswith("/api/v1/specialist")
                 or path.startswith("/api/v1/chain") or path.startswith("/api/v1/identity")
                 or path.startswith("/api/v1/protocol") or path.startswith("/api/v1/ecosystem")
-                or path.startswith("/api/v1/contributors")):
+                or path.startswith("/api/v1/contributors")
+                or path.startswith("/api/v1/evidence") or path.startswith("/api/v1/ship-gate")
+                or path.startswith("/api/v1/intent")):
             try:
                 body = self._read_body()
                 if body is None:
