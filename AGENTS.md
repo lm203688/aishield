@@ -29,6 +29,12 @@ prompt，对齐 **OWASP MCP Top 10 (2025)** 与 **OWASP Agentic AI Top 10 (ASI01
    推完必须 API 复验。
 5. **事件型告警必须能销案。** "本轮新增 N 条漏洞" 类告警不会自动恢复，零新增即 resolve；
    不要把它当健康型告警只在恢复时 `--resolve`。
+6. **跑测试的前提只能来自一处。** 任何 job 执行 `python tests/run_all.py` 都必须先引用
+   `.github/actions/prepare-tests` —— 由 `scripts/validate_workflows.py` 的 **E11** 强制。
+   历史事故（2026-10-05）：同一件事在 6 个 workflow 里各自实现，5 个漏装签名后端依赖 →
+   干净 runner 上 L1/L3 用例成片报假回归 → spine 在 job 2 终止、其后 8 个 job 全 skipped。
+   注意这是**递进式**的：spine 串行，修好一个 job，下一个同型 job 当天就会以同样方式失败。
+   逐个补没用，只能靠统一入口 + 门禁。
 
 ## 架构速览
 
@@ -51,7 +57,8 @@ prompt，对齐 **OWASP MCP Top 10 (2025)** 与 **OWASP Agentic AI Top 10 (ASI01
 ```
 # 1. 克隆并准备
 git clone https://github.com/lm203688/aishield.git && cd aishield
-python -m venv .venv && source .venv/bin/activate && pip install pytest
+python -m venv .venv && source .venv/bin/activate
+pip install pytest cryptography     # cryptography 是**必需**的，不是可选增强
 
 # 2. 跑全量测试
 python tests/run_all.py
@@ -59,6 +66,12 @@ python tests/run_all.py
 # 3. 自证隔离不变量
 python scripts/prove_isolation.py
 ```
+
+> `cryptography` 为什么必需：L1 可移植身份（JWKS 只发非对称公钥、第三方凭公钥离线验签）
+> 与 L3 意图授权（AP2 Intent Mandate）建立在 Ed25519 上。缺它时 `eco/crypto_sign.py`
+> 会静默降级成 hmac-sha256，那两组用例 fail-closed 成片报红，**看起来像产品回归**。
+> `tests/run_all.py` 会在开跑前预检并中止（退出码 2），让你不必对着一屏误导性红找根因。
+> CI 侧由 `.github/actions/prepare-tests` 统一保证，本地无需对应 workflow 做任何事。
 
 > 把上面这段贴进 Claude Code / Codex 即可启动，无需额外讲解。
 

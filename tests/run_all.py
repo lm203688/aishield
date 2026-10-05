@@ -108,9 +108,16 @@ class _DataGuard:
 # hmac-sha256，而 issue_credential 是 fail-closed 的（拒绝签出无法被第三方
 # 公开验证的凭证）—— 于是这两个模块会集体报红，看起来像代码回归。
 #
-# 2026-10-05 真踩：用托管解释器 3.13.12（无 cryptography）跑全量，得到
+# 2026-10-05 真踩（本机）：用托管解释器 3.13.12（无 cryptography）跑全量，得到
 # 11 FAIL + 17 ERROR，全在身份/意图授权；换成本机 C:\Python314\python.exe
 # （cryptography 50.0.1）立刻 27/27 绿。**这不是回归，是解释器选错**。
+#
+# 2026-10-05 同日 CI 侧（后果严重得多）：threat-intel-feed 的 verify job 裸跑本
+# 脚本，干净 runner 上无 cryptography → 成片报红 → 该 job 失败 → spine 在 job 2
+# 终止 → 其后 8 个 job 全部 skipped，整条闭环停摆一天。CI 侧不再靠"记得装"：
+# 统一前置是 ./.github/actions/prepare-tests，并由 validate_workflows.py 的 E11
+# **强制**每个跑本脚本的 job 引用它。本预检是第二道防线 —— 万一某个入口漏了
+# 引用，得到的也是一句能直接照做的提示，而不是一屏伪装成回归的红。
 #
 # 所以这里做预检：与其让人对着 28 条误导性红自己找根因，不如开机就报一句
 # 能直接照做的提示。允许显式降级（AISHIELD_ALLOW_DEGRADED_CRYPTO=1），
@@ -161,11 +168,15 @@ def _crypto_backend_guard() -> str:
         pass
     allow = os.environ.get('AISHIELD_ALLOW_DEGRADED_CRYPTO') == '1'
     print("=" * 68)
-    print("⚠  未安装 cryptography → 密钥环只能降级到 hmac-sha256（对称）")
+    print("⚠  未安装 cryptography → 签名后端只能降级到 hmac-sha256（对称）")
     print("   受影响模块：%s" % ", ".join(_CRYPTO_MODULES))
-    print("   本机正确解释器：C:\\Python314\\python.exe（cryptography 50.x）")
-    print("   托管解释器 3.13.12 没有这个包 —— 用它跑会得到一堆"
-          "「看起来像回归」的红（实测 11 FAIL + 17 ERROR）。")
+    print("   这**不是代码回归**：降级态下 L1 可移植身份（JWKS 只发非对称公钥、")
+    print("   第三方凭公钥离线验签）与 L3 意图授权（AP2 Intent Mandate）在密码学上")
+    print("   根本不成立，用例会 fail-closed 成片报红，且看起来像产品回归。")
+    print("   修复（任选其一）：")
+    print("     · 装依赖：python -m pip install cryptography")
+    print("     · 换解释器：改用已装 cryptography 的那个 python 跑本脚本")
+    print("   CI 侧由 ./.github/actions/prepare-tests 统一保证，无需手工处理。")
     if allow:
         print("   AISHIELD_ALLOW_DEGRADED_CRYPTO=1 → 显式降级：跳过上述模块。")
         print("=" * 68)
@@ -357,6 +368,12 @@ def main():
         # 目标端配置化 + headers 凭据脱敏 + 产物泄露探针；含 3 条反向用例
         # （缺必填/构建异常/CSV 表头）验证校验不是装饰品。
         'tests.test_export_registry',
+        # 2026-10-05 测试前置门禁（E11）：`python tests/run_all.py` 曾在 6 个
+        # workflow 里各自实现，只有 1 个装了 cryptography。另 5 个在干净 runner 上
+        # 跑会让签名后端静默降级 → L1/L3 用例成片报假回归 → spine 在 job 2 终止、
+        # 后 8 个 job 全跳过。修法不是补那 5 处，而是把前置定义一次
+        # （.github/actions/prepare-tests）并由门禁强制没人能绕过。
+        'tests.test_workflow_test_prereq',
     ]
 
     loaded = 0

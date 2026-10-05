@@ -74,9 +74,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.13'
+      # 测试前置统一走 prepare-tests：本 job 的"跳过重复测试"优化只在 ci.json 新鲜
+      # 时生效，路径走岔时仍会真的跑 run_all.py —— 那时前置缺失就会静默报假回归。
+      - uses: ./.github/actions/prepare-tests
       - name: Check CI status (引用 ci.yml 最近结果)
         id: ci-check
         run: |

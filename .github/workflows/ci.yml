@@ -126,54 +126,30 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.13'
-
-    - name: Run syntax check
-      run: |
-        python -m py_compile api/server.py eco/*.py scanner/*.py scripts/*.py
-
     # ── 为什么测试必须用 Ed25519 后端 ──────────────────────────────────
     # eco/crypto_sign.py 在没有 cryptography 时**静默降级**为 hmac-sha256。
     # 那不是零依赖的功劳，是假绿：L1 可移植身份（JWKS 只发非对称公钥）与
     # L3 意图授权都建立在 Ed25519 上 —— 降级态下 JWKS 发不出任何公钥，
     # 凭证/mandate 签出来只能自证，而测试会照常跑完并全绿。
-    # 2026-10-05 实测：同一套 L1/L3 用例在 hmac 后端下 14  failures / 16 errors，
-    # 说明「跑测试的那台机器有没装 cryptography」会直接决定这些用例是否存在。
+    # 2026-10-05 实测（本机）：同一套 L1/L3 用例在 hmac 后端下成片报红
+    # （14 failures / 16 errors），说明「跑测试的那台机器有没装 cryptography」
+    # 会直接决定这些用例是否存在。
     #
     # 这里刻意**不建 requirements.txt**：dependency-check 那个 job 规定仓库里
     # 出现 requirements.txt 就直接 exit 1（守的是 scanner/runtime 零依赖对外承诺）。
-    # 所以可选增强依赖只能在 CI 里显式装，不能落成清单文件。
-    - name: Install Ed25519 signing backend (required by L1/L3 tests)
-      shell: bash
-      run: |
-        set -o pipefail
-        python -c "import cryptography" 2>/dev/null && {
-          echo "cryptography 已就位，签名后端将使用 ed25519"
-        } || {
-          echo "装 cryptography —— L1/L3 用例依赖真实的非对称签名路径"
-          pip install cryptography || {
-            echo "::warning::cryptography 安装失败 —— L1/L3 用例会失败（而非跳过），"
-            echo "这一步失败会如实暴露后端缺失，不降级为 skip"
-            exit 1
-          }
-        }
-        python -c "from eco import crypto_sign as cs; print('签名后端:', cs.backend())"
+    # 所以这类增强依赖只能在 CI 里显式装，不能落成清单文件。
+    #
+    # 装什么、装完怎么断言 —— 定义一次就够：走 ./.github/actions/prepare-tests
+    # （本仓 6 个跑测试的 job 共用，由 validate_workflows.py 的 E11 强制引用）。
+    # 放在最前面：它同时负责 Python 版本，后续步骤都依赖它。
+    - name: Prepare test environment
+      uses: ./.github/actions/prepare-tests
+      with:
+        install-node-deps: 'true'
 
-    - name: Install mcp-server deps (enables the stdio E2E test)
-      shell: bash
+    - name: Run syntax check
       run: |
-        # stdio 端到端测试要真的启动 node 子进程，需要 @modelcontextprotocol/sdk。
-        # node_modules 被 gitignore、runner 又是干净环境，不装这一步 E2E 只能跳过，
-        # 于是「端到端」名存实亡。装不上时降级为警告而不是让整个 job 失败：
-        # 依赖网络/注册表不可用时，不该让一整套 590 个 Python 测试陪葬。
-        cd mcp-server
-        set -o pipefail
-        if ! npm ci --no-audit --no-fund 2>&1 | tail -15; then
-          echo "::warning::mcp-server 依赖安装失败 —— stdio 端到端测试会自动跳过"
-        fi
+        python -m py_compile api/server.py eco/*.py scanner/*.py scripts/*.py
 
     - name: Run quick tests
       run: |

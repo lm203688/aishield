@@ -126,9 +126,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.13'
+      # 测试前置统一走 prepare-tests。
+      # 【2026-10-05】本 job 原先是裸 `python tests/run_all.py`：干净 runner 上无
+      # cryptography → 签名后端降级 hmac-sha256 → L1/L3 用例 fail-closed 报红
+      # （18F/9E）→ 本 job 失败 → spine 在 job 2 终止 → 后 8 个 job 全 skipped。
+      # 失败信息长成"Scanner Integrity 挂了"的样子，把根因指向新规则污染扫描器，
+      # 而真实原因只是这台机器少装一个包。
+      - uses: ./.github/actions/prepare-tests
 
       - uses: actions/download-artifact@v4
         with:

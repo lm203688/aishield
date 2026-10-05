@@ -28,9 +28,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.13'
+      # 测试前置统一走 prepare-tests。本 job 是全链最危险的一环：它把候选规则
+      # 写进线上规则库，唯一的刹车就是下面那次全量测试。若前置缺失，刹车会
+      # 以"看起来像产品回归"的方式失效（实测干净 runner 上 18F/9E 全在身份侧）。
+      - uses: ./.github/actions/prepare-tests
 
       - name: Gate report (--check；blocked=六道闸门未过，必须可见，不得吞)
         # 铁律：禁止 `|| true` 吞门禁失败。blocked（校验未过，如良性语料误报）

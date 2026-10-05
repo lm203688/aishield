@@ -1,0 +1,96 @@
+name: Prepare test environment
+description: >-
+  跑本仓测试套件的**唯一**前置入口：Python + Ed25519 签名后端 + （可选）MCP 依赖。
+  任何执行 `python tests/run_all.py` 的 job 都必须先引用本 action —— 由
+  scripts/validate_workflows.py 的 E11 强制。
+
+# ── 为什么需要这个 action ──────────────────────────────────────────────
+# 【2026-10-05 事故】同一件事（"跑全量测试要装什么"）在 6 个 workflow 里各自
+# 实现，其中 5 个漏了 cryptography。后果不是"少装一个包"，而是**连锁停摆**：
+#
+#   threat-intel-feed 的 verify job 裸跑 run_all.py
+#     → 干净 runner 上 eco/crypto_sign.py 静默降级 hmac-sha256
+#     → L1 可移植身份 / L3 意图授权用例集体 fail-closed 报红（实测 18F/9E）
+#     → 该 job 失败 → spine 在 job 2 终止
+#     → 其后 8 个 job（规则晋升 / 自扫描 / CI 验证 / 部署 / 分发 / 汇报）全部 skipped
+#     → meta_monitor 报「5 个状态域停摆」，而真实根因只有 1 个
+#
+# 更隐蔽的是**递进式复现**：spine 是串行的，修好 job 2 之后，job 3
+# （rule-promoter，同样裸跑 run_all.py）当天就会以完全相同的方式失败，spine 改停在
+# job 3。逐个补 = 一天推进一格，永远追不上。另 3 处（feature-closed-loop /
+# publish-npm / self-heal-closed-loop）各有独立 cron，会各自静默失败。
+#
+# 所以修法不是"补 pip install"，而是把前置**定义一次**，再由门禁保证没有人绕过。
+
+# ── 为什么 cryptography 是硬前提而不是可选增强 ────────────────────────
+# scanner/runtime 的对外承诺是**零依赖**（仓库刻意不建 requirements.txt，
+# ci.yml 的 dependency-check job 见到该文件直接 exit 1）。但**测试**不是 runtime：
+# L1「可移植身份」= JWKS 只发非对称公钥、第三方仅凭公钥离线验签；L3「意图授权」=
+# AP2 对齐的 Intent Mandate。这两项能力本身建立在 Ed25519 上，降级成 hmac-sha256
+# 时它们**根本不存在**（对称密钥无法公开分发，签出来的凭证没人能独立验证）。
+#
+# 测试用例在这些前提下会照常加载、然后成片失败 —— 失败信息看起来像产品回归，
+# 实际是"这台机器没装包"。这类"测试存在与否取决于环境"的状态，比测试失败更危险。
+# 故此处 fail-closed：装不上就明确报错退出，绝不降级为 skip（skip 就是假绿）。
+
+inputs:
+  install-node-deps:
+    description: >-
+      是否安装 mcp-server 的 npm 依赖。stdio 端到端测试要真的启动 node 子进程，
+      没有它那几个用例会**跳过** —— 跳过就是让「端到端」名存实亡，正是本 action
+      要消灭的那种假绿。故默认 true。
+      只有调用方自己已经装过（如 publish-npm 的 npm ci）才设 false，省掉重复安装。
+    required: false
+    default: 'true'
+
+runs:
+  using: composite
+  steps:
+    # 调用方需先 actions/checkout —— 下面要 import 本仓的 eco.crypto_sign 来断言后端。
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.13'
+
+    - name: Install Ed25519 signing backend (hard requirement)
+      shell: bash
+      run: |
+        set -o pipefail
+        if python -c "import cryptography" 2>/dev/null; then
+          echo "cryptography 已就位"
+        else
+          echo "装 cryptography —— L1 可移植身份 / L3 意图授权用例依赖真实的非对称签名路径"
+          python -m pip install --quiet cryptography
+        fi
+
+    - name: Assert signing backend is Ed25519 (fail-closed)
+      shell: bash
+      run: |
+        # 装完还不够：必须验证**当前进程真的用上了**它。
+        # eco/crypto_sign.py 是在 import 时按 cryptography 是否可用来定后端的，
+        # 若这一步拿到的仍是 hmac-sha256，说明装的东西没生效（例如装到了别的解释器 /
+        # 被 PYTHONPATH 遮蔽），此时继续跑测试只会产出误导性红。
+        python - <<'PY'
+        import sys
+        sys.path.insert(0, '.')
+        from eco import crypto_sign as cs
+        backend = cs.backend()
+        print(f"签名后端: {backend} | cryptography 可用: {cs.have_crypto()}")
+        if backend != cs.ALG_ED25519:
+            print("::error::签名后端仍为 %s —— 测试将在错误前提下运行" % backend)
+            sys.exit(1)
+        PY
+
+    - name: Install mcp-server deps
+      if: inputs.install-node-deps == 'true'
+      shell: bash
+      run: |
+        # stdio 端到端测试要真的启动 node 子进程，需要 @modelcontextprotocol/sdk。
+        # node_modules 被 gitignore、runner 又是干净环境，不装这一步 E2E 只能跳过，
+        # 于是「端到端」名存实亡。装不上时降级为警告而不是让整个 job 失败：
+        # 依赖网络/注册表不可用时，不该让一整套 Python 测试陪葬。
+        cd mcp-server
+        set -o pipefail
+        if ! npm ci --no-audit --no-fund 2>&1 | tail -15; then
+          echo "::warning::mcp-server 依赖安装失败 —— stdio 端到端测试会自动跳过"
+        fi

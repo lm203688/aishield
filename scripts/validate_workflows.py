@@ -17,6 +17,7 @@ step id 而非 job id，GitHub Actions 解析期直接报错，整个 workflow 4
   E8 表达式含 shell 变量插值 / 注释里写坏表达式（workflow 无法加载）
   E9 CRLF(\\r) 行尾（破坏 heredoc 定界符导致 bash 语法错）/ 命令替换内嵌 heredoc（脆弱写法）
   E10 并发 push 假绿吞错（`git push || echo`）/ `git add data/state/` 整目录提交
+  E11 跑全量测试却没引用统一前置 prepare-tests（同一件事多处各自实现的必然漂移）
   W1 关键步骤使用 continue-on-error（测试形同虚设）
   W2 workflow 无任何触发器
   W3 cron 表达式字段数不合法
@@ -38,11 +39,40 @@ from typing import Any, Dict, List
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 WF_DIR = REPO_ROOT / ".github" / "workflows"
+# 本地 composite action。它们与 workflow 同属 CI 代码，且常被多个 job 共用
+# （本仓 prepare-tests 被 6 个 job 引用）—— 出错会连锁失败，必须同样受检。
+ACTION_DIR = REPO_ROOT / ".github" / "actions"
 
 # ${{ ... }} 表达式提取（非贪婪，一行内可命中多个）
 EXPRESSION_RE = re.compile(r"\$\{\{(.*?)\}\}")
 # 表达式里的 shell 变量插值：$ 紧跟标识符。Actions 表达式不支持这个。
 SHELL_VAR_IN_EXPR = re.compile(r"\$[A-Za-z_][A-Za-z0-9_.]*")
+
+# ── E11：跑全量测试必须引用统一前置 ────────────────────────────────────
+# 起因（2026-10-05 事故）：`python tests/run_all.py` 在 6 个 workflow 里各自
+# 实现，只有 ci.yml 装了 cryptography。另外 5 个在干净 runner 上跑 → 签名后端
+# 降级 hmac-sha256 → L1/L3 用例 fail-closed 成片报红（实测 18F/9E）→
+# threat-intel-feed 的 verify job 失败 → spine 在 job 2 终止 → 后 8 个 job 全跳过。
+#
+# 关键在于这是**递进式**的：spine 串行，修好 job 2 后 job 3（rule-promoter）
+# 当天就会以同样方式失败。逐个补 = 一天推进一格，永远追不上。所以必须靠门禁
+# 把"绕不过去"钉死 —— 这条检查比修那 5 处引用重要得多。
+PREP_ACTION = "./.github/actions/prepare-tests"
+# 真在跑全量套件的命令行（允许 python / python3 / 带 -u 等开关）。
+FULL_SUITE_RE = re.compile(r"\bpython[0-9.]*\b[^\n|;&]*\btests/run_all\.py\b")
+
+
+def _command_lines(script: str):
+    """只产出真正的命令行，跳过整行注释。
+
+    注释里提一句 run_all.py 不该被当成"这个 job 在跑测试"：本仓库的 workflow
+    里有大量解释性注释专门讨论测试，误报会让门禁很快失去信誉。
+    """
+    for line in (script or "").splitlines():
+        s = line.strip()
+        if not s or s.startswith("#"):
+            continue
+        yield line
 
 try:
     import yaml  # type: ignore
@@ -88,6 +118,43 @@ def _detect_cycle(deps: Dict[str, List[str]]) -> List[str]:
         if color[n] == WHITE and dfs(n, []):
             break
     return cycle
+
+
+def _is_composite_action(data: Dict[str, Any]) -> bool:
+    """是否是一个 composite action 定义（.github/actions/**/action.yml）。
+
+    action.yml 与 workflow 同属「CI 代码」，但它没有 on / jobs 结构，适用的
+    检查集不同（没有触发器、没有 job 依赖），故必须先区分再分流。
+
+    为什么必须校验它：本仓的 .github/actions/prepare-tests 是 **6 个 job 的
+    单点依赖** —— 它一旦 CRLF 污染 / heredoc 定界符损坏 / 表达式写错，那 6 个
+    job 会**一起**失败。而这恰好就是本轮要消灭的「连锁停摆」形态：
+    把命脉集中到一处之后，那一处必须被更严格地守住，否则等于把风险换了个位置。
+    """
+    runs = data.get("runs")
+    return isinstance(runs, dict) and runs.get("using") == "composite"
+
+
+def _check_local_refs(text: str, res: Dict[str, Any]) -> None:
+    """E4：引用的本地脚本 / 本地 action 必须真实存在。
+
+    workflow 与 action 共用本检查，所以抽成函数而不是复制两份 —— 复制出来的
+    两份迟早会漂移，而「同一件事多处各自实现」正是本轮事故的根因形态。
+    """
+    for m in re.finditer(r"python\s+(scripts/[\w./-]+\.py|tests/[\w./-]+\.py)", text):
+        rel = m.group(1)
+        if not (REPO_ROOT / rel).exists():
+            res["errors"].append(f"E4 引用了不存在的脚本: {rel}")
+    for m in re.finditer(r"bash\s+(scripts/[\w./-]+\.sh)", text):
+        rel = m.group(1)
+        if not (REPO_ROOT / rel).exists():
+            res["warnings"].append(f"W5 引用了本仓库不存在的 shell 脚本: {rel}（可能在服务器侧）")
+    for m in re.finditer(r"uses:\s*\./?\.github/[\w./-]+", text):
+        rel = m.group(0).split(":", 1)[1].strip()
+        if rel.startswith("./"):
+            rel = rel[2:]
+        if not (REPO_ROOT / rel).exists():
+            res["errors"].append(f"E4 引用了不存在的本地 action: {rel}")
 
 
 def check_file(path: Path) -> Dict[str, Any]:
@@ -136,7 +203,9 @@ def check_file(path: Path) -> Dict[str, Any]:
             for i in node:
                 yield from _walk_runs(i)
 
-    for _ in _walk_runs(data.get("jobs", {})):
+    # 遍历整份 data（而非 data["jobs"]）：composite action 的 run 位于
+    # runs.steps[].run，不在 jobs 下 —— 只传 jobs 会让 action 完全逃过检查。
+    for _ in _walk_runs(data):
         res["warnings"].append(
             "E9 检测到命令替换内嵌 heredoc ($( ... <<'EOF' ...))，"
             "该写法在 CRLF/定界符带尾随空白时会致 bash 语法错，建议改为调用落盘脚本"
@@ -176,7 +245,7 @@ def check_file(path: Path) -> Dict[str, Any]:
             for i in node:
                 yield from _run_lines(i)
 
-    for line in _run_lines(data.get("jobs", {})):
+    for line in _run_lines(data):
         s = line.strip()
         if "git_push_safe" in s:
             continue
@@ -201,10 +270,15 @@ def check_file(path: Path) -> Dict[str, Any]:
 
     # 场景：run 块里的多行字符串未缩进，续行落到第 0 列后被 YAML 当成新的顶层键。
     # 这类错误语法上合法、GitHub 不报错，但 run 命令已被截断 —— 比语法错更隐蔽。
-    ALLOWED_TOP = {
-        "name", "on", "jobs", "permissions", "env", "defaults",
-        "concurrency", "run-name", True,  # PyYAML 把 on: 解析成布尔 True
-    }
+    if _is_composite_action(data):
+        # composite action 的合法顶层键是另一套；沿用 workflow 的白名单会全量误报
+        ALLOWED_TOP = {"name", "description", "author", "inputs", "outputs",
+                       "runs", "branding"}
+    else:
+        ALLOWED_TOP = {
+            "name", "on", "jobs", "permissions", "env", "defaults",
+            "concurrency", "run-name", True,  # PyYAML 把 on: 解析成布尔 True
+        }
     for key in data.keys():
         if key not in ALLOWED_TOP:
             res["errors"].append(
@@ -250,6 +324,17 @@ def check_file(path: Path) -> Dict[str, Any]:
                     f"E8 第 {lineno} 行表达式含 shell 变量插值: ${{{{ {body} }}}}"
                     f" —— Actions 表达式不支持，整个 workflow 将无法加载"
                 )
+
+    # ── composite action：通用检查已跑完，在此分流 ───────────────────────
+    # 下面的触发器 / job / needs 检查都建立在 workflow 结构上（on / jobs）。
+    # action.yml 没有这些结构，继续往下走只会产出成片误报（E5 无 dispatch、
+    # W2 无触发器、E1 未定义 job），把真信号淹掉。
+    if _is_composite_action(data):
+        res["kind"] = "action"
+        res["crons"] = []
+        res["workflow_run_refs"] = []
+        _check_local_refs(text, res)
+        return res
 
     # 触发器检查（PyYAML 会把 on: 解析成 True 键，需两边都看）
     on = data.get("on", data.get(True))
@@ -333,15 +418,8 @@ def check_file(path: Path) -> Dict[str, Any]:
     if cycle:
         res["errors"].append(f"E3 job 依赖成环: {' -> '.join(cycle)}")
 
-    # 引用的本地脚本是否存在
-    for m in re.finditer(r"python\s+(scripts/[\w./-]+\.py|tests/[\w./-]+\.py)", text):
-        rel = m.group(1)
-        if not (REPO_ROOT / rel).exists():
-            res["errors"].append(f"E4 引用了不存在的脚本: {rel}")
-    for m in re.finditer(r"bash\s+(scripts/[\w./-]+\.sh)", text):
-        rel = m.group(1)
-        if not (REPO_ROOT / rel).exists():
-            res["warnings"].append(f"W5 引用了本仓库不存在的 shell 脚本: {rel}（可能在服务器侧）")
+    # 引用的本地脚本 / 本地 action 是否存在（与 action 分支共用同一实现）
+    _check_local_refs(text, res)
 
     # 测试步骤被 continue-on-error 架空
     for jname, jbody in jobs.items():
@@ -363,6 +441,30 @@ def check_file(path: Path) -> Dict[str, Any]:
                     f"W1 job '{jname}' 步骤 '{st.get('name') or run[:30]}' "
                     f"跑了测试却设 continue-on-error，测试无法阻断发布"
                 )
+
+    # ── E11 跑全量测试的 job 必须引用统一前置 ────────────────────────────
+    # 判据：job 内出现真正的 `python tests/run_all.py` 命令行（注释不算），
+    # 但该 job 的任一步骤都没有 uses 这个 composite action → 报错。
+    for jname, jbody in jobs.items():
+        if not isinstance(jbody, dict):
+            continue
+        steps = [st for st in (jbody.get("steps") or []) if isinstance(st, dict)]
+        runs_suite = any(
+            FULL_SUITE_RE.search(line)
+            for st in steps
+            for line in _command_lines(st.get("run") or "")
+        )
+        if not runs_suite:
+            continue
+        has_prep = any((st.get("uses") or "").strip().startswith(PREP_ACTION)
+                       for st in steps)
+        if not has_prep:
+            res["errors"].append(
+                f"E11 job '{jname}' 执行了全量测试却没有引用 {PREP_ACTION} —— "
+                f"缺前置时签名后端会降级为 hmac-sha256，L1/L3 用例将以"
+                f"「看起来像回归」的方式成片报红（实测 18F/9E），而真实原因只是"
+                f"这台机器少装一个包"
+            )
     return res
 
 
@@ -425,6 +527,8 @@ def main() -> int:
         return 0
 
     files = sorted(list(WF_DIR.glob("*.yml")) + list(WF_DIR.glob("*.yaml")))
+    action_files = (sorted(ACTION_DIR.glob("*/action.yml")) if ACTION_DIR.exists() else [])
+    files = files + action_files
     results = [check_file(f) for f in files]
     cross_check(results)
     n_err = sum(len(r["errors"]) for r in results)
@@ -435,11 +539,15 @@ def main() -> int:
             {"total": len(files), "errors": n_err, "warnings": n_warn, "results": results},
             ensure_ascii=False, indent=2))
     else:
-        print(f"校验 {len(files)} 个 workflow 文件\n" + "=" * 62)
+        n_actions = len(action_files)
+        print(f"校验 {len(files)} 个文件（{len(files) - n_actions} workflow + "
+              f"{n_actions} local action）\n" + "=" * 62)
         for r in results:
             if r["errors"] or r["warnings"]:
                 icon = "❌" if r["errors"] else "⚠️ "
-                print(f"\n{icon} {r['file']}  (jobs: {', '.join(r['jobs']) or '-'})")
+                kind = ("composite action" if r.get("kind") == "action"
+                        else f"jobs: {', '.join(r['jobs']) or '-'}")
+                print(f"\n{icon} {r['file']}  ({kind})")
                 for e in r["errors"]:
                     print(f"     ERROR  {e}")
                 for w in r["warnings"]:

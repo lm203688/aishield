@@ -111,9 +111,11 @@ jobs:
           node-version: '20'
           registry-url: 'https://registry.npmjs.org'
 
-      - uses: actions/setup-python@v5
+      # 测试前置统一走 prepare-tests；node 依赖由下面的 npm ci 负责，故关掉
+      # action 自带的安装（默认 true），避免在发布流程里重复装一遍。
+      - uses: ./.github/actions/prepare-tests
         with:
-          python-version: '3.13'
+          install-node-deps: 'false'
 
       - name: Install dependencies
         working-directory: mcp-server

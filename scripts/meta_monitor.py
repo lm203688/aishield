@@ -20,6 +20,7 @@ AIShield 元监控 (Meta-Monitor)：监控自动化体系本身
   M7 上游情报源   —— OSV / NVD / GitHub Advisory 是否真的可用（情报库有无停更）
   M8 雷达情报源   —— Tech Radar 的 github/arxiv/hn/reddit/standards/platforms 是否可用
   M9 雷达规则效果 —— 已晋升的雷达规则是否真的命中攻击、是否误伤良性输入
+  M10 监控覆盖面  —— 有独立 cron 的 workflow 是否都在受监清单内（元监控自检）
 
 用法：
     python scripts/meta_monitor.py
@@ -152,6 +153,11 @@ CRON_MAX_AGE_HOURS = {
     "npm-self-heal.yml": 48,
     "stale.yml": 48,
     "closed-loop-spine.yml": 48,
+    # 【2026-10-05 补】它每天 09:20 UTC 独立运行（另含 push 触发），却一直不在
+    # 任何受监清单里 —— 每天在跑、坏了没人知道。之所以长期没被发现，是因为它
+    # 既不在 CRON_MAX_AGE_HOURS，也不在 spine 的编排里，两边都以为对方在管。
+    # 现在由 M10「监控覆盖面」把这类遗漏变成显式红灯，不再靠人记得。
+    "geo-indexnow-submit.yml": 48,
 }
 
 # 状态域 -> 归属（写入该域的）workflow 列表。
@@ -169,7 +175,11 @@ CRON_MAX_AGE_HOURS = {
 DOMAIN_OWNERS = {
     "health": ["self-heal-closed-loop.yml", "deploy-server.yml"],
     "selfheal": ["self-heal-closed-loop.yml", "deploy-server.yml"],
-    "distribution": ["channel-distribution.yml", "closed-loop-spine.yml"],
+    # distribution 域有**两个**写入者：channel-distribution（分发动作）与
+    # geo-indexnow-submit（收录提交，见其 state_bus.py set distribution）。
+    # 原先只登记了前者，于是收录链路的活性从来没被真正判过。
+    "distribution": ["channel-distribution.yml", "closed-loop-spine.yml",
+                     "geo-indexnow-submit.yml"],
     "intel": ["threat-intel-feed.yml", "closed-loop-spine.yml"],
     "rules": ["threat-intel-feed.yml", "rule-promoter.yml", "closed-loop-spine.yml"],
     "flywheel": ["data-scan-flywheel.yml", "closed-loop-spine.yml"],
@@ -268,13 +278,44 @@ def check_liveness() -> Dict[str, Any]:
         "silent": silent,
         "failing": failing,
         "detail": "所有定时任务按期执行且最近一次均成功" if not silent and not failing
-                  else f"{len(silent)} 个任务超期未执行，{len(failing)} 个最近运行失败 —— 这是静默失效的典型信号",
+                  else f"{len(silent)} 个任务超期未执行，{len(failing)} 个最近运行失败"
+                       + (f"（{'、'.join(failing)}）" if failing else "")
+                       + " —— 这是静默失效的典型信号",
     }
 
 
 # --------------------------------------------------------------------------
 # M3 静默失败（状态总线陈旧）
 # --------------------------------------------------------------------------
+def _common_failed_owner(stale: List[str], latest: Dict[str, Dict[str, Any]]):
+    """在被判 stale 的域里找**共同的失败归属** workflow —— 把「N 个故障」收敛成「1 个根因」。
+
+    【2026-10-05 事故】spine 的 job 2 失败时，体检报
+    「状态域 ['distribution','intel','rules','flywheel','feature'] 停摆」——
+    读起来是 5 个环节各自出了问题，实际这 5 个域的归属列表里都含
+    closed-loop-spine.yml，真正要修的只有 1 处（打开 spine 看它在哪个 job 断的）。
+
+    面板的职责不只是「报出异常」，还要把异常归到**可操作的最小根因**上：
+    报 5 个故障会让人去逐个排查 5 个子系统，归因粒度错了，诊断成本放大一个量级。
+
+    只在某个失败归属覆盖 >= 2 个 stale 域时才点出（单域的情况 detail 已说清）。
+    """
+    hits: Dict[str, List[str]] = {}
+    for domain in stale:
+        for wf in DOMAIN_OWNERS.get(domain, []):
+            info = latest.get(wf) or {}
+            if not info.get("at"):
+                continue
+            if info.get("conclusion") == "failure":
+                hits.setdefault(wf, []).append(domain)
+    if not hits:
+        return None
+    wf, domains = max(hits.items(), key=lambda kv: len(kv[1]))
+    if len(domains) < 2:
+        return None
+    return wf, domains
+
+
 def check_state_freshness() -> Dict[str, Any]:
     """M3 静默失败检测。
 
@@ -315,11 +356,18 @@ def check_state_freshness() -> Dict[str, Any]:
                 pass
         if not fresh:
             stale.append(domain)
+    detail = ("所有状态域的归属 workflow 均按期成功执行" if not stale
+              else f"状态域 {stale} 的归属 workflow 超过阈值未成功运行 —— 对应环节可能已停摆")
+    root = _common_failed_owner(stale, latest)
+    if root:
+        wf, domains = root
+        detail += (f"；共同根因：{wf} 最近一次运行失败，{len(domains)} 个域共用该归属"
+                   f"（{'、'.join(domains)}）—— 先修这一处，不必逐个排查各子系统")
     return {
         "ok": not stale,
         "stale": stale,
-        "detail": "所有状态域的归属 workflow 均按期成功执行" if not stale
-                  else f"状态域 {stale} 的归属 workflow 超过阈值未成功运行 —— 对应环节可能已停摆",
+        "root_cause": (root[0] if root else None),
+        "detail": detail,
     }
 
 
@@ -588,6 +636,64 @@ def check_radar_effect() -> Dict[str, Any]:
             "detail": f"雷达规则效果正常（{len(rules)} 条，{catch_n} 条命中正样本，零误报）"}
 
 
+# --------------------------------------------------------------------------
+# M10 监控覆盖面（元监控自检：我有没有漏监控）
+# --------------------------------------------------------------------------
+def check_monitor_coverage() -> Dict[str, Any]:
+    """M10 监控覆盖面：有独立 cron 的 workflow 必须全部被本模块判活。
+
+    补的洞（2026-10-05 实测）：geo-indexnow-submit.yml 每天 09:20 独立运行，
+    却既不在 CRON_MAX_AGE_HOURS / DOMAIN_OWNERS 里，也不在 spine 的编排里 ——
+    **每天在跑，坏了没人知道**。
+
+    这是静默失效的最深处：M2~M9 的前提都是「这个环节已被纳入监控」，而这里的
+    问题是「这个环节根本不在监控范围内」—— 连「有东西坏了」这个信号本身都不存在。
+    上面所有检查做得再好，也照不到监控范围之外的空白。
+
+    同时校验归属清单里的**文件名真实存在**：写错一个文件名会被
+    _monitored_workflows 的存在性过滤静默丢掉，于是某个域的活性判据悄悄少一个
+    来源 —— 判据变弱却毫无提示。判据弱化本身也是一种静默失效。
+    """
+    declared = set(CRON_MAX_AGE_HOURS)
+    for owners in DOMAIN_OWNERS.values():
+        declared.update(owners)
+
+    missing_files = sorted(n for n in declared if not (WF_DIR / n).exists())
+    if missing_files:
+        return {
+            "ok": False,
+            "missing_files": missing_files,
+            "detail": f"受监清单引用了不存在的 workflow：{missing_files} —— 该归属会被"
+                      f"静默过滤掉，对应环节的判活依据会悄悄少一个来源",
+        }
+
+    if yaml is None:
+        return {"ok": None, "detail": "无 PyYAML，跳过监控覆盖面检查"}
+
+    scheduled: List[str] = []
+    for p in sorted(WF_DIR.glob("*.yml")):
+        try:
+            data = yaml.safe_load(p.read_text(encoding="utf-8")) or {}
+        except Exception:
+            continue
+        if not isinstance(data, dict):
+            continue
+        on = data.get("on", data.get(True))
+        if isinstance(on, dict) and on.get("schedule"):
+            scheduled.append(p.name)
+
+    uncovered = sorted(n for n in scheduled if n not in declared)
+    if uncovered:
+        return {
+            "ok": False,
+            "uncovered": uncovered,
+            "detail": f"{uncovered} 有独立 cron 却不在受监清单里 —— 每天在跑但坏了"
+                      f"没人知道（两边都以为对方在管）",
+        }
+    return {"ok": True,
+            "detail": f"所有独立调度的 workflow（{len(scheduled)} 个）均已被监控覆盖"}
+
+
 CHECKS = [
     ("M1 语法有效性", check_syntax),
     ("M2 运行活性", check_liveness),
@@ -598,6 +704,7 @@ CHECKS = [
     ("M7 上游情报源", check_intel_sources),
     ("M8 雷达情报源", check_radar_sources),
     ("M9 雷达规则效果", check_radar_effect),
+    ("M10 监控覆盖面", check_monitor_coverage),
 ]
 
 

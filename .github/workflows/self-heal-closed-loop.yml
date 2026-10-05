@@ -205,9 +205,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.13'
+      # 测试前置统一走 prepare-tests。本 job 是"修复后必须全绿才上线"的闸门：
+      # 前置缺失会让闸门在错误前提下亮红，从而把真实修复也一起挡在门外。
+      - uses: ./.github/actions/prepare-tests
 
       - name: Run full test suite (blocking)
         run: |

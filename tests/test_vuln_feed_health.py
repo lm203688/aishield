@@ -601,5 +601,61 @@ class TestMetaMonitorM9(unittest.TestCase):
         self.assertIsNone(r["ok"], "尚无晋升规则时应跳过而非判红")
 
 
+class TestMetaMonitorM10(unittest.TestCase):
+    """M10：元监控必须检查**自己有没有漏监控**。
+
+    起因（2026-10-05 实测）：geo-indexnow-submit.yml 每天 09:20 独立运行，却既
+    不在 CRON_MAX_AGE_HOURS / DOMAIN_OWNERS 里，也不在 spine 的编排里 ——
+    **每天在跑、坏了没人知道**。M2~M9 的前提都是「该环节已被纳入监控」，
+    它们照不到监控范围之外的空白：那是一块连「有东西坏了」这个信号都不存在的区域。
+    """
+
+    def test_registered_in_checks(self):
+        labels = [lbl for lbl, _ in mm.CHECKS]
+        self.assertIn("M10 监控覆盖面", labels)
+
+    def test_every_scheduled_workflow_is_monitored(self):
+        r = mm.check_monitor_coverage()
+        if r["ok"] is None:
+            self.skipTest(r.get("detail", "无 PyYAML"))
+        self.assertTrue(r["ok"], r.get("detail"))
+
+    def test_missing_workflow_file_is_reported(self):
+        """归属清单写错文件名 → 该域判据静默少一个来源，必须报出来。
+
+        `_monitored_workflows()` 会把它过滤掉，于是没人发现判据已经变弱。
+        """
+        with mock.patch.dict(mm.DOMAIN_OWNERS,
+                             {"__probe__": ["nope-does-not-exist.yml"]}):
+            r = mm.check_monitor_coverage()
+        self.assertFalse(r["ok"], "引用了不存在的 workflow 却判绿")
+        self.assertIn("nope-does-not-exist.yml", r["missing_files"])
+
+    def test_unmonitored_scheduled_workflow_is_reported(self):
+        """把 geo-indexnow 从清单摘掉 → 必须报「有 cron 却无人监控」。"""
+        saved_cron = mm.CRON_MAX_AGE_HOURS.pop("geo-indexnow-submit.yml", None)
+        saved_owners = list(mm.DOMAIN_OWNERS.get("distribution", []))
+        try:
+            mm.DOMAIN_OWNERS["distribution"] = [
+                x for x in saved_owners if x != "geo-indexnow-submit.yml"]
+            r = mm.check_monitor_coverage()
+        finally:
+            if saved_cron is not None:
+                mm.CRON_MAX_AGE_HOURS["geo-indexnow-submit.yml"] = saved_cron
+            mm.DOMAIN_OWNERS["distribution"] = saved_owners
+        self.assertFalse(r["ok"], "有独立 cron 却无人监控，M10 竟然判绿")
+        self.assertIn("geo-indexnow-submit.yml", r["uncovered"])
+
+    def test_geo_indexnow_registered_in_both_places(self):
+        """回归护栏：活性清单与状态域归属**两处都要登记**。
+
+        只登记活性不登记域归属 → distribution 域的判据少一个来源；
+        只登记域归属不登记活性 → 它自己的存活性仍无人过问。
+        这个 workflow 会写 `state_bus.py set distribution`，所以两者都该有它。
+        """
+        self.assertIn("geo-indexnow-submit.yml", mm.CRON_MAX_AGE_HOURS)
+        self.assertIn("geo-indexnow-submit.yml", mm.DOMAIN_OWNERS["distribution"])
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
