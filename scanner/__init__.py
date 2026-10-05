@@ -14,6 +14,18 @@ from .client_discovery import (
 from .osv import check_osv
 from .attack_path import solve_minimal_removal, attack_graph_json
 from .exporters import to_nucleus, to_splunk, to_attack_graph
+# 统一导出面（F3 收口）：目标端注册表 + 配置化；含 OCSF 1.1 / STIX 2.1
+from .export_registry import (
+    TARGETS as EXPORT_TARGETS, TargetConfig, export as export_findings,
+    export_to, batch_export, load_config as load_export_config,
+)
+# 评分可解释（M3 收口）：扣分账本闭合 + 独立复算回放。
+# 注意 explain_score 这个名字留给 engine 的文本版（历史兼容），这里导出的是
+# 机器可读版与审计/复算，用不冲突的名字，免得后来的 import 把前面的覆盖掉。
+from .score_explain import (
+    audit as audit_score, replay as replay_score, explain as explain_score_json,
+    attribution_text as score_attribution_text,
+)
 from .policy import load_policy, evaluate_policy
 from .telemetry import record_scan, get_aggregates, reset as telemetry_reset
 from .live_probe import probe_server_metadata
@@ -49,6 +61,10 @@ __all__ = [
     # 新增能力（D1/M3/M4/F2/F3/F6/D3/D4）
     "check_osv", "solve_minimal_removal", "attack_graph_json",
     "to_nucleus", "to_splunk", "to_attack_graph",
+    # 统一导出面（F3 收口）+ 评分可解释（M3 收口）
+    "EXPORT_TARGETS", "TargetConfig", "export_findings", "export_to", "batch_export",
+    "load_export_config", "audit_score", "replay_score", "explain_score_json",
+    "score_attribution_text",
     "load_policy", "evaluate_policy",
     "record_scan", "get_aggregates", "telemetry_reset",
     "probe_server_metadata", "discover_across_registries", "search_registry",

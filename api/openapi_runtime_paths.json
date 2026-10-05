@@ -1,7 +1,7 @@
 {
   "note": "运行时路由清单：进程内直调 api.server.AIShieldHandler.do_GET/do_POST 探得，与 curated 规范合并后即线上 /openapi.json。",
   "source": "runtime probe (scripts/gen_openapi_spec.py)",
-  "generated_at": "2026-10-05T10:50:32",
+  "generated_at": "2026-10-05T20:51:52",
   "route_count": 132,
   "operation_count": 148,
   "probe_errors": [],
@@ -10,9 +10,10 @@
     "restored": [
       "C:\\Users\\xing\\Desktop\\aishield\\data\\fleet.json",
       "C:\\Users\\xing\\Desktop\\aishield\\data\\monitored_tools.json",
-      "C:\\Users\\xing\\Desktop\\aishield\\api/data\\governance_audit.jsonl",
+      "C:\\Users\\xing\\Desktop\\aishield\\api/data\\agent_card_key.json",
       "C:\\Users\\xing\\Desktop\\aishield\\api/data\\spend_caps.json",
-      "C:\\Users\\xing\\Desktop\\aishield\\api/data\\usage.json"
+      "C:\\Users\\xing\\Desktop\\aishield\\api/data\\usage.json",
+      "(已删除探针新建) C:\\Users\\xing\\Desktop\\aishield\\api/data\\governance_audit.jsonl"
     ],
     "failed": []
   },
@@ -805,68 +806,7 @@
                 "type": "array",
                 "items": {
                   "type": "object",
-                  "properties": {
-                    "subscription_id": {
-                      "type": "object"
-                    },
-                    "source_url": {
-                      "type": "object"
-                    },
-                    "plan": {
-                      "type": "object"
-                    },
-                    "plan_label": {
-                      "type": "object"
-                    },
-                    "payer_id": {
-                      "type": "object"
-                    },
-                    "cert_id": {
-                      "type": "object"
-                    },
-                    "status": {
-                      "type": "object"
-                    },
-                    "price_cny": {
-                      "type": "object"
-                    },
-                    "price_usd": {
-                      "type": "object"
-                    },
-                    "attest_interval_days": {
-                      "type": "object"
-                    },
-                    "grace_days": {
-                      "type": "object"
-                    },
-                    "created_at": {
-                      "type": "object"
-                    },
-                    "started_at": {
-                      "type": "object"
-                    },
-                    "expires_at": {
-                      "type": "object"
-                    },
-                    "next_attest_at": {
-                      "type": "object"
-                    },
-                    "last_attest_at": {
-                      "type": "object"
-                    },
-                    "renewals": {
-                      "type": "object"
-                    },
-                    "cancelled_at": {
-                      "type": "object"
-                    },
-                    "cancel_reason": {
-                      "type": "object"
-                    },
-                    "effective_status": {
-                      "type": "object"
-                    }
-                  },
+                  "properties": {},
                   "additionalProperties": true
                 }
               }
@@ -1045,20 +985,7 @@
                 "type": "array",
                 "items": {
                   "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "object"
-                    },
-                    "error": {
-                      "type": "object"
-                    },
-                    "subscription_id": {
-                      "type": "object"
-                    },
-                    "status": {
-                      "type": "object"
-                    }
-                  },
+                  "properties": {},
                   "additionalProperties": true
                 }
               },
@@ -1171,14 +1098,7 @@
                 "type": "array",
                 "items": {
                   "type": "object",
-                  "properties": {
-                    "sub_9e2c76b42fb3": {
-                      "type": "object"
-                    },
-                    "status": {
-                      "type": "object"
-                    }
-                  },
+                  "properties": {},
                   "additionalProperties": true
                 }
               }
@@ -1658,9 +1578,53 @@
           "verb": "get",
           "summary": "GET /api/v1/certify/list（运行时探得；schema 由真实响应推导）",
           "status": 200,
-          "sample_present": false,
-          "sample_truncated": true,
-          "schema": {},
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "success": {
+                "type": "boolean"
+              },
+              "certifications": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "cert_id": {
+                      "type": "object"
+                    },
+                    "source_url": {
+                      "type": "object"
+                    },
+                    "score": {
+                      "type": "object"
+                    },
+                    "badge_level": {
+                      "type": "object"
+                    },
+                    "risk_level": {
+                      "type": "object"
+                    },
+                    "findings_count": {
+                      "type": "object"
+                    },
+                    "status": {
+                      "type": "object"
+                    },
+                    "certified_at": {
+                      "type": "object"
+                    },
+                    "expires_at": {
+                      "type": "object"
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              }
+            },
+            "additionalProperties": true
+          },
           "x-aishield-generated": true,
           "x-aishield-probe-status": 200
         }
@@ -2687,48 +2651,37 @@
       ]
     },
     {
-      "path": "/api/v1/export/nucleus",
+      "path": "/api/v1/export",
       "tag": "export",
-      "summary": "POST /api/v1/export/nucleus（运行时探得；schema 由真实响应推导）",
+      "summary": "POST /api/v1/export（运行时探得；schema 由真实响应推导）",
       "operations": [
         {
           "verb": "post",
-          "summary": "POST /api/v1/export/nucleus（运行时探得；schema 由真实响应推导）",
-          "status": 200,
+          "summary": "POST /api/v1/export（运行时探得；schema 由真实响应推导）",
+          "status": 404,
           "sample_present": true,
           "sample_truncated": false,
           "schema": {
             "type": "object",
             "properties": {
-              "schema": {
+              "error": {
                 "type": "string"
               },
-              "asset_name": {
+              "error_code": {
                 "type": "string"
               },
-              "asset_type": {
+              "error_id": {
                 "type": "string"
-              },
-              "scanner": {
-                "type": "string"
-              },
-              "findings": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {},
-                  "additionalProperties": true
-                }
               }
             },
             "additionalProperties": true
           },
           "x-aishield-generated": true,
-          "x-aishield-probe-status": 200
+          "x-aishield-probe-status": 404
         }
       ],
       "operation_ids": [
-        "postExportNucleus"
+        "postExport"
       ]
     },
     {
@@ -2870,42 +2823,6 @@
       ],
       "operation_ids": [
         "postExportSbom"
-      ]
-    },
-    {
-      "path": "/api/v1/export/splunk",
-      "tag": "export",
-      "summary": "POST /api/v1/export/splunk（运行时探得；schema 由真实响应推导）",
-      "operations": [
-        {
-          "verb": "post",
-          "summary": "POST /api/v1/export/splunk（运行时探得；schema 由真实响应推导）",
-          "status": 200,
-          "sample_present": true,
-          "sample_truncated": false,
-          "schema": {
-            "type": "object",
-            "properties": {
-              "event_count": {
-                "type": "integer"
-              },
-              "events": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {},
-                  "additionalProperties": true
-                }
-              }
-            },
-            "additionalProperties": true
-          },
-          "x-aishield-generated": true,
-          "x-aishield-probe-status": 200
-        }
-      ],
-      "operation_ids": [
-        "postExportSplunk"
       ]
     },
     {
@@ -3207,9 +3124,43 @@
           "verb": "get",
           "summary": "GET /api/v1/governance/audit（运行时探得；schema 由真实响应推导）",
           "status": 200,
-          "sample_present": false,
-          "sample_truncated": true,
-          "schema": {},
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "success": {
+                "type": "boolean"
+              },
+              "total": {
+                "type": "integer"
+              },
+              "chain": {
+                "type": "object",
+                "properties": {
+                  "valid": {
+                    "type": "boolean"
+                  },
+                  "entries": {
+                    "type": "integer"
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": true
+              },
+              "entries": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {},
+                  "additionalProperties": true
+                }
+              }
+            },
+            "additionalProperties": true
+          },
           "x-aishield-generated": true,
           "x-aishield-probe-status": 200
         }
@@ -3620,6 +3571,15 @@
               },
               "deployed_at": {
                 "type": "null"
+              },
+              "signing_backend": {
+                "type": "string"
+              },
+              "identity_ready": {
+                "type": "boolean"
+              },
+              "identity_reason": {
+                "type": "string"
               }
             },
             "additionalProperties": true
@@ -3656,47 +3616,7 @@
                 "type": "array",
                 "items": {
                   "type": "object",
-                  "properties": {
-                    "name": {
-                      "type": "object"
-                    },
-                    "did": {
-                      "type": "object"
-                    },
-                    "public_key": {
-                      "type": "object"
-                    },
-                    "capabilities": {
-                      "type": "object"
-                    },
-                    "owner": {
-                      "type": "object"
-                    },
-                    "reputation_score": {
-                      "type": "object"
-                    },
-                    "reputation_level": {
-                      "type": "object"
-                    },
-                    "registered_at": {
-                      "type": "object"
-                    },
-                    "updated_at": {
-                      "type": "object"
-                    },
-                    "status": {
-                      "type": "object"
-                    },
-                    "revoked_at": {
-                      "type": "object"
-                    },
-                    "identity_token_expires": {
-                      "type": "object"
-                    },
-                    "identity_token_consumed_at": {
-                      "type": "object"
-                    }
-                  },
+                  "properties": {},
                   "additionalProperties": true
                 }
               }
@@ -4251,9 +4171,173 @@
           "verb": "get",
           "summary": "Agent 生态 API · snapshot",
           "status": 200,
-          "sample_present": false,
-          "sample_truncated": true,
-          "schema": {},
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "schema": {
+                "type": "string"
+              },
+              "generated_at": {
+                "type": "string"
+              },
+              "totals": {
+                "type": "object",
+                "properties": {
+                  "certifications": {
+                    "type": "integer"
+                  },
+                  "agents_registered": {
+                    "type": "integer"
+                  }
+                },
+                "additionalProperties": true
+              },
+              "top_by_score": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "cert_id": {
+                      "type": "object"
+                    },
+                    "source_url": {
+                      "type": "object"
+                    },
+                    "name": {
+                      "type": "object"
+                    },
+                    "score": {
+                      "type": "object"
+                    },
+                    "badge_level": {
+                      "type": "object"
+                    },
+                    "risk_level": {
+                      "type": "object"
+                    },
+                    "findings_count": {
+                      "type": "object"
+                    },
+                    "issued_at": {
+                      "type": "object"
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              },
+              "top_by_badge": {
+                "type": "object",
+                "properties": {
+                  "platinum": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "gold": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "silver": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "bronze": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  }
+                },
+                "additionalProperties": true
+              },
+              "top_by_domain": {
+                "type": "object",
+                "properties": {
+                  "legal": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "medical": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "finance": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "education": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "engineering": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "design": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "research": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "civic": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  }
+                },
+                "additionalProperties": true
+              },
+              "top_by_provider": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "provider": {
+                      "type": "object"
+                    },
+                    "count": {
+                      "type": "object"
+                    },
+                    "mean_score": {
+                      "type": "object"
+                    },
+                    "max_score": {
+                      "type": "object"
+                    },
+                    "cert_ids": {
+                      "type": "object"
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              }
+            },
+            "additionalProperties": true
+          },
           "x-aishield-generated": true,
           "x-aishield-probe-status": 200
         }
@@ -4613,47 +4697,7 @@
                 "type": "array",
                 "items": {
                   "type": "object",
-                  "properties": {
-                    "trade_order_id": {
-                      "type": "object"
-                    },
-                    "gateway": {
-                      "type": "object"
-                    },
-                    "payment": {
-                      "type": "object"
-                    },
-                    "amount_cny": {
-                      "type": "object"
-                    },
-                    "total_fee": {
-                      "type": "object"
-                    },
-                    "title": {
-                      "type": "object"
-                    },
-                    "attach": {
-                      "type": "object"
-                    },
-                    "status": {
-                      "type": "object"
-                    },
-                    "open_order_id": {
-                      "type": "object"
-                    },
-                    "pay_url": {
-                      "type": "object"
-                    },
-                    "qrcode_url": {
-                      "type": "object"
-                    },
-                    "metadata": {
-                      "type": "object"
-                    },
-                    "created_at": {
-                      "type": "object"
-                    }
-                  },
+                  "properties": {},
                   "additionalProperties": true
                 }
               }
@@ -5511,62 +5555,17 @@
               },
               "by_tool": {
                 "type": "object",
-                "properties": {
-                  "hack": {
-                    "type": "integer"
-                  }
-                },
+                "properties": {},
                 "additionalProperties": true
               },
               "by_agent": {
                 "type": "object",
-                "properties": {
-                  "null": {
-                    "type": "integer"
-                  }
-                },
+                "properties": {},
                 "additionalProperties": true
               },
               "daily": {
                 "type": "object",
-                "properties": {
-                  "2026-07-19": {
-                    "type": "object",
-                    "properties": {
-                      "total": {
-                        "type": "object"
-                      },
-                      "success": {
-                        "type": "object"
-                      },
-                      "blocked": {
-                        "type": "object"
-                      },
-                      "error": {
-                        "type": "object"
-                      }
-                    },
-                    "additionalProperties": true
-                  },
-                  "2026-07-20": {
-                    "type": "object",
-                    "properties": {
-                      "total": {
-                        "type": "object"
-                      },
-                      "success": {
-                        "type": "object"
-                      },
-                      "blocked": {
-                        "type": "object"
-                      },
-                      "error": {
-                        "type": "object"
-                      }
-                    },
-                    "additionalProperties": true
-                  }
-                },
+                "properties": {},
                 "additionalProperties": true
               }
             },
@@ -5637,29 +5636,7 @@
                 "type": "array",
                 "items": {
                   "type": "object",
-                  "properties": {
-                    "agent_id": {
-                      "type": "object"
-                    },
-                    "name": {
-                      "type": "object"
-                    },
-                    "description": {
-                      "type": "object"
-                    },
-                    "url": {
-                      "type": "object"
-                    },
-                    "version": {
-                      "type": "object"
-                    },
-                    "skills": {
-                      "type": "object"
-                    },
-                    "authentication": {
-                      "type": "object"
-                    }
-                  },
+                  "properties": {},
                   "additionalProperties": true
                 }
               }
@@ -6022,6 +5999,40 @@
       ],
       "operation_ids": [
         "postScanClientConfig"
+      ]
+    },
+    {
+      "path": "/api/v1/score/audit",
+      "tag": "score",
+      "summary": "POST /api/v1/score/audit（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/score/audit（运行时探得；schema 由真实响应推导）",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "postScoreAudit"
       ]
     },
     {

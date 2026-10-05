@@ -372,6 +372,7 @@ def calculate_scores(static, dependency, secrets, poisoning, taint, total_files,
     for dim_key, (label, w, ded, catfilter) in _DIM_CONFIG.items():
         penalties = []
         seen_desc = set()
+        folded = []
         for f in unique:
             cat = f.get("owasp_category", "")
             if catfilter is not None:
@@ -382,12 +383,23 @@ def calculate_scores(static, dependency, secrets, poisoning, taint, total_files,
                     continue
             desc = f.get("description", "")
             if desc in seen_desc:
+                # 同一描述只在扣分里体现一次。这是口径，不是 bug —— 但必须可见：
+                # 否则用户以为「三条同类告警只扣一次分」是漏算，可解释性就假了。
+                # 折叠项单独记录 rule_id/严重度/次数，回放时能查到被吞掉的是哪几条。
+                folded.append({"reason": desc, "severity": f.get("severity", "info"),
+                               "amount": ded.get(f.get("severity", "info"), 0),
+                               "owasp": cat, "rule_id": f.get("rule_id") or f.get("type", ""),
+                               "folded_count": 1})
                 continue
             seen_desc.add(desc)
             amt = ded.get(f.get("severity", "info"), 0)
             if amt > 0:
                 penalties.append({"reason": desc, "severity": f.get("severity", "info"),
-                                   "amount": amt, "owasp": cat})
+                                   "amount": amt, "owasp": cat,
+                                   # 归因必须能落到具体规则上，不然「为什么扣 25 分」
+                                   # 只能看到一句中文描述、申诉无门。
+                                   "rule_id": f.get("rule_id") or f.get("type", ""),
+                                   "finding_type": f.get("type", "")})
         total_pen = sum(p["amount"] for p in penalties)
         base = 100
         # total_files==0 阻尼（空扫描不虚高）
@@ -400,10 +412,18 @@ def calculate_scores(static, dependency, secrets, poisoning, taint, total_files,
                 base = max(0, base - 30)
         score = max(0, min(100, base - total_pen))
         dims[dim_key] = score
+        full = sorted(penalties, key=lambda p: -p["amount"])
         breakdown[dim_key] = {
             "base": base,
             "penalty": total_pen,
-            "contributors": sorted(penalties, key=lambda p: -p["amount"])[:5],
+            # 展示用 top5（历史兼容，别改现有消费方）
+            "contributors": full[:5],
+            # 全量扣分账：contributors 只留 5 条，penalty 却是全量求和 ——
+            # 之前「展示 80 / 实际 105」的缺口就出在这里，解释永远拼不平。
+            #  attributable 字段让 audit() 能 100% 闭合，缺一分都要能被抓出来。
+            "contributions_full": full,
+            "truncated": len(full) > 5,
+            "folded_duplicates": folded,
         }
 
     overall = int(round(

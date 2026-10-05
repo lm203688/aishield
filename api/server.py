@@ -1637,8 +1637,55 @@ class AIShieldHandler(BaseHTTPRequestHandler):
             _record_usage("attack-path", self.client_address[0])
             return
 
-        # ── Nucleus / SIEM 导出 (F3) ──
-        if path in ("/api/v1/export/nucleus", "/api/v1/export/splunk"):
+        # ── 统一导出面 (F3 收口：目标端注册表 + 配置化) ──
+        # 旧实现是 /api/v1/export/nucleus|splunk 两个硬分支，加目标端要改路由表；
+        # 现在统一到 registry，/api/v1/export/<target> 一条走完，registry 只列目标端。
+        if path.startswith("/api/v1/export"):
+            try:
+                body = self._read_body()
+                if body is None:
+                    return
+                edata = json.loads(body) if body else {}
+            except json.JSONDecodeError:
+                self._send_json({"error": "Invalid JSON"}, 400)
+                return
+            tail = path.rstrip("/").rsplit("/", 1)[-1]
+            try:
+                from scanner.export_registry import TARGETS, TargetConfig, export
+                if tail in ("", "registry", "targets"):
+                    self._send_json({
+                        "targets": [{"name": n,
+                                     "schema": "%s %s" % (s["schema_name"], s["schema_version"]),
+                                     "kind": s["kind"], "note": s["note"]}
+                                    for n, s in sorted(TARGETS.items())],
+                        "total": len(TARGETS),
+                    }, 200)
+                    _record_usage("export-registry", self.client_address[0])
+                    return
+                if tail not in TARGETS:
+                    self._send_json({"error": "未知导出目标 %s，可选: %s" % (tail, ", ".join(sorted(TARGETS)))}, 404)
+                    _record_usage("export", self.client_address[0])
+                    return
+                findings = edata.get("findings") or []
+                tconf = edata.get("target_config")
+                if tconf:
+                    cfg = TargetConfig.from_dict(dict(tconf, target=tail))
+                else:
+                    cfg = TargetConfig("adhoc", tail, **(edata.get("options") or {}))
+                res = export(findings, cfg)
+                out = {"result": res.to_dict(), "issues": res.issues, "warnings": res.warnings}
+                if TARGETS[tail]["kind"] == "text":
+                    out["payload_text"] = res.payload
+                else:
+                    out["payload"] = res.payload
+                self._send_json(out, 200 if res.ok else 500)
+            except Exception as e:
+                self._send_json({"error": str(e)}, 500)
+            _record_usage("export", self.client_address[0])
+            return
+
+        # ── 评分可解释（M3 收口）：让打分从黑盒变成可回放的账本 ──
+        if path == "/api/v1/score/audit":
             try:
                 body = self._read_body()
                 if body is None:
@@ -1648,16 +1695,25 @@ class AIShieldHandler(BaseHTTPRequestHandler):
                 self._send_json({"error": "Invalid JSON"}, 400)
                 return
             try:
-                from scanner.exporters import to_nucleus, to_splunk
-                findings = edata.get("findings") or []
-                if path.endswith("nucleus"):
-                    payload = to_nucleus(findings, edata.get("asset_name", "aishield-scan"))
-                else:
-                    payload = to_splunk(findings)
-                self._send_json(payload, 200)
+                from scanner.score_explain import audit, replay, explain
+                scores = edata.get("scores")
+                findings = edata.get("findings")
+                total_files = int(edata.get("total_files") or 0)
+                if scores is None:
+                    if not findings:
+                        self._send_json({"error": "scores 或 findings 至少给一个"}, 400)
+                        return
+                    scores = replay(findings, total_files=total_files)
+                aud = audit(scores, findings=findings, total_files=total_files)
+                self._send_json({
+                    "ok": aud["ok"], "attribution_complete": aud["attribution_complete"],
+                    "coverage": aud["coverage"], "issues": aud["issues"],
+                    "warnings": aud["warnings"], "digest": aud["digest"],
+                    "explain": explain(scores, fmt="json"),
+                }, 200 if aud["ok"] else 500)
             except Exception as e:
                 self._send_json({"error": str(e)}, 500)
-            _record_usage("export", self.client_address[0])
+            _record_usage("score-audit", self.client_address[0])
             return
 
         # ── 策略即代码评估 (F6) ──
