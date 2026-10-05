@@ -19,10 +19,12 @@ step id 而非 job id，GitHub Actions 解析期直接报错，整个 workflow 4
   E10 并发 push 假绿吞错（`git push || echo`）/ `git add data/state/` 整目录提交
   E11 有第三方依赖的本仓入口却没引用统一前置 prepare-tests（派生判据，不写死名单）
   E12 统一前置没装齐测试套件**真正**依赖的第三方包（从 import 图推导，不用人工清单）
+  E13 声明为"并发冲突可自动解决"的数据文件不是单一生产者（快照语义前提不成立）
   W1 关键步骤使用 continue-on-error（测试形同虚设）
   W2 workflow 无任何触发器
   W3 cron 表达式字段数不合法
   W6 统一前置装了测试套件已不再依赖的包（声明与依赖反向漂移）
+  W7 声明为"可自动解决冲突"的数据文件已无人写入 / glob 已失效
 
 退出码：0=全部通过，1=存在错误(E)
 用法：
@@ -116,6 +118,214 @@ IMPORT_TO_DIST: Dict[str, str] = {v: k for k, v in DIST_TO_IMPORT.items()}
 # import 图遍历时要跳过的目录（第三方包 / 本机沙箱 / 打包产物，都不算「本仓模块」）
 _GRAPH_SKIP = {".git", ".workbuddy", "node_modules", "__pycache__", ".venv",
                "venv", "site-packages", "build", "dist", "outputs", ".mypy_cache"}
+
+
+# ── E13 / W7：并发 push 的「快照类」声明必须被**派生实测** ────────────────
+# 起因（2026-10-05，第三条同型事故）：spine 端到端复验时同一个生产者被并发实例化
+# （手动 dispatch 与 spine 的 workflow_call 同时跑 —— 被调用 workflow 上写的
+# concurrency 实测不生效），两 run 各写一份快照 → push 时 rebase 撞 content 冲突
+# → git_push_safe.sh 按「`data/state/` 之外一律是真实逻辑」判成需人工处理
+# → exit 3 → 当天闭环在 job 4 终止，其后 8 个 job 全部 skipped，并报一次假警。
+#
+# 根因不是那一次重叠，而是**分类判据用了一个路径前缀代理**：
+#   data/generated_rules.json 的 out 完全由 data/threat_intel.json 重算
+#     （intel_to_rules.py 读旧文件只为打印一个 Δ 数字，不参与决策）；
+#   data/threat_intel.json 由 fetch_vuln_feeds.py 单点整体重写
+#     （旧副本只用于「全源失败时不刷新 updated」，让停更在时间戳上可见）。
+#   两者与 data/state/* 完全同类 —— 「快照、最后写入者胜」是安全的。
+#
+# 与 E11/E12 同型：**清单式代理必然漏**。所以 E13 不采信声明的内容，
+# 而是为每条 glob 实测：写入者必须存在且**唯一**（唯一生产者是 last-writer-wins
+# 成立的前提）。0 个 → W7 警告（声明已失效）；≥2 个 → E13 错误（必须移出）。
+AUTO_PATHS_FILE = REPO_ROOT / ".github" / "auto-resolvable-paths.txt"
+# 派生写入者时扫描的本仓源码目录（刻意不含 tests/ —— 那里只读数据文件）
+_WRITE_SCAN_DIRS = ("scripts", "api", "scanner", "eco", "connectors",
+                    "collector", "distribution")
+# 写入点解析出来的路径常量里，哪一段算"被写的数据文件名"
+_DATA_FILE_RE = re.compile(r"[\w.-]+\.(?:json|jsonl|txt|csv|ya?ml)$")
+
+
+def _str_consts(node: ast.AST) -> List[str]:
+    """收集节点子树里的所有字符串常量。"""
+    return [n.value for n in ast.walk(node)
+            if isinstance(n, ast.Constant) and isinstance(n.value, str)]
+
+
+def _declared_auto_paths() -> List[str]:
+    """读并发冲突可自动解决的 glob 声明（`#` 起注释，空行忽略）。"""
+    if not AUTO_PATHS_FILE.exists():
+        return []
+    pats: List[str] = []
+    for line in AUTO_PATHS_FILE.read_text(encoding="utf-8").splitlines():
+        pat = line.split("#", 1)[0].strip()
+        if pat:
+            pats.append(pat)
+    return pats
+
+
+def _open_modes(node: ast.Call, pos: int) -> List[str]:
+    """取出 open 调用的模式常量（第 pos 个位置参数优先，其次 `mode=` 关键字）。"""
+    if len(node.args) > pos:
+        return _str_consts(node.args[pos])
+    for kw in node.keywords:
+        if kw.arg == "mode":
+            return _str_consts(kw.value)
+    return []
+
+
+def _is_write_mode(modes: List[str]) -> bool:
+    return any(any(c in m for c in "wax+") for m in modes)
+
+
+def _write_site_names(tree: ast.AST) -> List[set]:
+    """取出每个写入点的**目标标识常量集合**（解析写入对象，不做 token 级判断）。
+
+    覆盖三种真实写法：
+      · `X.write_text(...)` / `X.write_bytes(...)`；
+      · 内建 `open(path, "w"/"a"/"x"/"+")`  —— 模式在第 1 个位置参数；
+      · `Path.open("w"/"a")`（方法形式）    —— 模式在第 0 个位置参数。
+    只读打开一律不算 —— 这正是 scripts/rule_decay.py 不该被判成
+    generated_rules.json 写入者的原因（它读该文件，但写的是 HITS_LOG 等）。
+    """
+    consts: Dict[str, set] = {}
+    for node in ast.walk(tree):
+        if (isinstance(node, ast.Assign) and len(node.targets) == 1
+                and isinstance(node.targets[0], ast.Name)):
+            consts.setdefault(node.targets[0].id, set()).update(
+                _str_consts(node.value))
+    out: List[set] = []
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        fn = node.func
+        target: ast.AST | None = None
+        if isinstance(fn, ast.Attribute) and fn.attr in ("write_text", "write_bytes"):
+            target = fn.value
+        elif isinstance(fn, ast.Attribute) and fn.attr == "open":
+            if not _is_write_mode(_open_modes(node, 0)):   # Path.open(mode, ...)
+                continue
+            target = fn.value
+        elif isinstance(fn, ast.Name) and fn.id == "open":
+            if not _is_write_mode(_open_modes(node, 1)):   # open(path, mode, ...)
+                continue
+            target = node.args[0] if node.args else None
+        if target is None:
+            continue
+        names = set(_str_consts(target))
+        if isinstance(target, ast.Name):
+            names |= consts.get(target.id, set())
+        out.append(names)
+    return out
+
+
+def _repo_py_files() -> List[Path]:
+    files: List[Path] = []
+    for d in _WRITE_SCAN_DIRS:
+        base = REPO_ROOT / d
+        if base.is_dir():
+            files.extend(p for p in sorted(base.rglob("*.py"))
+                         if not any(part in _GRAPH_SKIP for part in p.parts))
+    return files
+
+
+def _write_map(basenames: Iterable[str]) -> Dict[str, List[str]]:
+    """basename -> 写它的本仓 Python 模块（派生，不维护清单）。
+
+    先用原文子串做**超集**预筛（写入者必然含该字面量），只对命中的文件做 AST
+    解析 —— 门禁一慢就会被绕过，这一步把绝大多数文件挡在解析之外。
+    """
+    want = set(basenames)
+    found: Dict[str, set] = {b: set() for b in want}
+    for py in _repo_py_files():
+        try:
+            text = py.read_text(encoding="utf-8-sig")
+        except OSError:
+            continue
+        if not any(b in text for b in want):
+            continue
+        try:
+            tree = ast.parse(text)
+        except (SyntaxError, ValueError):
+            continue
+        for names in _write_site_names(tree):
+            for n in names:
+                m = _DATA_FILE_RE.search(n)
+                if m and Path(m.group(0)).name in want:
+                    found[Path(m.group(0)).name].add(_rel(py))
+    return {k: sorted(v) for k, v in found.items()}
+
+
+def _has_glob(pat: str) -> bool:
+    """条目是否含通配符（含通配符的条目成员是动态命名的，见 E13 边界说明）。"""
+    return any(c in pat for c in "*?[")
+
+
+def _push_script_text() -> str:
+    """消费方脚本的原文（抽成函数是为了让测试能注入"分叉"的场景）。"""
+    p = REPO_ROOT / "scripts" / "git_push_safe.sh"
+    try:
+        return p.read_text(encoding="utf-8") if p.exists() else ""
+    except OSError:
+        return ""
+
+
+def _check_auto_resolvable_paths(results: List[Dict[str, Any]]) -> None:
+    """E13 / W7：可自动解决冲突的声明，必须每条都实测出**唯一**生产者。
+
+    声明本身（.github/auto-resolvable-paths.txt）是给人读的策略说明，不是判据；
+    判据是下面这两条实测：
+      · 写入者必须唯一  —— 否则 E13（两个生产者 = 两处在改真实内容，
+        静默取一方会丢改动，「最后写入者胜」的前提不成立）；
+      · 字面量条目的写入者必须存在 —— 否则 W7（声明已失效，删除它，
+        留着会让真冲突被当成快照静默覆盖）。
+    另加一条消费者一致性：脚本必须真的读这个声明，否则声明与判据分叉
+    —— 「清单改了但不生效」正是本轮事故的同型形态。
+
+    边界（已知且刻意，为了不制造永久误报）：含**通配符**的条目（如
+    data/state/*）成员是运行期按 key 动态拼出来的（scripts/state_bus.py 的
+    STATE_DIR / f"{domain}.json"），基名不以字面量出现，静态推导必然看不见写入者。
+    对这类条目只检查「glob 还能匹配到文件」，其成员中**能被静态看到**的写入者
+    仍照常做唯一性检查。误报会让门禁被整体无视，比漏报更糟，所以这里宁可留白。
+    """
+    if not AUTO_PATHS_FILE.exists():
+        return  # 由测试兜底；不存在时 git_push_safe.sh 退回内置前缀，行为不变
+
+    entry: Dict[str, Any] = {"file": AUTO_PATHS_FILE.name, "kind": "policy",
+                             "errors": [], "warnings": [], "jobs": []}
+    patterns = _declared_auto_paths()
+    matched_all: List[Path] = []
+    for pat in patterns:
+        matched_all.extend(p for p in REPO_ROOT.glob(pat) if p.is_file())
+    wmap = _write_map(p.name for p in matched_all)
+
+    for pat in patterns:
+        matched = [p for p in REPO_ROOT.glob(pat) if p.is_file()]
+        if not matched:
+            entry["warnings"].append(
+                f"W7 声明 '{pat}' 匹配不到任何文件 —— 该条已失效，请从 "
+                f"{_rel(AUTO_PATHS_FILE)} 删除（留着会让真冲突被当成快照覆盖）")
+            continue
+        for f in sorted(matched):
+            writers = wmap.get(f.name, [])
+            if len(writers) > 1:
+                entry["errors"].append(
+                    f"E13 '{_rel(f)}' 有 {len(writers)} 个写入者"
+                    f"（{', '.join(writers)}）—— 「最后写入者胜」只在**单一生产者**"
+                    f"下成立；两个生产者说明两处都在改真实内容，并发时静默取一方"
+                    f"会丢改动。请把它从 {_rel(AUTO_PATHS_FILE)} 移出，"
+                    f"让冲突按真冲突处理（exit 3 交人工）")
+            elif not writers and not _has_glob(pat):
+                entry["warnings"].append(
+                    f"W7 '{_rel(f)}' 被声明为并发冲突可自动解决，但找不到任何"
+                    f"本仓 Python 写入者 —— 声明已失效（写入者也可能不在 "
+                    f"{'/'.join(_WRITE_SCAN_DIRS)} 内）")
+
+    push_sh_text = _push_script_text()
+    if push_sh_text and AUTO_PATHS_FILE.name not in push_sh_text:
+        entry["errors"].append(
+            f"E13 scripts/git_push_safe.sh 没有读取 {AUTO_PATHS_FILE.name} —— "
+            f"声明与消费者已分叉：策略写在声明里，实际判据却仍在脚本里硬编码")
+    results.append(entry)
 
 
 def _command_lines(script: str):
@@ -778,6 +988,7 @@ def cross_check(results: List[Dict[str, Any]]) -> None:
     配置看起来完全正常，实际从未生效，且没有任何信号告诉你。
     """
     _check_prereq_covers_suite_deps(results)
+    _check_auto_resolvable_paths(results)
 
     known = {r["name"] for r in results if r.get("name")}
     for r in results:
@@ -850,6 +1061,7 @@ def main() -> int:
             if r["errors"] or r["warnings"]:
                 icon = "❌" if r["errors"] else "⚠️ "
                 kind = ("composite action" if r.get("kind") == "action"
+                        else "policy declaration" if r.get("kind") == "policy"
                         else f"jobs: {', '.join(r['jobs']) or '-'}")
                 print(f"\n{icon} {r['file']}  ({kind})")
                 for e in r["errors"]:

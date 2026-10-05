@@ -1,0 +1,44 @@
+# 并发 push 时允许「自动解决冲突」的数据文件（快照语义：最后写入者胜）
+# ---------------------------------------------------------------------------
+# 消费者：scripts/git_push_safe.sh（rebase 撞 content 冲突时按本表分区）
+# 校验者：scripts/validate_workflows.py 的 E13（本表内容可信性由它实测）
+#
+# 【为什么不能靠路径前缀】
+#   在 2026-10-05 之前，判据是前缀 `data/state/`。一次**合法的**并发重叠
+#   （手动 dispatch 与 spine 的 workflow_call 同时实例化同一个生产者；被调用
+#   workflow 上写的 concurrency 实测不生效）就让 push 撞上 data/generated_rules.json
+#   的 content 冲突，被判定为「非状态文件 = 真实逻辑冲突」→ exit 3 →
+#   当天闭环在 job 4 终止，其后 8 个 job 全部 skipped，并报一次假警。
+#   前缀只是"这类文件长什么样"的代理，不是判据本身。
+#
+# 【真正的判据（E13 为每条 glob 实测，不采信注释）】
+#   该数据文件必须同时满足：
+#     ① 只有**一个** Python 写入者 —— 唯一生产者是 last-writer-wins 成立的前提；
+#        两个生产者说明两处都在改真实内容，静默取一方会丢改动。
+#     ② 该写入者对它是**整体重写**（输出由上游重算，读旧文件不参与决策）——
+#        因此丢掉对方那一份是安全的，下一轮即覆盖。
+#   不满足则必须从本表移出：那时冲突就是真冲突，应当 exit 3 交人工 + 告警。
+#
+# E13 实测口径：0 个写入者 → W7 警告（声明已失效，请删除）；
+#                ≥2 个写入者 → E13 错误（last-writer-wins 不成立）。
+#
+# 已实测的写入者（供人阅读，不参与判定）：
+#   data/generated_rules.json ← scripts/intel_to_rules.py
+#     （读旧文件只为算一个 Δ 数字打印，最终 out 完全由 data/threat_intel.json 重算）
+#   data/threat_intel.json    ← scripts/fetch_vuln_feeds.py
+#     （旧副本只用于"全源失败时不刷新 updated"，让停更在时间戳上可见）
+#   data/state/*              ← 各处状态总线回写（全量快照，最后写入者胜）
+#
+# 语法：每行一条 glob（bash case 模式），`#` 起注释。空行忽略。
+#
+# 【已知边界，本轮刻意不改但留痕】
+#   data/state/* 里混着 3 个**追加型台账**（alerts.jsonl / undelivered_alerts.jsonl
+#   由 scripts/notify.py，promotion_ledger.jsonl 由 scripts/promote_rule.py）。
+#   追加语义下撞车时取一方确实会丢对方追加的条目 —— 但这是本表建立**之前**就有的
+#   策略（原判据同样是 `data/state/` 前缀），本轮不改变它，避免顺手改语义。
+#   若要收紧：把这三个字面量单独列出并移出本表，让它们的冲突走 exit 3。
+#   通配符条目成员是运行期动态命名的，静态推导看不见写入者，因此对它们只做
+#   "glob 仍能匹配到文件"检查（见 validate_workflows.py E13 边界说明）。
+data/state/*
+data/generated_rules.json
+data/threat_intel.json

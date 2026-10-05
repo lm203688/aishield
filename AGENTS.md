@@ -43,6 +43,18 @@ prompt，对齐 **OWASP MCP Top 10 (2025)** 与 **OWASP Agentic AI Top 10 (ASI01
    两个教训：① 这是**递进式**的，逐个补没用，只能靠统一入口 + 门禁；
    ② 收敛到一处之后，那一处的内容必须**派生**出来 —— 否则只是把「N 个漏点」换成
    「1 个漏点」，漏的形式从"改 6 个文件"变成"改 1 个文件但没人提醒你"。
+7. **并发 push 时"哪些文件可自动解决冲突"的判据只能是"写入者唯一"，不能是路径前缀。**
+   名单在 `.github/auto-resolvable-paths.txt`（`scripts/git_push_safe.sh` 读它），
+   内容由 `scripts/validate_workflows.py` 的 **E13** 派生实测：每条 glob 的
+   写入者必须存在且**唯一**（唯一生产者 = "最后写入者胜"成立的前提），
+   0 个 → W7、≥2 个 → E13。
+   历史事故（2026-10-05，第三条同型）：同一次复验里同一生产者被并发实例化，
+   两份快照撞在 `data/generated_rules.json` 上，而判据是前缀 `data/state/` ——
+   该文件被误判为"真实逻辑冲突"→ exit 3 → 当天闭环在 job 4 终止、其后 8 个 job
+   全 skipped，还报了一次假警。前缀只是"这类文件长什么样"的代理，不是判据。
+   加新条目：先确认该文件**只有一个** Python 写入者且是整体重写（可跑
+   `python -c "import scripts.validate_workflows as V; print(V._write_map(['<文件名>']))"`），
+   再把 glob 加进声明；门禁会替你复核。
 
 ## 架构速览
 

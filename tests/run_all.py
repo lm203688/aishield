@@ -421,6 +421,13 @@ def main():
         # 后 8 个 job 全跳过。修法不是补那 5 处，而是把前置定义一次
         # （.github/actions/prepare-tests）并由门禁强制没人能绕过。
         'tests.test_workflow_test_prereq',
+        # 2026-10-05 并发 push 的「快照类」声明（E13）：同一天第三条同型事故 ——
+        # spine 复验时同一生产者被并发实例化，两份快照在 data/generated_rules.json
+        # 上撞 content 冲突，而判据是路径前缀代理「data/state/ 之外一律是真实逻辑」
+        # → exit 3 → 当天闭环在 job 4 终止、后 8 个 job 全跳过。
+        # 修法：判据改为「写入者是否唯一」，声明受 E13 派生实测；含真跑 git rebase
+        # 冲突的端到端用例（快照类自动解决 / 非快照类 exit 3）。
+        'tests.test_auto_resolvable_paths',
     ]
 
     loaded = 0
