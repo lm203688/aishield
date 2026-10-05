@@ -249,6 +249,11 @@ def main():
         # 对称密钥永不进 JWKS 是红线；除销必须实时读盘（缓存=攻击复用窗口）；
         # 第三方仅凭 JWKS 的 x 就能离线验签，这才是「别家能不能验我」。
         'tests.test_verifiable_identity',
+        # 2026-10-05 干净 checkout 门禁：把身份侧文件全部重定向到一个**空目录**，
+        # 跑一遍「发凭据 → 注册 → 签 VC → 验 VC → 除销」闭环。CI 里 api/data/*.json
+        # 一个都没有（全被 .gitignore），同类 setUp 崩溃只在那里暴露 —— 这条必须
+        # 进总入口，否则它永远只在本地运行，变成又一个看不见的空转门禁。
+        'tests.test_clean_checkout',
     ]
 
     loaded = 0
