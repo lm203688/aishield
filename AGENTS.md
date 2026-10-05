@@ -27,6 +27,13 @@ prompt，对齐 **OWASP MCP Top 10 (2025)** 与 **OWASP Agentic AI Top 10 (ASI01
    勿引用 227/215/133/228 等历史数字。
 4. **本地测试绿 ≠ CI 绿。** 推送走 `scripts/_push_batch.py`（Contents API，单提交），
    推完必须 API 复验。
+   **统一 push 入口的退出码必须被尊重**：`bash scripts/git_push_safe.sh` 的失败
+   （exit 1 重试耗尽 / exit 3 真冲突）不许用 `|| echo` / `|| true` 吞掉 —— 吞掉后
+   并发冲突与产物丢失都不会被发现。确属装饰性回写、失败也确实安全时，
+   必须在**紧邻上方注释**里写 `allow-push-degrade: <理由>`（理由必须非空）。
+   由 `scripts/validate_workflows.py` 的 **E10** 强制 —— 它原先只盯字面量 `git push`，
+   而报错信息又叫大家改用这个入口，等于"推荐了入口却对入口免检"，
+   2026-10-05 与其他三条一起被归为同一类缺陷。
 5. **事件型告警必须能销案。** "本轮新增 N 条漏洞" 类告警不会自动恢复，零新增即 resolve；
    不要把它当健康型告警只在恢复时 `--resolve`。
 6. **跑测试/门禁的前提只能来自一处，且那一处必须是被派生校验的。**

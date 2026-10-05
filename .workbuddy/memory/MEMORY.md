@@ -45,7 +45,7 @@ CF Named Tunnel（cloudflared→:8450→api/server.py），前缀 `/api/v1`，�
 dispatch 要点：body 必须带 `{"ref":"main"}`（只发 `{}` 返 422 `"ref" wasn't supplied`）。部署 job 常在 **Post Checkout code** 停摆数分钟（runner 侧），等一轮自愈，不行再 dispatch 一次。**核线五件**（2026-10-05 补 agent-card）：`/api/v1/health`（version+rules_count+commit）、**`/.well-known/agent-card.json`**（`against N MCP / M skill rule categories`，**这条长期不在核线清单里，正是 235/241 能漂两个月的直接原因**）、`/.well-known/agent.json`、`/llms.txt`、`/geo-faqs.json`（都必须是 264/291）。探活务必 `curl --ssl-no-revoke --tlsv1.3 -H "User-Agent: Mozilla/5.0"`。
 
 ## 铁律
-1. **假绿六层**：吞异常／`if not res: continue` 退 []／`| tail` 吞退出码（需 pipefail）／mock 外部 IO 不验请求路径／`echo "X=$?"` 抢退出码／`notify()` 恒 0。退出码显式 `rc=$?`→`exit $rc`，禁 `|| true`。
+1. **假绿六层**：吞异常／`if not res: continue` 退 []／`| tail` 吞退出码（需 pipefail）／mock 外部 IO 不验请求路径／`echo "X=$?"` 抢退出码／`notify()` 恒 0。退出码显式 `rc=$?`→`exit $rc`，禁 `|| true`。**统一 push 入口的退出码同样不许吞**（E10 原有一句 `if "git_push_safe" in s: continue` 让入口整行免检，而报错信息又叫大家改用该入口 —— "推荐了入口却对入口免检"）：刻意降级必须在**紧邻上方注释**写 `allow-push-degrade: <非空理由>`（`_run_lines` 产出"紧邻注释块 + 当前行"，只取紧邻 4 行防远处声明漂移；理由只能取自注释 —— 初版把理由算在拼接串上，冒号后为空时会吃到命令行，"无理由"被静默放过）。全仓唯一一处吞码是 `geo-indexnow-submit.yml` 的装饰性心跳，已声明。
 2. **结论层** `risk`/`safe` 不得轻于最严重 finding（输出 worst_severity）。
 3. 雷达规则须含 `|` 或有界 `.{n,m}`；BENIGN_CORPUS 须区分「话题提及」与「祈使式执行」。
 4. **正则语义别从读屏推断**：查 `func.__code__.co_consts`；shell `-c` 内联正则不可信，写 .py 跑。

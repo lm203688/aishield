@@ -12,7 +12,7 @@ job 4 终止，其后 8 个 job 全部 skipped，并报一次假警。
 根因不是那次重叠，而是**分类判据用了路径前缀这个代理**。因此本轮的修法是：
 把判据从"路径长什么样"换成"写入者是否唯一"，并让声明受 E13 派生校验。
 
-本文件锁死两件事
+本文件锁死三件事
 ----------------
 1. 派生器**按调用对象**解析写入者，而不是"文件里出现了该字面量且有写调用"。
    后者会把 scripts/rule_decay.py 误判成 data/generated_rules.json 的写入者
@@ -20,9 +20,13 @@ job 4 终止，其后 8 个 job 全部 skipped，并报一次假警。
    RADAR_RULES）—— 一个爱误报的门禁很快会被整体无视。
 2. 真正跑一次 git rebase 冲突（不是 mock）：快照类冲突必须自动解决并 push 成功，
    非快照类冲突必须 exit 3。
+3. E10 必须守住**统一 push 入口**的退出码。原先 `if "git_push_safe" in s: continue`
+   让入口整行免检，而门禁自己的报错信息又叫人改用这个入口 —— 「推荐了入口却不守
+   入口」，与 E11/E12/E13 同型；刻意降级必须有 `allow-push-degrade: <理由>` 声明。
 """
 
 import ast
+import re
 import shutil
 import subprocess
 import sys
@@ -353,6 +357,112 @@ class TestSnapshotConflictResolution(unittest.TestCase):
         self.assertEqual(rc, 3, f"未声明文件冲突必须 exit 3，实际 rc={rc}\n{out}")
         self.assertIn("非快照文件冲突", out)
         self.assertIn("scanner_rules.py", out)
+
+
+_NODE_HEAD = "\n".join([
+    "name: probe",
+    "on:",
+    "  workflow_dispatch:",
+    "permissions:",
+    "  contents: write",
+    "jobs:",
+    "  a:",
+    "    runs-on: ubuntu-latest",
+    "    steps:",
+    "      - name: p",
+    "        run: |",
+    "",
+])
+
+
+def _check_probe(body: str):
+    """把一段 run 块塞进最小 workflow，跑真正的 check_file，返回 errors。
+
+    必须 newline='' 写：Windows 上 write_text 会把 \\n 译成 \\r\\n，直接触发 E9，
+    那样测的就不是 E10 了。
+    """
+    tmp = Path(tempfile.mkdtemp(prefix="aishield_wfprobe_"))
+    try:
+        p = tmp / "probe.yml"
+        lines = "".join("          " + ln + "\n" for ln in body.splitlines())
+        with open(p, "w", encoding="utf-8", newline="") as fh:
+            fh.write(_NODE_HEAD + lines)
+        return V.check_file(p)["errors"]
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
+class TestPushSwallowGate(unittest.TestCase):
+    """E10 对「统一 push 入口的退出码」的守护。
+
+    为什么专门测它：门禁原先有一句 `if "git_push_safe" in s: continue` —— 只要行里
+    出现统一入口就整行免检，而门禁**自己的报错信息**恰恰叫人改用这个入口。
+    「推荐了入口却对入口免检」与 E11/E12/E13 同型，是本项目最容易反复出现的一类缺陷。
+    """
+
+    def setUp(self):
+        self.assertIsNotNone(V.yaml, "本套件运行前已由 run_all.py 预检 pyyaml")
+
+    def test_entry_swallow_without_declaration_is_an_error(self):
+        errs = _check_probe('bash scripts/git_push_safe.sh || echo "skipped"')
+        self.assertTrue(errs and "E10" in errs[0], errs)
+        self.assertIn("git_push_safe.sh", errs[0])
+
+    def test_literal_git_push_swallow_is_still_an_error(self):
+        """老行为不能因为扩正则而丢。"""
+        errs = _check_probe("git push origin main || echo skipped")
+        self.assertTrue(errs and "E10" in errs[0], errs)
+
+    def test_bare_entry_call_passes(self):
+        self.assertEqual(_check_probe("bash scripts/git_push_safe.sh"), [])
+
+    def test_comment_mentioning_entry_passes(self):
+        """注释里提到入口 ≠ 吞码（引用场景不能误报）。"""
+        self.assertEqual(
+            _check_probe("# 参考 bash scripts/git_push_safe.sh 的用法"), [])
+
+    def test_declared_degrade_with_reason_passes(self):
+        body = ("# allow-push-degrade: 只回写展示字段，下一轮重算覆盖\n"
+                'bash scripts/git_push_safe.sh || echo "x"')
+        self.assertEqual(_check_probe(body), [])
+
+    def test_declared_degrade_without_reason_is_an_error(self):
+        """有声明但没理由 = 把门禁关掉，必须报。
+
+        这条踩过坑：第一版把"理由"算在「注释块 + 命令行」的拼接串上，
+        冒号后为空时会把后面的命令行当成理由，于是静默放过。
+        """
+        body = ('# allow-push-degrade:\n'
+                'bash scripts/git_push_safe.sh || echo "x"')
+        errs = _check_probe(body)
+        self.assertTrue(errs and "理由" in errs[0], errs)
+
+    def test_inline_degrade_marker_passes(self):
+        body = ('bash scripts/git_push_safe.sh || echo "x"'
+                '  # allow-push-degrade: 装饰性心跳')
+        self.assertEqual(_check_probe(body), [])
+
+    def test_declaration_must_be_adjacent(self):
+        """声明与降级必须紧邻 —— 否则"远处的声明"会漂移成万能豁免。"""
+        body = ("# allow-push-degrade: 太远了\n# x\n# y\n# z\n# w\n"
+                'bash scripts/git_push_safe.sh || echo "x"')
+        self.assertTrue(_check_probe(body), "隔着 5 行的声明不该被吸附")
+
+    def test_real_repo_has_no_undeclared_swallow(self):
+        r = V.check_file(ROOT / ".github" / "workflows"
+                         / "geo-indexnow-submit.yml")
+        self.assertEqual([e for e in r["errors"] if "E10" in e], [],
+                         "真仓里唯一那处刻意的 push 降级必须带声明")
+
+    def test_real_geo_indexnow_degrade_is_declared(self):
+        """把生产里那个**唯一**的例外钉住：声明一旦被删掉，这条会立刻红。"""
+        src = (ROOT / ".github" / "workflows"
+               / "geo-indexnow-submit.yml").read_text(encoding="utf-8")
+        self.assertIn("git_push_safe.sh || echo", src,
+                      "该 workflow 的心跳降级是本仓唯一的 push 吞码例外")
+        marker = re.search(r"allow-push-degrade\s*:\s*(\S.*)", src)
+        self.assertIsNotNone(marker, "该例外必须带 allow-push-degrade 声明")
+        self.assertTrue(marker.group(1).strip(), "声明必须写理由")
 
 
 if __name__ == "__main__":

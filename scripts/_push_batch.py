@@ -1,5 +1,5 @@
 import argparse
-import base64, json, os, subprocess, sys, tempfile
+import base64, json, os, subprocess, sys, tempfile, time
 
 REPO = "lm203688/aishield"
 BRANCH = "main"
@@ -67,29 +67,63 @@ FILES += _auto_declaration_files(FILES)
 
 
 def req(method, url, payload=None):
-    body_path = tempfile.mktemp(suffix=".out")
-    cmd = ["curl", "-sS", "--ssl-no-revoke", "--tlsv1.3", "-X", method,
-           "-H", f"Authorization: Bearer {TOKEN}", "-H", "Accept: application/vnd.github+json",
-           "-H", "User-Agent: aishield-ops", "-o", body_path, "-w", "%{http_code}"]
+    """带明确诊断的重试。
+
+    2026-10-05：本机沙箱会间歇性地让 curl **不写出** -o 的目标文件，原实现直接
+    `open(body_path)` → 抛一个毫无信息的 FileNotFoundError（连 curl 的 returncode
+    和 stderr 都丢了），看起来像脚本坏了而其实是传输抖动。现在把它变成
+    "带 rc/stderr 的错误 + 重试 3 次"，失败时也说得清是什么失败。
+    """
     pf = None
     if payload is not None:
-        pf = tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False, encoding="utf-8")
-        json.dump(payload, pf); pf.close()
-        cmd += ["-H", "Content-Type: application/json", "-d", f"@{pf.name}"]
-    cmd.append(url)
+        pf = tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False,
+                                         encoding="utf-8")
+        json.dump(payload, pf)
+        pf.close()
+
+    last_err = ""
     try:
-        p = subprocess.run(cmd, capture_output=True, text=True, timeout=90)
-        status = int((p.stdout or "0").strip() or 0)
-        body = open(body_path, encoding="utf-8", errors="replace").read()
+        for attempt in (1, 2, 3):
+            body_path = tempfile.mktemp(suffix=".out")
+            cmd = ["curl", "-sS", "--ssl-no-revoke", "--tlsv1.3", "-X", method,
+                   "-H", f"Authorization: Bearer {TOKEN}",
+                   "-H", "Accept: application/vnd.github+json",
+                   "-H", "User-Agent: aishield-ops", "-o", body_path,
+                   "-w", "%{http_code}"]
+            if pf:
+                cmd += ["-H", "Content-Type: application/json", "-d", f"@{pf.name}"]
+            cmd.append(url)
+            try:
+                p = subprocess.run(cmd, capture_output=True, text=True, timeout=90)
+                if not os.path.exists(body_path):
+                    raise RuntimeError(
+                        f"curl 未写出响应体 rc={p.returncode} "
+                        f"stderr={(p.stderr or '')[:200]!r}")
+                with open(body_path, encoding="utf-8", errors="replace") as fh:
+                    body = fh.read()
+                status = int((p.stdout or "0").strip() or 0)
+                try:
+                    return status, json.loads(body or "{}")
+                except Exception:
+                    return status, {"message": body[:300]}
+            except RuntimeError as e:
+                last_err = str(e)
+                if attempt < 3:
+                    time.sleep(2 * attempt)
+            finally:
+                if os.path.exists(body_path):
+                    try:
+                        os.unlink(body_path)
+                    except OSError:
+                        pass
+        raise SystemExit(
+            f"push 失败：{method} {url} 连续 3 次未拿到响应体 —— {last_err}")
     finally:
         if pf and os.path.exists(pf.name):
-            os.unlink(pf.name)
-        if os.path.exists(body_path):
-            os.unlink(body_path)
-    try:
-        return status, json.loads(body or "{}")
-    except Exception:
-        return status, {"message": body[:300]}
+            try:
+                os.unlink(pf.name)
+            except OSError:
+                pass
 
 
 s, who = req("GET", "https://api.github.com/user")

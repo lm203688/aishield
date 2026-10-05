@@ -31,12 +31,17 @@
 #
 # 语法：每行一条 glob（bash case 模式），`#` 起注释。空行忽略。
 #
-# 【已知边界，本轮刻意不改但留痕】
-#   data/state/* 里混着 3 个**追加型台账**（alerts.jsonl / undelivered_alerts.jsonl
-#   由 scripts/notify.py，promotion_ledger.jsonl 由 scripts/promote_rule.py）。
-#   追加语义下撞车时取一方确实会丢对方追加的条目 —— 但这是本表建立**之前**就有的
-#   策略（原判据同样是 `data/state/` 前缀），本轮不改变它，避免顺手改语义。
-#   若要收紧：把这三个字面量单独列出并移出本表，让它们的冲突走 exit 3。
+# 【已知边界，本轮刻意不改但留痕 —— 已实测为**潜在**而非现发风险】
+#   data/state/* 里混着 4 个**追加型台账**（alerts.jsonl / undelivered_alerts.jsonl
+#   由 scripts/notify.py；promotion_ledger.jsonl 由 scripts/promote_rule.py；
+#   rule_hits.jsonl 由 scripts/rule_decay.py）。追加语义下撞车取一方会丢对方条目。
+#   但 2026-10-05 实测：这 4 个里只有 alerts.jsonl 被 git 跟踪，其余 3 个未跟踪；
+#   且**没有任何 workflow 提交它们**（全仓 workflow 无 `git add -A` / `git add .`，
+#   只有逐文件 `git add`，而逐文件清单里不含这些台账）。所以它们几乎不会产生冲突，
+#   风险是潜在的，**当前不需要动作**。
+#   若将来有 workflow 开始提交其中某个：优先给它加 `merge=union`（.gitattributes，
+#   git 内置合并驱动，语义就是"追加型日志取并集"，比 exit 3 或取一方都正确）；
+#   退而求其次才是把它移出本表、让冲突走 exit 3。
 #   通配符条目成员是运行期动态命名的，静态推导看不见写入者，因此对它们只做
 #   "glob 仍能匹配到文件"检查（见 validate_workflows.py E13 边界说明）。
 data/state/*

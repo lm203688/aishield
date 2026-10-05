@@ -199,5 +199,6 @@ jobs:
             git commit -m "auto: GEO IndexNow 状态域心跳 [skip ci]" || true
             # 心跳是装饰性状态回写：push 失败不该把绿灯的核心提交盖成红灯。
             # 真正的红灯由 key-check / submit 两个 job 判定。
+            # allow-push-degrade: 只回写 indexnow_last_run/submitted 两个展示字段，不涉及规则、鉴证或台账；丢失后下一轮 state_bus.set 全量重算覆盖，无累积效应
             bash scripts/git_push_safe.sh || echo "::warning::心跳 push 失败（状态总线快照未入库，下一轮重算即覆盖）"
           fi

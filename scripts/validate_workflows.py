@@ -16,7 +16,9 @@ step id 而非 job id，GitHub Actions 解析期直接报错，整个 workflow 4
   E6 非法顶层键（run 块续行落到第 0 列，命令被静默截断）
   E8 表达式含 shell 变量插值 / 注释里写坏表达式（workflow 无法加载）
   E9 CRLF(\\r) 行尾（破坏 heredoc 定界符导致 bash 语法错）/ 命令替换内嵌 heredoc（脆弱写法）
-  E10 并发 push 假绿吞错（`git push || echo`）/ `git add data/state/` 整目录提交
+  E10 并发 push 假绿吞错（`git push` **或统一入口 `git_push_safe.sh`** 的失败被
+      `|| echo`/`|| true` 吞）/ `git add data/state/` 整目录提交；刻意降级须写
+      `allow-push-degrade: <理由>`
   E11 有第三方依赖的本仓入口却没引用统一前置 prepare-tests（派生判据，不写死名单）
   E12 统一前置没装齐测试套件**真正**依赖的第三方包（从 import 图推导，不用人工清单）
   E13 声明为"并发冲突可自动解决"的数据文件不是单一生产者（快照语义前提不成立）
@@ -685,9 +687,17 @@ def check_file(path: Path) -> Dict[str, Any]:
     #   (b) `git add data/state/` —— 把别的 workflow 刚 push 的状态文件一并提交，
     #       rebase 时产生内容冲突（重试无法解决），必须精确到本 workflow 自己的域文件。
     # 统一要求走 scripts/git_push_safe.sh（带重试，耗尽才真 exit 1 触发 alert job）。
+    #
+    # 【2026-10-05 补】原先这里有一句 `if "git_push_safe" in s: continue` —— 只要行里
+    # 出现统一入口就整行免检。于是 `bash scripts/git_push_safe.sh || echo "..."` 优雅地
+    # 绕过门禁：**门禁的报错信息叫人改用这个入口，却对入口的退出码免检**。
+    # 这与 E11/E12/E13 同型（收敛到一处却没守住那一处），所以现在入口一并受检，
+    # 同时给"确实是装饰性回写、失败也不该红"的场景一个**声明式**出口：
+    # 同一行或上一行写 `allow-push-degrade: <理由>`（理由必须非空，否则报错）。
     PUSHSWALLOW = re.compile(
-        r"git\s+push\s+.*\|\|\s*(?:echo\b|true\b|\d\s*$)"
+        r"(?:git\s+push|git_push_safe\.sh)\b[^\n|;&]*\|\|\s*(?:echo\b|true\b|\d\s*$|\{)"
     )
+    DEGRADE_MARKER = re.compile(r"allow-push-degrade\s*:")
     PULL_NO_RETRY = re.compile(r"git\s+pull\s+--rebase\b[^\n]*\|\|\s*true")
     # 目录引用 = 同一行存在 `git add`，且 `data/state/` 之后紧跟空白或行尾。
     # 反例（不报）：`git add ROADMAP.md data/state/feature.json` —— 精确文件，合法。
@@ -696,28 +706,63 @@ def check_file(path: Path) -> Dict[str, Any]:
     ADD_STATE_DIR = re.compile(r"git\s+add\b[^\n]*\bdata/state/(?=\s|$)")
 
     def _run_lines(node):
+        """产出 (紧邻上方的注释块, 当前行)。
+
+        当前行跳过整行注释，但**把紧邻的注释块一起带出来** —— 降级声明
+        `allow-push-degrade:` 是写在注释里的，丢掉它就没法区分"刻意降级"与
+        "顺手吞掉"。只取紧邻的 4 行，避免把远处的声明误吸附过来。
+        """
         if isinstance(node, dict):
             for k, v in node.items():
                 if k == "run" and isinstance(v, str):
+                    comments: List[str] = []
                     for line in v.splitlines():
                         if line.strip().startswith("#"):
+                            comments.append(line)
                             continue
-                        yield line
+                        yield "\n".join(comments[-4:]), line
+                        comments = []
                 else:
                     yield from _run_lines(v)
         elif isinstance(node, list):
             for i in node:
                 yield from _run_lines(i)
 
-    for line in _run_lines(data):
+    def _degrade_marker(above: str, line: str):
+        """(是否声明降级, 理由)。
+
+        理由**只能取自注释**：上一版把理由算在"注释块 + 命令行"的拼接串上，
+        `# allow-push-degrade:`（冒号后为空）会把后面的命令行当成理由，
+        于是"声明了但没写理由"被静默放过 —— 探针实测抓到，已修。
+        """
+        m = DEGRADE_MARKER.search(above or "")
+        if m:
+            return True, above[m.end():].replace("\n", " ").strip()
+        inline = line.split("#", 1)[1] if "#" in line else ""
+        m = DEGRADE_MARKER.search(inline)
+        if m:
+            return True, inline[m.end():].strip()
+        return False, ""
+
+    for above, line in _run_lines(data):
         s = line.strip()
-        if "git_push_safe" in s:
-            continue
         if PUSHSWALLOW.search(s):
-            res["errors"].append(
-                f"E10 `git push` 的失败被 `|| echo`/`|| true` 吞成假绿（{s[:70]}）"
-                "—— 并发冲突时产物永久丢失；改用 `bash scripts/git_push_safe.sh`"
-            )
+            declared, reason = _degrade_marker(above, line)
+            if declared and reason:
+                continue  # 显式声明且写了理由：接受（例如装饰性心跳回写）
+            if declared:
+                res["errors"].append(
+                    f"E10 `allow-push-degrade:` 必须写明理由（{s[:60]}）—— "
+                    "没有理由的例外等于把门禁关掉"
+                )
+            else:
+                res["errors"].append(
+                    f"E10 统一 push 入口 `git_push_safe.sh` 的失败被 `|| echo`/`|| true` "
+                    f"吞成假绿（{s[:70]}）—— 脚本报错信息让调用方改用这个入口，"
+                    "入口的退出码就必须被尊重：吞掉后并发冲突 / 重试耗尽都不会被发现，"
+                    "产物永久丢失。确属装饰性回写（失败也确实安全）请在紧邻上方注释里写 "
+                    "`allow-push-degrade: <理由>`"
+                )
         elif PULL_NO_RETRY.search(s):
             res["errors"].append(
                 f"E10 `git pull --rebase ... || true` 吞掉 rebase 失败且无重试（{s[:70]}）；"
