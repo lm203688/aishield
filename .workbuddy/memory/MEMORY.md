@@ -9,10 +9,12 @@ Agent 生态支持体系基础设施（2026-09-30 由"agent 安全扫描器"战�
 
 ## 规则数 / 声明位（勿引用旧数）
 **264 = 静态 237 + 生成 8 + 雷达 19**（真值 `/api/v1/health.rules_breakdown`）；Skill **291**。
-`scripts/rule_count_gate.py` **50 个受约束声明位**（出口 `drifted_files()`）；`scripts/sync_version.py` **47 个版本位**，唯一事实源 `api/server.py:API_VERSION`。
+`scripts/rule_count_gate.py` **53 个受约束声明位**（出口 `drifted_files()`）；`scripts/sync_version.py` **47 个版本位**，唯一事实源 `api/server.py:API_VERSION`。
 **晋升流程**：`rule_count_gate.py --sync` → 用 `_push_batch` 推全量 collect_files()。`_push_batch` 已自动并入 `drifted_files()` 差集（`--no-auto-decl` 可关）——**一律走它，别手挑文件**。
-坑：英文 `N / M rules` 被当单值兜底会静默篡改 docs（已补 pattern+回归）；`/.well-known/agent-card.json` 实际读 `docs/.well-known/`；带日期文档按 `HISTORICAL_ALLOWLIST` 保留原值。
-**散文 pattern 必须覆盖 `rule categories` 复数变体**（2026-10-03 真实漂移：名片 rules 块 264/291、description 仍 235/241，门禁一路绿灯）。语料面另见 `scripts/rule_corpus.py`（17 族 35 正样本 + 7 条 KNOWN_GAP_SAMPLES，benchmark 出 `family_gaps` / `known_gap_missed`）。
+坑：英文 `N / M rules` 被当单值兜底会静默篡改 docs（已补 pattern+回归）；带日期文档按 `HISTORICAL_ALLOWLIST` 保留原值。
+**pair 模式必须大小写不敏感**（2026-10-05 实测）：`238 MCP / 244 skill rules` 因 `Skill` 大写要求而整个 pair 不匹配 → `--sync` 把 skill 改对、MCP 原样留下，产出**半对文件**且门禁绿灯（smithery.yaml 的 `238` 就这么躺了两个多月）。已加 `re.I` + 判据 `test_lowercase_skill_pair_is_not_half_fixed`。
+**`TEXT_EXT` 必须含 `.xml`**：`api/static/feeds.xml` 是对外 Atom 订阅源，长期写 227 条；漏检的原因不是模式不全，而是**文件清单**本身。
+**散文 pattern 必须覆盖 `rule categories` 复数变体**。语料面另见 `scripts/rule_corpus.py`（17 族 35 正样本 + 7 条 KNOWN_GAP_SAMPLES）。
 
 ## 基准
 `scripts/benchmark.py`：serious_only **46/50=92.0% 召回 / 0/45 误报**（MIN_RECALL .85 / MIN_COVERAGE 1.00）；缺口 instruction_sample #1/#13/#16/#23。红队探针 **17/17 PASS**。探针 engine 须返回 `analyze()['findings']`，期望值用 OWASP 类别。
@@ -28,10 +30,19 @@ Agent 生态支持体系基础设施（2026-09-30 由"agent 安全扫描器"战�
 ## API 契约门禁（2026-10-03 新增，positions 生态支持体系的可发现性）
 `scripts/openapi_contract.py` = **运行时路由 vs `/openapi.json` 双向 diff**（进程内直调 `do_GET/do_POST`，契约取服务器自己发的 `/openapi.json`）。实测 **110 条运行时路由 vs 10 条契约路径 → 103 条智能体不可发现**；契约里还有 **3 条跑不通**（`GET /api/v1/billing/plans`、`GET /api/v1/identity/agents`、`POST /api/v1/identity/register`）。根因：`api/openapi_spec.py` 是**手工 curated 10 条**，与路由实现从无强制同步。**只拦新增**（存量 106 条进 `scripts/openapi_contract_baseline.json`），不做逐条补 schema 的补齐活（表面工作）。`--check/--json/--update-baseline/--no-probe`；测试 `tests/test_openapi_contract.py`（含"门禁不是空转"的反向用例）。库级横幅污染 stdout → 库输出走 stderr；判定用 `unknown\s+(\w+\s+){0,3}(route|endpoint|path)`（trust_api 的 `unknown trust endpoint` 是限定词形态）。
 
+## 声明面门禁（2026-10-05 新增，`8d35a9f8`）——验证「服务出去的字节」
+**这一类缺陷的形状**：线上 `/.well-known/agent-card.json` 返回 **235/241**（真值 264/291），而 `rule_count_gate --check` 全绿。根因 = `server.py:483` Trust 分支先 return 读 `docs/.well-known/agent-card.json`（真服务），`server.py:768` 静态分支同 path **永不可达**（死代码），而 `rule_count_gate._is_declared_surface()` 对 `docs/` **一律 False**（理由"历史快照"）→ **门禁扫死副本、放行活副本**。
+**通用教训**：版本/规则数门禁的**验证对象都是文件**。只要服务路径与文件路径之间存在哪怕一层间接（两处 if 顺序 / 两个根各躺一份 / 不可达分支），"文件正确"就推不出"服务正确"。**验证层选错对象比模式写漏更隐蔽**。
+- `api/declaration_surface.py`（新）：`SERVED`（URL→文件/类型/处理模块/`version_path`）+ `SHADOWS`（孪生台账 mirror/superseded/leftover）。**刻意不做运行时耦合** —— 它是被验证的声明，不是控制流；不符就红，不掩盖实现。
+- `scripts/declaration_surface_gate.py`（新）：7 检查 = 注册表完整性 / 孪生身份 / **AST 分派唯一性** / 门禁覆盖闭合（仓库内）+ 运行时规则数 / 版本 / 可达性（**直调 handler 取真实字节**，第 5 条与 `rule_count_gate` 共用 `scan_text`+权威值）。退出码 0/1/2，**2 = 门禁自身异常**（不得退化成"没找到问题"）。
+- **同 URL 在同一个分派函数里只能声明一次**。实测抓出 `do_POST` 里 `/api/v1/governance/policy` 双分派 → `allow`/`deny`/`default_deny` **从上线起全部不可调用**，请求落到 bind 分支把 `deny` 当 pack 名返回 `unknown policy pack: ` —— **降级成误导性错误的安全控制**。已合并为单一处理点（未知 action 明确回绝，不静默降级）。教训：`tests/test_governance.py` 只测模块函数、从不发路由请求，所以模块级全绿而路由死。
+- **两个易踩的 AST 陷阱**：① 按**函数形参**收集变量名 → `path = parsed.path` 是局部变量，一个都收不到，**检查静默空转**（门禁自己假绿）；② 递归进 `JoinedStr`/`BinOp` → f-string 公共前缀与 `"/" + key` 被算成重复。**只取 Compare 的直接操作数**。
+- 连带修复：`server.py` 补 RFC 9116 规范路径 `/.well-known/security.txt`（robots.txt 一直 Allow 却 404）；对齐 agent-card 235/241→264/291、smithery 238→264、feeds.xml 227→264。文档 `docs/declaration-surfaces.md`。
+
 ## 线上拓扑 / 推送
-CF Named Tunnel（cloudflared→:8450→api/server.py），前缀 `/api/v1`，无 CF Pages。**域名是根域**：`https://aishield.tools/api/v1/health`（`api.aishield.tools` 不解析）。**禁 `pkill -f cloudflared`**，按 PID 停。
-推送：`scripts/_push_batch.py`（原子）或 `gh_push.py`（首参 message，无 `-m`）。本机无 `.git` → git status 全假阴性。PAT 缺 `workflows: write` 但**能** dispatch（deploy-server 317161867 / spine 347082049）——部署停摆时手动 dispatch 绕过 spine。
-dispatch 要点：body 必须带 `{"ref":"main"}`（只发 `{}` 返 422 `"ref" wasn't supplied`）。部署 job 常在 **Post Checkout code** 停摆数分钟（runner 侧），等一轮自愈，不行再 dispatch 一次。核线四件：`/api/v1/health`（version+rules_count+commit）、`/.well-known/agent.json`（service_version 与 description 里的 `N MCP rule categories / M skill rule categories`）、`/llms.txt`、`/geo-faqs.json`（都必须是 264/291）。探活务必 `curl --ssl-no-revoke --tlsv1.3 -H "User-Agent: Mozilla/5.0"`。
+CF Named Tunnel（cloudflared→:8450→api/server.py），前缀 `/api/v1`，无 CF Pages。**域名是根域**：`https://aishield.tools/api/v1/health`（`api.aishield.tools` 不解析）。**禁 `pkill -f cloudflared`**，按 PID 停。GitHub Pages 亦设了同一自定义域 → `lm203688.github.io/aishield/*` **301 回 aishield.tools**，因此 `docs/` 下**从不对外服务**，只作 API 的数据源（`docs/.well-known/agent-card.json` 就是这样被读的）。
+推送：`scripts/_push_batch.py`（原子）或 `gh_push.py`（首参 message，无 `-m`）。本机无 `.git` → git status 全假阴性。PAT 在 `.workbuddy/schedule-revert-pat.txt`，缺 `workflows: write` 但**能** dispatch ——部署停摆时手动 dispatch 绕过 spine。
+dispatch 要点：body 必须带 `{"ref":"main"}`（只发 `{}` 返 422 `"ref" wasn't supplied`）。部署 job 常在 **Post Checkout code** 停摆数分钟（runner 侧），等一轮自愈，不行再 dispatch 一次。**核线五件**（2026-10-05 补 agent-card）：`/api/v1/health`（version+rules_count+commit）、**`/.well-known/agent-card.json`**（`against N MCP / M skill rule categories`，**这条长期不在核线清单里，正是 235/241 能漂两个月的直接原因**）、`/.well-known/agent.json`、`/llms.txt`、`/geo-faqs.json`（都必须是 264/291）。探活务必 `curl --ssl-no-revoke --tlsv1.3 -H "User-Agent: Mozilla/5.0"`。
 
 ## 铁律
 1. **假绿六层**：吞异常／`if not res: continue` 退 []／`| tail` 吞退出码（需 pipefail）／mock 外部 IO 不验请求路径／`echo "X=$?"` 抢退出码／`notify()` 恒 0。退出码显式 `rc=$?`→`exit $rc`，禁 `|| true`。
@@ -53,7 +64,10 @@ agent `agent_Mt-2YPE4Kv` / handle aishield；产品 `xp_VhvfZN00Sk` **status=pen
 ## 待办
 - 🔴 沙箱 Bash 传输抖动：同路径间歇 "No such file or directory"；用单条独立调用 + cwd 相对路径。
 - 🟡 竞赛线 NO-GO（Foresight P≈2%）转向 SwarmLabs/GOAI；旧 CF token 待吊销；根目录 0 字节 `nul` 仅影响 ripgrep；`.workbuddy/memory/` 在 main 被跟踪。
-- 🟢 2026-10-03 闭环：规则 **264/291**、版本 **4.11.0**、50 声明位零漂移、全量 **1756 全绿**（26 skip）、CI 质量门禁全 success、线上 health 4.11.0/264（commit `522e1450`）且名片/llms/geo-faqs 四处散文均自洽。7 条已知漏报已由 8 条新规则全部检出。`_push_batch` 自动带漂移声明位。真实 harness 实测 0 critical。
+- 🟢 **2026-10-05 闭环（最新）**：规则 **264/291**、版本 **4.11.0**、**53 声明位零漂移**、全量 **1937 全绿（3 skip，rc=0）**、契约 **148/148** 零 phantom、声明面门禁 7/7 绿、CI run **37321913125** success（新步骤 `Assert declaration surfaces are served correctly` 在 CI 中真实执行）。新增声明面门禁 + 修掉 4 处同源缺口（含一个从上线起不可调用的 kill switch）。推送 `8d35a9f8`。**待办：该 commit 部署到 VPS 后复验线上 agent-card 已从 235/241 变 264/291**。
+- 🟡 规则数门禁仍有两类"文件清单"级盲区未做通用化：非 `TEXT_EXT` 后缀（如 `.js`/`.css` 里若写声明）与新声明面文件未入注册表。当前靠声明面门禁的运行时探针兜底，**新增对外资产时应同时更新 `api/declaration_surface.py`**。
+- 🟡 生产孤儿 DID：线上仍有 `did:aishield:f3a4f5cec744`(probe)；`DELETE` 返 403 是**正确越权防护**（非故障），真清理须在 VPS 上跑 `scripts/identity_maintenance.py --purge-orphan --yes`，未擅自加后门。
+- 🟢 2026-10-03 闭环：50 声明位零漂移、全量 **1756 全绿**（26 skip）、CI 全 success、7 条已知漏报由 8 条新规则全部检出。
 
 ## API 契约 = 实现的投影（2026-10-03 `471848bb`，已闭环）
 `scripts/gen_openapi_spec.py`（新）：进程内探运行时 → `api/openapi_runtime_paths.json`（113 路径/123 操作）。
