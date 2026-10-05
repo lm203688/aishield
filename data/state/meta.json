@@ -8,28 +8,12 @@
       "M2 运行活性: 0 个任务超期未执行，1 个最近运行失败 —— 这是静默失效的典型信号",
       "M3 状态新鲜度: 状态域 ['distribution', 'intel', 'rules', 'flywheel', 'feature'] 的归属 workflow 超过阈值未成功运行 —— 对应环节可能已停摆"
     ],
-    "checked_at": "2026-10-05T03:22:17.467339+00:00",
+    "checked_at": "2026-10-05T05:34:15.485551+00:00",
     "_source": "meta_monitor",
-    "_ts": "2026-10-05T03:22:17.467591+00:00",
+    "_ts": "2026-10-05T05:34:15.485791+00:00",
     "level": "degraded"
   },
   "history": [
-    {
-      "ts": "2026-09-25T04:54:26.090347+00:00",
-      "source": "meta_monitor",
-      "state": {
-        "score": 67,
-        "passed": 6,
-        "total": 9,
-        "problems": [
-          "M2 运行活性: 0 个任务超期未执行，2 个最近运行失败 —— 这是静默失效的典型信号",
-          "M3 状态新鲜度: 状态域 ['distribution', 'intel', 'rules', 'flywheel', 'feature', 'ci'] 的归属 workflow 超过阈值未成功运行 —— 对应环节可能已停摆",
-          "M7 上游情报源: 上游情报源异常：情报库已 92h 未成功更新"
-        ],
-        "checked_at": "2026-09-25T04:54:26.090094+00:00",
-        "level": "degraded"
-      }
-    },
     {
       "ts": "2026-09-25T08:37:52.368553+00:00",
       "source": "meta_monitor",
@@ -702,8 +686,23 @@
         "checked_at": "2026-10-05T03:22:17.467339+00:00",
         "level": "degraded"
       }
+    },
+    {
+      "ts": "2026-10-05T05:34:15.485804+00:00",
+      "source": "meta_monitor",
+      "state": {
+        "score": 78,
+        "passed": 7,
+        "total": 9,
+        "problems": [
+          "M2 运行活性: 0 个任务超期未执行，1 个最近运行失败 —— 这是静默失效的典型信号",
+          "M3 状态新鲜度: 状态域 ['distribution', 'intel', 'rules', 'flywheel', 'feature'] 的归属 workflow 超过阈值未成功运行 —— 对应环节可能已停摆"
+        ],
+        "checked_at": "2026-10-05T05:34:15.485551+00:00",
+        "level": "degraded"
+      }
     }
   ],
-  "updated": "2026-10-05T03:22:17.467608+00:00",
+  "updated": "2026-10-05T05:34:15.485807+00:00",
   "desc": "元监控：自动化体系自身的健康度"
 }
