@@ -32,31 +32,6 @@ CRED_DIR='/root/.cloudflared'
 # ========== STEP 1: 启动 API (端口 8450) ==========
 log "=== STEP 1: 启动 API (端口 8450) ==="
 
-# --- STEP 1a: 身份签名后端（L1 可移植身份 / L3 意图授权的生死线）---
-# 【2026-10-05 修的真实生产缺口】线上 /api/v1/identity/jwks 长期返回
-# keys=[] ready=false，根因不在代码而在**运行时环境**：
-#   * api/data/*.json 被 gitignore，tarball 投递也不含 —— 生产从来没有签发密钥；
-#   * eco/crypto_sign.py 在没有 cryptography 时会**静默降级**成 hmac-sha256，
-#     于是 JWKS 发不出公钥、VC 与 mandate 签出来只能自证；
-#   * 而本机与 CI 都装了 cryptography —— 所以 1865 个单测、148 条契约路由全绿，
-#     绿的是代码，不是生产。这是第三层假绿（前两层是「入口漏接」「签不出也不报」）。
-# 处理办法复用 scripts/rotate_signing_key.py：它先预检后端，再做「备份 → 迁移
-# → 自检 → 不过就自回滚」，不会留下「迁移显示成功、第三方其实验不过」的半吊子。
-#
-# 为什么不在这里 exit 1：pip 装不上（网络/权限）属于环境侧偶发，不该让整条
-# 发布链陪葬；这一步只把结果如实打进日志，真正的拦截在部署验证门第 6 条断言
-# （线上 identity_ready 必须为 true）。退出码显式取 rc，不用 || echo 吞掉。
-python3 -m pip install cryptography >/dev/null 2>&1 \
-  && echo "[identity] cryptography 就位（后端应为 ed25519）" \
-  || echo "[identity] WARN: cryptography 安装失败，后端可能仍是 hmac-sha256"
-
-cd "$(dirname "$0")/.." 2>/dev/null || true
-python3 scripts/rotate_signing_key.py --yes > /tmp/aishield-rotate.log 2>&1
-rotate_rc=$?
-tail -n 12 /tmp/aishield-rotate.log
-echo "[identity] rotate_signing_key exit=${rotate_rc}（非 0 不阻断部署；"
-echo "           线上 identity_ready 断言会判红）"
-
 cd /opt/aishield 2>/dev/null || cd ~/aishield 2>/dev/null || true
 # ── 代码更新 ──────────────────────────────────────────────────────
 # 【2026-08-28 修复】旧实现有两个叠加的静默失效：
@@ -184,6 +159,38 @@ fi
 if ! curl -sf http://127.0.0.1:8450/api/v1/health 2>/dev/null; then
     NEED_RESTART=1
 fi
+
+# ── 身份签名后端预置（L1 可移植身份 / L3 意图授权的生死线）────────────
+# 【2026-10-05 修的真实生产缺口】线上 /api/v1/identity/jwks 长期返回
+# keys=[] ready=false，根因不在代码而在**运行时环境**：
+#   * api/data/*.json 被 gitignore，runner 投递的 tarball 也不含它 ——
+#     生产从来没有签发密钥；
+#   * eco/crypto_sign.py 在没有 cryptography 时会**静默降级**成 hmac-sha256，
+#     JWKS 发不出公钥、VC 与 mandate 签出来只能自证；
+#   * 而本机与 CI 都装了 cryptography —— 于是 1865 个单测、148 条契约路由全绿。
+#     绿的是代码，不是生产。这是第三层假绿（前两层是「入口漏接」「签不出也不报」）。
+#
+# 为什么必须放在代码刷新**之后**（这里，而不是 STEP 1 开头）：
+# 第一版放在开头，可那时磁盘上还是**上一次部署的旧代码**，
+# scripts/rotate_signing_key.py 这个文件根本还不存在（exit 127），
+# 于是「pip 装成功了、后端确实是 ed25519、但身份仍是 ready=false」——
+# 一个看起来更像成功的空转。预置必须踩在新代码已经在盘上的时点。
+#
+# 复用 scripts/rotate_signing_key.py：预检后端 → 备份 → 迁移 → 自检 → 不过就自回滚，
+# 不会留下「迁移显示成功、第三方其实验不过」的半吊子状态。
+#
+# 为什么不 exit 1：pip 装不上（网络/权限）属于环境侧偶发，不该让整条发布链陪葬；
+# 这里只把结果如实打进日志，真正的拦截在部署验证门第 6 条断言（identity_ready）。
+# 退出码显式取 rc，不用 `|| echo` 吞掉。
+python3 -m pip install cryptography >/dev/null 2>&1 \
+  && echo "[identity] cryptography 就位（后端应为 ed25519）" \
+  || echo "[identity] WARN: cryptography 安装失败，签名后端将退化为 hmac-sha256"
+
+python3 scripts/rotate_signing_key.py --yes > /tmp/aishield-rotate.log 2>&1
+rotate_rc=$?
+tail -n 12 /tmp/aishield-rotate.log
+echo "[identity] rotate_signing_key exit=${rotate_rc}（非 0 不阻断部署；"
+echo "           部署验证门的 identity_ready 断言会判红）"
 
 # ── API 保活 ────────────────────────────────────────────────────────
 # 【2026-09-18 修复】线上 502 失活约 20h 的根因：API 进程只有 nohup 启动，
