@@ -80,6 +80,21 @@ prompt，对齐 **OWASP MCP Top 10 (2025)** 与 **OWASP Agentic AI Top 10 (ASI01
    改前者而门禁读后者 → 改动对门禁不可见；断言恰好是"应当为空"时就会得到**假绿**。
    凡需要注入/观察的模块级状态，一律走已抽出的访问器（如
    `declaration_surface_gate._rule_gate()`），并用 `is` 断言同一对象。
+10. **改写对外声明面的自动提交，必须先验证再推送。**
+    `[skip ci]` 本身不是缺陷（本仓 13 处都合法），缺陷是"**改写对外资产却没验证**"。
+    判据：`scripts/git_push_safe.sh` 在推送前取「本次提交改动的文件 ∩ 声明面」
+    （`rule_count_gate.declared_surface_changed()`，派生判据），非空则跑
+    `rule_count_gate.py --check`，不一致 **exit 4 拒绝推送**；人/agent 侧由
+    `scripts/_push_batch.py` 的 `_surface_precheck()` 对称守卫，**刻意不给逃生开关**。
+    `validate_workflows.py` 的 **E14** 钉住这条：带 CI-skip 提交 + 暂存声明面路径 ⇒
+    必须走统一入口（且入口**仍含**预检，防"预检被摘掉"）或在本 job 内自检。
+    历史事故（2026-10-06，同型第 6 处，最要命的一处）：`channel-distribution` 的
+    publish job 带 `[skip ci]` 重写 `api/static/feeds.xml`，用生成脚本里写死的 133
+    覆盖了当天刚修好的 264，**全程零报警**；线上当时仍是 264（部署早于该提交），
+    下一次部署才会把 133 发出去。闭环的写入者恰是唯一能绕过全部门禁的人。
+11. **E10 与 E14 分工**：E10 管"失败不许被吞"，E14 管"**验证根本没发生**"。
+    后者更隐蔽 —— jobs 全绿、文件确实推上去了，只是推上去的内容把门禁的结论推翻了。
+
 
 ## 架构速览
 
