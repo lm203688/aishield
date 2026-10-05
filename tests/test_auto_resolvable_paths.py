@@ -358,6 +358,25 @@ class TestSnapshotConflictResolution(unittest.TestCase):
         self.assertIn("非快照文件冲突", out)
         self.assertIn("scanner_rules.py", out)
 
+    def test_missing_declaration_falls_back_to_old_prefix(self):
+        """声明文件缺失时必须退回**旧的**前缀判据，不得静默扩大自动解决范围。
+
+        这条是向后兼容的护栏：老 checkout / 复用本脚本的其他仓库拿不到声明，
+        此时 `data/generated_rules.json` 不在 `data/state/` 前缀内 → 走 exit 3。
+        若哪天有人把兜底写成"没声明就都自动解决"，这条会立刻红。
+        """
+        a, b = self._setup()
+        (b / ".github" / DECL.name).unlink()      # 拿不到声明
+        (b / "data" / "generated_rules.json").write_text('{"v":1,"who":"B"}\n',
+                                                         encoding="utf-8")
+        self._git(b, "add", "-A")
+        self._git(b, "commit", "-qm", "B local")
+        self._push_from_a(a, "data/generated_rules.json", '{"v":2,"who":"A"}\n', "A")
+
+        rc, out = self._run_script(b)
+        self.assertEqual(rc, 3, f"无声明时不得自动解决，实际 rc={rc}\n{out}")
+        self.assertIn("generated_rules.json", out)
+
 
 _NODE_HEAD = "\n".join([
     "name: probe",
