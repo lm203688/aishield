@@ -243,7 +243,19 @@ jobs:
         run: |
           cp /tmp/rules/generated_rules.json data/generated_rules.json 2>/dev/null || true
           cp /tmp/rules/threat_intel.json    data/threat_intel.json    2>/dev/null || true
-          mkdir -p data/state && cp -r /tmp/rules/state/. data/state/ 2>/dev/null || true
+          # 【2026-10-06 修】artifact 路径布局随上传形态变化（data/ 剥掉或保留仓库根），
+          # 两种都认；且**找不到就炸** —— 原来 `2>/dev/null || true` 会把"状态没落地"
+          # 这件事吞掉，job 依然报 success。
+          mkdir -p data/state
+          if [ -d /tmp/rules/state ]; then
+            cp -r /tmp/rules/state/. data/state/
+          elif [ -d /tmp/rules/data/state ]; then
+            cp -r /tmp/rules/data/state/. data/state/
+          else
+            echo "::error::generated-rules artifact 中找不到 state/ —— 拒绝静默丢状态"
+            find /tmp/rules -maxdepth 4 -type f 2>/dev/null | head -20 || true
+            exit 1
+          fi
           # 同步 README 规则计数（情报入库后引擎数量变化）
           python -c "
           import re, os
@@ -268,7 +280,7 @@ jobs:
             --source threat-intel-feed || true
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/threat_intel.json data/generated_rules.json data/state/intel.json  mcp-server/README.md 2>/dev/null || true
+          git add data/threat_intel.json data/generated_rules.json data/state/intel.json data/state/rules.json mcp-server/README.md 2>/dev/null || true
           if ! git diff --cached --quiet; then
             git commit -m "auto: 威胁情报入库 + 检测规则更新 + README计数同步（情报 ${{ needs.fetch.outputs.total }} 条 / 规则 ${{ needs.to-rules.outputs.rules }} 条）[skip ci]" || true
             bash scripts/git_push_safe.sh

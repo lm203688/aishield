@@ -148,8 +148,30 @@ jobs:
 
       - name: Apply and commit
         run: |
-          cp /tmp/agg/feature.json data/state/feature.json 2>/dev/null || true
-          cp /tmp/agg/ROADMAP.md ROADMAP.md 2>/dev/null || true
+          set -euo pipefail
+          # 【2026-10-06 修】artifact 多路径上传会按**仓库相对结构**落盘：
+          # `path: |` 里同时给了 `data/state/feature.json` 与 `ROADMAP.md`，
+          # 公共父目录是仓库根，于是下载后是 /tmp/agg/data/state/feature.json
+          # 与 /tmp/agg/ROADMAP.md。此前只 `cp /tmp/agg/feature.json` 且用
+          # `|| true` 吞掉失败 —— 结果 63 天里每轮只提交了 ROADMAP.md，
+          # feature 状态域冻结在 08-04，而每轮 job 都报 success：
+          # 闭环空转的教科书形状（原件在动、对外可读的状态不动）。
+          # 现在两种布局都认，找不到就**炸**（宁可红，不可静默丢状态）。
+          SRC=""
+          for c in /tmp/agg/feature.json /tmp/agg/data/state/feature.json; do
+            if [ -f "$c" ]; then SRC="$c"; break; fi
+          done
+          if [ -z "$SRC" ]; then
+            echo "::error::feedback-state artifact 中找不到 feature.json（拒绝静默跳过）"
+            find /tmp/agg -maxdepth 4 -type f 2>/dev/null | head -20 || true
+            exit 1
+          fi
+          cp "$SRC" data/state/feature.json
+          if [ -f /tmp/agg/ROADMAP.md ]; then
+            cp /tmp/agg/ROADMAP.md ROADMAP.md
+          elif [ -f /tmp/agg/data/ROADMAP.md ]; then
+            cp /tmp/agg/data/ROADMAP.md ROADMAP.md
+          fi
           git config user.name  "aishield-bot"
           git config user.email "bot@aishield.local"
           git add ROADMAP.md data/state/feature.json

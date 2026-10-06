@@ -89,6 +89,18 @@ jobs:
           exit 1
         fi
 
+    # 契约管"路由能不能被发现"，但**发现得到 ≠ 调得动**。
+    # agent 调用索引（docs/agent-api-index.md）是给外部 agent 的"照着能调"入口，
+    # 它由契约派生；一旦有人改了路由/契约而没重算索引，索引就变成一份
+    # "看起来权威、实际过期"的文档 —— 那比没有更坏。所以钉死它。
+    - name: Assert agent API index is fresh
+      run: |
+        if ! python scripts/gen_agent_api_index.py --check; then
+          echo "::error::docs/agent-api-index.md 与契约不一致（索引已过期）"
+          echo "修复方式：本地运行 python scripts/gen_agent_api_index.py 并提交"
+          exit 1
+        fi
+
     # server.json 的 description 上限 100 字符这类约束，
     # 服务端只回一句笼统的 400，必须在提交前校验
     - name: Validate MCP registry manifest

@@ -52,5 +52,12 @@
     "type": "git",
     "url": "https://github.com/lm203688/aishield"
   },
-  "homepage": "https://aishield.tools"
+  "homepage": "https://aishield.tools",
+  "aishield": {
+    "provenance": "sigstore attestation via GitHub Actions OIDC (npm publish --provenance)", 
+    "provenance_verify": "npm audit signatures && npm view aishield-mcp-server --json | jq .dist.attestations",
+    "audit_boundary": "A registry listing means distribution happened, not that the code was audited. Neither npm, Glama nor any directory endorses this package's safety.",
+    "scan_scope": "Reports findings under the current rule set only. Passing a scan does not warrant that a third-party tool is risk-free.",
+    "execution_model": "local, offline, non-executing: the scanner never spawns commands found in scanned configs"
+  }
 }

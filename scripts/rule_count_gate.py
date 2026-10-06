@@ -301,6 +301,47 @@ def _served_docs_surfaces() -> Tuple[str, ...]:
 SERVED_DOCS = _served_docs_surfaces()
 
 
+def _published_content_sources() -> Tuple[str, ...]:
+    """**被发布出去的**稿件源文件（从发布器自己的发现函数现算，不手抄清单）。
+
+    为什么必须算出来：2026-10-06 定时 spine 连续失败，根因是
+    `content/blog/case-filesystem-test-2026-07-25.md` 里写死 `133 条安全规则`
+    —— 而 `scripts/publish_content.py:publish_feed()` 会把每篇稿件的
+    ``summary`` **原样抄进** ``api/static/feeds.xml``（受约束声明面）。
+    源不在门禁里、产物在门禁里，于是每天分发都把过期数字重新写回对外面，
+    推送前预检再把它拦下 —— 闭环自己把自己摁死，且报警指向产物、不指向源。
+
+    判据派生自 ``publish_content.CONTENT_DIRS``（发布器真正读的目录），
+    而不是在门禁里另抄一份路径前缀：两处白名单一扩缩就会分叉，
+    而那正是 feeds.xml 的根因形状。
+
+    刻意不加 try/except：发布器缺失/导入失败就必须炸，退化成空元组
+    等于把"源不受门禁"这件事悄悄搬回来。
+    """
+    here = os.path.dirname(os.path.abspath(__file__))
+    if here not in sys.path:
+        sys.path.insert(0, here)
+    from publish_content import CONTENT_DIRS, INTERNAL_PREFIXES  # 唯一真相源
+    out: List[str] = []
+    for d in CONTENT_DIRS:
+        try:
+            rel_dir = os.path.relpath(str(d), REPO).replace(os.sep, "/")
+        except ValueError:  # 跨盘符（Windows 下理论可能）
+            continue
+        if rel_dir.startswith(".."):
+            continue
+        for name in sorted(os.listdir(d)) if os.path.isdir(d) else []:
+            if not name.endswith(".md"):
+                continue
+            if name.startswith(INTERNAL_PREFIXES):
+                continue
+            out.append(f"{rel_dir}/{name}")
+    return tuple(out)
+
+
+PUBLISHED_SOURCES = _published_content_sources()
+
+
 def _is_declared_surface(rel: str) -> bool:
     """判定一个文件是否属于"对外声明面"。
 
@@ -308,6 +349,10 @@ def _is_declared_surface(rel: str) -> bool:
     用户/Agent 真会读到的地方，而不是全仓库 grep。
     """
     if rel in ALLOWED_DOCS:
+        return True
+    # 稿件源（content/blog、eco/content）：它们的内容会被发布器抄进
+    # api/static/feeds.xml。产物受门禁而源不受，就是"门禁抓症状、放走病因"。
+    if rel in PUBLISHED_SOURCES:
         return True
     # 被服务的 docs 声明面（当前是 docs/.well-known/agent-card.json）。
     # 它们和 api/static 下的副本**同样对外**，只因历史遗留的"两个根"而

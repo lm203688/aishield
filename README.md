@@ -379,6 +379,41 @@ AIShield 会根据最新扫描结果动态渲染徽章颜色和状态。
 
 ---
 
+## Runner Provenance：装上去的东西，凭什么相信它
+
+Agent 生态里最贵的沉默成本，是**把"能在注册表里搜到"当成"被审计过"**。
+我们把它拆成可核对的三句话：
+
+**1）本包带 sigstore provenance，绑定到具体 commit。**
+`aishield-mcp-server` 的每一次发布都走 `npm publish --provenance`，
+由 GitHub Actions 的 OIDC 身份签发，证明"这个 tarball 确实由
+`lm203688/aishield` 的某次 commit 在 GitHub 托管 runner 上构建"。
+它不是自签名的声明，而是可在本地复核的 attestation：
+
+```bash
+npm audit signatures                                   # 校验依赖与 provenance 链
+npm view aishield-mcp-server --json | jq .dist.attestations
+```
+
+**2）"已发布 / 已上架 / 已被收录" 一律不等于 "已审计"。**
+本包在 npm、Glama 等渠道的上架只说明**分发动作发生了**，
+不构成任何一方对代码安全性的背书。第三方目录里的描述是第三方写的，
+以本仓库与本文件为准。
+
+**3）我们只对自己的**规则集与检测能力**负责，不替别人做背书。**
+AIShield 是一个**本地、离线、非执行式**的扫描器：它读配置与代码、给出发现，
+但不替第三方声明"无风险"。扫描通过只意味着"在本次规则集下未发现已知模式"。
+
+| 分发面 | 可取到什么 | 可信度边界 |
+|:---|:---|:---|
+| 本仓库源码 | 全部实现与规则 | 唯一权威来源 |
+| npm `aishield-mcp-server` | 构建产物 + provenance attestation | 可验到 commit；不含仓库外注入 |
+| GitHub Action `aishield-security-scan` | CI 门禁与评分 | 评分口径见 `docs/ci-self-scan.md` |
+| 线上 `aishield.tools/api/v1/*` | 发现文档与只读数据 | 无写权限、无凭据托管 |
+| 第三方目录 / 聚合站 | 第三方描述 | **不构成本方声明** |
+
+---
+
 ## 路线图
 
 ### Phase 1 — 安全扫描引擎 ✅ (当前)

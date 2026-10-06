@@ -324,8 +324,19 @@ def check_state_freshness() -> Dict[str, Any]:
     并发 push 冲突被 `|| echo` 吞掉，仓库里从未真正入库（git ls-files = 0），
     本地副本永远是 08-04 的陈旧快照 —— 据此判分会产生恒定的假 degraded。
 
-    正确信号：状态域归属的 workflow 近期是否真的成功跑过（与 M2 同源的运行活性）。
-    无 token（本地）时跳过，与 M2/M6 一致，避免本地永远亮红灯。
+    现改为**双信号**，缺一不可：
+
+    （甲）运行活性：状态域归属的 workflow 近期是否真的成功跑过（与 M2 同源）。
+          无 token（本地）时跳过，与 M2/M6 一致，避免本地永远亮红灯。
+    （乙）状态落地：**直接**读 data/state/<domain>.json 的 updated 与阈值比。
+
+    为什么必须补回（乙）：2026-09-08 把(甲)改成"归属列表末尾挂 spine"之后，
+    每个域的归属里都有每日 spine，于是只要 spine 绿，(甲)就**恒判新鲜** ——
+    2026-10-06 实测 spine 每轮 success，而 feature 状态域冻结 63 天、
+    rules 冻结 32 天（一个 artifact 路径写错被 `|| true` 吞、一个漏进 git add）。
+    只判(甲)等于给"链路在跑、状态没落地"这种空转发永久绿灯，而它正是本函数
+    存在的唯一理由。两种失效形状不同，必须分别判。
+    无 token（本地）时(乙)不读文件：本地副本恒陈旧，读了只有固定假红。
     """
     if not GH_TOKEN:
         return {"ok": None,
@@ -356,16 +367,51 @@ def check_state_freshness() -> Dict[str, Any]:
                 pass
         if not fresh:
             stale.append(domain)
+
+    # ── 第二信号：状态文件**自己的** updated 时间戳 ──────────────────
+    # 上面那段判的是"归属 workflow 跑没跑"。但每个域的归属列表末尾都挂了
+    # 每日 spine，于是只要 spine 绿，M3 就**恒判新鲜** —— 2026-10-06 实测：
+    # spine 每轮 success，而 data/state/feature.json 已冻结 63 天、
+    # data/state/rules.json 冻结 32 天。两个都是真缺陷，机制却相反：
+    #   ① feature：artifact 多路径上传按仓库相对结构落盘，
+    #      `cp /tmp/agg/feature.json ... || true` 天天失败被吞，只提交了 ROADMAP.md；
+    #   ② rules：restore 成功，但 job 的 `git add` 名单里漏了 data/state/rules.json。
+    # "在跑"与"在写"是两件事，必须分别判；只判前者就是给空转发绿灯。
+    # 只在 CI（有 token、checkout 即最新）里读文件：本地副本恒是陈旧快照，
+    # 读了只会产生固定假红（见本函数 docstring 的历史教训）。
+    stale_files: List[str] = []
+    state_dir = REPO_ROOT / "data" / "state"
+    for domain in DOMAIN_OWNERS:
+        p = state_dir / f"{domain}.json"
+        if not p.exists():
+            continue  # 未落盘的域（如 flywheel）由上面的运行活性那一路覆盖
+        try:
+            ts = (json.loads(p.read_text(encoding="utf-8")) or {}).get("updated")
+            if not ts:
+                continue
+            t_file = datetime.fromisoformat(str(ts).replace("Z", "+00:00"))
+            if t_file.tzinfo is None:
+                t_file = t_file.replace(tzinfo=timezone.utc)
+        except Exception:
+            continue
+        hrs = (now - t_file).total_seconds() / 3600
+        if hrs > DOMAIN_MAX_AGE_HOURS.get(domain, 336):
+            stale_files.append(f"{domain}({hrs / 24:.0f}d)")
+
     detail = ("所有状态域的归属 workflow 均按期成功执行" if not stale
               else f"状态域 {stale} 的归属 workflow 超过阈值未成功运行 —— 对应环节可能已停摆")
+    if stale_files:
+        detail += (f"；且状态文件自身超期未刷新：{'、'.join(stale_files)}"
+                   f" —— 链路在跑但状态没落地（artifact 路径/git add 名单是首要嫌疑）")
     root = _common_failed_owner(stale, latest)
     if root:
         wf, domains = root
         detail += (f"；共同根因：{wf} 最近一次运行失败，{len(domains)} 个域共用该归属"
                    f"（{'、'.join(domains)}）—— 先修这一处，不必逐个排查各子系统")
     return {
-        "ok": not stale,
+        "ok": not stale and not stale_files,
         "stale": stale,
+        "stale_files": stale_files,
         "root_cause": (root[0] if root else None),
         "detail": detail,
     }

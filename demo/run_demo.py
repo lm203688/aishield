@@ -3,7 +3,7 @@ demo/run_demo.py — AIShield 三场景真实演示
 
 用真实模块跑 3 个核心场景，产出 demo/transcript.json：
   1) 安全闸拦截 prompt-injection 攻击消息
-  2) 持续鉴证检测 rug-pull 漂移（好→坏→吊销）
+  2) 持续鉴证检测 rug-pull 漂移（好→坏→结论翻转 + 哈希存证）
   3) Cumora 式任务原子锁防止双执行
 
 transcript.json 同时被 demo/index.html 作为"终端回放"数据源。
@@ -35,8 +35,10 @@ def run():
 
     # ── 场景 1：安全闸拦截攻击 ──
     transcript.append(_step("system", "header", "【场景 1】Agent 安全闸：拦截 prompt-injection 攻击消息"))
-    gw_svc = gw.AgentSecurityGateway()
-    res1 = gw_svc.screen_message(
+    # 注：网关是模块级函数 `screen_message()`，不是类。2026-10-06 修 ——
+    # 此处曾写成 `gw.AgentSecurityGateway()`，该符号不存在，demo 直接 `AttributeError`
+    # 起不来，而 index.html 的数据源 transcript.json 因此从未生成（演示页一直是空壳）。
+    res1 = gw.screen_message(
         sender_agent_id="agent:unknown",
         channel="a2a",
         target_agent_id="agent:core",
@@ -52,7 +54,7 @@ def run():
                             "✅ 攻击消息被安全闸在 agent 通路入口拦下，未进入 agent。"))
 
     # ── 场景 2：持续鉴证 rug-pull 漂移 ──
-    transcript.append(_step("system", "header", "【场景 2】持续鉴证：检测 rug-pull 漂移（好→坏→吊销）"))
+    transcript.append(_step("system", "header", "【场景 2】持续鉴证：检测 rug-pull 漂移（好→坏→结论翻转）"))
     svc = att.AttestationService()
     # 用独立临时 data 目录，避免污染真实 attestations.json
     att.ATTESTATIONS_FILE = os.path.join(tempfile.mkdtemp(), "attestations.json")
@@ -65,18 +67,23 @@ def run():
     transcript.append(_step("attest", "ok", f"第1次复扫 score=92 → result={a1['result']}（认证生效）"))
     a2 = svc.attest_once(sid, scan_fn=bad, force=True)
     transcript.append(_step("attest", "alert",
-                            f"第2次复扫 score=41 → result={a2['result']} cert_action={a2.get('cert_action')}",
+                            f"第2次复扫 score=41 → result={a2['result']} prev_level={a2.get('prev_level')} "
+                            f"cert_action={a2.get('cert_action')} evidence_seq={a2.get('evidence_seq')}",
                             a2))
     transcript.append(_step("attest", "ok",
-                            "✅ 工具中途变坏（rug-pull），持续鉴证立即吊销认证并写入哈希链存证。"))
+                            "✅ 工具中途变坏（rug-pull）：鉴证结论由 pass 翻转为 failed，"
+                            f"证据链追加第 {a2.get('evidence_seq')} 条哈希存证"
+                            f"（{str(a2.get('evidence_hash'))[:16]}…）；等级由 {a2.get('prev_level')} 掉到 "
+                            f"{a2.get('badge_level')}，认证不再续期。"))
 
     # ── 场景 3：任务原子锁防双执行 ──
     transcript.append(_step("system", "header", "【场景 3】Cumora 式任务原子锁：防止双执行"))
     from eco.collab import TaskDelegation
     with tempfile.TemporaryDirectory() as td:
-        collab.COLLAB_FILE = os.path.join(td, "collab.json")
-        if os.path.exists(collab.COLLAB_FILE):
-            os.remove(collab.COLLAB_FILE)
+        # 常量名是 DELEGATIONS_FILE（不是 COLLAB_FILE）—— 2026-10-06 修。
+        collab.DELEGATIONS_FILE = os.path.join(td, "collab.json")
+        if os.path.exists(collab.DELEGATIONS_FILE):
+            os.remove(collab.DELEGATIONS_FILE)
         d = TaskDelegation()
         k = {"task_description": "deploy-to-prod", "from_agent_id": "agent:planner",
              "to_agent_id": "agent:worker", "task_key": "prod-deploy-001"}

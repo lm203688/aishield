@@ -1,7 +1,7 @@
 {
   "domain": "feature",
   "current": {
-    "adopted": 8,
+    "adopted": 5,
     "issues_created": 7,
     "by_source": {
       "S1 用户反馈": 0,
@@ -9,10 +9,10 @@
       "S3 体系问题": 3,
       "S4 情报驱动": 2
     },
-    "p1_count": 7,
-    "last_run": "2026-08-04T06:41:12.560843+00:00",
-    "_source": "feedback_aggregator",
-    "_ts": "2026-08-04T06:41:12.560892+00:00"
+    "p1_count": 1,
+    "last_run": "state-bus catch-up (2026-10-06, 采自当日 spine job 7 实际输出)",
+    "_source": "feature-closed-loop",
+    "_ts": "2026-10-06T15:06:36.751312+00:00"
   },
   "history": [
     {
@@ -30,8 +30,24 @@
         "p1_count": 7,
         "last_run": "2026-08-04T06:41:12.560843+00:00"
       }
+    },
+    {
+      "ts": "2026-10-06T15:06:36.751333+00:00",
+      "source": "feature-closed-loop",
+      "state": {
+        "adopted": 5,
+        "issues_created": 7,
+        "by_source": {
+          "S1 用户反馈": 0,
+          "S2 生态位待办": 3,
+          "S3 体系问题": 3,
+          "S4 情报驱动": 2
+        },
+        "p1_count": 1,
+        "last_run": "state-bus catch-up (2026-10-06, 采自当日 spine job 7 实际输出)"
+      }
     }
   ],
-  "updated": "2026-08-04T06:41:12.560901+00:00",
+  "updated": "2026-10-06T15:06:36.751338+00:00",
   "desc": "功能迭代闭环采纳结果"
 }

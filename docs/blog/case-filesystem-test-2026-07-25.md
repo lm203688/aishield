@@ -2,7 +2,7 @@
 layout: default
 title: "深入分析：filesystem-test 如何修复安全漏洞"
 date: 2026-07-25
-description: "基于 AIShield 133 条安全规则扫描，该工具存在以下问题："
+description: "基于 AIShield 264 条安全规则扫描，该工具存在以下问题："
 ---
 
 ---
@@ -28,7 +28,7 @@ tags: ["case-study", "MCP", "security-scan"]
 
 ## 风险分析
 
-基于 AIShield 133 条安全规则扫描，该工具存在以下问题：
+基于 AIShield 264 条安全规则扫描，该工具存在以下问题：
 
 - **总分**: 61/100（🟡 中等）
 - **主要风险**: critical
