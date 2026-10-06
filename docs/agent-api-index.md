@@ -13,8 +13,8 @@
 |:---|:---|
 | 契约版本 | `3.0.3` |
 | 可调用操作数 | **148** |
-| 已声明请求体 | 7 |
-| **请求体未声明** | **141** |
+| 已声明请求体 | 28 |
+| **请求体未声明** | **120** |
 | 组件 schema 数 | 11 |
 
 `请求体未声明` 不是“参数无意义”，而是**契约还没把它写下来** —— 外部 agent 只能靠猜字段名。缺口是**可数的**，见文末清单；`--check` 防止它悄悄变大。
@@ -25,10 +25,10 @@
 
 | 方法 | 路径 | 认证 | 实测状态 | 摘要 | 响应顶层字段 | 请求体 |
 |:---|:---|:---:|:---:|:---|:---|:---|
-| `POST` | `/api/v1/agent-card/identity` | 未声明 | 200 | Agent 生态 API · identity | `agent_id`, `kya`, `kya_sd_jwt_compact`, `web_bot_auth`, `erc8004` | 未声明 |
+| `POST` | `/api/v1/agent-card/identity` | 未声明 | 200 | Agent 生态 API · identity | `agent_id`, `kya`, `kya_sd_jwt_compact`, `web_bot_auth`, `erc8004` | `card`, `trust_score` |
 | `GET` | `/api/v1/agent-card/pubkey` | 未声明 | 200 | Agent 生态 API · pubkey | `signer_did`, `key_id`, `alg`, `public_key`, `endpoint` | 未声明 |
-| `POST` | `/api/v1/agent-card/sign` | 未声明 | 200 | Agent 生态 API · sign | `aishield` | 未声明 |
-| `POST` | `/api/v1/agent-card/verify` | 未声明 | 200 | Agent 生态 API · verify | `valid`, `reason` | 未声明 |
+| `POST` | `/api/v1/agent-card/sign` | 未声明 | 200 | Agent 生态 API · sign | `aishield` | `card`, `trust_score` |
+| `POST` | `/api/v1/agent-card/verify` | 未声明 | 200 | Agent 生态 API · verify | `valid`, `reason` | `card`, `public_key` |
 | `POST` | `/api/v1/attestation/cancel` | 未声明 | 200 | POST /api/v1/attestation/cancel | `success`, `error`, `error_code`, `error_id` | 未声明 |
 | `GET` | `/api/v1/attestation/expiring` | 未声明 | 200 | GET /api/v1/attestation/expiring | `success`, `total`, `subscriptions` | 未声明 |
 | `GET` | `/api/v1/attestation/list` | 未声明 | 200 | GET /api/v1/attestation/list | `success`, `total`, `subscriptions` | 未声明 |
@@ -38,38 +38,38 @@
 | `POST` | `/api/v1/attestation/subscribe` | 未声明 | 200 | POST /api/v1/attestation/subscribe | `success`, `error`, `error_code`, `error_id` | 未声明 |
 | `GET` | `/api/v1/attestation/trust` | 未声明 | 200 | GET /api/v1/attestation/trust | `success`, `error`, `error_code`, `error_id` | 未声明 |
 | `GET` | `/api/v1/attestations` | 未声明 | 200 | GET /api/v1/attestations | `count`, `attestations` | 未声明 |
-| `POST` | `/api/v1/attestations` | 未声明 | 200 | POST /api/v1/attestations | `error`, `error_code`, `error_id` | 未声明 |
+| `POST` | `/api/v1/attestations` | 未声明 | 200 | POST /api/v1/attestations | `error`, `error_code`, `error_id` | `subject`, `verdict`, `coverage`, `attestation`, `issuer`, `expires_at` |
 | `GET` | `/api/v1/attestations/from-scan` | 未声明 | 200 | GET /api/v1/attestations/from-scan | `error`, `error_code`, `error_id` | 未声明 |
-| `POST` | `/api/v1/attestations/from-scan` | 未声明 | 200 | POST /api/v1/attestations/from-scan | `error`, `error_code`, `error_id` | 未声明 |
+| `POST` | `/api/v1/attestations/from-scan` | 未声明 | 200 | POST /api/v1/attestations/from-scan | `error`, `error_code`, `error_id` | `scan_result`, `subject_url`, `subject_type` |
 | `GET` | `/api/v1/attestations/revoke` | 未声明 | 200 | GET /api/v1/attestations/revoke | `error`, `error_code`, `error_id` | 未声明 |
-| `POST` | `/api/v1/attestations/revoke` | 未声明 | 200 | POST /api/v1/attestations/revoke | `error`, `error_code`, `error_id` | 未声明 |
+| `POST` | `/api/v1/attestations/revoke` | 未声明 | 200 | POST /api/v1/attestations/revoke | `error`, `error_code`, `error_id` | `attestation_id`, `reason` |
 | `GET` | `/api/v1/attestations/schema` | 未声明 | 200 | GET /api/v1/attestations/schema | `error`, `error_code`, `error_id` | 未声明 |
 | `GET` | `/api/v1/attestations/verify` | 未声明 | 200 | GET /api/v1/attestations/verify | `error`, `error_code`, `error_id` | 未声明 |
-| `POST` | `/api/v1/attestations/verify` | 未声明 | 200 | POST /api/v1/attestations/verify | `error`, `error_code`, `error_id` | 未声明 |
+| `POST` | `/api/v1/attestations/verify` | 未声明 | 200 | POST /api/v1/attestations/verify | `error`, `error_code`, `error_id` | `attestation_id`, `online_verification` |
 | `GET` | `/api/v1/digest` | 未声明 | 200 | GET /api/v1/digest | `error`, `hint`, `schema`, `error_code`, `error_id` | 未声明 |
 | `GET` | `/api/v1/identity/agents` | 未声明 | 200 | 列出所有已注册 Agent | `success`, `total`, `agents` | 未声明 |
-| `POST` | `/api/v1/identity/credentials/issue` | 未声明 | 200 | Agent 生态 API · issue | `error`, `error_code`, `error_id` | 未声明 |
-| `POST` | `/api/v1/identity/credentials/revoke` | 未声明 | 200 | Agent 生态 API · revoke | `success`, `error`, `error_code`, `error_id` | 未声明 |
-| `POST` | `/api/v1/identity/credentials/verify` | 未声明 | 200 | Agent 生态 API · verify | `success`, `error`, `error_code`, `error_id` | 未声明 |
-| `POST` | `/api/v1/identity/erc8004/wrap` | 未声明 | 200 | Agent 生态 API · wrap | `error`, `error_code`, `error_id` | 未声明 |
+| `POST` | `/api/v1/identity/credentials/issue` | 未声明 | 200 | Agent 生态 API · issue | `error`, `error_code`, `error_id` | `did`, `owner`, `identity_token`, `claims`, `ttl` |
+| `POST` | `/api/v1/identity/credentials/revoke` | 未声明 | 200 | Agent 生态 API · revoke | `success`, `error`, `error_code`, `error_id` | `did`, `owner`, `credential_id` |
+| `POST` | `/api/v1/identity/credentials/verify` | 未声明 | 200 | Agent 生态 API · verify | `success`, `error`, `error_code`, `error_id` | `token` |
+| `POST` | `/api/v1/identity/erc8004/wrap` | 未声明 | 200 | Agent 生态 API · wrap | `error`, `error_code`, `error_id` | `wallet_address`, `chain_id` |
 | `GET` | `/api/v1/identity/jwks` | 未声明 | 200 | Agent 生态 API · jwks | `keys`, `ready`, `algorithm`, `reason` | 未声明 |
-| `POST` | `/api/v1/identity/kyad/export` | 未声明 | 200 | Agent 生态 API · export | `agent_id`, `kya`, `kya_sd_jwt_compact`, `web_bot_auth`, `erc8004` | 未声明 |
+| `POST` | `/api/v1/identity/kyad/export` | 未声明 | 200 | Agent 生态 API · export | `agent_id`, `kya`, `kya_sd_jwt_compact`, `web_bot_auth`, `erc8004` | `card`, `trust_score` |
 | `POST` | `/api/v1/identity/register` | 需要 | 200 | 注册 Agent（需注册凭据） | `success`, `did`, `name`, `reputation_score`, `status`, `registered_at` | AgentRegisterRequest |
-| `POST` | `/api/v1/identity/registration-token` | 未声明 | 200 | Agent 生态 API · registration-token | `error`, `error_code`, `error_id` | 未声明 |
+| `POST` | `/api/v1/identity/registration-token` | 未声明 | 200 | Agent 生态 API · registration-token | `error`, `error_code`, `error_id` | `owner`, `ttl_seconds` |
 | `GET` | `/api/v1/identity/wallets` | 未声明 | 200 | Agent 生态 API · wallets | `docs` | 未声明 |
 | `GET` | `/api/v1/registry` | 未声明 | 200 | Trust API 认证与信任评分 · registry | `count`, `agents` | 未声明 |
 | `GET` | `/api/v1/registry/discover` | 未声明 | 200 | Trust API 认证与信任评分 · discover | `error`, `agent_id`, `error_code`, `error_id` | 未声明 |
 | `POST` | `/api/v1/registry/discover` | 未声明 | 200 | Trust API 认证与信任评分 · discover | `object` | 未声明 |
 | `GET` | `/api/v1/trust` | 未声明 | 200 | Trust API 认证与信任评分 · trust | `error`, `error_code`, `error_id` | 未声明 |
 | `POST` | `/api/v1/trust` | 未声明 | 200 | Trust API 认证与信任评分 · trust | `error`, `error_code`, `error_id` | 未声明 |
-| `POST` | `/api/v1/trust/auto` | 未声明 | 200 | Trust API 认证与信任评分 · auto | `error`, `error_code`, `error_id` | 未声明 |
+| `POST` | `/api/v1/trust/auto` | 未声明 | 200 | Trust API 认证与信任评分 · auto | `error`, `error_code`, `error_id` | `scan_result` |
 | `GET` | `/api/v1/trust/cert` | 未声明 | 200 | Trust API 认证与信任评分 · cert | `error`, `error_code`, `error_id` | 未声明 |
-| `POST` | `/api/v1/trust/certify` | 未声明 | 200 | Trust API 认证与信任评分 · certify | `error`, `error_code`, `error_id` | 未声明 |
+| `POST` | `/api/v1/trust/certify` | 未声明 | 200 | Trust API 认证与信任评分 · certify | `error`, `error_code`, `error_id` | `source_url`, `scan_report` |
 | `GET` | `/api/v1/trust/digest` | 未声明 | 200 | Trust API 认证与信任评分 · digest | `error`, `hint`, `schema`, `error_code`, `error_id` | 未声明 |
 | `POST` | `/api/v1/trust/digest` | 未声明 | 200 | Trust API 认证与信任评分 · digest | `error`, `hint`, `schema`, `error_code`, `error_id` | 未声明 |
 | `GET` | `/api/v1/trust/score` | 未声明 | 200 | Trust API 认证与信任评分 · score | `error`, `error_code`, `error_id` | 未声明 |
 | `GET` | `/api/v1/trust/verify` | 未声明 | 200 | Trust API 认证与信任评分 · verify | `error`, `error_code`, `error_id` | 未声明 |
-| `POST` | `/api/v1/trust/verify` | 未声明 | 200 | Trust API 认证与信任评分 · verify | `error`, `error_code`, `error_id` | 未声明 |
+| `POST` | `/api/v1/trust/verify` | 未声明 | 200 | Trust API 认证与信任评分 · verify | `error`, `error_code`, `error_id` | `src`, `type` |
 
 ## P1 · 准入与证据（这次动作合不合规）
 
@@ -77,7 +77,7 @@
 
 | 方法 | 路径 | 认证 | 实测状态 | 摘要 | 响应顶层字段 | 请求体 |
 |:---|:---|:---:|:---:|:---|:---|:---|
-| `POST` | `/api/v1/chain` | 未声明 | 200 | Agent 生态 API · chain | `schema`, `chain_id`, `entries`, `head_hash`, `hmac`, `verified` …（共 7） | 未声明 |
+| `POST` | `/api/v1/chain` | 未声明 | 200 | Agent 生态 API · chain | `schema`, `chain_id`, `entries`, `head_hash`, `hmac`, `verified` …（共 7） | `chain_id` |
 | `POST` | `/api/v1/evidence` | 未声明 | 200 | POST /api/v1/evidence | `run_id`, `hmac`, `created_at`, `title` | 未声明 |
 | `GET` | `/api/v1/evidence/schemas` | 未声明 | 200 | GET /api/v1/evidence/schemas | `schema`, `ocsf_classes`, `stix_observable_types`, `attack_ttps`, `states`, `transitions` | 未声明 |
 | `GET` | `/api/v1/evidence/verify-payload` | 未声明 | 200 | GET /api/v1/evidence/verify-payload | `schema`, `run_id`, `title`, `description`, `created_at`, `hmac` …（共 14） | 未声明 |
@@ -85,8 +85,8 @@
 | `POST` | `/api/v1/intent/mandates` | 未声明 | 200 | POST /api/v1/intent/mandates | `error`, `error_code`, `error_id` | 未声明 |
 | `POST` | `/api/v1/intent/mandates/evaluate` | 未声明 | 200 | POST /api/v1/intent/mandates/evaluate | `error`, `error_code`, `error_id` | 未声明 |
 | `POST` | `/api/v1/intent/mandates/verify` | 未声明 | 200 | POST /api/v1/intent/mandates/verify | `error`, `error_code`, `error_id` | 未声明 |
-| `POST` | `/api/v1/protocol/normalize` | 未声明 | 200 | Agent 生态 API · normalize | `error`, `error_code`, `error_id` | 未声明 |
-| `POST` | `/api/v1/protocol/translate` | 未声明 | 200 | Agent 生态 API · translate | `error`, `error_code`, `error_id` | 未声明 |
+| `POST` | `/api/v1/protocol/normalize` | 未声明 | 200 | Agent 生态 API · normalize | `error`, `error_code`, `error_id` | `protocol`, `payload` |
+| `POST` | `/api/v1/protocol/translate` | 未声明 | 200 | Agent 生态 API · translate | `error`, `error_code`, `error_id` | `target`, `payload`, `from_protocol` |
 | `GET` | `/api/v1/sandbox/backend/current` | 未声明 | 200 | Agent 生态 API · current | `recommended`, `system`, `python_version`, `backends`, `recommended_info` | 未声明 |
 | `GET` | `/api/v1/sandbox/backend/matrix` | 未声明 | 200 | Agent 生态 API · matrix | `system`, `recommended`, `matrix` | 未声明 |
 | `POST` | `/api/v1/scan/attack-path` | 未声明 | 200 | POST /api/v1/scan/attack-path | `recommendation`, `graph` | 未声明 |
@@ -100,8 +100,8 @@
 
 | 方法 | 路径 | 认证 | 实测状态 | 摘要 | 响应顶层字段 | 请求体 |
 |:---|:---|:---:|:---:|:---|:---|:---|
-| `POST` | `/api/v1/agent-infra/scan` | 未声明 | 200 | 海外平台接入与 Agent 基础设施扫描 · scan | `ok`, `error`, `error_code`, `error_id` | 未声明 |
-| `POST` | `/api/v1/agent-infra/scan-portfolio` | 未声明 | 200 | 海外平台接入与 Agent 基础设施扫描 · scan-portfolio | `ok`, `error`, `error_code`, `error_id` | 未声明 |
+| `POST` | `/api/v1/agent-infra/scan` | 未声明 | 200 | 海外平台接入与 Agent 基础设施扫描 · scan | `ok`, `error`, `error_code`, `error_id` | `name`, `repo_url`, `local_path`, `files`, `platform_id`, `tool_type` |
+| `POST` | `/api/v1/agent-infra/scan-portfolio` | 未声明 | 200 | 海外平台接入与 Agent 基础设施扫描 · scan-portfolio | `ok`, `error`, `error_code`, `error_id` | `specs` |
 | `GET` | `/api/v1/agent-infra/targets` | 未声明 | 200 | 海外平台接入与 Agent 基础设施扫描 · targets | `object` | 未声明 |
 | `GET` | `/api/v1/billing/plans` | 未声明 | 200 | 查询计费套餐 | `success`, `plans` | 未声明 |
 | `GET` | `/api/v1/connectors` | 未声明 | 200 | 海外平台接入与 Agent 基础设施扫描 · connectors | `ok`, `platforms`, `count` | 未声明 |
@@ -197,11 +197,11 @@
 
 ## 缺口清单（请求体未声明，按分组）
 
-其中 `POST` 且无请求体声明共 **77** 条 —— 这些是「agent 最难照着调」的部分，按 P0→P3 排，前 20 条是有界的下一轮增量：
+其中 `POST` 且无请求体声明共 **56** 条 —— 这些是「agent 最难照着调」的部分，按 P0→P3 排，前 20 条是有界的下一轮增量：
 
-- **P0**（23）：`/api/v1/agent-card/identity`、`/api/v1/agent-card/sign`、`/api/v1/agent-card/verify`、`/api/v1/attestation/cancel`、`/api/v1/attestation/renew`、`/api/v1/attestation/run-cycle`、`/api/v1/attestation/subscribe`、`/api/v1/attestations`、`/api/v1/attestations/from-scan`、`/api/v1/attestations/revoke`、`/api/v1/attestations/verify`、`/api/v1/identity/credentials/issue`…
-- **P1**（11）：`/api/v1/chain`、`/api/v1/evidence`、`/api/v1/evidence/verify-payload`、`/api/v1/intent/mandates`、`/api/v1/intent/mandates/evaluate`、`/api/v1/intent/mandates/verify`、`/api/v1/protocol/normalize`、`/api/v1/protocol/translate`、`/api/v1/scan/attack-path`、`/api/v1/scan/client-config`、`/api/v1/ship-gate/run`
-- **P2**（5）：`/api/v1/agent-infra/scan`、`/api/v1/agent-infra/scan-portfolio`、`/api/v1/connectors`、`/api/v1/contributors`、`/api/v1/specialist/agents`
+- **P0**（7）：`/api/v1/attestation/cancel`、`/api/v1/attestation/renew`、`/api/v1/attestation/run-cycle`、`/api/v1/attestation/subscribe`、`/api/v1/registry/discover`、`/api/v1/trust`、`/api/v1/trust/digest`
+- **P1**（8）：`/api/v1/evidence`、`/api/v1/evidence/verify-payload`、`/api/v1/intent/mandates`、`/api/v1/intent/mandates/evaluate`、`/api/v1/intent/mandates/verify`、`/api/v1/scan/attack-path`、`/api/v1/scan/client-config`、`/api/v1/ship-gate/run`
+- **P2**（3）：`/api/v1/connectors`、`/api/v1/contributors`、`/api/v1/specialist/agents`
 - **P3**（38）：`/api/v1/account/login`、`/api/v1/account/recharge`、`/api/v1/account/register`、`/api/v1/agent/scan`、`/api/v1/arena/scan`、`/api/v1/certify/fulfill`、`/api/v1/certify/request-payment`、`/api/v1/certify/request-payment-cny`、`/api/v1/checkout/create`、`/api/v1/export`、`/api/v1/export/sarif`、`/api/v1/export/sbom`…
 
 ## 复验方法（不要相信本文，相信命令）

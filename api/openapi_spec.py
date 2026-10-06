@@ -98,6 +98,39 @@ def _runtime_manifest() -> dict | None:
     return _RUNTIME_CACHE
 
 
+def _apply_request_bodies(spec: dict) -> dict:
+    """把生态请求体声明表并进契约（第三层：只补 requestBody）。
+
+    运行时探针按空 body 探路由，只能反推**响应** —— 于是
+    ``/api/v1/attestations/from-scan`` 这类"接入时最先要调"的端点，在
+    ``/openapi.json`` 里写着"请求体未声明"，外部 agent 不知道字段名必然 400。
+
+    ``api/ecosystem_request_bodies.py`` 就是补这一层的声明表，每个字段都能在
+    handler 源码里回查到字面量（``tests/test_ecosystem_request_contract.py`` 负责验）。
+
+    **只对已存在的 path+verb 注入**：声明表里如果写了运行时不存在的东西，
+    这里静默跳过而不是凭空造一条路由 —— phantom 由契约测试单独抓，不靠这里兜底。
+    """
+    try:
+        from api.ecosystem_request_bodies import as_openapi_request_bodies
+    except ImportError:  # 允许以脚本方式从仓库根外直接跑
+        return spec
+    paths = spec.get("paths") or {}
+    injected = 0
+    for path, verbs in as_openapi_request_bodies().items():
+        item = paths.get(path)
+        if not isinstance(item, dict):
+            continue
+        for verb, rb in verbs.items():
+            op = item.get(verb)
+            if isinstance(op, dict) and not op.get("requestBody"):
+                op["requestBody"] = rb
+                op["x-aishield-request-body-source"] = "declared"
+                injected += 1
+    spec.setdefault("x-aishield-request-bodies-injected", injected)
+    return spec
+
+
 def _merge_runtime_paths(spec: dict) -> dict:
     """把运行时探得的路径并进契约：**curated 优先**。
 
@@ -1136,4 +1169,5 @@ def get_openapi_spec():
     }
 
     _merge_runtime_paths(spec)
+    _apply_request_bodies(spec)
     return spec

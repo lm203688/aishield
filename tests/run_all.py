@@ -313,6 +313,11 @@ def main():
         # 线上长期返回 'Schema not found' 而本地全绿：schema/trust-attestation-v1.json
         # 本地有、main 上不存在（未入库），部署 tarball 来自 checkout ⇒ 线上签不出凭证。
         'tests.test_trust_attestation_schema',
+        # 2026-10-06：生态请求体声明表契约 —— 声明表的 path/verb 必须是运行时真路由
+        # （无 phantom），字段名必须能在 handler 源码里找到字面量（无编造）。
+        # 覆盖 agent 接入最先要调的 22 条（attestations / trust / agent-card /
+        # identity / protocol / chain / agent-infra）。
+        'tests.test_ecosystem_request_contract',
         # 2026-09-19 在线扫描页 + 框架适配器 + SARIF 导出契约
         'tests.test_sarif_export',
         'tests.test_scan_inline_page',
