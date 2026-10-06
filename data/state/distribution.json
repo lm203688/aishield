@@ -9,9 +9,9 @@
       "rss",
       "readme"
     ],
-    "last_run": "publish=failure/registry=skipped/assert=failure",
+    "last_run": "publish=success/registry=success/assert=success",
     "_source": "channel-distribution",
-    "_ts": "2026-10-06T10:30:52.005663+00:00",
+    "_ts": "2026-10-06T15:33:48.436356+00:00",
     "published_total": 4
   },
   "history": [
@@ -691,8 +691,24 @@
         "last_run": "publish=failure/registry=skipped/assert=failure",
         "published_total": 4
       }
+    },
+    {
+      "ts": "2026-10-06T15:33:48.436371+00:00",
+      "source": "channel-distribution",
+      "state": {
+        "articles": 4,
+        "published_issues": 4,
+        "channels": [
+          "github-issue",
+          "pages",
+          "rss",
+          "readme"
+        ],
+        "last_run": "publish=success/registry=success/assert=success",
+        "published_total": 4
+      }
     }
   ],
-  "updated": "2026-10-06T10:30:52.005685+00:00",
+  "updated": "2026-10-06T15:33:48.436375+00:00",
   "desc": "内容与生态分发执行结果"
 }
