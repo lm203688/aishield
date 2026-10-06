@@ -1,7 +1,19 @@
 {
-  "generated_at": "2026-10-06T10:14:40.010111+00:00",
-  "source_intel_count": 522,
+  "generated_at": "2026-10-06T15:18:54.967183+00:00",
+  "source_intel_count": 524,
   "package_blacklist": {
+    "pip:langflow": {
+      "ecosystem": "pip",
+      "package": "langflow",
+      "severity": "critical",
+      "advisories": [
+        "GHSA-8qpj-27x8-pwpq",
+        "GHSA-jxw3-mjmx-3pqm",
+        "GHSA-cf6m-vc3m-7cgm",
+        "GHSA-9fpm-3445-2vx4",
+        "GHSA-qqw9-2vj9-hx7r"
+      ]
+    },
     "npm:simple-git": {
       "ecosystem": "npm",
       "package": "simple-git",
@@ -83,17 +95,6 @@
       "severity": "high",
       "advisories": [
         "GHSA-v853-p72q-4cfw"
-      ]
-    },
-    "pip:langflow": {
-      "ecosystem": "pip",
-      "package": "langflow",
-      "severity": "critical",
-      "advisories": [
-        "GHSA-jxw3-mjmx-3pqm",
-        "GHSA-cf6m-vc3m-7cgm",
-        "GHSA-9fpm-3445-2vx4",
-        "GHSA-qqw9-2vj9-hx7r"
       ]
     },
     "pip:headroom-ai": {
@@ -1195,6 +1196,21 @@
     }
   },
   "pattern_rules": {
+    "(?i)(Access-Control-Allow-Origin['\\\"]?\\s*[:,]\\s*['\\\"]\\*|cors\\s*\\(\\s*\\)\\s*)": {
+      "description": "跨域校验缺失: 允许任意来源",
+      "severity": "high",
+      "owasp": "LLM07",
+      "owasp_name": "系统提示泄露 (System Prompt Leakage)",
+      "derived_from": "origin",
+      "intel_hits": 53,
+      "evidence": [
+        "GHSA-f4ch-vxwc-3p2m",
+        "GHSA-x33g-cr3x-6449",
+        "GHSA-h46j-26q3-rggf",
+        "GHSA-72qq-p3r5-f7wq",
+        "GHSA-v2f8-6655-7grj"
+      ]
+    },
     "(?i)(os\\.system|subprocess\\.(call|run|Popen)|child_process\\.exec)\\s*\\(\\s*[^)]*(\\+|%|\\$\\{|f['\\\"])": {
       "description": "命令注入: 动态拼接系统命令",
       "severity": "critical",
@@ -1208,21 +1224,6 @@
         "CVE-2026-100368",
         "CVE-2026-95660",
         "GHSA-q69g-4hcv-6jg4"
-      ]
-    },
-    "(?i)(Access-Control-Allow-Origin['\\\"]?\\s*[:,]\\s*['\\\"]\\*|cors\\s*\\(\\s*\\)\\s*)": {
-      "description": "跨域校验缺失: 允许任意来源",
-      "severity": "high",
-      "owasp": "LLM07",
-      "owasp_name": "系统提示泄露 (System Prompt Leakage)",
-      "derived_from": "origin",
-      "intel_hits": 52,
-      "evidence": [
-        "GHSA-x33g-cr3x-6449",
-        "GHSA-h46j-26q3-rggf",
-        "GHSA-72qq-p3r5-f7wq",
-        "GHSA-v2f8-6655-7grj",
-        "GHSA-qqw9-2vj9-hx7r"
       ]
     },
     "(?i)(\\.\\./){2,}|(%2e%2e%2f)": {
@@ -1316,8 +1317,8 @@
     }
   },
   "owasp_distribution": {
-    "LLM05": 3,
     "LLM07": 3,
+    "LLM05": 3,
     "LLM06": 2
   },
   "total_rules": 136
