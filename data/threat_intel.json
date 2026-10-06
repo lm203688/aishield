@@ -1,6 +1,482 @@
 {
   "intel": [
     {
+      "id": "GHSA-ph3r-5jfg-f84f",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 6.5,
+      "title": "vLLM: Mirrored multimodal IPC caches desync after a rejected request — a later request reusing the same media hash trips a receiver assertion in the engine core",
+      "summary": "## Affected\n\n- **Ecosystem / package:** pip / `vllm`\n- **Affected versions:** vLLM ≤ 0.25.1 (confirmed on 0.25.1, commit [`752a3a504485`](https://github.com/vllm-project/vllm/tree/752a3a504485790a2e8491cacbb35c137339ad34)). The lower bound predates 0.25.1; maintainers can confirm how far back the mirrored sender/receiver cache protocol reaches.\n\n## Summary\n\nvLLM's default multimodal cache (`mm_processor_cache_type=\"lru\"`) mirrors state across two processes: the frontend (P0) holds only metadata ",
+      "affected": "pip:vllm",
+      "references": [
+        "https://github.com/advisories/GHSA-ph3r-5jfg-f84f"
+      ],
+      "published": "2026-10-06T00:02:05Z",
+      "fetched": "2026-10-06T10:14:28.140735+00:00"
+    },
+    {
+      "id": "GHSA-935w-9g4m-p28p",
+      "source": "github-advisory",
+      "severity": "low",
+      "cvss": 3.1,
+      "title": "vLLM: Harmony tool continuations drop `cache_salt` — restoring a cross-tenant prefix-cache membership oracle",
+      "summary": "## Affected\n\n- **Ecosystem / package:** pip / `vllm`\n- **Affected versions:** vLLM ≤ 0.25.1 (confirmed on 0.25.1, commit [`752a3a504485`](https://github.com/vllm-project/vllm/tree/752a3a504485790a2e8491cacbb35c137339ad34)). The lower bound predates 0.25.1; maintainers can confirm how far back the tool-continuation re-submission has omitted the salt.\n\n## Summary\n\nOn the GPT-OSS \"Harmony\" path (`POST /v1/responses`), a request that uses a built-in or MCP tool runs as a multi-turn loop: after each ",
+      "affected": "pip:vllm",
+      "references": [
+        "https://github.com/advisories/GHSA-935w-9g4m-p28p"
+      ],
+      "published": "2026-10-06T00:02:02Z",
+      "fetched": "2026-10-06T10:14:28.140819+00:00"
+    },
+    {
+      "id": "GHSA-g4wm-2vf7-vfgr",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 8.1,
+      "title": "simple-git allows command execution through unblocked Git configuration includes",
+      "summary": "## Summary\n\nAn OS command injection vulnerability in `git.clone()` allows any application that flows attacker-influenced data into `customArgs` to execute arbitrary code. simple-git 3.36.0 (current latest on npm) ships without any `include.path` entry in the `blockUnsafeOperationsPlugin` denylist. Passing `-c include.path=<file>` via customArgs loads any local file as a gitconfig. The loaded file can set `core.sshCommand` (or any otherwise-denied key), and the next remote operation in the same c",
+      "affected": "npm:simple-git",
+      "references": [
+        "https://github.com/advisories/GHSA-g4wm-2vf7-vfgr"
+      ],
+      "published": "2026-10-05T23:48:05Z",
+      "fetched": "2026-10-06T10:14:26.841769+00:00"
+    },
+    {
+      "id": "GHSA-x33g-cr3x-6449",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 6.5,
+      "title": "PyJWT accepts inconsistent OKP x/d JWKs, causing public/private key identity confusion",
+      "summary": "### Summary\n\nPyJWT accepts internally inconsistent OKP private JWKs where the declared public key `x` does not correspond to the supplied private key `d`.\n\nWhen `d` is present, `OKPAlgorithm.from_jwk()` constructs the Ed25519/Ed448 private key from `d` without verifying that the public key derived from `d` matches `x`. As a result, the original JWK can contain one public key identity while PyJWT performs cryptographic operations using a different key.\n\nIn affected DPoP integrations, this can all",
+      "affected": "pip:PyJWT",
+      "references": [
+        "https://github.com/advisories/GHSA-x33g-cr3x-6449"
+      ],
+      "published": "2026-10-05T23:44:03Z",
+      "fetched": "2026-10-06T10:14:28.140993+00:00"
+    },
+    {
+      "id": "GHSA-x6mc-67gf-chw4",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 5.3,
+      "title": "vLLM: Qwen2-VL / Qwen3-VL video samplers bound on request-controlled max_frames, which the num_frames ceiling does not reach",
+      "summary": "### Summary\n\nAn unauthenticated remote attacker can exhaust the memory of the vLLM API-server process by raising the request-level `media_io_kwargs.video.max_frames` and `fps` knobs on any deployment serving a Qwen2-VL or Qwen3-VL model. 74 extra bytes of JSON took the server's peak RSS from 2 271 MiB to 13 629 MiB over unauthenticated `POST /tokenize`.\n\nThe `num_frames` ceiling reported in GHSA-vxqj-p4gw-9h4c and fixed by open PR #51969 does not reach this path: the Qwen samplers do not read `n",
+      "affected": "pip:vllm",
+      "references": [
+        "https://github.com/advisories/GHSA-x6mc-67gf-chw4"
+      ],
+      "published": "2026-10-05T23:42:59Z",
+      "fetched": "2026-10-06T10:14:28.141067+00:00"
+    },
+    {
+      "id": "GHSA-58v5-2m8f-94pr",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 5.3,
+      "title": "vLLM: GLMGA video sampling permits request-driven CPU and memory exhaustion",
+      "summary": "## Summary\n\nThe OpenAI-compatible chat endpoint accepts request-level video loader options through `media_io_kwargs`. A caller can select the GLMGA sampler and provide large `fps` and `max_frames` values. GLMGA first constructs an attacker-sized Python index list and then deduplicates it, even when the supplied video contains only a few frames. This work occurs in the shared media-loading executor before frame reads, allowing a tiny valid video and compact JSON options to consume disproportionat",
+      "affected": "pip:vllm",
+      "references": [
+        "https://github.com/advisories/GHSA-58v5-2m8f-94pr"
+      ],
+      "published": "2026-10-05T23:42:55Z",
+      "fetched": "2026-10-06T10:14:28.141081+00:00"
+    },
+    {
+      "id": "GHSA-ph72-cqr5-qpp7",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 6.5,
+      "title": "vLLM: Scale-out disaggregated multimodal transport trusts caller-supplied features",
+      "summary": "## Affected\n\n- **Ecosystem / package:** pip / `vllm`\n- **Affected versions:** vLLM ≤ 0.25.1 (confirmed on 0.25.1, commit [`752a3a504485`](https://github.com/vllm-project/vllm/tree/752a3a504485790a2e8491cacbb35c137339ad34)). The lower bound predates 0.25.1; maintainers can confirm how far back the scale-out transport path reaches.\n\n## Summary\n\nvLLM's disaggregated **scale-out** transport splits a multimodal request into a trusted render step (`POST /v1/chat/completions/render`) and a separate gen",
+      "affected": "pip:vllm",
+      "references": [
+        "https://github.com/advisories/GHSA-ph72-cqr5-qpp7"
+      ],
+      "published": "2026-10-05T23:42:50Z",
+      "fetched": "2026-10-06T10:14:28.141197+00:00"
+    },
+    {
+      "id": "GHSA-85xf-c7hm-whqw",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 6.5,
+      "title": "vLLM: Structured-output request errors escape the request boundary and terminate the shared EngineCore — engine-fatal denial of service (3 sites)",
+      "summary": "## Affected\n\n- **Ecosystem / package:** pip / `vllm`\n- **Affected versions:** vLLM ≤ 0.25.1 (confirmed on 0.25.1, commit [`752a3a504485`](https://github.com/vllm-project/vllm/tree/752a3a504485790a2e8491cacbb35c137339ad34)). The lower bound predates 0.25.1; maintainers can confirm how far back each path reaches.\n\n## Summary\n\nThree structured-output request paths let an ordinary request reach a condition that raises an **uncaught, engine-fatal** exception instead of a per-request validation error.",
+      "affected": "pip:vllm",
+      "references": [
+        "https://github.com/advisories/GHSA-85xf-c7hm-whqw"
+      ],
+      "published": "2026-10-05T23:42:44Z",
+      "fetched": "2026-10-06T10:14:28.141293+00:00"
+    },
+    {
+      "id": "GHSA-2phq-3phc-84px",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 4.2,
+      "title": "vLLM: Flash late-interaction scoring caches query embeddings under a caller-controlled request id — cross-request integrity break and induced errors on `/score` and `/rerank`",
+      "summary": "## Affected\n\n- **Ecosystem / package:** pip / `vllm`\n- **Affected versions:** vLLM ≤ 0.25.1 (confirmed on 0.25.1, commit [`752a3a504485`](https://github.com/vllm-project/vllm/tree/752a3a504485790a2e8491cacbb35c137339ad34)). The lower bound predates 0.25.1; maintainers can confirm how far back the flash late-interaction query cache reaches.\n\n## Summary\n\nOn late-interaction `/score` and `/rerank` deployments with flash late interaction enabled (the default for supported models), the worker caches ",
+      "affected": "pip:vllm",
+      "references": [
+        "https://github.com/advisories/GHSA-2phq-3phc-84px"
+      ],
+      "published": "2026-10-05T23:42:39Z",
+      "fetched": "2026-10-06T10:14:28.141349+00:00"
+    },
+    {
+      "id": "GHSA-2823-qmq8-rwvj",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 6.5,
+      "title": "vLLM: Loose `cache_salt` validation lets a single request kill EngineCore on LMCache-MP deployments — uncaught downstream `ValueError` denial of service",
+      "summary": "## Affected\n\n- **Ecosystem / package:** pip / `vllm`\n- **Affected versions:** vLLM ≤ 0.25.1 (confirmed on 0.25.1, commit [`752a3a504485`](https://github.com/vllm-project/vllm/tree/752a3a504485790a2e8491cacbb35c137339ad34)). The lower bound predates 0.25.1; maintainers can confirm how far back the loose `cache_salt` validator and unguarded scheduling-path lookup reach.\n\n## Summary\n\nvLLM's OpenAI-compatible request models (Completions, Chat Completions, Responses) accept a client-supplied `cache_s",
+      "affected": "pip:vllm",
+      "references": [
+        "https://github.com/advisories/GHSA-2823-qmq8-rwvj"
+      ],
+      "published": "2026-10-05T23:42:34Z",
+      "fetched": "2026-10-06T10:14:28.141427+00:00"
+    },
+    {
+      "id": "GHSA-hrvq-x7jp-36xv",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": null,
+      "title": "Nx: Path traversal in nx migrate package-migrations extraction",
+      "summary": "## Summary\n\n`nx migrate` reads each target package's `nx-migrations.migrations` value from its manifest and extracts the referenced file to a path built by joining that value onto a temporary directory. The value is never validated, so a package whose `migrations` field contains `..` segments (or an absolute path) steers the extraction to write outside the temporary directory. A hostile package — or any package pulled in transitively through a trusted package's `packageGroup` — can write attacke",
+      "affected": "npm:nx, npm:nx",
+      "references": [
+        "https://github.com/advisories/GHSA-hrvq-x7jp-36xv"
+      ],
+      "published": "2026-10-05T23:28:35Z",
+      "fetched": "2026-10-06T10:14:26.842133+00:00"
+    },
+    {
+      "id": "GHSA-g7fw-3gjp-g5hf",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 6.5,
+      "title": "OpenClaw: Channel read actions could skip target allowlists",
+      "summary": "### Summary\n\nChannel read actions could skip target allowlists. In affected versions, explicit read targets in Microsoft Teams, Feishu, Matrix, and Google Chat could reach channels or rooms outside the configured read policy.\n\nThis advisory is scoped to caller-supplied targets for message, reaction, pin, member, and related metadata reads in the named plugins. It does not change OpenClaw's trusted-operator model or create per-user isolation within one Gateway.\n\n### Impact\n\nA lower-trust sender o",
+      "affected": "npm:@openclaw/msteams, npm:@openclaw/feishu, npm:@openclaw/matrix, npm:@openclaw/googlechat",
+      "references": [
+        "https://github.com/advisories/GHSA-g7fw-3gjp-g5hf"
+      ],
+      "published": "2026-10-05T23:27:44Z",
+      "fetched": "2026-10-06T10:14:26.842151+00:00"
+    },
+    {
+      "id": "GHSA-5h3f-q97h-ccvc",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": 10.0,
+      "title": "vm2: NodeVM custom resolution bypasses external path boundaries",
+      "summary": "## Summary\n\nAt source revision `91034466bfb7f56b95fd48083ec6ca36d058f164` of vm2 3.11.8, an untrusted `NodeVM` guest can turn one allowlisted custom-resolved module into authorization for a separate file whose path merely shares the resolved path's string prefix. `LegacyResolver.customResolve` stores the resolved path in `this.externals` as `^<path>` without an end or separator boundary; a later absolute require of a sibling such as `foo2/index.js` therefore passes the external check and is load",
+      "affected": "npm:vm2",
+      "references": [
+        "https://github.com/advisories/GHSA-5h3f-q97h-ccvc"
+      ],
+      "published": "2026-10-05T23:24:29Z",
+      "fetched": "2026-10-06T10:14:26.842290+00:00"
+    },
+    {
+      "id": "GHSA-2v2p-6j97-cjg9",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 8.6,
+      "title": "vm2: Host Promise rejection from an exposed constructor can terminate the vm2 host process",
+      "summary": "## Summary\n\nAn untrusted script run by `VM.run` can construct an embedder-exposed host function that returns a rejected native Promise and ignore the result. The sandbox-to-host `construct` trap forwards that Promise without applying the host-side rejection handling already used by the neighboring `apply` trap, so Node's strict unhandled-rejection policy terminates the host process.\n\n## Technical Details\n\nThe precondition is an application-supplied constructable host function in the VM sandbox w",
+      "affected": "npm:vm2",
+      "references": [
+        "https://github.com/advisories/GHSA-2v2p-6j97-cjg9"
+      ],
+      "published": "2026-10-05T23:19:55Z",
+      "fetched": "2026-10-06T10:14:26.842380+00:00"
+    },
+    {
+      "id": "GHSA-489w-w794-jq94",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 10.0,
+      "title": "vm2: NodeVM zlib Buffers expose pooled host memory across the VM boundary",
+      "summary": "## Summary\n\nWhen an application explicitly exposes Node's `zlib` module through vm2's `NodeVM` builtin allowlist, an untrusted guest can obtain a pool-backed host `Buffer` from `zlib.deflateSync`, create a full-width view of its backing `ArrayBuffer`, read bytes outside the compressed result, and flip a byte in an unrelated host buffer. The pinned vm2 revision reproduces disclosure and host-memory modification, while a sandbox-local `Buffer` control remains exact-size and non-mutating.\n\n## Techn",
+      "affected": "npm:vm2",
+      "references": [
+        "https://github.com/advisories/GHSA-489w-w794-jq94"
+      ],
+      "published": "2026-10-05T23:00:46Z",
+      "fetched": "2026-10-06T10:14:26.842436+00:00"
+    },
+    {
+      "id": "GHSA-6fw5-9hq8-w87g",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.4,
+      "title": "GraphQL Tools: TLS Certificate Validation Disabled in Legacy GraphQL WebSocket Executor",
+      "summary": "## Impact\n\n`buildWSLegacyExecutor()` in `@graphql-tools/executor-legacy-ws` previously hardcoded `rejectUnauthorized: false` when creating WebSocket connections over WSS. This disabled TLS certificate validation, allowing a network-positioned attacker to perform a Man-in-the-Middle (MITM) attack against applications that use this executor with a `wss://` endpoint. Credentials passed via `connectionParams` or `headers` could be intercepted, and subscription data could be tampered with.\n\n**Who is ",
+      "affected": "npm:@graphql-tools/executor-legacy-ws",
+      "references": [
+        "https://github.com/advisories/GHSA-6fw5-9hq8-w87g"
+      ],
+      "published": "2026-10-05T22:56:56Z",
+      "fetched": "2026-10-06T10:14:26.842451+00:00"
+    },
+    {
+      "id": "GHSA-7mx3-vvmw-hjmv",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": null,
+      "title": "GraphQL Tools has prototype pollution in well-established utility function `mergeDeep`",
+      "summary": "Closed by https://github.com/ardatan/graphql-tools/pull/8423\nMitigated in Hive Gateway by https://github.com/graphql-hive/gateway/pull/2600\n\nA client can alias fields to `constructor`, `__proto__` or `prototype` so that the response keys from two subgraphs collide on those names during result merging. Because `mergeDeep` recursed through inherited properties, the merge walked `{}.constructor` to `Object`, then `Object.__proto__` to `Function.prototype`, and wrote a subgraph-supplied value over `",
+      "affected": "npm:@graphql-tools/utils",
+      "references": [
+        "https://github.com/advisories/GHSA-7mx3-vvmw-hjmv"
+      ],
+      "published": "2026-10-05T22:56:46Z",
+      "fetched": "2026-10-06T10:14:26.842463+00:00"
+    },
+    {
+      "id": "GHSA-27vj-qcqg-25rc",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 8.8,
+      "title": "fsspec: Server-Side Template Injection in ReferenceFileSystem leads to Remote Code Execution",
+      "summary": "### Summary\n\n`fsspec.implementations.reference.ReferenceFileSystem` parses a \"references\"\nJSON document (Kerchunk format) supplied either inline or via a URL. The\nparser renders fields from this JSON through **un-sandboxed**\n`jinja2.Template(...).render(...)` calls in three locations. An attacker who\ncontrols the JSON document — typically by hosting it at a URL that the\nvictim opens with `fsspec.filesystem(\"reference\", fo=URL)` or via\n`xarray.open_dataset(\"reference://...\")` — achieves arbitrary",
+      "affected": "pip:fsspec",
+      "references": [
+        "https://github.com/advisories/GHSA-27vj-qcqg-25rc"
+      ],
+      "published": "2026-10-05T22:53:22Z",
+      "fetched": "2026-10-06T10:14:28.141666+00:00"
+    },
+    {
+      "id": "GHSA-g2v6-rqmx-r4w6",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.2,
+      "title": "@vue/server-renderer: XSS via missing CR in attribute-name blacklist",
+      "summary": "## Description\n\n`@vue/server-renderer` was investigated specifically because it's the one place in Vue where template rendering output becomes a real HTTP response body -- a genuine server-side trust boundary, unlike client-side rendering which only ever affects the same browser session that's already running the app's own JS.\n\n`ssrRenderAttrs()` (in `packages/server-renderer/src/helpers/ssrRenderAttrs.ts`) is what compiled SSR output calls for something like `<div v-bind=\"userObject\">`. It loop",
+      "affected": "npm:@vue/server-renderer, npm:@vue/server-renderer",
+      "references": [
+        "https://github.com/advisories/GHSA-g2v6-rqmx-r4w6"
+      ],
+      "published": "2026-10-05T22:50:55Z",
+      "fetched": "2026-10-06T10:14:26.842743+00:00"
+    },
+    {
+      "id": "GHSA-v853-p72q-4cfw",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.5,
+      "title": "Quart leaks raw request body (incl. plaintext passwords) to stdout via stray debug print in Body.__await__",
+      "summary": "### Summary\nQuart 0.23.0 contains a stray debug statement (`print(data)`) inside `Body.__await__` in `quart/wrappers/request.py`. Any request whose body is awaited — `await request.form`, `await request.get_data()`, WTForms `validate_on_submit()`, etc. — has its raw, unparsed body printed to stdout, including plaintext form fields such as passwords and CSRF tokens. Confirmed present in 0.23.0, confirmed absent in 0.22.0.\n\n### Details\nIn `src/quart/wrappers/request.py`, `Body.__await__` accumulat",
+      "affected": "pip:quart",
+      "references": [
+        "https://github.com/advisories/GHSA-v853-p72q-4cfw"
+      ],
+      "published": "2026-10-05T22:49:44Z",
+      "fetched": "2026-10-06T10:14:28.141696+00:00"
+    },
+    {
+      "id": "GHSA-f8gf-w286-fmq2",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.1,
+      "title": "vm2: `allowAsync: false` can be bypassed through Promise thenable assimilation in VM and NodeVM",
+      "summary": "### Summary\n\nWhen `allowAsync` is set to `false`, vm2 is expected to reject attempts to run asynchronous code. Direct use of `Promise.prototype.then` is blocked, but Promise static methods still assimilate attacker-controlled thenables. `Promise.resolve(thenable)`, `Promise.all([thenable])`, `Promise.race([thenable])`, `Promise.any([thenable])`, and `Promise.allSettled([thenable])` can invoke the thenable's `then` method in a microtask after `VM.run()` or `NodeVM.run()` has already returned.\n\nTh",
+      "affected": "npm:vm2",
+      "references": [
+        "https://github.com/advisories/GHSA-f8gf-w286-fmq2"
+      ],
+      "published": "2026-10-05T22:47:34Z",
+      "fetched": "2026-10-06T10:14:26.842978+00:00"
+    },
+    {
+      "id": "GHSA-88hf-g992-jg85",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": 10.0,
+      "title": "vm2: Sandbox Escape (NodeVM)",
+      "summary": "## Summary\n\nIt being possible to obtain the host `__proto__` getter/setter, has been used in many reports:\n\n- https://github.com/patriksimek/vm2/security/advisories/GHSA-vwrp-x96c-mhwq\n- https://github.com/patriksimek/vm2/security/advisories/GHSA-v6mx-mf47-r5wg\n- https://github.com/patriksimek/vm2/security/advisories/GHSA-grj5-jjm8-h35p\n- https://github.com/patriksimek/vm2/security/advisories/GHSA-47x8-96vw-5wg6\n\nYet it was never patched...\n\n---\n\nThis can, still, be used to escape the sandbox, o",
+      "affected": "npm:vm2",
+      "references": [
+        "https://github.com/advisories/GHSA-88hf-g992-jg85"
+      ],
+      "published": "2026-10-05T22:47:09Z",
+      "fetched": "2026-10-06T10:14:26.842994+00:00"
+    },
+    {
+      "id": "GHSA-gjq8-xm47-88rc",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": 8.6,
+      "title": "vm2: Host-returned Promise rejection can bypass vm2's unhandled-rejection hardening and terminate the host process",
+      "summary": "## Summary\n\nvm2 current head (`v3.11.5`, commit `7a1f5100b96f48d34e0fe104ab37c0acc5944f92`) can still be used to terminate the host Node.js process when sandbox code calls a host-realm function that returns a rejected host Promise and then ignores the returned value.\n\nThis is an incomplete-fix variant of the `GHSA-hw58-p9xv-2mjh` unhandled rejection hardening. The `localPromise` constructor now catches and consumes sandbox-created unhandled rejections, but host Promises returned across the bridg",
+      "affected": "npm:vm2",
+      "references": [
+        "https://github.com/advisories/GHSA-gjq8-xm47-88rc"
+      ],
+      "published": "2026-10-05T22:45:48Z",
+      "fetched": "2026-10-06T10:14:26.843046+00:00"
+    },
+    {
+      "id": "GHSA-3vgf-8m4q-q4qr",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": 10.0,
+      "title": "vm2: Default VM can mutate host TypedArray and ArrayBuffer intrinsics after the host-prototype pollution fix",
+      "summary": "## Summary\n\nvm2's current host-intrinsic prototype protection is incomplete. The fix for `GHSA-vwrp-x96c-mhwq` blocks sandbox writes into classic host intrinsics such as `Object.prototype`, `Array.prototype`, and `Function.prototype`, but current head still lets sandbox code in a default `VM` reach and mutate host `Uint8Array.prototype`, `%TypedArray%.prototype`, and `ArrayBuffer.prototype`.\n\nAfter `VM.run()` returns, normal host typed-array and ArrayBuffer objects observe attacker-controlled pr",
+      "affected": "npm:vm2",
+      "references": [
+        "https://github.com/advisories/GHSA-3vgf-8m4q-q4qr"
+      ],
+      "published": "2026-10-05T22:45:22Z",
+      "fetched": "2026-10-06T10:14:26.843086+00:00"
+    },
+    {
+      "id": "GHSA-x965-fc75-jpqh",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": 9.0,
+      "title": "vm2 sandbox escape to host RCE via revisited host-wrapped AggregateError bypassing Error sanitization cycle short-circuit",
+      "summary": "## Summary\nvm2 `3.11.6` (this fork's latest release) contains an incomplete-fix bypass of the Error.cause host-reference sanitization added in GHSA-m283-3h24-438v (commit `7e3faaf`). Sandbox code that catches a host-wrapped `AggregateError` which is *revisited within a single `handleException` traversal* (self-cycle, mutual-cycle, or the same host aggregate referenced twice in `errors[]`) receives a live, unsanitized host proxy inside the \"sanitized\" `errors[]`, yielding full host RCE on the thr",
+      "affected": "npm:vm2",
+      "references": [
+        "https://github.com/advisories/GHSA-x965-fc75-jpqh"
+      ],
+      "published": "2026-10-05T22:38:04Z",
+      "fetched": "2026-10-06T10:14:26.843147+00:00"
+    },
+    {
+      "id": "GHSA-r273-hxvj-fxhp",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 5.8,
+      "title": "vm2: util.getCallSites() bypasses GHSA-v27g-jcqj-v8rw host-frame redaction, leaks host call stack",
+      "summary": "### Summary\n\nNodeVM exposes the host `util` module to the sandbox through an unfiltered shallow copy (`Object.assign({}, util)`). On Node.js >= 22.9 this hands sandboxed code `util.getCallSites()`, a programmatic stack-introspection API that returns the host process's full call stack — absolute file paths, function names, and line numbers — including vm2 bridge internals and the embedding application's entrypoint. This bypasses the host-frame redaction established in GHSA-v27g-jcqj-v8rw, which o",
+      "affected": "npm:vm2",
+      "references": [
+        "https://github.com/advisories/GHSA-r273-hxvj-fxhp"
+      ],
+      "published": "2026-10-05T22:37:40Z",
+      "fetched": "2026-10-06T10:14:26.843192+00:00"
+    },
+    {
+      "id": "GHSA-x6m4-chr9-cg97",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 5.8,
+      "title": "vm2 leaks absolute host filesystem paths to sandbox code via error stack formatting",
+      "summary": "## Summary\n\nAttacker-controlled code can trigger a host-realm syntax error and read its stack through the vm2 bridge. Host-realm stack formatting bypasses the sandbox-side redaction, so the returned value exposes absolute paths from vm2, Node.js internals, and the embedding application. Default VM and NodeVM configurations are affected without requiring special options.\n\n## PoC\n\nA default-configured `VM` runs attacker-supplied code. Calling `eval` with deliberately malformed source makes the hos",
+      "affected": "npm:vm2",
+      "references": [
+        "https://github.com/advisories/GHSA-x6m4-chr9-cg97"
+      ],
+      "published": "2026-10-05T22:35:31Z",
+      "fetched": "2026-10-06T10:14:26.843212+00:00"
+    },
+    {
+      "id": "GHSA-r4fx-v8hh-22mv",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.5,
+      "title": "vm2: timeout Option Bypass via FinalizationRegistry Cleanup Callback (Unbounded Host Event-Loop Block)",
+      "summary": "### Vulnerability Summary\n \nvm2's `VM({ timeout })` option is documented and relied upon as the mechanism that bounds how long sandboxed code may execute. In the current implementation, the timeout only wraps the single synchronous call to `VM#run()` (via `doWithTimeout` → `this._runScript(script)` in `lib/vm.js`). It does not, and structurally cannot, bound code that the V8 engine itself schedules to run *after* that call has already returned.\n \n`FinalizationRegistry` and `WeakRef` are exposed ",
+      "affected": "npm:vm2",
+      "references": [
+        "https://github.com/advisories/GHSA-r4fx-v8hh-22mv"
+      ],
+      "published": "2026-10-05T22:35:04Z",
+      "fetched": "2026-10-06T10:14:26.843289+00:00"
+    },
+    {
+      "id": "GHSA-j3hm-6rg5-mchv",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": 10.0,
+      "title": "vm2: NodeVM `require.external` without an explicit `require.root` grants unrestricted host filesystem access and full RCE",
+      "summary": "## Summary\n\n`NodeVM`'s `require.external` option lets sandboxed code `require()` local files and npm packages. When `require.external` is enabled and `require.root` is **not explicitly set to a path that excludes `node_modules`**, two defaults combine to fully defeat the sandbox:\n\n- `require.root` defaults to **unrestricted** — \"if omitted every path is allowed.\"\n- `require.context` defaults to **`\"host\"`** — files loaded this way run through the **real Node.js `require()`**, not inside any vm2 ",
+      "affected": "npm:vm2",
+      "references": [
+        "https://github.com/advisories/GHSA-j3hm-6rg5-mchv"
+      ],
+      "published": "2026-10-05T22:34:50Z",
+      "fetched": "2026-10-06T10:14:26.843377+00:00"
+    },
+    {
+      "id": "GHSA-fcqc-726x-5wfc",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": 10.0,
+      "title": "vm2: Sandboxed code can read and write host-realm memory via Node's shared Buffer pool",
+      "summary": "### Summary\nSandboxed code is able to disclose host memory used by small allocations by `Buffer.from`, `Buffer.concat`.\n\n### Details\nvm2 exposes `Buffer` object to sandboxed code by default. Small [`Buffer` allocations](https://nodejs.org/api/buffer.html#static-method-bufferallocunsafesize) (for example, [Buffer.allocUnsafe()](https://nodejs.org/api/buffer.html#static-method-bufferallocunsafesize), [Buffer.from(array)](https://nodejs.org/api/buffer.html#static-method-bufferfromarray), [Buffer.fr",
+      "affected": "npm:vm2",
+      "references": [
+        "https://github.com/advisories/GHSA-fcqc-726x-5wfc"
+      ],
+      "published": "2026-10-05T22:34:35Z",
+      "fetched": "2026-10-06T10:14:26.843389+00:00"
+    },
+    {
+      "id": "GHSA-wjwh-qqvp-g4p4",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": 10.0,
+      "title": "vm2 sandbox escape via WebAssembly.compileStreaming Promise species bypass",
+      "summary": "## Summary\n\nThere is a sandbox escape in vm2 `3.11.5` / current HEAD when it is used on Node.js 26. The issue is reachable from a default `new VM()` sandbox. No `NodeVM`, `require` permission, host object injection, or intentionally unsafe configuration is required.\n\nThe escape is a patch-bypass of the same security invariant addressed by GHSA-6j2x-vhqr-qr7q. The earlier fix removed the JSPI entry points `WebAssembly.promising` and `WebAssembly.Suspending`, because those APIs exposed a Promise p",
+      "affected": "npm:vm2",
+      "references": [
+        "https://github.com/advisories/GHSA-wjwh-qqvp-g4p4"
+      ],
+      "published": "2026-10-05T22:34:22Z",
+      "fetched": "2026-10-06T10:14:26.843413+00:00"
+    },
+    {
+      "id": "GHSA-jxw3-mjmx-3pqm",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": 9.1,
+      "title": "Langflow: Weak Fernet Key via random.seed()",
+      "summary": "### Summary\n\nLangflow uses Python's `random` module (Mersenne Twister, a non-cryptographic PRNG) seeded with the `SECRET_KEY` to derive the Fernet encryption key for all stored user credentials (API keys, LLM provider secrets, database passwords). When the `SECRET_KEY` is shorter than 32 characters — a common scenario for self-hosted deployments using simple/memorable secrets — the derived encryption key is fully deterministic and reproducible by anyone who knows the seed value. An attacker who ",
+      "affected": "pip:langflow",
+      "references": [
+        "https://github.com/advisories/GHSA-jxw3-mjmx-3pqm"
+      ],
+      "published": "2026-10-05T22:31:35Z",
+      "fetched": "2026-10-06T10:14:28.141886+00:00"
+    },
+    {
+      "id": "GHSA-cf6m-vc3m-7cgm",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": 9.8,
+      "title": "Langflow: Unauthenticated Flow Execution via Webhook Authentication Bypass",
+      "summary": "### Summary\nA vulnerability in Langflow's webhook authentication logic allows unauthenticated users to trigger the execution of any flow. The system incorrectly bypasses API key validation when the `WEBHOOK_AUTH_ENABLE` configuration is set to `False`. This allows a remote attacker who knows a flow's UUID to execute it as if they were the owner, potentially leading to Remote Code Execution (RCE) or Denial of Service (DoS).\n\n### Details\nThe `WEBHOOK_AUTH_ENABLE` setting was introduced in v1.7.0 (",
+      "affected": "pip:langflow",
+      "references": [
+        "https://github.com/advisories/GHSA-cf6m-vc3m-7cgm"
+      ],
+      "published": "2026-10-05T22:31:22Z",
+      "fetched": "2026-10-06T10:14:28.141933+00:00"
+    },
+    {
+      "id": "GHSA-9fpm-3445-2vx4",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 8.8,
+      "title": "Langflow: Prompt injection in Langflow Smart Transform can lead to code execution",
+      "summary": "## Summary\n\nLangflow versions 1.3.0 through 1.10.2 contain a code-injection vulnerability in the Smart Transform (`LambdaFilterComponent`) component.\n\nSmart Transform places flow-author instructions and a preview of its input data into a prompt asking an LLM to generate a Python lambda. It then extracts a one-line lambda from the model response, applies only syntactic format checks, evaluates it with Python's full builtins, and invokes the resulting function inside the Langflow process.\n\nA malic",
+      "affected": "pip:langflow",
+      "references": [
+        "https://github.com/advisories/GHSA-9fpm-3445-2vx4"
+      ],
+      "published": "2026-10-05T22:30:41Z",
+      "fetched": "2026-10-06T10:14:28.142038+00:00"
+    },
+    {
       "id": "GHSA-h46j-26q3-rggf",
       "source": "github-advisory",
       "severity": "high",
@@ -111,6 +587,20 @@
       ],
       "published": "2026-10-02T19:31:33Z",
       "fetched": "2026-10-03T09:06:58.707379+00:00"
+    },
+    {
+      "id": "GHSA-qqw9-2vj9-hx7r",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": null,
+      "title": "Duplicate Advisory: Title Authenticated Remote Code Execution in validate_code via Malicious Decorators Description",
+      "summary": "## Duplicate Advisory\n\nThis advisory has been withdrawn because it is a duplicate of GHSA-w584-2h2r-2hvf. This link is maintained to preserve external references.\n\n## Original Description\nlangflow-ai langflow v1.9.3 is affected by: Code Injection. The impact is: execute arbitrary code (remote). The component is: src/backend/base/langflow/api/v1/validate.py:validate-post_validate_code-a-real-authenticated-http-post-to-api-v1. The attack vector is: Attack surface: HTTP or browser-backed service pa",
+      "affected": "pip:langflow",
+      "references": [
+        "https://github.com/advisories/GHSA-qqw9-2vj9-hx7r"
+      ],
+      "published": "2026-10-02T00:31:30Z",
+      "fetched": "2026-10-06T10:14:28.142547+00:00"
     },
     {
       "id": "CVE-2025-71427",
@@ -7152,7 +7642,7 @@
       "fetched": "2026-08-04T06:34:53.913899+00:00"
     }
   ],
-  "updated": "2026-10-05T16:07:39.548172+00:00",
+  "updated": "2026-10-06T10:14:28.643441+00:00",
   "sources": [
     "osv",
     "nvd",
@@ -7171,7 +7661,7 @@
         "items": 0,
         "attempts": 1,
         "error": null,
-        "checked_at": "2026-10-05T16:07:04.454148+00:00",
+        "checked_at": "2026-10-06T10:14:07.185896+00:00",
         "consecutive_failures": 0,
         "degraded_since": null
       },
@@ -7180,31 +7670,31 @@
         "items": 34,
         "attempts": 1,
         "error": null,
-        "checked_at": "2026-10-05T16:07:36.414637+00:00",
+        "checked_at": "2026-10-06T10:14:25.880868+00:00",
         "consecutive_failures": 0,
         "degraded_since": null
       },
       "github-advisory": {
         "ok": true,
-        "items": 35,
+        "items": 41,
         "attempts": 1,
         "error": null,
-        "checked_at": "2026-10-05T16:07:39.547807+00:00",
+        "checked_at": "2026-10-06T10:14:28.643128+00:00",
         "consecutive_failures": 0,
         "degraded_since": null
       }
     },
     "degraded": [],
-    "last_success": "2026-10-05T16:07:39.548172+00:00",
-    "last_attempt": "2026-10-05T16:07:39.548172+00:00"
+    "last_success": "2026-10-06T10:14:28.643441+00:00",
+    "last_attempt": "2026-10-06T10:14:28.643441+00:00"
   },
   "stats": {
-    "high": 226,
-    "critical": 77,
-    "medium": 141,
-    "low": 6,
+    "medium": 154,
+    "low": 7,
+    "high": 237,
+    "critical": 87,
     "unknown": 36,
     "moderate": 1
   },
-  "total": 487
+  "total": 522
 }
