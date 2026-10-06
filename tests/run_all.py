@@ -309,6 +309,10 @@ def main():
         'tests.test_deployment_observability',  # 退出码传导契约：诊断语句不得抢占部署/自愈的退出码
         'tests.test_notify_hardening',  # 2026-09-18：告警链路出站脱敏 + fail-closed 退出码 + 未送达台账闭环
         'tests.test_rule_audit_contract',  # 2026-09-18：基线审计契约（零 critical 误报/引用抑制/情报去重/对抗式评审闸门有效）
+        # 2026-10-06：Trust Attestation 签发链路 —— 钉"schema 文件必须随仓库发布"。
+        # 线上长期返回 'Schema not found' 而本地全绿：schema/trust-attestation-v1.json
+        # 本地有、main 上不存在（未入库），部署 tarball 来自 checkout ⇒ 线上签不出凭证。
+        'tests.test_trust_attestation_schema',
         # 2026-09-19 在线扫描页 + 框架适配器 + SARIF 导出契约
         'tests.test_sarif_export',
         'tests.test_scan_inline_page',

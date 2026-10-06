@@ -1,0 +1,209 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AIShield Trust Attestation v1",
+  "description": "Machine-readable trust attestation for agent ecosystem assets",
+  "type": "object",
+  "required": [
+    "schema",
+    "issuer",
+    "issued_at",
+    "subject",
+    "verdict",
+    "coverage",
+    "attestation"
+  ],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "pattern": "^aishield-trust/v1$",
+      "description": "Schema version identifier"
+    },
+    "issuer": {
+      "type": "string",
+      "format": "uri",
+      "description": "AIShield instance URL that issued this attestation"
+    },
+    "issued_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp when this attestation was issued"
+    },
+    "subject": {
+      "type": "object",
+      "required": ["type", "url", "name"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["mcp_server", "skill", "agent", "prompt"],
+          "description": "Type of the attested asset"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "Source URL of the attested asset"
+        },
+        "name": {
+          "type": "string",
+          "description": "Human-readable name of the attested asset"
+        },
+        "version": {
+          "type": "string",
+          "description": "Version identifier (optional)"
+        },
+        "fingerprint": {
+          "type": "string",
+          "description": "Content fingerprint for integrity verification (optional)"
+        }
+      }
+    },
+    "verdict": {
+      "type": "object",
+      "required": ["score", "level", "risk", "no_spawn_guarantee", "offline_scan"],
+      "properties": {
+        "score": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Security score (0-100)"
+        },
+        "level": {
+          "type": "string",
+          "enum": ["gold", "silver", "bronze", "basic"],
+          "description": "Security level based on score"
+        },
+        "risk": {
+          "type": "string",
+          "enum": ["safe", "medium", "high", "critical", "unknown"],
+          "description": "Overall risk assessment"
+        },
+        "no_spawn_guarantee": {
+          "type": "boolean",
+          "description": "Guarantee that no commands from scanned configuration were executed"
+        },
+        "offline_scan": {
+          "type": "boolean",
+          "description": "Scan performed without external network dependencies"
+        },
+        "details": {
+          "type": "object",
+          "properties": {
+            "critical_findings": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Number of critical security findings"
+            },
+            "high_findings": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Number of high severity findings"
+            },
+            "medium_findings": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Number of medium severity findings"
+            },
+            "low_findings": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Number of low severity findings"
+            },
+            "total_rules": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Total number of security rules applied"
+            }
+          }
+        }
+      }
+    },
+    "coverage": {
+      "type": "object",
+      "required": ["owasp_mcp_top10", "owasp_asi_top10", "dimensions"],
+      "properties": {
+        "owasp_mcp_top10": {
+          "type": "string",
+          "pattern": "^\\d+/\\d+$",
+          "description": "OWASP MCP Top 10 coverage (e.g., '10/10')"
+        },
+        "owasp_asi_top10": {
+          "type": "string",
+          "pattern": "^\\d+/\\d+$",
+          "description": "OWASP Agentic AI Top 10 coverage (e.g., '10/10')"
+        },
+        "dimensions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["security", "permissions", "data_handling", "supply_chain", "reliability", "identity", "collaboration"]
+          },
+          "description": "Security dimensions covered by the attestation"
+        }
+      }
+    },
+    "attestation": {
+      "type": "object",
+      "required": ["method", "last_attested_at", "chain_anchor", "evidence_count"],
+      "properties": {
+        "method": {
+          "type": "string",
+          "enum": ["continuous", "once"],
+          "description": "Attestation method: continuous monitoring or one-time scan"
+        },
+        "last_attested_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp of last attestation"
+        },
+        "chain_anchor": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$",
+          "description": "SHA-256 hash chain anchor for audit trail"
+        },
+        "evidence_count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of evidence items supporting this attestation"
+        },
+        "next_attestation_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When next attestation is scheduled (for continuous method)"
+        }
+      }
+    },
+    "badge": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL to SVG security badge for display"
+    },
+    "api": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL to API endpoint for programmatic verification"
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "scanner_version": {
+          "type": "string",
+          "description": "AIShield scanner version used"
+        },
+        "ruleset": {
+          "type": "string",
+          "description": "Ruleset identifier (e.g., 'owasp-mcp-top10-v1')"
+        },
+        "locale": {
+          "type": "string",
+          "description": "Locale used for scanning (e.g., 'zh-CN')"
+        },
+        "custom_rules": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Custom rules applied (if any)"
+        }
+      }
+    }
+  }
+}
