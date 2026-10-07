@@ -1,7 +1,40 @@
 {
-  "generated_at": "2026-10-06T15:18:54.967183+00:00",
-  "source_intel_count": 524,
+  "generated_at": "2026-10-07T10:16:56.020106+00:00",
+  "source_intel_count": 528,
   "package_blacklist": {
+    "npm:knowns": {
+      "ecosystem": "npm",
+      "package": "knowns",
+      "severity": "high",
+      "advisories": [
+        "GHSA-mc52-mwq4-vfx3",
+        "GHSA-9gfj-28hw-jchp"
+      ]
+    },
+    "npm:@payloadcms/plugin-mcp": {
+      "ecosystem": "npm",
+      "package": "@payloadcms/plugin-mcp",
+      "severity": "high",
+      "advisories": [
+        "GHSA-2q76-m6w6-qgc6"
+      ]
+    },
+    "npm:@modelcontextprotocol/sdk": {
+      "ecosystem": "npm",
+      "package": "@modelcontextprotocol/sdk",
+      "severity": "high",
+      "advisories": [
+        "GHSA-6qxp-vccf-f47h"
+      ]
+    },
+    "npm:@modelcontextprotocol/client": {
+      "ecosystem": "npm",
+      "package": "@modelcontextprotocol/client",
+      "severity": "high",
+      "advisories": [
+        "GHSA-6qxp-vccf-f47h"
+      ]
+    },
     "pip:langflow": {
       "ecosystem": "pip",
       "package": "langflow",
@@ -193,14 +226,6 @@
       "severity": "high",
       "advisories": [
         "GHSA-q986-4x7x-gx39"
-      ]
-    },
-    "npm:knowns": {
-      "ecosystem": "npm",
-      "package": "knowns",
-      "severity": "high",
-      "advisories": [
-        "GHSA-9gfj-28hw-jchp"
       ]
     },
     "pip:compliance-trestle": {
@@ -1196,6 +1221,21 @@
     }
   },
   "pattern_rules": {
+    "(?i)(os\\.system|subprocess\\.(call|run|Popen)|child_process\\.exec)\\s*\\(\\s*[^)]*(\\+|%|\\$\\{|f['\\\"])": {
+      "description": "命令注入: 动态拼接系统命令",
+      "severity": "critical",
+      "owasp": "LLM05",
+      "owasp_name": "不当输出处理 (Improper Output Handling)",
+      "derived_from": "command injection",
+      "intel_hits": 17,
+      "evidence": [
+        "GHSA-mc52-mwq4-vfx3",
+        "GHSA-g4wm-2vf7-vfgr",
+        "GHSA-x78j-v8h9-3j2q",
+        "CVE-2026-100368",
+        "CVE-2026-95660"
+      ]
+    },
     "(?i)(Access-Control-Allow-Origin['\\\"]?\\s*[:,]\\s*['\\\"]\\*|cors\\s*\\(\\s*\\)\\s*)": {
       "description": "跨域校验缺失: 允许任意来源",
       "severity": "high",
@@ -1209,21 +1249,6 @@
         "GHSA-h46j-26q3-rggf",
         "GHSA-72qq-p3r5-f7wq",
         "GHSA-v2f8-6655-7grj"
-      ]
-    },
-    "(?i)(os\\.system|subprocess\\.(call|run|Popen)|child_process\\.exec)\\s*\\(\\s*[^)]*(\\+|%|\\$\\{|f['\\\"])": {
-      "description": "命令注入: 动态拼接系统命令",
-      "severity": "critical",
-      "owasp": "LLM05",
-      "owasp_name": "不当输出处理 (Improper Output Handling)",
-      "derived_from": "command injection",
-      "intel_hits": 16,
-      "evidence": [
-        "GHSA-g4wm-2vf7-vfgr",
-        "GHSA-x78j-v8h9-3j2q",
-        "CVE-2026-100368",
-        "CVE-2026-95660",
-        "GHSA-q69g-4hcv-6jg4"
       ]
     },
     "(?i)(\\.\\./){2,}|(%2e%2e%2f)": {
@@ -1317,9 +1342,9 @@
     }
   },
   "owasp_distribution": {
-    "LLM07": 3,
     "LLM05": 3,
+    "LLM07": 3,
     "LLM06": 2
   },
-  "total_rules": 136
+  "total_rules": 139
 }
