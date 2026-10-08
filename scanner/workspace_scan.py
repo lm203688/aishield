@@ -54,6 +54,7 @@ from .computeruse_scan import computeruse_analysis
 from .memory_integrity_scan import memory_integrity_analysis
 from .agent_memory_scan import agent_memory_analysis
 from .rag_corpus_poison_scan import rag_corpus_poison_analysis
+from .a2a_orchestration_scan import a2a_orchestration_analysis
 from .mcp_manifest_scan import mcp_manifest_analysis
 
 TZ = timezone(timedelta(hours=8))
@@ -69,7 +70,7 @@ ENGINES_REUSED = [
     "memory_analysis", "antitamper_analysis", "least_agency_analysis",
     "scope_composition_analysis", "goal_hijack_analysis", "dark_pattern_analysis",
     "mcp_oauth_analysis", "computeruse_analysis",     "memory_integrity_analysis", "agent_memory_analysis",
-    "rag_corpus_poison_scan", "mcp_manifest_analysis",
+    "rag_corpus_poison_scan", "a2a_orchestration_scan", "mcp_manifest_analysis",
 ]
 
 # 安全护栏：避免误读巨型 workspace
@@ -426,6 +427,7 @@ def _local_pipeline(files, name, tool_type="mcp"):
     memory_integrity = memory_integrity_analysis(files)
     agent_memory = agent_memory_analysis(files)
     rag_corpus = rag_corpus_poison_analysis(files)
+    a2a_orchestration = a2a_orchestration_analysis(files)
     mcp_manifest = mcp_manifest_analysis(files)
     extra_findings = (identity.get("findings", []) + network.get("findings", [])
                       + agentcard.get("findings", []) + authentik.get("findings", [])
@@ -439,6 +441,7 @@ def _local_pipeline(files, name, tool_type="mcp"):
                       + memory_integrity.get("findings", [])
                       + agent_memory.get("findings", [])
                       + rag_corpus.get("findings", [])
+                      + a2a_orchestration.get("findings", [])
                       + mcp_manifest.get("findings", []))
     scores = calculate_scores(static, dependency, secrets, poisoning, taint, total_files,
                               extra_findings=extra_findings)
@@ -494,6 +497,8 @@ def _local_pipeline(files, name, tool_type="mcp"):
         all_findings.append(f)
     for f in rag_corpus.get("findings", []):
         all_findings.append(f)
+    for f in a2a_orchestration.get("findings", []):
+        all_findings.append(f)
     for f in mcp_manifest.get("findings", []):
         all_findings.append(f)
 
@@ -536,6 +541,7 @@ def _local_pipeline(files, name, tool_type="mcp"):
         "memory_integrity_scan": memory_integrity,
         "agent_memory_scan": agent_memory,
         "rag_corpus_poison_scan": rag_corpus,
+        "a2a_orchestration_scan": a2a_orchestration,
         "mcp_manifest_scan": mcp_manifest,
         "recommendations": recommendations,
         # 不变量声明（与顶层报告同源，供门禁测试断言）
