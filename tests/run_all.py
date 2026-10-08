@@ -379,6 +379,10 @@ def main():
         # 2026-10-08 Phase 1：RAG 语料/持久化记忆内容投毒扫描（内容级，
         # 与 agent_memory_scan 代码级互补；填路线图 Gap 6 的真实空白面）
         'tests.test_rag_corpus_poison_scan',
+        # 2026-10-08 Phase 2：A2A/多智能体编排信任链扫描（ASI07，与
+        # agentcard_scan 互补——卡片结构层由后者管，本模块管运行时消息/委托
+        # artifact + 内容级编排计划信任反模式；填路线图 Gap 5）
+        'tests.test_a2a_orchestration_scan',
         # 2026-10-03 攻击语料攻击面族覆盖度：recall=1.0 必须在 17 个攻击面上
         # 分别站得住，族级 0 检出要报出来而不是被总数摊平；KNOWN_GAP_SAMPLES
         # 记账当前规则真覆盖不到的攻击面（补上规则即要求把样本移出名单）。
