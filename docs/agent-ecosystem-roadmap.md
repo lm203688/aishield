@@ -39,9 +39,10 @@
 
 ### Gap 5 — 智能体编排 / A2A（ASI07 跨智能体通信）
 - **开源现状**：Google **A2A（Agent2Agent）协议**、agent card（`/.well-known/agent.json` 信任声明）、agent-to-agent message。AIShield 已有 agent-card 解析 + `agent-infra` API。
-- **自研范围**：扫描 agent card 的信任声明（身份锚点、能力声明、delegation 链）；检测 ASI07 spoofing / replay / unauthenticated；多智能体 **plan 静态扫描**（goal-hijack 链式）。
+- **现状澄清（2026-10-08）**：本仓库**卡片结构层** ASI07 已由 `scanner/agentcard_scan.py` 覆盖（AgentCard JSON 的签名/过期/https/鉴权方案/委托收敛，映射 MCP07）。**真正空白的是两面**——① A2A **运行时消息/委托 artifact**（`message`/parts、`task`/contextId、`delegationChain` 这类运行期工件：自带 sender 身份却无 proof、委托链下发 `scope:"*"`/admin 提权、消息无 nonce 重放保护）；② **内容级编排计划**信任反模式（prompt/SKILL/调度配置里"盲信对端消息""把凭证转发给另一 agent""冒充某 agent""以全权限委托子 agent"）。
+- **自研范围（本次落地）**：`scanner/a2a_orchestration_scan.py` 覆盖上述两面，与 `agentcard_scan` **互补不重叠**（卡片由后者管，运行时消息/计划由本模块管）。六类 finding：`a2a_credential_forward_peer`(critical) / `a2a_blind_trust_peer`(high) / `a2a_delegation_escalation`(critical) / `a2a_identity_spoof`(high) / `a2a_unverified_sender`(high) / `a2a_replay_no_protection`(medium)，均 `owasp_category=ASI07`。已接入 `workspace_scan._local_pipeline`（与 rag_corpus 同款），15 单测覆盖正/负样本与集成。
 - **可集成**：A2A 规范（repo 待核实：`github.com/google/A2A`）、agent card schema。
-- **验收**：新增 `scanner/a2a_scan.py` + 规则若干；`/api/v1/agent-infra/*` 扩展。
+- **验收**：✅ 见 Phase 2 行；`scanner/` 在 rule_count_gate 排除目录，不增声明位；API 扩展（`/api/v1/agent-infra/*`）留待后续按需，本次仅补扫描面。
 
 ### Gap 6 — 记忆 / RAG（ASI06 记忆与上下文投毒）★ 推荐 Phase 1
 - **现状澄清（2026-10-08）**：本仓库**代码级** ASI06 已由 `scanner/agent_memory_scan.py`（#343）覆盖（8 框架、跨 session 累积、检索注入、持久化指令）。**真正空白的是内容级**——RAG 语料 / 持久化记忆**正文**里的投毒（间接注入残留、角色劫持、外传诱导），此前无人扫。
@@ -75,7 +76,7 @@
 |---|---|---|
 | **Phase 0** | 规划 + 开源清单（本文档） | ✅ 本轮回完成 |
 | **Phase 1** | Gap 6 记忆/RAG（内容级） | ✅ 2026-10-08 完成：`scanner/rag_corpus_poison_scan.py` + 接入 `workspace_scan` 流水线 + 11 单测；全量 2085 测试绿 |
-| **Phase 2** | Gap 5 A2A | 延伸已有 agent-card 基础 |
+| **Phase 2** | Gap 5 A2A | ✅ 2026-10-08 完成：`scanner/a2a_orchestration_scan.py`（ASI07，与 agentcard_scan 互补——卡片结构层由后者管，本模块管运行时消息/委托 artifact + 内容级编排计划信任反模式）+ 接 `workspace_scan` 流水线 + 15 单测；全量 2100 测试绿 |
 | **Phase 3** | Gap 8 供应链/AIBOM | 对接 CycloneDX 标准 |
 | **Phase 4** | Gap 12 代码执行沙箱 | 危险 tool 检测 |
 | 横切 | Gap 10 运行时 guard | 贯穿各 phase，封装 red-team/benchmark 为运行时 API |
