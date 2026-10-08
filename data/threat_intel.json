@@ -1,6 +1,258 @@
 {
   "intel": [
     {
+      "id": "GHSA-fj8f-m44g-c479",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.5,
+      "title": "PraisonAI: Prompt Injection Defense Bypassed for HIGH-Level Threats",
+      "summary": "### Summary\nInjection Defense is a purpose-built prompt injection defense layer. It scans LLM inputs through six detection categories: instruction overrides, authority claims, boundary manipulation, obfuscation, financial manipulation, and self-harm instructions.\n\nThe defense is misconfigured by default. The block threshold defaults to Threat Level. CRITICAL, which is only reached when 3 or more detection checks fire simultaneously. A single-check match — including the explicitly flagged \"danger",
+      "affected": "pip:PraisonAI",
+      "references": [
+        "https://github.com/advisories/GHSA-fj8f-m44g-c479"
+      ],
+      "published": "2026-10-07T20:43:58Z",
+      "fetched": "2026-10-08T10:32:19.617669+00:00"
+    },
+    {
+      "id": "GHSA-x3q2-h9hx-4r4j",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.5,
+      "title": "Docling has arbitrary file read/write (and command execution when shell-escape is enabled) when rendering untrusted TikZ with the opt-in Tectonic engine",
+      "summary": "### Summary\n\nWhen the LaTeX backend is configured to render TikZ pictures with the Tectonic engine (`LatexBackendOptions(tikz_engine=\"tectonic\")`), the TikZ body and the document preamble from the input file are compiled by Tectonic without any restriction on TeX's file primitives. A crafted `.tex` file can read files the process can read and write files at paths the process can write. If the caller also sets `tikz_engine_allow_shell_escape=True`, the document can run shell commands through `\\wr",
+      "affected": "pip:docling, pip:docling-slim",
+      "references": [
+        "https://github.com/advisories/GHSA-x3q2-h9hx-4r4j"
+      ],
+      "published": "2026-10-07T20:42:05Z",
+      "fetched": "2026-10-08T10:32:19.617753+00:00"
+    },
+    {
+      "id": "GHSA-9jxx-vjrv-h2rq",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 6.7,
+      "title": "Docling imports plugin entry points before the allow_external_plugins check",
+      "summary": "### Summary\n\n`allow_external_plugins=False` (the default, and the CLI default) is meant to restrict docling to its own model plugins. However, docling's plugin factories call pluggy's `load_setuptools_entrypoints()`, which imports every module registered under docling's plugin entry-point group. Only afterwards does docling filter out modules outside the `docling.` namespace. Import-time code in any installed third-party plugin therefore runs even though external plugins are disabled.\n\n### Detai",
+      "affected": "pip:docling, pip:docling-slim",
+      "references": [
+        "https://github.com/advisories/GHSA-9jxx-vjrv-h2rq"
+      ],
+      "published": "2026-10-07T20:40:56Z",
+      "fetched": "2026-10-08T10:32:19.617822+00:00"
+    },
+    {
+      "id": "GHSA-w794-rj3p-xv45",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": 9.9,
+      "title": "Langflow: OS command injection (RCE) via arbitrary command in MCP stdio server configuration",
+      "summary": "### Summary\n\nBefore **Langflow 1.10.3**, the MCP stdio transport launched whatever `command` / `args` a user put in an MCP server configuration, with no allowlist and (before 1.10.3) wrapped in `bash -c \"exec {command} ...\"`. Any user able to reach the MCP server settings (\"Settings → MCP Servers → Add MCP Server\", `POST/PATCH /api/v2/mcp/servers/{server_name}`) or to build a flow with the MCP Tools component could add a \"server\" whose command is an arbitrary OS command (`touch`, `rm -rf`, a rev",
+      "affected": "pip:langflow, pip:langflow-base, pip:lfx",
+      "references": [
+        "https://github.com/advisories/GHSA-w794-rj3p-xv45"
+      ],
+      "published": "2026-10-07T20:36:35Z",
+      "fetched": "2026-10-08T10:32:19.617881+00:00"
+    },
+    {
+      "id": "GHSA-gh98-4phw-6fmw",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 5.4,
+      "title": "Langflow : Cross-user flow access and vertex execution via deprecated /api/v1/build/{flow_id}/vertices endpoints",
+      "summary": "### Summary\n\nBefore **Langflow 1.10.1**, two deprecated but still-routed endpoints in the chat API did not check that the authenticated caller owns the flow referenced in the URL path:\n\n- `POST /api/v1/build/{flow_id}/vertices` (`retrieve_vertices_order`)\n- `POST /api/v1/build/{flow_id}/vertices/{vertex_id}` (`build_vertex`)\n\nAny authenticated user who knows (or obtains) another user's `flow_id` could load that user's private flow graph, enumerate its vertex IDs, and build (execute) individual v",
+      "affected": "pip:langflow, pip:langflow-base",
+      "references": [
+        "https://github.com/advisories/GHSA-gh98-4phw-6fmw"
+      ],
+      "published": "2026-10-07T20:36:25Z",
+      "fetched": "2026-10-08T10:32:19.617945+00:00"
+    },
+    {
+      "id": "GHSA-4hmc-cfm3-w43c",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": null,
+      "title": "Langflow has Authenticated Cross-Project File Disclosure via Unscoped MCP Resource Handlers",
+      "summary": "### Summary\nLangflow's project-scoped MCP transport authenticates the caller for the `project_id` in the connection URL, but the subsequent `resources/read` operation does not authorize the resource URI being requested. An authenticated user can connect to their own project-scoped MCP endpoint and supply a crafted file-download URI that points to another user's flow-backed file. The server then reads and returns the victim file without verifying ownership or project membership.\n\nThis is a cross-",
+      "affected": "pip:langflow",
+      "references": [
+        "https://github.com/advisories/GHSA-4hmc-cfm3-w43c"
+      ],
+      "published": "2026-10-07T20:35:12Z",
+      "fetched": "2026-10-08T10:32:19.618016+00:00"
+    },
+    {
+      "id": "GHSA-39w2-rjm5-chcv",
+      "source": "github-advisory",
+      "severity": "low",
+      "cvss": 5.4,
+      "title": "Next.js has information disclosure in development server's Model Context Protocol endpoint",
+      "summary": "The Next.js development server (`next dev`) exposes a Model Context Protocol endpoint that does not verify which website a request originates from, allowing a malicious website visited by the developer to read sensitive development data — including the project's location on disk, source code snippets from error reports, the route inventory, and development logs. Only applications run with `next dev` are affected. Production deployments do not serve this endpoint.",
+      "affected": "npm:next",
+      "references": [
+        "https://github.com/advisories/GHSA-39w2-rjm5-chcv"
+      ],
+      "published": "2026-10-07T20:31:51Z",
+      "fetched": "2026-10-08T10:32:18.150816+00:00"
+    },
+    {
+      "id": "GHSA-347q-26qq-h2p6",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.3,
+      "title": "Ghost: Stored XSS via Bookmark Card Images",
+      "summary": "### Impact\n\nWhen creating a bookmark card, Ghost could store non-image files fetched from an external website as bookmark icons or thumbnails. This allowed any staff user, including Contributors, to host arbitrary HTML on the site's domain, possibly resulting in compromise of other staff users' admin sessions.\n\n### Vulnerable versions\n\nThis vulnerability is present in Ghost from v5.94.0 up to v6.64.0.\n\n### Patches\n\nv6.64.0 contains a fix for this issue.\n\n### How to update\n\nFor self-hosters using",
+      "affected": "npm:ghost",
+      "references": [
+        "https://github.com/advisories/GHSA-347q-26qq-h2p6"
+      ],
+      "published": "2026-10-07T20:27:41Z",
+      "fetched": "2026-10-08T10:32:18.150999+00:00"
+    },
+    {
+      "id": "GHSA-gfjp-2p8f-94qv",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.3,
+      "title": "Ghost: Stored XSS via File Uploads on Local Storage",
+      "summary": "### Impact\n\nGhost restricts the content type that uploaded files are served with, to prevent browsers from executing them. On sites using the default local storage adapter, this restriction was not applied, so files uploaded by any staff user were served with a content type derived from their file extension. This could be used to host scripts on the site's domain, possibly resulting in compromise of other staff users' admin sessions.\n\n### Vulnerable versions\n\nThis vulnerability is present in Gho",
+      "affected": "npm:ghost",
+      "references": [
+        "https://github.com/advisories/GHSA-gfjp-2p8f-94qv"
+      ],
+      "published": "2026-10-07T20:25:58Z",
+      "fetched": "2026-10-08T10:32:18.151070+00:00"
+    },
+    {
+      "id": "GHSA-mwj6-rfh8-7qf4",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": null,
+      "title": "Hydra: Mutable instantiate policy sets allow target blocklist bypass",
+      "summary": "## Summary\n\nHydra's legacy `instantiate()` target blocklists and related execution-policy\ncollections are stored in mutable module-level state. Because `_locate()` can\nresolve attributes on imported objects, a configuration can resolve a mutation\nmethod such as `.discard()`, modify the active policy, and then instantiate a\ntarget that would otherwise be blocked.\n\n## Impact\n\nA configuration controlling multiple sibling `_target_` entries can first\nremove an entry from a target blocklist and then ",
+      "affected": "pip:hydra-core, pip:hydra-core",
+      "references": [
+        "https://github.com/advisories/GHSA-mwj6-rfh8-7qf4"
+      ],
+      "published": "2026-10-07T20:23:57Z",
+      "fetched": "2026-10-08T10:32:19.618069+00:00"
+    },
+    {
+      "id": "GHSA-6g59-gm2v-qhvq",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 8.5,
+      "title": "PraisonAI: Crawl4AI/Chromium backend is also affected by the `web_crawl` SSRF validation bypass",
+      "summary": "## Summary\n\nThe DNS-rebinding / redirect SSRF bypass in PRAI-05 is **not limited to the httpx/urllib backend**. When `crawl4ai` (headless Chromium via Playwright) is installed, `web_crawl` auto-selects `provider=crawl4ai`, and the headless browser re-resolves DNS and follows redirects on its own — with no per-connection SSRF guard. Runtime-confirmed read-back of the internal canary via both DNS rebinding and redirect (`provider: \"crawl4ai\"`). Status: runtime-confirmed addendum to PRAI-05.\n\n## De",
+      "affected": "pip:praisonaiagents",
+      "references": [
+        "https://github.com/advisories/GHSA-6g59-gm2v-qhvq"
+      ],
+      "published": "2026-10-07T20:22:17Z",
+      "fetched": "2026-10-08T10:32:19.618108+00:00"
+    },
+    {
+      "id": "GHSA-pq68-rvw4-xp4r",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": 10.0,
+      "title": "vm2 contains a sandbox escape vulnerability",
+      "summary": "vm2 NodeVM versions before 3.12.1 contain a sandbox escape vulnerability where the DANGEROUS_BUILTINS denylist omits child_process despite blocking other host-spawning modules. Attackers can require child_process and execute arbitrary commands on the host system when NodeVM is configured with builtin:['*'] or explicit child_process allowance.\n\nThis fork hardens `NodeVM` with a `DANGEROUS_BUILTINS` denylist that blocks host‑code‑reaching core modules **even when the sandbox requests `builtin:['*'",
+      "affected": "npm:vm2",
+      "references": [
+        "https://github.com/advisories/GHSA-pq68-rvw4-xp4r"
+      ],
+      "published": "2026-10-07T18:05:00Z",
+      "fetched": "2026-10-08T10:32:18.151260+00:00"
+    },
+    {
+      "id": "GHSA-4f6c-2vvp-gw82",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.1,
+      "title": "Langflow: IP Spoofing Bypass via `X-Forwarded-For` Allowing Remote Configuration Write",
+      "summary": "**Description**:\n### Summary\nAn IP spoofing vulnerability in the Model Context Protocol (MCP) configuration installation endpoint (`POST /api/v1/mcp/project/{project_id}/install`) allowed authenticated remote attackers to bypass the \"local-only\" access restriction. By sending a spoofed `X-Forwarded-For: 127.0.0.1` header, an attacker could make the server treat the request as originating from localhost, letting them write/overwrite an MCP client configuration file on the server's filesystem.\n\n##",
+      "affected": "pip:langflow",
+      "references": [
+        "https://github.com/advisories/GHSA-4f6c-2vvp-gw82"
+      ],
+      "published": "2026-10-07T16:18:23Z",
+      "fetched": "2026-10-08T10:32:19.618295+00:00"
+    },
+    {
+      "id": "GHSA-g6j7-pffp-8whg",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": 9.1,
+      "title": "PraisonAI: Code Injection via f-string Interpolation in Deploy API Server Generation",
+      "summary": "### Summary\nThe `deploy/api.py` module generates Python server code by directly interpolating the `agents_file` parameter into an f-string that is then written to a file and executed via `subprocess.Popen()`. An attacker who controls the `agents_file` value (via CLI argument, configuration, or upstream API) can inject arbitrary Python code.\n\n### Details\n\n`src/praisonai/praisonai/deploy/api.py` (line 80):\n\n```python\ncode = f'''...\n    praisonai = PraisonAI(agent_file=\"{agents_file}\")\n...\n    \"age",
+      "affected": "pip:PraisonAI",
+      "references": [
+        "https://github.com/advisories/GHSA-g6j7-pffp-8whg"
+      ],
+      "published": "2026-10-07T16:05:53Z",
+      "fetched": "2026-10-08T10:32:19.618303+00:00"
+    },
+    {
+      "id": "GHSA-mxmx-rh57-jx58",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 6.5,
+      "title": "PraisonAI: Platform members can delete owner issue dependencies through member-owned related issues",
+      "summary": "# Platform members can delete owner issue dependencies through member-owned related issues\n\n## Summary\n\n`praisonai-platform` issue dependency deletion can be authorized against the wrong side of a dependency edge. A workspace member cannot delete a dependency through the owner-created issue endpoint, but can delete the same dependency through a member-owned related issue endpoint because the route accepts either endpoint and checks delete permission only against the caller-selected URL issue.\n\n#",
+      "affected": "pip:praisonai-platform",
+      "references": [
+        "https://github.com/advisories/GHSA-mxmx-rh57-jx58"
+      ],
+      "published": "2026-10-07T14:28:56Z",
+      "fetched": "2026-10-08T10:32:19.618352+00:00"
+    },
+    {
+      "id": "GHSA-7c92-x8vg-4258",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 8.6,
+      "title": "PraisonAI: AgentMail webhook mode accepts forged unsigned message.received events and invokes agents",
+      "summary": "# AgentMail webhook mode accepts forged unsigned message.received events and invokes agents\n\n## Summary\n\n`praisonai` AgentMail webhook mode exposes a public aiohttp webhook endpoint that accepts caller-controlled `message.received` JSON without verifying AgentMail's Svix webhook signatures, then dispatches the forged message into the configured agent session and reply path.\n\n## Technical Details\n\nThe affected boundary is webhook authenticity. AgentMail's webhook verification documentation says A",
+      "affected": "pip:praisonai",
+      "references": [
+        "https://github.com/advisories/GHSA-7c92-x8vg-4258"
+      ],
+      "published": "2026-10-07T14:07:10Z",
+      "fetched": "2026-10-08T10:32:19.618385+00:00"
+    },
+    {
+      "id": "GHSA-qj9c-59p6-8cgx",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.3,
+      "title": "PraisonAI: AgentMail webhook lacks signature verification, allowing unauthenticated message injection and sender spoofing",
+      "summary": "## Summary\n\nPraisonAI's AgentMail bot, when run in webhook (or hybrid) mode, starts an aiohttp webhook server bound to `0.0.0.0` and processes inbound `message.received` events **without verifying any signature/HMAC and without authentication**. The sender address and message body are taken directly from the attacker-controlled request body, so any network peer can inject messages into the agent with a spoofed sender (bypassing sender allow/block lists) and have the agent process the content and",
+      "affected": "pip:praisonai",
+      "references": [
+        "https://github.com/advisories/GHSA-qj9c-59p6-8cgx"
+      ],
+      "published": "2026-10-07T14:06:56Z",
+      "fetched": "2026-10-08T10:32:19.618417+00:00"
+    },
+    {
+      "id": "GHSA-xf64-4pmc-h8qf",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 5.4,
+      "title": "wger: trainer_login accepts GET - CSRF bypass enables forced session rebinding",
+      "summary": "### Summary\n\nThe `trainer_login` view in wger accepts GET requests and executes `django_login()` without any CSRF protection, because Django's `CsrfViewMiddleware` only enforces tokens on unsafe methods (POST/PUT/PATCH/DELETE). An attacker can embed a single `<img>` tag on a malicious page; when an authenticated trainer loads that page, their browser auto-issues the GET with the session cookie, forcibly rebinding the trainer's session to an arbitrary user account.\n\n### Details\n\n**File**: `wger/c",
+      "affected": "pip:wger",
+      "references": [
+        "https://github.com/advisories/GHSA-xf64-4pmc-h8qf"
+      ],
+      "published": "2026-10-07T13:45:33Z",
+      "fetched": "2026-10-08T10:32:19.618663+00:00"
+    },
+    {
       "id": "GHSA-mc52-mwq4-vfx3",
       "source": "github-advisory",
       "severity": "high",
@@ -7730,7 +7982,7 @@
       "fetched": "2026-08-04T06:34:53.913899+00:00"
     }
   ],
-  "updated": "2026-10-07T10:16:40.912415+00:00",
+  "updated": "2026-10-08T10:32:20.120552+00:00",
   "sources": [
     "osv",
     "nvd",
@@ -7749,7 +8001,7 @@
         "items": 1,
         "attempts": 1,
         "error": null,
-        "checked_at": "2026-10-07T10:16:18.420319+00:00",
+        "checked_at": "2026-10-08T10:31:57.537175+00:00",
         "consecutive_failures": 0,
         "degraded_since": null
       },
@@ -7758,31 +8010,31 @@
         "items": 34,
         "attempts": 1,
         "error": null,
-        "checked_at": "2026-10-07T10:16:37.294424+00:00",
+        "checked_at": "2026-10-08T10:32:17.172776+00:00",
         "consecutive_failures": 0,
         "degraded_since": null
       },
       "github-advisory": {
         "ok": true,
-        "items": 33,
+        "items": 29,
         "attempts": 1,
         "error": null,
-        "checked_at": "2026-10-07T10:16:40.912047+00:00",
+        "checked_at": "2026-10-08T10:32:20.120159+00:00",
         "consecutive_failures": 0,
         "degraded_since": null
       }
     },
     "degraded": [],
-    "last_success": "2026-10-07T10:16:40.912415+00:00",
-    "last_attempt": "2026-10-07T10:16:40.912415+00:00"
+    "last_success": "2026-10-08T10:32:20.120552+00:00",
+    "last_attempt": "2026-10-08T10:32:20.120552+00:00"
   },
   "stats": {
-    "high": 241,
-    "critical": 88,
-    "medium": 155,
-    "low": 7,
+    "high": 251,
+    "medium": 159,
+    "critical": 91,
+    "low": 8,
     "unknown": 36,
     "moderate": 1
   },
-  "total": 528
+  "total": 546
 }
