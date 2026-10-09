@@ -1,7 +1,104 @@
 {
-  "generated_at": "2026-10-08T10:32:47.417502+00:00",
-  "source_intel_count": 546,
+  "generated_at": "2026-10-09T10:30:20.349187+00:00",
+  "source_intel_count": 583,
   "package_blacklist": {
+    "npm:praisonai": {
+      "ecosystem": "npm",
+      "package": "praisonai",
+      "severity": "high",
+      "advisories": [
+        "GHSA-6wjp-v33h-5cvq"
+      ]
+    },
+    "pip:praisonai-platform": {
+      "ecosystem": "pip",
+      "package": "praisonai-platform",
+      "severity": "high",
+      "advisories": [
+        "GHSA-c78w-2q4r-68r7"
+      ]
+    },
+    "pip:praisonai": {
+      "ecosystem": "pip",
+      "package": "praisonai",
+      "severity": "critical",
+      "advisories": [
+        "GHSA-cv3g-hj65-pcfh",
+        "GHSA-9mp3-24cc-77mg",
+        "GHSA-hc5v-gxvj-58wh",
+        "GHSA-5r6c-gj4g-r697",
+        "GHSA-4w49-gwv8-fpjg",
+        "GHSA-79fv-7hq9-w7xg",
+        "GHSA-2gpf-2492-q9jh",
+        "GHSA-7c92-x8vg-4258",
+        "GHSA-qj9c-59p6-8cgx"
+      ]
+    },
+    "pip:pydantic-ai": {
+      "ecosystem": "pip",
+      "package": "pydantic-ai",
+      "severity": "high",
+      "advisories": [
+        "GHSA-6fqq-452j-qhrp",
+        "GHSA-h4xc-3qfq-jf93"
+      ]
+    },
+    "pip:pydantic-ai-slim": {
+      "ecosystem": "pip",
+      "package": "pydantic-ai-slim",
+      "severity": "high",
+      "advisories": [
+        "GHSA-6fqq-452j-qhrp",
+        "GHSA-h4xc-3qfq-jf93"
+      ]
+    },
+    "pip:datamodel-code-generator": {
+      "ecosystem": "pip",
+      "package": "datamodel-code-generator",
+      "severity": "high",
+      "advisories": [
+        "GHSA-77xj-x4rm-935c",
+        "GHSA-vx7x-vcc2-c44g",
+        "GHSA-954p-556p-r752",
+        "GHSA-5578-w22f-pfx9"
+      ]
+    },
+    "npm:handlebars": {
+      "ecosystem": "npm",
+      "package": "handlebars",
+      "severity": "critical",
+      "advisories": [
+        "GHSA-8r5x-fm3f-whwj"
+      ]
+    },
+    "npm:generator-jhipster": {
+      "ecosystem": "npm",
+      "package": "generator-jhipster",
+      "severity": "high",
+      "advisories": [
+        "GHSA-r223-96jv-q533"
+      ]
+    },
+    "pip:praisonaiagents": {
+      "ecosystem": "pip",
+      "package": "praisonaiagents",
+      "severity": "critical",
+      "advisories": [
+        "GHSA-c44f-37qr-gw3f",
+        "GHSA-4gfv-wg42-7jw5",
+        "GHSA-m6wp-h223-4c8g",
+        "GHSA-2xv2-w8cq-5gxw",
+        "GHSA-qg25-6gc4-48mg",
+        "GHSA-6g59-gm2v-qhvq",
+        "GHSA-gxmw-5f7x-6g22",
+        "GHSA-vg6p-v9vm-6fgj",
+        "GHSA-x44h-65qv-cw74",
+        "GHSA-7g3p-92qq-8wvh",
+        "GHSA-8hjw-25cg-g52h",
+        "GHSA-hxmv-c4g6-5fqc",
+        "GHSA-5r34-2g38-6569"
+      ]
+    },
     "pip:PraisonAI": {
       "ecosystem": "pip",
       "package": "PraisonAI",
@@ -85,21 +182,6 @@
         "GHSA-mwj6-rfh8-7qf4"
       ]
     },
-    "pip:praisonaiagents": {
-      "ecosystem": "pip",
-      "package": "praisonaiagents",
-      "severity": "high",
-      "advisories": [
-        "GHSA-6g59-gm2v-qhvq",
-        "GHSA-gxmw-5f7x-6g22",
-        "GHSA-vg6p-v9vm-6fgj",
-        "GHSA-x44h-65qv-cw74",
-        "GHSA-7g3p-92qq-8wvh",
-        "GHSA-8hjw-25cg-g52h",
-        "GHSA-hxmv-c4g6-5fqc",
-        "GHSA-5r34-2g38-6569"
-      ]
-    },
     "npm:vm2": {
       "ecosystem": "npm",
       "package": "vm2",
@@ -134,15 +216,6 @@
         "GHSA-cfcw-xp6x-25gj",
         "GHSA-m283-3h24-438v",
         "GHSA-gmc2-2x9w-cgh9"
-      ]
-    },
-    "pip:praisonai": {
-      "ecosystem": "pip",
-      "package": "praisonai",
-      "severity": "high",
-      "advisories": [
-        "GHSA-7c92-x8vg-4258",
-        "GHSA-qj9c-59p6-8cgx"
       ]
     },
     "npm:knowns": {
@@ -1248,16 +1321,6 @@
         "GHSA-m4x6-gwgp-4pm7"
       ]
     },
-    "pip:datamodel-code-generator": {
-      "ecosystem": "pip",
-      "package": "datamodel-code-generator",
-      "severity": "high",
-      "advisories": [
-        "GHSA-vx7x-vcc2-c44g",
-        "GHSA-954p-556p-r752",
-        "GHSA-5578-w22f-pfx9"
-      ]
-    },
     "pip:bedrock-agentcore": {
       "ecosystem": "pip",
       "package": "bedrock-agentcore",
@@ -1286,6 +1349,66 @@
     }
   },
   "pattern_rules": {
+    "(?i)(\\.\\./){2,}|(%2e%2e%2f)": {
+      "description": "路径遍历: 越权访问上级目录",
+      "severity": "high",
+      "owasp": "LLM06",
+      "owasp_name": "过度代理权限 (Excessive Agency)",
+      "derived_from": "path traversal",
+      "intel_hits": 36,
+      "evidence": [
+        "GHSA-9mp3-24cc-77mg",
+        "GHSA-77xj-x4rm-935c",
+        "GHSA-m6wp-h223-4c8g",
+        "GHSA-hrvq-x7jp-36xv",
+        "CVE-2025-71427"
+      ]
+    },
+    "(?i)(Access-Control-Allow-Origin['\\\"]?\\s*[:,]\\s*['\\\"]\\*|cors\\s*\\(\\s*\\)\\s*)": {
+      "description": "跨域校验缺失: 允许任意来源",
+      "severity": "high",
+      "owasp": "LLM07",
+      "owasp_name": "系统提示泄露 (System Prompt Leakage)",
+      "derived_from": "origin",
+      "intel_hits": 57,
+      "evidence": [
+        "GHSA-hc5v-gxvj-58wh",
+        "GHSA-q2xc-rrxj-58x9",
+        "GHSA-39w2-rjm5-chcv",
+        "GHSA-4f6c-2vvp-gw82",
+        "GHSA-f4ch-vxwc-3p2m"
+      ]
+    },
+    "(?i)(requests\\.(get|post)|urllib\\.request\\.urlopen|fetch)\\s*\\(\\s*[^)]*(user|input|param|req\\.)": {
+      "description": "SSRF: 请求目标来自不可信输入",
+      "severity": "high",
+      "owasp": "LLM06",
+      "owasp_name": "过度代理权限 (Excessive Agency)",
+      "derived_from": "ssrf",
+      "intel_hits": 46,
+      "evidence": [
+        "GHSA-4w49-gwv8-fpjg",
+        "GHSA-vmxc-h2x2-jmf3",
+        "GHSA-qg25-6gc4-48mg",
+        "GHSA-6g59-gm2v-qhvq",
+        "GHSA-jqmf-mx4f-hfr6"
+      ]
+    },
+    "(?i)(auth(entication)?\\s*[:=]\\s*(False|None|null|0)\\b|verify\\s*=\\s*False)": {
+      "description": "认证绕过: 显式关闭校验",
+      "severity": "critical",
+      "owasp": "LLM07",
+      "owasp_name": "系统提示泄露 (System Prompt Leakage)",
+      "derived_from": "authentication",
+      "intel_hits": 49,
+      "evidence": [
+        "GHSA-2gpf-2492-q9jh",
+        "GHSA-qj9c-59p6-8cgx",
+        "GHSA-cf6m-vc3m-7cgm",
+        "GHSA-h46j-26q3-rggf",
+        "GHSA-q986-4x7x-gx39"
+      ]
+    },
     "(?i)(os\\.system|subprocess\\.(call|run|Popen)|child_process\\.exec)\\s*\\(\\s*[^)]*(\\+|%|\\$\\{|f['\\\"])": {
       "description": "命令注入: 动态拼接系统命令",
       "severity": "critical",
@@ -1299,21 +1422,6 @@
         "GHSA-g4wm-2vf7-vfgr",
         "GHSA-x78j-v8h9-3j2q",
         "CVE-2026-100368"
-      ]
-    },
-    "(?i)(Access-Control-Allow-Origin['\\\"]?\\s*[:,]\\s*['\\\"]\\*|cors\\s*\\(\\s*\\)\\s*)": {
-      "description": "跨域校验缺失: 允许任意来源",
-      "severity": "high",
-      "owasp": "LLM07",
-      "owasp_name": "系统提示泄露 (System Prompt Leakage)",
-      "derived_from": "origin",
-      "intel_hits": 55,
-      "evidence": [
-        "GHSA-39w2-rjm5-chcv",
-        "GHSA-4f6c-2vvp-gw82",
-        "GHSA-f4ch-vxwc-3p2m",
-        "GHSA-x33g-cr3x-6449",
-        "GHSA-h46j-26q3-rggf"
       ]
     },
     "(?i)(session|token)\\s*[:=]\\s*['\\\"][^'\\\"]{0,8}['\\\"]": {
@@ -1331,21 +1439,6 @@
         "GHSA-g2v6-rqmx-r4w6"
       ]
     },
-    "(?i)(requests\\.(get|post)|urllib\\.request\\.urlopen|fetch)\\s*\\(\\s*[^)]*(user|input|param|req\\.)": {
-      "description": "SSRF: 请求目标来自不可信输入",
-      "severity": "high",
-      "owasp": "LLM06",
-      "owasp_name": "过度代理权限 (Excessive Agency)",
-      "derived_from": "ssrf",
-      "intel_hits": 43,
-      "evidence": [
-        "GHSA-6g59-gm2v-qhvq",
-        "GHSA-jqmf-mx4f-hfr6",
-        "GHSA-q567-cr4x-96w4",
-        "GHSA-xxv7-2vv3-h682",
-        "GHSA-3cv6-jpf6-8222"
-      ]
-    },
     "(?i)(docker\\.sock|/proc/self/|privileged\\s*[:=]\\s*true|--cap-add\\s*=?\\s*SYS_ADMIN)": {
       "description": "沙箱逃逸: 容器高危配置",
       "severity": "critical",
@@ -1359,36 +1452,6 @@
         "GHSA-x965-fc75-jpqh",
         "GHSA-wjwh-qqvp-g4p4",
         "GHSA-qhwx-74w5-xhxq"
-      ]
-    },
-    "(?i)(auth(entication)?\\s*[:=]\\s*(False|None|null|0)\\b|verify\\s*=\\s*False)": {
-      "description": "认证绕过: 显式关闭校验",
-      "severity": "critical",
-      "owasp": "LLM07",
-      "owasp_name": "系统提示泄露 (System Prompt Leakage)",
-      "derived_from": "authentication",
-      "intel_hits": 47,
-      "evidence": [
-        "GHSA-qj9c-59p6-8cgx",
-        "GHSA-cf6m-vc3m-7cgm",
-        "GHSA-h46j-26q3-rggf",
-        "GHSA-q986-4x7x-gx39",
-        "GHSA-wrhw-j3f9-8vc6"
-      ]
-    },
-    "(?i)(\\.\\./){2,}|(%2e%2e%2f)": {
-      "description": "路径遍历: 越权访问上级目录",
-      "severity": "high",
-      "owasp": "LLM06",
-      "owasp_name": "过度代理权限 (Excessive Agency)",
-      "derived_from": "path traversal",
-      "intel_hits": 33,
-      "evidence": [
-        "GHSA-hrvq-x7jp-36xv",
-        "CVE-2025-71427",
-        "GHSA-c2m8-h5v5-343r",
-        "GHSA-9gfj-28hw-jchp",
-        "GHSA-rr49-f9g6-c9r5"
       ]
     },
     "(?i)(pickle\\.loads|yaml\\.load\\s*\\((?![^)]*Loader)|node-serialize)": {
@@ -1407,9 +1470,9 @@
     }
   },
   "owasp_distribution": {
-    "LLM05": 3,
+    "LLM06": 2,
     "LLM07": 3,
-    "LLM06": 2
+    "LLM05": 3
   },
-  "total_rules": 146
+  "total_rules": 152
 }

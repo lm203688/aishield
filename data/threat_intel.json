@@ -1,6 +1,510 @@
 {
   "intel": [
     {
+      "id": "GHSA-556j-vv39-8rqv",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": null,
+      "title": "Banks: Symlink traversal and arbitrary file disclosure/overwrite in DirectoryPromptRegistry",
+      "summary": "### Summary\nIn `banks.registries.DirectoryPromptRegistry`, prompt file paths and the index file (`index.json`) do not refuse symbolic links. When a prompt directory contains or accepts untrusted files (e.g. unpacked archives, shared repositories, or multi-tenant folders), symbolic links pointing outside the registry root can be used to disclose arbitrary files via `_scan()` / `get()` or overwrite arbitrary files via `set()` / `_save()`.\n\n### Details\nFollowing PR #77, `DirectoryPromptRegistry` va",
+      "affected": "pip:banks",
+      "references": [
+        "https://github.com/advisories/GHSA-556j-vv39-8rqv"
+      ],
+      "published": "2026-10-08T22:10:07Z",
+      "fetched": "2026-10-09T10:30:06.828385+00:00"
+    },
+    {
+      "id": "GHSA-hmq2-7hp6-7crh",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 6.5,
+      "title": "Banks: User-controlled prompt input can be parsed as privileged chat messages",
+      "summary": "## Summary\n\n  Banks' `Prompt.chat_messages()` method parses every rendered output line as a potential `ChatMessage` JSON\n  object. If attacker-controlled template data renders to JSON such as `{\"role\":\"system\",\"content\":\"...\"}`,\n  Banks returns it as a privileged `system` message instead of treating it as plain user-controlled text.\n\n  Applications that render untrusted user input with `Prompt.chat_messages()` and pass the returned messages\n  directly to an LLM provider may be vulnerable to chat",
+      "affected": "pip:banks",
+      "references": [
+        "https://github.com/advisories/GHSA-hmq2-7hp6-7crh"
+      ],
+      "published": "2026-10-08T22:10:01Z",
+      "fetched": "2026-10-09T10:30:06.828405+00:00"
+    },
+    {
+      "id": "GHSA-6wjp-v33h-5cvq",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 8.6,
+      "title": "PraisonAI: AgentOS defaults to network-exposed no-auth mode, allowing unauthenticated agent invocation and instruction disclosure",
+      "summary": "## Summary\n\nThe AgentOS server in the `praisonai` TypeScript/npm package ships an insecure default: it binds `0.0.0.0`, sets no API key, and uses CORS `*` with credentials. The API-key middleware is only registered when an API key is configured, so the documented quickstart (`new AgentOS({agents:[...]}).serve({port})`) exposes, **unauthenticated**, `GET /api/agents` (which leaks agent names/roles/instructions, i.e. system prompts) and `POST /api/chat` (which invokes agents). Any network peer can",
+      "affected": "npm:praisonai",
+      "references": [
+        "https://github.com/advisories/GHSA-6wjp-v33h-5cvq"
+      ],
+      "published": "2026-10-08T22:01:29Z",
+      "fetched": "2026-10-09T10:30:05.644006+00:00"
+    },
+    {
+      "id": "GHSA-c78w-2q4r-68r7",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.1,
+      "title": "PraisonAI: Platform member PATCH routes allow owner resource rewrites and project lead reassignment delete bypass",
+      "summary": "# Platform member PATCH routes allow owner resource rewrites and project lead reassignment delete bypass\n\n## Summary\n\n`praisonai-platform` lets an ordinary workspace member patch owner-created project, issue, and agent records even though the paired delete routes enforce owner/admin authorization. For projects, the member can first patch `lead_id` to their own user id and then delete the owner-created project, bypassing a delete guard that correctly returned `403` before the reassignment.\n\n## Te",
+      "affected": "pip:praisonai-platform",
+      "references": [
+        "https://github.com/advisories/GHSA-c78w-2q4r-68r7"
+      ],
+      "published": "2026-10-08T22:01:11Z",
+      "fetched": "2026-10-09T10:30:06.828517+00:00"
+    },
+    {
+      "id": "GHSA-cv3g-hj65-pcfh",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 8.8,
+      "title": "PraisonAI: Shell command allowlist bypass via find -exec built-in action",
+      "summary": "### Summary\n\nThe shell command execution hardening introduced in PraisonAI npm 1.7.2 / Python 4.6.58 to fix GHSA-5jv7-2mjm-h6qj (utility-tools shell chaining) and GHSA-vjv9-7m7j-h833 (SandboxExecutor chaining) can be bypassed via `find`'s built-in `-exec` action.\n\nThe fix blocks shell metacharacters (`` ;|&`><$()${} ``) and uses `spawn()` with `shell: false`. However, `find` remains in the safe command allowlist, and its `-exec ... {} +` action executes commands without shell metacharacters — th",
+      "affected": "pip:praisonai",
+      "references": [
+        "https://github.com/advisories/GHSA-cv3g-hj65-pcfh"
+      ],
+      "published": "2026-10-08T22:00:55Z",
+      "fetched": "2026-10-09T10:30:06.828587+00:00"
+    },
+    {
+      "id": "GHSA-9mp3-24cc-77mg",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": 9.9,
+      "title": "PraisonAI: AICoder Arbitrary File Write and Command Execution via LLM Tool Calls",
+      "summary": "### Summary\nThe `AICoder` UI component exposes `write_to_file` and `execute_command` tools to the LLM with no path validation and no command sanitization. An attacker can achieve arbitrary file write to any location on the filesystem (including `/root/.ssh/authorized_keys`, `/etc/crontab`) and arbitrary command execution through prompt injection in the chat interface. Docker containers run as root, maximizing impact.\n\n### Details\n\n#### Path Traversal in write_to_file\n\n`src/praisonai/praisonai/ui",
+      "affected": "pip:praisonai",
+      "references": [
+        "https://github.com/advisories/GHSA-9mp3-24cc-77mg"
+      ],
+      "published": "2026-10-08T22:00:40Z",
+      "fetched": "2026-10-09T10:30:06.828596+00:00"
+    },
+    {
+      "id": "GHSA-hc5v-gxvj-58wh",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.3,
+      "title": "PraisonAI: MCP HTTP-stream transport is unauthenticated by default, exposing tool enumeration and an unvalidated tool-call surface",
+      "summary": "## Summary\n\nPraisonAI's MCP HTTP-stream server authenticates requests only when an API key is configured; the CLI defaults `--api-key` to `None`, so `praisonai mcp serve --transport http-stream` exposes the full MCP surface unauthenticated. A request with no `Authorization` (and no `Origin`) can `initialize` and `tools/list` (~50 tools), and the dispatcher forwards tool-call arguments to handlers without validating them against the advertised `inputSchema`. Runtime-confirmed for unauthenticated ",
+      "affected": "pip:praisonai",
+      "references": [
+        "https://github.com/advisories/GHSA-hc5v-gxvj-58wh"
+      ],
+      "published": "2026-10-08T21:58:42Z",
+      "fetched": "2026-10-09T10:30:06.828668+00:00"
+    },
+    {
+      "id": "GHSA-xxgv-vgvj-qvxh",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 6.5,
+      "title": "PraisonAI: Platform members can rewrite shared labels and owner issue labels without owner/admin authorization",
+      "summary": "# Platform members can rewrite shared labels and owner issue labels without owner/admin authorization\n\n## Summary\n\n`praisonai-platform` lets an ordinary workspace member rename and recolor shared labels and add/remove labels on an owner-created issue even though direct label deletion is restricted to workspace admin/owner authority in current releases.\n\n## Technical Details\n\nThe affected boundary is the difference between ordinary workspace membership and authority to mutate shared workspace tri",
+      "affected": "pip:praisonai-platform",
+      "references": [
+        "https://github.com/advisories/GHSA-xxgv-vgvj-qvxh"
+      ],
+      "published": "2026-10-08T21:58:27Z",
+      "fetched": "2026-10-09T10:30:06.828740+00:00"
+    },
+    {
+      "id": "GHSA-5r6c-gj4g-r697",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": null,
+      "title": "PraisonAI: SecurityPolicy command/path/import restrictions are completely unenforced by the default SubprocessSandbox backend",
+      "summary": "Summary\nSecurityPolicy in praisonaiagents/sandbox/config.py is a documented configuration data class with fields for allow_subprocess, allowed_paths, blocked_paths, allowed_commands, blocked_commands, allowed_imports, and blocked_imports. Its strict() classmethod is explicitly described as creating \"a strict security policy for untrusted code,\" setting allow_subprocess=False and allow_file_write=False, and inheriting default blocked_paths (/etc/passwd, /etc/shadow, ~/.ssh, ~/.aws, ~/.config) and",
+      "affected": "pip:praisonai",
+      "references": [
+        "https://github.com/advisories/GHSA-5r6c-gj4g-r697"
+      ],
+      "published": "2026-10-08T21:58:11Z",
+      "fetched": "2026-10-09T10:30:06.828780+00:00"
+    },
+    {
+      "id": "GHSA-4w49-gwv8-fpjg",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.2,
+      "title": "PraisonAI: Jobs API is unauthenticated by default and allows attacker-controlled webhook SSRF",
+      "summary": "## Summary\n\nPraisonAI's Async Jobs API enables its API-key middleware **only when `PRAISONAI_JOBS_API_KEY` is set**, so by default every endpoint is unauthenticated. An unauthenticated `POST /api/v1/runs` accepts an attacker-controlled `webhook_url`; on job completion the server POSTs the job payload to it via `httpx`. The `webhook_url` has an SSRF validator (`gethostbyname` + private-IP check), but it validates at request time while `httpx` re-resolves at connection time — a DNS-rebinding TOCTO",
+      "affected": "pip:praisonai",
+      "references": [
+        "https://github.com/advisories/GHSA-4w49-gwv8-fpjg"
+      ],
+      "published": "2026-10-08T21:57:57Z",
+      "fetched": "2026-10-09T10:30:06.828829+00:00"
+    },
+    {
+      "id": "GHSA-6fqq-452j-qhrp",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.5,
+      "title": "Pydantic AI: Concurrency-limited models can keep their slot when a streamed request ends early",
+      "summary": "> This issue was posted by Codex Desktop using gpt-6.1-sol on behalf of David.\n\n### Summary\n\nApplications that wrap a model with `ConcurrencyLimitedModel` or `limit_model_concurrency` can permanently lose shared concurrency capacity when a streamed request releases its slot from a different task than the one that acquired it. This can happen when a stream ends early, and also when a stream is fully consumed using the default `stream_text()` debouncing.\n\nIn an application that exposes an affected",
+      "affected": "pip:pydantic-ai, pip:pydantic-ai-slim",
+      "references": [
+        "https://github.com/advisories/GHSA-6fqq-452j-qhrp"
+      ],
+      "published": "2026-10-08T19:42:55Z",
+      "fetched": "2026-10-09T10:30:06.828841+00:00"
+    },
+    {
+      "id": "GHSA-4r3p-w3mc-5v34",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 5.3,
+      "title": "PraisonAI: Prompt-injection defense blocks only when 3+ detector families fire simultaneously; realistic single-vector injections pass through unblocked",
+      "summary": "## Summary\n\nPraisonAI's opt-in prompt-injection defense (`enable_injection_defense()`) only blocks at `ThreatLevel.CRITICAL`, which requires three or more distinct detector families to match simultaneously. A realistic single- or double-vector prompt injection (e.g. \"Ignore all previous instructions…\") is classified `HIGH` and passes through unmodified. The documented `HIGH` \"sanitize\" behavior is not implemented.\n\n## Root cause\n\n`scan_text` sets `blocked = (level >= ThreatLevel.CRITICAL) and no",
+      "affected": "pip:praisonai",
+      "references": [
+        "https://github.com/advisories/GHSA-4r3p-w3mc-5v34"
+      ],
+      "published": "2026-10-08T19:39:53Z",
+      "fetched": "2026-10-09T10:30:06.828897+00:00"
+    },
+    {
+      "id": "GHSA-79fv-7hq9-w7xg",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.8,
+      "title": "PraisonAI: API deploy code generator embeds unescaped YAML fields into Python source",
+      "summary": "# API deploy code generator embeds unescaped YAML fields into Python source\n\n## Summary\n\nPraisonAI's API deployment generator copies `deploy.api.host` from `agents.yaml` directly into generated Python source without safe literal encoding. A malicious PraisonAI project can set that host value to a Python expression splice; when an operator runs the API deploy flow, the generated server source compiles and executes the injected expression at startup. The same generator also embeds `agents_file` di",
+      "affected": "pip:praisonai",
+      "references": [
+        "https://github.com/advisories/GHSA-79fv-7hq9-w7xg"
+      ],
+      "published": "2026-10-08T19:36:29Z",
+      "fetched": "2026-10-09T10:30:06.828932+00:00"
+    },
+    {
+      "id": "GHSA-2gpf-2492-q9jh",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 8.2,
+      "title": "PraisonAI: Call API localhost-only authentication bypass via spoofed Host header",
+      "summary": "# Call API localhost-only authentication bypass via spoofed Host header\n\n## Summary\n\nPraisonAI's patched `PRAISONAI_CALL_AUTH=disabled` safeguard for the n8n/call agent invocation API can be bypassed with a spoofed `Host: 127.0.0.1` header, allowing an unauthenticated network caller to list and invoke registered agents when the service is reachable and the opt-out is enabled.\n\n## Technical Details\n\nThe affected code is `src/praisonai/praisonai/api/agent_invoke.py`. `verify_token()` is used as a ",
+      "affected": "pip:praisonai",
+      "references": [
+        "https://github.com/advisories/GHSA-2gpf-2492-q9jh"
+      ],
+      "published": "2026-10-08T19:36:26Z",
+      "fetched": "2026-10-09T10:30:06.828973+00:00"
+    },
+    {
+      "id": "GHSA-q7m5-3jmv-vm48",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 5.5,
+      "title": "PraisonAI: ContextGatherer include resolution permits absolute and traversal reads outside the workspace",
+      "summary": "# ContextGatherer include resolution permits absolute and traversal reads outside the workspace\n\n## Summary\n\nPraisonAI's `praisonai.ui.context.ContextGatherer` treats the configured `directory` as the project workspace, but project-controlled `.praisoncontext` and `.praisoninclude` files can name absolute paths or `..` traversal paths. When context gathering runs, PraisonAI opens those outside paths and appends their contents to the generated context bundle. An attacker who can supply or modify ",
+      "affected": "pip:praisonai",
+      "references": [
+        "https://github.com/advisories/GHSA-q7m5-3jmv-vm48"
+      ],
+      "published": "2026-10-08T17:58:30Z",
+      "fetched": "2026-10-09T10:30:06.829001+00:00"
+    },
+    {
+      "id": "GHSA-77xj-x4rm-935c",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.5,
+      "title": "datamodel-code-generator: Protobuf weak-import path traversal allows files to be written outside the temporary directory",
+      "summary": "## Summary\n\nWhen processing an attacker-controlled Protobuf schema, vulnerable versions of\n`datamodel-code-generator` could write a generated weak-import stub outside the\nintended `__weak_imports__` temporary directory. Absolute import paths and relative\npaths containing `..` could escape this directory.\n\nAn attacker could create directories and new files at locations writable by the\nprocess. Relative path traversal could also overwrite existing writable files\nbecause the existence check and the",
+      "affected": "pip:datamodel-code-generator",
+      "references": [
+        "https://github.com/advisories/GHSA-77xj-x4rm-935c"
+      ],
+      "published": "2026-10-08T17:58:01Z",
+      "fetched": "2026-10-09T10:30:06.829171+00:00"
+    },
+    {
+      "id": "GHSA-xpx6-x8c2-mw5w",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 5.5,
+      "title": "PraisonAI: Project custom command templates can read outside-workspace files into model prompts",
+      "summary": "# Project custom command templates can read outside-workspace files into model prompts\n\n## Summary\n\nPraisonAI's new file-based custom command feature auto-discovers project commands from `.praisonai/commands/*.md`. When a user runs `praisonai run --command <name>` inside a repository, the command body is interpolated before it is sent as the model prompt.\n\nThe interpolation code expands `@path` references by reading files relative to the current working directory, but it does not canonicalize th",
+      "affected": "pip:praisonai",
+      "references": [
+        "https://github.com/advisories/GHSA-xpx6-x8c2-mw5w"
+      ],
+      "published": "2026-10-08T17:57:49Z",
+      "fetched": "2026-10-09T10:30:06.829186+00:00"
+    },
+    {
+      "id": "GHSA-8r5x-fm3f-whwj",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": 9.8,
+      "title": "Handlebars: JavaScript Injection via AST Type Confusion in compile (bypass of CVE-2026-33937)",
+      "summary": "## Summary\n\n`Handlebars.compile()` and `Handlebars.precompile()` accept a pre-parsed AST as well as a template string. Handlebars 4.7.9 added validation for such ASTs. It only checks values on `PathExpression`, `NumberLiteral` and `BooleanLiteral` nodes, and the compiler still writes several other AST values into the generated JavaScript unchecked.\n\nIf an application passes an untrusted object to `compile()` or `precompile()`, such as a parsed JSON request body, that object can carry arbitrary J",
+      "affected": "npm:handlebars",
+      "references": [
+        "https://github.com/advisories/GHSA-8r5x-fm3f-whwj"
+      ],
+      "published": "2026-10-08T17:52:32Z",
+      "fetched": "2026-10-09T10:30:05.644673+00:00"
+    },
+    {
+      "id": "GHSA-v36g-jcw9-x7cw",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 6.5,
+      "title": "Pydantic AI: Excessive resource use when local web fetching converts nested HTML",
+      "summary": "### Summary\n\nApplications using Pydantic AI's local web-fetch tool can experience excessive CPU and memory use when it converts attacker-controlled HTML. An agent must fetch the affected page; provider-native web fetching is not affected.\n\n### Details\n\nNested block elements cause HTML-to-Markdown conversion to reprocess accumulated text at each level and can greatly expand the intermediate output. The response-body limit bounds downloaded bytes, while the returned-content limit is applied only a",
+      "affected": "pip:pydantic-ai, pip:pydantic-ai, pip:pydantic-ai-slim, pip:pydantic-ai-slim",
+      "references": [
+        "https://github.com/advisories/GHSA-v36g-jcw9-x7cw"
+      ],
+      "published": "2026-10-08T17:40:50Z",
+      "fetched": "2026-10-09T10:30:06.829194+00:00"
+    },
+    {
+      "id": "GHSA-r223-96jv-q533",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 8.8,
+      "title": "JHipster: SQL Injection in the Parameter of JHipster-Generated Reactive (WebFlux + R2DBC) Applicationssort",
+      "summary": "# SQL Injection in the `sort` Parameter of JHipster-Generated Reactive (WebFlux + R2DBC) Applications\n\n- **Product**: jhipster/generator-jhipster (npm package `generator-jhipster`)\n- **Affected versions**: v7.0.0 through v9.2.0 \n- **Component**: generated reactive-application code, template `EntityManager_reactive.java.ejs`\n- **Report date**: 2026-08-29\n\n---\n\n## 1. Summary\n\nEvery reactive (Spring WebFlux + Spring Data R2DBC + SQL) application generated by `generator-jhipster` contains an SQL inj",
+      "affected": "npm:generator-jhipster",
+      "references": [
+        "https://github.com/advisories/GHSA-r223-96jv-q533"
+      ],
+      "published": "2026-10-08T17:40:37Z",
+      "fetched": "2026-10-09T10:30:05.644947+00:00"
+    },
+    {
+      "id": "GHSA-wf65-4jjx-q444",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": null,
+      "title": "PraisonAI: PGVector and Cassandra knowledge stores interpolate vector dimensions into DDL",
+      "summary": "# PGVector and Cassandra knowledge stores interpolate vector dimensions into DDL\n\n## Summary\n\nThe PGVector and Cassandra knowledge-store backends validate SQL/CQL identifiers such as schema, keyspace, and collection names, but still insert the caller-controlled `dimension` argument directly into `CREATE TABLE` vector column declarations. A caller that can influence collection creation dimensions can append SQL/CQL tokens to the generated DDL executed by the database driver.\n\n## Technical Details",
+      "affected": "pip:praisonai",
+      "references": [
+        "https://github.com/advisories/GHSA-wf65-4jjx-q444"
+      ],
+      "published": "2026-10-08T17:17:01Z",
+      "fetched": "2026-10-09T10:30:06.829243+00:00"
+    },
+    {
+      "id": "GHSA-q2xc-rrxj-58x9",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 6.4,
+      "title": "Pydantic AI Web chat UI (`Agent.to_web()`, `clai web`): the local chat endpoint does not validate the `Host` header",
+      "summary": "### Summary\n\nThe Pydantic AI development web chat UI (`Agent.to_web()`, `clai web`) does not validate the `Host` header of incoming requests. A website a developer visits can use DNS rebinding to make requests to a chat UI running on that developer's machine appear same-origin to the browser, causing the served agent to run and to execute its tools with the privileges and credentials of the local process.\n\n### Details\n\nOnce a name the attacker controls resolves to the loopback address, the brows",
+      "affected": "pip:pydantic-ai, pip:pydantic-ai, pip:pydantic-ai-slim, pip:pydantic-ai-slim",
+      "references": [
+        "https://github.com/advisories/GHSA-q2xc-rrxj-58x9"
+      ],
+      "published": "2026-10-08T17:16:39Z",
+      "fetched": "2026-10-09T10:30:06.829266+00:00"
+    },
+    {
+      "id": "GHSA-h4xc-3qfq-jf93",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.6,
+      "title": "Pydantic AI Web chat UI (`Agent.to_web()`, `clai web`): a website visited by the developer can trigger agent runs and server-side tool execution on the local chat endpoint",
+      "summary": "### Summary\n\nThe Pydantic AI development web chat UI (`Agent.to_web()`, `clai web`) did not check the content type of requests to its chat endpoint. This allowed a website visited by a developer to submit a request to a chat UI running on that developer's machine, causing the served agent to run and to execute its tools with the privileges and credentials of the local process.\n\nBinding the web UI to localhost — the default — does not prevent this, because a page open in the developer's browser c",
+      "affected": "pip:pydantic-ai, pip:pydantic-ai, pip:pydantic-ai-slim, pip:pydantic-ai-slim",
+      "references": [
+        "https://github.com/advisories/GHSA-h4xc-3qfq-jf93"
+      ],
+      "published": "2026-10-08T17:16:36Z",
+      "fetched": "2026-10-09T10:30:06.829287+00:00"
+    },
+    {
+      "id": "GHSA-3gh4-cghq-f8v4",
+      "source": "github-advisory",
+      "severity": "low",
+      "cvss": null,
+      "title": "Pydantic AI OpenTelemetry instrumentation: retry prompt content is not redacted when `include_content=False`",
+      "summary": "### Summary\n\nPydantic AI's OpenTelemetry instrumentation supports `InstrumentationSettings(include_content=False)` to exclude message content — user prompts, model completions, tool call arguments and responses — from exported telemetry, so that agents can be monitored without sending sensitive content to the observability backend.\n\nRetry prompts — the feedback messages Pydantic AI sends back to the model when its output fails validation or an output validator raises `ModelRetry` — were not cove",
+      "affected": "pip:pydantic-ai, pip:pydantic-ai, pip:pydantic-ai-slim, pip:pydantic-ai-slim",
+      "references": [
+        "https://github.com/advisories/GHSA-3gh4-cghq-f8v4"
+      ],
+      "published": "2026-10-08T17:16:32Z",
+      "fetched": "2026-10-09T10:30:06.829319+00:00"
+    },
+    {
+      "id": "GHSA-v2xh-2vp8-57h8",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 6.5,
+      "title": "Pydantic AI: Unbounded memory use when downloading remote content via web_fetch or FileUrl",
+      "summary": "### Summary\n\nSeveral remote-content download paths in Pydantic AI buffered the entire HTTP response body into memory before enforcing any size limit. An application that exposes the local web-fetch tool (`web_fetch_tool`, or the `WebFetch` capability's local fallback) to untrusted prompts can be driven to fetch an attacker-chosen URL that streams a very large body, exhausting process memory and crashing the worker. The same unbounded buffering applied to `FileUrl` media downloads (`ImageUrl`, `D",
+      "affected": "pip:pydantic-ai, pip:pydantic-ai, pip:pydantic-ai-slim, pip:pydantic-ai-slim",
+      "references": [
+        "https://github.com/advisories/GHSA-v2xh-2vp8-57h8"
+      ],
+      "published": "2026-10-08T17:16:28Z",
+      "fetched": "2026-10-09T10:30:06.829344+00:00"
+    },
+    {
+      "id": "GHSA-c44f-37qr-gw3f",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 8.1,
+      "title": "PraisonAI: SkillTools Executes Scripts Without Path Containment Validation",
+      "summary": "### Summary\n`SkillTools.run_skill_script()` accepts a `script_path` parameter and executes it via `subprocess.run()` without any path containment validation. While `FileTools` has `_validate_path()` with traversal detection, `SkillTools` performs none. An LLM-directed call can execute arbitrary scripts from any filesystem location. The `@require_approval` decorator can be bypassed via YAML `approve:` for high-risk tools.\n\n### Details\n`src/praisonai-agents/praisonaiagents/tools/skill_tools.py` (l",
+      "affected": "pip:praisonaiagents",
+      "references": [
+        "https://github.com/advisories/GHSA-c44f-37qr-gw3f"
+      ],
+      "published": "2026-10-08T16:49:23Z",
+      "fetched": "2026-10-09T10:30:06.829380+00:00"
+    },
+    {
+      "id": "GHSA-4gfv-wg42-7jw5",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.8,
+      "title": "PraisonAI: Unsafe Dynamic Module Loading Leads to Arbitrary Code Execution via tools.py in AgentFlow",
+      "summary": "### Summary\nAn unsafe dynamic module loading vulnerability allows an attacker who can control a workflow file and a sibling `tools.py` to execute arbitrary Python code when the workflow is executed.\n\n### Details\nThe vulnerability is located in the workflow structured output resolution logic.\n\nFile: src/praisonai-agents/praisonaiagents/workflows/workflows.py\n\nMethod: AgentFlow._resolve_pydantic_class\n\n```python\nif self.file_path:\n    workflow_dir = Path(self.file_path).parent\n    tools_path = wor",
+      "affected": "pip:praisonaiagents",
+      "references": [
+        "https://github.com/advisories/GHSA-4gfv-wg42-7jw5"
+      ],
+      "published": "2026-10-08T16:48:57Z",
+      "fetched": "2026-10-09T10:30:06.829394+00:00"
+    },
+    {
+      "id": "GHSA-4xxv-6wmf-xf45",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 5.7,
+      "title": "PraisonAI: FastContext path resolution permits absolute and traversal reads outside the workspace",
+      "summary": "# FastContext path resolution permits absolute and traversal reads outside the workspace\n\n## Summary\n\nPraisonAI's `praisonaiagents.context.fast` FastContext feature treats `workspace_path` as the root directory for code search, but its model-facing search tools and high-level `read_context()` helper accept absolute paths and `..` traversal paths without checking that the resolved path remains under that workspace. A lower-trust prompt or caller that can influence FastContext tool arguments can r",
+      "affected": "pip:praisonaiagents",
+      "references": [
+        "https://github.com/advisories/GHSA-4xxv-6wmf-xf45"
+      ],
+      "published": "2026-10-08T16:48:52Z",
+      "fetched": "2026-10-09T10:30:06.829413+00:00"
+    },
+    {
+      "id": "GHSA-fpf4-vwcp-v4hp",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 6.5,
+      "title": "Pydantic AI: Event loop blocked by quadratic title extraction in `web_fetch`",
+      "summary": "### Summary\n\nThe local web-fetch tool (`web_fetch_tool`, also used as the `WebFetch` capability's local fallback) processed responses with several steps whose running time grows quadratically with the size of certain server-controlled inputs, and ran them on the event loop: decoding the body with whichever charset the server declared, extracting the page title with a backtracking regular expression, and converting the HTML to markdown. An application that exposes this tool to untrusted prompts c",
+      "affected": "pip:pydantic-ai, pip:pydantic-ai, pip:pydantic-ai-slim, pip:pydantic-ai-slim",
+      "references": [
+        "https://github.com/advisories/GHSA-fpf4-vwcp-v4hp"
+      ],
+      "published": "2026-10-08T16:48:25Z",
+      "fetched": "2026-10-09T10:30:06.829448+00:00"
+    },
+    {
+      "id": "GHSA-4x9p-g9wm-8q7f",
+      "source": "github-advisory",
+      "severity": "low",
+      "cvss": null,
+      "title": "Pydantic AI OpenTelemetry instrumentation: exception events on tool and agent run spans include content when `include_content=False`",
+      "summary": "### Summary\n\nPydantic AI's OpenTelemetry instrumentation supports `InstrumentationSettings(include_content=False)` to exclude message content — user prompts, model completions, tool call arguments and responses, and any other message content — from exported telemetry, so that agents can be monitored without sending sensitive content to the observability backend.\n\nThe message attributes honoured the setting. Several other parts of the same spans did not, and exported content regardless of it:\n\n- ",
+      "affected": "pip:pydantic-ai, pip:pydantic-ai, pip:pydantic-ai-slim, pip:pydantic-ai-slim",
+      "references": [
+        "https://github.com/advisories/GHSA-4x9p-g9wm-8q7f"
+      ],
+      "published": "2026-10-08T16:48:16Z",
+      "fetched": "2026-10-09T10:30:06.829490+00:00"
+    },
+    {
+      "id": "GHSA-vmxc-h2x2-jmf3",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 6.8,
+      "title": "Pydantic AI: SSRF cloud-metadata blocklist bypass via IPv6 zone identifiers",
+      "summary": "### Summary\n\nWhen an application using Pydantic AI opts a URL into local network access — either a `FileUrl` with `force_download='allow-local'`, or `web_fetch_tool(allow_local_urls=True)` — the cloud-metadata blocklist could be bypassed by appending an IPv6 zone identifier to a metadata address (for example `fd00:ec2::254%251`). The host ignores the zone identifier on a destination that is not link-local and delivers the request to the metadata endpoint anyway, exposing cloud IAM short-term cre",
+      "affected": "pip:pydantic-ai, pip:pydantic-ai, pip:pydantic-ai-slim, pip:pydantic-ai-slim",
+      "references": [
+        "https://github.com/advisories/GHSA-vmxc-h2x2-jmf3"
+      ],
+      "published": "2026-10-08T16:48:06Z",
+      "fetched": "2026-10-09T10:30:06.829532+00:00"
+    },
+    {
+      "id": "GHSA-m6wp-h223-4c8g",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 8.4,
+      "title": "PraisonAI: Plugin Auto-Discovery Executes Arbitrary Python Files Without Verification",
+      "summary": "### Summary\nThe plugin manager loads and executes arbitrary `.py` files from `.praisonai/plugins/` directories (both project-level and user home) via `importlib.util.spec_from_file_location()` + `exec_module()` with zero code signing, integrity verification, or sandboxing. Any attacker who can write a file to the plugins directory (via path traversal, supply chain attack, or compromised dependency) achieves arbitrary code execution when the plugin system initializes.\n\n### Details\n\n`src/praisonai",
+      "affected": "pip:praisonaiagents",
+      "references": [
+        "https://github.com/advisories/GHSA-m6wp-h223-4c8g"
+      ],
+      "published": "2026-10-08T16:44:04Z",
+      "fetched": "2026-10-09T10:30:06.829543+00:00"
+    },
+    {
+      "id": "GHSA-2xv2-w8cq-5gxw",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": 10.0,
+      "title": "PraisonAI: CodeAgent Executes LLM-Generated Code Without Sandboxing and Leaks All Environment Secrets",
+      "summary": "### Summary\n`CodeAgent._execute_python()` executes LLM-generated Python code in a subprocess with the complete parent-process environment (`os.environ.copy()`), zero AST validation, zero import restrictions, and no sandbox enforcement — even when `CodeConfig(sandbox=True)` is explicitly set. This allows an attacker who can influence LLM output (via prompt injection in agent input, tool results, or ingested content) to exfiltrate all environment secrets (API keys, database credentials, cloud toke",
+      "affected": "pip:praisonaiagents",
+      "references": [
+        "https://github.com/advisories/GHSA-2xv2-w8cq-5gxw"
+      ],
+      "published": "2026-10-08T16:44:01Z",
+      "fetched": "2026-10-09T10:30:06.829576+00:00"
+    },
+    {
+      "id": "GHSA-29r9-67vg-qj56",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": 6.1,
+      "title": "PraisonAI: Human-in-the-loop tool approval is cached by tool name and silently reused for all subsequent calls with arbitrary arguments",
+      "summary": "## Summary\n\nPraisonAI gates dangerous tools (file writes, deletes, shell/code execution) behind an interactive approval prompt. The first approval of a tool is cached for the remainder of the run and silently reused for all later invocations of that tool with arbitrary, unreviewed arguments.\n\n## Root cause\n\n`ApprovalRegistry.is_already_approved` (`src/praisonai-agents/praisonaiagents/approval/registry.py`, around line 181) returns `True` whenever the tool name is present in a per-run context set",
+      "affected": "pip:praisonaiagents",
+      "references": [
+        "https://github.com/advisories/GHSA-29r9-67vg-qj56"
+      ],
+      "published": "2026-10-08T16:43:45Z",
+      "fetched": "2026-10-09T10:30:06.829606+00:00"
+    },
+    {
+      "id": "GHSA-qg25-6gc4-48mg",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 8.5,
+      "title": "PraisonAI: DNS rebinding bypass in `web_crawl` SSRF protection allows internal response disclosure",
+      "summary": "## Summary\n\nPraisonAI's `web_crawl` agent tool performs a server-side HTTP fetch of an agent/attacker-influenced URL. SSRF is meant to be prevented by `_is_safe_crawl_url()`, which resolves the hostname and rejects private/loopback/link-local IPs **at validation time**. The validated value is the URL *string* (not a pinned IP); the fetch backend then **re-resolves the hostname at connection time**. Because validation and connection perform two independent DNS resolutions, a **DNS-rebinding** dom",
+      "affected": "pip:praisonaiagents",
+      "references": [
+        "https://github.com/advisories/GHSA-qg25-6gc4-48mg"
+      ],
+      "published": "2026-10-08T16:36:50Z",
+      "fetched": "2026-10-09T10:30:06.829701+00:00"
+    },
+    {
+      "id": "GHSA-qjw5-xwrp-xwpq",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": null,
+      "title": "PraisonAI: Project config can auto-save agent output outside the project root",
+      "summary": "# Project config can auto-save agent output outside the project root\n\n## Summary\n\n`praisonaiagents` automatically reads project-local `.praisonai/config.toml` defaults when constructing an `Agent`. A repository-controlled config can set `defaults.output.output_file` to an absolute path or a `..` traversal path. When the developer later calls `agent.start(...)`, PraisonAI writes the agent response to that path with `open(..., \"w\")`, creating parent directories if needed.\n\nThis lets an untrusted p",
+      "affected": "pip:praisonaiagents",
+      "references": [
+        "https://github.com/advisories/GHSA-qjw5-xwrp-xwpq"
+      ],
+      "published": "2026-10-08T16:36:34Z",
+      "fetched": "2026-10-09T10:30:06.829716+00:00"
+    },
+    {
       "id": "GHSA-fj8f-m44g-c479",
       "source": "github-advisory",
       "severity": "high",
@@ -2263,6 +2767,24 @@
       ],
       "published": "2026-09-16T13:48:28Z",
       "fetched": "2026-09-17T08:38:06.461200+00:00"
+    },
+    {
+      "id": "CVE-2026-61560",
+      "source": "nvd",
+      "severity": "critical",
+      "cvss": 9.8,
+      "title": "`@zereight/mcp-gitlab` is a Model Context Protocol server for GitLab. Prior to version 2.1.27, the SSE transport mode (`SSE=true`) exposes all MCP tools without any authentication. The `upload_markdow",
+      "summary": "`@zereight/mcp-gitlab` is a Model Context Protocol server for GitLab. Prior to version 2.1.27, the SSE transport mode (`SSE=true`) exposes all MCP tools without any authentication. The `upload_markdown` tool reads arbitrary files from the server's local filesystem via an unsanitized `file_path` parameter and uploads them to a GitLab project. Combined, any unauthenticated network-reachable attacker can read `/proc/self/environ` to steal the server's `GITLAB_PERSONAL_ACCESS_TOKEN` and achieve full",
+      "affected": "model context protocol",
+      "references": [
+        "https://github.com/zereight/gitlab-mcp/pull/482",
+        "https://github.com/zereight/gitlab-mcp/pull/554",
+        "https://github.com/zereight/gitlab-mcp/pull/622",
+        "https://github.com/zereight/gitlab-mcp/security/advisories/GHSA-cv3r-c5h8-f4g5",
+        "https://github.com/zereight/gitlab-mcp/security/advisories/GHSA-cv3r-c5h8-f4g5"
+      ],
+      "published": "2026-09-15T22:16:58.040",
+      "fetched": "2026-10-09T10:29:52.679129+00:00"
     },
     {
       "id": "CVE-2026-61568",
@@ -7982,7 +8504,7 @@
       "fetched": "2026-08-04T06:34:53.913899+00:00"
     }
   ],
-  "updated": "2026-10-08T10:32:20.120552+00:00",
+  "updated": "2026-10-09T10:30:07.331203+00:00",
   "sources": [
     "osv",
     "nvd",
@@ -8001,7 +8523,7 @@
         "items": 1,
         "attempts": 1,
         "error": null,
-        "checked_at": "2026-10-08T10:31:57.537175+00:00",
+        "checked_at": "2026-10-09T10:29:46.194691+00:00",
         "consecutive_failures": 0,
         "degraded_since": null
       },
@@ -8010,31 +8532,31 @@
         "items": 34,
         "attempts": 1,
         "error": null,
-        "checked_at": "2026-10-08T10:32:17.172776+00:00",
+        "checked_at": "2026-10-09T10:30:04.776314+00:00",
         "consecutive_failures": 0,
         "degraded_since": null
       },
       "github-advisory": {
         "ok": true,
-        "items": 29,
+        "items": 44,
         "attempts": 1,
         "error": null,
-        "checked_at": "2026-10-08T10:32:20.120159+00:00",
+        "checked_at": "2026-10-09T10:30:07.330677+00:00",
         "consecutive_failures": 0,
         "degraded_since": null
       }
     },
     "degraded": [],
-    "last_success": "2026-10-08T10:32:20.120552+00:00",
-    "last_attempt": "2026-10-08T10:32:20.120552+00:00"
+    "last_success": "2026-10-09T10:30:07.331203+00:00",
+    "last_attempt": "2026-10-09T10:30:07.331203+00:00"
   },
   "stats": {
-    "high": 251,
-    "medium": 159,
-    "critical": 91,
-    "low": 8,
+    "medium": 174,
+    "high": 267,
+    "critical": 95,
+    "low": 10,
     "unknown": 36,
     "moderate": 1
   },
-  "total": 546
+  "total": 583
 }
