@@ -1,6 +1,76 @@
 {
   "intel": [
     {
+      "id": "GHSA-pwhx-cvv3-qj5c",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 8.2,
+      "title": "Tina: Code injection via unescaped Git branch name in generated client source",
+      "summary": "### Summary\n\n`@tinacms/cli` inserts the raw Git branch value into the generated `client.ts` source without escaping or encoding. A Git-valid branch name can close the string literal and inject an arbitrary JavaScript expression that executes when the consumer build imports the generated client module.\n\n### Affected component\n\n- **Source (branch read):** `packages/@tinacms/cli/src/cmds/init/templates/config.ts` lines 155–172 — reads `VERCEL_GIT_COMMIT_REF`, `GITHUB_BRANCH`, or `HEAD` into `config",
+      "affected": "npm:@tinacms/cli",
+      "references": [
+        "https://github.com/advisories/GHSA-pwhx-cvv3-qj5c"
+      ],
+      "published": "2026-10-09T20:56:52Z",
+      "fetched": "2026-10-10T09:47:16.772378+00:00"
+    },
+    {
+      "id": "GHSA-x34j-47hf-4xg7",
+      "source": "github-advisory",
+      "severity": "critical",
+      "cvss": 9.3,
+      "title": "TinaCMS admin preview iframe loads an attacker-controlled origin from the URL fragment",
+      "summary": "### Summary\n\nThe TinaCMS admin builds its preview `<iframe src>` from the `/~/*` hash-router splat without checking that the value stays same-origin. A fragment with a doubled slash (`#/~//attacker.example/p`) becomes the protocol-relative URL `//attacker.example/p`, so the admin frames an external site. That same unvalidated string derives `expectedOrigin`, the only trust anchor for the admin↔preview `postMessage` channel, so the attacker's frame is treated as trusted: it can submit any GraphQL",
+      "affected": "npm:tinacms, npm:@tinacms/app",
+      "references": [
+        "https://github.com/advisories/GHSA-x34j-47hf-4xg7"
+      ],
+      "published": "2026-10-09T20:56:48Z",
+      "fetched": "2026-10-10T09:47:16.772596+00:00"
+    },
+    {
+      "id": "GHSA-c42q-qvc3-j6vg",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.6,
+      "title": "@tinacms/web-components: `tina-markdown` writes rich-text link URLs into `href` without scheme validation, allowing stored XSS",
+      "summary": "### Summary\n\n`<tina-markdown>` renders a rich-text AST into the DOM and, for `a` nodes, assigns the node's URL straight to the anchor's `href` with no scheme check. A link authored in the CMS as `javascript:…` renders as a live `javascript:` anchor, so a visitor who clicks it executes attacker-supplied script in the site's origin. Every sibling renderer in the repository already sanitizes these URLs; this one does not.\n\n### Details\n\nThe unvalidated sink:\n\n```\npackages/@tinacms/web-components/src",
+      "affected": "npm:@tinacms/web-components",
+      "references": [
+        "https://github.com/advisories/GHSA-c42q-qvc3-j6vg"
+      ],
+      "published": "2026-10-09T20:56:45Z",
+      "fetched": "2026-10-10T09:47:16.772707+00:00"
+    },
+    {
+      "id": "GHSA-9q47-3cm2-2rp8",
+      "source": "github-advisory",
+      "severity": "medium",
+      "cvss": null,
+      "title": "pyLoad: Rate-Limit Bypass and Audit-Log Spoofing via Trusted Client-Controlled `X-Forwarded-For` Header",
+      "summary": "## Summary\n\npyLoad determines the \"client IP\" used for its rate-limiting decorator and for its\nsecurity/audit logging by reading the client-supplied `X-Forwarded-For` (XFF) HTTP header and\ntaking the leftmost value. No trusted-proxy configuration exists (the Cheroot WSGI server faces\nclients directly, and there is no `ProxyFix` middleware). Because any client can freely set this\nheader, an attacker can (1) completely bypass rate limiting by rotating the header on each request,\nand (2) forge the ",
+      "affected": "pip:pyload-ng",
+      "references": [
+        "https://github.com/advisories/GHSA-9q47-3cm2-2rp8"
+      ],
+      "published": "2026-10-09T17:09:12Z",
+      "fetched": "2026-10-10T09:47:17.824231+00:00"
+    },
+    {
+      "id": "GHSA-jq7h-wrvp-3rgx",
+      "source": "github-advisory",
+      "severity": "high",
+      "cvss": 7.5,
+      "title": "pyLoad: Privilege revocation and password change through the REST API do not invalidate the user's session",
+      "summary": "An admin who revokes a user's privileges through the REST API does not actually revoke them, because the session carrying those privileges is never invalidated.\n\npyLoad authorizes each request from values copied into the Flask session at login. set_session in webui/app/helpers.py writes role and perms once, and both login_required and the session branch of apikey_auth read them back from the session rather than from the database. The fix for GHSA-66hx-chf7-3332 handled this by deleting the user'",
+      "affected": "pip:pyload-ng",
+      "references": [
+        "https://github.com/advisories/GHSA-jq7h-wrvp-3rgx"
+      ],
+      "published": "2026-10-09T17:09:09Z",
+      "fetched": "2026-10-10T09:47:17.824265+00:00"
+    },
+    {
       "id": "GHSA-556j-vv39-8rqv",
       "source": "github-advisory",
       "severity": "medium",
@@ -8504,7 +8574,7 @@
       "fetched": "2026-08-04T06:34:53.913899+00:00"
     }
   ],
-  "updated": "2026-10-09T10:30:07.331203+00:00",
+  "updated": "2026-10-10T09:47:18.326437+00:00",
   "sources": [
     "osv",
     "nvd",
@@ -8523,7 +8593,7 @@
         "items": 1,
         "attempts": 1,
         "error": null,
-        "checked_at": "2026-10-09T10:29:46.194691+00:00",
+        "checked_at": "2026-10-10T09:46:57.634334+00:00",
         "consecutive_failures": 0,
         "degraded_since": null
       },
@@ -8532,31 +8602,31 @@
         "items": 34,
         "attempts": 1,
         "error": null,
-        "checked_at": "2026-10-09T10:30:04.776314+00:00",
+        "checked_at": "2026-10-10T09:47:15.942654+00:00",
         "consecutive_failures": 0,
         "degraded_since": null
       },
       "github-advisory": {
         "ok": true,
-        "items": 44,
+        "items": 41,
         "attempts": 1,
         "error": null,
-        "checked_at": "2026-10-09T10:30:07.330677+00:00",
+        "checked_at": "2026-10-10T09:47:18.326065+00:00",
         "consecutive_failures": 0,
         "degraded_since": null
       }
     },
     "degraded": [],
-    "last_success": "2026-10-09T10:30:07.331203+00:00",
-    "last_attempt": "2026-10-09T10:30:07.331203+00:00"
+    "last_success": "2026-10-10T09:47:18.326437+00:00",
+    "last_attempt": "2026-10-10T09:47:18.326437+00:00"
   },
   "stats": {
-    "medium": 174,
-    "high": 267,
-    "critical": 95,
+    "high": 270,
+    "critical": 96,
+    "medium": 175,
     "low": 10,
     "unknown": 36,
     "moderate": 1
   },
-  "total": 583
+  "total": 588
 }

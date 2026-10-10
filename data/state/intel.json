@@ -3,7 +3,7 @@
   "current": {
     "total": 93,
     "added": 93,
-    "high_new": 20,
+    "high_new": 4,
     "stats": {
       "high": 43,
       "medium": 24,
@@ -19,8 +19,8 @@
     ],
     "last_run": "2026-08-04T06:35:13.244491+00:00",
     "_source": "threat-intel-feed",
-    "_ts": "2026-10-09T10:32:18.598351+00:00",
-    "intel_total": 583
+    "_ts": "2026-10-10T09:49:09.655644+00:00",
+    "intel_total": 588
   },
   "history": [
     {
@@ -1125,8 +1125,32 @@
         "last_run": "2026-08-04T06:35:13.244491+00:00",
         "intel_total": 583
       }
+    },
+    {
+      "ts": "2026-10-10T09:49:09.655662+00:00",
+      "source": "threat-intel-feed",
+      "state": {
+        "total": 93,
+        "added": 93,
+        "high_new": 4,
+        "stats": {
+          "high": 43,
+          "medium": 24,
+          "critical": 9,
+          "unknown": 13,
+          "low": 3,
+          "moderate": 1
+        },
+        "sources": [
+          "osv",
+          "nvd",
+          "github-advisory"
+        ],
+        "last_run": "2026-08-04T06:35:13.244491+00:00",
+        "intel_total": 588
+      }
     }
   ],
-  "updated": "2026-10-09T10:32:18.598374+00:00",
+  "updated": "2026-10-10T09:49:09.655667+00:00",
   "desc": "威胁情报采集与转化结果"
 }

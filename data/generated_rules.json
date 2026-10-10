@@ -1,7 +1,47 @@
 {
-  "generated_at": "2026-10-09T10:30:20.349187+00:00",
-  "source_intel_count": 583,
+  "generated_at": "2026-10-10T09:47:32.965373+00:00",
+  "source_intel_count": 588,
   "package_blacklist": {
+    "npm:@tinacms/cli": {
+      "ecosystem": "npm",
+      "package": "@tinacms/cli",
+      "severity": "high",
+      "advisories": [
+        "GHSA-pwhx-cvv3-qj5c"
+      ]
+    },
+    "npm:tinacms": {
+      "ecosystem": "npm",
+      "package": "tinacms",
+      "severity": "critical",
+      "advisories": [
+        "GHSA-x34j-47hf-4xg7"
+      ]
+    },
+    "npm:@tinacms/app": {
+      "ecosystem": "npm",
+      "package": "@tinacms/app",
+      "severity": "critical",
+      "advisories": [
+        "GHSA-x34j-47hf-4xg7"
+      ]
+    },
+    "npm:@tinacms/web-components": {
+      "ecosystem": "npm",
+      "package": "@tinacms/web-components",
+      "severity": "high",
+      "advisories": [
+        "GHSA-c42q-qvc3-j6vg"
+      ]
+    },
+    "pip:pyload-ng": {
+      "ecosystem": "pip",
+      "package": "pyload-ng",
+      "severity": "high",
+      "advisories": [
+        "GHSA-jq7h-wrvp-3rgx"
+      ]
+    },
     "npm:praisonai": {
       "ecosystem": "npm",
       "package": "praisonai",
@@ -1349,6 +1389,36 @@
     }
   },
   "pattern_rules": {
+    "(?i)(Access-Control-Allow-Origin['\\\"]?\\s*[:,]\\s*['\\\"]\\*|cors\\s*\\(\\s*\\)\\s*)": {
+      "description": "跨域校验缺失: 允许任意来源",
+      "severity": "high",
+      "owasp": "LLM07",
+      "owasp_name": "系统提示泄露 (System Prompt Leakage)",
+      "derived_from": "origin",
+      "intel_hits": 59,
+      "evidence": [
+        "GHSA-x34j-47hf-4xg7",
+        "GHSA-c42q-qvc3-j6vg",
+        "GHSA-hc5v-gxvj-58wh",
+        "GHSA-q2xc-rrxj-58x9",
+        "GHSA-39w2-rjm5-chcv"
+      ]
+    },
+    "(?i)(session|token)\\s*[:=]\\s*['\\\"][^'\\\"]{0,8}['\\\"]": {
+      "description": "会话安全: 会话标识过短或硬编码",
+      "severity": "high",
+      "owasp": "LLM07",
+      "owasp_name": "系统提示泄露 (System Prompt Leakage)",
+      "derived_from": "session",
+      "intel_hits": 47,
+      "evidence": [
+        "GHSA-jq7h-wrvp-3rgx",
+        "GHSA-347q-26qq-h2p6",
+        "GHSA-gfjp-2p8f-94qv",
+        "GHSA-7c92-x8vg-4258",
+        "GHSA-xf64-4pmc-h8qf"
+      ]
+    },
     "(?i)(\\.\\./){2,}|(%2e%2e%2f)": {
       "description": "路径遍历: 越权访问上级目录",
       "severity": "high",
@@ -1362,21 +1432,6 @@
         "GHSA-m6wp-h223-4c8g",
         "GHSA-hrvq-x7jp-36xv",
         "CVE-2025-71427"
-      ]
-    },
-    "(?i)(Access-Control-Allow-Origin['\\\"]?\\s*[:,]\\s*['\\\"]\\*|cors\\s*\\(\\s*\\)\\s*)": {
-      "description": "跨域校验缺失: 允许任意来源",
-      "severity": "high",
-      "owasp": "LLM07",
-      "owasp_name": "系统提示泄露 (System Prompt Leakage)",
-      "derived_from": "origin",
-      "intel_hits": 57,
-      "evidence": [
-        "GHSA-hc5v-gxvj-58wh",
-        "GHSA-q2xc-rrxj-58x9",
-        "GHSA-39w2-rjm5-chcv",
-        "GHSA-4f6c-2vvp-gw82",
-        "GHSA-f4ch-vxwc-3p2m"
       ]
     },
     "(?i)(requests\\.(get|post)|urllib\\.request\\.urlopen|fetch)\\s*\\(\\s*[^)]*(user|input|param|req\\.)": {
@@ -1424,21 +1479,6 @@
         "CVE-2026-100368"
       ]
     },
-    "(?i)(session|token)\\s*[:=]\\s*['\\\"][^'\\\"]{0,8}['\\\"]": {
-      "description": "会话安全: 会话标识过短或硬编码",
-      "severity": "high",
-      "owasp": "LLM07",
-      "owasp_name": "系统提示泄露 (System Prompt Leakage)",
-      "derived_from": "session",
-      "intel_hits": 46,
-      "evidence": [
-        "GHSA-347q-26qq-h2p6",
-        "GHSA-gfjp-2p8f-94qv",
-        "GHSA-7c92-x8vg-4258",
-        "GHSA-xf64-4pmc-h8qf",
-        "GHSA-g2v6-rqmx-r4w6"
-      ]
-    },
     "(?i)(docker\\.sock|/proc/self/|privileged\\s*[:=]\\s*true|--cap-add\\s*=?\\s*SYS_ADMIN)": {
       "description": "沙箱逃逸: 容器高危配置",
       "severity": "critical",
@@ -1470,9 +1510,9 @@
     }
   },
   "owasp_distribution": {
-    "LLM06": 2,
     "LLM07": 3,
+    "LLM06": 2,
     "LLM05": 3
   },
-  "total_rules": 152
+  "total_rules": 157
 }
