@@ -1,6 +1,94 @@
 {
   "intel": [
     {
+      "id": "CVE-2026-108600",
+      "source": "nvd",
+      "severity": "medium",
+      "cvss": 4.7,
+      "title": "open-multi-agent (@open-multi-agent/core) 1.5.0 through 1.21.2 contains a link following vulnerability in the file_write tool sandbox that allows attackers to create files outside the workspace root b",
+      "summary": "open-multi-agent (@open-multi-agent/core) 1.5.0 through 1.21.2 contains a link following vulnerability in the file_write tool sandbox that allows attackers to create files outside the workspace root by using dangling symlinks. Attackers can plant a dangling symlink in the workspace and steer the agent via prompt injection to write attacker-influenced content anywhere the agent process can write.",
+      "affected": "prompt injection",
+      "references": [
+        "https://github.com/open-multi-agent/open-multi-agent",
+        "https://github.com/open-multi-agent/open-multi-agent/blob/6ec5498643c7e431aa66751f17f47a529e7f927c/packages/core/src/tool/built-in/file-write.ts#L67",
+        "https://github.com/open-multi-agent/open-multi-agent/blob/6ec5498643c7e431aa66751f17f47a529e7f927c/packages/core/src/tool/built-in/path-safety.ts#L104-L113",
+        "https://hackmd.io/@haind/open-multi-agent-file-write-dangling-symlink-escape",
+        "https://www.vulncheck.com/advisories/open-multi-agent-1.5.0-through-1.21.2-sandbox-escape-via-file-write-dangling-symlink"
+      ],
+      "published": "2026-10-10T19:16:58.640",
+      "fetched": "2026-10-11T09:57:29.603501+00:00"
+    },
+    {
+      "id": "CVE-2026-108599",
+      "source": "nvd",
+      "severity": "medium",
+      "cvss": 4.7,
+      "title": "phi 0.1.1 through 0.28.4 contains an improper link resolution vulnerability that allows malicious repositories to bypass workspace_only_writes by exploiting lexical-only path checks in the permission ",
+      "summary": "phi 0.1.1 through 0.28.4 contains an improper link resolution vulnerability that allows malicious repositories to bypass workspace_only_writes by exploiting lexical-only path checks in the permission gate. Attackers can commit symlinks pointing outside the workspace and use prompt injection to make the write tool write attacker-influenced content to external files without approval.",
+      "affected": "prompt injection",
+      "references": [
+        "https://github.com/pulseaiclub/phi",
+        "https://github.com/pulseaiclub/phi/blob/5b3cb440a7c58115ef64283a737a43299f2805a4/internal/permission/gate.go#L106-L119",
+        "https://github.com/pulseaiclub/phi/blob/5b3cb440a7c58115ef64283a737a43299f2805a4/internal/tools/writetool/write.go#L64-L68",
+        "https://hackmd.io/@haind/phi-symlink-permission-boundary",
+        "https://www.vulncheck.com/advisories/phi-0.1.1-through-0.28.4-symlink-workspace-write-restriction-bypass"
+      ],
+      "published": "2026-10-10T19:16:58.487",
+      "fetched": "2026-10-11T09:57:29.603498+00:00"
+    },
+    {
+      "id": "CVE-2026-108593",
+      "source": "nvd",
+      "severity": "medium",
+      "cvss": 6.4,
+      "title": "9router 0.4.1 through 0.5.99 contains a configuration injection vulnerability in the POST /api/cli-tools/hermes-settings endpoint that allows authenticated dashboard users to inject arbitrary keys int",
+      "summary": "9router 0.4.1 through 0.5.99 contains a configuration injection vulnerability in the POST /api/cli-tools/hermes-settings endpoint that allows authenticated dashboard users to inject arbitrary keys into the Hermes Agent config.yaml file. Attackers can submit a baseUrl containing double quotes and newlines to add hooks_auto_accept and a hooks.post_llm_call shell command, which Hermes Agent executes without approval after an LLM call.",
+      "affected": "llm agent",
+      "references": [
+        "https://github.com/decolua/9router",
+        "https://github.com/decolua/9router/blob/a99cf57239ff778b61e434c2786009d5ed1c412c/src/app/api/cli-tools/hermes-settings/route.js#L185-L223",
+        "https://github.com/decolua/9router/blob/a99cf57239ff778b61e434c2786009d5ed1c412c/src/app/api/cli-tools/hermes-settings/route.js#L20-L35",
+        "https://hackmd.io/@haind/9router-hermes-config-injection",
+        "https://www.vulncheck.com/advisories/9router-0.4.1-through-0.5.99-config-injection-rce-via-hermes-settings-endpoint"
+      ],
+      "published": "2026-10-10T19:16:57.607",
+      "fetched": "2026-10-11T09:57:42.300959+00:00"
+    },
+    {
+      "id": "CVE-2026-108592",
+      "source": "nvd",
+      "severity": "medium",
+      "cvss": 5.3,
+      "title": "mini-swe-agent 1.10.0 through 2.4.6 contains an information exposure vulnerability in BubblewrapEnvironment because bwrap omits --clearenv, so sandboxed commands inherit the host environment. Attacker",
+      "summary": "mini-swe-agent 1.10.0 through 2.4.6 contains an information exposure vulnerability in BubblewrapEnvironment because bwrap omits --clearenv, so sandboxed commands inherit the host environment. Attackers using prompt injection in processed task content can make the agent read API keys from the environment and exfiltrate them over the shared network.",
+      "affected": "prompt injection",
+      "references": [
+        "https://github.com/SWE-agent/mini-swe-agent",
+        "https://github.com/SWE-agent/mini-swe-agent/blob/v2.4.6/src/minisweagent/environments/extra/bubblewrap.py#L38-L103",
+        "https://hackmd.io/@haind/minisweagent-bubblewrap-host-environment-leak",
+        "https://www.vulncheck.com/advisories/mini-swe-agent-1.10.0-through-2.4.6-environment-exposure-via-bubblewrapenvironment"
+      ],
+      "published": "2026-10-10T19:16:57.463",
+      "fetched": "2026-10-11T09:57:29.603495+00:00"
+    },
+    {
+      "id": "CVE-2026-108583",
+      "source": "nvd",
+      "severity": "medium",
+      "cvss": 4.2,
+      "title": "zotero-mcp 0.10.0 through 0.14.1 contains a server-side request forgery vulnerability that allows attackers to reach internal services because _fetch_embedded_metadata fetches URLs without destination",
+      "summary": "zotero-mcp 0.10.0 through 0.14.1 contains a server-side request forgery vulnerability that allows attackers to reach internal services because _fetch_embedded_metadata fetches URLs without destination validation. Attackers can steer the agent via prompt injection into calling zotero_add_by_url, causing requests to loopback, private, or link-local hosts directly or via redirects, leaking citation meta-tags and error details.",
+      "affected": "prompt injection",
+      "references": [
+        "https://github.com/54yyyu/zotero-mcp/blob/v0.14.1/src/zotero_mcp/tools/write.py#L2035-L2089",
+        "https://github.com/54yyyu/zotero-mcp/issues/326",
+        "https://hackmd.io/@haind/zotero-mcp-generic-url-metadata-ssrf",
+        "https://www.vulncheck.com/advisories/zotero-mcp-0.10.0-through-0.14.1-ssrf-via-zotero-add-by-url-tool"
+      ],
+      "published": "2026-10-10T16:16:31.667",
+      "fetched": "2026-10-11T09:57:29.603492+00:00"
+    },
+    {
       "id": "GHSA-pwhx-cvv3-qj5c",
       "source": "github-advisory",
       "severity": "high",
@@ -8574,7 +8662,7 @@
       "fetched": "2026-08-04T06:34:53.913899+00:00"
     }
   ],
-  "updated": "2026-10-10T09:47:18.326437+00:00",
+  "updated": "2026-10-11T09:57:51.543566+00:00",
   "sources": [
     "osv",
     "nvd",
@@ -8593,16 +8681,16 @@
         "items": 1,
         "attempts": 1,
         "error": null,
-        "checked_at": "2026-10-10T09:46:57.634334+00:00",
+        "checked_at": "2026-10-11T09:57:29.219208+00:00",
         "consecutive_failures": 0,
         "degraded_since": null
       },
       "nvd": {
         "ok": true,
-        "items": 34,
+        "items": 39,
         "attempts": 1,
         "error": null,
-        "checked_at": "2026-10-10T09:47:15.942654+00:00",
+        "checked_at": "2026-10-11T09:57:48.301157+00:00",
         "consecutive_failures": 0,
         "degraded_since": null
       },
@@ -8611,22 +8699,22 @@
         "items": 41,
         "attempts": 1,
         "error": null,
-        "checked_at": "2026-10-10T09:47:18.326065+00:00",
+        "checked_at": "2026-10-11T09:57:51.543263+00:00",
         "consecutive_failures": 0,
         "degraded_since": null
       }
     },
     "degraded": [],
-    "last_success": "2026-10-10T09:47:18.326437+00:00",
-    "last_attempt": "2026-10-10T09:47:18.326437+00:00"
+    "last_success": "2026-10-11T09:57:51.543566+00:00",
+    "last_attempt": "2026-10-11T09:57:51.543566+00:00"
   },
   "stats": {
+    "medium": 180,
     "high": 270,
     "critical": 96,
-    "medium": 175,
     "low": 10,
     "unknown": 36,
     "moderate": 1
   },
-  "total": 588
+  "total": 593
 }
