@@ -1,6 +1,24 @@
 {
   "intel": [
     {
+      "id": "CVE-2026-108756",
+      "source": "nvd",
+      "severity": "medium",
+      "cvss": 5.4,
+      "title": "Abilityai Trinity through 0.9.5 contains a missing authorization vulnerability in the Telegram router that allows agent-scoped MCP API keys to perform human-only binding operations. Attackers controll",
+      "summary": "Abilityai Trinity through 0.9.5 contains a missing authorization vulnerability in the Telegram router that allows agent-scoped MCP API keys to perform human-only binding operations. Attackers controlling an agent, typically via prompt injection, can send messages through the owner's bot token, replace the binding with their own token, or delete it.",
+      "affected": "prompt injection",
+      "references": [
+        "https://github.com/Abilityai/trinity",
+        "https://github.com/Abilityai/trinity/blob/e38c1c0f2567c602541c90c4c92152e99e6ead11/src/backend/routers/telegram.py#L168-L219",
+        "https://github.com/Abilityai/trinity/blob/e38c1c0f2567c602541c90c4c92152e99e6ead11/src/backend/routers/telegram.py#L258-L323",
+        "https://hackmd.io/@haind/rJ2OBa8sfl",
+        "https://www.vulncheck.com/advisories/abilityai-trinity-through-0.9.5-missing-authorization-in-telegram-binding-routes"
+      ],
+      "published": "2026-10-11T13:17:20.680",
+      "fetched": "2026-10-12T10:43:28.228816+00:00"
+    },
+    {
       "id": "CVE-2026-108600",
       "source": "nvd",
       "severity": "medium",
@@ -8662,7 +8680,7 @@
       "fetched": "2026-08-04T06:34:53.913899+00:00"
     }
   ],
-  "updated": "2026-10-11T09:57:51.543566+00:00",
+  "updated": "2026-10-12T10:43:50.640957+00:00",
   "sources": [
     "osv",
     "nvd",
@@ -8681,16 +8699,16 @@
         "items": 1,
         "attempts": 1,
         "error": null,
-        "checked_at": "2026-10-11T09:57:29.219208+00:00",
+        "checked_at": "2026-10-12T10:43:27.502533+00:00",
         "consecutive_failures": 0,
         "degraded_since": null
       },
       "nvd": {
         "ok": true,
-        "items": 39,
+        "items": 40,
         "attempts": 1,
         "error": null,
-        "checked_at": "2026-10-11T09:57:48.301157+00:00",
+        "checked_at": "2026-10-12T10:43:47.182440+00:00",
         "consecutive_failures": 0,
         "degraded_since": null
       },
@@ -8699,22 +8717,22 @@
         "items": 41,
         "attempts": 1,
         "error": null,
-        "checked_at": "2026-10-11T09:57:51.543263+00:00",
+        "checked_at": "2026-10-12T10:43:50.640633+00:00",
         "consecutive_failures": 0,
         "degraded_since": null
       }
     },
     "degraded": [],
-    "last_success": "2026-10-11T09:57:51.543566+00:00",
-    "last_attempt": "2026-10-11T09:57:51.543566+00:00"
+    "last_success": "2026-10-12T10:43:50.640957+00:00",
+    "last_attempt": "2026-10-12T10:43:50.640957+00:00"
   },
   "stats": {
-    "medium": 180,
+    "medium": 181,
     "high": 270,
     "critical": 96,
     "low": 10,
     "unknown": 36,
     "moderate": 1
   },
-  "total": 593
+  "total": 594
 }
