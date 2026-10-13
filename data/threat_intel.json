@@ -1,6 +1,56 @@
 {
   "intel": [
     {
+      "id": "CVE-2026-84317",
+      "source": "nvd",
+      "severity": "high",
+      "cvss": 8.8,
+      "title": "Nginx UI is a web user interface for the Nginx web server. Prior to 2.4.1, internal/config/validation.go (ValidateConfigFile) is a security control that blocks dangerous nginx directives — js_*, perl_",
+      "summary": "Nginx UI is a web user interface for the Nginx web server. Prior to 2.4.1, internal/config/validation.go (ValidateConfigFile) is a security control that blocks dangerous nginx directives — js_*, perl_*, load_module of the njs/perl modules, and user root. It is enforced on three of the four config-write paths: api/config/add.go, api/config/modify.go, and mcp/config/config_modify.go. The fourth path — the MCP tool nginx_config_add (mcp/config/config_add.go) — does NOT call it: it writes the caller",
+      "affected": "prompt injection",
+      "references": [
+        "https://github.com/0xJacky/nginx-ui/commit/23d1934099b05b2a01589b48129dc3d3159d91c2",
+        "https://github.com/0xJacky/nginx-ui/releases/tag/v2.4.1",
+        "https://github.com/0xJacky/nginx-ui/security/advisories/GHSA-76pm-mq2q-9gcr"
+      ],
+      "published": "2026-10-12T21:17:22.213",
+      "fetched": "2026-10-13T10:31:02.920947+00:00"
+    },
+    {
+      "id": "CVE-2026-57143",
+      "source": "nvd",
+      "severity": "high",
+      "cvss": 8.8,
+      "title": "PraisonAI is a multi-agent teams system. Prior to praisonaiagents 1.6.62, searxng_search and the search_web SearxNG provider pass the LLM-controlled searxng_url parameter directly to requests.get with",
+      "summary": "PraisonAI is a multi-agent teams system. Prior to praisonaiagents 1.6.62, searxng_search and the search_web SearxNG provider pass the LLM-controlled searxng_url parameter directly to requests.get without validating its scheme, host, port, or resolved address. Prompt-injected content can direct the default search tool to internal JSON services, distinguish open and closed internal ports, and attempt cloud-metadata requests, with returned JSON results entering agent context. This issue is fixed in",
+      "affected": "llm agent",
+      "references": [
+        "https://github.com/MervinPraison/PraisonAI/commit/2a855c470077c7d2e2479a575f7ef7f548d51c33",
+        "https://github.com/MervinPraison/PraisonAI/releases/tag/v4.6.62",
+        "https://github.com/MervinPraison/PraisonAI/security/advisories/GHSA-4pcv-mg8v-vrgf"
+      ],
+      "published": "2026-10-12T19:16:39.110",
+      "fetched": "2026-10-13T10:31:15.534709+00:00"
+    },
+    {
+      "id": "CVE-2026-108953",
+      "source": "nvd",
+      "severity": "high",
+      "cvss": 7.8,
+      "title": "mac-shell-mcp before 2.0.0 contains an OS command injection vulnerability that allows MCP clients to bypass the command whitelist by injecting shell metacharacters into execute_command arguments. Atta",
+      "summary": "mac-shell-mcp before 2.0.0 contains an OS command injection vulnerability that allows MCP clients to bypass the command whitelist by injecting shell metacharacters into execute_command arguments. Attackers or malicious prompts can call a safe command such as pwd with arguments like ';' to run forbidden commands as the server user without approval.",
+      "affected": "prompt injection",
+      "references": [
+        "https://github.com/cfdude/mac-shell-mcp",
+        "https://github.com/cfdude/mac-shell-mcp/blob/1c1708201abb7a18c83075e1bf933e7a92cbeb9f/src/services/command-service.ts#L257-L340",
+        "https://github.com/cfdude/mac-shell-mcp/commit/932ce733cde07bb30b1f186303e6692dbb5d087a",
+        "https://github.com/cfdude/mac-shell-mcp/issues/45",
+        "https://www.vulncheck.com/advisories/mac-shell-mcp-before-2.0.0-os-command-injection-via-execute-command-arguments"
+      ],
+      "published": "2026-10-12T13:17:28.307",
+      "fetched": "2026-10-13T10:31:02.920942+00:00"
+    },
+    {
       "id": "CVE-2026-108756",
       "source": "nvd",
       "severity": "medium",
@@ -8680,7 +8730,7 @@
       "fetched": "2026-08-04T06:34:53.913899+00:00"
     }
   ],
-  "updated": "2026-10-12T10:43:50.640957+00:00",
+  "updated": "2026-10-13T10:31:25.183679+00:00",
   "sources": [
     "osv",
     "nvd",
@@ -8699,16 +8749,16 @@
         "items": 1,
         "attempts": 1,
         "error": null,
-        "checked_at": "2026-10-12T10:43:27.502533+00:00",
+        "checked_at": "2026-10-13T10:31:02.481446+00:00",
         "consecutive_failures": 0,
         "degraded_since": null
       },
       "nvd": {
         "ok": true,
-        "items": 40,
+        "items": 43,
         "attempts": 1,
         "error": null,
-        "checked_at": "2026-10-12T10:43:47.182440+00:00",
+        "checked_at": "2026-10-13T10:31:21.534904+00:00",
         "consecutive_failures": 0,
         "degraded_since": null
       },
@@ -8717,22 +8767,22 @@
         "items": 41,
         "attempts": 1,
         "error": null,
-        "checked_at": "2026-10-12T10:43:50.640633+00:00",
+        "checked_at": "2026-10-13T10:31:25.183399+00:00",
         "consecutive_failures": 0,
         "degraded_since": null
       }
     },
     "degraded": [],
-    "last_success": "2026-10-12T10:43:50.640957+00:00",
-    "last_attempt": "2026-10-12T10:43:50.640957+00:00"
+    "last_success": "2026-10-13T10:31:25.183679+00:00",
+    "last_attempt": "2026-10-13T10:31:25.183679+00:00"
   },
   "stats": {
+    "high": 273,
     "medium": 181,
-    "high": 270,
     "critical": 96,
     "low": 10,
     "unknown": 36,
     "moderate": 1
   },
-  "total": 594
+  "total": 597
 }
