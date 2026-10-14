@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-10-13T10:31:38.447168+00:00",
-  "source_intel_count": 597,
+  "generated_at": "2026-10-14T08:40:22.552500+00:00",
+  "source_intel_count": 600,
   "package_blacklist": {
     "npm:@tinacms/cli": {
       "ecosystem": "npm",

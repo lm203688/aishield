@@ -1,6 +1,55 @@
 {
   "intel": [
     {
+      "id": "CVE-2026-110204",
+      "source": "nvd",
+      "severity": "high",
+      "cvss": 8.8,
+      "title": "Roo Code through 3.54.0 contains a command approval bypass vulnerability that allows attackers to run denied shell commands because parseCommandLine() treats ${ command; } substitutions as parameter e",
+      "summary": "Roo Code through 3.54.0 contains a command approval bypass vulnerability that allows attackers to run denied shell commands because parseCommandLine() treats ${ command; } substitutions as parameter expansions. Attackers using indirect prompt injection can embed denied commands inside an allowlisted command like echo to execute them without user approval on bash 5.3+ or ksh93.",
+      "affected": "prompt injection",
+      "references": [
+        "https://github.com/7rah/oss-cve/blob/6adb836d24ca446fd168c3acdc4c170beb77fe0f/roocode-group03-funsub.md",
+        "https://github.com/RooCodeInc/Roo-Code/blob/v3.54.0/src/shared/parse-command.ts#L74-L79",
+        "https://www.vulncheck.com/advisories/roo-code-through-3.54.0-auto-approve-bypass-via-funsub-command-substitution",
+        "https://github.com/7rah/oss-cve/blob/6adb836d24ca446fd168c3acdc4c170beb77fe0f/roocode-group03-funsub.md"
+      ],
+      "published": "2026-10-13T19:18:43.857",
+      "fetched": "2026-10-14T08:39:45.823441+00:00"
+    },
+    {
+      "id": "CVE-2026-110203",
+      "source": "nvd",
+      "severity": "high",
+      "cvss": 8.8,
+      "title": "Roo Code through 3.54.0 contains a command approval bypass vulnerability that allows attackers to auto-approve denied shell commands by abusing quote-masking regex in parseCommandLine(). Attackers can",
+      "summary": "Roo Code through 3.54.0 contains a command approval bypass vulnerability that allows attackers to auto-approve denied shell commands by abusing quote-masking regex in parseCommandLine(). Attackers can use indirect prompt injection with escaped or single-quoted double quotes to hide command separators behind allowlisted prefixes like echo, executing commands without user approval.",
+      "affected": "prompt injection",
+      "references": [
+        "https://github.com/7rah/oss-cve/blob/6adb836d24ca446fd168c3acdc4c170beb77fe0f/roocode-quote-boundary.md",
+        "https://github.com/RooCodeInc/Roo-Code/blob/v3.54.0/src/shared/parse-command.ts#L111-L115",
+        "https://www.vulncheck.com/advisories/roo-code-through-3.54.0-auto-approve-bypass-via-quote-masking-desynchronization"
+      ],
+      "published": "2026-10-13T19:18:43.707",
+      "fetched": "2026-10-14T08:39:45.823438+00:00"
+    },
+    {
+      "id": "CVE-2026-110202",
+      "source": "nvd",
+      "severity": "high",
+      "cvss": 8.8,
+      "title": "Roo Code through 3.54.0 contains a command approval bypass vulnerability in getCommandDecision() that allows attackers to auto-approve denied shell commands by prefixing them with a bare >& redirect. ",
+      "summary": "Roo Code through 3.54.0 contains a command approval bypass vulnerability in getCommandDecision() that allows attackers to auto-approve denied shell commands by prefixing them with a bare >& redirect. Attackers using indirect prompt injection can make the allowlist match a redirect target like echo while the shell runs the denied command on the developer machine.",
+      "affected": "prompt injection",
+      "references": [
+        "https://github.com/7rah/oss-cve/blob/6adb836d24ca446fd168c3acdc4c170beb77fe0f/roocode-group14-redirect.md",
+        "https://github.com/RooCodeInc/Roo-Code/blob/v3.54.0/src/core/auto-approval/commands.ts#L265-L274",
+        "https://www.vulncheck.com/advisories/roo-code-through-3.54.0-auto-approve-bypass-via-redirect-operator-stripping"
+      ],
+      "published": "2026-10-13T19:18:43.543",
+      "fetched": "2026-10-14T08:39:45.823436+00:00"
+    },
+    {
       "id": "CVE-2026-84317",
       "source": "nvd",
       "severity": "high",
@@ -8730,7 +8779,7 @@
       "fetched": "2026-08-04T06:34:53.913899+00:00"
     }
   ],
-  "updated": "2026-10-13T10:31:25.183679+00:00",
+  "updated": "2026-10-14T08:40:07.580995+00:00",
   "sources": [
     "osv",
     "nvd",
@@ -8749,16 +8798,16 @@
         "items": 1,
         "attempts": 1,
         "error": null,
-        "checked_at": "2026-10-13T10:31:02.481446+00:00",
+        "checked_at": "2026-10-14T08:39:44.176757+00:00",
         "consecutive_failures": 0,
         "degraded_since": null
       },
       "nvd": {
         "ok": true,
-        "items": 43,
+        "items": 46,
         "attempts": 1,
         "error": null,
-        "checked_at": "2026-10-13T10:31:21.534904+00:00",
+        "checked_at": "2026-10-14T08:40:04.666546+00:00",
         "consecutive_failures": 0,
         "degraded_since": null
       },
@@ -8767,22 +8816,22 @@
         "items": 41,
         "attempts": 1,
         "error": null,
-        "checked_at": "2026-10-13T10:31:25.183399+00:00",
+        "checked_at": "2026-10-14T08:40:07.580601+00:00",
         "consecutive_failures": 0,
         "degraded_since": null
       }
     },
     "degraded": [],
-    "last_success": "2026-10-13T10:31:25.183679+00:00",
-    "last_attempt": "2026-10-13T10:31:25.183679+00:00"
+    "last_success": "2026-10-14T08:40:07.580995+00:00",
+    "last_attempt": "2026-10-14T08:40:07.580995+00:00"
   },
   "stats": {
-    "high": 273,
+    "high": 276,
     "medium": 181,
     "critical": 96,
     "low": 10,
     "unknown": 36,
     "moderate": 1
   },
-  "total": 597
+  "total": 600
 }
