@@ -519606,26 +519606,721 @@
         }
       ],
       "error_details": []
+    },
+    {
+      "id": "batch_20261014_163914",
+      "source": "all",
+      "scanner_version": "4.1",
+      "scanned_at": "2026-10-14 16:39:14",
+      "total": 1,
+      "success": 1,
+      "errors": 0,
+      "results": [
+        {
+          "security_score": 70,
+          "permissions_score": 100,
+          "data_handling_score": 100,
+          "supply_chain_score": 100,
+          "reliability_score": 100,
+          "overall_score": 88,
+          "risk_level": "medium",
+          "badge_level": "gold",
+          "owasp_coverage": {
+            "covered": [
+              "MCP03",
+              "MCP08"
+            ],
+            "covered_count": 2,
+            "total": 10,
+            "coverage_percent": 20,
+            "categories": {
+              "MCP03": {
+                "name": "Tool Poisoning",
+                "name_cn": "工具投毒",
+                "rules_triggered": 2,
+                "total_rules": 11
+              },
+              "MCP08": {
+                "name": "Lack of Audit & Observability",
+                "name_cn": "审计与可观测性缺失",
+                "rules_triggered": 3,
+                "total_rules": 6
+              }
+            }
+          },
+          "agentic_coverage": {
+            "covered": [],
+            "covered_count": 0,
+            "total": 10,
+            "coverage_percent": 0,
+            "categories": {}
+          },
+          "rules_count": 264,
+          "score_breakdown": {
+            "security_score": {
+              "base": 100,
+              "penalty": 30,
+              "contributors": [
+                {
+                  "reason": "块注释中隐藏恶意指令",
+                  "severity": "critical",
+                  "amount": 20,
+                  "owasp": "MCP03",
+                  "rule_id": "MCP03-003",
+                  "finding_type": "dangerous_pattern"
+                },
+                {
+                  "reason": "[情报驱动] 路径遍历: 越权访问上级目录",
+                  "severity": "high",
+                  "amount": 10,
+                  "owasp": null,
+                  "rule_id": "GEN-B2A0",
+                  "finding_type": "dangerous_pattern"
+                }
+              ],
+              "contributions_full": [
+                {
+                  "reason": "块注释中隐藏恶意指令",
+                  "severity": "critical",
+                  "amount": 20,
+                  "owasp": "MCP03",
+                  "rule_id": "MCP03-003",
+                  "finding_type": "dangerous_pattern"
+                },
+                {
+                  "reason": "[情报驱动] 路径遍历: 越权访问上级目录",
+                  "severity": "high",
+                  "amount": 10,
+                  "owasp": null,
+                  "rule_id": "GEN-B2A0",
+                  "finding_type": "dangerous_pattern"
+                }
+              ],
+              "truncated": false,
+              "folded_duplicates": [
+                {
+                  "reason": "[情报驱动] 路径遍历: 越权访问上级目录",
+                  "severity": "high",
+                  "amount": 10,
+                  "owasp": null,
+                  "rule_id": "GEN-B2A0",
+                  "folded_count": 1
+                },
+                {
+                  "reason": "[情报驱动] 路径遍历: 越权访问上级目录",
+                  "severity": "high",
+                  "amount": 10,
+                  "owasp": null,
+                  "rule_id": "GEN-B2A0",
+                  "folded_count": 1
+                },
+                {
+                  "reason": "块注释中隐藏恶意指令",
+                  "severity": "critical",
+                  "amount": 20,
+                  "owasp": "MCP03",
+                  "rule_id": "MCP03-003",
+                  "folded_count": 1
+                },
+                {
+                  "reason": "[情报驱动] 路径遍历: 越权访问上级目录",
+                  "severity": "high",
+                  "amount": 10,
+                  "owasp": null,
+                  "rule_id": "GEN-B2A0",
+                  "folded_count": 1
+                },
+                {
+                  "reason": "[情报驱动] 路径遍历: 越权访问上级目录",
+                  "severity": "high",
+                  "amount": 10,
+                  "owasp": null,
+                  "rule_id": "GEN-B2A0",
+                  "folded_count": 1
+                }
+              ]
+            },
+            "permissions_score": {
+              "base": 100,
+              "penalty": 0,
+              "contributors": [],
+              "contributions_full": [],
+              "truncated": false,
+              "folded_duplicates": []
+            },
+            "data_handling_score": {
+              "base": 100,
+              "penalty": 0,
+              "contributors": [],
+              "contributions_full": [],
+              "truncated": false,
+              "folded_duplicates": []
+            },
+            "supply_chain_score": {
+              "base": 100,
+              "penalty": 0,
+              "contributors": [],
+              "contributions_full": [],
+              "truncated": false,
+              "folded_duplicates": []
+            },
+            "reliability_score": {
+              "base": 100,
+              "penalty": 0,
+              "contributors": [],
+              "contributions_full": [],
+              "truncated": false,
+              "folded_duplicates": []
+            }
+          },
+          "top_deductions": [
+            {
+              "dimension": "security_score",
+              "reason": "块注释中隐藏恶意指令",
+              "severity": "critical",
+              "amount": 20,
+              "owasp": "MCP03",
+              "rule_id": "MCP03-003",
+              "finding_type": "dangerous_pattern"
+            },
+            {
+              "dimension": "security_score",
+              "reason": "[情报驱动] 路径遍历: 越权访问上级目录",
+              "severity": "high",
+              "amount": 10,
+              "owasp": null,
+              "rule_id": "GEN-B2A0",
+              "finding_type": "dangerous_pattern"
+            }
+          ],
+          "name": "apify/apify-mcp-server",
+          "source_url": "https://github.com/apify/apify-mcp-server",
+          "tool_type": "mcp",
+          "findings": [
+            {
+              "type": "dangerous_pattern",
+              "rule_id": "MCP08-006",
+              "severity": "info",
+              "description": "使用console.log而非结构化日志",
+              "file": "src/web/src/utils/mock-openai.ts",
+              "lines": "29",
+              "col": 5,
+              "evidence": "console.log(",
+              "owasp_category": "MCP08",
+              "remediation": "补齐结构化日志与审计事件，记录关键操作的主体/动作/结果，并接入异常告警",
+              "citation_context": false
+            },
+            {
+              "type": "dangerous_pattern",
+              "rule_id": "MCP03-003",
+              "severity": "critical",
+              "description": "块注释中隐藏恶意指令",
+              "file": "src/web/src/pages/ActorSearch/ActorSearchDetail.tsx",
+              "lines": "84",
+              "col": 5,
+              "evidence": "/* TODO: this is an exception from the design system, let's figure out how to not do overrides */",
+              "owasp_category": "MCP03",
+              "remediation": "提示注入：把外部内容当作不可信数据而非指令，显式声明边界，并对输出做二次校验",
+              "citation_context": false
+            },
+            {
+              "type": "dangerous_pattern",
+              "rule_id": "GEN-B2A0",
+              "severity": "high",
+              "description": "[情报驱动] 路径遍历: 越权访问上级目录",
+              "file": "src/web/src/pages/ActorSearch/ActorSearchDetail.tsx",
+              "lines": "15",
+              "col": 28,
+              "evidence": "../../",
+              "owasp_category": null,
+              "remediation": "对用户输入的路径做规范化并校验是否落在允许目录内，拒绝 .. 穿越与 URL 编码变体",
+              "citation_context": false
+            },
+            {
+              "type": "dangerous_pattern",
+              "rule_id": "GEN-B2A0",
+              "severity": "high",
+              "description": "[情报驱动] 路径遍历: 越权访问上级目录",
+              "file": "src/web/src/pages/ActorSearch/ActorSearch.tsx",
+              "lines": "6",
+              "col": 28,
+              "evidence": "../../",
+              "owasp_category": null,
+              "remediation": "对用户输入的路径做规范化并校验是否落在允许目录内，拒绝 .. 穿越与 URL 编码变体",
+              "citation_context": false
+            },
+            {
+              "type": "dangerous_pattern",
+              "rule_id": "GEN-B2A0",
+              "severity": "high",
+              "description": "[情报驱动] 路径遍历: 越权访问上级目录",
+              "file": "src/web/src/pages/ActorSearch/ActorSearch.skeleton.tsx",
+              "lines": "6",
+              "col": 32,
+              "evidence": "../../",
+              "owasp_category": null,
+              "remediation": "对用户输入的路径做规范化并校验是否落在允许目录内，拒绝 .. 穿越与 URL 编码变体",
+              "citation_context": false
+            },
+            {
+              "type": "dangerous_pattern",
+              "rule_id": "MCP03-003",
+              "severity": "critical",
+              "description": "块注释中隐藏恶意指令",
+              "file": "src/web/src/pages/ActorRun/ActorRun.tsx",
+              "lines": "28",
+              "col": 5,
+              "evidence": "/** Identifier + count only. Item bodies are fetched separately via get-dataset-items. */",
+              "owasp_category": "MCP03",
+              "remediation": "提示注入：把外部内容当作不可信数据而非指令，显式声明边界，并对输出做二次校验",
+              "citation_context": false
+            },
+            {
+              "type": "dangerous_pattern",
+              "rule_id": "GEN-B2A0",
+              "severity": "high",
+              "description": "[情报驱动] 路径遍历: 越权访问上级目录",
+              "file": "src/web/src/pages/ActorRun/ActorRun.tsx",
+              "lines": "7",
+              "col": 31,
+              "evidence": "../../",
+              "owasp_category": null,
+              "remediation": "对用户输入的路径做规范化并校验是否落在允许目录内，拒绝 .. 穿越与 URL 编码变体",
+              "citation_context": false
+            },
+            {
+              "type": "dangerous_pattern",
+              "rule_id": "GEN-B2A0",
+              "severity": "high",
+              "description": "[情报驱动] 路径遍历: 越权访问上级目录",
+              "file": "src/web/src/pages/ActorRun/ActorRun.skeleton.tsx",
+              "lines": "6",
+              "col": 32,
+              "evidence": "../../",
+              "owasp_category": null,
+              "remediation": "对用户输入的路径做规范化并校验是否落在允许目录内，拒绝 .. 穿越与 URL 编码变体",
+              "citation_context": false
+            }
+          ],
+          "total_findings": 8,
+          "static_analysis": {
+            "findings": [
+              {
+                "type": "dangerous_pattern",
+                "rule_id": "MCP08-006",
+                "severity": "info",
+                "description": "使用console.log而非结构化日志",
+                "file": "src/web/src/utils/mock-openai.ts",
+                "lines": "29",
+                "col": 5,
+                "evidence": "console.log(",
+                "owasp_category": "MCP08",
+                "remediation": "补齐结构化日志与审计事件，记录关键操作的主体/动作/结果，并接入异常告警",
+                "citation_context": false
+              },
+              {
+                "type": "dangerous_pattern",
+                "rule_id": "MCP08-006",
+                "severity": "info",
+                "description": "使用console.log而非结构化日志",
+                "file": "src/web/src/utils/mock-openai.ts",
+                "lines": "61",
+                "col": 9,
+                "evidence": "console.log(",
+                "owasp_category": "MCP08",
+                "remediation": "补齐结构化日志与审计事件，记录关键操作的主体/动作/结果，并接入异常告警",
+                "citation_context": false
+              },
+              {
+                "type": "dangerous_pattern",
+                "rule_id": "MCP08-006",
+                "severity": "info",
+                "description": "使用console.log而非结构化日志",
+                "file": "src/web/src/utils/mock-openai.ts",
+                "lines": "68",
+                "col": 9,
+                "evidence": "console.log(",
+                "owasp_category": "MCP08",
+                "remediation": "补齐结构化日志与审计事件，记录关键操作的主体/动作/结果，并接入异常告警",
+                "citation_context": false
+              },
+              {
+                "type": "dangerous_pattern",
+                "rule_id": "MCP03-003",
+                "severity": "critical",
+                "description": "块注释中隐藏恶意指令",
+                "file": "src/web/src/pages/ActorSearch/ActorSearchDetail.tsx",
+                "lines": "84",
+                "col": 5,
+                "evidence": "/* TODO: this is an exception from the design system, let's figure out how to not do overrides */",
+                "owasp_category": "MCP03",
+                "remediation": "提示注入：把外部内容当作不可信数据而非指令，显式声明边界，并对输出做二次校验",
+                "citation_context": false
+              },
+              {
+                "type": "dangerous_pattern",
+                "rule_id": "GEN-B2A0",
+                "severity": "high",
+                "description": "[情报驱动] 路径遍历: 越权访问上级目录",
+                "file": "src/web/src/pages/ActorSearch/ActorSearchDetail.tsx",
+                "lines": "15",
+                "col": 28,
+                "evidence": "../../",
+                "owasp_category": null,
+                "remediation": "对用户输入的路径做规范化并校验是否落在允许目录内，拒绝 .. 穿越与 URL 编码变体",
+                "citation_context": false
+              },
+              {
+                "type": "dangerous_pattern",
+                "rule_id": "GEN-B2A0",
+                "severity": "high",
+                "description": "[情报驱动] 路径遍历: 越权访问上级目录",
+                "file": "src/web/src/pages/ActorSearch/ActorSearchDetail.tsx",
+                "lines": "16",
+                "col": 28,
+                "evidence": "../../",
+                "owasp_category": null,
+                "remediation": "对用户输入的路径做规范化并校验是否落在允许目录内，拒绝 .. 穿越与 URL 编码变体",
+                "citation_context": false
+              },
+              {
+                "type": "dangerous_pattern",
+                "rule_id": "GEN-B2A0",
+                "severity": "high",
+                "description": "[情报驱动] 路径遍历: 越权访问上级目录",
+                "file": "src/web/src/pages/ActorSearch/ActorSearchDetail.tsx",
+                "lines": "17",
+                "col": 36,
+                "evidence": "../../",
+                "owasp_category": null,
+                "remediation": "对用户输入的路径做规范化并校验是否落在允许目录内，拒绝 .. 穿越与 URL 编码变体",
+                "citation_context": false
+              },
+              {
+                "type": "dangerous_pattern",
+                "rule_id": "GEN-B2A0",
+                "severity": "high",
+                "description": "[情报驱动] 路径遍历: 越权访问上级目录",
+                "file": "src/web/src/pages/ActorSearch/ActorSearch.tsx",
+                "lines": "6",
+                "col": 28,
+                "evidence": "../../",
+                "owasp_category": null,
+                "remediation": "对用户输入的路径做规范化并校验是否落在允许目录内，拒绝 .. 穿越与 URL 编码变体",
+                "citation_context": false
+              },
+              {
+                "type": "dangerous_pattern",
+                "rule_id": "GEN-B2A0",
+                "severity": "high",
+                "description": "[情报驱动] 路径遍历: 越权访问上级目录",
+                "file": "src/web/src/pages/ActorSearch/ActorSearch.tsx",
+                "lines": "7",
+                "col": 31,
+                "evidence": "../../",
+                "owasp_category": null,
+                "remediation": "对用户输入的路径做规范化并校验是否落在允许目录内，拒绝 .. 穿越与 URL 编码变体",
+                "citation_context": false
+              },
+              {
+                "type": "dangerous_pattern",
+                "rule_id": "GEN-B2A0",
+                "severity": "high",
+                "description": "[情报驱动] 路径遍历: 越权访问上级目录",
+                "file": "src/web/src/pages/ActorSearch/ActorSearch.tsx",
+                "lines": "8",
+                "col": 33,
+                "evidence": "../../",
+                "owasp_category": null,
+                "remediation": "对用户输入的路径做规范化并校验是否落在允许目录内，拒绝 .. 穿越与 URL 编码变体",
+                "citation_context": false
+              },
+              {
+                "type": "dangerous_pattern",
+                "rule_id": "GEN-B2A0",
+                "severity": "high",
+                "description": "[情报驱动] 路径遍历: 越权访问上级目录",
+                "file": "src/web/src/pages/ActorSearch/ActorSearch.skeleton.tsx",
+                "lines": "6",
+                "col": 32,
+                "evidence": "../../",
+                "owasp_category": null,
+                "remediation": "对用户输入的路径做规范化并校验是否落在允许目录内，拒绝 .. 穿越与 URL 编码变体",
+                "citation_context": false
+              },
+              {
+                "type": "dangerous_pattern",
+                "rule_id": "MCP03-003",
+                "severity": "critical",
+                "description": "块注释中隐藏恶意指令",
+                "file": "src/web/src/pages/ActorRun/ActorRun.tsx",
+                "lines": "28",
+                "col": 5,
+                "evidence": "/** Identifier + count only. Item bodies are fetched separately via get-dataset-items. */",
+                "owasp_category": "MCP03",
+                "remediation": "提示注入：把外部内容当作不可信数据而非指令，显式声明边界，并对输出做二次校验",
+                "citation_context": false
+              },
+              {
+                "type": "dangerous_pattern",
+                "rule_id": "GEN-B2A0",
+                "severity": "high",
+                "description": "[情报驱动] 路径遍历: 越权访问上级目录",
+                "file": "src/web/src/pages/ActorRun/ActorRun.tsx",
+                "lines": "7",
+                "col": 31,
+                "evidence": "../../",
+                "owasp_category": null,
+                "remediation": "对用户输入的路径做规范化并校验是否落在允许目录内，拒绝 .. 穿越与 URL 编码变体",
+                "citation_context": false
+              },
+              {
+                "type": "dangerous_pattern",
+                "rule_id": "GEN-B2A0",
+                "severity": "high",
+                "description": "[情报驱动] 路径遍历: 越权访问上级目录",
+                "file": "src/web/src/pages/ActorRun/ActorRun.tsx",
+                "lines": "8",
+                "col": 28,
+                "evidence": "../../",
+                "owasp_category": null,
+                "remediation": "对用户输入的路径做规范化并校验是否落在允许目录内，拒绝 .. 穿越与 URL 编码变体",
+                "citation_context": false
+              },
+              {
+                "type": "dangerous_pattern",
+                "rule_id": "GEN-B2A0",
+                "severity": "high",
+                "description": "[情报驱动] 路径遍历: 越权访问上级目录",
+                "file": "src/web/src/pages/ActorRun/ActorRun.tsx",
+                "lines": "9",
+                "col": 33,
+                "evidence": "../../",
+                "owasp_category": null,
+                "remediation": "对用户输入的路径做规范化并校验是否落在允许目录内，拒绝 .. 穿越与 URL 编码变体",
+                "citation_context": false
+              },
+              {
+                "type": "dangerous_pattern",
+                "rule_id": "GEN-B2A0",
+                "severity": "high",
+                "description": "[情报驱动] 路径遍历: 越权访问上级目录",
+                "file": "src/web/src/pages/ActorRun/ActorRun.skeleton.tsx",
+                "lines": "6",
+                "col": 32,
+                "evidence": "../../",
+                "owasp_category": null,
+                "remediation": "对用户输入的路径做规范化并校验是否落在允许目录内，拒绝 .. 穿越与 URL 编码变体",
+                "citation_context": false
+              }
+            ],
+            "total_files": 20,
+            "patterns_checked": 264,
+            "owasp_coverage": {
+              "covered": [
+                "MCP03",
+                "MCP08"
+              ],
+              "covered_count": 2,
+              "total": 10,
+              "coverage_percent": 20,
+              "categories": {
+                "MCP03": {
+                  "name": "Tool Poisoning",
+                  "name_cn": "工具投毒",
+                  "rules_triggered": 2,
+                  "total_rules": 11
+                },
+                "MCP08": {
+                  "name": "Lack of Audit & Observability",
+                  "name_cn": "审计与可观测性缺失",
+                  "rules_triggered": 3,
+                  "total_rules": 6
+                }
+              }
+            },
+            "agentic_coverage": {
+              "covered": [],
+              "covered_count": 0,
+              "total": 10,
+              "coverage_percent": 0,
+              "categories": {}
+            }
+          },
+          "dependency_analysis": {
+            "findings": [],
+            "dependencies": [],
+            "total_dependencies": 0
+          },
+          "secrets_detection": {
+            "findings": []
+          },
+          "llm_analysis": {
+            "findings": [],
+            "analyzed": false,
+            "reason": "LLM not configured (set AISHIELD_LLM_URL and AISHIELD_LLM_KEY)"
+          },
+          "llm_supply_chain": {
+            "findings": [],
+            "analyzed": false
+          },
+          "toxic_flow_scan": [],
+          "baseline_drift": [],
+          "compliance": {
+            "frameworks": {
+              "nist_csf": {
+                "controls_hit": 3,
+                "controls": {
+                  "PR.PS-04": {
+                    "findings_count": 1,
+                    "max_severity": "info"
+                  },
+                  "DE.CM-09": {
+                    "findings_count": 3,
+                    "max_severity": "critical"
+                  },
+                  "PR.PS-06": {
+                    "findings_count": 2,
+                    "max_severity": "critical"
+                  }
+                }
+              },
+              "iso27001": {
+                "controls_hit": 4,
+                "controls": {
+                  "A.8.15": {
+                    "findings_count": 1,
+                    "max_severity": "info"
+                  },
+                  "A.8.16": {
+                    "findings_count": 1,
+                    "max_severity": "info"
+                  },
+                  "A.8.28": {
+                    "findings_count": 2,
+                    "max_severity": "critical"
+                  },
+                  "A.5.37": {
+                    "findings_count": 2,
+                    "max_severity": "critical"
+                  }
+                }
+              },
+              "pci_dss": {
+                "controls_hit": 2,
+                "controls": {
+                  "10.2": {
+                    "findings_count": 1,
+                    "max_severity": "info"
+                  },
+                  "6.2.4": {
+                    "findings_count": 2,
+                    "max_severity": "critical"
+                  }
+                }
+              },
+              "maestro": {
+                "controls_hit": 3,
+                "controls": {
+                  "L5": {
+                    "findings_count": 1,
+                    "max_severity": "info"
+                  },
+                  "L3": {
+                    "findings_count": 2,
+                    "max_severity": "critical"
+                  },
+                  "L6": {
+                    "findings_count": 2,
+                    "max_severity": "critical"
+                  }
+                }
+              }
+            },
+            "categories_mapped": 2,
+            "findings_unmapped": 5,
+            "note": "映射为审计锚点（select-the-control），不构成合规认证结论",
+            "category_id_namespace": "aishield-internal",
+            "owasp_agentic_2026": {
+              "ASI01": "Agent Goal Hijack",
+              "ASI02": "Tool Misuse & Exploitation",
+              "ASI03": "Identity & Privilege Abuse",
+              "ASI04": "Agentic Supply Chain Vulnerabilities",
+              "ASI05": "Unexpected Code Execution",
+              "ASI06": "Memory & Context Poisoning",
+              "ASI07": "Insecure Inter-Agent Communication",
+              "ASI08": "Cascading Failures",
+              "ASI09": "Human-Agent Trust Exploitation",
+              "ASI10": "Rogue Agents"
+            },
+            "internal_to_owasp_agentic": {
+              "ASI01": [
+                "ASI01"
+              ],
+              "ASI02": [
+                "ASI02"
+              ],
+              "ASI03": [
+                "ASI03"
+              ],
+              "ASI04": [
+                "ASI06"
+              ],
+              "ASI05": [
+                "ASI03"
+              ],
+              "ASI06": [
+                "ASI07",
+                "ASI04"
+              ],
+              "ASI07": [],
+              "ASI08": [],
+              "ASI09": [
+                "ASI08"
+              ],
+              "ASI10": [
+                "ASI10",
+                "ASI09"
+              ]
+            },
+            "owasp_agentic_uncovered": [
+              "ASI05"
+            ]
+          },
+          "osv_cve": [],
+          "commit_hash": "172c84ef",
+          "recommendations": [
+            "未发现明显安全风险，建议定期重新审计"
+          ],
+          "scanned_at": "2026-10-14 16:39:13",
+          "scanner_version": "4.0",
+          "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)",
+          "source": "github-search",
+          "directory_description": "The Apify MCP server enables your AI agents to extract data from social media, search engines, maps, e-commerce sites, or any other website using thousands of ready-made scrapers, crawlers, and automa",
+          "stars": 11109
+        }
+      ],
+      "error_details": []
     }
   ],
   "summary": {
-    "total_tools": 75,
-    "last_scan": "2026-10-11 17:57:01",
+    "total_tools": 76,
+    "last_scan": "2026-10-14 16:39:14",
     "scanner_version": "4.1",
-    "avg_score": 70.90666666666667,
+    "avg_score": 71.13157894736842,
     "badge_distribution": {
       "none": 21,
-      "gold": 22,
+      "gold": 23,
       "bronze": 12,
       "silver": 20
     },
     "risk_distribution": {
       "critical": 34,
       "safe": 14,
-      "medium": 14,
+      "medium": 15,
       "high": 13
     },
-    "owasp_coverage_avg": 4.16
+    "owasp_coverage_avg": 4.131578947368421
   },
   "tools": [
     {
@@ -621258,6 +621953,689 @@
       "source": "smithery-api-github-fallback",
       "directory_description": "Skybridge is a full-stack TypeScript framework for MCP Apps and ChatGPT Apps. Type-safe. React-powered. Platform-agnostic.",
       "stars": 2153
+    },
+    {
+      "security_score": 70,
+      "permissions_score": 100,
+      "data_handling_score": 100,
+      "supply_chain_score": 100,
+      "reliability_score": 100,
+      "overall_score": 88,
+      "risk_level": "medium",
+      "badge_level": "gold",
+      "owasp_coverage": {
+        "covered": [
+          "MCP03",
+          "MCP08"
+        ],
+        "covered_count": 2,
+        "total": 10,
+        "coverage_percent": 20,
+        "categories": {
+          "MCP03": {
+            "name": "Tool Poisoning",
+            "name_cn": "工具投毒",
+            "rules_triggered": 2,
+            "total_rules": 11
+          },
+          "MCP08": {
+            "name": "Lack of Audit & Observability",
+            "name_cn": "审计与可观测性缺失",
+            "rules_triggered": 3,
+            "total_rules": 6
+          }
+        }
+      },
+      "agentic_coverage": {
+        "covered": [],
+        "covered_count": 0,
+        "total": 10,
+        "coverage_percent": 0,
+        "categories": {}
+      },
+      "rules_count": 264,
+      "score_breakdown": {
+        "security_score": {
+          "base": 100,
+          "penalty": 30,
+          "contributors": [
+            {
+              "reason": "块注释中隐藏恶意指令",
+              "severity": "critical",
+              "amount": 20,
+              "owasp": "MCP03",
+              "rule_id": "MCP03-003",
+              "finding_type": "dangerous_pattern"
+            },
+            {
+              "reason": "[情报驱动] 路径遍历: 越权访问上级目录",
+              "severity": "high",
+              "amount": 10,
+              "owasp": null,
+              "rule_id": "GEN-B2A0",
+              "finding_type": "dangerous_pattern"
+            }
+          ],
+          "contributions_full": [
+            {
+              "reason": "块注释中隐藏恶意指令",
+              "severity": "critical",
+              "amount": 20,
+              "owasp": "MCP03",
+              "rule_id": "MCP03-003",
+              "finding_type": "dangerous_pattern"
+            },
+            {
+              "reason": "[情报驱动] 路径遍历: 越权访问上级目录",
+              "severity": "high",
+              "amount": 10,
+              "owasp": null,
+              "rule_id": "GEN-B2A0",
+              "finding_type": "dangerous_pattern"
+            }
+          ],
+          "truncated": false,
+          "folded_duplicates": [
+            {
+              "reason": "[情报驱动] 路径遍历: 越权访问上级目录",
+              "severity": "high",
+              "amount": 10,
+              "owasp": null,
+              "rule_id": "GEN-B2A0",
+              "folded_count": 1
+            },
+            {
+              "reason": "[情报驱动] 路径遍历: 越权访问上级目录",
+              "severity": "high",
+              "amount": 10,
+              "owasp": null,
+              "rule_id": "GEN-B2A0",
+              "folded_count": 1
+            },
+            {
+              "reason": "块注释中隐藏恶意指令",
+              "severity": "critical",
+              "amount": 20,
+              "owasp": "MCP03",
+              "rule_id": "MCP03-003",
+              "folded_count": 1
+            },
+            {
+              "reason": "[情报驱动] 路径遍历: 越权访问上级目录",
+              "severity": "high",
+              "amount": 10,
+              "owasp": null,
+              "rule_id": "GEN-B2A0",
+              "folded_count": 1
+            },
+            {
+              "reason": "[情报驱动] 路径遍历: 越权访问上级目录",
+              "severity": "high",
+              "amount": 10,
+              "owasp": null,
+              "rule_id": "GEN-B2A0",
+              "folded_count": 1
+            }
+          ]
+        },
+        "permissions_score": {
+          "base": 100,
+          "penalty": 0,
+          "contributors": [],
+          "contributions_full": [],
+          "truncated": false,
+          "folded_duplicates": []
+        },
+        "data_handling_score": {
+          "base": 100,
+          "penalty": 0,
+          "contributors": [],
+          "contributions_full": [],
+          "truncated": false,
+          "folded_duplicates": []
+        },
+        "supply_chain_score": {
+          "base": 100,
+          "penalty": 0,
+          "contributors": [],
+          "contributions_full": [],
+          "truncated": false,
+          "folded_duplicates": []
+        },
+        "reliability_score": {
+          "base": 100,
+          "penalty": 0,
+          "contributors": [],
+          "contributions_full": [],
+          "truncated": false,
+          "folded_duplicates": []
+        }
+      },
+      "top_deductions": [
+        {
+          "dimension": "security_score",
+          "reason": "块注释中隐藏恶意指令",
+          "severity": "critical",
+          "amount": 20,
+          "owasp": "MCP03",
+          "rule_id": "MCP03-003",
+          "finding_type": "dangerous_pattern"
+        },
+        {
+          "dimension": "security_score",
+          "reason": "[情报驱动] 路径遍历: 越权访问上级目录",
+          "severity": "high",
+          "amount": 10,
+          "owasp": null,
+          "rule_id": "GEN-B2A0",
+          "finding_type": "dangerous_pattern"
+        }
+      ],
+      "name": "apify/apify-mcp-server",
+      "source_url": "https://github.com/apify/apify-mcp-server",
+      "tool_type": "mcp",
+      "findings": [
+        {
+          "type": "dangerous_pattern",
+          "rule_id": "MCP08-006",
+          "severity": "info",
+          "description": "使用console.log而非结构化日志",
+          "file": "src/web/src/utils/mock-openai.ts",
+          "lines": "29",
+          "col": 5,
+          "evidence": "console.log(",
+          "owasp_category": "MCP08",
+          "remediation": "补齐结构化日志与审计事件，记录关键操作的主体/动作/结果，并接入异常告警",
+          "citation_context": false
+        },
+        {
+          "type": "dangerous_pattern",
+          "rule_id": "MCP03-003",
+          "severity": "critical",
+          "description": "块注释中隐藏恶意指令",
+          "file": "src/web/src/pages/ActorSearch/ActorSearchDetail.tsx",
+          "lines": "84",
+          "col": 5,
+          "evidence": "/* TODO: this is an exception from the design system, let's figure out how to not do overrides */",
+          "owasp_category": "MCP03",
+          "remediation": "提示注入：把外部内容当作不可信数据而非指令，显式声明边界，并对输出做二次校验",
+          "citation_context": false
+        },
+        {
+          "type": "dangerous_pattern",
+          "rule_id": "GEN-B2A0",
+          "severity": "high",
+          "description": "[情报驱动] 路径遍历: 越权访问上级目录",
+          "file": "src/web/src/pages/ActorSearch/ActorSearchDetail.tsx",
+          "lines": "15",
+          "col": 28,
+          "evidence": "../../",
+          "owasp_category": null,
+          "remediation": "对用户输入的路径做规范化并校验是否落在允许目录内，拒绝 .. 穿越与 URL 编码变体",
+          "citation_context": false
+        },
+        {
+          "type": "dangerous_pattern",
+          "rule_id": "GEN-B2A0",
+          "severity": "high",
+          "description": "[情报驱动] 路径遍历: 越权访问上级目录",
+          "file": "src/web/src/pages/ActorSearch/ActorSearch.tsx",
+          "lines": "6",
+          "col": 28,
+          "evidence": "../../",
+          "owasp_category": null,
+          "remediation": "对用户输入的路径做规范化并校验是否落在允许目录内，拒绝 .. 穿越与 URL 编码变体",
+          "citation_context": false
+        },
+        {
+          "type": "dangerous_pattern",
+          "rule_id": "GEN-B2A0",
+          "severity": "high",
+          "description": "[情报驱动] 路径遍历: 越权访问上级目录",
+          "file": "src/web/src/pages/ActorSearch/ActorSearch.skeleton.tsx",
+          "lines": "6",
+          "col": 32,
+          "evidence": "../../",
+          "owasp_category": null,
+          "remediation": "对用户输入的路径做规范化并校验是否落在允许目录内，拒绝 .. 穿越与 URL 编码变体",
+          "citation_context": false
+        },
+        {
+          "type": "dangerous_pattern",
+          "rule_id": "MCP03-003",
+          "severity": "critical",
+          "description": "块注释中隐藏恶意指令",
+          "file": "src/web/src/pages/ActorRun/ActorRun.tsx",
+          "lines": "28",
+          "col": 5,
+          "evidence": "/** Identifier + count only. Item bodies are fetched separately via get-dataset-items. */",
+          "owasp_category": "MCP03",
+          "remediation": "提示注入：把外部内容当作不可信数据而非指令，显式声明边界，并对输出做二次校验",
+          "citation_context": false
+        },
+        {
+          "type": "dangerous_pattern",
+          "rule_id": "GEN-B2A0",
+          "severity": "high",
+          "description": "[情报驱动] 路径遍历: 越权访问上级目录",
+          "file": "src/web/src/pages/ActorRun/ActorRun.tsx",
+          "lines": "7",
+          "col": 31,
+          "evidence": "../../",
+          "owasp_category": null,
+          "remediation": "对用户输入的路径做规范化并校验是否落在允许目录内，拒绝 .. 穿越与 URL 编码变体",
+          "citation_context": false
+        },
+        {
+          "type": "dangerous_pattern",
+          "rule_id": "GEN-B2A0",
+          "severity": "high",
+          "description": "[情报驱动] 路径遍历: 越权访问上级目录",
+          "file": "src/web/src/pages/ActorRun/ActorRun.skeleton.tsx",
+          "lines": "6",
+          "col": 32,
+          "evidence": "../../",
+          "owasp_category": null,
+          "remediation": "对用户输入的路径做规范化并校验是否落在允许目录内，拒绝 .. 穿越与 URL 编码变体",
+          "citation_context": false
+        }
+      ],
+      "total_findings": 8,
+      "static_analysis": {
+        "findings": [
+          {
+            "type": "dangerous_pattern",
+            "rule_id": "MCP08-006",
+            "severity": "info",
+            "description": "使用console.log而非结构化日志",
+            "file": "src/web/src/utils/mock-openai.ts",
+            "lines": "29",
+            "col": 5,
+            "evidence": "console.log(",
+            "owasp_category": "MCP08",
+            "remediation": "补齐结构化日志与审计事件，记录关键操作的主体/动作/结果，并接入异常告警",
+            "citation_context": false
+          },
+          {
+            "type": "dangerous_pattern",
+            "rule_id": "MCP08-006",
+            "severity": "info",
+            "description": "使用console.log而非结构化日志",
+            "file": "src/web/src/utils/mock-openai.ts",
+            "lines": "61",
+            "col": 9,
+            "evidence": "console.log(",
+            "owasp_category": "MCP08",
+            "remediation": "补齐结构化日志与审计事件，记录关键操作的主体/动作/结果，并接入异常告警",
+            "citation_context": false
+          },
+          {
+            "type": "dangerous_pattern",
+            "rule_id": "MCP08-006",
+            "severity": "info",
+            "description": "使用console.log而非结构化日志",
+            "file": "src/web/src/utils/mock-openai.ts",
+            "lines": "68",
+            "col": 9,
+            "evidence": "console.log(",
+            "owasp_category": "MCP08",
+            "remediation": "补齐结构化日志与审计事件，记录关键操作的主体/动作/结果，并接入异常告警",
+            "citation_context": false
+          },
+          {
+            "type": "dangerous_pattern",
+            "rule_id": "MCP03-003",
+            "severity": "critical",
+            "description": "块注释中隐藏恶意指令",
+            "file": "src/web/src/pages/ActorSearch/ActorSearchDetail.tsx",
+            "lines": "84",
+            "col": 5,
+            "evidence": "/* TODO: this is an exception from the design system, let's figure out how to not do overrides */",
+            "owasp_category": "MCP03",
+            "remediation": "提示注入：把外部内容当作不可信数据而非指令，显式声明边界，并对输出做二次校验",
+            "citation_context": false
+          },
+          {
+            "type": "dangerous_pattern",
+            "rule_id": "GEN-B2A0",
+            "severity": "high",
+            "description": "[情报驱动] 路径遍历: 越权访问上级目录",
+            "file": "src/web/src/pages/ActorSearch/ActorSearchDetail.tsx",
+            "lines": "15",
+            "col": 28,
+            "evidence": "../../",
+            "owasp_category": null,
+            "remediation": "对用户输入的路径做规范化并校验是否落在允许目录内，拒绝 .. 穿越与 URL 编码变体",
+            "citation_context": false
+          },
+          {
+            "type": "dangerous_pattern",
+            "rule_id": "GEN-B2A0",
+            "severity": "high",
+            "description": "[情报驱动] 路径遍历: 越权访问上级目录",
+            "file": "src/web/src/pages/ActorSearch/ActorSearchDetail.tsx",
+            "lines": "16",
+            "col": 28,
+            "evidence": "../../",
+            "owasp_category": null,
+            "remediation": "对用户输入的路径做规范化并校验是否落在允许目录内，拒绝 .. 穿越与 URL 编码变体",
+            "citation_context": false
+          },
+          {
+            "type": "dangerous_pattern",
+            "rule_id": "GEN-B2A0",
+            "severity": "high",
+            "description": "[情报驱动] 路径遍历: 越权访问上级目录",
+            "file": "src/web/src/pages/ActorSearch/ActorSearchDetail.tsx",
+            "lines": "17",
+            "col": 36,
+            "evidence": "../../",
+            "owasp_category": null,
+            "remediation": "对用户输入的路径做规范化并校验是否落在允许目录内，拒绝 .. 穿越与 URL 编码变体",
+            "citation_context": false
+          },
+          {
+            "type": "dangerous_pattern",
+            "rule_id": "GEN-B2A0",
+            "severity": "high",
+            "description": "[情报驱动] 路径遍历: 越权访问上级目录",
+            "file": "src/web/src/pages/ActorSearch/ActorSearch.tsx",
+            "lines": "6",
+            "col": 28,
+            "evidence": "../../",
+            "owasp_category": null,
+            "remediation": "对用户输入的路径做规范化并校验是否落在允许目录内，拒绝 .. 穿越与 URL 编码变体",
+            "citation_context": false
+          },
+          {
+            "type": "dangerous_pattern",
+            "rule_id": "GEN-B2A0",
+            "severity": "high",
+            "description": "[情报驱动] 路径遍历: 越权访问上级目录",
+            "file": "src/web/src/pages/ActorSearch/ActorSearch.tsx",
+            "lines": "7",
+            "col": 31,
+            "evidence": "../../",
+            "owasp_category": null,
+            "remediation": "对用户输入的路径做规范化并校验是否落在允许目录内，拒绝 .. 穿越与 URL 编码变体",
+            "citation_context": false
+          },
+          {
+            "type": "dangerous_pattern",
+            "rule_id": "GEN-B2A0",
+            "severity": "high",
+            "description": "[情报驱动] 路径遍历: 越权访问上级目录",
+            "file": "src/web/src/pages/ActorSearch/ActorSearch.tsx",
+            "lines": "8",
+            "col": 33,
+            "evidence": "../../",
+            "owasp_category": null,
+            "remediation": "对用户输入的路径做规范化并校验是否落在允许目录内，拒绝 .. 穿越与 URL 编码变体",
+            "citation_context": false
+          },
+          {
+            "type": "dangerous_pattern",
+            "rule_id": "GEN-B2A0",
+            "severity": "high",
+            "description": "[情报驱动] 路径遍历: 越权访问上级目录",
+            "file": "src/web/src/pages/ActorSearch/ActorSearch.skeleton.tsx",
+            "lines": "6",
+            "col": 32,
+            "evidence": "../../",
+            "owasp_category": null,
+            "remediation": "对用户输入的路径做规范化并校验是否落在允许目录内，拒绝 .. 穿越与 URL 编码变体",
+            "citation_context": false
+          },
+          {
+            "type": "dangerous_pattern",
+            "rule_id": "MCP03-003",
+            "severity": "critical",
+            "description": "块注释中隐藏恶意指令",
+            "file": "src/web/src/pages/ActorRun/ActorRun.tsx",
+            "lines": "28",
+            "col": 5,
+            "evidence": "/** Identifier + count only. Item bodies are fetched separately via get-dataset-items. */",
+            "owasp_category": "MCP03",
+            "remediation": "提示注入：把外部内容当作不可信数据而非指令，显式声明边界，并对输出做二次校验",
+            "citation_context": false
+          },
+          {
+            "type": "dangerous_pattern",
+            "rule_id": "GEN-B2A0",
+            "severity": "high",
+            "description": "[情报驱动] 路径遍历: 越权访问上级目录",
+            "file": "src/web/src/pages/ActorRun/ActorRun.tsx",
+            "lines": "7",
+            "col": 31,
+            "evidence": "../../",
+            "owasp_category": null,
+            "remediation": "对用户输入的路径做规范化并校验是否落在允许目录内，拒绝 .. 穿越与 URL 编码变体",
+            "citation_context": false
+          },
+          {
+            "type": "dangerous_pattern",
+            "rule_id": "GEN-B2A0",
+            "severity": "high",
+            "description": "[情报驱动] 路径遍历: 越权访问上级目录",
+            "file": "src/web/src/pages/ActorRun/ActorRun.tsx",
+            "lines": "8",
+            "col": 28,
+            "evidence": "../../",
+            "owasp_category": null,
+            "remediation": "对用户输入的路径做规范化并校验是否落在允许目录内，拒绝 .. 穿越与 URL 编码变体",
+            "citation_context": false
+          },
+          {
+            "type": "dangerous_pattern",
+            "rule_id": "GEN-B2A0",
+            "severity": "high",
+            "description": "[情报驱动] 路径遍历: 越权访问上级目录",
+            "file": "src/web/src/pages/ActorRun/ActorRun.tsx",
+            "lines": "9",
+            "col": 33,
+            "evidence": "../../",
+            "owasp_category": null,
+            "remediation": "对用户输入的路径做规范化并校验是否落在允许目录内，拒绝 .. 穿越与 URL 编码变体",
+            "citation_context": false
+          },
+          {
+            "type": "dangerous_pattern",
+            "rule_id": "GEN-B2A0",
+            "severity": "high",
+            "description": "[情报驱动] 路径遍历: 越权访问上级目录",
+            "file": "src/web/src/pages/ActorRun/ActorRun.skeleton.tsx",
+            "lines": "6",
+            "col": 32,
+            "evidence": "../../",
+            "owasp_category": null,
+            "remediation": "对用户输入的路径做规范化并校验是否落在允许目录内，拒绝 .. 穿越与 URL 编码变体",
+            "citation_context": false
+          }
+        ],
+        "total_files": 20,
+        "patterns_checked": 264,
+        "owasp_coverage": {
+          "covered": [
+            "MCP03",
+            "MCP08"
+          ],
+          "covered_count": 2,
+          "total": 10,
+          "coverage_percent": 20,
+          "categories": {
+            "MCP03": {
+              "name": "Tool Poisoning",
+              "name_cn": "工具投毒",
+              "rules_triggered": 2,
+              "total_rules": 11
+            },
+            "MCP08": {
+              "name": "Lack of Audit & Observability",
+              "name_cn": "审计与可观测性缺失",
+              "rules_triggered": 3,
+              "total_rules": 6
+            }
+          }
+        },
+        "agentic_coverage": {
+          "covered": [],
+          "covered_count": 0,
+          "total": 10,
+          "coverage_percent": 0,
+          "categories": {}
+        }
+      },
+      "dependency_analysis": {
+        "findings": [],
+        "dependencies": [],
+        "total_dependencies": 0
+      },
+      "secrets_detection": {
+        "findings": []
+      },
+      "llm_analysis": {
+        "findings": [],
+        "analyzed": false,
+        "reason": "LLM not configured (set AISHIELD_LLM_URL and AISHIELD_LLM_KEY)"
+      },
+      "llm_supply_chain": {
+        "findings": [],
+        "analyzed": false
+      },
+      "toxic_flow_scan": [],
+      "baseline_drift": [],
+      "compliance": {
+        "frameworks": {
+          "nist_csf": {
+            "controls_hit": 3,
+            "controls": {
+              "PR.PS-04": {
+                "findings_count": 1,
+                "max_severity": "info"
+              },
+              "DE.CM-09": {
+                "findings_count": 3,
+                "max_severity": "critical"
+              },
+              "PR.PS-06": {
+                "findings_count": 2,
+                "max_severity": "critical"
+              }
+            }
+          },
+          "iso27001": {
+            "controls_hit": 4,
+            "controls": {
+              "A.8.15": {
+                "findings_count": 1,
+                "max_severity": "info"
+              },
+              "A.8.16": {
+                "findings_count": 1,
+                "max_severity": "info"
+              },
+              "A.8.28": {
+                "findings_count": 2,
+                "max_severity": "critical"
+              },
+              "A.5.37": {
+                "findings_count": 2,
+                "max_severity": "critical"
+              }
+            }
+          },
+          "pci_dss": {
+            "controls_hit": 2,
+            "controls": {
+              "10.2": {
+                "findings_count": 1,
+                "max_severity": "info"
+              },
+              "6.2.4": {
+                "findings_count": 2,
+                "max_severity": "critical"
+              }
+            }
+          },
+          "maestro": {
+            "controls_hit": 3,
+            "controls": {
+              "L5": {
+                "findings_count": 1,
+                "max_severity": "info"
+              },
+              "L3": {
+                "findings_count": 2,
+                "max_severity": "critical"
+              },
+              "L6": {
+                "findings_count": 2,
+                "max_severity": "critical"
+              }
+            }
+          }
+        },
+        "categories_mapped": 2,
+        "findings_unmapped": 5,
+        "note": "映射为审计锚点（select-the-control），不构成合规认证结论",
+        "category_id_namespace": "aishield-internal",
+        "owasp_agentic_2026": {
+          "ASI01": "Agent Goal Hijack",
+          "ASI02": "Tool Misuse & Exploitation",
+          "ASI03": "Identity & Privilege Abuse",
+          "ASI04": "Agentic Supply Chain Vulnerabilities",
+          "ASI05": "Unexpected Code Execution",
+          "ASI06": "Memory & Context Poisoning",
+          "ASI07": "Insecure Inter-Agent Communication",
+          "ASI08": "Cascading Failures",
+          "ASI09": "Human-Agent Trust Exploitation",
+          "ASI10": "Rogue Agents"
+        },
+        "internal_to_owasp_agentic": {
+          "ASI01": [
+            "ASI01"
+          ],
+          "ASI02": [
+            "ASI02"
+          ],
+          "ASI03": [
+            "ASI03"
+          ],
+          "ASI04": [
+            "ASI06"
+          ],
+          "ASI05": [
+            "ASI03"
+          ],
+          "ASI06": [
+            "ASI07",
+            "ASI04"
+          ],
+          "ASI07": [],
+          "ASI08": [],
+          "ASI09": [
+            "ASI08"
+          ],
+          "ASI10": [
+            "ASI10",
+            "ASI09"
+          ]
+        },
+        "owasp_agentic_uncovered": [
+          "ASI05"
+        ]
+      },
+      "osv_cve": [],
+      "commit_hash": "172c84ef",
+      "recommendations": [
+        "未发现明显安全风险，建议定期重新审计"
+      ],
+      "scanned_at": "2026-10-14 16:39:13",
+      "scanner_version": "4.0",
+      "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)",
+      "source": "github-search",
+      "directory_description": "The Apify MCP server enables your AI agents to extract data from social media, search engines, maps, e-commerce sites, or any other website using thousands of ready-made scrapers, crawlers, and automa",
+      "stars": 11109
     }
   ]
 }
