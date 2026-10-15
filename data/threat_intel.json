@@ -1,6 +1,20 @@
 {
   "intel": [
     {
+      "id": "GHSA-856c-92hv-3vxx",
+      "source": "github-advisory",
+      "severity": "low",
+      "cvss": 3.1,
+      "title": "Apprise forwards configured auth headers across cross-origin HTTP redirects",
+      "summary": "# Summary\n\nApprise's HTTP-based notification plugins and its HTTP attachment / config loaders (`apprise/attachment/http.py`, `apprise/config/http.py`) follow HTTP 3xx redirects by default and **re-send the user-configured auth headers and query parameters on the redirected request**. If an operator-configured destination is later compromised (service takeover, malicious update), or an attacker holds a MITM position on an unprotected network path, that destination can return a `302 Location:` to ",
+      "affected": "pip:apprise",
+      "references": [
+        "https://github.com/advisories/GHSA-856c-92hv-3vxx"
+      ],
+      "published": "2026-10-14T18:38:05Z",
+      "fetched": "2026-10-15T08:17:49.240791+00:00"
+    },
+    {
       "id": "CVE-2026-110204",
       "source": "nvd",
       "severity": "high",
@@ -3002,6 +3016,23 @@
       "fetched": "2026-09-18T08:13:20.065107+00:00"
     },
     {
+      "id": "CVE-2026-64684",
+      "source": "nvd",
+      "severity": "medium",
+      "cvss": 6.8,
+      "title": "RMCP is an official Rust SDK for the Model Context Protocol. Prior to 2.1.0, the rmcp crate's StreamableHttpClientTransport in crates/rmcp/src/transport/common/reqwest/streamable_http_client.rs builds",
+      "summary": "RMCP is an official Rust SDK for the Model Context Protocol. Prior to 2.1.0, the rmcp crate's StreamableHttpClientTransport in crates/rmcp/src/transport/common/reqwest/streamable_http_client.rs builds its default_http_client with reqwest's automatic redirect policy and applies caller-supplied values from StreamableHttpClientTransportConfig.custom_headers without marking them as sensitive. When a malicious or compromised MCP endpoint returns a cross-origin 307 or 308 redirect, reqwest follows the",
+      "affected": "model context protocol",
+      "references": [
+        "https://github.com/modelcontextprotocol/rust-sdk/commit/496902b9cf2c8a947454718da31829ae776b969b",
+        "https://github.com/modelcontextprotocol/rust-sdk/pull/936",
+        "https://github.com/modelcontextprotocol/rust-sdk/releases/tag/rmcp-v2.1.0",
+        "https://github.com/modelcontextprotocol/rust-sdk/security/advisories/GHSA-9g45-5xwm-f3wc"
+      ],
+      "published": "2026-09-16T22:17:04.577",
+      "fetched": "2026-10-15T08:17:33.948051+00:00"
+    },
+    {
       "id": "GHSA-hcwq-8wjf-3gcr",
       "source": "github-advisory",
       "severity": "medium",
@@ -3028,6 +3059,42 @@
       ],
       "published": "2026-09-16T15:34:27Z",
       "fetched": "2026-09-17T08:38:07.824991+00:00"
+    },
+    {
+      "id": "CVE-2026-63128",
+      "source": "nvd",
+      "severity": "high",
+      "cvss": 7.5,
+      "title": "RMCP is an official Rust SDK for the Model Context Protocol. Prior to 2.0.0, the rmcp crate's stateful Streamable HTTP server in crates/rmcp/src/transport/streamable_http_server/tower.rs allows an una",
+      "summary": "RMCP is an official Rust SDK for the Model Context Protocol. Prior to 2.0.0, the rmcp crate's stateful Streamable HTTP server in crates/rmcp/src/transport/streamable_http_server/tower.rs allows an unauthenticated client to send a well-formed JSON-RPC POST that is not an initialization request, or an initialization request with a mismatched protocol header, causing StreamableHttpService::handle_post to call LocalSessionManager.create_session before validating the message. An early validation fail",
+      "affected": "model context protocol",
+      "references": [
+        "https://github.com/modelcontextprotocol/rust-sdk/commit/dfa7fd6f9309deab60bea230b041be9a3fcda846",
+        "https://github.com/modelcontextprotocol/rust-sdk/pull/934",
+        "https://github.com/modelcontextprotocol/rust-sdk/releases/tag/rmcp-v2.0.0",
+        "https://github.com/modelcontextprotocol/rust-sdk/security/advisories/GHSA-9pj6-vhgr-3mwh",
+        "https://github.com/modelcontextprotocol/rust-sdk/security/advisories/GHSA-9pj6-vhgr-3mwh"
+      ],
+      "published": "2026-09-16T15:17:39.960",
+      "fetched": "2026-10-15T08:17:33.948048+00:00"
+    },
+    {
+      "id": "CVE-2026-63127",
+      "source": "nvd",
+      "severity": "high",
+      "cvss": 8.2,
+      "title": "RMCP is an official Rust SDK for the Model Context Protocol. Prior to 2.0.0, the rmcp crate's OAuth implementation in crates/rmcp/src/transport/auth.rs omits the RFC 9728 resource field from ResourceS",
+      "summary": "RMCP is an official Rust SDK for the Model Context Protocol. Prior to 2.0.0, the rmcp crate's OAuth implementation in crates/rmcp/src/transport/auth.rs omits the RFC 9728 resource field from ResourceServerMetadata and allows discover_oauth_server_via_resource_metadata to use protected-resource metadata without confirming that the returned resource identifier exactly matches the configured MCP server. A malicious MCP server can publish metadata for a different legitimate MCP resource and its auth",
+      "affected": "model context protocol",
+      "references": [
+        "https://github.com/modelcontextprotocol/rust-sdk/commit/c1a8b29ff2cc45e7820b900dae42cbb4958089ec",
+        "https://github.com/modelcontextprotocol/rust-sdk/pull/937",
+        "https://github.com/modelcontextprotocol/rust-sdk/releases/tag/rmcp-v2.0.0",
+        "https://github.com/modelcontextprotocol/rust-sdk/security/advisories/GHSA-33f5-2c5q-wgwj",
+        "https://github.com/modelcontextprotocol/rust-sdk/security/advisories/GHSA-33f5-2c5q-wgwj"
+      ],
+      "published": "2026-09-16T15:17:39.817",
+      "fetched": "2026-10-15T08:17:33.948045+00:00"
     },
     {
       "id": "GHSA-cv3r-c5h8-f4g5",
@@ -8779,7 +8846,7 @@
       "fetched": "2026-08-04T06:34:53.913899+00:00"
     }
   ],
-  "updated": "2026-10-14T08:40:07.580995+00:00",
+  "updated": "2026-10-15T08:17:49.742894+00:00",
   "sources": [
     "osv",
     "nvd",
@@ -8798,40 +8865,40 @@
         "items": 1,
         "attempts": 1,
         "error": null,
-        "checked_at": "2026-10-14T08:39:44.176757+00:00",
+        "checked_at": "2026-10-15T08:17:26.386549+00:00",
         "consecutive_failures": 0,
         "degraded_since": null
       },
       "nvd": {
         "ok": true,
-        "items": 46,
+        "items": 44,
         "attempts": 1,
         "error": null,
-        "checked_at": "2026-10-14T08:40:04.666546+00:00",
+        "checked_at": "2026-10-15T08:17:46.265618+00:00",
         "consecutive_failures": 0,
         "degraded_since": null
       },
       "github-advisory": {
         "ok": true,
-        "items": 41,
+        "items": 40,
         "attempts": 1,
         "error": null,
-        "checked_at": "2026-10-14T08:40:07.580601+00:00",
+        "checked_at": "2026-10-15T08:17:49.742545+00:00",
         "consecutive_failures": 0,
         "degraded_since": null
       }
     },
     "degraded": [],
-    "last_success": "2026-10-14T08:40:07.580995+00:00",
-    "last_attempt": "2026-10-14T08:40:07.580995+00:00"
+    "last_success": "2026-10-15T08:17:49.742894+00:00",
+    "last_attempt": "2026-10-15T08:17:49.742894+00:00"
   },
   "stats": {
-    "high": 276,
-    "medium": 181,
+    "low": 11,
+    "high": 278,
+    "medium": 182,
     "critical": 96,
-    "low": 10,
     "unknown": 36,
     "moderate": 1
   },
-  "total": 600
+  "total": 604
 }
