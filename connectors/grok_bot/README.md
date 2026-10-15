@@ -29,7 +29,7 @@ xAI 官方 Grok Bot 已经内置：
 
 | Gap | xAI 覆盖？ | AIShield 补齐 |
 |---|---|---|
-| 可携带的个人 Agent 身份（跨平台） | ❌（xAI 账号体系） | ✅ PAI DID `did:aishield:pa:*` |
+| 可携带的个人 Agent 身份（跨平台） | ❌（xAI 账号体系） | ✅ PAI DID `did:key` |
 | 个人累计预算守护 | ⚠️（订阅制，但 agent 内消费无边界） | ✅ 4 粒度 + 8 因素风险评分 |
 | 用户级行动 dispute 回执 | ❌（xAI 内部日志） | ✅ HMAC 链 + 90 天离线可验证 |
 | 跨平台审计链 | ❌（每平台各自） | ✅ 单点治理，任意平台实例都记账 |
@@ -114,7 +114,7 @@ Grok Bot 支持用户自建 "Custom Skills"（2026-05 上线）。AIShield
 
 ### 1. 可携带个人身份
 ```
-did:aishield:pa:<user_hash>
+did:key:z6Mk...（由 user_id 确定性派生的自认证 DID）
 ```
 跨 Grok Bot / Coze / ChatGPT Agent 都可识别，用户拥有，xAI 无法单方面吊销。
 

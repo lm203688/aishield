@@ -172,7 +172,7 @@ curl -X POST https://api.aishield.tools/api/v1/agent-infra/scan-portfolio \
 
 | 平台治理缺口 | AIShield 补齐 |
 |---|---|
-| `portable_personal_identity` | PAI DID (`did:aishield:pa:*`)，跨平台可验证 |
+| `portable_personal_identity` | PAI DID (`did:key`)，跨平台可验证 |
 | `cumulative_budget_governance` | 4 粒度预算守护（per_tx / daily / weekly / monthly） |
 | `target_site_risk_scoring` | 8 因素风险评分 |
 | `connector_independent_review` | 8 规则独立审核 |

@@ -279,7 +279,8 @@ ECO_REQUEST_BODIES: dict[tuple[str, str], dict] = {
             "claims": {**_OBJ, "description": "自定义声明（可选）"},
             "ttl": {**_INT, "default": 86400, "description": "有效期秒数（可选）"},
         },
-        "example": {"did": "did:aishield:abc123", "owner": "team-acme",
+        "example": {"did": "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK",
+                    "owner": "team-acme",
                     "identity_token": "it_xxxxxxxx"},
     },
 
@@ -304,7 +305,8 @@ ECO_REQUEST_BODIES: dict[tuple[str, str], dict] = {
             "owner": {**_STR, "description": "所有者标识"},
             "credential_id": {**_STR, "description": "凭证 ID"},
         },
-        "example": {"did": "did:aishield:abc123", "owner": "team-acme",
+        "example": {"did": "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK",
+                    "owner": "team-acme",
                     "credential_id": "vc_xxxxxxxx"},
     },
 

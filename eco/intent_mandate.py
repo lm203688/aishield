@@ -46,6 +46,7 @@ from typing import Any, Dict, List, Optional
 
 from eco import crypto_sign as _cs
 from eco import verifiable_identity as _vi
+from eco import did_key
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -201,6 +202,15 @@ class IntentMandate:
         if deadline is None:
             constraints["deadline"] = now + int(ttl)
 
+        # #441：issuer DID 缺省为签名密钥的自认证 did:key（可从 iss 直接解出
+        # 公钥独立验签）；显式 key.issuer 优先，密钥异常回退旧标签。
+        _iss_pub = str(key.get("public_key") or "")
+        try:
+            _iss_default = did_key.did_key_from_base64url(_iss_pub) if _iss_pub \
+                else ("did:aishield:" + kid)
+        except Exception:
+            _iss_default = "did:aishield:" + kid
+
         mandate_id = hashlib.sha256(_canonical(
             {"did": agent_did, "action": action, "kid": kid, "iat": now}
         )).hexdigest()[:16]
@@ -208,7 +218,7 @@ class IntentMandate:
             "typ": MANDATE_TYPE,
             "alg": _vi.ALG,
             "kid": kid,
-            "iss": str(key.get("issuer") or ("did:aishield:" + kid)),
+            "iss": str(key.get("issuer") or _iss_default),
             "sub": agent_did,
             "mid": mandate_id,
             "action": action,

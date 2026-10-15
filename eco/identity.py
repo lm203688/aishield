@@ -25,6 +25,11 @@ import hashlib
 import threading
 from datetime import datetime, timezone, timedelta
 
+try:
+    from eco import did_key
+except ImportError:  # 允许以脚本方式直接运行自测
+    import did_key
+
 # ── 路径配置 ──
 # 数据目录: api/data/（相对于项目根目录）
 _BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -243,15 +248,30 @@ class RegistrationTokenAuthority:
 #  DID 生成
 # ══════════════════════════════════════════════
 
-def generate_did():
+def generate_did(public_key=None):
     """
-    生成去中心化身份标识符
-    格式: did:aishield:<随机hex>
-    
+    生成去中心化身份标识符。
+
+    #441：统一到自认证 ``did:key``。给定合法 Ed25519 公钥（urlsafe-base64，
+    同 crypto_sign._b64e 输出，32 字节 raw）时，DID = 该公钥派生的
+    ``did:key:z...``——公钥编码进 DID，任何人可独立验证，无需信任服务在线。
+
+    无有效公钥时（调用方未提供 key）无法构造自认证身份，退回旧标签
+    ``did:aishield:<随机hex>``（仅作查找键，不承载安全声明）。
+
+    Args:
+        public_key (str, opt): urlsafe-base64 编码的 Ed25519 公钥
+
     Returns:
-        str: DID字符串，例如 "did:aishield:a3f2b1c4e5d6"
+        str: DID 字符串，例如 "did:key:z6Mk..." 或（回退）"did:aishield:a3f2b1c4e5d6"
     """
-    # 生成12字节随机hex作为标识符
+    if public_key:
+        try:
+            return did_key.did_key_from_base64url(public_key)
+        except Exception:
+            # 非 32 字节 / 非法编码：无法派生 did:key，走下面的回退分支
+            pass
+    # 无有效 Ed25519 公钥：退回旧标签（仅作查找键，无安全声明）
     rand_bytes = uuid.uuid4().bytes[:6]
     identifier = rand_bytes.hex()
     return f"did:aishield:{identifier}"
@@ -314,7 +334,20 @@ class AgentRegistration:
 
         # 校验通过才生成 DID，避免「凭据失效但 DID 已被占用」的脏半状态
         if not did:
-            did = generate_did()
+            did = generate_did(public_key=public_key)
+        else:
+            # #441 冒用防护：调用方自带 did:key 时，内嵌公钥必须与 public_key 一致，
+            # 否则等于允许冒用他人自认证身份。无 public_key 或公钥不符一律拒绝。
+            if did_key.is_did_key(did):
+                if not public_key:
+                    raise ValueError("提供 did:key 时必须同时提供匹配的 public_key")
+                try:
+                    embedded = did_key.decode_did_key(did)
+                    provided = did_key._b64url_decode(public_key)
+                except Exception as exc:
+                    raise ValueError(f"无效的 did:key 或 public_key: {exc}")
+                if embedded != provided:
+                    raise ValueError("did:key 内嵌公钥与 public_key 不一致")
 
         # 检查DID是否已存在
         if did in self._agents:

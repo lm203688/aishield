@@ -29,6 +29,11 @@ try:
 except ImportError:  # 允许以脚本方式直接运行自测
     import crypto_sign as cs
 
+try:
+    from eco import did_key
+except ImportError:  # 允许以脚本方式直接运行自测
+    import did_key
+
 _BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _WELLKNOWN = os.path.join(_BASE, "static", ".well-known")
 _KEY_DIR = os.path.join(_BASE, "api", "data")
@@ -38,8 +43,33 @@ _PUBKEY_FILE = os.path.join(_WELLKNOWN, "agent-card-pubkey.json")
 TZ = timezone(timedelta(hours=8))
 _lock = threading.Lock()
 
+# 旧体系标签：仅在信任服务密钥文件不可用时作为回退（向后兼容）。
+# 正常情况签名者 DID 应为由 Ed25519 公钥派生的自认证 did:key（见 get_signer_did）。
 SIGNER_DID = "did:aishield:trust-service"
+SIGNER_DID_LEGACY = SIGNER_DID
 KEY_ID = "key-1"
+
+
+def get_signer_did(key_dir=None):
+    """信任服务签名者的自认证 DID。
+
+    优先从磁盘上的 Ed25519 公钥派生 ``did:key:z...``（公钥编码进 DID，任何人
+    可独立验证，无需信任服务在线）。密钥文件不存在 / 非 ed25519（HMAC 降级）
+    时回退到旧标签 ``did:aishield:trust-service``，保证导入与无密钥环境不崩溃。
+
+    #441：把信任服务身份从「标签」升级为「自认证凭证」。
+    """
+    kd = key_dir or _KEY_DIR
+    path = os.path.join(kd, "agent_card_key.json")
+    try:
+        if os.path.exists(path):
+            with open(path, "r", encoding="utf-8") as f:
+                doc = json.load(f)
+            if doc.get("alg") == cs.ALG_ED25519 and doc.get("public_key"):
+                return did_key.did_key_from_base64url(doc["public_key"])
+    except Exception:
+        pass
+    return SIGNER_DID_LEGACY
 
 
 def _now_iso():
@@ -49,13 +79,20 @@ def _now_iso():
 class AgentCardSigner:
     """签名 / 验证 Agent Card。"""
 
-    def __init__(self, key_dir=None, signer_did=SIGNER_DID, key_id=KEY_ID):
-        self.signer_did = signer_did
+    def __init__(self, key_dir=None, signer_did=None, key_id=KEY_ID):
+        # signer_did 留空 → 由 _resolve_signer_did() 从密钥文件派生 did:key；
+        # 显式传入则尊重（测试 / 迁移回滚时可用旧标签）。
+        self._explicit_signer_did = signer_did
         self.key_id = key_id
         self.key_dir = key_dir or _KEY_DIR
         self._alg = None
         self._priv = None
         self._pub = None
+
+    def _resolve_signer_did(self):
+        if self._explicit_signer_did:
+            return self._explicit_signer_did
+        return get_signer_did(self.key_dir)
 
     # ── 密钥管理 ──
     def _load_or_create(self):
@@ -107,7 +144,7 @@ class AgentCardSigner:
         signed = dict(card)
         signed["aishield"] = {
             "signature": sig,
-            "signer_did": self.signer_did,
+            "signer_did": self._resolve_signer_did(),
             "signed_at": _now_iso(),
             "key_id": self.key_id,
             "alg": self._alg,
@@ -124,14 +161,14 @@ class AgentCardSigner:
         os.makedirs(d, exist_ok=True)
         if self._alg == cs.ALG_ED25519:
             payload = {
-                "signer_did": self.signer_did,
+                "signer_did": self._resolve_signer_did(),
                 "alg": self._alg,
                 "key_id": self.key_id,
                 "public_key": self._pub,
             }
         else:
             payload = {
-                "signer_did": self.signer_did,
+                "signer_did": self._resolve_signer_did(),
                 "alg": self._alg,
                 "key_id": self.key_id,
                 "verification": "server-side",

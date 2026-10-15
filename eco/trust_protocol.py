@@ -31,47 +31,18 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Literal, Optional
 
+try:
+    from eco import did_key
+except ImportError:  # 允许以脚本方式直接运行自测
+    import did_key
+
 # ─────────────────────────────────────────────────────────────────────────────
-# 身份层：Ed25519 + did:key（纯标准库实现，RFC 8032 / Curve25519）
+# 身份层：Ed25519（纯标准库实现，RFC 8032 / Curve25519）+ did:key
+# did:key 编解码统一收口到 eco/did_key.py（#441 单一真源，避免两套 base58 漂移）。
 # ─────────────────────────────────────────────────────────────────────────────
 
-ED25519_MULTICODEC_PREFIX = bytes([0xed, 0x01])
-BASE58_ALPHABET = b"123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
-
-
-def _base58_encode(data: bytes) -> str:
-    # 仅统计「前导」零字节（标准 base58 语义）
-    zeros = 0
-    for b in data:
-        if b == 0:
-            zeros += 1
-        else:
-            break
-    n = int.from_bytes(data, "big")
-    chars = []
-    while n > 0:
-        n, r = divmod(n, 58)
-        chars.append(BASE58_ALPHABET[r:r + 1])
-    return ("1" * zeros) + b"".join(reversed(chars)).decode()
-
-
-def _base58_decode(s: str) -> bytes:
-    # 仅统计「前导」'1' 字符为前导零字节
-    zeros = 0
-    for c in s:
-        if c == "1":
-            zeros += 1
-        else:
-            break
-    n = 0
-    for c in s.encode():
-        n = n * 58 + BASE58_ALPHABET.index(c)
-    out = []
-    while n > 0:
-        n, r = divmod(n, 256)
-        out.append(r)
-    out.reverse()
-    return b"\x00" * zeros + bytes(out)
+# 兼容别名：保留对外可见的 multicodec 前缀常量
+ED25519_MULTICODEC_PREFIX = did_key.MULTICODEC_ED25519_PUB
 
 
 P = 2**255 - 19
@@ -219,28 +190,36 @@ def generate_keypair() -> AgentKeypair:
     """生成新 Ed25519 密钥对并派生 did:key:z6Mk... DID。"""
     private_key = secrets.token_bytes(32)
     public_key = _public_key_from_private(private_key)
-    multicodec = ED25519_MULTICODEC_PREFIX + public_key
-    did = f"did:key:z{_base58_encode(multicodec)}"
-    return AgentKeypair(private_key=private_key, public_key=public_key, did=did)
+    return AgentKeypair(
+        private_key=private_key, public_key=public_key,
+        did=did_key.encode_ed25519_pubkey(public_key),
+    )
+
+
+def keypair_from_seed(seed: bytes) -> AgentKeypair:
+    """从 32 字节种子**确定性**派生 Ed25519 密钥对 + did:key（零依赖，纯标准库）。
+
+    用于把稳定标识（如自然人 user_id 的 SHA256）映射为自认证身份：同一 seed
+    永远得到同一 did:key，保证幂等 / 可复算。派生出的公钥是合法 Ed25519 曲线
+    点，因此 did:key 密码学上自洽（可独立验签）。
+    """
+    if len(seed) != 32:
+        raise ValueError("seed 必须是 32 字节")
+    public_key = _public_key_from_private(seed)
+    return AgentKeypair(
+        private_key=seed, public_key=public_key,
+        did=did_key.encode_ed25519_pubkey(public_key),
+    )
 
 
 def public_key_to_did(public_key: bytes) -> str:
-    """从 32 字节 Ed25519 公钥派生 did:key:z6Mk... DID。"""
-    multicodec = ED25519_MULTICODEC_PREFIX + public_key
-    return f"did:key:z{_base58_encode(multicodec)}"
+    """从 32 字节 Ed25519 公钥派生 did:key:z6Mk... DID（委托 did_key 单一真源）。"""
+    return did_key.encode_ed25519_pubkey(public_key)
 
 
 def did_to_public_key(did: str) -> bytes:
-    """从 did:key:z6Mk... DID 提取 32 字节原始公钥。"""
-    if not did.startswith("did:key:"):
-        raise ValueError("Not a did:key DID")
-    mb = did[len("did:key:"):]
-    if not mb.startswith("z"):
-        raise ValueError("Expected multibase base58btc (prefix 'z')")
-    decoded = _base58_decode(mb[1:])
-    if decoded[:2] != ED25519_MULTICODEC_PREFIX:
-        raise ValueError("DID is not an Ed25519 did:key (expected multicodec prefix 0xed01)")
-    return decoded[2:]
+    """从 did:key:z6Mk... DID 提取 32 字节原始公钥（委托 did_key 单一真源）。"""
+    return did_key.decode_did_key(did)
 
 
 def sign_data(data: str | bytes, private_key: bytes) -> str:

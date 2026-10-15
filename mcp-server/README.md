@@ -147,7 +147,7 @@ HMAC-SHA256 chained audit + OCSF 1.1 event classes + STIX 2.1 observables + ATT&
 
 | Tool | Description |
 |------|-------------|
-| `aishield_personal_did_create` | Create or fetch a Personal Agent Identity (PAI DID, `did:aishield:pa:*`). Idempotent. |
+| `aishield_personal_did_create` | Create or fetch a Personal Agent Identity (PAI DID, `did:key`). Idempotent. |
 | `aishield_personal_instance_register` | Register a personal agent instance (e.g. "Alice's Muse on iOS") under her PAI DID. Revoke per-instance independently. |
 | `aishield_personal_ticket_create` | Sign a capability ticket (action allowlist + scope + TTL) for one instance. Server HMAC-sealed, independently verifiable. |
 | `aishield_personal_budget_check` | Pre-flight budget + risk check. Returns `allow` / `confirm` (quote-first) / `block` / `denied` verdict. |

@@ -35,6 +35,11 @@ import threading
 import time
 from datetime import datetime, timezone, timedelta
 
+try:
+    from eco import agent_card
+except ImportError:  # 允许以脚本方式直接运行自测
+    import agent_card
+
 TZ = timezone(timedelta(hours=8))
 _BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _DATA_DIR = os.path.join(_BASE, "api", "data")
@@ -97,10 +102,13 @@ def register_agent(
     *, agent_id: str, name: str, domain: str,
     capabilities: list, certs: list = None,
     url: str = "", provider: str = "", description: str = "",
-    publisher_did: str = "did:aishield:trust-service",
+    publisher_did: str | None = None,
     extra: dict = None,
 ) -> dict:
     """注册（或覆盖更新）一个专业 agent。返回完整记录。"""
+    # #441：publisher_did 缺省时统一为信任服务自认证 did:key（密钥不可用回退旧标签）。
+    if not publisher_did:
+        publisher_did = agent_card.get_signer_did()
     if domain not in DOMAINS:
         raise ValueError(f"unknown domain: {domain}; must be one of {list(DOMAINS)}")
     if not agent_id or not name:

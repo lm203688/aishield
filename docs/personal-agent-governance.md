@@ -66,7 +66,7 @@ AIShield 定位：**Personal Agent Governance Kernel**。
 ### 4 大能力（新增）
 
 **1. PAI 身份（Personal Agent Identity）**
-- 每个自然人一个 DID（`did:aishield:pa:<hash>`）
+- 每个自然人一个 DID（`did:key:z6Mk...`，自认证，由 user_id 确定性派生）
 - 每个 DID 下多个 Agent 实例（Alice 的 Muse / ChatGPT-Agent / 自建）
 - Capability Ticket：`用户对某实例的一次授权`（scope + TTL + HMAC 签名）
 - 吊销实例 → 连带吊销其所有 tickets
@@ -146,7 +146,7 @@ tests/
 | 决策 | 选择 | 理由 |
 |---|---|---|
 | 签名算法 | Ed25519 优先 / HMAC-SHA256 降级 | 零依赖原则，与 agent_card 一致 |
-| DID 方法 | `did:aishield:pa:<base32>` | 遵循 DWN 命名，独立于企业 DID 命名空间 |
+| DID 方法 | `did:key:z6Mk...`（自认证 Ed25519） | 公钥编码进 DID、独立于企业 DID 命名空间；旧 `did:aishield:pa:*` 仍向后兼容 |
 | HMAC 链 | 每 user 独立 | 隐私隔离 + 独立验证 |
 | 存储 | JSON 文件 | 零依赖、易迁移、易 export/delete（GDPR） |
 | 风险评分 | 8 因素加权 | 消费级场景足够，避免复杂 ML |

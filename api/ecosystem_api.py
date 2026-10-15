@@ -252,7 +252,7 @@ def _specialist_register(data: dict) -> dict:
             url=data.get("url", ""),
             provider=data.get("provider", ""),
             description=data.get("description", ""),
-            publisher_did=data.get("publisher_did", "did:aishield:trust-service"),
+            publisher_did=data.get("publisher_did") or _import_agent_card().get_signer_did(),
             extra=data.get("extra"),
         )
         return rec, 201

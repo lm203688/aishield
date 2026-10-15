@@ -166,7 +166,7 @@ Agent 在本标准中具有以下属性：
 
 ```json
 {
-  "agent_did": "did:aishield:7f3a2b1c9d4e5f6a8b0c1d2e3f4a5b6c",
+  "agent_did": "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK",
   "agent_name": "CodeReviewer-Pro",
   "description": "专业的代码审查 Agent，支持 20+ 编程语言",
   "endpoint": "https://agent.example.com/a2a",
@@ -178,13 +178,23 @@ Agent 在本标准中具有以下属性：
 
 > 基于 W3C DID 标准的去中心化身份标识符，用于唯一标识一个 Agent 实体。
 
-本标准使用 DID 方法前缀 `did:aishield:` 作为 Agent 的身份标识空间。
+本标准以 **`did:key`** 作为 Agent 身份的**规范方法**（canonical）：Ed25519 公钥经
+multicodec `0xed01` 前缀 + base58btc 编码进 DID 本身（`did:key:z6Mk...`），任何人
+拿到 DID 即可解出公钥独立验签，无需信任服务在线。
+
+历史方法 **`did:aishield:` / `did:aishield:pa:`** 已**弃用（deprecated）但向后兼容**：
+早期版本曾用 `did:aishield:<hex>` 作纯标签（真实安全来自独立于 DID 的 Ed25519 签名）。
+存量 `did:aishield:*` 仍是合法标识符（可按 DID 直接查询），但**新签发身份一律使用
+`did:key`**。下文 JSON 示例中保留的 `did:aishield:<可读角色名>` 仅为示意占位。
 
 ```
-did:aishield:{unique-identifier}
+did:key:z6Mk...          # 规范：自认证身份（Ed25519 公钥编码进 DID）
 
-示例：
-did:aishield:7f3a2b1c9d4e5f6a8b0c1d2e3f4a5b6c
+示例（规范）：
+did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK
+
+示例（历史 / 弃用，仍可解析）：
+did:aishield:a3f2b1c4e5d6
 did:aishield:org-acme-devops-agent-v2
 ```
 
@@ -196,12 +206,12 @@ DID 文档应包含以下必要字段：
     "https://www.w3.org/ns/did/v1",
     "https://aishield.org/ns/did/v1"
   ],
-  "id": "did:aishield:7f3a2b1c9d4e5f6a8b0c1d2e3f4a5b6c",
-  "controller": "did:aishield:7f3a2b1c9d4e5f6a8b0c1d2e3f4a5b6c",
+  "id": "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK",
+  "controller": "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK",
   "verificationMethod": [{
     "id": "#key-1",
     "type": "Ed25519VerificationKey2020",
-    "controller": "did:aishield:7f3a2b1c9d4e5f6a8b0c1d2e3f4a5b6c",
+    "controller": "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK",
     "publicKeyMultibase": "zH3C2AVvLMv6gmMNam3uVAjZpfkcJCwDwnZn6z3wXmqPV"
   }],
   "authentication": ["#key-1"],
@@ -227,7 +237,7 @@ Trust Score 是一个 0-100 的数值，由多个维度的加权分数组成。�
 ```json
 {
   "skill_card_version": "0.1",
-  "agent_did": "did:aishield:7f3a2b1c9d4e5f6a8b0c1d2e3f4a5b6c",
+  "agent_did": "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK",
   "skills": [
     {
       "skill_id": "code-review",
@@ -458,7 +468,7 @@ AIShield 安全认证定义三个递进等级，每个等级代表不同深度�
 {
   "on_chain_record": {
     "cert_id": "cert-aishield-2026-07-20-xxxxx",
-    "agent_did": "did:aishield:7f3a2b1c9d4e5f6a8b0c1d2e3f4a5b6c",
+    "agent_did": "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK",
     "level": 3,
     "score": 92,
     "scan_hash": "sha256:abc123...",
@@ -500,7 +510,7 @@ Agent 开发者向 Certifier 提交安全认证申请。申请需包含以下信
     "version": "0.1",
     "requested_level": 2,
     "agent": {
-      "did": "did:aishield:7f3a2b1c9d4e5f6a8b0c1d2e3f4a5b6c",
+      "did": "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK",
       "name": "CodeReviewer-Pro",
       "endpoint": "https://agent.example.com/a2a",
       "version": "2.1.0"
@@ -584,7 +594,7 @@ Certifier 对提交的工具描述和 Agent 端点执行自动化安全扫描。
   "scan_result": {
     "version": "0.1",
     "scan_id": "scan-2026-07-20-a1b2c3",
-    "agent_did": "did:aishield:7f3a2b1c9d4e5f6a8b0c1d2e3f4a5b6c",
+    "agent_did": "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK",
     "scan_timestamp": "2026-07-20T08:00:00Z",
     "scanner_version": "aishield-scanner-v0.1.0",
     "total_score": 82,
@@ -737,7 +747,7 @@ AIShield 安全认证证书使用标准化的 JSON 格式：
   "aishield_cert": {
     "cert_id": "cert-aishield-2026-07-20-7f3a2b",
     "cert_version": "0.1",
-    "agent_did": "did:aishield:7f3a2b1c9d4e5f6a8b0c1d2e3f4a5b6c",
+    "agent_did": "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK",
     "agent_name": "CodeReviewer-Pro",
     "agent_endpoint": "https://agent.example.com/a2a",
     "level": 2,
@@ -804,7 +814,7 @@ AIShield 安全认证证书使用标准化的 JSON 格式：
 ```json
 {
   "cert_id": "cert-aishield-2026-07-20-7f3a2b",
-  "agent_did": "did:aishield:7f3a2b1c9d4e5f6a8b0c1d2e3f4a5b6c",
+  "agent_did": "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK",
   "level": 2,
   "score": 82,
   "issued_at": "2026-07-20T10:00:00Z",
@@ -844,7 +854,7 @@ Cache-Control: public, max-age=3600
   "aishield_cert": {
     "cert_id": "cert-aishield-2026-07-20-7f3a2b",
     "cert_version": "0.1",
-    "agent_did": "did:aishield:7f3a2b1c9d4e5f6a8b0c1d2e3f4a5b6c",
+    "agent_did": "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK",
     "agent_name": "CodeReviewer-Pro",
     "level": 2,
     "level_name": "Verified",
@@ -1310,7 +1320,7 @@ Activity Score = (Active_Days_Score × 0.5) + (Transaction_Volume_Score × 0.5)
 ```json
 {
   "identity_verification": {
-    "agent_did": "did:aishield:7f3a2b1c9d4e5f6a8b0c1d2e3f4a5b6c",
+    "agent_did": "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK",
     "verified_attributes": [
       {
         "type": "email",
@@ -1410,7 +1420,7 @@ GET /aishield-trust/v1/score/{did}
 **请求示例**：
 
 ```http
-GET /aishield-trust/v1/score/did:aishield:7f3a2b1c9d4e5f6a8b0c1d2e3f4a5b6c HTTP/1.1
+GET /aishield-trust/v1/score/did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK HTTP/1.1
 Host: trust.aishield.org
 Accept: application/json
 ```
@@ -1425,7 +1435,7 @@ Cache-Control: public, max-age=300
 {
   "trust_score_response": {
     "version": "0.1",
-    "agent_did": "did:aishield:7f3a2b1c9d4e5f6a8b0c1d2e3f4a5b6c",
+    "agent_did": "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK",
     "agent_name": "CodeReviewer-Pro",
     "trust_score": 74,
     "computed_at": "2026-07-20T12:00:00Z",
@@ -1496,7 +1506,7 @@ Content-Type: application/json
 
 {
   "dids": [
-    "did:aishield:7f3a2b1c9d4e5f6a8b0c1d2e3f4a5b6c",
+    "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK",
     "did:aishield:abc123def456",
     "did:aishield:xyz789"
   ]
@@ -1511,7 +1521,7 @@ Content-Type: application/json
     "version": "0.1",
     "scores": [
       {
-        "agent_did": "did:aishield:7f3a2b1c9d4e5f6a8b0c1d2e3f4a5b6c",
+        "agent_did": "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK",
         "trust_score": 74
       },
       {
@@ -1556,7 +1566,7 @@ Trust Score 在以下事件发生时触发重新计算：
 {
   "trust_event": {
     "event_type": "task_completed",
-    "agent_did": "did:aishield:7f3a2b1c9d4e5f6a8b0c1d2e3f4a5b6c",
+    "agent_did": "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK",
     "delegation_id": "del-2026-07-20-a1b2c3d4",
     "timestamp": "2026-07-20T14:30:00Z",
     "data": {
@@ -1588,7 +1598,7 @@ Trust Score 保留最近 365 天的每日评分快照：
 ```json
 {
   "score_history": {
-    "agent_did": "did:aishield:7f3a2b1c9d4e5f6a8b0c1d2e3f4a5b6c",
+    "agent_did": "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK",
     "period": "365d",
     "snapshots": [
       {"date": "2026-07-20", "score": 74},
@@ -1803,7 +1813,7 @@ Agent Delegation Protocol 是 AIShield Trust Standard 的核心交互协议，�
       "endpoint": "https://ops.companya.com/a2a"
     },
     "delegate": {
-      "did": "did:aishield:7f3a2b1c9d4e5f6a8b0c1d2e3f4a5b6c",
+      "did": "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK",
       "name": "CodeReviewer-Pro",
       "endpoint": "https://agent.example.com/a2a"
     },
@@ -1996,7 +2006,7 @@ Agent Delegation Protocol 是 AIShield Trust Standard 的核心交互协议，�
     ],
     "completed_at": "2026-07-20T18:30:00Z",
     "execution_duration_seconds": 31200,
-    "delegate_did": "did:aishield:7f3a2b1c9d4e5f6a8b0c1d2e3f4a5b6c",
+    "delegate_did": "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK",
     "delegate_signature": "eyJhbGciOiJFZERTQSIsImtpZCI6IiNrZXktMSJ9..."
   }
 }
@@ -2236,12 +2246,12 @@ POST /aishield-delegation/v1/{delegation_id}/dispute
     "payment": {
       "amount": "65.00",
       "currency": "USDC",
-      "to": "did:aishield:7f3a2b1c9d4e5f6a8b0c1d2e3f4a5b6c"
+      "to": "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK"
     },
     "arbitration_fee": {
       "amount": "5.00",
       "currency": "USDC",
-      "paid_by": "did:aishield:7f3a2b1c9d4e5f6a8b0c1d2e3f4a5b6c"
+      "paid_by": "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK"
     },
     "trust_score_impact": {
       "delegate_penalty": -5,
@@ -2336,7 +2346,7 @@ POST /aishield-delegation/v1/{delegation_id}/dispute
 **Step 1: Delegator 查询 Delegate 的信任信息**
 
 ```http
-GET /aishield-trust/v1/score/did:aishield:7f3a2b1c9d4e5f6a8b0c1d2e3f4a5b6c HTTP/1.1
+GET /aishield-trust/v1/score/did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK HTTP/1.1
 
 响应：
 {
@@ -2372,7 +2382,7 @@ Content-Type: application/json
       "name": "CompanyA Ops"
     },
     "delegate": {
-      "did": "did:aishield:7f3a2b1c9d4e5f6a8b0c1d2e3f4a5b6c"
+      "did": "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK"
     },
     "escrow": {
       "enabled": true,
@@ -2415,7 +2425,7 @@ Content-Type: application/json
     "task_hash": "sha256:e3b0c442...",
     "result_summary": "审查完成：3 个高危漏洞、5 个中危问题",
     "completed_at": "2026-07-20T22:30:00Z",
-    "delegate_did": "did:aishield:7f3a2b1c9d4e5f6a8b0c1d2e3f4a5b6c",
+    "delegate_did": "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK",
     "delegate_signature": "..."
   }
 }
@@ -2822,7 +2832,7 @@ if __name__ == "__main__":
     client = TrustScoreClient()
 
     # 查询 Trust Score
-    did = "did:aishield:7f3a2b1c9d4e5f6a8b0c1d2e3f4a5b6c"
+    did = "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK"
     score = client.get_trust_score(did)
 
     print("=== Trust Score ===")
@@ -3488,7 +3498,7 @@ AIShield Trust Standard 的制定受益于以下开源标准和社区工作：
         },
         "agent_did": {
           "type": "string",
-          "pattern": "^did:aishield:"
+          "pattern": "^did:(key|aishield):"
         },
         "agent_name": {
           "type": "string",

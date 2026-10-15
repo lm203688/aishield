@@ -1720,7 +1720,7 @@ server.tool(
   `创建或查询个人 Agent 身份 (PAI DID)。
 
 一个自然人可以有多个个人 Agent 实例（Alice 的 Muse / Alice 的 ChatGPT-Agent）。
-DID 遵循 did:aishield:pa:<hash> 命名约定，服务端为每次身份创建分配唯一标识，
+DID 为自认证 did:key（Ed25519 公钥编码进 DID，服务端按 user_id 确定性派生，同一 user_id 恒得同一 DID），
 后续可用于签署 Capability Ticket、追溯 Agent 行动、发起 Dispute。`,
   {
     user_id: z.string().describe('自然人标识（如 email 或平台用户 id）'),

@@ -39,6 +39,16 @@ try:
 except ImportError:
     import crypto_sign as cs
 
+try:
+    from eco import agent_card
+except ImportError:  # 允许以脚本方式直接运行自测
+    import agent_card
+
+try:
+    from eco import trust_protocol
+except ImportError:  # 允许以脚本方式直接运行自测
+    import trust_protocol
+
 TZ = timezone(timedelta(hours=8))
 _BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _DATA = os.path.join(_BASE, "api", "data")
@@ -47,9 +57,20 @@ HMAC_SECRET_FILE = os.path.join(_DATA, "personal_agent_hmac.json")
 
 _lock = threading.RLock()
 
-# DID 方法名 —— 遵循 DWN "did:<method>:<did>" 命名约定，method 前缀 aishield:pa
-PA_DID_METHOD = "aishield:pa"
-PA_SIGNER_DID = "did:aishield:trust-service"  # 复用 agent_card 的信任服务签名者
+# 自然人身份 DID 方法：#441 起统一为自认证 did:key（公钥编码进 DID），
+# 不再使用旧标签 did:aishield:pa:*。历史已存用户维持旧 DID（幂等返回）。
+
+
+def get_pa_signer_did() -> str:
+    """PAI 信任服务签名者 DID（#441：统一为自认证 did:key，密钥不可用回退旧标签）。"""
+    try:
+        return agent_card.get_signer_did()
+    except Exception:
+        return "did:aishield:trust-service"
+
+
+# 兼容旧常量：模块级常量在导入时解析一次（密钥未生成则回退旧标签）。
+PA_SIGNER_DID = get_pa_signer_did()
 
 # 行动 provenance HMAC 链默认参数
 CHUNK_TTL_DAYS = 90  # provenance 记录保留 90 天
@@ -100,12 +121,6 @@ def _hash_hex(obj, secret=b""):
     if secret:
         return hmac.new(secret, body.encode("utf-8"), hashlib.sha256).hexdigest()
     return hashlib.sha256(body.encode("utf-8")).hexdigest()
-
-
-def _b32(data):
-    """base32 lower w/o padding（DID 用）。"""
-    import base64
-    return base64.b32encode(data).decode("ascii").rstrip("=").lower()
 
 
 def _norm_user(user_id):
@@ -188,16 +203,22 @@ def _save(data):
 # ══════════════════════════════════════════════════════════════
 
 def create_personal_did(user_id, display_name=None, email=None):
-    """为自然人创建 PAI 身份。幂等：已存在则返回现有。"""
+    """为自然人创建 PAI 身份。幂等：已存在则返回现有。
+
+    #441：自然人身份统一为自认证 ``did:key``。从 user_id 确定性派生 Ed25519
+    密钥对（零依赖、纯标准库），DID = 公钥派生的 ``did:key:z...``——同一 user_id
+    永远得到同一 DID（幂等 / 可复算），且密码学上自洽（可独立验签）。
+    """
     user_id = _norm_user(user_id)
     with _lock:
         data = _load()
         existing = data["users"].get(user_id)
         if existing:
             return dict(existing, idempotent=True)
-        ident_fingerprint = _hash_hex({"user_id": user_id, "name": display_name,
-                                       "email": email})[:24]
-        did = f"did:{PA_DID_METHOD}:{_b32(bytes.fromhex(ident_fingerprint[:16]))}"
+        # 稳定种子 → 确定性密钥对 → did:key
+        seed = hashlib.sha256(
+            ("aishield:pai:v1:" + user_id).encode("utf-8")).digest()
+        did = trust_protocol.keypair_from_seed(seed).did
         rec = {
             "user_id": user_id,
             "did": did,

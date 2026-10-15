@@ -22,7 +22,7 @@ Meta 官方 Muse 已经内置：
 
 | Gap | Stripe Link / Meta Sentinel 覆盖？ | AIShield 补齐 |
 |---|---|---|
-| 跨平台可验证的个人 Agent 身份（"这个 Muse 是 Alice 的"） | ❌（Meta 账号体系封闭） | ✅ PAI DID (`did:aishield:pa:*`) |
+| 跨平台可验证的个人 Agent 身份（"这个 Muse 是 Alice 的"） | ❌（Meta 账号体系封闭） | ✅ PAI DID (`did:key`) |
 | 累计预算 + 周 / 月上限 | ❌（Stripe Link 只管单次卡号） | ✅ 个人预算守护（4 粒度） |
 | 目标站风险评分 + quote-first 决策 | ⚠️（Stripe 有 3D Secure，但不做决策层） | ✅ 8 因素风险评分 + allow/confirm/block/denied |
 | Connector 独立第二意见 | ❌（Meta 自审） | ✅ 8 维度独立评估 |
@@ -45,7 +45,7 @@ Meta 官方 Muse 已经内置：
 
 > AIShield is an open-source personal agent governance kernel (MIT, github.com/lm203688/aishield). It plugs into Muse before the agent executes sensitive actions — payment, email, form-fill, connector install — and gives the user three things Meta's stack does not provide:
 >
-> 1. **A portable personal identity** (PAI DID, `did:aishield:pa:*`) that works across Muse, ChatGPT-Agent, Claude-Agent, and any self-built agent. Users own it; no platform can revoke it unilaterally.
+> 1. **A portable personal identity** (PAI DID, `did:key`) that works across Muse, ChatGPT-Agent, Claude-Agent, and any self-built agent. Users own it; no platform can revoke it unilaterally.
 > 2. **Personal budget governance with cumulative weekly and monthly limits** — beyond what Stripe Link's per-transaction card number can express. Includes 8-factor risk scoring (target-site reputation, amount vs. personal history P90, off-hours, currency shift, first-seen target, high-risk action type, quote-first gap) and a four-tier verdict: allow / confirm / block / denied.
 > 3. **Immutable action provenance** — every sensitive action Muse performs is appended to an HMAC-SHA256 chained ledger, verifiable offline for 90 days. Users can file disputes against any action with cryptographic receipts.
 >

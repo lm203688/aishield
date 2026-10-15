@@ -30,6 +30,11 @@ import json
 import os
 from datetime import datetime, timezone, timedelta
 
+try:
+    from eco import agent_card
+except ImportError:  # 允许以脚本方式直接运行自测
+    import agent_card
+
 TZ = timezone(timedelta(hours=8))
 NAMESPACE_AISHIELD = "aishield.org/2026"
 
@@ -56,7 +61,7 @@ def _canon(obj) -> bytes:
 def build_kya_claims(
     *, agent_id: str, name: str, url: str = "",
     capabilities: list = None, trust_score: int | None = None,
-    signer_did: str = "did:aishield:trust-service",
+    signer_did: str | None = None,
     attestations: list = None,
 ) -> dict:
     """生成 KYA v0.1 风格的 SD-JWT claims 集合。
@@ -75,6 +80,9 @@ def build_kya_claims(
         "constraints": [ ... 8 种 machine-verifiable constraint 中的常见几种 ... ]
       }
     """
+    # #441：signer_did 缺省时统一为信任服务自认证 did:key（密钥不可用回退旧标签）。
+    if not signer_did:
+        signer_did = agent_card.get_signer_did()
     now = _now_iso()
     claims = []
 
@@ -324,7 +332,7 @@ def did_to_wallet(did: str) -> dict | None:
 
 def agent_card_to_identity(
     card: dict,
-    *, signer_did: str = "did:aishield:trust-service",
+    *, signer_did: str | None = None,
     trust_score: int | None = None,
 ) -> dict:
     """一站式：Agent Card → 三种上游身份（KYA + Web Bot Auth + ERC-8004 optional）。

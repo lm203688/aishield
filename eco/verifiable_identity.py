@@ -60,6 +60,7 @@ import time
 from typing import Any, Dict, List, Optional
 
 from eco import crypto_sign as _cs
+from eco import did_key
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _DATA = os.path.join(BASE, "api", "data")
@@ -303,6 +304,12 @@ class SigningKeyRing:
             )
         pub = str(a.get("public_key") or "")
         kid = _kid(pub)
+        # #441：issuer DID 统一为签名密钥的自认证 did:key（公钥编码进 DID，
+        # 第三方可从 iss 直接解出公钥独立验签）。密钥异常时回退旧标签。
+        try:
+            issuer_did = did_key.did_key_from_base64url(pub)
+        except Exception:
+            issuer_did = "did:aishield:" + kid
         now = _now()
         cid = hashlib.sha256(
             _canonical({"sub": subject_did, "kid": kid, "iat": now})).hexdigest()[:16]
@@ -310,7 +317,7 @@ class SigningKeyRing:
             "typ": VC_TYPE,
             "alg": ALG,
             "kid": kid,
-            "iss": "did:aishield:" + kid,
+            "iss": issuer_did,
             "sub": subject_did,
             "vcd": cid,
             "iat": now,

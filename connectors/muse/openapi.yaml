@@ -55,7 +55,7 @@ paths:
                     type: string
                   did:
                     type: string
-                    pattern: '^did:aishield:pa:[a-z0-9]+$'
+                    pattern: '^did:key:z6Mk[1-9A-HJ-NP-Za-km-z]+$'
     get:
       summary: 列出所有用户 id
       responses:

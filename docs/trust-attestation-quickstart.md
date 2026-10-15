@@ -133,7 +133,7 @@ curl -sS -X POST https://aishield.tools/api/v1/identity/register \
 # ③ 签发可验证身份凭证
 curl -sS -X POST https://aishield.tools/api/v1/identity/credentials/issue \
   -H 'Content-Type: application/json' \
-  -d '{"did": "did:aishield:abc123", "owner": "team-acme",
+  -d '{"did": "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK", "owner": "team-acme",
        "identity_token": "it_xxxxxxxx", "ttl": 86400}'
 
 # ④ 公开验证（验签离线可完成）
@@ -144,7 +144,7 @@ curl -sS -X POST https://aishield.tools/api/v1/identity/credentials/verify \
 # ⑤ 除销（仅属主；owner 不匹配即 403）
 curl -sS -X POST https://aishield.tools/api/v1/identity/credentials/revoke \
   -H 'Content-Type: application/json' \
-  -d '{"did": "did:aishield:abc123", "owner": "team-acme",
+  -d '{"did": "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK", "owner": "team-acme",
        "credential_id": "vc_xxxxxxxx"}'
 ```
 

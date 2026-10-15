@@ -684,7 +684,7 @@ for _pid, _p in list(PLATFORMS.items()):
 
 GOVERNANCE_PROVISIONS: dict[str, dict[str, str]] = {
     "portable_personal_identity":
-        "PAI DID (did:aishield:pa:*) —— 跨平台可验证个人 Agent 身份",
+        "PAI DID (did:key，自认证) —— 跨平台可验证个人 Agent 身份",
     "cumulative_budget_governance":
         "个人预算守护（per_tx / daily / weekly / monthly 4 粒度）",
     "target_site_risk_scoring":

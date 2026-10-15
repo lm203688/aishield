@@ -21,6 +21,8 @@ import unittest
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from eco import identity                                    # noqa: E402
+from eco import crypto_sign as cs                           # noqa: E402
+from eco import did_key                                     # noqa: E402
 from api import ecosystem_api                               # noqa: E402
 
 _AGENTS = identity.AGENTS_FILE
@@ -249,6 +251,60 @@ class TestIdentityApiSurface(unittest.TestCase):
         payload, status = ecosystem_api.handle_delete("/api/v1/nope/deep")
         self.assertEqual(status, 404)
         self.assertIn("Not found", payload["error"])
+
+
+class TestDidKeyIdentity(IdentityRevocationTestCase):
+    """#441：Agent 身份统一到自认证 did:key + 冒用防护。"""
+
+    def test_generate_did_from_public_key(self):
+        alg, _priv, pub = cs.generate_keypair()
+        did = identity.generate_did(pub)
+        self.assertTrue(did_key.is_did_key(did))
+        self.assertEqual(did_key.decode_did_key(did), did_key._b64url_decode(pub))
+
+    def test_generate_did_fallback_without_key(self):
+        # 无有效公钥 → 退回旧标签（仅作查找键）
+        self.assertTrue(identity.generate_did().startswith("did:aishield:"))
+        self.assertTrue(identity.generate_did("garbage!!").startswith("did:aishield:"))
+
+    def test_register_derives_did_key_from_public_key(self):
+        alg, _priv, pub = cs.generate_keypair()
+        tk = self._issue("alice")
+        agent = identity.AgentRegistration().register(
+            name="didkey-agent", owner="alice",
+            registration_token=tk["token"], public_key=pub)
+        self.assertTrue(did_key.is_did_key(agent["did"]))
+        self.assertEqual(did_key.decode_did_key(agent["did"]),
+                         did_key._b64url_decode(pub))
+
+    def test_register_accepts_matching_did_key(self):
+        alg, _priv, pub = cs.generate_keypair()
+        did = did_key.did_key_from_base64url(pub)
+        tk = self._issue("alice")
+        agent = identity.AgentRegistration().register(
+            name="self-cert", did=did, owner="alice",
+            registration_token=tk["token"], public_key=pub)
+        self.assertEqual(agent["did"], did)
+
+    def test_register_rejects_did_key_public_key_mismatch(self):
+        # 自带 did:key 但 public_key 与之不符 → 冒用，必须拒绝
+        _a, _p, pub_a = cs.generate_keypair()
+        _b, _p2, pub_b = cs.generate_keypair()
+        did = did_key.did_key_from_base64url(pub_a)
+        tk = self._issue("alice")
+        with self.assertRaises(ValueError):
+            identity.AgentRegistration().register(
+                name="spoof", did=did, owner="alice",
+                registration_token=tk["token"], public_key=pub_b)
+
+    def test_register_rejects_did_key_without_public_key(self):
+        alg, _priv, pub = cs.generate_keypair()
+        did = did_key.did_key_from_base64url(pub)
+        tk = self._issue("alice")
+        with self.assertRaises(ValueError):
+            identity.AgentRegistration().register(
+                name="no-key", did=did, owner="alice",
+                registration_token=tk["token"])
 
     def test_delete_handler_revokes_owner_from_query(self):
         issued, _ = ecosystem_api._identity_token_issue({"owner": "alice"})

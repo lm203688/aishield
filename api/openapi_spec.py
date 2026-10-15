@@ -440,8 +440,8 @@ def get_openapi_spec():
                             "properties": {
                                 "did": {
                                     "type": "string",
-                                    "description": "去中心化身份标识",
-                                    "example": "did:aishield:a1b2c3d4e5f6",
+                                    "description": "去中心化身份标识（did:key 自认证身份）",
+                                    "example": "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK",
                                 },
                                 "name": {
                                     "type": "string",

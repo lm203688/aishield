@@ -17,6 +17,7 @@ import tempfile
 import unittest
 
 from eco import trust_protocol as tp
+from eco import did_key
 
 
 class IdentityTest(unittest.TestCase):
@@ -61,6 +62,49 @@ class IdentityTest(unittest.TestCase):
     def test_invalid_did_raises(self):
         with self.assertRaises(ValueError):
             tp.did_to_public_key("did:web:example.com")
+
+
+class DidKeyCodecTest(unittest.TestCase):
+    """eco/did_key.py：#441 统一的 did:key 编解码（单一真源）。"""
+
+    def test_ed25519_roundtrip(self):
+        for _ in range(5):
+            pk = os.urandom(32)
+            did = did_key.encode_ed25519_pubkey(pk)
+            self.assertTrue(did.startswith("did:key:z6Mk"))
+            self.assertEqual(did_key.decode_did_key(did), pk)
+
+    def test_from_base64url(self):
+        import base64
+        pk = os.urandom(32)
+        b64 = base64.urlsafe_b64encode(pk).decode().rstrip("=")
+        did = did_key.did_key_from_base64url(b64)
+        self.assertEqual(did_key.decode_did_key(did), pk)
+
+    def test_is_did_key(self):
+        pk = os.urandom(32)
+        self.assertTrue(did_key.is_did_key(did_key.encode_ed25519_pubkey(pk)))
+        self.assertFalse(did_key.is_did_key("did:aishield:abc"))
+        self.assertFalse(did_key.is_did_key("did:key:z"))
+        self.assertFalse(did_key.is_did_key(None))
+
+    def test_did_method(self):
+        self.assertEqual(did_key.did_method("did:key:z6Mk"), "key")
+        self.assertEqual(did_key.did_method("did:aishield:trust-service"), "aishield")
+        self.assertEqual(did_key.did_method("did:aishield:pa:xyz"), "aishield:pa")
+        self.assertIsNone(did_key.did_method("not-a-did"))
+
+    def test_decode_rejects_non_ed25519_multicodec(self):
+        # 构造一个合法 base58btc 但前缀非 0xed01 的 did:key，应被拒绝
+        from eco import did_key as dk
+        payload = b"\xec\x01" + os.urandom(32)  # 0xec01 非 Ed25519
+        bad = "did:key:z" + dk._b58encode(payload)
+        with self.assertRaises(ValueError):
+            dk.decode_did_key(bad)
+
+    def test_encode_rejects_wrong_length(self):
+        with self.assertRaises(ValueError):
+            did_key.encode_ed25519_pubkey(b"too-short")
 
 
 class ScoringTest(unittest.TestCase):

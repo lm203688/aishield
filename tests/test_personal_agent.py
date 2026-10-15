@@ -47,7 +47,8 @@ class TestPersonalAgentIdentity(unittest.TestCase):
 
     def test_create_did_basic(self):
         u = self.pa.create_personal_did("alice@example.com", "Alice", "alice@example.com")
-        self.assertTrue(u["did"].startswith("did:aishield:pa:"))
+        # #441：自然人身份统一为自认证 did:key（公钥编码进 DID）
+        self.assertTrue(u["did"].startswith("did:key:z6Mk"))
         self.assertEqual(u["user_id"], "alice@example.com")
         self.assertEqual(u["display_name"], "Alice")
 
@@ -74,7 +75,8 @@ class TestPersonalAgentIdentity(unittest.TestCase):
 
     def test_register_instance_autocreates_did(self):
         inst = self.pa.register_agent_instance("newuser@example.com", "Test", "Test")
-        self.assertTrue(inst["parent_did"].startswith("did:aishield:pa:"))
+        # #441：parent_did 现为自认证 did:key
+        self.assertTrue(inst["parent_did"].startswith("did:key:z6Mk"))
 
     def test_revoke_instance_cascades_tickets(self):
         self.pa.create_personal_did("alice@example.com")
