@@ -270,6 +270,7 @@ def main():
         'tests.test_attestation_live',
         'tests.test_distribution_gate',
         'tests.test_trust_api',
+        'tests.test_handshake_stateless',  # 2026-10-15 补登记：存在但未纳入 runner，被 run_all 静默跳过（假绿）
         'tests.test_identity_network_scan',
         'tests.test_capability_boundary_scan',
         'tests.test_capability_full_scan',
