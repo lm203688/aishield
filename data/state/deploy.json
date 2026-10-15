@@ -2,19 +2,11 @@
   "domain": "deploy",
   "current": {
     "last_deploy_verify": "success",
-    "deploy_run_id": "38536550027",
+    "deploy_run_id": "38659365555",
     "_source": "deploy-server",
-    "_ts": "2026-10-14T08:49:30.762004+00:00"
+    "_ts": "2026-10-15T00:20:57.885576+00:00"
   },
   "history": [
-    {
-      "ts": "2026-09-14T08:58:23.725751+00:00",
-      "source": "deploy-server",
-      "state": {
-        "last_deploy_verify": "success",
-        "deploy_run_id": "34824795369"
-      }
-    },
     {
       "ts": "2026-09-15T08:47:58.333479+00:00",
       "source": "deploy-server",
@@ -406,8 +398,16 @@
         "last_deploy_verify": "success",
         "deploy_run_id": "38536550027"
       }
+    },
+    {
+      "ts": "2026-10-15T00:20:57.885589+00:00",
+      "source": "deploy-server",
+      "state": {
+        "last_deploy_verify": "success",
+        "deploy_run_id": "38659365555"
+      }
     }
   ],
-  "updated": "2026-10-14T08:49:30.762026+00:00",
+  "updated": "2026-10-15T00:20:57.885595+00:00",
   "desc": "部署与上线验证结果（deploy-server 独占写入）"
 }
