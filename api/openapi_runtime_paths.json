@@ -1,16 +1,15 @@
 {
   "note": "运行时路由清单：进程内直调 api.server.AIShieldHandler.do_GET/do_POST 探得，与 curated 规范合并后即线上 /openapi.json。",
   "source": "runtime probe (scripts/gen_openapi_spec.py)",
-  "generated_at": "2026-10-05T20:51:52",
-  "route_count": 132,
-  "operation_count": 148,
+  "generated_at": "2026-10-15T09:29:46",
+  "route_count": 133,
+  "operation_count": 149,
   "probe_errors": [],
   "state_audit": {
     "created": [],
     "restored": [
       "C:\\Users\\xing\\Desktop\\aishield\\data\\fleet.json",
       "C:\\Users\\xing\\Desktop\\aishield\\data\\monitored_tools.json",
-      "C:\\Users\\xing\\Desktop\\aishield\\api/data\\agent_card_key.json",
       "C:\\Users\\xing\\Desktop\\aishield\\api/data\\spend_caps.json",
       "C:\\Users\\xing\\Desktop\\aishield\\api/data\\usage.json",
       "(已删除探针新建) C:\\Users\\xing\\Desktop\\aishield\\api/data\\governance_audit.jsonl"
@@ -1086,25 +1085,9 @@
           "verb": "get",
           "summary": "GET /api/v1/attestations（运行时探得；schema 由真实响应推导）",
           "status": 200,
-          "sample_present": true,
-          "sample_truncated": false,
-          "schema": {
-            "type": "object",
-            "properties": {
-              "count": {
-                "type": "integer"
-              },
-              "attestations": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {},
-                  "additionalProperties": true
-                }
-              }
-            },
-            "additionalProperties": true
-          },
+          "sample_present": false,
+          "sample_truncated": true,
+          "schema": {},
           "x-aishield-generated": true,
           "x-aishield-probe-status": 200
         },
@@ -1491,6 +1474,33 @@
                     },
                     "additionalProperties": true
                   },
+                  "lifetime": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "object"
+                      },
+                      "price": {
+                        "type": "object"
+                      },
+                      "currency": {
+                        "type": "object"
+                      },
+                      "billing_cycle": {
+                        "type": "object"
+                      },
+                      "daily_limit": {
+                        "type": "object"
+                      },
+                      "monthly_limit": {
+                        "type": "object"
+                      },
+                      "features": {
+                        "type": "object"
+                      }
+                    },
+                    "additionalProperties": true
+                  },
                   "enterprise": {
                     "type": "object",
                     "properties": {
@@ -1578,53 +1588,9 @@
           "verb": "get",
           "summary": "GET /api/v1/certify/list（运行时探得；schema 由真实响应推导）",
           "status": 200,
-          "sample_present": true,
-          "sample_truncated": false,
-          "schema": {
-            "type": "object",
-            "properties": {
-              "success": {
-                "type": "boolean"
-              },
-              "certifications": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "cert_id": {
-                      "type": "object"
-                    },
-                    "source_url": {
-                      "type": "object"
-                    },
-                    "score": {
-                      "type": "object"
-                    },
-                    "badge_level": {
-                      "type": "object"
-                    },
-                    "risk_level": {
-                      "type": "object"
-                    },
-                    "findings_count": {
-                      "type": "object"
-                    },
-                    "status": {
-                      "type": "object"
-                    },
-                    "certified_at": {
-                      "type": "object"
-                    },
-                    "expires_at": {
-                      "type": "object"
-                    }
-                  },
-                  "additionalProperties": true
-                }
-              }
-            },
-            "additionalProperties": true
-          },
+          "sample_present": false,
+          "sample_truncated": true,
+          "schema": {},
           "x-aishield-generated": true,
           "x-aishield-probe-status": 200
         }
@@ -3477,6 +3443,79 @@
       ]
     },
     {
+      "path": "/api/v1/guard",
+      "tag": "guard",
+      "summary": "GET /api/v1/guard（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "GET /api/v1/guard（运行时探得；schema 由真实响应推导）",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "service": {
+                "type": "string"
+              },
+              "version": {
+                "type": "string"
+              },
+              "default_mode": {
+                "type": "string"
+              },
+              "endpoints": {
+                "type": "object",
+                "properties": {
+                  "GET  /api/v1/guard/evaluate?server=&tool=": {
+                    "type": "string"
+                  },
+                  "GET  /api/v1/guard/policy": {
+                    "type": "string"
+                  },
+                  "GET  /api/v1/guard/audit?limit=": {
+                    "type": "string"
+                  },
+                  "GET  /api/v1/guard/status": {
+                    "type": "string"
+                  },
+                  "GET  /api/v1/guard/kill-switch?server=": {
+                    "type": "string"
+                  },
+                  "POST /api/v1/guard/evaluate": {
+                    "type": "string"
+                  },
+                  "POST /api/v1/guard/kill": {
+                    "type": "string"
+                  },
+                  "POST /api/v1/guard/revive": {
+                    "type": "string"
+                  },
+                  "POST /api/v1/guard/policy": {
+                    "type": "string"
+                  },
+                  "POST /api/v1/guard/allow": {
+                    "type": "string"
+                  },
+                  "POST /api/v1/guard/deny": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": true
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "getGuard"
+      ]
+    },
+    {
       "path": "/api/v1/handshake",
       "tag": "handshake",
       "summary": "POST /api/v1/handshake（运行时探得；schema 由真实响应推导）",
@@ -3567,7 +3606,7 @@
                 "type": "string"
               },
               "commit": {
-                "type": "null"
+                "type": "string"
               },
               "deployed_at": {
                 "type": "null"
@@ -3579,7 +3618,7 @@
                 "type": "boolean"
               },
               "identity_reason": {
-                "type": "string"
+                "type": "null"
               }
             },
             "additionalProperties": true
@@ -3616,7 +3655,47 @@
                 "type": "array",
                 "items": {
                   "type": "object",
-                  "properties": {},
+                  "properties": {
+                    "name": {
+                      "type": "object"
+                    },
+                    "did": {
+                      "type": "object"
+                    },
+                    "public_key": {
+                      "type": "object"
+                    },
+                    "capabilities": {
+                      "type": "object"
+                    },
+                    "owner": {
+                      "type": "object"
+                    },
+                    "reputation_score": {
+                      "type": "object"
+                    },
+                    "reputation_level": {
+                      "type": "object"
+                    },
+                    "registered_at": {
+                      "type": "object"
+                    },
+                    "updated_at": {
+                      "type": "object"
+                    },
+                    "status": {
+                      "type": "object"
+                    },
+                    "revoked_at": {
+                      "type": "object"
+                    },
+                    "identity_token_expires": {
+                      "type": "object"
+                    },
+                    "identity_token_consumed_at": {
+                      "type": "object"
+                    }
+                  },
                   "additionalProperties": true
                 }
               }
@@ -3791,18 +3870,28 @@
                 "type": "array",
                 "items": {
                   "type": "object",
-                  "properties": {},
+                  "properties": {
+                    "kid": {
+                      "type": "object"
+                    },
+                    "kty": {
+                      "type": "object"
+                    },
+                    "crv": {
+                      "type": "object"
+                    },
+                    "alg": {
+                      "type": "object"
+                    },
+                    "x": {
+                      "type": "object"
+                    }
+                  },
                   "additionalProperties": true
                 }
               },
               "ready": {
                 "type": "boolean"
-              },
-              "algorithm": {
-                "type": "string"
-              },
-              "reason": {
-                "type": "string"
               }
             },
             "additionalProperties": true
@@ -4171,173 +4260,9 @@
           "verb": "get",
           "summary": "Agent 生态 API · snapshot",
           "status": 200,
-          "sample_present": true,
-          "sample_truncated": false,
-          "schema": {
-            "type": "object",
-            "properties": {
-              "schema": {
-                "type": "string"
-              },
-              "generated_at": {
-                "type": "string"
-              },
-              "totals": {
-                "type": "object",
-                "properties": {
-                  "certifications": {
-                    "type": "integer"
-                  },
-                  "agents_registered": {
-                    "type": "integer"
-                  }
-                },
-                "additionalProperties": true
-              },
-              "top_by_score": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "cert_id": {
-                      "type": "object"
-                    },
-                    "source_url": {
-                      "type": "object"
-                    },
-                    "name": {
-                      "type": "object"
-                    },
-                    "score": {
-                      "type": "object"
-                    },
-                    "badge_level": {
-                      "type": "object"
-                    },
-                    "risk_level": {
-                      "type": "object"
-                    },
-                    "findings_count": {
-                      "type": "object"
-                    },
-                    "issued_at": {
-                      "type": "object"
-                    }
-                  },
-                  "additionalProperties": true
-                }
-              },
-              "top_by_badge": {
-                "type": "object",
-                "properties": {
-                  "platinum": {
-                    "type": "array",
-                    "items": {
-                      "type": "object"
-                    }
-                  },
-                  "gold": {
-                    "type": "array",
-                    "items": {
-                      "type": "object"
-                    }
-                  },
-                  "silver": {
-                    "type": "array",
-                    "items": {
-                      "type": "object"
-                    }
-                  },
-                  "bronze": {
-                    "type": "array",
-                    "items": {
-                      "type": "object"
-                    }
-                  }
-                },
-                "additionalProperties": true
-              },
-              "top_by_domain": {
-                "type": "object",
-                "properties": {
-                  "legal": {
-                    "type": "array",
-                    "items": {
-                      "type": "object"
-                    }
-                  },
-                  "medical": {
-                    "type": "array",
-                    "items": {
-                      "type": "object"
-                    }
-                  },
-                  "finance": {
-                    "type": "array",
-                    "items": {
-                      "type": "object"
-                    }
-                  },
-                  "education": {
-                    "type": "array",
-                    "items": {
-                      "type": "object"
-                    }
-                  },
-                  "engineering": {
-                    "type": "array",
-                    "items": {
-                      "type": "object"
-                    }
-                  },
-                  "design": {
-                    "type": "array",
-                    "items": {
-                      "type": "object"
-                    }
-                  },
-                  "research": {
-                    "type": "array",
-                    "items": {
-                      "type": "object"
-                    }
-                  },
-                  "civic": {
-                    "type": "array",
-                    "items": {
-                      "type": "object"
-                    }
-                  }
-                },
-                "additionalProperties": true
-              },
-              "top_by_provider": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "provider": {
-                      "type": "object"
-                    },
-                    "count": {
-                      "type": "object"
-                    },
-                    "mean_score": {
-                      "type": "object"
-                    },
-                    "max_score": {
-                      "type": "object"
-                    },
-                    "cert_ids": {
-                      "type": "object"
-                    }
-                  },
-                  "additionalProperties": true
-                }
-              }
-            },
-            "additionalProperties": true
-          },
+          "sample_present": false,
+          "sample_truncated": true,
+          "schema": {},
           "x-aishield-generated": true,
           "x-aishield-probe-status": 200
         }
@@ -5065,7 +4990,9 @@
               "users": {
                 "type": "array",
                 "items": {
-                  "type": "string"
+                  "type": "object",
+                  "properties": {},
+                  "additionalProperties": true
                 }
               }
             },
@@ -5636,7 +5563,29 @@
                 "type": "array",
                 "items": {
                   "type": "object",
-                  "properties": {},
+                  "properties": {
+                    "agent_id": {
+                      "type": "object"
+                    },
+                    "name": {
+                      "type": "object"
+                    },
+                    "description": {
+                      "type": "object"
+                    },
+                    "url": {
+                      "type": "object"
+                    },
+                    "version": {
+                      "type": "object"
+                    },
+                    "skills": {
+                      "type": "object"
+                    },
+                    "authentication": {
+                      "type": "object"
+                    }
+                  },
                   "additionalProperties": true
                 }
               }
