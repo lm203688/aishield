@@ -578,5 +578,30 @@ class SandboxBackendTest(unittest.TestCase):
         self.assertGreaterEqual(len(r2["matrix"]), 5)
 
 
+class AgentCardPubkeyDidKeyTest(unittest.TestCase):
+    """#441：/api/v1/agent-card/pubkey 的 signer_did 必须是自认证 did:key。
+
+    回归：AgentCardSigner 去掉 .signer_did 实例属性后，该端点曾 500
+    （'AgentCardSigner' object has no attribute 'signer_did'）—— 现由
+    signer_did 属性委托 _resolve_signer_did() 修复，此用例钉死不再复发。
+    """
+
+    def test_pubkey_endpoint_returns_did_key(self):
+        import ecosystem_api
+        from eco import did_key
+        r, sc = ecosystem_api.handle_get("/api/v1/agent-card/pubkey", "")
+        self.assertEqual(sc, 200)
+        self.assertTrue(did_key.is_did_key(r["signer_did"]),
+                        f"signer_did 应为 did:key，实际 {r.get('signer_did')!r}")
+        self.assertEqual(r["alg"], "ed25519")
+        self.assertIn("public_key", r)
+
+    def test_pubkey_helper_returns_did_key(self):
+        import ecosystem_api
+        from eco import did_key
+        r = ecosystem_api._agent_card_pubkey()
+        self.assertTrue(did_key.is_did_key(r["signer_did"]))
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

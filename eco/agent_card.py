@@ -94,6 +94,11 @@ class AgentCardSigner:
             return self._explicit_signer_did
         return get_signer_did(self.key_dir)
 
+    @property
+    def signer_did(self):
+        """向后兼容属性：等价于 _resolve_signer_did()（#441 起为自认证 did:key）。"""
+        return self._resolve_signer_did()
+
     # ── 密钥管理 ──
     def _load_or_create(self):
         if self._priv is not None:
