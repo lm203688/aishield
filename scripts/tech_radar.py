@@ -187,7 +187,8 @@ def _http_text(url, headers=None, timeout=20):
 def _pat():
     p = os.path.join(ROOT, ".workbuddy", "schedule-revert-pat.txt")
     if os.path.exists(p):
-        return open(p, encoding="utf-8").read().strip()
+        with open(p, encoding="utf-8") as _f:
+            return _f.read().strip()
     return os.environ.get("AISHIELD_PAT", "")
 
 def _ensure_dirs():
@@ -198,7 +199,8 @@ def _ensure_dirs():
 def _load_state():
     if os.path.exists(STATE_FILE):
         try:
-            return json.loads(open(STATE_FILE, encoding="utf-8").read())
+            with open(STATE_FILE, encoding="utf-8") as _f:
+                return json.loads(_f.read())
         except Exception:
             pass
     return {"seen_ids": [], "last_run": None, "runs": 0}
@@ -210,17 +212,15 @@ def _save_state(state):
     merged.update(state)
     merged["last_run"] = _now_utc().isoformat()
     merged["runs"] = merged.get("runs", 0) + 1
-    open(STATE_FILE, "w", encoding="utf-8").write(
-        json.dumps(merged, ensure_ascii=False, indent=2)
-    )
+    with open(STATE_FILE, "w", encoding="utf-8") as _f:
+        _f.write(json.dumps(merged, ensure_ascii=False, indent=2))
 
 def _save_endpoint_hint(state):
     """Persist state without touching run counters (used mid-scan)."""
     try:
         os.makedirs(os.path.dirname(STATE_FILE), exist_ok=True)
-        open(STATE_FILE, "w", encoding="utf-8").write(
-            json.dumps(state, ensure_ascii=False, indent=2)
-        )
+        with open(STATE_FILE, "w", encoding="utf-8") as _f:
+            _f.write(json.dumps(state, ensure_ascii=False, indent=2))
     except Exception:
         pass
 
@@ -1312,7 +1312,8 @@ def _publish(rel_paths, token, message):
         if not os.path.exists(abs_p):
             results.append((rel, False, "missing local file"))
             continue
-        content = open(abs_p, encoding="utf-8").read()
+        with open(abs_p, encoding="utf-8") as _f:
+            content = _f.read()
         my_b64 = base64.b64encode(content.encode("utf-8")).decode("ascii")
 
         status, sha, cur_b64 = _gh_get_file(rel, token)

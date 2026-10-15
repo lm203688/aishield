@@ -137,9 +137,19 @@ def _try_http_handshake(url):
                         
                         # 检查缓存契约
                         _check_cache_contract(result, findings)
-                        
+
                         # 检查 Multi Round-Trip Requests
                         _check_input_required(tools, findings)
+
+                        # 2026-07-28 无状态化后的信任假设（报告 P0-4）：
+                        # 移除 initialize 握手后，`_meta` 自报身份成为唯一线索，
+                        # 须与令牌确立的主体核对；MCP Apps 的服务端渲染 HTML
+                        # 必须按不可信内容处理。
+                        # 传输层确立的主体 = 被扫 URL 所确立的服务身份
+                        # （绝不可从不可信的 server response 内读取）。
+                        _check_meta_identity_consistency(
+                            result, findings, transport_subject=url)
+                        _check_mcp_apps_untrusted(result, findings)
                         
                     elif "error" in result:
                         # 服务器不支持无状态模式，回退到旧版
@@ -282,6 +292,119 @@ def _check_cache_contract(result, findings):
                 "type": "missing_cache_contract",
                 "severity": "low",
                 "description": "服务器未声明缓存契约 (ttlMs)，客户端可能过度重新获取工具列表",
+            })
+
+
+def _check_meta_identity_consistency(result, findings, transport_subject=None,
+                                     transport_granted_scopes=None):
+    """检查 `_meta` 自报身份/权限是否与**传输层确立**的主体一致（2026-07-28 协议）。
+
+    协议关键点：`_meta` 里的身份/能力声明是**不可信输入**，必须与传输层确立的
+    主体/授予范围核对，不一致须 fail-closed。旧版有状态协议靠 Session-Id 隐式
+    绑定了主体，移除握手后，自报身份成为唯一线索，若客户端只信 `_meta` 就等于
+    允许任何 server 冒充他人。
+
+    取值纪律（本函数存在的全部意义，见回归测试
+    ``tests/test_handshake_stateless.py::test_token_subject_read_outside_result``）：
+      * ``token_subject`` / ``granted_scopes`` **必须由调用方从传输层传入**
+        （``transport_subject`` / ``transport_granted_scopes``），**绝不可从
+        不可信的 ``result`` 内读取**。伪造服务端可在 response 里自填
+        ``token_subject`` / ``granted_scopes`` 令其等于自报值，使比对永远相等
+        —— 那条 critical 检测会静默永不触发，"看起来实现了、实际是死代码"，
+        比没写更危险。
+      * 无传输层基准（``None``）时**不报**（fail-safe：不凭空指控），但也绝不
+        信任自报值。
+
+    覆盖两种不一致：
+      1. server 响应自称身份 ≠ 传输层确立的主体
+      2. server 自报权限范围（roles/scopes）超出其实际被授予的范围
+    """
+    result_data = result.get("result", {})
+    if not isinstance(result_data, dict):
+        return
+
+    meta = result_data.get("_meta")
+    if meta is None:
+        return
+    if not isinstance(meta, dict):
+        findings.append({
+            "type": "meta_not_object",
+            "severity": "medium",
+            "description": "`_meta` 不是对象——客户端对身份声明的结构化解析"
+                           "不可靠，身份核对失去结构依据（应 fail-closed 拒绝）",
+        })
+        return
+
+    # 1) 自报主体 vs 传输层确立主体
+    # 令牌/连接确立的主体由**传输层**带来（此处为被扫 URL 所确立的服务身份），
+    # 只认调用方传入的 transport_subject，绝不读不可信的 result——否则伪造
+    # 服务端自填 token_subject 让比对永远相等，critical 检测静默失效。
+    claimed = meta.get("subject") or meta.get("principal") or meta.get("client_id")
+    token_subject = transport_subject
+    if claimed is not None and token_subject is not None:
+        if str(claimed) != str(token_subject):
+            findings.append({
+                "type": "meta_subject_mismatch",
+                "severity": "critical",
+                "description": f"`_meta` 自报主体 ({claimed}) 与传输层确立的主体 "
+                               f"({token_subject}) 不一致——"
+                               f"协议要求不一致时 fail-closed，此处可被用于身份冒充",
+            })
+
+    # 2) 自报 scope 超出实际授予
+    # 授予基准只认传输层传入的 transport_granted_scopes，绝不读不可信的 result。
+    claimed_scopes = meta.get("scopes") or meta.get("roles")
+    granted = transport_granted_scopes
+    if isinstance(claimed_scopes, list) and isinstance(granted, (list, tuple, set)):
+        extra = sorted(set(map(str, claimed_scopes)) - set(map(str, granted)))
+        if extra:
+            findings.append({
+                "type": "meta_scope_overclaim",
+                "severity": "high",
+                "description": f"`_meta` 自报权限超出实际授予：{', '.join(extra)}——"
+                               f"自报能力面不可信，须以令牌授予为准（ASI03 身份与权限滥用）",
+            })
+
+
+def _check_mcp_apps_untrusted(result, findings):
+    """检查 MCP Apps（服务端渲染 HTML）是否被当作可信内容（2026-07-28 新增）。
+
+    MCP Apps 允许服务端返回并渲染 HTML。若宿主把它当**可信**内容直接注入
+    页面，即可执行同源脚本 → 读取宿主页面全部数据（含 agent 会话、凭证）。
+    协议要求：视为不可信内容，沙箱 iframe + CSP + postMessage 校验三者齐备。
+    """
+    result_data = result.get("result", {})
+    if not isinstance(result_data, dict):
+        return
+
+    apps = result_data.get("apps") or result_data.get("ui")
+    if not isinstance(apps, list):
+        return
+
+    for app in apps:
+        if not isinstance(app, dict):
+            continue
+        uri = str(app.get("uri") or app.get("html") or app.get("url") or "")
+        if not uri:
+            continue
+        # 服务端返回 HTML 资源是 Apps 的正常形态，危险的是**宿主侧防护缺失**。
+        # 宿主是否沙箱化由客户端决定，此处只标记"需要沙箱渲染"的高风险资源，
+        # 让接入方在消费该 Apps 时强制走沙箱路径。
+        if app.get("sandboxed") is False or app.get("sandbox") is False:
+            findings.append({
+                "type": "mcp_app_untrusted_content",
+                "severity": "high",
+                "description": f"MCP App ({uri[:60]}) 显式声明不使用沙箱——"
+                               f"服务端渲染 HTML 必须视为不可信内容，"
+                               f"须用沙箱 iframe + CSP + postMessage 源校验渲染",
+            })
+        elif "text/html" in uri or uri.endswith(".html"):
+            findings.append({
+                "type": "mcp_app_html_resource",
+                "severity": "info",
+                "description": f"MCP App 提供 HTML 资源 ({uri[:60]})——"
+                               f"渲染前须确认宿主已按不可信内容处理"
+                               f"（沙箱 iframe / CSP / postMessage 源白名单）",
             })
 
 

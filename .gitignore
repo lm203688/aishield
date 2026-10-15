@@ -122,6 +122,12 @@ data/telemetry.jsonl
 # =====================
 # WorkBuddy (personal memory + private skills)
 # =====================
+# 下列目录是 Agent 运行时/个人记忆，不属于 AIShield 项目源码，
+# 且可能含运维细节与项目记忆，公开仓库严禁入库。
+.workbuddy/
+.workbuddy-ai/
+.opencode/
+# 保留下方精确忽略作为防御纵深（PAT/Token 已由此拦截）
 .workbuddy/.cache/
 
 # ── 部署期产物：由 deploy-named-tunnel.sh 在服务器上写入，不进仓库 ──
@@ -140,3 +146,9 @@ scripts/_audit.py
 scripts/_drift_audit.py
 scripts/_drift_detail.py
 scripts/_rollback_crons.py
+
+# ── Windows 保留设备名误建文件（0 字节垃圾，阻断 git add -A）──
+# 某脚本将输出重定向到 nul 时误建成真实文件，git 因 DOS 设备名无法索引，
+# 导致 `git add -A` 整批失败。忽略之，不删除（可逆）。
+nul
+NUL

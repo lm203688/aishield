@@ -492,8 +492,9 @@ class TestSyncReadmeCountsIsIdempotent(unittest.TestCase):
 
     def test_sync_is_declared_as_non_destructive_in_source(self):
         """默认路径仍指向真实 npm 页面，别让可选参数把调用方带偏。"""
-        src = open(os.path.join(ROOT, 'scripts', 'promote_rule.py'),
-                   encoding='utf-8').read()
+        with open(os.path.join(ROOT, 'scripts', 'promote_rule.py'),
+                  encoding='utf-8') as _f:
+            src = _f.read()
         self.assertIn('readme = readme or os.path.join(ROOT, "mcp-server", "README.md")',
                       src)
 
@@ -538,8 +539,9 @@ class TestDraftFormatMatchesEngine(unittest.TestCase):
         from scanner import rules as R
         self.assertFalse(hasattr(R, 'Rule'))
         self.assertFalse(hasattr(R, 'RuleResult'))
-        src = open(os.path.join(ROOT, 'scripts', 'tech_radar.py'),
-                   encoding='utf-8').read()
+        with open(os.path.join(ROOT, 'scripts', 'tech_radar.py'),
+                  encoding='utf-8') as _f:
+            src = _f.read()
         self.assertNotIn('from scanner.rules import Rule', src,
                          '起草模板不得引用不存在的 Rule 类')
 

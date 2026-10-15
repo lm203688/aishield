@@ -28,6 +28,10 @@ except ImportError:
     LLM_AVAILABLE = False
 
 TZ = timezone(timedelta(hours=8))
+
+# 单一版本常量：任何「用户可读到的扫描版本声明」都必须引用它，
+# 并经 scripts/sync_version.py 门禁与全仓库版本保持一致（不得手抄字面量）。
+SCANNER_VERSION = "4.11.0"
 USER_AGENT = "AIShield/4.0"
 
 
@@ -534,11 +538,11 @@ def scan(source_url, tool_type="mcp", name="", description="", enable_osv=False,
     """
     # 输入验证
     if not source_url or not isinstance(source_url, str):
-        return {"error": "source_url is required and must be a string", "overall_score": 0, "badge_level": "none", "risk_level": "critical", "findings": [], "total_findings": 0, "scanned_at": datetime.now(TZ).strftime("%Y-%m-%d %H:%M:%S"), "scanner_version": "4.0"}
+        return {"error": "source_url is required and must be a string", "overall_score": 0, "badge_level": "none", "risk_level": "critical", "findings": [], "total_findings": 0, "scanned_at": datetime.now(TZ).strftime("%Y-%m-%d %H:%M:%S"), "scanner_version": SCANNER_VERSION}
     
     source_url = source_url.strip()
     if len(source_url) > 500:
-        return {"error": "source_url too long (max 500 chars)", "overall_score": 0, "badge_level": "none", "risk_level": "critical", "findings": [], "total_findings": 0, "scanned_at": datetime.now(TZ).strftime("%Y-%m-%d %H:%M:%S"), "scanner_version": "4.0"}
+        return {"error": "source_url too long (max 500 chars)", "overall_score": 0, "badge_level": "none", "risk_level": "critical", "findings": [], "total_findings": 0, "scanned_at": datetime.now(TZ).strftime("%Y-%m-%d %H:%M:%S"), "scanner_version": SCANNER_VERSION}
     
     if tool_type not in ("mcp", "skill", "gpt", "prompt"):
         tool_type = "mcp"
@@ -546,7 +550,7 @@ def scan(source_url, tool_type="mcp", name="", description="", enable_osv=False,
     # 仅允许GitHub URL扫描（非prompt类型）
     if tool_type not in ("gpt", "prompt") and not re.match(r'^https?://github\.com/[\w.-]+/[\w.-]+', source_url):
         if not re.match(r'^https?://', source_url):
-            return {"error": "Only GitHub URLs are supported for scanning", "overall_score": 0, "badge_level": "none", "risk_level": "critical", "findings": [], "total_findings": 0, "scanned_at": datetime.now(TZ).strftime("%Y-%m-%d %H:%M:%S"), "scanner_version": "4.0"}
+            return {"error": "Only GitHub URLs are supported for scanning", "overall_score": 0, "badge_level": "none", "risk_level": "critical", "findings": [], "total_findings": 0, "scanned_at": datetime.now(TZ).strftime("%Y-%m-%d %H:%M:%S"), "scanner_version": SCANNER_VERSION}
     # Step 1: 获取源码
     if tool_type == "gpt":
         source_data = {"files": {}, "commit_hash": "", "gpt_url": source_url}
@@ -607,10 +611,27 @@ def scan(source_url, tool_type="mcp", name="", description="", enable_osv=False,
         except Exception:
             drift_findings = []
 
+    # Step 6d: 跨通道污点（分片重组 / 编码规避 / 跨引用逃逸 —— 单一通道扫描看不到完整恶意载荷）
+    try:
+        from .cross_channel_taint import scan_cross_channel
+        cross_channel_results = scan_cross_channel(files)
+    except Exception:
+        cross_channel_results = []
+
+    # Step 6e: 能力契约 diff（实现能力集 vs 声明 surface，超权即报）
+    try:
+        from .capability_contract import scan_capability_contract
+        capability_results = scan_capability_contract(files)
+    except Exception:
+        capability_results = []
+
     # Step 7: 评分（含 LLM 语义 findings 归因）
     scores = calculate_scores(
         static_results, dependency_results, secrets_results, poisoning_results, taint_results,
-        total_files, extra_findings=llm_results.get("findings", []) + llm_sc_results.get("findings", []) + toxic_results,
+        total_files, extra_findings=(
+            llm_results.get("findings", []) + llm_sc_results.get("findings", [])
+            + toxic_results + cross_channel_results + capability_results
+        ),
     )
 
     # 汇总去重
@@ -623,6 +644,8 @@ def scan(source_url, tool_type="mcp", name="", description="", enable_osv=False,
     for f in llm_results.get("findings", []): all_findings.append(f)
     for f in llm_sc_results.get("findings", []): all_findings.append(f)
     for f in toxic_results: all_findings.append(f)
+    for f in cross_channel_results: all_findings.append(f)
+    for f in capability_results: all_findings.append(f)
     for f in drift_findings: all_findings.append(f)
     for f in osv_findings: all_findings.append(f)
 
@@ -636,13 +659,24 @@ def scan(source_url, tool_type="mcp", name="", description="", enable_osv=False,
 
     recommendations = generate_recommendations(unique_findings, scores)
 
-    # Step 8: 合规映射（借鉴 Latteflo/mcp-scanner —— 纯报告层，
+    # Step 8: 合规映射（借鉴 Latteflo/mcp-scanner ——纯报告层，
     # findings 按 OWASP 类别聚合到 NIST CSF / ISO 27001 / PCI DSS 控制项）
     try:
         from .compliance import compliance_summary as _compliance
         compliance_results = _compliance(unique_findings)
     except Exception:
         compliance_results = {}
+
+    # Step 8b: CoSAI MCP Security v2.0 采购证据包（2026-08-12 发布）。
+    # 与 Step 8 的区别：CoSAI 回答的是"这套方案整体处于哪个安全保证级、
+    # 八维度覆盖如何"—— 企业采购评审现场真正被问的问题。本仓内部 ASI
+    # 编号与官方非同一套，故必须由这一层把证据对齐到采购方的语言。
+    # 保证级不由扫描结果自动授予：未提供部署态证据时最高只主张 L1。
+    try:
+        from .cosai_evidence import cosai_evidence_map as _cosai
+        cosai_results = _cosai(unique_findings)
+    except Exception:
+        cosai_results = {}
 
     return {
         **scores,
@@ -659,40 +693,56 @@ def scan(source_url, tool_type="mcp", name="", description="", enable_osv=False,
         "toxic_flow_scan": toxic_results,
         "baseline_drift": drift_findings,
         "compliance": compliance_results,
+        "cosai": cosai_results,
         "osv_cve": osv_findings,
         "commit_hash": source_data.get("commit_hash", ""),
         "recommendations": recommendations,
         "scanned_at": datetime.now(TZ).strftime("%Y-%m-%d %H:%M:%S"),
-        "scanner_version": "4.0",
+        "scanner_version": SCANNER_VERSION,
         "owasp_standard": "OWASP MCP Top 10 (2025 v0.1)",
     }
 
 
 def batch_scan(source_urls, tool_type="mcp", concurrency=3):
-    """
-    批量扫描多个工具
-    
+    """批量扫描多个工具（**真并发**，ThreadPoolExecutor）。
+
+    早期实现是 ``for`` 循环 + ``time.sleep(1)``（注释明写"暂为串行"），并发形同
+    虚设；此处改为线程池并行，与 ``batch_scanner.py`` 的并发模型一致。
+
     Args:
-        source_urls: [{"url": "...", "name": "...", "type": "mcp"}, ...]
+        source_urls: [{"url": "...", "name": "...", "type": "mcp"}, ...] 或 ["url", ...]
         tool_type: 默认工具类型
-        concurrency: 并发数（暂为串行，后续支持async）
-    
+        concurrency: 并发数（线程池 worker 数）
+
     Returns:
-        dict: 批量扫描结果汇总
+        dict: 批量扫描结果汇总（结构与旧版一致，保证 server.py 调用方无感）
     """
-    results = []
-    errors = []
+    from concurrent.futures import ThreadPoolExecutor
+
+    items = []
     for item in source_urls:
         url = item if isinstance(item, str) else item.get("url", "")
         name = "" if isinstance(item, str) else item.get("name", "")
         t = tool_type if isinstance(item, str) else item.get("type", tool_type)
+        if url:
+            items.append((url, name, t))
+
+    results = []
+    errors = []
+
+    def _one(arg):
+        url, name, t = arg
         try:
-            result = scan(url, t, name)
-            results.append(result)
-            time.sleep(1)  # 避免GitHub API限流
-        except Exception as e:
-            errors.append({"url": url, "error": str(e)})
-            time.sleep(1)
+            return {"url": url, "result": scan(url, t, name)}
+        except Exception as e:  # 单条失败不影响整体
+            return {"url": url, "error": str(e)}
+
+    with ThreadPoolExecutor(max_workers=max(1, int(concurrency))) as ex:
+        for out in ex.map(_one, items):
+            if "error" in out:
+                errors.append(out)
+            else:
+                results.append(out["result"])
 
     return {
         "total": len(source_urls),

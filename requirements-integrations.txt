@@ -55,3 +55,10 @@ Pillow>=10.0.0
 
 # Phase 11: 打包发布 (setup.py)
 setuptools>=68.0.0
+
+# Phase 12: 运行时治理适配器 (connectors/runtime_guard_adapter.py)
+# LangChain/CrewAI 工具适配器：可选依赖，仅在调用 as_langchain_tool() /
+# as_crewai_tool() 时才需要，缺失时抛清晰错误（不强制依赖，保持核心零依赖）。
+# 发行名 crewai-tools 的 import 名是 crewai_tools，两者都已登记。
+crewai>=0.30.0
+crewai-tools>=0.1.0

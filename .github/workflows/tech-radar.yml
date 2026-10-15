@@ -1,0 +1,35 @@
+name: AIShield Tech Radar (技术雷达采集)
+
+# 补位任务：tech_radar.py 此前不被任何 workflow 调用（仅设计为本地 WorkBuddy
+# 自动化），导致雷达链饿死——spine 成功但 docs/intel + data/state 从不刷新，
+# 下游 rule promoter / radar_effect 拿不到新鲜信号。本工作流定时运行雷达采集，
+# 并通过脚本内置的 Contents API（AISHIELD_PAT）将日报 + 滚动索引 + 状态写回 main。
+#
+# 发布走脚本内置的 Contents API（非 git push），故不触发 E10 推送吞错门禁；
+# 脚本为纯标准库实现、无第三方依赖，故不强制引用 prepare-tests（E11 派生判据不命中）。
+
+on:
+  schedule:
+    - cron: '23 6 * * *'   # 每日 06:23 UTC 采集一次
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tech-radar
+  cancel-in-progress: false
+
+jobs:
+  radar:
+    name: Collect tech radar signals
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Run tech radar (publish via Contents API)
+        env:
+          AISHIELD_PAT: ${{ secrets.AISHIELD_PAT }}
+        run: python3 scripts/tech_radar.py --once --publish

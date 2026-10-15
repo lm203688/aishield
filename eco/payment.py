@@ -79,7 +79,7 @@ PLANS = {
     },
     "pro": {
         "name": "Pro",
-        "price": 19,
+        "price": 39,
         "currency": "CNY",
         "billing_cycle": "monthly",
         "daily_limit": 1000,
@@ -91,6 +91,20 @@ PLANS = {
             "批量扫描",
             "API优先级",
             "历史报告导出",
+        ],
+    },
+    "lifetime": {
+        "name": "终身版",
+        "price": 199,
+        "currency": "CNY",
+        "billing_cycle": "once",
+        "daily_limit": 1000,
+        "monthly_limit": 30000,
+        "features": [
+            "包含 Pro 全部能力",
+            "永久订阅权益",
+            "后续小版本免费",
+            "优先支持",
         ],
     },
     "enterprise": {

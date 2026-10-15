@@ -21,13 +21,17 @@ eco/verifiable_identity.py — L1 可移植身份：JWKS 公钥发现 + 可验�
 ═══════════════════════════════════════════════════════════════════
   生产现状与迁移（真问题，不是假设）
 ═══════════════════════════════════════════════════════════════════
-  线上 api/data/agent_card_key.json 的 alg 是 **hmac-sha256（对称）**，
-  private_key 与 public_key 是同一个值。这意味着：
+  当前线上 ``api/data/agent_card_key.json`` 的 alg **已是 ed25519（非对称）**，
+  私钥/公钥分离，JWKS 对外就绪（``ready=true``，返回真实 Ed25519 公钥）。
+  服务启动时 ``api/server.py`` 调用 ``ensure_ed25519(persist=True)`` 保证这一点；
+  若发现活跃密钥仍是 HMAC，则自动迁移并在 JWKS 诚实标 ``ready=false``。
 
-    * 那个 "public_key" 根本不是公钥，它就是签名密钥本身；
-    * 任何照搬 public_key 去发布的 JWKS 端点，等于把签名密钥公开 ——
-      任何人都能伪造 aishield 签发的 agent 凭证；
-    * 所以 JWKS 不能简单把字段搬出去，必须先做密钥迁移。
+  历史包袱（双窗口，生产安全）：早期版本确曾用 hmac-sha256（对称），彼时
+  ``public_key`` 与 ``private_key`` 同值，照搬发布等于公开签名密钥。故：
+
+    * JWKS **永不**发布对称密钥（见 ``_assert_publishable`` 红线守卫）；
+    * 旧对称密钥一旦迁移即进入 deprecated：**只保留验旧签，绝不发布、绝不进 JWKS**；
+    * 迁移后的旧凭证仍能验（deprecated 公钥参与验签），新凭证公开可验。
 
   迁移语义（双窗口，生产安全）：
     - 新 Ed25519 密钥成为 active（对外签发 + 进 JWKS）；
@@ -197,6 +201,20 @@ class SigningKeyRing:
     def rotate_to_ed25519(self, *, persist: bool = True) -> Dict[str, Any]:
         """迁移到 Ed25519：新 active + 旧密钥进 deprecated（幂等，见 rotate）。"""
         return self.rotate(persist=persist)
+
+    def ensure_ed25519(self, *, persist: bool = True) -> Dict[str, Any]:
+        """保证活跃密钥为非对称 Ed25519：不是则幂等迁移。
+
+        供服务启动时（api/server.py main）调用，使 JWKS 对外就绪——只有
+        非对称公钥才能进 JWKS 被第三方公开验证；HMAC 对称密钥按安全红线
+        永不外发，于是 JWKS 会 `ready=false`，aishield-trust/v1 信封也只能
+        诚实标 `unsigned`。迁移把活跃密钥换成 Ed25519，旧密钥进 deprecated
+        （仅验旧签），JWKS 随即 `ready=true`。幂等：已是 Ed25519 时不动。
+        """
+        if self.is_ed25519_ready():
+            return {"ensured": True, "already": True,
+                    "kid": _kid(str((self.active() or {}).get("public_key") or ""))}
+        return self.rotate_to_ed25519(persist=persist)
 
     def rotate(self, *, force: bool = False, persist: bool = True) -> Dict[str, Any]:
         """轮换密钥：新 Ed25519 为 active，旧 active 进 deprecated（仅验旧签）。
