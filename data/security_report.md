@@ -1,31 +1,31 @@
 # AIShield MCP安全扫描报告
 
-生成时间: 2026-10-14 16:39:15
+生成时间: 2026-10-15 16:16:52
 扫描引擎版本: 4.1
 扫描工具总数: 76
-平均安全评分: 71.1/100
+平均安全评分: 71.3/100
 
 ## 评分分布
 
 | 等级 | 数量 |
 |------|------|
-| gold | 23 |
-| silver | 20 |
-| bronze | 12 |
+| gold | 21 |
+| silver | 23 |
+| bronze | 11 |
 | none | 21 |
 
 ## OWASP MCP Top 10 覆盖率
 
-- **MCP01** 令牌管理不当: 12/76 (16%)
+- **MCP01** 令牌管理不当: 10/76 (13%)
 - **MCP010** : 0/76 (0%)
-- **MCP02** 权限范围蔓延: 44/76 (58%)
-- **MCP03** 工具投毒: 17/76 (22%)
+- **MCP02** 权限范围蔓延: 32/76 (42%)
+- **MCP03** 工具投毒: 13/76 (17%)
 - **MCP04** 供应链攻击: 29/76 (38%)
-- **MCP05** 命令注入: 26/76 (34%)
-- **MCP06** 提示注入: 35/76 (46%)
-- **MCP07** 认证不足: 3/76 (4%)
-- **MCP08** 审计缺失: 45/76 (59%)
-- **MCP09** 影子服务器: 51/76 (67%)
+- **MCP05** 命令注入: 19/76 (25%)
+- **MCP06** 提示注入: 29/76 (38%)
+- **MCP07** 认证不足: 2/76 (3%)
+- **MCP08** 审计缺失: 40/76 (53%)
+- **MCP09** 影子服务器: 44/76 (58%)
 
 ## 高风险工具 (score < 60)
 
@@ -33,42 +33,42 @@
 - **BeehiveInnovations/pal-mcp-server** — 37/100, 44 issues
 - **reactive-resume/reactive-resume** — 38/100, 44 issues
 - **OpenByteInc/QuantDinger** — 39/100, 58 issues
+- **czlonkowski/n8n-mcp** — 40/100, 14 issues
 - **zylon-ai/private-gpt** — 40/100, 28 issues
 - **assafelovic/gpt-researcher** — 40/100, 41 issues
-- **ruvnet/ruflo** — 41/100, 43 issues
+- **brightdata/brightdata-mcp** — 42/100, 29 issues
 - **amruthpillai/reactive-resume** — 42/100, 31 issues
 - **reactive-resume/app** — 42/100, 32 issues
-- **activepieces/activepieces** — 45/100, 22 issues
-- **czlonkowski/n8n-mcp** — 46/100, 25 issues
-- **microsoft/playwright-mcp** — 47/100, 28 issues
+- **koala73/worldmonitor** — 46/100, 12 issues
+- **perplexityai/modelcontextprotocol** — 47/100, 43 issues
 - **sansan0/TrendRadar** — 48/100, 38 issues
-- **brightdata/brightdata-mcp** — 50/100, 31 issues
 - **oraios/serena** — 50/100, 18 issues
 - **mrexodia/ida-pro-mcp** — 51/100, 30 issues
 - **snyk/agent-scan** — 53/100, 22 issues
 - **wonderwhy-er/DesktopCommanderMCP** — 53/100, 20 issues
+- **google-gemini/gemini-cli** — 54/100, 12 issues
 - **feder-cr/AIHawk** — 54/100, 13 issues
 - **feder-cr/aihawk_mcp_server** — 54/100, 13 issues
 
 ## 最安全工具 (score >= 85)
 
-- **nitrocloudofficial/nitrostack** — 85/100
 - **awslabs/mcp** — 87/100
 - **mcp-use/mcp-use** — 88/100
-- **MCPJam/inspector** — 88/100
 - **alpic-ai/skybridge** — 88/100
 - **apify/apify-mcp-server** — 88/100
 - **PV-Bhat/gemsuite-mcp** — 89/100
+- **bytedance/UI-TARS-desktop** — 90/100
+- **triggerdotdev/trigger.dev** — 90/100
 - **modelcontextprotocol/python-sdk** — 90/100
 - **morluto/rea** — 90/100
 - **metorial/metorial** — 92/100
 - **liaokongVFX/MCP-Chinese-Getting-Started-Guide** — 93/100
-- **hangwin/mcp-chrome** — 93/100
-- **open-metadata/OpenMetadata** — 94/100
 - **modelcontextprotocol/modelcontextprotocol** — 95/100
 - **0x4m4/hexstrike-ai** — 95/100
 - **Decodo/mcp-server** — 96/100
 - **Dot-Fun/fathom-mcp** — 96/100
 - **opensolon/solon** — 96/100
-- **modelcontextprotocol/typescript-sdk** — 96/100
+- **open-metadata/OpenMetadata** — 96/100
 - **MODSetter/SurfSense** — 97/100
+- **call518/MCP-OpenStack-Ops** — 98/100
+- **nitrocloudofficial/nitrostack** — 99/100
