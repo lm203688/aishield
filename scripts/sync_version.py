@@ -90,6 +90,11 @@ TARGETS: List[Tuple[str, str, str]] = [
     ("api/server.py",
      r'(API_VERSION\s*=\s*")([^"]+)(")',
      r"\g<1>{v}\g<3>"),
+    # 扫描器对外自报版本：用户可读到的扫描版本声明，必须与全仓库版本一致。
+    # 此前漏登记 → sync_version 对它失明，test_version_declare 钉为门禁缺口。
+    ("scanner/engine.py",
+     r'(SCANNER_VERSION\s*=\s*")([^"]+)(")',
+     r"\g<1>{v}\g<3>"),
     # SARIF / SBOM 产物里对外自报的工具版本。会直接进入用户的 CI 产物，
     # 却从未在门禁内——曾长期停在 4.3.0 而 npm 已 4.8.3。
     ("scanner/sbom.py",
