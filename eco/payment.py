@@ -79,7 +79,7 @@ PLANS = {
     },
     "pro": {
         "name": "Pro",
-        "price": 39,
+        "price": 19,
         "currency": "CNY",
         "billing_cycle": "monthly",
         "daily_limit": 1000,
