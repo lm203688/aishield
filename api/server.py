@@ -556,6 +556,19 @@ class AIShieldHandler(BaseHTTPRequestHandler):
             self._send_json({"success": True, "plans": payment.PLANS}, 200)
             return
 
+        # ── 运行时治理门面（#422 治理通电）：把 eco/runtime_governance 接线成产品级 API
+        #    fail-closed 准入网关 / kill switch / 不可篡改审计链 / 策略管理，全经
+        #    /api/v1/guard/* 暴露。默认 mode=observe（记录并放行、不拦截），对外
+        #    诚实标注 enforced=False，避免「以为护栏开着其实没拦」的能力误读。
+        if path.startswith("/api/v1/guard"):
+            try:
+                import governance_api
+                payload, status = governance_api.handle_get(path, parsed.query)
+                self._send_json(payload, status)
+            except Exception as e:  # noqa: BLE001
+                self._send_json({"error": str(e)}, 500)
+            return
+
         # Landing Page — Agent SEO
         if path == "/agent.html":
             html_path = os.path.join(BASE, "static", "agent.html")
