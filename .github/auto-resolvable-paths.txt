@@ -42,6 +42,10 @@
 #   若将来有 workflow 开始提交其中某个：优先给它加 `merge=union`（.gitattributes，
 #   git 内置合并驱动，语义就是"追加型日志取并集"，比 exit 3 或取一方都正确）；
 #   退而求其次才是把它移出本表、让冲突走 exit 3。
+#   2026-10-15 RSES：evolution_ledger.jsonl（eco/evolution_ledger.py，规则自进化
+#   问责账本）走了上面那条"首选方案"—— rule-promoter workflow 提交它（单写者：
+#   只有该 workflow 的 promote/rollback 记账写它），.gitattributes 配 merge=union。
+#   它**不**声明进本表：本表是快照语义（整体重写），追加型日志必须走 union。
 #   通配符条目成员是运行期动态命名的，静态推导看不见写入者，因此对它们只做
 #   "glob 仍能匹配到文件"检查（见 validate_workflows.py E13 边界说明）。
 data/state/*

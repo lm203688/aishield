@@ -84,7 +84,8 @@ runs:
         # ↓↓↓ 这一行是 E12 读取的声明：测试套件 import 的第三方包必须都在这里 ↓↓↓
         # pip 对已满足的包会短路，不会重复下载，所以无需 `if 已装 then 跳过` 分支
         # —— 分支会让「声明」与「实际安装」两件事分叉，正是本 action 要消灭的形态。
-        python -m pip install --quiet --disable-pip-version-check cryptography pyyaml
+        # 2026-10-15 FVI：test_invariant_property 引入 hypothesis（属性测试）。
+        python -m pip install --quiet --disable-pip-version-check cryptography pyyaml hypothesis
 
     - name: Assert prerequisites are really in effect (fail-closed)
       shell: bash

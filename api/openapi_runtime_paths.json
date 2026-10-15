@@ -1,9 +1,9 @@
 {
   "note": "运行时路由清单：进程内直调 api.server.AIShieldHandler.do_GET/do_POST 探得，与 curated 规范合并后即线上 /openapi.json。",
   "source": "runtime probe (scripts/gen_openapi_spec.py)",
-  "generated_at": "2026-10-15T09:29:46",
-  "route_count": 133,
-  "operation_count": 149,
+  "generated_at": "2026-10-16T00:48:05",
+  "route_count": 161,
+  "operation_count": 178,
   "probe_errors": [],
   "state_audit": {
     "created": [],
@@ -576,6 +576,46 @@
       ],
       "operation_ids": [
         "postAgentSetup"
+      ]
+    },
+    {
+      "path": "/api/v1/agent/status/{did}",
+      "tag": "agent",
+      "summary": "GET /api/v1/agent/status/{did}（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "GET /api/v1/agent/status/{did}（运行时探得；schema 由真实响应推导）",
+          "status": 404,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "success": {
+                "type": "boolean"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              },
+              "detail": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 404
+        }
+      ],
+      "operation_ids": [
+        "getAgentStatus"
       ]
     },
     {
@@ -1330,6 +1370,40 @@
       "operation_ids": [
         "getAttestationsVerify",
         "postAttestationsVerify"
+      ]
+    },
+    {
+      "path": "/api/v1/attestations/{id}",
+      "tag": "attestations",
+      "summary": "GET /api/v1/attestations/{id}（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "GET /api/v1/attestations/{id}（运行时探得；schema 由真实响应推导）",
+          "status": 404,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 404
+        }
+      ],
+      "operation_ids": [
+        "getAttestations"
       ]
     },
     {
@@ -2151,6 +2225,550 @@
       ]
     },
     {
+      "path": "/api/v1/eco-support/agent-memory-scan",
+      "tag": "eco-support",
+      "summary": "Agent 生态支持体系：记忆扫描/策略包/红队探针/晋升/衰减 · agent-memory-scan",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "Agent 生态支持体系：记忆扫描/策略包/红队探针/晋升/衰减 · agent-memory-scan",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "postEcoSupportAgentMemoryScan"
+      ]
+    },
+    {
+      "path": "/api/v1/eco-support/confidence-promotion",
+      "tag": "eco-support",
+      "summary": "Agent 生态支持体系：记忆扫描/策略包/红队探针/晋升/衰减 · confidence-promotion",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "Agent 生态支持体系：记忆扫描/策略包/红队探针/晋升/衰减 · confidence-promotion",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string"
+              },
+              "result": {
+                "type": "object",
+                "properties": {
+                  "now": {
+                    "type": "string"
+                  },
+                  "total_candidates": {
+                    "type": "integer"
+                  },
+                  "attack_corpus_size": {
+                    "type": "integer"
+                  },
+                  "benign_corpus_size": {
+                    "type": "integer"
+                  },
+                  "thresholds": {
+                    "type": "object",
+                    "properties": {
+                      "seed": {
+                        "type": "object"
+                      },
+                      "draft": {
+                        "type": "object"
+                      },
+                      "rule": {
+                        "type": "object"
+                      },
+                      "stale_days": {
+                        "type": "object"
+                      },
+                      "dead_days": {
+                        "type": "object"
+                      }
+                    },
+                    "additionalProperties": true
+                  },
+                  "buckets": {
+                    "type": "object",
+                    "properties": {
+                      "ready_to_promote": {
+                        "type": "object"
+                      },
+                      "draft": {
+                        "type": "object"
+                      },
+                      "seed": {
+                        "type": "object"
+                      },
+                      "raw": {
+                        "type": "object"
+                      },
+                      "false_positive": {
+                        "type": "object"
+                      },
+                      "topic_mention": {
+                        "type": "object"
+                      },
+                      "low_specificity": {
+                        "type": "object"
+                      },
+                      "already_rejected": {
+                        "type": "object"
+                      },
+                      "stale": {
+                        "type": "object"
+                      }
+                    },
+                    "additionalProperties": true
+                  },
+                  "details": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "promoted_this_run": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  }
+                },
+                "additionalProperties": true
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "postEcoSupportConfidencePromotion"
+      ]
+    },
+    {
+      "path": "/api/v1/eco-support/policy-apply",
+      "tag": "eco-support",
+      "summary": "Agent 生态支持体系：记忆扫描/策略包/红队探针/晋升/衰减 · policy-apply",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "Agent 生态支持体系：记忆扫描/策略包/红队探针/晋升/衰减 · policy-apply",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "postEcoSupportPolicyApply"
+      ]
+    },
+    {
+      "path": "/api/v1/eco-support/policy-packs",
+      "tag": "eco-support",
+      "summary": "Agent 生态支持体系：记忆扫描/策略包/红队探针/晋升/衰减 · policy-packs",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "Agent 生态支持体系：记忆扫描/策略包/红队探针/晋升/衰减 · policy-packs",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "count": {
+                "type": "integer"
+              },
+              "packs": {
+                "type": "object",
+                "properties": {
+                  "default": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "object"
+                      },
+                      "description": {
+                        "type": "object"
+                      },
+                      "context": {
+                        "type": "object"
+                      },
+                      "config": {
+                        "type": "object"
+                      }
+                    },
+                    "additionalProperties": true
+                  },
+                  "mcp-only": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "object"
+                      },
+                      "description": {
+                        "type": "object"
+                      },
+                      "context": {
+                        "type": "object"
+                      },
+                      "config": {
+                        "type": "object"
+                      }
+                    },
+                    "additionalProperties": true
+                  },
+                  "personal-agent": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "object"
+                      },
+                      "description": {
+                        "type": "object"
+                      },
+                      "context": {
+                        "type": "object"
+                      },
+                      "config": {
+                        "type": "object"
+                      }
+                    },
+                    "additionalProperties": true
+                  },
+                  "red-team": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "object"
+                      },
+                      "description": {
+                        "type": "object"
+                      },
+                      "context": {
+                        "type": "object"
+                      },
+                      "config": {
+                        "type": "object"
+                      }
+                    },
+                    "additionalProperties": true
+                  },
+                  "strict": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "object"
+                      },
+                      "description": {
+                        "type": "object"
+                      },
+                      "context": {
+                        "type": "object"
+                      },
+                      "config": {
+                        "type": "object"
+                      }
+                    },
+                    "additionalProperties": true
+                  }
+                },
+                "additionalProperties": true
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "getEcoSupportPolicyPacks"
+      ]
+    },
+    {
+      "path": "/api/v1/eco-support/red-team-probe",
+      "tag": "eco-support",
+      "summary": "Agent 生态支持体系：记忆扫描/策略包/红队探针/晋升/衰减 · red-team-probe",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "Agent 生态支持体系：记忆扫描/策略包/红队探针/晋升/衰减 · red-team-probe",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string"
+              },
+              "result": {
+                "type": "object",
+                "properties": {
+                  "total": {
+                    "type": "integer"
+                  },
+                  "passed": {
+                    "type": "integer"
+                  },
+                  "failed": {
+                    "type": "integer"
+                  },
+                  "results": {
+                    "type": "object",
+                    "properties": {
+                      "MCP01-1": {
+                        "type": "object"
+                      },
+                      "MCP01-2": {
+                        "type": "object"
+                      },
+                      "MCP02-1": {
+                        "type": "object"
+                      },
+                      "MCP03-1": {
+                        "type": "object"
+                      },
+                      "MCP04-1": {
+                        "type": "object"
+                      },
+                      "MCP05-1": {
+                        "type": "object"
+                      },
+                      "MCP06-1": {
+                        "type": "object"
+                      },
+                      "MCP07-1": {
+                        "type": "object"
+                      },
+                      "MCP08-1": {
+                        "type": "object"
+                      },
+                      "MCP09-1": {
+                        "type": "object"
+                      },
+                      "MCP10-1": {
+                        "type": "object"
+                      },
+                      "ASI06-1": {
+                        "type": "object"
+                      },
+                      "ASI06-2": {
+                        "type": "object"
+                      },
+                      "ASI07-1": {
+                        "type": "object"
+                      },
+                      "ASI08-1": {
+                        "type": "object"
+                      },
+                      "ASI04-1": {
+                        "type": "object"
+                      },
+                      "ASI04-2": {
+                        "type": "object"
+                      }
+                    },
+                    "additionalProperties": true
+                  },
+                  "engine_used": {
+                    "type": "boolean"
+                  },
+                  "probes": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  }
+                },
+                "additionalProperties": true
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "postEcoSupportRedTeamProbe"
+      ]
+    },
+    {
+      "path": "/api/v1/eco-support/red-team-probe/coverage",
+      "tag": "eco-support",
+      "summary": "Agent 生态支持体系：记忆扫描/策略包/红队探针/晋升/衰减 · coverage",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "Agent 生态支持体系：记忆扫描/策略包/红队探针/晋升/衰减 · coverage",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "total": {
+                "type": "integer"
+              },
+              "by_category": {
+                "type": "object",
+                "properties": {
+                  "ASI04": {
+                    "type": "integer"
+                  },
+                  "ASI06": {
+                    "type": "integer"
+                  },
+                  "ASI07": {
+                    "type": "integer"
+                  },
+                  "ASI08": {
+                    "type": "integer"
+                  },
+                  "MCP01": {
+                    "type": "integer"
+                  },
+                  "MCP02": {
+                    "type": "integer"
+                  },
+                  "MCP03": {
+                    "type": "integer"
+                  },
+                  "MCP04": {
+                    "type": "integer"
+                  },
+                  "MCP05": {
+                    "type": "integer"
+                  },
+                  "MCP06": {
+                    "type": "integer"
+                  },
+                  "MCP07": {
+                    "type": "integer"
+                  },
+                  "MCP08": {
+                    "type": "integer"
+                  },
+                  "MCP09": {
+                    "type": "integer"
+                  },
+                  "MCP10": {
+                    "type": "integer"
+                  }
+                },
+                "additionalProperties": true
+              },
+              "by_severity": {
+                "type": "object",
+                "properties": {
+                  "critical": {
+                    "type": "integer"
+                  },
+                  "high": {
+                    "type": "integer"
+                  },
+                  "medium": {
+                    "type": "integer"
+                  }
+                },
+                "additionalProperties": true
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "getEcoSupportRedTeamProbeCoverage"
+      ]
+    },
+    {
+      "path": "/api/v1/eco-support/rule-decay",
+      "tag": "eco-support",
+      "summary": "Agent 生态支持体系：记忆扫描/策略包/红队探针/晋升/衰减 · rule-decay",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "Agent 生态支持体系：记忆扫描/策略包/红队探针/晋升/衰减 · rule-decay",
+          "status": 200,
+          "sample_present": false,
+          "sample_truncated": true,
+          "schema": {},
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "getEcoSupportRuleDecay"
+      ]
+    },
+    {
+      "path": "/api/v1/eco-support/rule-decay/retire",
+      "tag": "eco-support",
+      "summary": "Agent 生态支持体系：记忆扫描/策略包/红队探针/晋升/衰减 · retire",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "Agent 生态支持体系：记忆扫描/策略包/红队探针/晋升/衰减 · retire",
+          "status": 200,
+          "sample_present": false,
+          "sample_truncated": true,
+          "schema": {},
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "postEcoSupportRuleDecayRetire"
+      ]
+    },
+    {
       "path": "/api/v1/evidence",
       "tag": "evidence",
       "summary": "POST /api/v1/evidence（运行时探得；schema 由真实响应推导）",
@@ -2648,6 +3266,107 @@
       ],
       "operation_ids": [
         "postExport"
+      ]
+    },
+    {
+      "path": "/api/v1/export/nucleus",
+      "tag": "export",
+      "summary": "POST /api/v1/export/nucleus（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/export/nucleus（运行时探得；schema 由真实响应推导）",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "result": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "target": {
+                    "type": "string"
+                  },
+                  "schema": {
+                    "type": "string"
+                  },
+                  "emitted_at": {
+                    "type": "string"
+                  },
+                  "ok": {
+                    "type": "boolean"
+                  },
+                  "issues": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "warnings": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "has_payload": {
+                    "type": "boolean"
+                  }
+                },
+                "additionalProperties": true
+              },
+              "issues": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {},
+                  "additionalProperties": true
+                }
+              },
+              "warnings": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {},
+                  "additionalProperties": true
+                }
+              },
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "schema": {
+                    "type": "string"
+                  },
+                  "asset_name": {
+                    "type": "string"
+                  },
+                  "asset_type": {
+                    "type": "string"
+                  },
+                  "scanner": {
+                    "type": "string"
+                  },
+                  "findings": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  }
+                },
+                "additionalProperties": true
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "postExportNucleus"
       ]
     },
     {
@@ -3480,6 +4199,9 @@
                   "GET  /api/v1/guard/status": {
                     "type": "string"
                   },
+                  "GET  /api/v1/guard/attest": {
+                    "type": "string"
+                  },
                   "GET  /api/v1/guard/kill-switch?server=": {
                     "type": "string"
                   },
@@ -3500,6 +4222,9 @@
                   },
                   "POST /api/v1/guard/deny": {
                     "type": "string"
+                  },
+                  "POST /api/v1/guard/attest": {
+                    "type": "string"
                   }
                 },
                 "additionalProperties": true
@@ -3513,6 +4238,355 @@
       ],
       "operation_ids": [
         "getGuard"
+      ]
+    },
+    {
+      "path": "/api/v1/guard/attest",
+      "tag": "guard",
+      "summary": "GET /api/v1/guard/attest（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "GET /api/v1/guard/attest（运行时探得；schema 由真实响应推导）",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "stream": {
+                "type": "object",
+                "properties": {
+                  "every_evaluations": {
+                    "type": "integer"
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": true
+              },
+              "latest": {
+                "type": "object",
+                "properties": {
+                  "ts": {
+                    "type": "string"
+                  },
+                  "evaluations": {
+                    "type": "integer"
+                  },
+                  "policy_digest": {
+                    "type": "string"
+                  },
+                  "policy_healthy": {
+                    "type": "boolean"
+                  },
+                  "audit_entries": {
+                    "type": "integer"
+                  },
+                  "audit_head_hash": {
+                    "type": "string"
+                  },
+                  "behavior_healthy": {
+                    "type": "boolean"
+                  },
+                  "behavior_anomaly_count": {
+                    "type": "integer"
+                  },
+                  "killed_count": {
+                    "type": "integer"
+                  },
+                  "seq": {
+                    "type": "integer"
+                  },
+                  "prev_hash": {
+                    "type": "string"
+                  },
+                  "hash": {
+                    "type": "string"
+                  },
+                  "signature": {
+                    "type": "string"
+                  },
+                  "signature_alg": {
+                    "type": "string"
+                  },
+                  "signer_kid": {
+                    "type": "string"
+                  },
+                  "third_party_verifiable": {
+                    "type": "boolean"
+                  }
+                },
+                "additionalProperties": true
+              },
+              "chain": {
+                "type": "object",
+                "properties": {
+                  "valid": {
+                    "type": "boolean"
+                  },
+                  "entries": {
+                    "type": "integer"
+                  },
+                  "head_hash": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": true
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "getGuardAttest"
+      ]
+    },
+    {
+      "path": "/api/v1/guard/audit",
+      "tag": "guard",
+      "summary": "GET /api/v1/guard/audit（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "GET /api/v1/guard/audit（运行时探得；schema 由真实响应推导）",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "count": {
+                "type": "integer"
+              },
+              "entries": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "seq": {
+                      "type": "object"
+                    },
+                    "ts": {
+                      "type": "object"
+                    },
+                    "event": {
+                      "type": "object"
+                    },
+                    "detail": {
+                      "type": "object"
+                    },
+                    "prev_hash": {
+                      "type": "object"
+                    },
+                    "hash": {
+                      "type": "object"
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "getGuardAudit"
+      ]
+    },
+    {
+      "path": "/api/v1/guard/evaluate",
+      "tag": "guard",
+      "summary": "GET /api/v1/guard/evaluate（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "GET /api/v1/guard/evaluate（运行时探得；schema 由真实响应推导）",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "getGuardEvaluate"
+      ]
+    },
+    {
+      "path": "/api/v1/guard/kill-switch",
+      "tag": "guard",
+      "summary": "GET /api/v1/guard/kill-switch（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "GET /api/v1/guard/kill-switch（运行时探得；schema 由真实响应推导）",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "getGuardKillSwitch"
+      ]
+    },
+    {
+      "path": "/api/v1/guard/policy",
+      "tag": "guard",
+      "summary": "GET /api/v1/guard/policy（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "GET /api/v1/guard/policy（运行时探得；schema 由真实响应推导）",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "mode": {
+                "type": "string"
+              },
+              "enforced": {
+                "type": "boolean"
+              },
+              "default_deny": {
+                "type": "boolean"
+              },
+              "allow_rules": {
+                "type": "integer"
+              },
+              "deny_rules": {
+                "type": "integer"
+              },
+              "killed_count": {
+                "type": "integer"
+              },
+              "policy_healthy": {
+                "type": "boolean"
+              },
+              "note": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "getGuardPolicy"
+      ]
+    },
+    {
+      "path": "/api/v1/guard/status",
+      "tag": "guard",
+      "summary": "GET /api/v1/guard/status（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "GET /api/v1/guard/status（运行时探得；schema 由真实响应推导）",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "default_deny": {
+                "type": "boolean"
+              },
+              "killed": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": true
+              },
+              "killed_count": {
+                "type": "integer"
+              },
+              "allow_rules": {
+                "type": "integer"
+              },
+              "deny_rules": {
+                "type": "integer"
+              },
+              "incident_threshold": {
+                "type": "integer"
+              },
+              "incidents": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": true
+              },
+              "policy_healthy": {
+                "type": "boolean"
+              },
+              "audit_chain": {
+                "type": "object",
+                "properties": {
+                  "valid": {
+                    "type": "boolean"
+                  },
+                  "entries": {
+                    "type": "integer"
+                  },
+                  "head_hash": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": true
+              },
+              "updated_at": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "getGuardStatus"
       ]
     },
     {
@@ -3707,6 +4781,74 @@
         }
       ],
       "operation_ids": [
+        "getIdentityAgents"
+      ]
+    },
+    {
+      "path": "/api/v1/identity/agents/{did}",
+      "tag": "ecosystem",
+      "summary": "Agent 生态 API · {did}",
+      "operations": [
+        {
+          "verb": "delete",
+          "summary": "Agent 生态 API · {did}",
+          "status": 404,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "did": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 404
+        },
+        {
+          "verb": "get",
+          "summary": "Agent 生态 API · {did}",
+          "status": 404,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "success": {
+                "type": "boolean"
+              },
+              "error": {
+                "type": "string"
+              },
+              "did": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 404
+        }
+      ],
+      "operation_ids": [
+        "deleteIdentityAgents",
         "getIdentityAgents"
       ]
     },
@@ -4990,9 +6132,7 @@
               "users": {
                 "type": "array",
                 "items": {
-                  "type": "object",
-                  "properties": {},
-                  "additionalProperties": true
+                  "type": "string"
                 }
               }
             },
@@ -5264,6 +6404,40 @@
       ],
       "operation_ids": [
         "getPlatformsStats"
+      ]
+    },
+    {
+      "path": "/api/v1/platforms/{id}",
+      "tag": "personal-agent",
+      "summary": "个人 Agent 治理层与平台注册表 · {id}",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "个人 Agent 治理层与平台注册表 · {id}",
+          "status": 404,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 404
+        }
+      ],
+      "operation_ids": [
+        "getPlatforms"
       ]
     },
     {
@@ -5982,6 +7156,175 @@
       ],
       "operation_ids": [
         "postScoreAudit"
+      ]
+    },
+    {
+      "path": "/api/v1/semantic",
+      "tag": "semantic",
+      "summary": "GET /api/v1/semantic（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "GET /api/v1/semantic（运行时探得；schema 由真实响应推导）",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "service": {
+                "type": "string"
+              },
+              "version": {
+                "type": "string"
+              },
+              "discipline": {
+                "type": "string"
+              },
+              "endpoints": {
+                "type": "object",
+                "properties": {
+                  "GET  /api/v1/semantic/status": {
+                    "type": "string"
+                  },
+                  "POST /api/v1/semantic/probe": {
+                    "type": "string"
+                  },
+                  "POST /api/v1/semantic/ratify": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": true
+              },
+              "candidate_kinds": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "getSemantic"
+      ]
+    },
+    {
+      "path": "/api/v1/semantic/probe",
+      "tag": "semantic",
+      "summary": "POST /api/v1/semantic/probe（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/semantic/probe（运行时探得；schema 由真实响应推导）",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "postSemanticProbe"
+      ]
+    },
+    {
+      "path": "/api/v1/semantic/ratify",
+      "tag": "semantic",
+      "summary": "POST /api/v1/semantic/ratify（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/semantic/ratify（运行时探得；schema 由真实响应推导）",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "postSemanticRatify"
+      ]
+    },
+    {
+      "path": "/api/v1/semantic/status",
+      "tag": "semantic",
+      "summary": "GET /api/v1/semantic/status（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "GET /api/v1/semantic/status（运行时探得；schema 由真实响应推导）",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "backend": {
+                "type": "object",
+                "properties": {
+                  "backend": {
+                    "type": "string"
+                  },
+                  "configured": {
+                    "type": "boolean"
+                  },
+                  "external_calls": {
+                    "type": "boolean"
+                  }
+                },
+                "additionalProperties": true
+              },
+              "default_offline": {
+                "type": "boolean"
+              },
+              "note": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "getSemanticStatus"
       ]
     },
     {
@@ -6763,6 +8106,190 @@
       ],
       "operation_ids": [
         "getTrustScore"
+      ]
+    },
+    {
+      "path": "/api/v1/trust/tlog/entries",
+      "tag": "trust",
+      "summary": "Trust API 认证与信任评分 · entries",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "Trust API 认证与信任评分 · entries",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "entries": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {},
+                  "additionalProperties": true
+                }
+              },
+              "tree_size": {
+                "type": "integer"
+              },
+              "root_hash": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "getTrustTlogEntries"
+      ]
+    },
+    {
+      "path": "/api/v1/trust/tlog/sth",
+      "tag": "trust",
+      "summary": "Trust API 认证与信任评分 · sth",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "Trust API 认证与信任评分 · sth",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "tree_size": {
+                "type": "integer"
+              },
+              "root_hash": {
+                "type": "string"
+              },
+              "ts": {
+                "type": "string"
+              },
+              "signature": {
+                "type": "null"
+              },
+              "unsigned_reason": {
+                "type": "string"
+              },
+              "third_party_verifiable": {
+                "type": "boolean"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "getTrustTlogSth"
+      ]
+    },
+    {
+      "path": "/api/v1/trust/vc2",
+      "tag": "trust",
+      "summary": "Trust API 认证与信任评分 · vc2",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "Trust API 认证与信任评分 · vc2",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "postTrustVc2"
+      ]
+    },
+    {
+      "path": "/api/v1/trust/vc2/revoke",
+      "tag": "trust",
+      "summary": "Trust API 认证与信任评分 · revoke",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "Trust API 认证与信任评分 · revoke",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "postTrustVc2Revoke"
+      ]
+    },
+    {
+      "path": "/api/v1/trust/vc2/verify",
+      "tag": "trust",
+      "summary": "Trust API 认证与信任评分 · verify",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "Trust API 认证与信任评分 · verify",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "postTrustVc2Verify"
       ]
     },
     {

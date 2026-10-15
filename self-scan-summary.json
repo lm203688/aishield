@@ -1,12 +1,12 @@
 {
-  "score": 88,
-  "overall_score": 88,
+  "score": 87,
+  "overall_score": 87,
   "risk_level": "low",
   "badge_level": "B",
   "report": {
     "totals": {
-      "findings": 56,
-      "suppressed": 28,
+      "findings": 57,
+      "suppressed": 29,
       "blocking_unsuppressed": 0
     },
     "sources": [
@@ -53,9 +53,9 @@
       {
         "source": "mcp-server/src",
         "files": 1,
-        "overall_score": 51,
-        "findings": 13,
-        "suppressed": 11,
+        "overall_score": 48,
+        "findings": 14,
+        "suppressed": 12,
         "blocking_unsuppressed": []
       },
       {

@@ -99,10 +99,18 @@ _VERBS = ("GET", "POST", "DELETE")
 # ════════════════════════════════════════════════════════════════════════════
 
 def iter_route_candidates() -> List[str]:
-    """从 api/**/*.py 里抽出所有 /api/v1/... 字面量（不含 openapi_spec.py 自身）。
+    """从 api/**/*.py 里抽出所有 /api/v1/... 路径（不含 openapi_spec.py 自身）。
 
-    这是**超集**：文档字符串、错误信息里提到的路径也会进来，靠后面的运行时探
-    针把它们洗掉 —— 宁可多收，不可漏收。
+    这是**超集**：文档字符串、错误信息、帮助清单里提到的路径也会进来，靠后面的
+    运行时探针把它们洗掉 —— 宁可多收，不可漏收。
+
+    2026-10-15 修：旧版要求整串引号内容就是路径（``["'](/api/v1/...)["']``），
+    于是前缀分派型模块的全部子路径对门禁隐身 —— governance_api.py 把路由写在
+    帮助清单里（``"GET  /api/v1/guard/attest": "..."``）、semantic_probe_api.py
+    在 server.py 的前缀块之后自己路由 ``/status`` ``/probe``，这些路径在
+    api/ 下从来不以"整串引号"形态出现，契约门禁与生成器双双看不见它们
+    （#431/#443 的 guard/* 六条路由就是这么绕过契约系统的）。改为子串匹配后
+    它们进入候选，由探针裁定真伪。
     """
     out: Set[str] = set()
     for root, dirs, files in os.walk(os.path.join(REPO, "api")):
@@ -116,8 +124,8 @@ def iter_route_candidates() -> List[str]:
                     src = f.read()
             except OSError:
                 continue
-            for m in re.finditer(r'["\'](/api/v1/[A-Za-z0-9\-_/{}.*]*)["\']', src):
-                lit = m.group(1)
+            for m in re.finditer(r'/api/v1/[A-Za-z0-9\-_/{}.*]+', src):
+                lit = m.group(0).rstrip(".")
                 if lit.endswith("/"):
                     continue
                 out.add(lit)

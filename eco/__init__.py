@@ -13,9 +13,11 @@ AIShield 生态核心模块包
   - observability:   成本可观测性模块（调用记录/成本预估/Agent效率/告警）
   - trust_protocol:  Agent 信誉协议层（Ed25519 did:key 身份 + 4维加权信誉评分）
   - replay:          攻击快照/回放（ChronosFix 借鉴，用于回放历史攻击并比对当前规则集是否退化）
+  - evolution_ledger: 规则自进化账本（哈希链 + 特权动作须 approved_by，RSES 脊柱）
+  - meta_agent:      有界元 agent（只起草/自测/提交审议，结构上不能晋升）
 
 使用方式:
-    from eco import identity, payment, badge, marketplace, a2a_gateway, collab, auth_provider, account, observability, trust_protocol, replay
+    from eco import identity, payment, badge, marketplace, a2a_gateway, collab, auth_provider, account, observability, trust_protocol, replay, evolution_ledger, meta_agent
 """
 
 from eco import identity
@@ -29,6 +31,10 @@ from eco import account
 from eco import observability
 from eco import trust_protocol
 from eco import replay
+# evolution_ledger 必须先于 meta_agent 导入：后者 `from eco import
+# evolution_ledger`，在本包部分初始化时从 sys.modules 取子模块。
+from eco import evolution_ledger
+from eco import meta_agent
 
 # NOTE: 公共JSON持久化工具已提取至 api.utils（load_json / save_json）
 #       各子模块当前仍使用各自的私有实现（_load_json / _save_json），
@@ -46,4 +52,6 @@ __all__ = [
     "observability",
     "trust_protocol",
     "replay",
+    "evolution_ledger",
+    "meta_agent",
 ]

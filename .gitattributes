@@ -1,0 +1,4 @@
+# 追加型台账：git 内置 union 合并驱动 —— 语义就是"追加型日志取并集"，
+# 比 exit 3 或取一方都正确（.github/auto-resolvable-paths.txt 的首选方案）。
+# 单写者：只有 rule-promoter workflow 的 promote/rollback 记账写它。
+data/state/evolution_ledger.jsonl merge=union

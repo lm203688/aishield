@@ -5,7 +5,9 @@ name: AIShield Rule Auto-Promoter
 # 本任务每日自动执行：六道闸门校验 → 批量晋升 → 全量测试 → 绿了入库 / 红了自动回滚并告警。
 #
 # 六道闸门（promote_rule.py 内置）：schema / 无 TODO / 正则可编译 / 不过宽 /
-# 不与现网规则重复 / 良性语料零误报。
+# 不与现网规则重复 / 良性语料零误报。第七道（RSES，2026-10-15）：晋升是特权
+# 动作，必须带批准人（--approved-by / $AISHIELD_APPROVER）并记入哈希链进化
+# 账本 data/state/evolution_ledger.jsonl（随晋升一并提交，merge=union）。
 # 晋升落点 data/radar_rules.json 与 intel 再生的 generated_rules.json 相互独立，
 # 威胁情报流水线不会抹掉雷达晋升的规则。
 
@@ -60,8 +62,14 @@ jobs:
 
       - name: Promote all passing candidates
         id: promo
+        env:
+          # RSES：晋升是特权动作，必须带批准人并记入哈希链进化账本
+          # （eco/evolution_ledger.py）。github.actor = 触发本次运行的真人
+          # （schedule 场景下为仓库属主/最后推送者；workflow_dispatch 为
+          # 实际 dispatch 者）。缺它 = 拒绝晋升，不提供匿名模式。
+          AISHIELD_APPROVER: ${{ github.actor }}
         run: |
-          python scripts/promote_rule.py --promote-all | tee /tmp/promo.log
+          python scripts/promote_rule.py --promote-all --approved-by "$AISHIELD_APPROVER" | tee /tmp/promo.log
           N=$(grep -Eo '^promoted [0-9]+' /tmp/promo.log | grep -Eo '[0-9]+' | tail -1)
           echo "promoted=${N:-0}" >> "$GITHUB_OUTPUT"
           echo "本轮晋升规则数: ${N:-0}"
@@ -84,6 +92,15 @@ jobs:
           # 安全阀：测试红了 = 本轮晋升引入回归。整体回退到晋升前状态，
           # 归档文件退回候选目录等待人工诊断，并发出 P1 告警附日志样本。
           git checkout -- data/radar_rules.json mcp-server/README.md 2>/dev/null || true
+          # RSES：安全阀回滚也要入账 —— 一次没有记录的规则集回退等于
+          # 账本对"线上实际发生过什么"说谎。actor/approved_by 用自动化身份
+          # （诚实记账：没有人类批准过这次回滚，是安全阀自己决定的）。
+          # 不加 `|| true`：记账失败必须让本步红，否则又是静默缺口。
+          python eco/evolution_ledger.py --record --action rollback \
+            --target data/radar_rules.json --actor ci:rule-promoter \
+            --approved-by ci:rule-promoter \
+            --rationale "full test suite red after promotion; safety-valve git checkout revert (promoted=${{ steps.promo.outputs.promoted }})" \
+            --evidence-json "{\"run\":\"${{ github.run_id }}\",\"trigger\":\"rule-promoter safety valve\"}"
           if [ -d scanner/_proposed/promoted ]; then
             find scanner/_proposed/promoted -name '*.json' -exec mv {} scanner/_proposed/ \; 2>/dev/null || true
           fi
@@ -110,13 +127,16 @@ jobs:
           # 心跳：rules 域每周期刷新（数值不变则不刷 history）
           RADAR_N=$(python -c "import json;print(len(json.load(open('data/radar_rules.json')).get('rules',{})))" 2>/dev/null || echo 0)
           python scripts/state_bus.py set rules "{\"radar_rules\":$RADAR_N,\"last_promoted\":${{ steps.promo.outputs.promoted }}}" --source rule-promoter || true
-          # 注意：不要 git add data/state/ —— 整个状态目录是并发冲突磁铁（多个
+          # 注意：不要 git add data/state/ 整个目录 —— 它是并发冲突磁铁（多个
           # workflow 同时写并 push），把它并进本次提交会让 rebase 产生内容冲突。
           # 晋升产物只涉及 radar_rules.json / _proposed / README，这些文件仅本
           # workflow 接触，无冲突。radar_effect.json 是唯一例外：它仅由本 workflow
           # 的 --promote-all（内部调用 radar_effect.evaluate）写入，单写者，无冲突，
           # 且 meta-monitor M9 需要从 main 读取它来检查"晋升规则是否误报"。
-          git add data/radar_rules.json scanner/_proposed/ mcp-server/README.md data/state/radar_effect.json 2>/dev/null || true
+          # evolution_ledger.jsonl 是第二个例外：RSES 问责账本，只由本 workflow
+          # 的 promote/rollback 记账写入（单写者），且 .gitattributes 给它配了
+          # merge=union（追加型日志的语义正确合并驱动，见 auto-resolvable-paths.txt）。
+          git add data/radar_rules.json scanner/_proposed/ mcp-server/README.md data/state/radar_effect.json data/state/evolution_ledger.jsonl 2>/dev/null || true
           if ! git diff --cached --quiet; then
             git commit -m "auto: 规则闸门自动晋升 ${{ steps.promo.outputs.promoted }} 条 [skip ci]"
             # 修复"只进不出"：并发 push 冲突曾被 `|| echo skipped` 静默吞掉，

@@ -67,12 +67,15 @@ class _Isolated(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.mkdtemp(prefix="aishield_shadow_")
         self._saved = {}
-        for attr in ("RADAR_RULES", "SNAPSHOT_DIR", "LEDGER", "PROPOSED_DIR"):
+        for attr in ("RADAR_RULES", "SNAPSHOT_DIR", "LEDGER", "PROPOSED_DIR",
+                     "EVOLUTION_LEDGER"):
             self._saved[attr] = getattr(promote_rule, attr)
         promote_rule.RADAR_RULES = os.path.join(self.tmp, "data", "radar_rules.json")
         promote_rule.SNAPSHOT_DIR = os.path.join(self.tmp, "data", "snapshots")
         promote_rule.LEDGER = os.path.join(self.tmp, "data", "state", "ledger.jsonl")
         promote_rule.PROPOSED_DIR = self.tmp
+        promote_rule.EVOLUTION_LEDGER = os.path.join(
+            self.tmp, "data", "state", "evolution_ledger.jsonl")
         self._saved["sync_readme_counts"] = promote_rule.sync_readme_counts
         promote_rule.sync_readme_counts = lambda: False
         self._saved["_evaluate_effect"] = promote_rule._evaluate_effect
@@ -193,6 +196,8 @@ class TestShadowWritesNothing(_Isolated):
             self.assertEqual(f.read(), original_bytes)
         # 台账 / 快照 / 效果台账都没被创建
         self.assertFalse(os.path.exists(promote_rule.LEDGER))
+        self.assertFalse(os.path.exists(promote_rule.EVOLUTION_LEDGER),
+                         "shadow 连问责账本都不许写")
         self.assertFalse(os.path.exists(radar_effect.EFFECT_FILE))
         self.assertEqual(promote_rule.list_snapshots(), [])
 
@@ -217,14 +222,16 @@ class TestEnforceConsultsShadow(_Isolated):
         全新攻击类型天然不在其中；硬拒会让整个晋升循环停摆。
         """
         path = _candidate(self.tmp, "dead", DEAD_PATTERN)
-        n = promote_rule.promote(path, self._data(path))
+        n = promote_rule.promote(path, self._data(path),
+                                approved_by="test-approver")
         self.assertEqual(n, 1)
         self.assertIn(DEAD_PATTERN, promote_rule.load_radar_rules()["rules"])
 
     def test_strict_refuses_a_dead_rule(self):
         path = _candidate(self.tmp, "dead", DEAD_PATTERN)
         did, code, _note = promote_rule._try_promote_one(
-            path, self._data(path), known=set(), strict=True)
+            path, self._data(path), known=set(), strict=True,
+            approved_by="test-approver")
         self.assertFalse(did)
         self.assertEqual(code, 3)
         self.assertNotIn(DEAD_PATTERN, promote_rule.load_radar_rules()["rules"])
@@ -232,14 +239,16 @@ class TestEnforceConsultsShadow(_Isolated):
     def test_strict_allows_a_rule_that_catches(self):
         path = _candidate(self.tmp, "catch", CATCH_PATTERN)
         did, code, _note = promote_rule._try_promote_one(
-            path, self._data(path), known=set(), strict=True)
+            path, self._data(path), known=set(), strict=True,
+            approved_by="test-approver")
         self.assertTrue(did, code)
         self.assertEqual(code, 0)
 
     def test_cmd_promote_all_strict_skips_dead_rules_and_exits_nonzero(self):
         _candidate(self.tmp, "catch", CATCH_PATTERN)
         _candidate(self.tmp, "dead", DEAD_PATTERN)
-        code = promote_rule.cmd_promote_all(strict=True)
+        code = promote_rule.cmd_promote_all(strict=True,
+                                        approved_by="test-approver")
         self.assertEqual(code, 1, "strict 下跳过死规则必须让 CI 看见")
         rules = promote_rule.load_radar_rules()["rules"]
         self.assertIn(CATCH_PATTERN, rules)
@@ -248,7 +257,9 @@ class TestEnforceConsultsShadow(_Isolated):
     def test_cmd_promote_all_default_exits_zero(self):
         _candidate(self.tmp, "catch", CATCH_PATTERN)
         _candidate(self.tmp, "dead", DEAD_PATTERN)
-        self.assertEqual(promote_rule.cmd_promote_all(strict=False), 0,
+        self.assertEqual(
+            promote_rule.cmd_promote_all(strict=False,
+                                        approved_by="test-approver"), 0,
                          "默认行为必须保持向后兼容（rule-promoter.yml 依赖它）")
 
 

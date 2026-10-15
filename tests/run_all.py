@@ -292,6 +292,21 @@ def main():
         'tests.test_stale_exemptions',
         'tests.test_finding_anchor',
         'tests.test_isolation_invariants',
+        # 2026-10-15 FVI（Program E）：隔离不变量的**属性测试**（Hypothesis 随机
+        # 语料证 no_execute/no_network/fail-closed/链完整/治理零 spawn），与上面
+        # 固定语料的回归锚点互补。依赖 hypothesis —— 已在 prepare-tests 声明。
+        'tests.test_invariant_property',
+        # 2026-10-15 NSE（Program A）：语义探针双轨契约（候选无结论 /
+        # ratify 桥接 / 后端诚实 / 精度护栏）。
+        'tests.test_semantic_probe',
+        # 2026-10-15 RIL（Program C）：持续证明流（流式鉴证）契约。
+        'tests.test_runtime_attestation',
+        # 2026-10-15 FTM（Program D）：VC 2.0 自认证验签 + CT 式透明日志
+        # Merkle 包含证明（树尺寸 1..10 × 每索引穷举）。
+        'tests.test_vc2_transparency',
+        # 2026-10-15 RSES（Program B）：规则自进化账本（哈希链不可静默篡改 /
+        # 特权动作须 approved_by / 元 agent 结构上不能晋升 / 自触发须 0）。
+        'tests.test_evolution_ledger',
         'tests.test_sync_version_targets',
         'tests.test_no_hardcoded_cf_token',
         # 2026-09-16 补登记：下列文件此前不在列表中，被 run_all 静默跳过。

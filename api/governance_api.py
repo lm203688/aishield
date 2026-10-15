@@ -63,6 +63,7 @@ def handle_get(path: str, query: str = ""):
                 "GET  /api/v1/guard/policy": "当前策略 + 模式",
                 "GET  /api/v1/guard/audit?limit=": "倒序读取不可篡改审计链",
                 "GET  /api/v1/guard/status": "网关健康 + 审计链校验",
+                "GET  /api/v1/guard/attest": "持续证明流：最新运行时快照 + 全链校验",
                 "GET  /api/v1/guard/kill-switch?server=": "查询某 server 是否被熔断",
                 "POST /api/v1/guard/evaluate": "判定（带 context）",
                 "POST /api/v1/guard/kill": "熔断某 server",
@@ -70,6 +71,7 @@ def handle_get(path: str, query: str = ""):
                 "POST /api/v1/guard/policy": "切换 mode: observe|enforce",
                 "POST /api/v1/guard/allow": "加放行规则",
                 "POST /api/v1/guard/deny": "加拒绝规则",
+                "POST /api/v1/guard/attest": "强制签一次运行时快照",
             },
         }, 200
 
@@ -110,6 +112,20 @@ def handle_get(path: str, query: str = ""):
         if not server:
             return {"error": "server query param required"}, 400
         return {"server": server, "killed": rg.is_killed(server)}, 200
+
+    if sub == "/attest":
+        # 持续证明流（Program C）：最新运行时快照 + 全链校验。
+        # 快照只含状态摘要（策略指纹/审计链头/行为健康），绝不含策略原文
+        # 与任何密钥材料 —— 可安全对外。
+        return {
+            "stream": {
+                "every_evaluations": rg.ATTEST_EVERY_EVALUATIONS,
+                "note": "每 N 次准入判定签一次运行时快照；签名密钥与 JWKS 同一把，"
+                        "第三方可离线验证",
+            },
+            "latest": rg.attest_status().get("latest"),
+            "chain": rg.attest_status().get("chain"),
+        }, 200
 
     return {"error": "unknown guard endpoint", "path": path,
             "hint": "GET %s/ for endpoint list" % PREFIX}, 404
@@ -165,6 +181,13 @@ def handle_post(path: str, data: dict):
         if not server:
             return {"error": "server required"}, 400
         return rg.deny_tool(server, tools), 200
+
+    if sub == "/attest":
+        # 强制签一次运行时快照（运维触发/测试用），返回快照本体。
+        entry = rg.attest_now()
+        if not entry:
+            return {"error": "快照签发失败"}, 500
+        return entry, 200
 
     return {"error": "unknown guard endpoint", "path": path}, 404
 

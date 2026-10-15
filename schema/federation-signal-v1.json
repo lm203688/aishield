@@ -1,0 +1,72 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://aishield.tools/schema/federation-signal-v1.json",
+  "title": "AIShield Federation Signal v1",
+  "description": "联邦信任网格（FTM）节点间共享的最小攻击信号单元。设计红线：信号是**摘要/特征向量**，绝不含原始被扫内容、原始配置、原始凭证或任何 PII —— 各节点零原始数据出域。",
+  "type": "object",
+  "required": ["schema_version", "signal_id", "node_did", "signal_type", "created_at", "signature"],
+  "properties": {
+    "schema_version": {"const": "federation-signal/v1"},
+    "signal_id": {
+      "type": "string",
+      "pattern": "^sig_[0-9a-f]{16}$",
+      "description": "信号 ID = sha256(canonical(signal-without-signature))[:16]，防重放/防篡改锚点"
+    },
+    "node_did": {
+      "type": "string",
+      "pattern": "^did:key:z6Mk[1-9A-HJ-NP-Za-km-z]+$",
+      "description": "发送节点身份（did:key 自认证，收方无需查表即可验签）"
+    },
+    "signal_type": {
+      "enum": ["novel_attack_feature_vector", "detection_coverage_gap", "false_positive_report", "rule_promotion_notice"],
+      "description": "信号类型。false_positive_report 用于误报反思（RSES 的 reflect 输入）；novel_attack_feature_vector 是 NSE 语义层的对抗特征摘要"
+    },
+    "attack_family": {
+      "type": "string",
+      "maxLength": 64,
+      "description": "攻击族标签（如 prompt_injection / supply_chain / memory_poison），对齐 OWASP MCP Top10 或 Agentic AI Top10 编号"
+    },
+    "feature_vector": {
+      "type": "array",
+      "items": {"type": "number", "minimum": -1, "maximum": 1},
+      "minItems": 8,
+      "maxItems": 128,
+      "description": "归一化特征向量（如语义探针各族的置信度剖面）。维度语义由 signal_type + attack_family 约定，版本化演进"
+    },
+    "dimensions": {
+      "type": "array",
+      "items": {"type": "string", "maxLength": 32},
+      "description": "feature_vector 的维度名（与向量等长），供人审计"
+    },
+    "sample_count": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "该信号基于的本地样本数（供收方评估统计显著性）"
+    },
+    "dp_noise_epsilon": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "可选：差分隐私噪声参数。提供时收方应按本地隐私预算决定是否采纳"
+    },
+    "evidence_ref": {
+      "type": "string",
+      "maxLength": 128,
+      "description": "可选：透明日志条目指针（transparency log seq/leaf_hash），供有权限方进一步核查 —— 指针而非内容"
+    },
+    "created_at": {"type": "string", "format": "date-time"},
+    "signature": {
+      "type": "object",
+      "required": ["alg", "value"],
+      "properties": {
+        "alg": {"const": "Ed25519"},
+        "value": {"type": "string", "description": "base64url(Ed25519 sign(canonical(signal without signature)))"}
+      }
+    }
+  },
+  "additionalProperties": false,
+  "x-aishield-invariants": [
+    "绝不含原始被扫文件内容、配置原文、凭证、PII（schema 无此类字段，且 additionalProperties=false）",
+    "signal_id 对全文（除签名字段）确定性派生，重放同内容得到同 ID",
+    "签名用发送节点 did:key 内嵌公钥即可验，不需要任何目录服务"
+  ]
+}

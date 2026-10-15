@@ -56,12 +56,15 @@ class _Isolated(unittest.TestCase):
         self.tmp = tempfile.mkdtemp(prefix='aishield_promote_')
         self._pr = {}
         for mod in (promote_rule,):
-            for attr in ('RADAR_RULES', 'SNAPSHOT_DIR', 'LEDGER', 'PROPOSED_DIR'):
+            for attr in ('RADAR_RULES', 'SNAPSHOT_DIR', 'LEDGER', 'PROPOSED_DIR',
+                     'EVOLUTION_LEDGER'):
                 self._pr[(mod, attr)] = getattr(mod, attr)
         promote_rule.RADAR_RULES = os.path.join(self.tmp, 'data', 'radar_rules.json')
         promote_rule.SNAPSHOT_DIR = os.path.join(self.tmp, 'data', 'snapshots')
         promote_rule.LEDGER = os.path.join(self.tmp, 'data', 'state', 'ledger.jsonl')
         promote_rule.PROPOSED_DIR = self.tmp
+        promote_rule.EVOLUTION_LEDGER = os.path.join(
+            self.tmp, 'data', 'state', 'evolution_ledger.jsonl')
         # promote() 会连带改写 mcp-server/README.md —— 测试里禁用
         self._pr[('sync_readme_counts',)] = promote_rule.sync_readme_counts
         promote_rule.sync_readme_counts = lambda: False
@@ -82,7 +85,8 @@ class TestSnapshotBeforePromotion(_Isolated):
         _write_rules(promote_rule.RADAR_RULES, before)
 
         path = _candidate(self.tmp)
-        n = promote_rule.promote(path, json.load(open(path, encoding='utf-8')))
+        n = promote_rule.promote(path, json.load(open(path, encoding='utf-8')),
+                                approved_by='test-approver')
 
         self.assertEqual(n, 1)
         snaps = promote_rule.list_snapshots()
@@ -96,7 +100,8 @@ class TestSnapshotBeforePromotion(_Isolated):
     def test_promote_without_existing_file_skips_snapshot(self):
         """首次晋升没有旧状态可留 —— 不得报错、不得造出空快照。"""
         path = _candidate(self.tmp)
-        n = promote_rule.promote(path, json.load(open(path, encoding='utf-8')))
+        n = promote_rule.promote(path, json.load(open(path, encoding='utf-8')),
+                                approved_by='test-approver')
         self.assertEqual(n, 1)
         self.assertEqual(promote_rule.list_snapshots(), [])
 
@@ -113,7 +118,8 @@ class TestSnapshotBeforePromotion(_Isolated):
                     "rules": [{"pattern": "evil%d\\s*payload" % i,
                                "description": "d", "severity": "high"}],
                 }, f)
-            promote_rule.promote(path, json.load(open(path, encoding='utf-8')))
+            promote_rule.promote(path, json.load(open(path, encoding='utf-8')),
+                                approved_by='test-approver')
         self.assertEqual(len(promote_rule.list_snapshots()), 2,
                          '快照名必须唯一，否则回滚点被覆盖')
 
@@ -130,7 +136,8 @@ class TestRollback(_Isolated):
                 "rules": [{"pattern": "rollback%d\\s*exploit" % i,
                            "description": "d", "severity": "high"}],
             }, f)
-        promote_rule.promote(path, json.load(open(path, encoding='utf-8')))
+        promote_rule.promote(path, json.load(open(path, encoding='utf-8')),
+                                approved_by='test-approver')
 
     def test_rollback_restores_the_exact_pre_state(self):
         before = {r'original\s*rule': ['d', 'high']}
@@ -139,7 +146,7 @@ class TestRollback(_Isolated):
         promoted_state = json.load(open(promote_rule.RADAR_RULES, encoding='utf-8'))['rules']
         self.assertIn('rollback0\\s*exploit', promoted_state)
 
-        code, target = promote_rule.rollback()
+        code, target = promote_rule.rollback(approved_by='test-approver')
         self.assertEqual(code, 0, '回滚必须成功: %s' % target)
         after = json.load(open(promote_rule.RADAR_RULES, encoding='utf-8'))['rules']
         self.assertEqual(after, before, '回滚后必须逐字恢复晋升前状态')
@@ -150,18 +157,19 @@ class TestRollback(_Isolated):
         self._promote_one()
         before_n = len(promote_rule.list_snapshots())
 
-        promote_rule.rollback()
+        promote_rule.rollback(approved_by='test-approver')
 
         self.assertEqual(len(promote_rule.list_snapshots()), before_n + 1,
                          '回滚未先快照当前状态，回错了无法撤销')
 
     def test_rollback_without_snapshots_fails_loudly(self):
-        code, msg = promote_rule.rollback()
+        code, msg = promote_rule.rollback(approved_by='test-approver')
         self.assertEqual(code, 2, '无快照必须非 0 退出')
         self.assertIn('没有可用快照', msg)
 
     def test_rollback_to_missing_snapshot_fails_loudly(self):
-        code, msg = promote_rule.rollback('no_such_snapshot.json')
+        code, msg = promote_rule.rollback('no_such_snapshot.json',
+                                  approved_by='test-approver')
         self.assertEqual(code, 2)
         self.assertIn('快照不存在', msg)
 
@@ -169,7 +177,7 @@ class TestRollback(_Isolated):
         _write_rules(promote_rule.RADAR_RULES, {r'base\s*rule': ['d', 'high']})
         self._promote_one()
         name = os.path.basename(promote_rule.list_snapshots()[0][0])
-        code, _ = promote_rule.rollback(name)
+        code, _ = promote_rule.rollback(name, approved_by='test-approver')
         self.assertEqual(code, 0, '应支持只传快照文件名')
 
 
@@ -178,8 +186,9 @@ class TestPromotionLedger(_Isolated):
     def test_promote_and_rollback_are_both_recorded(self):
         _write_rules(promote_rule.RADAR_RULES, {r'base\s*rule': ['d', 'high']})
         path = _candidate(self.tmp)
-        promote_rule.promote(path, json.load(open(path, encoding='utf-8')))
-        promote_rule.rollback()
+        promote_rule.promote(path, json.load(open(path, encoding='utf-8')),
+                                approved_by='test-approver')
+        promote_rule.rollback(approved_by='test-approver')
 
         entries = promote_rule.load_ledger()
         events = [e['event'] for e in entries]
@@ -197,7 +206,8 @@ class TestPromotionLedger(_Isolated):
         """一行一条、追加写 —— 不得被后续事件覆盖。"""
         _write_rules(promote_rule.RADAR_RULES, {r'base\s*rule': ['d', 'high']})
         path = _candidate(self.tmp)
-        promote_rule.promote(path, json.load(open(path, encoding='utf-8')))
+        promote_rule.promote(path, json.load(open(path, encoding='utf-8')),
+                                approved_by='test-approver')
         with open(promote_rule.LEDGER, encoding='utf-8') as f:
             lines = [l for l in f.read().splitlines() if l.strip()]
         self.assertEqual(len(lines), 1)
@@ -208,7 +218,8 @@ class TestPromotionLedger(_Isolated):
         promote_rule.LEDGER = os.path.join(self.tmp, 'no_such_dir',
                                             'ledger.jsonl')
         path = _candidate(self.tmp)
-        n = promote_rule.promote(path, json.load(open(path, encoding='utf-8')))
+        n = promote_rule.promote(path, json.load(open(path, encoding='utf-8')),
+                                approved_by='test-approver')
         self.assertEqual(n, 1, '台账故障不应阻断晋升')
 
 
@@ -286,10 +297,13 @@ class TestCliWiring(unittest.TestCase):
     def test_promote_takes_a_snapshot_before_writing(self):
         src = open(os.path.join(ROOT, 'scripts', 'promote_rule.py'),
                    encoding='utf-8').read()
-        fn = src[src.index('def promote(path, data):'):]
+        fn = src[src.index('def promote(path, data, approved_by=None):'):]
         fn = fn[:fn.index('\ndef ', 1)]
+        approver_i = fn.index('if not approved_by')
         snap_i = fn.index('snapshot_current()')
         write_i = fn.index('open(RADAR_RULES')
+        self.assertLess(approver_i, snap_i,
+                        '批准人校验必须先于任何数据变动（无批准人 = 拒绝晋升）')
         self.assertLess(snap_i, write_i, '快照必须在覆盖写之前，否则回滚点已丢')
 
 

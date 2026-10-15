@@ -35,6 +35,9 @@ Usage
   python scripts/rule_decay.py --hits-file X.jsonl  # 追加外部命中记录
   python scripts/rule_decay.py --retire             # 从 radar_rules.json 移除
                                                           # retire_suggested 规则
+                                                          # （须 --approved-by 或
+                                                          #  $AISHIELD_APPROVER，
+                                                          #  入 RSES 进化账本）
 """
 from __future__ import annotations
 
@@ -56,6 +59,10 @@ RADAR_RULES = os.path.join(ROOT, "data", "radar_rules.json")
 GENERATED_RULES = os.path.join(ROOT, "data", "generated_rules.json")
 HITS_LOG = os.path.join(ROOT, "data", "state", "rule_hits.jsonl")
 DECAY_STATE = os.path.join(ROOT, "data", "state", "rule_decay.json")
+#: RSES 进化账本（eco/evolution_ledger.py）。--retire 是 demote（特权动作）：
+#: 必须带批准人，否则拒绝动规则库。与 promote_rule.py 的 EVOLUTION_LEDGER 同路径。
+EVOLUTION_LEDGER = os.path.join(ROOT, "data", "state", "evolution_ledger.jsonl")
+APPROVER_ENV = "AISHIELD_APPROVER"
 
 from rule_corpus import ATTACK_SAMPLES, BENIGN_CORPUS  # noqa: E402
 
@@ -313,29 +320,68 @@ def _write_state(state: Dict[str, Any]) -> None:
         json.dump(state, f, indent=2, ensure_ascii=False)
 
 
-def retire_rules_from_source(state: Dict[str, Any]) -> int:
-    """从 radar_rules.json 移除所有 retire_suggested 的规则。"""
+def retire_rules_from_source(state: Dict[str, Any], approved_by: str | None = None) -> int:
+    """从 radar_rules.json 移除所有 retire_suggested 的规则。
+
+    approved_by 必填（--retire 是 demote，特权动作，RSES 账本记账）：
+    移除会真实发生时才校验 —— 没有待退规则时不逼批准人。
+    """
     retire_hashes = [h for h, r in state["rules"].items()
                      if r["status"] == "retire_suggested"]
     if not retire_hashes:
         return 0
+    if not approved_by or not str(approved_by).strip():
+        raise ValueError("--retire removes live rules and requires an approver: "
+                         "--approved-by NAME or $%s=NAME" % APPROVER_ENV)
     if not os.path.exists(RADAR_RULES):
         return 0
     with open(RADAR_RULES, encoding="utf-8") as f:
         d = json.load(f)
     rules = d.get("rules", {})
     removed = 0
+    removed_patterns: List[str] = []
     for h in retire_hashes:
         # 反查 pattern
         for pat, meta in list(rules.items()):
             if _pattern_hash(pat) == h:
                 del rules[pat]
                 removed += 1
+                removed_patterns.append(pat)
                 break
     if removed:
         with open(RADAR_RULES, "w", encoding="utf-8") as f:
             json.dump(d, f, indent=2, ensure_ascii=False)
+        _record_demote(removed_patterns, approved_by)
     return removed
+
+
+def _record_demote(patterns: List[str], approved_by: str) -> None:
+    """把一次退役记入 RSES 进化账本（actor human:<approver>）。
+
+    按文件路径加载 eco/evolution_ledger.py —— 与 promote_rule.py 同因：
+    本脚本要轻量，不拉 eco/__init__ 的全体子模块。
+    """
+    import importlib.util
+    path = os.path.join(ROOT, "eco", "evolution_ledger.py")
+    spec = importlib.util.spec_from_file_location("aishield_evolution_ledger", path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    approver = approved_by.strip()
+    actor = approver if ":" in approver else "human:" + approver
+    mod.record(actor=actor, action="demote", target="data/radar_rules.json",
+               rationale="rule decay: 30-snapshot zero-hit window retired %d rule(s)"
+                         % len(patterns),
+               evidence={"removed_patterns": patterns,
+                         "radar_rule_count_after": _radar_rule_count()},
+               approved_by=approver, path=EVOLUTION_LEDGER)
+
+
+def _radar_rule_count() -> int:
+    try:
+        with open(RADAR_RULES, encoding="utf-8") as f:
+            return len((json.load(f) or {}).get("rules", {}) or {})
+    except Exception:
+        return -1
 
 
 def main(argv: List[str] | None = None) -> int:
@@ -347,6 +393,10 @@ def main(argv: List[str] | None = None) -> int:
                    help="从外部 JSONL 追加命中记录到最新快照")
     p.add_argument("--retire", action="store_true",
                    help="从 radar_rules.json 移除所有 retire_suggested 规则（危险）")
+    p.add_argument("--approved-by", dest="approved_by", default=None,
+                   metavar="NAME",
+                   help="Approver identity recorded in the evolution ledger "
+                        "for --retire (falls back to $%s)" % APPROVER_ENV)
     args = p.parse_args(argv)
 
     # 1. 加载规则
@@ -383,7 +433,12 @@ def main(argv: List[str] | None = None) -> int:
 
     # 7. 执行 retire
     if args.retire:
-        removed = retire_rules_from_source(state)
+        approver = (args.approved_by or os.environ.get(APPROVER_ENV) or "").strip()
+        try:
+            removed = retire_rules_from_source(state, approved_by=approver or None)
+        except ValueError as e:
+            print("REFUSED: %s" % e)
+            return 2
         print(f"\nretired {removed} rules from {os.path.relpath(RADAR_RULES, ROOT)}")
 
     # 退出码

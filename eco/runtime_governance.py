@@ -231,13 +231,19 @@ class BehaviorMonitor:
     def __init__(self, path=None, window_sec=BEHAVIOR_WINDOW_SEC,
                  rate_max=BEHAVIOR_RATE_MAX, denial_max=BEHAVIOR_DENIAL_MAX,
                  escalate=None):
-        self.path = path or _behavior_path()
+        self._path_override = path
         self.window_sec = window_sec
         self.rate_max = rate_max
         self.denial_max = denial_max
         # escalate(server, severity, detail) —— 命中异常时的"动作"钩子；
         # 默认 None（只审计不升级），闭环保守，避免监控本身误伤。
         self.escalate = escalate
+
+    @property
+    def path(self):
+        """惰性解析：与 AttestationStream.path 同因（import 时固化的路径会让
+        测试对 AUDIT_LOG 的替换失效，把行为状态写进真实 api/data/）。"""
+        return self._path_override or _behavior_path()
 
     # ── 持久化（原子写） ──
     def _load(self):
@@ -505,6 +511,12 @@ class RuntimeGovernor:
                         _default_behavior.observe(server, tool, decision)
                     except Exception:
                         pass
+                # 持续证明流（Program C）：每 N 次判定签一次运行时快照。
+                # 与行为监控同纪律：证明流故障绝不影响放行判定本身。
+                try:
+                    _default_attest.snapshot()
+                except Exception:
+                    pass
             return res
 
         if not server:
@@ -673,11 +685,277 @@ class RuntimeGovernor:
         }
 
 
+# ══════════════════════════════════════════════
+#  持续证明流（Program C — RIL）：流式鉴证
+# ══════════════════════════════════════════════
+#
+# 决策网关回答"这次调用允许吗"（点），行为监控回答"模式正常吗"（线），
+# 持续证明流回答"**此刻的整个运行时状态可被第三方验证吗**"（面）。
+#
+# 把 docs 蓝图 §3 Program C 的"连续证明（continuous attestation）流"
+# 落地：每 N 次准入判定（或强制触发）对运行时状态签一次名 ——
+#   策略指纹 + 审计链头 + 行为健康 + 熔断数
+# 签名密钥即 verifiable_identity 的 active Ed25519 密钥，与 JWKS 对外
+# 发布的同一把：第三方拉一次 JWKS（或从签名者 did:key 直接解出公钥）
+# 就能离线验证任一快照，无需信任本服务在线。
+#
+# 缺 cryptography 时按设计降级 HMAC，并诚实标注
+# third_party_verifiable=False —— 宁可不可验，也不假装可验。
+
+ATTEST_EVERY_EVALUATIONS = 25   # 每 N 次判定签一次运行时快照
+
+
+def _attest_path():
+    """与审计日志同目录 —— 测试替换 AUDIT_LOG 时自动隔离，不碰真实数据。"""
+    return os.path.join(os.path.dirname(AUDIT_LOG), "runtime_attestations.jsonl")
+
+
+class AttestationStream:
+    """流式证明：对运行时状态拍签名快照，追加进哈希链日志。"""
+
+    def __init__(self, path=None, every=ATTEST_EVERY_EVALUATIONS, key_resolver=None):
+        self._path_override = path
+        self.every = max(1, int(every))
+        self._counter = 0
+        # key_resolver(kid) -> key dict：验证时按 kid 找公钥的回调。
+        # 生产默认走 verifiable_identity 密钥环（含 deprecated，旧快照仍可验）；
+        # 测试可注入，避免碰真实 api/data。
+        self.key_resolver = key_resolver
+
+    @property
+    def path(self):
+        """路径**每次访问都重新解析**，不是 import 时固化。
+
+        2026-10-15 全量套件实测：`_default_attest = AttestationStream()` 在
+        import 时就把路径钉成真实 api/data/runtime_attestations.jsonl，之后
+        测试替换 rg.AUDIT_LOG 对单例无效 —— test_invariant_property 的
+        Hypothesis 循环跑满 50 次判定，快照写进了真实数据文件（测试污染）。
+        改为惰性解析后，"测试替换 AUDIT_LOG 即隔离"的注释才真正成立。
+        """
+        return self._path_override or _attest_path()
+
+    # ── 签名者（与 JWKS 同一把密钥）──
+    def _signer(self):
+        """返回 active 签名密钥 dict；无密钥返回 None（调用方记 unsigned）。"""
+        from eco import verifiable_identity as vi
+        ring = vi.SigningKeyRing().load()
+        return ring.active()
+
+    # ── 运行时状态采集 ──
+    def _policy_digest(self):
+        try:
+            with open(POLICY_FILE, "rb") as f:
+                return _sha256(f.read().decode("utf-8", "replace"))
+        except Exception:
+            return "unreadable"
+
+    @staticmethod
+    def _audit_head_and_count():
+        """只解析末条 + 计数（不整链校验；完整校验走 verify_chain()）。"""
+        if not os.path.exists(AUDIT_LOG):
+            return 0, None
+        count = 0
+        last = None
+        try:
+            with open(AUDIT_LOG, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    count += 1
+                    last = line
+        except Exception:
+            return count, None
+        if not last:
+            return 0, None
+        try:
+            return count, json.loads(last).get("hash")
+        except Exception:
+            return count, None
+
+    def _state(self):
+        entries, head = self._audit_head_and_count()
+        try:
+            behavior = _default_behavior.status()
+        except Exception:
+            behavior = {"healthy": None, "anomaly_count": None}
+        policy, ok = _load_policy()
+        return {
+            "ts": _now_iso(),
+            "evaluations": self._counter,
+            "policy_digest": self._policy_digest(),
+            "policy_healthy": ok,
+            "audit_entries": entries,
+            "audit_head_hash": head,
+            "behavior_healthy": behavior.get("healthy"),
+            "behavior_anomaly_count": behavior.get("anomaly_count"),
+            "killed_count": len(policy.get("killed", {})),
+        }
+
+    # ── 快照签发与落盘 ──
+    def snapshot(self, force=False) -> dict | None:
+        """签一次运行时快照。非 force 时按 every 节流（返回 None 表示未到点）。"""
+        if not force:
+            self._counter += 1
+            if self._counter % self.every != 0:
+                return None
+        with _lock:
+            prev = self._last_entry()
+            seq = (prev.get("seq", 0) + 1) if prev else 1
+            prev_hash = prev.get("hash", GENESIS_HASH) if prev else GENESIS_HASH
+            payload = self._state()
+            payload["seq"] = seq
+            payload["prev_hash"] = prev_hash
+            body = json.dumps(payload, ensure_ascii=False, sort_keys=True,
+                              separators=(",", ":")).encode("utf-8")
+            entry = dict(payload)
+            entry["hash"] = _sha256(body.decode("utf-8"))
+
+            key = self._signer()
+            if key:
+                alg = str(key.get("alg") or "")
+                try:
+                    sig = _cs_sign(body, str(key.get("private_key") or ""), alg or None)
+                    entry["signature"] = sig
+                    entry["signature_alg"] = alg or "unknown"
+                    entry["signer_kid"] = _kid_of(key)
+                    # Ed25519 非对称 → 第三方可验；HMAC 对称 → 诚实标注不可验
+                    entry["third_party_verifiable"] = bool(
+                        alg and alg.lower() == "ed25519")
+                except Exception as exc:
+                    entry["signature"] = None
+                    entry["unsigned_reason"] = f"sign failed: {type(exc).__name__}"
+                    entry["third_party_verifiable"] = False
+            else:
+                entry["signature"] = None
+                entry["unsigned_reason"] = "no active signing key"
+                entry["third_party_verifiable"] = False
+
+            os.makedirs(os.path.dirname(self.path) or ".", exist_ok=True)
+            with open(self.path, "a", encoding="utf-8") as f:
+                f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+        audit("runtime_attestation", {"seq": seq, "policy_digest": payload["policy_digest"],
+                                      "third_party_verifiable": entry["third_party_verifiable"]})
+        return entry
+
+    def _last_entry(self):
+        if not os.path.exists(self.path):
+            return None
+        last = None
+        try:
+            with open(self.path, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if line:
+                        last = line
+        except Exception:
+            return None
+        if not last:
+            return None
+        try:
+            return json.loads(last)
+        except Exception:
+            return None
+
+    # ── 查询与验证 ──
+    def latest(self) -> dict | None:
+        return self._last_entry()
+
+    def verify(self) -> dict:
+        """校验整条证明链：hash 链连续性 + 每条签名（有签的）。"""
+        if not os.path.exists(self.path):
+            return {"valid": True, "entries": 0, "note": "证明流为空"}
+        prev_hash = GENESIS_HASH
+        expected_seq = 1
+        count = 0
+        try:
+            with open(self.path, "r", encoding="utf-8") as f:
+                for lineno, line in enumerate(f, 1):
+                    line = line.strip()
+                    if not line:
+                        continue
+                    try:
+                        entry = json.loads(line)
+                    except Exception:
+                        return {"valid": False, "entries": count, "broken_at": lineno,
+                                "reason": "JSON 解析失败"}
+                    count += 1
+                    if entry.get("seq") != expected_seq:
+                        return {"valid": False, "entries": count, "broken_at": lineno,
+                                "reason": f"序号断裂：期望 {expected_seq}，实际 {entry.get('seq')}"}
+                    if entry.get("prev_hash") != prev_hash:
+                        return {"valid": False, "entries": count, "broken_at": lineno,
+                                "reason": "prev_hash 不匹配（前序快照被篡改或删除）"}
+                    body = {k: v for k, v in entry.items()
+                            if k not in ("hash", "signature", "signature_alg",
+                                        "signer_kid", "third_party_verifiable",
+                                        "unsigned_reason")}
+                    if _sha256(json.dumps(body, ensure_ascii=False, sort_keys=True,
+                                          separators=(",", ":"))) != entry.get("hash"):
+                        return {"valid": False, "entries": count, "broken_at": lineno,
+                                "reason": "本条内容被篡改（hash 不符）"}
+                    sig = entry.get("signature")
+                    if sig:
+                        key = self._key_by_kid(entry.get("signer_kid"))
+                        if not key:
+                            return {"valid": False, "entries": count, "broken_at": lineno,
+                                    "reason": f"签名者 kid 不在密钥环: {entry.get('signer_kid')}"}
+                        raw = json.dumps(body, ensure_ascii=False, sort_keys=True,
+                                         separators=(",", ":")).encode("utf-8")
+                        if not _cs_verify(raw, sig, str(key.get("public_key") or ""),
+                                          str(key.get("alg") or "")):
+                            return {"valid": False, "entries": count, "broken_at": lineno,
+                                    "reason": "签名校验失败（快照被改写或密钥不匹配）"}
+                    prev_hash = entry["hash"]
+                    expected_seq += 1
+        except Exception as exc:
+            return {"valid": False, "entries": count, "reason": f"读取失败: {exc}"}
+        return {"valid": True, "entries": count, "head_hash": prev_hash}
+
+    def _key_by_kid(self, kid):
+        if not kid:
+            return None
+        if self.key_resolver is not None:
+            return self.key_resolver(kid)
+        from eco import verifiable_identity as vi
+        ring = vi.SigningKeyRing().load()
+        for cand in [ring.active()] + ring.deprecated():
+            if cand and _kid_of(cand) == kid:
+                return cand
+        return None
+
+    def status(self):
+        return {
+            "every_evaluations": self.every,
+            "evaluations_seen": self._counter,
+            "latest": self.latest(),
+            "chain": self.verify(),
+        }
+
+
+def _kid_of(key: dict) -> str:
+    """签名密钥的 kid（与 verifiable_identity 同口径：公钥 sha256 前 12 位）。"""
+    import hashlib as _hl
+    return _hl.sha256(str(key.get("public_key") or "").encode("ascii")).hexdigest()[:12]
+
+
+def _cs_sign(message: bytes, private_b64: str, alg=None) -> str:
+    from eco import crypto_sign as cs
+    return cs.sign(message, private_b64, alg)
+
+
+def _cs_verify(message: bytes, signature_b64: str, public_b64: str, alg: str) -> bool:
+    from eco import crypto_sign as cs
+    return cs.verify(message, signature_b64, public_b64, alg)
+
+
 # ── 模块级便捷 API ──
 _default = RuntimeGovernor()
 # 默认行为监控：只检测+审计，不自动升级（闭环保守；需要自动熔断时调
 # enable_behavior_escalation()）。escalate 钩子可在任意时刻挂上。
 _default_behavior = BehaviorMonitor()
+# 持续证明流：每 25 次判定签一次运行时快照（路径随 AUDIT_LOG 隔离）。
+_default_attest = AttestationStream()
 
 
 def evaluate(server, tool="", context=None, log=True, behavior=True):
@@ -745,6 +1023,16 @@ def set_default_deny(enabled):
 
 def status():
     return _default.status()
+
+
+def attest_now():
+    """强制签一次运行时快照（供运维/测试触发，不经节流）。"""
+    return _default_attest.snapshot(force=True)
+
+
+def attest_status():
+    """持续证明流状态：配置 + 最新快照 + 全链校验。"""
+    return _default_attest.status()
 
 
 if __name__ == "__main__":

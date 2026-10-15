@@ -22,6 +22,10 @@ This tool refuses to promote anything that fails:
   5. duplicate   -- pattern not already in the live rule set
   6. benign corpus -- ZERO matches against known-good samples
                       (a rule that fires on benign input is worse than no rule)
+  7. approver    -- --promote / --promote-all / --rollback require an approver
+                    (--approved-by NAME or $AISHIELD_APPROVER), recorded in the
+                    hash-chained evolution ledger (eco/evolution_ledger.py).
+                    No anonymous rule-set changes.
 
 Promoted rules land in `data/radar_rules.json`, loaded by scanner/rules.py at
 import time. Deliberately a separate file from `data/generated_rules.json`,
@@ -39,6 +43,11 @@ Usage:
   python scripts/promote_rule.py --rollback             # roll back to newest
   python scripts/promote_rule.py --rollback <snap.json> # roll back to one
   python scripts/promote_rule.py --ledger               # show promote/rollback log
+  python scripts/promote_rule.py --evolution-ledger     # show the RSES hash-chained ledger
+
+  Enforce modes (--promote / --promote-all / --rollback) additionally require an
+  approver: --approved-by NAME, or export AISHIELD_APPROVER=NAME once. The
+  approver is recorded (actor human:NAME) in data/state/evolution_ledger.jsonl.
 
 Shadow vs enforce (see the module docstring of the shadow section below):
   shadow   -- observe only. Runs validation + effect measurement against a
@@ -70,7 +79,18 @@ PROPOSED_DIR = os.path.join(ROOT, "scanner", "_proposed")
 RADAR_RULES = os.path.join(ROOT, "data", "radar_rules.json")
 SNAPSHOT_DIR = os.path.join(ROOT, "data", "snapshots")
 LEDGER = os.path.join(ROOT, "data", "state", "promotion_ledger.jsonl")
+#: 规则自进化账本（eco/evolution_ledger.py）的落点。与上面 LEDGER 的分工：
+#: 那个是信息性事件流水（写失败不阻断晋升，契约见 tests/test_rule_promotion_
+#: rollback.py::test_ledger_failure_does_not_block_promotion）；这个是**问责
+#: 脊柱** —— 每一次改规则集的动作都必须带批准人入链，加载/写入失败会 raise。
+#: 由 rule-promoter workflow 提交进 git（.gitattributes 配 merge=union，
+#: 追加型日志的语义正确合并驱动），见 .github/auto-resolvable-paths.txt。
+EVOLUTION_LEDGER = os.path.join(ROOT, "data", "state", "evolution_ledger.jsonl")
 KEEP_SNAPSHOTS = 20
+
+#: 人类跑本脚本时的批准人环境变量（--approved-by 优先）。缺批准人 = 拒绝
+#: 执行特权动作，不提供"匿名模式"。
+APPROVER_ENV = "AISHIELD_APPROVER"
 
 VALID_SEVERITIES = {"critical", "high", "medium", "low", "info"}
 
@@ -225,11 +245,66 @@ def load_ledger():
     return out
 
 
-def rollback(target=None):
+# ---------------------------------------------------------------------------
+# 进化账本（RSES 问责脊柱）
+# ---------------------------------------------------------------------------
+# 为什么按文件路径加载而不是 `from eco import evolution_ledger`：eco/__init__
+# 会一次性导入 identity/payment/badge/marketplace 等十几个子模块。本脚本是
+# CI 闸门，必须保持轻量与无导入侧效应，所以直接加载那一个文件（它只依赖标准库）。
+_EVO_MOD = None
+
+
+def _evolution_module():
+    """加载 eco/evolution_ledger.py（缓存）。加载失败 = 无法存证 = 拒绝晋升。"""
+    global _EVO_MOD
+    if _EVO_MOD is not None:
+        return _EVO_MOD
+    import importlib.util
+    path = os.path.join(ROOT, "eco", "evolution_ledger.py")
+    spec = importlib.util.spec_from_file_location("aishield_evolution_ledger", path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    _EVO_MOD = mod
+    return mod
+
+
+def _resolve_approver(cli_value):
+    """批准人 = --approved-by 参数 > AISHIELD_APPROVER 环境变量 > None。
+
+    None 表示"没人批准" —— 调用方必须把它当硬拒绝，不得降级成放行。
+    """
+    value = (cli_value or os.environ.get(APPROVER_ENV) or "").strip()
+    return value or None
+
+
+def _approver_actor(approver):
+    """人类批准人归一成 `human:<name>`（无前缀时补），与 meta: 前缀对仗。
+
+    信任域靠前缀区分：meta:* 只许起草；ci:*/human:* 可带批准人改规则集。
+    """
+    approver = approver.strip()
+    return approver if ":" in approver else "human:" + approver
+
+
+def _evolution_record(*, action, target, rationale="", evidence=None,
+                      approved_by=None):
+    """向进化账本追加一条。失败会抛给调用方（与 LEDGER 的不阻断刻意不同）。"""
+    mod = _evolution_module()
+    return mod.record(actor=_approver_actor(approved_by or ""), action=action,
+                      target=target, rationale=rationale, evidence=evidence,
+                      approved_by=approved_by, path=EVOLUTION_LEDGER)
+
+
+def rollback(target=None, approved_by=None):
     """回滚到某份快照（默认最新）。先快照当前状态，防止回滚方向搞反。
+
+    approved_by 必填：回滚同样改规则集，是特权动作（RSES 账本记账）。
 
     返回 (exit_code, message)。
     """
+    if not approved_by or not str(approved_by).strip():
+        raise ValueError("rollback requires approved_by (pass --approved-by "
+                         "or set %s)" % APPROVER_ENV)
     snaps = list_snapshots()
     if target is None:
         if not snaps:
@@ -245,6 +320,13 @@ def rollback(target=None):
     ledger_append("rollback", restored_from=os.path.basename(target),
                   previous_snapshot=os.path.basename(before) if before else None,
                   timestamp=os.path.basename(target))
+    _evolution_record(
+        action="rollback", target="data/radar_rules.json",
+        rationale="rolled back radar rules to %s" % os.path.basename(target),
+        evidence={"restored_from": os.path.basename(target),
+                  "previous_snapshot": (os.path.basename(before)
+                                        if before else None)},
+        approved_by=approved_by)
     print("rolled back to %s (previous state kept at %s)"
           % (os.path.basename(target),
              os.path.basename(before) if before else "n/a"))
@@ -530,7 +612,18 @@ def render_shadow(verdicts):
 # ---------------------------------------------------------------------------
 # Promotion
 # ---------------------------------------------------------------------------
-def promote(path, data):
+def promote(path, data, approved_by=None):
+    """晋升一个候选。approved_by 必填 —— 规则集变更不允许匿名（RSES）。
+
+    顺序：先验账本可用（缺批准人/账本加载失败都在动数据前响），再快照、
+    落库、归档候选，最后入进化账本。入账失败会 raise：一次没有记录的
+    规则集变更是完整性事故，不是"打个 warning 就好"。
+    """
+    if not approved_by or not str(approved_by).strip():
+        raise ValueError("promote requires approved_by (no anonymous rule-set "
+                         "changes; pass --approved-by or set %s)" % APPROVER_ENV)
+    _evolution_module()  # 动数据前先确认能存证
+
     store = load_radar_rules()
     store.setdefault("rules", {})
     store.setdefault("provenance", {})
@@ -564,6 +657,16 @@ def promote(path, data):
                   attack_category=data.get("attack_category", ""),
                   snapshot=os.path.basename(before) if before else None,
                   rule_count=len(store.get("rules", {})))
+    prov = _provenance_entry(data, os.path.basename(path))
+    _evolution_record(
+        action="promote", target=os.path.basename(path),
+        rationale=prov.get("trigger", ""),
+        evidence={"patterns": patterns,
+                  "attack_category": data.get("attack_category", ""),
+                  "signal_url": prov.get("signal_url", ""),
+                  "snapshot": os.path.basename(before) if before else None,
+                  "radar_rule_count": len(store.get("rules", {}))},
+        approved_by=approved_by)
     prune_snapshots()
 
     sync_readme_counts()
@@ -691,7 +794,7 @@ def _evaluate_effect():
         print(f"  warning: effect evaluation skipped ({e})")
 
 
-def _try_promote_one(path, data, known, strict):
+def _try_promote_one(path, data, known, strict, approved_by=None):
     """Enforce-mode decision for a single candidate.
 
     Returns (promoted: bool, code: int, note: str).
@@ -712,7 +815,7 @@ def _try_promote_one(path, data, known, strict):
             print("SKIPPED --strict: %s -- %s" % (verdict["candidate"], msg))
             return False, 3, verdict["candidate"]
         print("WARNING: promoting anyway -- %s -- %s" % (verdict["candidate"], msg))
-    n = promote(path, data)
+    n = promote(path, data, approved_by=approved_by)
     print("promoted %d rule(s) from %s -> data/radar_rules.json"
           % (n, os.path.basename(path)))
     return True, 0, verdict["candidate"]
@@ -725,7 +828,12 @@ def cmd_shadow():
     return code
 
 
-def cmd_promote(target, strict=False):
+def cmd_promote(target, strict=False, approved_by=None):
+    approver = _resolve_approver(approved_by)
+    if not approver:
+        print("REFUSED -- promotion requires an approver: pass --approved-by "
+              "<name> or set %s=<name>" % APPROVER_ENV)
+        return 2
     path = target if os.path.isabs(target) else os.path.join(PROPOSED_DIR, target)
     if not os.path.exists(path):
         print("not found: %s" % path)
@@ -738,19 +846,26 @@ def cmd_promote(target, strict=False):
         for msg in problems:
             print("  - %s" % msg)
         return 1
-    _ok, code, _note = _try_promote_one(path, data, live_patterns(), strict)
+    _ok, code, _note = _try_promote_one(path, data, live_patterns(), strict,
+                                        approved_by=approver)
     _evaluate_effect()
     return 0 if code == 0 else code
 
 
-def cmd_promote_all(strict=False):
+def cmd_promote_all(strict=False, approved_by=None):
+    approver = _resolve_approver(approved_by)
+    if not approver:
+        print("REFUSED -- promotion requires an approver: pass --approved-by "
+              "<name> or set %s=<name>" % APPROVER_ENV)
+        return 2
     known = live_patterns()
     promoted = refused = skipped = 0
     for path, data in load_candidates():
         ok, _ = validate(path, data, known)
         if not ok:
             continue  # cmd_check already reports these; enforce never writes them
-        did, code, _note = _try_promote_one(path, data, known, strict)
+        did, code, _note = _try_promote_one(path, data, known, strict,
+                                            approved_by=approver)
         if did:
             promoted += 1
             known |= {r["pattern"].strip() for r in data["rules"]}
@@ -796,8 +911,13 @@ def cmd_list_snapshots():
     return 0
 
 
-def cmd_rollback(target):
-    code, msg = rollback(target)
+def cmd_rollback(target, approved_by=None):
+    approver = _resolve_approver(approved_by)
+    if not approver:
+        print("REFUSED -- rollback requires an approver: pass --approved-by "
+              "<name> or set %s=<name>" % APPROVER_ENV)
+        return 2
+    code, msg = rollback(target, approved_by=approver)
     print(msg)
     return code
 
@@ -824,6 +944,12 @@ def main():
     ap.add_argument("--strict", action="store_true",
                     help="Refuse zero-catch (dead) rules instead of promoting "
                          "them with a warning")
+    ap.add_argument("--approved-by", dest="approved_by", default=None,
+                    metavar="NAME",
+                    help="Approver identity recorded in the evolution ledger "
+                         "for this rule-set change (required by --promote / "
+                         "--promote-all / --rollback; falls back to $%s)"
+                         % APPROVER_ENV)
     g = ap.add_mutually_exclusive_group(required=True)
     g.add_argument("--check", action="store_true", help="Validate all candidates")
     g.add_argument("--shadow", action="store_true",
@@ -837,6 +963,10 @@ def main():
     g.add_argument("--rollback", nargs="?", const="", default=None,
                    metavar="SNAP", help="Roll back to a snapshot (default: newest)")
     g.add_argument("--ledger", action="store_true", help="Show promote/rollback log")
+    g.add_argument("--evolution-ledger", dest="evolution_ledger",
+                   action="store_true",
+                   help="Show the RSES evolution ledger (hash-chained, "
+                        "approver-gated)")
     args = ap.parse_args()
 
     if args.check:
@@ -844,17 +974,22 @@ def main():
     if args.shadow:
         return cmd_shadow()
     if args.promote:
-        return cmd_promote(args.promote, strict=args.strict)
+        return cmd_promote(args.promote, strict=args.strict,
+                           approved_by=args.approved_by)
     if args.promote_all:
-        return cmd_promote_all(strict=args.strict)
+        return cmd_promote_all(strict=args.strict,
+                               approved_by=args.approved_by)
     if args.list:
         return cmd_list()
     if args.list_snapshots:
         return cmd_list_snapshots()
     if args.rollback is not None:
-        return cmd_rollback(args.rollback or None)
+        return cmd_rollback(args.rollback or None,
+                            approved_by=args.approved_by)
     if args.ledger:
         return cmd_ledger()
+    if args.evolution_ledger:
+        return _evolution_module().main(["--list", "--path", EVOLUTION_LEDGER])
     return 0
 
 

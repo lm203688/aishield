@@ -925,6 +925,28 @@ def handle_get(path, query=""):
     if path == "/api/v1/trust/score" or path == "/api/v1/trust/cert":
         return {"error": "agent_id / cert_id required in path"}, 400
 
+    # ── FTM（Program D）：W3C VC 2.0 + CT 式透明日志 ──
+    if path == "/api/v1/trust/tlog/sth":
+        # 当前签名树头：第三方验证"服务方日志此刻的状态"
+        from eco import transparency_log as tlog
+        return tlog.sth(), 200
+
+    if path == "/api/v1/trust/tlog/entries":
+        from eco import transparency_log as tlog
+        try:
+            limit = int(q.get("limit", ["20"])[0])
+        except (TypeError, ValueError):
+            limit = 20
+        return {"entries": tlog.get_log().entries(limit=min(limit, 100)),
+                "tree_size": tlog.get_log().size(),
+                "root_hash": tlog.get_log().root()}, 200
+
+    m = __import__("re").match(r"^/api/v1/trust/tlog/proof/(\d+)$", path)
+    if m:
+        # 包含证明：leaf_index（0-based）
+        from eco import transparency_log as tlog
+        return tlog.get_log().inclusion_proof(int(m.group(1))), 200
+
     if path == "/.well-known/agent-card.json":
         return agent_card(), 200
 
@@ -934,6 +956,57 @@ def handle_get(path, query=""):
 def handle_post(path, data):
     """返回 (payload_dict, status_code)。"""
     data = data or {}
+
+    # ── FTM（Program D）：VC 2.0 签发（签发即进透明日志）──
+    if path == "/api/v1/trust/vc2":
+        subject_did = data.get("subject_did") or data.get("subject")
+        if not subject_did or not isinstance(subject_did, str):
+            return {"error": "subject_did required"}, 400
+        claims = data.get("claims") or {}
+        if not isinstance(claims, dict):
+            return {"error": "claims must be an object"}, 400
+        try:
+            ttl = int(data.get("ttl", 86400))
+        except (TypeError, ValueError):
+            return {"error": "ttl must be an integer"}, 400
+        try:
+            from eco import verifiable_identity as vi
+            issued = vi.issue_vc2(subject_did, claims, ttl,
+                                  data.get("credential_types"))
+        except RuntimeError as exc:
+            return {"error": str(exc)}, 503
+        # 透明签发：凭证摘要（不含 claims 原文）进 CT 式日志
+        try:
+            from eco import transparency_log as tlog
+            tlog.append({
+                "type": "vc2_issuance",
+                "credential_id": issued["credential_id"],
+                "issuer": issued["issuer"],
+                "subject": subject_did,
+                "expires_at": issued["expires_at"],
+            })
+        except Exception:
+            pass        # 日志故障不阻断签发，但响应里如实标注
+            issued["transparency_logged"] = False
+        else:
+            issued["transparency_logged"] = True
+        return issued, 201
+
+    if path == "/api/v1/trust/vc2/verify":
+        token = data.get("jwt") or data.get("credential")
+        if not token:
+            return {"error": "jwt (VC-JWT string) or credential (object with jwt) required"}, 400
+        from eco import verifiable_identity as vi
+        return vi.verify_vc2(token), 200
+
+    if path == "/api/v1/trust/vc2/revoke":
+        credential_id = data.get("credential_id")
+        if not credential_id:
+            return {"error": "credential_id required"}, 400
+        from eco import verifiable_identity as vi
+        ok = vi.revoke(credential_id)
+        return {"success": ok, "credential_id": credential_id,
+                "note": "除销后 verify_vc2 返回 code=revoked"}, 200
 
     # Trust Attestation 端点
     if path == "/api/v1/attestations":

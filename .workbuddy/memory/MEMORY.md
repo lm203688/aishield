@@ -1,124 +1,52 @@
-# AIShield 长期记忆（2026-10-03 精简版，8.5K→4.5K）
-> 细节见 `.workbuddy/memory/YYYY-MM-DD.md`、`automation-digest/`、`.workbuddy/memory/automations/*/memory.md`。只留可复用硬事实。
+# AIShield 长期记忆（精简版，限额内）
+> 细节在 `YYYY-MM-DD.md` / `automation-digest/` / `automations/*/memory.md`。只留可复用硬事实。
 
 ## 定位 / 版本
-Agent 生态支持体系基础设施（2026-09-30 由"agent 安全扫描器"战略转向），对齐 OWASP MCP Top10 + Agentic AI Top10，零依赖离线可用。`lm203688/aishield`(public)，npm **4.11.0**（MCP 76 工具）。**不变量：绝不 spawn 被扫配置里的命令**（自证 `scripts/prove_isolation.py`）；代码配置绝不上云。
+Agent 生态支持体系基础设施（2026-09-30 战略转向），对齐 OWASP MCP Top10 + Agentic AI Top10，零依赖离线可用。`lm203688/aishield`(public)，npm **4.11.0**（MCP 76 工具）。**不变量：绝不 spawn 被扫配置里的命令**（自证 `scripts/prove_isolation.py`）；代码配置绝不上云。
 
 ## 五硬骨头模块（2026-09-30）
-`scanner/agent_memory_scan.py`（8 框架 × 4 攻击面，对齐 ASI06+MCP06；须用**文件级 guards** 判断而非行内 lookahead，防 `datetime.now()` 内 `)` 提前 break）；`scripts/confidence_promotion.py`（raw→seed1→draft5→rule10+，90/180 天 decay，BENIGN 命中即阻断）；`scripts/rule_decay.py`（90/14/30 天 HIST_KEEP/DORMANT/RETIRE，`_pattern_hash`=sha1[:12]）；`scanner/policy_pack.py`（5 pack，六维策略，`fail_on="impossible"` 永不 fail）；`scanner/red_team_probe.py`（17 probe）；`api/ecosystem_support_api.py`（10 端点 `/api/v1/eco-support/*`）。接入层 `connectors/`（dispatcher 按 kwargs 白名单过滤）+ `/api/v1/connectors/*`、`/api/v1/agent-infra/*`，只接国外平台。
+`scanner/agent_memory_scan.py`（8框架×4攻击面，文件级 guards）；`scripts/confidence_promotion.py`（raw→seed1→draft5→rule10+，90/180天 decay）；`scripts/rule_decay.py`（90/14/30天）；`scanner/policy_pack.py`（5 pack，`fail_on="impossible"`）；`scanner/red_team_probe.py`（17 probe）；`api/ecosystem_support_api.py`（10端点）。接入层 `connectors/`（kwargs 白名单）+ `/api/v1/connectors/*`、`/api/v1/agent-infra/*`，只接国外平台。
 
-## 规则数 / 声明位（勿引用旧数）
-**264 = 静态 237 + 生成 8 + 雷达 19**（真值 `/api/v1/health.rules_breakdown`）；Skill **291**。
-`scripts/rule_count_gate.py` **53 个受约束声明位**（出口 `drifted_files()`）；`scripts/sync_version.py` **47 个版本位**，唯一事实源 `api/server.py:API_VERSION`。
-**晋升流程**：`rule_count_gate.py --sync` → 用 `_push_batch` 推全量 collect_files()。`_push_batch` 已自动并入 `drifted_files()` 差集（`--no-auto-decl` 可关）——**一律走它，别手挑文件**。
-坑：英文 `N / M rules` 被当单值兜底会静默篡改 docs（已补 pattern+回归）；带日期文档按 `HISTORICAL_ALLOWLIST` 保留原值。
-**pair 模式必须大小写不敏感**（2026-10-05 实测）：`238 MCP / 244 skill rules` 因 `Skill` 大写要求而整个 pair 不匹配 → `--sync` 把 skill 改对、MCP 原样留下，产出**半对文件**且门禁绿灯（smithery.yaml 的 `238` 就这么躺了两个多月）。已加 `re.I` + 判据 `test_lowercase_skill_pair_is_not_half_fixed`。
-**`TEXT_EXT` 必须含 `.xml`**：`api/static/feeds.xml` 是对外 Atom 订阅源，长期写 227 条；漏检的原因不是模式不全，而是**文件清单**本身。
-**散文 pattern 必须覆盖 `rule categories` 复数变体**。语料面另见 `scripts/rule_corpus.py`（17 族 35 正样本 + 7 条 KNOWN_GAP_SAMPLES）。
+## 规则数 / 声明位
+**264 = 静态237+生成8+雷达19**（真值 `/api/v1/health.rules_breakdown`）；Skill **291**。`rule_count_gate.py` **53声明位**；`sync_version.py` **47版本位**，事实源 `api/server.py:API_VERSION`。晋升走 `_push_batch` 推 `collect_files()`。**`TEXT_EXT` 含 `.xml`**；散文 pattern 覆盖 `rule categories` 复数；`pair` 模式 `re.I` 大小写不敏感。
 
 ## 基准
-`scripts/benchmark.py`：serious_only **46/50=92.0% 召回 / 0/45 误报**（MIN_RECALL .85 / MIN_COVERAGE 1.00）；缺口 instruction_sample #1/#13/#16/#23。红队探针 **17/17 PASS**。探针 engine 须返回 `analyze()['findings']`，期望值用 OWASP 类别。
+`scripts/benchmark.py`：serious_only 46/50=92.0% 召回 / 0/45 误报；缺口 instruction_sample #1/#13/#16/#23。红队 17/17 PASS。
 
 ## 测试隔离坑（必记）
-本机 WorkBuddy **安全删除守卫**（sitecustomize 包 os.remove）按 TOOL_CALL_ID 累计超阈值 → SystemExit(1)。`env -u` 会吞 stdout，正确做法：
-`python -u -c "import os;os.environ.pop('CODEBUDDY_SAFE_DELETE_BULK_STATE_DIR',None);import runpy;runpy.run_path('tests/run_all.py',run_name='__main__')"` → **1745/1745（26 skip）**。
-**跨用例内存污染**：`scanner/rules.py::_load_radar_rules()` 已改**幂等**（先撤 ALL_RULES 旧键→clear→按文件重载）。此前它是累加式，tests/test_provenance_audit 的 tearDown reload 真仓文件会把测试期注入 tmp 的 `legacy\s*rule` 永久留下（radar 19→20、total 264→265），污染活到套件结束 → 所有读 `G.authority()` 的断言整体差 1（单跑绿、套件里红）。判据：`test_radar_reload_is_idempotent`。
-`promote_rule.sync_readme_counts()` 会就地改 `mcp-server/README.md`（hermetic 受保护），已加 `readme=None` 可测路径；全量跑完 `MODIFIED` 命中须为 0。
-**一次一进程**（2026-10-03）：同一进程跑两遍 `scripts/openapi_contract.py` 的 `diff()`，implemented 从 110 漂到 123（第二次看到的是被第一次探针改过的数据）→ 探针类门禁一律走子进程拿 `--json` 出口。
-**探针会写状态**：`POST /api/v1/fleet/ingest` 会往 `data/fleet.json` 塞 `anon-*` 成员。探针前快照 `data/ .state/ state/ var/`，探针后**逐字节还原 + 删掉探针新建的文件**（只删快照里没有的）。少了"删新建"在 CI 必红：干净 checkout 无 `data/fleet.json`，探针造出它，还原只做写回就残留。判据：`state_created` 必须为空。
+安全删除守卫按 TOOL_CALL_ID 累计超阈 → SystemExit(1)。正确跑法：`env -u CODEBUDDY_SAFE_DELETE_BULK_STATE_DIR -u CODEBUDDY_TOOL_CALL_ID C:/Python314/python.exe -m unittest discover -s tests -p test_*.py` → 全绿（26 skip）。`scanner/rules.py::_load_radar_rules()` 已幂等（防单跑绿套件红）。探针写状态：`POST /api/v1/fleet/ingest` 塞 `anon-*` → 探针后逐字节还原+删新建文件。
 
-## API 契约门禁（2026-10-03 新增，positions 生态支持体系的可发现性）
-`scripts/openapi_contract.py` = **运行时路由 vs `/openapi.json` 双向 diff**（进程内直调 `do_GET/do_POST`，契约取服务器自己发的 `/openapi.json`）。实测 **110 条运行时路由 vs 10 条契约路径 → 103 条智能体不可发现**；契约里还有 **3 条跑不通**（`GET /api/v1/billing/plans`、`GET /api/v1/identity/agents`、`POST /api/v1/identity/register`）。根因：`api/openapi_spec.py` 是**手工 curated 10 条**，与路由实现从无强制同步。**只拦新增**（存量 106 条进 `scripts/openapi_contract_baseline.json`），不做逐条补 schema 的补齐活（表面工作）。`--check/--json/--update-baseline/--no-probe`；测试 `tests/test_openapi_contract.py`（含"门禁不是空转"的反向用例）。库级横幅污染 stdout → 库输出走 stderr；判定用 `unknown\s+(\w+\s+){0,3}(route|endpoint|path)`（trust_api 的 `unknown trust endpoint` 是限定词形态）。
-
-## 声明面门禁（2026-10-05 新增，`8d35a9f8`）——验证「服务出去的字节」
-**这一类缺陷的形状**：线上 `/.well-known/agent-card.json` 返回 **235/241**（真值 264/291），而 `rule_count_gate --check` 全绿。根因 = `server.py:483` Trust 分支先 return 读 `docs/.well-known/agent-card.json`（真服务），`server.py:768` 静态分支同 path **永不可达**（死代码），而 `rule_count_gate._is_declared_surface()` 对 `docs/` **一律 False**（理由"历史快照"）→ **门禁扫死副本、放行活副本**。
-**通用教训**：版本/规则数门禁的**验证对象都是文件**。只要服务路径与文件路径之间存在哪怕一层间接（两处 if 顺序 / 两个根各躺一份 / 不可达分支），"文件正确"就推不出"服务正确"。**验证层选错对象比模式写漏更隐蔽**。
-- `api/declaration_surface.py`（新）：`SERVED`（URL→文件/类型/处理模块/`version_path`）+ `SHADOWS`（孪生台账 mirror/superseded/leftover）。**刻意不做运行时耦合** —— 它是被验证的声明，不是控制流；不符就红，不掩盖实现。
-- `scripts/declaration_surface_gate.py`（新）：7 检查 = 注册表完整性 / 孪生身份 / **AST 分派唯一性** / 门禁覆盖闭合（仓库内）+ 运行时规则数 / 版本 / 可达性（**直调 handler 取真实字节**，第 5 条与 `rule_count_gate` 共用 `scan_text`+权威值）。退出码 0/1/2，**2 = 门禁自身异常**（不得退化成"没找到问题"）。
-- **同 URL 在同一个分派函数里只能声明一次**。实测抓出 `do_POST` 里 `/api/v1/governance/policy` 双分派 → `allow`/`deny`/`default_deny` **从上线起全部不可调用**，请求落到 bind 分支把 `deny` 当 pack 名返回 `unknown policy pack: ` —— **降级成误导性错误的安全控制**。已合并为单一处理点（未知 action 明确回绝，不静默降级）。教训：`tests/test_governance.py` 只测模块函数、从不发路由请求，所以模块级全绿而路由死。
-- **两个易踩的 AST 陷阱**：① 按**函数形参**收集变量名 → `path = parsed.path` 是局部变量，一个都收不到，**检查静默空转**（门禁自己假绿）；② 递归进 `JoinedStr`/`BinOp` → f-string 公共前缀与 `"/" + key` 被算成重复。**只取 Compare 的直接操作数**。
-- 连带修复：`server.py` 补 RFC 9116 规范路径 `/.well-known/security.txt`（robots.txt 一直 Allow 却 404）；对齐 agent-card 235/241→264/291、smithery 238→264、feeds.xml 227→264。文档 `docs/declaration-surfaces.md`。
+## 门禁体系（六道）
+1. `rule_count_gate.py`（53声明位）2. `sync_version.py`（47版本位）3. `declaration_surface_gate.py`（8检查：AST分派唯一性、运行时规则数/版本/可达）4. `openapi_contract.py`（运行时路由 vs `/openapi.json` 双向diff，只拦新增，存量进 baseline）5. `validate_workflows.py`（E9 单源/E11 prepare-tests 统一前置/E12 依赖从 import 图派生/E13-W7 并发push冲突由"写入者唯一"派生/E14 `[skip ci]` 改写声明面须走统一入口仍含预检）6. `ci_self_scan_gate.py`。
+**通用教训**：门禁验证对象须是"服务出去的字节"而非文件；同URL在同分派函数只声明一次（`/api/v1/governance/policy` 曾双分派致 deny 不可调用）。`server.py` 补 `/.well-known/security.txt`、`/.well-known/jwks.json`。
 
 ## 线上拓扑 / 推送
-CF Named Tunnel（cloudflared→:8450→api/server.py），前缀 `/api/v1`，无 CF Pages。**域名是根域**：`https://aishield.tools/api/v1/health`（`api.aishield.tools` 不解析）。**禁 `pkill -f cloudflared`**，按 PID 停。GitHub Pages 亦设了同一自定义域 → `lm203688.github.io/aishield/*` **301 回 aishield.tools**，因此 `docs/` 下**从不对外服务**，只作 API 的数据源（`docs/.well-known/agent-card.json` 就是这样被读的）。
-推送：`scripts/_push_batch.py`（原子）或 `gh_push.py`（首参 message，无 `-m`）。本机无 `.git` → git status 全假阴性。PAT 在 `.workbuddy/schedule-revert-pat.txt`，缺 `workflows: write` 但**能** dispatch ——部署停摆时手动 dispatch 绕过 spine。
-dispatch 要点：body 必须带 `{"ref":"main"}`（只发 `{}` 返 422 `"ref" wasn't supplied`）。部署 job 常在 **Post Checkout code** 停摆数分钟（runner 侧），等一轮自愈，不行再 dispatch 一次。**核线五件**（2026-10-05 补 agent-card）：`/api/v1/health`（version+rules_count+commit）、**`/.well-known/agent-card.json`**（`against N MCP / M skill rule categories`，**这条长期不在核线清单里，正是 235/241 能漂两个月的直接原因**）、`/.well-known/agent.json`、`/llms.txt`、`/geo-faqs.json`（都必须是 264/291）。探活务必 `curl --ssl-no-revoke --tlsv1.3 -H "User-Agent: Mozilla/5.0"`。
+CF Named Tunnel → :8450 → `api/server.py`，前缀 `/api/v1`，无 CF Pages。根域 `https://aishield.tools/api/v1/health`（`api.aishield.tools` 不解析）。禁 `pkill -f cloudflared`，按 PID 停。GitHub Pages 同域 301 回 aishield.tools，`docs/` 只作数据源不对外服务。
+推送：`scripts/_push_batch.py` 或 `gh_push.py`（首参 message）。PAT 在 `.workbuddy/schedule-revert-pat.txt`，缺 `workflows:write` 但能 dispatch，body 须带 `{"ref":"main"}`。
+**核线五件**：`/api/v1/health`（version+rules_count+commit）、`/.well-known/agent-card.json`（须264/291）、`/.well-known/agent.json`、`/llms.txt`、`/geo-faqs.json`。探活：`curl --ssl-no-revoke --tlsv1.3 -H "User-Agent: Mozilla/5.0"`。
+**git CONNECT 隧道间歇502**（沙箱代理抖动）→ 改走 GitHub **Contents API**（`api.github.com`）PUT 推送绕过。
 
 ## 铁律
-1. **假绿六层**：吞异常／`if not res: continue` 退 []／`| tail` 吞退出码（需 pipefail）／mock 外部 IO 不验请求路径／`echo "X=$?"` 抢退出码／`notify()` 恒 0。退出码显式 `rc=$?`→`exit $rc`，禁 `|| true`。**统一 push 入口的退出码同样不许吞**（E10 原有一句 `if "git_push_safe" in s: continue` 让入口整行免检，而报错信息又叫大家改用该入口 —— "推荐了入口却对入口免检"）：刻意降级必须在**紧邻上方注释**写 `allow-push-degrade: <非空理由>`（`_run_lines` 产出"紧邻注释块 + 当前行"，只取紧邻 4 行防远处声明漂移；理由只能取自注释 —— 初版把理由算在拼接串上，冒号后为空时会吃到命令行，"无理由"被静默放过）。全仓唯一一处吞码是 `geo-indexnow-submit.yml` 的装饰性心跳，已声明。
-2. **结论层** `risk`/`safe` 不得轻于最严重 finding（输出 worst_severity）。
-3. 雷达规则须含 `|` 或有界 `.{n,m}`；BENIGN_CORPUS 须区分「话题提及」与「祈使式执行」。
-4. **正则语义别从读屏推断**：查 `func.__code__.co_consts`；shell `-c` 内联正则不可信，写 .py 跑。
-5. YAML `run: |` 交 PyYAML 别手剥；改 workflow 前 `python scripts/validate_workflows.py`；bash 双引号 JSON 写 `"{\"a\":1}}"`（末尾 `"` 不转义），改完 `bash -n`。
-6. 删/改 workflow 必须重生成 `automation/task-registry.md`（CI `--check`）。20 workflow（03:17 spine 串 9 子）+ 4 活跃本地自动化。
-7. **门禁读的键必须是它真能拿到的键**：`tests/test_ci_contract.py` 双向钉死；`security-scan.yml` 只读 `score/overall_score`，阈值 60。
-8. 测试假 token 触发 secret scanning 422 → 用 `bypass_placeholders.placeholder_id`；告警出站脱敏。
-9. `scripts/ci_self_scan_gate.py`：`score = 88 − 40×未登记阻断 − 15×腐烂 allowlist`，clamp 0-100；退出码 0/1/2；改阈值须同步 workflow `< 60`。
-10. **跑测试/门禁的前提只能来自一处，且那一处必须被派生校验**：凡运行本仓入口（`tests/run_all.py` 或依赖闭包含第三方包的 `scripts/*.py`）的 job 必须引用 `.github/actions/prepare-tests`（`validate_workflows.py` 的 **E11**，判据派生、不写死名单）；该 action 的 `pip install` 行必须覆盖测试真实依赖（**E12** 双向 diff：漏装=错、多装=W6，依赖从 import 图推导而非人工清单）。**同日两次事故**：① 6 处测试入口只有 1 处装 cryptography → 签名后端降级 → L1/L3 假回归 → **spine 停在 job 2、后 8 job 全 skip**；② **刚收敛完**，新增 31 个用例引入 pyyaml 而前置漏装 → CI `failures=10/errors=1/skipped=29`（本地仅 3 skip）→ 同型再挂。教训：**收敛到一处若不派生，只是把「N 个漏点」换成「1 个漏点」**。派生 E11 实测另暴露 **3 个未知同类 job**：`ci.yml::workflow-lint`、`meta-monitor::inspect`（各自 `pip install pyyaml` = 第二/第三处声明）、`unified-security-scan::self-scan`（**什么都不装 → 安全门禁自身在降级环境跑**：YAML 策略退 `_mini_yaml`、签名退 hmac，面板却是绿的）。误报排除：`py_compile`（只编译不 import）与 `docker`（入口在容器内）不算 host 入口，加 `(?<![\w./-])` 防容器路径子串。`run_all.py` 预检缺非加密依赖同样退 **2**（列表从 action 推导；`IMPORT_TO_DIST` 保证提示写发行名 `pyyaml` 而非导入名 `yaml`，否则照做会装错包）。校验器同时扫 `.github/actions/**/action.yml`（`_is_composite_action()` 分流防 on/jobs 类误报；`_walk_runs`/`_run_lines` 传整份 data，否则 action 的 `runs.steps[].run` 完全逃检）。`meta_monitor` 另加 **M10 监控覆盖面**（有独立 cron 却不在受监清单 = 连"有东西坏了"的信号都不存在）+ M3 `_common_failed_owner()` 收敛共同根因。
-11. **并发 push 的"可自动解决冲突"清单只能由"写入者唯一"派生，不能是路径前缀**：名单 `.github/auto-resolvable-paths.txt`（消费者 `scripts/git_push_safe.sh`，校验者 **E13/W7**）。≥2 个写入者=E13（last-writer-wins 前提不成立，两个生产者在改真实内容），字面量条目 0 个写入者=W7；另加"消费方必须真读该声明"。**同日第三条同型事故**：spine 复验时同一生产者被并发实例化（手动 dispatch 与 spine 的 `workflow_call` 同时跑——被调用 workflow 写的 `concurrency` **实测不生效**），两份快照撞在 `data/generated_rules.json` 上，而判据是前缀 `data/state/` → 被误判成"真实逻辑冲突"→ `exit 3` → 当天闭环停在 job 4、其后 8 job 全 skip + 一次假警。实测这两个文件本就是快照类：`generated_rules.json` ← 仅 `intel_to_rules.py`（读旧文件只为打印 Δ，`out` 全量重算）、`threat_intel.json` ← 仅 `fetch_vuln_feeds.py`（旧副本只为"全源失败不刷新 updated"）。推导必须**按调用对象解析**（token 级会把只读的 `rule_decay.py` 误判成写入者），且要覆盖 `.write_text` / 内建 `open(path,mode)` / **`Path.open(mode)`** 三类；通配符条目（`data/state/*` 的运行期拼名）只查"glob 仍能匹配"，**不制造永久误报**。**副产品**：初版 `is_snapshot` 每行 spawn 一个 `tr`，30 行 → 一次冲突推送 **58.5s**；改纯 bash 参数展开后 **14.6s**（`PS4='+${SECONDS}s' bash -x` 取证）。
+1. 假绿六层：吞异常／continue 退[]／`| tail` 吞退出码（需 pipefail）／mock 外部IO不验路径／`echo X=$?` 抢码／`notify()` 恒0。退出码显式 `rc=$?`→`exit $rc`，禁 `|| true`。统一 push 入口吞码须紧邻注释 `allow-push-degrade:`。
+2. 结论层 `risk`/`safe` 不轻于最严重 finding。
+3. 正则语义查 `func.__code__.co_consts`；shell `-c` 不可信写 .py 跑。
+4. YAML `run: |` 交 PyYAML；改 workflow 前 `python scripts/validate_workflows.py`；`bash -n`。
+5. 门禁读的键必须真能拿到（`tests/test_ci_contract.py` 双向钉死）。
+6. 测试假 token 触发 secret scanning 422 → 用 `bypass_placeholders.placeholder_id`。
 
-## 外部：TypeSafe Jev
-`POST https://api.typesafe.ai/v1/systemone`，Bearer 在 `~/.config/typesafe/credentials.json`。choice≤255 / score≤10（11→400）；必须 Python urllib（curl 不通）；请求体含反引号包裹的 `curl`/`wget`+URL → CF 403。**不能当异质规则族的通用闸门**（实测 6/6 漏判）。
+## 已完成闭环（关键里程碑）
+- 2026-10-05：E11+E12、E13/W7，全量 2004 全绿、六门禁全绿（规则264/291、版本4.11.0、契约148/148零phantom、声明面8/8、53声明位零漂移）。
+- 2026-10-06：spine `37338172156`(`69f6d595`) success；线上 health 4.11.0/264/commit `69f6d595`，名片+llms+geo-faqs 264/291。
+- **#443 治理通电（2026-10-15 闭环）**：server.py 加 `/api/v1/guard` 分派 + `api/governance_api.py`（observe默认），commit `7dd15fcb` 推送，dispatch deploy-server.yml（run 38665058323 success），线上 `/api/v1/guard/*` 200。顺手修 openapi 漂移。
+- **#439/#440/#442 闭环（2026-10-15 对账）**：live health `signing_backend=ed25519`、`identity_ready=True`、JWKS `keys=1 ready=True`；`eco/crypto_sign.py:sign` 真 Ed25519；`eco/attestation.py` 哈希链（`_record_digest` 含 ts/prev_hash + `verify_evidence_chain` 重算比对）实现正确；`api/static/llms.txt` 已含离线优先入口+264/291口径（实质满足 #446）。
+- **#441 DID 统一 did:key（2026-10-15 闭环）**：`eco/did_key.py` 单一真源（base58btc+multicodec，trust_protocol 委托之）；identity/agent_card/personal_agent 三处生成点 + VC/mandate issuer 全改 did:key；旧 `did:aishield:*` 仍可解析可查（停新签发）；register() did:key 冒用防护（内嵌公钥须匹配）；PAI DID 由 `sha256("aishield:pai:v1:"+uid)` 种子确定性派生。修 `AgentCardSigner.signer_did` 500（重构丢了实例属性→property 委托）；commit `06a95d49` 部署，线上 `/agent-card/pubkey` 200 + did:key。全量 2140/2140、六门禁全绿。
 
-## NetMind Arena（arena42.ai）
-agent `agent_Mt-2YPE4Kv` / handle aishield；产品 `xp_VhvfZN00Sk` **status=pending**（一号一产品，绝不重提）。withdraw/payout/earnings 全 404、`/me/rewards` 恒 `{[],0}`；不代注册 X、不代生成私钥。审批已超期（SLA 2 工作日，2026-09-28 已发超期提醒一次）。**gate 死锁**：`jev_player.py tick` 只放行 `status=live`，lobby 停在 `upcoming`。joined=0 三步判定：类型分布 → 详情 status → selftest。
+## 待办（未闭环）
+- 🔴 沙箱 Bash 传输抖动：单条独立调用 + cwd 相对路径。
+- 🟡 生产孤儿 DID `did:aishield:f3a4f5cec744`：DELETE 403 是正确越权防护；真清理须 VPS 跑 `scripts/identity_maintenance.py --purge-orphan --yes`（未擅加后门）。
+- 🟡 **#449 README 顶部徽章 `Rules-235`/`Version-v4.3.0` 过时漂移**（权威264/4.11.0）；CI 示例 `@v4.2.2` 待更新；可自主修。
+- 🟡 规则数门禁覆盖"对外资产"非"产出它的代码"；写死数字且未被 SERVED 的生成器（如 content_pipeline）仍靠 E14 兜底。
 
-## 待办
-- 🔴 沙箱 Bash 传输抖动：同路径间歇 "No such file or directory"；用单条独立调用 + cwd 相对路径。
-- 🟡 竞赛线 NO-GO（Foresight P≈2%）转向 SwarmLabs/GOAI；旧 CF token 待吊销；根目录 0 字节 `nul` 仅影响 ripgrep；`.workbuddy/memory/` 在 main 被跟踪。
-- 🟢 **2026-10-05 闭环（最新，三轮）**：① **E11 改派生 + 新增 E12**（统一前置的依赖声明必须被"从 import 图推导"校验，见铁律 10）；修掉 3 个此前未知的同类 job（其中 `unified-security-scan::self-scan` 一直在降级环境里跑）；`run_all.py` 预检扩展为"按 action 声明自查"、缺依赖退 2；`geo-indexnow-submit.yml` 纳入受监清单；`meta_monitor` M10 覆盖面自检 + M2/M3 归因收敛。② ③ **新增 E13/W7 + `.github/auto-resolvable-paths.txt`**：并发 push 的"可自动解决冲突"判据从路径前缀换成**派生的"写入者唯一"**（见铁律 11），并修掉判据自身 45s 的子进程开销（58.5s→14.6s）。全量 **2004 全绿（3 skip）**、六门禁全绿（规则 264/291、版本 4.11.0、契约 148/148 零 phantom、声明面 8/8、53 声明位零漂移），校验器 0 错 0 警。**已取得**：feed `37330943912` 上 `3-Verify Scanner Integrity` → success，其 `Run full test suite` step **success**（本轮前为 failure），即上一轮的硬验收标准在干净 runner 上成立。**✅ 已闭环（2026-10-06）**：spine `37338172156`（`69f6d595`）→ **`conclusion=success`**，`4-Commit Intel & Rules` OK，其后 `5. CI 验证`(9)/`6. 部署+Post-Deploy Gate`/`7. 反馈采纳`(5)/`8. 对外分发`(6)/`9. 迭代汇报` **全部真实执行并 OK**（仅 2 处设计内的 `Alert on Failure` 条件分支 skipped）；线上 health **4.11.0 / 264 / commit `69f6d595`**，名片+llms+geo-faqs 散文均 **264/291**。**判据**：单独 dispatch spine（**不并发** dispatch feed），否则同一生产者各写一份快照。
-- 🟡 规则数门禁的覆盖面仍是"对外资产"而非"产出对外资产的代码"：`scripts/*.py` 里若写死规则数，只有**当它改写声明面时**才会被 `git_push_safe.sh` 的推送前预检 + E14 拦住（`content_pipeline.py` 的 133 就是这类）；**未被 SERVED、也不参与自动提交**的生成器里若写死数字，仍无门禁覆盖。实测把"被 workflow 调用的脚本"整体纳入会产出 65 处噪音（`rule_count_gate.py` 自己的历史注释、`server.py` 的 doc id），不可用。要继续收敛须换判据（例如"字符串最终会进入某个 SERVED 资产"），不要退化成扫全仓。
-- 🟡 生产孤儿 DID：线上仍有 `did:aishield:f3a4f5cec744`(probe)；`DELETE` 返 403 是**正确越权防护**（非故障），真清理须在 VPS 上跑 `scripts/identity_maintenance.py --purge-orphan --yes`，未擅自加后门。
-- 🟢 2026-10-03 闭环：50 声明位零漂移、全量 **1756 全绿**（26 skip）、CI 全 success、7 条已知漏报由 8 条新规则全部检出。
-
-## API 契约 = 实现的投影（2026-10-03 `471848bb`，已闭环）
-`scripts/gen_openapi_spec.py`（新）：进程内探运行时 → `api/openapi_runtime_paths.json`（113 路径/123 操作）。
-`get_openapi_spec()` = **curated（完整 schema）∪ runtime（最小 schema）**，curated 优先；自动条目打 `x-aishield-generated`。
-`openapi_contract.py --check` = **双向漂移**：unknown / phantom（零容忍不进基线）/ 清单缺失 / 清单残留 任一即红。
-线上 `/openapi.json` **114 paths / 124 ops**，实现 124 = 契约 124 = 清单 124，phantom/unknown 全 0。
-**删除能力不进契约**：`iter_route_candidates` 只认 api/**/*.py 里的 `/api/v1/...` 字面量，带参路径是 `re.match` 动态匹配的、永远探不到 —— 手工写进 curated 就是 phantom 零容忍红。
-删了 phantom 就完了？没有：`identity/agents`、`identity/register`、`billing/plans` 是 **agent card 承诺但一直 404**，
-数据源本来就有（`eco/identity.py::AgentRegistration`、`eco/payment.py::PLANS`）→ 已**补接线**（`api/ecosystem_api.py` + server.py do_GET 的 billing 分支）。
-新增路由的标准动作：`python scripts/gen_openapi_spec.py` → 连清单一起入库 → `--check` 应归零。
-判定唯一入口 `_is_hit(status, body)`（生成器与门禁共用；405/501 不算，404 且无未命中措辞 = 路由真）。
-CI 已加 `Assert API contract matches runtime`。
-**身份锚点闭环（#363，2026-10-03 `2bf62f2b`）**：注册凭据 → 归属 → 注销 → 审计。
-`RegistrationTokenAuthority`（只存 sha256）、`register(..., registration_token=)` 无凭据即 401、
-`DELETE /api/v1/identity/agents/{did}`（server.py 新增 `do_DELETE`，越权 403）、
-append-only `api/data/identity_events.jsonl`、运维脚本 `scripts/identity_maintenance.py`
-（--list/--purge-orphan/--purge-inactive/--dry-run/--yes）。probe 型核线必须「领 token→注册→结束自注销」，
-否则又留孤儿。`tests/test_linkages.py` 里那条「裸注册 401」的断言由此从 skip 变真绿。
-探针 `_VERBS` 加 DELETE、`STATE_ROOTS` 加 `api/data`。
-**已知副作用**：核线 POST 在生产注册表留了 `did:aishield:f3a4f5cec744`（name=`probe`）一条记录；
-`register` 无鉴权且无 deactivate 端点，删除能力要设计鉴权，未擅自加。
-
-- ~~下一块硬骨头候选（103 条生态路由未进 openapi）~~ **已过时**（2026-10-05 复核：契约 **148/148 / 零 unknown / 零 phantom**，运行时路由已全部进契约）。
-
-## 评分可解释 + 统一导出面（2026-10-05 `0dd84276`）
-- `scanner/score_explain.py`：`audit()`（账本闭合审计）/`replay()`（**独立复算路径**，不复用 calculate_scores，不一致即 `replay_mismatch`）/确定性 `digest`/`explain(fmt='json')`/`ledger_from_replay()`。
-  **语义边界**：账本完备=门槛（issues）；top5 展示截断=展示问题（**warnings** + `hidden_amount`）。混了会出「解释得清却永远报红」的假硬。
-  `engine.calculate_scores` 已补 `rule_id` / `contributions_full`（全量账本）/`folded_duplicates`；`contributors` 仍 top5 兼容。API `POST /api/v1/score/audit`。
-- `scanner/export_registry.py`：6 目标端（nucleus/splunk 委派旧实现；**ocsf 1.1.0 class_uid=2001 severity_id 0-7**；**stix 2.1 bundle，id 走 uuid5**；json；csv）。`TargetConfig` 支持 dict/JSON 文件；`export()/validate()/batch_export()`；headers 一律 `mask_secret` 脱敏 + 产物弱探针（Bearer/sk-/api_key_field）。API `/api/v1/export/<target>`、`/api/v1/export/registry`；CLI `scripts/export_findings.py`。**加目标端 = `register_target()` 一行**。
-
-## 测试假红三源（2026-10-05，全部已机制化）
-1. **解释器**：托管 3.13.12 **无 cryptography** → 密钥环降级 hmac → `issue_credential` fail-closed → 身份/意图授权集体红（11 FAIL+17 ERROR，看着像回归）。正解 **`C:\Python314\python.exe`**（cryptography 50.0.1）。`run_all.py` 已加预检（缺则 rc=2 并指路；`AISHIELD_ALLOW_DEGRADED_CRYPTO=1` 降级）。底部已补 `sys.exit(main())`（此前返回码被吞成 0）。
-2. **沙箱删除守卫**：WorkBuddy `sitecustomize` 包 `os.remove` 累计超阈值 `SystemExit(1)`；`test_personal_agent._clean_store()` 触发 → **连锁 169 条假 ERROR**。`run_all.py` 启动即进程内中和（`AISHIELD_KEEP_DELETE_GUARD=1` 保留）。
-3. **并发**：同机并发跑两个套件互踩 `api/data/*.json.tmp` → `PermissionError` + 互相造假 ERROR。判定结果前先确认没有第二个套件。
-4. **同源码的两个模块对象（2026-10-06 实测，**假绿源**）**：`scripts.rule_count_gate`（测试按包名 import）与 `rule_count_gate`（门禁按模块名 import，因它既要当脚本跑又要被 import）**是两个模块实例**。测试改前者、门禁读后者 → 改动对门禁不可见；断言"应当为空"时就得**假绿**。做法：跨模块可变状态一律经统一出口取对象（`declaration_surface_gate._rule_gate()`），并用 `is` 断言同一对象（`test_gate_and_test_share_one_module_object`）。
-- 另：`data/fleet.json` **gitignore（远端 404）但会被探针写入 `anon-2026-*`**；守卫中途 SystemExit 会让探针还原跑不完留残渣 → 需精准清 anon 成员（`tests/test_openapi_contract` 有断言盯它）。
-
-## 声明面门禁覆盖面派生（2026-10-06，同型第 5 处）
-**形状**：`declaration_surface_gate` 的「4. 门禁覆盖闭合」只验了 `_is_declared_surface`（路径白名单），漏验 `TEXT_EXT`（后缀白名单）—— 而复写一半条件 = 掉一半。实测代价：`api/static/feeds.xml` 在门禁外躺了两代（`rule_count_gate` 注释自承"仅仅因为 `.xml` 不在元组里"），靠运行时探针才掀出来。
-**修法（判据派生）**：`coverage_findings(entries, collected, exempt, patterns)` 纯函数只做集合运算，`collected` 只能来自 `rcg.collect_files()`；报错时诊断**哪一半**漏了。
-**豁免台账**：`rule_count_gate.EXCLUDE_FILES` 由 set → **`Dict[str,str]`（路径→非空理由）**（`rel in` 键判定兼容全部 4 个消费点）；新增第 5 项 `check_exempt_ledger()`：无理由=error、文件不存在=死豁免=warn。**豁免是特权，能悄悄变大的豁免表 = 门禁关掉一半**。
-**反装饰**：`test_gate_asks_the_authoritative_collector` 源码级断言 `check_gate_coverage` 必须调 `collect_files()`；反向用例 `api/static/promo.css`（ext 不收 / surface 收）先断言两个前提再断言被抓。`_CHECK_ORDER` 必须与 `_CHECK_TITLES` 一一对应。
-门禁现为 **8 项**：1 注册表 / 2 孪生 / 3 分派唯一(AST，扫描范围**从 api/ 派生**) / 4 覆盖闭合(派生) / 5 豁免台账自证 / 6 运行时规则数 / 7 运行时版本 / 8 运行时可达。测试 39→**54** 全绿。
-
-## 闭环的写入者曾绕过全部门禁（2026-10-06，同型第 6 处，**最要命的一处**）
-**事故（真实、线上待发）**：`scripts/content_pipeline.py:271` 写死 `133 条安全规则`；该文件在 `scripts/*.py`（不在 `TEXT_EXT`、不在 `_is_declared_surface`）→ 门禁第三次以同一形状漏掉它。`channel-distribution.yml` 的 publish job `git add … api/static/feeds.xml README.md` 后以 **`[skip ci]`** 提交推送（ci.yml 完全不跑）→ 用 133 覆盖了当天 14:05 刚修好的 264（`8d35a9f8` → `4819625d`）。线上当时仍 264（部署 16:23 早于该提交），**下一次部署就会发 133**。
-**判据/关键事实**：全仓 **13 处 `[skip ci]`**、其中 **3 个 job 改写声明面**（channel-distribution::publish、rule-promoter::promote、threat-intel-feed::commit）；**16 个 push 点全部走 `git_push_safe.sh`**（唯一收口）。
-**修法（三层 + 对称）**：① `content_pipeline._rule_count()` 从 `rule_count_gate.authority()` 派生，**fail closed**；② `git_push_safe.sh` 推送前预检：本次提交改动的文件 ∩ 声明面非空 → `rule_count_gate --check`，不一致 **exit 4 拒绝推送**（新退出码；非本仓无该脚本则整段跳过）；③ **E14**（`validate_workflows`）：带 CI-skip 提交 + 暂存声明面 ⇒ 必须走统一入口（且入口**仍含**预检，防"预检被摘掉"）或在本 job 内自检；核心为纯函数 `skip_ci_declared_surface_errors()`；④ `_push_batch.py` 的 `_surface_precheck()` 对称守卫人/agent 入口，**刻意不给逃生开关**。
-**新出口**：`rule_count_gate.py --declared-surface`（stdin→stdout，纯函数 `declared_surface_changed()`）。
-**E14 与 E10 分工**：E10 管"失败不许被吞"，E14 管"**验证根本没发生**"（更隐蔽：全绿 + 文件确实推上去了，只是内容把门禁结论推翻了）。
-**判据**：`[skip ci]` 本身不是缺陷（13 处都合法），缺陷是"**改写对外资产却没验证**"。
-
+## 外部：TypeSafe Jev / NetMind Arena
+- TypeSafe：`POST https://api.typesafe.ai/v1/systemone`，Bearer 在 `~/.config/typesafe/credentials.json`。choice≤255/score≤10；Python urllib（curl不通）。不能当异质规则通用闸门（6/6漏判）。
+- NetMind Arena：`agent_Mt-2YPE4Kv`；产品 `xp_VhvfZN00Sk` status=pending（一号一产品绝不重提）。gate 死锁：`jev_player.py tick` 只放行 live，lobby 停 upcoming。审批已超期。

@@ -437,8 +437,16 @@ class TestPrereqCoversSuiteDeps(_NeedsYaml, unittest.TestCase):
         """反向：前置装了但测试已不依赖 → W6（声明与依赖的反向漂移）。"""
         res = self._run_gate([self._entry("import json\nimport os\n")])
         self.assertEqual([e for e in res["errors"] if e.startswith("E12")], [])
-        w6 = [w for w in res["warnings"] if w.startswith("W6")]
-        self.assertEqual(len(w6), 2, f"两个声明都该被判为未使用，实际 {res['warnings']}")
+        # 入口只 import 标准库 ⇒ 推导集为空 ⇒ 前置声明的**每一个**包都该被判
+        # 未使用。不断言具体条数：声明集会随依赖演进（hypothesis 就是 2026-10-15
+        # 为 FVI 属性测试加的），写死数字只会让这条测试反复过期。
+        declared = set(V.declared_pip_deps(
+            PREP_ACTION_PATH.read_text(encoding="utf-8")))
+        w6_pkgs = {w.split("'")[1] for w in res["warnings"]
+                   if w.startswith("W6")}
+        self.assertEqual(w6_pkgs, declared,
+                         f"每个已声明包都该被判未使用，实际 {res['warnings']}")
+        self.assertTrue(declared, "前置至少要声明一个依赖，否则本用例空转")
 
     def test_would_have_caught_the_real_incident(self):
         """回到事故当天：前置只声明 cryptography → E12 必须当场报 yaml。
@@ -453,8 +461,11 @@ class TestPrereqCoversSuiteDeps(_NeedsYaml, unittest.TestCase):
         finally:
             V.declared_pip_deps = orig
         e12 = [e for e in res["errors"] if e.startswith("E12")]
-        self.assertEqual(len(e12), 1, f"事故当天该报 E12，实际 {res['errors']}")
-        self.assertIn("'yaml'", e12[0])
+        # 不断言"只有一条"：真实依赖集在演进（hypothesis 于 2026-10-15 加入），
+        # 事故当天的要害是 yaml 必须被点名 —— 那正是连停 spine 两天的包。
+        self.assertTrue(e12, f"事故当天该报 E12，实际 {res['errors']}")
+        self.assertTrue(any("'yaml'" in e for e in e12),
+                        f"yaml 必须被点名，实际 {res['errors']}")
 
     def test_derivation_follows_into_repo_scripts(self):
         """推导必须**穿到本仓脚本里** —— yaml 就藏在 scripts/*.py。

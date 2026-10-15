@@ -569,6 +569,18 @@ class AIShieldHandler(BaseHTTPRequestHandler):
                 self._send_json({"error": str(e)}, 500)
             return
 
+        # ── NSE 语义探针门面（Program A 通电）：双轨纪律 —— 探针只产候选，
+        #    结论必经符号层 ratify。任何响应都不含 verdict/score/risk 字段，
+        #    语义层加入在数学上不可能抬高误报。默认后端零外部调用（离线）。
+        if path.startswith("/api/v1/semantic"):
+            try:
+                import semantic_probe_api
+                payload, status = semantic_probe_api.handle_get(path, parsed.query)
+                self._send_json(payload, status)
+            except Exception as e:  # noqa: BLE001
+                self._send_json({"error": str(e)}, 500)
+            return
+
         # Landing Page — Agent SEO
         if path == "/agent.html":
             html_path = os.path.join(BASE, "static", "agent.html")
@@ -1487,6 +1499,26 @@ class AIShieldHandler(BaseHTTPRequestHandler):
             except Exception as e:
                 self._send_json({"error": str(e)}, 500)
             _record_usage("trust-api", self.client_address[0])
+            return
+
+        # ── NSE 语义探针（Program A）：probe / ratify ──
+        #    与 GET 侧同一条纪律：响应不含结论字段；默认后端零外部调用。
+        if path.startswith("/api/v1/semantic"):
+            try:
+                body = self._read_body()
+                if body is None:
+                    return
+                data = json.loads(body) if body else {}
+            except json.JSONDecodeError:
+                self._send_json({"error": "Invalid JSON"}, 400)
+                return
+            try:
+                import semantic_probe_api
+                payload, status = semantic_probe_api.handle_post(path, data)
+                self._send_json(payload, status)
+            except Exception as e:  # noqa: BLE001
+                self._send_json({"error": str(e)}, 500)
+            _record_usage("semantic-probe", self.client_address[0])
             return
 
         # ── Ecosystem API (P1): Agent 生态 5 支柱 ──

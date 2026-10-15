@@ -53,6 +53,7 @@ eco/verifiable_identity.py — L1 可移植身份：JWKS 公钥发现 + 可验�
 from __future__ import annotations
 
 import base64
+import datetime
 import hashlib
 import json
 import os
@@ -101,6 +102,12 @@ def _canonical(obj: Any) -> bytes:
 
 def _now() -> int:
     return int(time.time())
+
+
+def _iso_utc(epoch: int) -> str:
+    """Unix 秒 → RFC 3339 UTC（W3C VC 2.0 validFrom/validUntil 要求）。"""
+    return datetime.datetime.fromtimestamp(epoch, tz=datetime.timezone.utc).strftime(
+        "%Y-%m-%dT%H:%M:%SZ")
 
 
 def _assert_publishable(key: Dict[str, Any], where: str) -> None:
@@ -390,6 +397,137 @@ class SigningKeyRing:
             self.save()
         return True
 
+    # ══════════════════════════════════════════
+    #  W3C VC 2.0 + VC-JWT（Program D / FTM）
+    # ══════════════════════════════════════════
+    #  与上面紧凑串行凭证（aishield.agent-identity.v1）的分工：
+    #    v1 = 自有紧凑格式，服务端闭环够用；
+    #    v2 = W3C VC 2.0 数据模型 + VC-JWT 保护，**给别家看的** ——
+    #        第三方拿到 JWT 字符串，从 iss 的 did:key 直接解出公钥
+    #        （自认证），离线验签，不需要我们的 JWKS、不需要我们在线。
+    #  这正是蓝图 §3 Program D「别家能不能验我」的落地。
+
+    VC2_CONTEXT = "https://www.w3.org/ns/credentials/v2"
+    VC2_STATUS_TYPE = "aishieldCredentialStatusList2026"
+    VC2_BASE_TYPE = "aishieldAgentIdentityV2"
+
+    def issue_vc2(self, subject_did: str, claims: Optional[Dict[str, Any]] = None,
+                  ttl: int = 86400,
+                  credential_types: Optional[List[str]] = None) -> Dict[str, Any]:
+        """签发一枚 W3C VC 2.0 凭证，返回 {credential, jwt, credential_id, ...}。
+
+        credential = VC 2.0 数据模型（JSON-LD context / type / issuer /
+        credentialSubject / validFrom / validUntil / credentialStatus）；
+        jwt = VC-JWT（W3C VC 2.0 标准化的 JOSE 保护形式，EdDSA 签名）。
+        """
+        a = self.active()
+        if not a:
+            raise RuntimeError("无可用签名密钥，无法签发凭证")
+        if not self.is_ed25519_ready():
+            raise RuntimeError(
+                f"当前活跃密钥 alg={a.get('alg')} 不是 {ALG}，签出的 VC 2.0 无法"
+                "被第三方公开验证；请先 rotate_to_ed25519() 迁移")
+        pub = str(a.get("public_key") or "")
+        kid = _kid(pub)
+        try:
+            issuer_did = did_key.did_key_from_base64url(pub)
+        except Exception:
+            issuer_did = "did:aishield:" + kid
+        now = _now()
+        cid = hashlib.sha256(_canonical(
+            {"sub": subject_did, "kid": kid, "iat": now, "typ": self.VC2_BASE_TYPE}
+        )).hexdigest()[:16]
+        extra_types = [t for t in (credential_types or []) if isinstance(t, str)]
+        vc = {
+            "@context": [self.VC2_CONTEXT],
+            "type": ["VerifiableCredential", self.VC2_BASE_TYPE] + extra_types,
+            "issuer": issuer_did,
+            "credentialSubject": {"id": subject_did, **(claims or {})},
+            "validFrom": _iso_utc(now),
+            "validUntil": _iso_utc(now + int(ttl)),
+            "credentialStatus": {
+                "id": "https://aishield.tools/api/v1/trust/vc2/status#" + cid,
+                "type": self.VC2_STATUS_TYPE,
+            },
+        }
+        # VC-JWT：header + payload（W3C VC 2.0 § Securing with JOSE）
+        header = {"typ": "JWT", "alg": "EdDSA"}
+        payload = {"iss": issuer_did, "sub": subject_did, "nbf": now,
+                   "exp": now + int(ttl), "jti": cid, "vc": vc}
+        signing_input = _b64u(_canonical(header)) + "." + _b64u(_canonical(payload))
+        sig = _cs.sign(signing_input.encode("ascii"),
+                       str(a.get("private_key") or ""), _cs.ALG_ED25519)
+        jwt = signing_input + "." + _b64u(_b64u_dec(sig))
+        return {"credential": vc, "jwt": jwt, "credential_id": cid,
+                "issuer": issuer_did, "kid": kid, "subject": subject_did,
+                "expires_at": payload["exp"], "status": "active",
+                "formats": ["vc+ld+json (data model)", "vc+jwt (secured)"]}
+
+    def verify_vc2(self, credential_or_jwt, *, check_revocation: bool = True) -> Dict[str, Any]:
+        """验证 VC 2.0：接受 VC-JWT 字符串或带 jwt 字段的凭证对象。
+
+        自认证路径：issuer 是 did:key → 直接解出公钥验签，**不依赖
+        本服务在线、不依赖 JWKS**。这是"别家能不能验我"的答案。
+        """
+        if isinstance(credential_or_jwt, str):
+            return self._verify_vc_jwt(credential_or_jwt, check_revocation)
+        if isinstance(credential_or_jwt, dict):
+            if credential_or_jwt.get("jwt"):
+                return self._verify_vc_jwt(credential_or_jwt["jwt"], check_revocation)
+            return {"valid": False, "code": "unsecured",
+                    "reason": "裸 VC 数据模型没有保护机制；请验证随附的 VC-JWT"}
+        return {"valid": False, "code": "malformed",
+                "reason": "输入应为 VC-JWT 字符串或含 jwt 字段的对象"}
+
+    def _verify_vc_jwt(self, jwt: str, check_revocation: bool = True) -> Dict[str, Any]:
+        if not jwt or not isinstance(jwt, str):
+            return {"valid": False, "code": "malformed", "reason": "JWT 为空"}
+        parts = jwt.split(".")
+        if len(parts) != 3:
+            return {"valid": False, "code": "malformed", "reason": "JWT 须有三段"}
+        try:
+            header = json.loads(_b64u_dec(parts[0]))
+            payload = json.loads(_b64u_dec(parts[1]))
+            sig_raw = _b64u_dec(parts[2])
+        except Exception:
+            return {"valid": False, "code": "malformed", "reason": "JWT 编码非法"}
+        iss = str(payload.get("iss")
+                  or (payload.get("vc") or {}).get("issuer") or "")
+        if not iss:
+            return {"valid": False, "code": "unresolvable_issuer", "reason": "缺 issuer"}
+        if not did_key.is_did_key(iss):
+            # 旧 did:aishield 标签签的 VC 2.0：无法自认证，只能服务端验。
+            # 诚实返回不可第三方验证，而不是假装验过。
+            return {"valid": False, "code": "non_self_certified_issuer",
+                    "reason": f"issuer {iss} 不是 did:key，第三方无法自认证验签",
+                    "credential": payload.get("vc")}
+        try:
+            raw_pub = did_key.decode_did_key(iss)
+        except Exception as exc:
+            return {"valid": False, "code": "unresolvable_issuer",
+                    "reason": f"did:key 解码失败: {exc}"}
+        pub_b64url = base64.urlsafe_b64encode(raw_pub).decode("ascii").rstrip("=")
+        ok = _cs.verify((parts[0] + "." + parts[1]).encode("ascii"),
+                        _cs_sign_to_b64(sig_raw), pub_b64url, _cs.ALG_ED25519)
+        if not ok:
+            return {"valid": False, "code": "bad_signature",
+                    "reason": "签名校验失败（JWT 被改写或密钥不匹配）"}
+        now = _now()
+        nbf, exp = payload.get("nbf"), payload.get("exp")
+        if isinstance(nbf, (int, float)) and now + 60 < nbf:
+            return {"valid": False, "code": "not_yet_valid",
+                    "reason": "凭证尚未生效", "credential": payload.get("vc")}
+        if isinstance(exp, (int, float)) and now > exp:
+            return {"valid": False, "code": "expired",
+                    "reason": "凭证已过期", "credential": payload.get("vc")}
+        jti = str(payload.get("jti") or "")
+        if check_revocation and jti and jti in _revoked_now():
+            return {"valid": False, "code": "revoked",
+                    "reason": "凭证已被除销", "credential": payload.get("vc")}
+        return {"valid": True, "code": "ok", "reason": "ok",
+                "issuer": iss, "jti": jti, "credential": payload.get("vc"),
+                "verification": "did:key self-certified (offline, no JWKS needed)"}
+
 
 def _cs_sign_to_b64(sig: bytes) -> str:
     """把验签入口需要的签名字节转成 crypto_sign 的 base64 形态。"""
@@ -437,6 +575,19 @@ def verify(token: str, *, check_revocation: bool = True) -> Dict[str, Any]:
 def revoke(credential_id: str) -> bool:
     ring = SigningKeyRing().load()
     return ring.revoke(credential_id)
+
+
+def issue_vc2(subject_did: str, claims: Optional[Dict[str, Any]] = None,
+              ttl: int = 86400,
+              credential_types: Optional[List[str]] = None) -> Dict[str, Any]:
+    """签发 W3C VC 2.0 凭证（VC-JWT 保护，did:key 自认证）。"""
+    return SigningKeyRing().load().issue_vc2(subject_did, claims, ttl, credential_types)
+
+
+def verify_vc2(credential_or_jwt, *, check_revocation: bool = True) -> Dict[str, Any]:
+    """验证 VC 2.0（第三方视角：只需 JWT 本身，did:key 自认证）。"""
+    return SigningKeyRing().load().verify_vc2(credential_or_jwt,
+                                              check_revocation=check_revocation)
 
 
 def status() -> Dict[str, Any]:

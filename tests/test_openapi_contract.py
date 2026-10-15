@@ -89,8 +89,12 @@ class TestContractParsing(unittest.TestCase):
     def test_lowercase_methods_are_normalised(self):
         routes = oc.contract_routes()
         self.assertGreater(len(routes), 0, "契约解析出 0 条 —— 多半是大小写问题")
+        # DELETE 也在列：2026-10-15 候选提取放宽到子串匹配后，身份注销
+        # DELETE /api/v1/identity/agents/{did} 第一次进入契约（它此前对探针
+        # 隐身）—— 方法键归一化必须覆盖 _VERBS 的全部三个动词，只认 GET/POST
+        # 会让注销端点永远"契约里没有"。
         self.assertTrue(
-            all(v in ("GET", "POST") for v, _ in routes),
+            all(v in oc._VERBS for v, _ in routes),
             f"方法键没归一化：{sorted({v for v, _ in routes})[:5]}",
         )
         self.assertIn(("GET", "/api/v1/health"), routes)

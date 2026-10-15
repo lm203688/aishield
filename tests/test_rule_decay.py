@@ -247,14 +247,19 @@ class TestRetireRulesFromSource(unittest.TestCase):
     def setUp(self):
         import scripts.rule_decay as mod
         self._orig = mod.RADAR_RULES
+        # RSES：--retire 是 demote（特权动作），会往进化账本记账 —— 测试必须
+        # 把账本也关进临时目录，否则往仓库真实 data/state/ 里写（ hermetic 违纪）。
+        self._orig_ledger = mod.EVOLUTION_LEDGER
         self.tmpdir = tempfile.mkdtemp()
         self.path = os.path.join(self.tmpdir, "radar_rules.json")
+        mod.EVOLUTION_LEDGER = os.path.join(self.tmpdir, "evolution_ledger.jsonl")
 
     def tearDown(self):
         import shutil
         shutil.rmtree(self.tmpdir, ignore_errors=True)
         import scripts.rule_decay as mod
         mod.RADAR_RULES = self._orig
+        mod.EVOLUTION_LEDGER = self._orig_ledger
 
     def test_removes_retire_suggested(self):
         import scripts.rule_decay as mod
@@ -278,7 +283,7 @@ class TestRetireRulesFromSource(unittest.TestCase):
                 },
             },
         }
-        removed = retire_rules_from_source(state)
+        removed = retire_rules_from_source(state, approved_by='test-approver')
         self.assertEqual(removed, 1)
         with open(self.path, encoding="utf-8") as f:
             d = json.load(f)
