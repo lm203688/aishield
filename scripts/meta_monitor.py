@@ -158,6 +158,9 @@ CRON_MAX_AGE_HOURS = {
     # 既不在 CRON_MAX_AGE_HOURS，也不在 spine 的编排里，两边都以为对方在管。
     # 现在由 M10「监控覆盖面」把这类遗漏变成显式红灯，不再靠人记得。
     "geo-indexnow-submit.yml": 48,
+    # 【2026-10-15 补】每日 06:23 UTC 独立运行（另含 workflow_dispatch），却一直
+    # 不在任何受监清单里 —— 每天在跑、坏了没人知道。由 M10 覆盖面自检显式告警。
+    "tech-radar.yml": 48,
 }
 
 # 状态域 -> 归属（写入该域的）workflow 列表。
