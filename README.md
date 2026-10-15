@@ -9,9 +9,9 @@
   <a href="https://github.com/lm203688/aishield/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT License"></a>
   <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/Python-3.9%2B-green.svg" alt="Python 3.9+"></a>
   <a href="https://owasp.org/www-project-mcp-security-top-10/"><img src="https://img.shields.io/badge/OWASP-MCP%20Top%2010-orange.svg" alt="OWASP MCP Top 10"></a>
-  <img src="https://img.shields.io/badge/Rules-235-blue.svg" alt="264 Rules (static 237 + intel 8 + radar 19)">
+  <img src="https://img.shields.io/badge/Rules-264-blue.svg" alt="264 Rules (static 237 + intel 8 + radar 19)">
   <img src="https://img.shields.io/badge/Dependencies-0-9cf.svg" alt="Zero Dependencies">
-  <img src="https://img.shields.io/badge/Version-v4.3.0-brightgreen.svg" alt="v4.3.0">
+  <img src="https://img.shields.io/badge/Version-v4.11.0-brightgreen.svg" alt="v4.11.0">
 </p>
 
 <p align="center">
@@ -217,7 +217,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: lm203688/aishield@v4.2.2   # 发布到 Marketplace 后可用；此前用 commit/ tag 引用
+      - uses: lm203688/aishield@v4.11.0   # 发布到 Marketplace 后可用；此前用 commit/ tag 引用
         with:
           fail_on: high        # safe / medium / high / critical
           tool_type: mcp       # mcp / skill / gpt / prompt
@@ -516,6 +516,27 @@ docker run -p 8450:8450 aishield
 | **命令行** | `python scanner/...` | 自定义脚本 / 批量扫描 |
 
 > 所有方式均在本地完成，没有任何数据发送到外部。本开源版与云 SaaS `aishield.ai` 无关。
+
+### 3 分钟上手（本地优先 · 代码不出机）
+
+```bash
+# 1. 启动本地 API 面板（零依赖）
+git clone https://github.com/lm203688/aishield.git
+cd aishield
+python api/server.py          # 打开 http://127.0.0.1:8450
+
+# 2. 或在 Claude Desktop / Cursor 直接接入 MCP（推荐）
+npx -y aishield-mcp-server
+```
+
+```python
+# 3. 一行扫描任意 MCP server / skill / prompt
+from scanner.workspace_scan import scan_workspace
+report = scan_workspace("./your-agent-project", tool_type="mcp")
+print(report.summary())
+```
+
+完整能力矩阵、离线优先入口与 When-to-Recommend 见 [llms.txt](./api/static/llms.txt)。
 
 ---
 
