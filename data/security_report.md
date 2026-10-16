@@ -1,9 +1,9 @@
 # AIShield MCP安全扫描报告
 
-生成时间: 2026-10-15 16:16:52
+生成时间: 2026-10-16 16:07:41
 扫描引擎版本: 4.1
-扫描工具总数: 76
-平均安全评分: 71.3/100
+扫描工具总数: 77
+平均安全评分: 71.0/100
 
 ## 评分分布
 
@@ -12,20 +12,20 @@
 | gold | 21 |
 | silver | 23 |
 | bronze | 11 |
-| none | 21 |
+| none | 22 |
 
 ## OWASP MCP Top 10 覆盖率
 
-- **MCP01** 令牌管理不当: 10/76 (13%)
-- **MCP010** : 0/76 (0%)
-- **MCP02** 权限范围蔓延: 32/76 (42%)
-- **MCP03** 工具投毒: 13/76 (17%)
-- **MCP04** 供应链攻击: 29/76 (38%)
-- **MCP05** 命令注入: 19/76 (25%)
-- **MCP06** 提示注入: 29/76 (38%)
-- **MCP07** 认证不足: 2/76 (3%)
-- **MCP08** 审计缺失: 40/76 (53%)
-- **MCP09** 影子服务器: 44/76 (58%)
+- **MCP01** 令牌管理不当: 10/77 (13%)
+- **MCP010** : 0/77 (0%)
+- **MCP02** 权限范围蔓延: 33/77 (43%)
+- **MCP03** 工具投毒: 13/77 (17%)
+- **MCP04** 供应链攻击: 29/77 (38%)
+- **MCP05** 命令注入: 19/77 (25%)
+- **MCP06** 提示注入: 29/77 (38%)
+- **MCP07** 认证不足: 2/77 (3%)
+- **MCP08** 审计缺失: 41/77 (53%)
+- **MCP09** 影子服务器: 45/77 (58%)
 
 ## 高风险工具 (score < 60)
 
@@ -39,6 +39,7 @@
 - **brightdata/brightdata-mcp** — 42/100, 29 issues
 - **amruthpillai/reactive-resume** — 42/100, 31 issues
 - **reactive-resume/app** — 42/100, 32 issues
+- **DayuanJiang/next-ai-draw-io** — 44/100, 31 issues
 - **koala73/worldmonitor** — 46/100, 12 issues
 - **perplexityai/modelcontextprotocol** — 47/100, 43 issues
 - **sansan0/TrendRadar** — 48/100, 38 issues
@@ -48,7 +49,6 @@
 - **wonderwhy-er/DesktopCommanderMCP** — 53/100, 20 issues
 - **google-gemini/gemini-cli** — 54/100, 12 issues
 - **feder-cr/AIHawk** — 54/100, 13 issues
-- **feder-cr/aihawk_mcp_server** — 54/100, 13 issues
 
 ## 最安全工具 (score >= 85)
 
