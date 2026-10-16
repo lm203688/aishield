@@ -11,7 +11,7 @@
     ],
     "last_run": "publish=success/registry=success/assert=success",
     "_source": "channel-distribution",
-    "_ts": "2026-10-14T08:50:35.906906+00:00",
+    "_ts": "2026-10-16T08:25:14.107792+00:00",
     "published_total": 4
   },
   "history": [
@@ -709,6 +709,6 @@
       }
     }
   ],
-  "updated": "2026-10-14T08:50:35.906921+00:00",
+  "updated": "2026-10-16T08:25:14.107807+00:00",
   "desc": "内容与生态分发执行结果"
 }
