@@ -465,6 +465,20 @@ def main():
         # 修法：判据改为「写入者是否唯一」，声明受 E13 派生实测；含真跑 git rebase
         # 冲突的端到端用例（快照类自动解决 / 非快照类 exit 3）。
         'tests.test_auto_resolvable_paths',
+        # 2026-10-16 跃迁蓝图 Program A–F 新模块门禁（缺哪补哪，非重复造轮子）：
+        # A=NSE 神经-符号双轨（候选无结论 / ratify 桥接 FP 中立 / 后端诚实）
+        'tests.test_neuro_symbolic_probe',
+        # B=RSES 安全自进化（元 agent 结构不可晋升 / 账本哈希链 / 特权须 approved_by）
+        'tests.test_rses_cycle',
+        # C=RIL 运行时免疫（观测≠执行 / 网关异常 fail-closed / 护栏抑制）
+        'tests.test_runtime_observer',
+        # D=FTM 联邦信任网格（VC 2.0 真签名验真 / CT 式透明日志 / 联邦聚合零数据出域）
+        'tests.test_trust_mesh',
+        # E=FVI 隔离不变量 CI 门禁单一入口（有界模型检查 + B4 自检 + 判别力自证）
+        'tests.test_run_fvi_gate',
+        # F=因果归因 + 合成红队（可解释安全归因 / agent-vs-agent 逃逸率 / 反哺 NSE corpus）
+        'tests.test_causal_attributor',
+        'tests.test_synthetic_redteam',
     ]
 
     loaded = 0
