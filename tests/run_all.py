@@ -292,6 +292,11 @@ def main():
         'tests.test_stale_exemptions',
         'tests.test_finding_anchor',
         'tests.test_isolation_invariants',
+        # 2026-10-16 FVI（Program E）v0.1：隔离不变量的**有界模型检查**门禁
+        # （scripts/check_isolation_invariants.py，穷举可达状态空间证 no_execute/
+        # no_network/single_writer(E13) + 判别力自证）。与上面 B4 经验式（拦截 spawn）
+        # 和下面 Hypothesis 属性测试构成「实例 + 穷举 + 随机」三层证据。
+        'tests.test_isolation_invariants_formal',
         # 2026-10-15 FVI（Program E）：隔离不变量的**属性测试**（Hypothesis 随机
         # 语料证 no_execute/no_network/fail-closed/链完整/治理零 spawn），与上面
         # 固定语料的回归锚点互补。依赖 hypothesis —— 已在 prepare-tests 声明。
