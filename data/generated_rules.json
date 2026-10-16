@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-10-15T08:18:05.524807+00:00",
-  "source_intel_count": 604,
+  "generated_at": "2026-10-16T08:08:48.990172+00:00",
+  "source_intel_count": 627,
   "package_blacklist": {
     "npm:@tinacms/cli": {
       "ecosystem": "npm",
@@ -1389,6 +1389,21 @@
     }
   },
   "pattern_rules": {
+    "(?i)(session|token)\\s*[:=]\\s*['\\\"][^'\\\"]{0,8}['\\\"]": {
+      "description": "会话安全: 会话标识过短或硬编码",
+      "severity": "high",
+      "owasp": "LLM07",
+      "owasp_name": "系统提示泄露 (System Prompt Leakage)",
+      "derived_from": "session",
+      "intel_hits": 52,
+      "evidence": [
+        "GHSA-hqm2-cfx2-2vgh",
+        "GHSA-84m7-p3x7-pcfv",
+        "GHSA-84m7-p3x7-pcfv",
+        "GHSA-jq7h-wrvp-3rgx",
+        "GHSA-347q-26qq-h2p6"
+      ]
+    },
     "(?i)(Access-Control-Allow-Origin['\\\"]?\\s*[:,]\\s*['\\\"]\\*|cors\\s*\\(\\s*\\)\\s*)": {
       "description": "跨域校验缺失: 允许任意来源",
       "severity": "high",
@@ -1419,21 +1434,6 @@
         "GHSA-x78j-v8h9-3j2q"
       ]
     },
-    "(?i)(session|token)\\s*[:=]\\s*['\\\"][^'\\\"]{0,8}['\\\"]": {
-      "description": "会话安全: 会话标识过短或硬编码",
-      "severity": "high",
-      "owasp": "LLM07",
-      "owasp_name": "系统提示泄露 (System Prompt Leakage)",
-      "derived_from": "session",
-      "intel_hits": 48,
-      "evidence": [
-        "GHSA-jq7h-wrvp-3rgx",
-        "GHSA-347q-26qq-h2p6",
-        "GHSA-gfjp-2p8f-94qv",
-        "GHSA-7c92-x8vg-4258",
-        "GHSA-xf64-4pmc-h8qf"
-      ]
-    },
     "(?i)(\\.\\./){2,}|(%2e%2e%2f)": {
       "description": "路径遍历: 越权访问上级目录",
       "severity": "high",
@@ -1455,7 +1455,7 @@
       "owasp": "LLM06",
       "owasp_name": "过度代理权限 (Excessive Agency)",
       "derived_from": "ssrf",
-      "intel_hits": 46,
+      "intel_hits": 50,
       "evidence": [
         "GHSA-4w49-gwv8-fpjg",
         "GHSA-vmxc-h2x2-jmf3",
@@ -1470,7 +1470,7 @@
       "owasp": "LLM07",
       "owasp_name": "系统提示泄露 (System Prompt Leakage)",
       "derived_from": "authentication",
-      "intel_hits": 49,
+      "intel_hits": 53,
       "evidence": [
         "GHSA-2gpf-2492-q9jh",
         "GHSA-qj9c-59p6-8cgx",
