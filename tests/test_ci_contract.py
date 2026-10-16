@@ -21,10 +21,31 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SERVER_PY = os.path.join(ROOT, 'api', 'server.py')
-WORKFLOW = os.path.join(ROOT, '.github', 'workflows', 'security-scan.yml')
+WF_DIR = os.path.join(ROOT, '.github', 'workflows')
+
+
+def _discover_security_workflows():
+    """文件系统发现所有安全门禁 workflow（匹配 *security*），不再硬编码文件名。
+
+    2026-10-16 修复：security-scan.yml 早已改名为 unified-security-scan.yml，
+    旧代码硬编码该文件名，导致本类的 3 个测试永久 skipTest 成死测试（既不报错
+    也不验证，属于假绿）。改为发现式后，改名 / 增删安全 workflow 都不再让门禁失盲。
+    """
+    if not os.path.isdir(WF_DIR):
+        return []
+    return sorted(
+        os.path.join(WF_DIR, f) for f in os.listdir(WF_DIR)
+        if 'security' in f.lower() and f.endswith(('.yml', '.yaml'))
+    )
 
 # API 承诺提供的分数取值路径（顶层键 / 嵌套容器键）
 API_SCORE_KEYS = {'score', 'report', 'overall_score', 'badge_level', 'risk_level'}
+
+# 扫描报告（/api/v1/scan 真实返回的 scanner/engine.scan 产物）包含的键。
+# 安全门禁除了读 audit 响应，还会读扫描报告里的 findings / total_findings，
+# 以及 finding 条目上的 severity —— 这些同样是 API 真实提供的字段，只是来自
+# 不同的端点。列入白名单，避免把"读扫描报告"误判成"读幻觉字段"。
+SCAN_REPORT_KEYS = {'findings', 'severity', 'total_findings'}
 
 
 def _read(path):
@@ -58,22 +79,33 @@ class TestAuditResponseContract(unittest.TestCase):
 
 
 class TestSecurityGateReadsRealKeys(unittest.TestCase):
-    """门禁读取的键必须被 API 真实提供（跨文件一致性）"""
+    """门禁读取的键必须被 API 真实提供（跨文件一致性）
+
+    发现式：对 .github/workflows/ 下所有 *security* 文件逐一校验，而非只盯一个
+    硬编码文件名。任何一个安全门禁改名都不会让本类失盲成死测试。
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.workflows = _discover_security_workflows()
 
     def setUp(self):
-        if not os.path.exists(WORKFLOW):
-            self.skipTest('security-scan.yml 不存在')
-        self.wf = _read(WORKFLOW)
+        if not self.workflows:
+            self.skipTest('未找到 *security* workflow 文件')
 
-    def _score_keys(self):
+    @staticmethod
+    def _score_keys_in(text):
         """抽取门禁从 JSON 报告中读取的所有键名"""
-        keys = set(re.findall(r"get\(\s*['\"]([A-Za-z_][A-Za-z0-9_]*)['\"]", self.wf))
-        keys |= set(re.findall(r"d\.([A-Za-z_][A-Za-z0-9_]*)\s*\?\?", self.wf))
+        keys = set(re.findall(r"get\(\s*['\"]([A-Za-z_][A-Za-z0-9_]*)['\"]", text))
+        keys |= set(re.findall(r"d\.([A-Za-z_][A-Za-z0-9_]*)\s*\?\?", text))
         return keys
 
     def test_every_key_the_gate_reads_is_served_by_api(self):
         """门禁读的键不能是 API 里不存在的幻觉字段（历史事故根因）"""
-        unknown = self._score_keys() - API_SCORE_KEYS
+        served = API_SCORE_KEYS | SCAN_REPORT_KEYS
+        unknown = set()
+        for wf in self.workflows:
+            unknown |= (self._score_keys_in(_read(wf)) - served)
         self.assertEqual(
             unknown, set(),
             f"门禁读取了 API 未提供的键 {sorted(unknown)} —— 会静默取到默认值",
@@ -81,15 +113,19 @@ class TestSecurityGateReadsRealKeys(unittest.TestCase):
 
     def test_gate_reads_at_least_one_score_key(self):
         """门禁必须真的读分数，而不是空跑"""
+        combined = set()
+        for wf in self.workflows:
+            combined |= self._score_keys_in(_read(wf))
         self.assertTrue(
-            self._score_keys() & {'score', 'overall_score'},
+            combined & {'score', 'overall_score'},
             '门禁未引用任何分数字段',
         )
 
     def test_gate_threshold_is_explicit(self):
         """阈值必须写死在门禁里，便于审计"""
-        self.assertRegex(self.wf, r'-lt\s+\d+|<\s*\d+|>=\s*\d+',
-                         '门禁缺少显式分数阈值')
+        for wf in self.workflows:
+            self.assertRegex(_read(wf), r'-lt\s+\d+|<\s*\d+|>=\s*\d+',
+                             f'{os.path.basename(wf)} 缺少显式分数阈值')
 
 
 class TestSelfScanGateEmitsRealKeys(unittest.TestCase):

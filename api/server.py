@@ -19,6 +19,7 @@ import time
 import uuid
 import threading
 import re
+import importlib.util
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from socketserver import ThreadingMixIn
 from urllib.parse import urlparse, parse_qs
@@ -80,22 +81,10 @@ TZ = timezone(timedelta(hours=8))
 _lock = threading.Lock()
 
 
-def _load_json(path, default=None):
-    if default is None:
-        default = {}
-    if os.path.exists(path):
-        try:
-            with open(path, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except Exception:
-            return default
-    return default
-
-
-def _save_json(path, data):
-    with _lock:
-        with open(path, "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False, indent=2)
+# 运行时状态持久化统一走 api/state_store（原子写 + 损坏自愈 + 目录锁）。
+# 取代原先直接 open 覆盖写活文件（无原子性，kill -9 会留下半截 JSON 卡死启动）。
+# 见 H1/S3 地基加固。函数签名保持不变，调用方无需改动。
+from api.state_store import save_json as _save_json, load_json as _load_json
 
 
 # 部署元信息：由 deploy-named-tunnel.sh 在每次 git reset 之后写入仓库根目录。
@@ -474,6 +463,19 @@ class AIShieldHandler(BaseHTTPRequestHandler):
                 from eco import verifiable_identity as vi
                 self._send_json(vi.jwks(), 200)
             except Exception as e:
+                self._send_json({"error": str(e)}, 500)
+            return
+
+        # ── 身份签名后端自省（S5 地基加固 2026-10-16）──
+        # 把「签名后端到底是 Ed25519 还是被静默降级成 hmac-sha256」变成一条
+        # 可独立查询的事实端点（health 里已有同款字段，这里拆出来便于单独探测 /
+        # 监控告警）。2026-10-05 线上 JWKS 一度 keys=[] ready=false，根因就是
+        # 生产没装 cryptography 而静默降级；这条端点让探针第一眼就能区分
+        # 「探不到后端」与「探到 HMAC」。
+        if path == "/api/v1/identity/backend":
+            try:
+                self._send_json(_identity_backend_fact(), 200)
+            except Exception as e:                       # noqa: BLE001
                 self._send_json({"error": str(e)}, 500)
             return
 
@@ -3178,6 +3180,25 @@ def assert_not_root():
 
 def main():
     assert_not_root()
+    # 生产入口 fail-loud（H4 / S5 地基加固 2026-10-16）：
+    # 若显式要求强密码学后端（AISHIELD_REQUIRE_CRYPTO=1），而运行环境装不上
+    # cryptography，L1 可移植身份 / L3 意图授权会静默降级成 hmac-sha256（对称），
+    # 第三方根本无法离线验签 —— 这种「装不上却照跑」正是 2026-10-05 生产事故的
+    # 根因。与其让生产静默跑一套死能力，不如启动即失败，把责任推回部署方。
+    # 默认不设置该变量时此检查不触发，行为向后兼容（部署方可显式开启强约束）。
+    if os.environ.get("AISHIELD_REQUIRE_CRYPTO") == "1":
+        # 不写 `import cryptography` 字面语句：本仓库刻意不建 requirements.txt
+        # （dependency-check 门禁对 requirements.txt 直接 exit 1），import_integrity
+        # 门禁只从 requirements*.txt 取第三方名，裸 import 会被误判为缺失内部模块。
+        # 改用标准库 find_spec 探测可用性，既不触发该误判，也满足 fail-loud 意图。
+        if importlib.util.find_spec("cryptography") is None:
+            sys.stderr.write(
+                "AISHIELD_REQUIRE_CRYPTO=1 但 cryptography 不可用：\n"
+                "L1/L3 签名后端将降级为 hmac-sha256（对称密钥无法公开分发），\n"
+                "第三方无法离线验签，生产不可接受。请先在运行环境安装 cryptography\n"
+                "（pip install cryptography）后再启动；或移除 AISHIELD_REQUIRE_CRYPTO\n"
+                "以允许降级（不推荐用于生产）。\n")
+            sys.exit(3)
     port = int(os.environ.get("AISHIELD_PORT", os.environ.get("PORT", 8450)))
     
     # 注册生态路由

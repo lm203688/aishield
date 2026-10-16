@@ -1,9 +1,9 @@
 {
   "note": "运行时路由清单：进程内直调 api.server.AIShieldHandler.do_GET/do_POST 探得，与 curated 规范合并后即线上 /openapi.json。",
   "source": "runtime probe (scripts/gen_openapi_spec.py)",
-  "generated_at": "2026-10-16T00:48:05",
-  "route_count": 161,
-  "operation_count": 178,
+  "generated_at": "2026-10-16T17:44:58",
+  "route_count": 162,
+  "operation_count": 179,
   "probe_errors": [],
   "state_audit": {
     "created": [],
@@ -3117,6 +3117,9 @@
                   "hmac": {
                     "type": "boolean"
                   },
+                  "cryptographically_signed": {
+                    "type": "boolean"
+                  },
                   "events": {
                     "type": "integer"
                   },
@@ -4267,58 +4270,7 @@
                 "additionalProperties": true
               },
               "latest": {
-                "type": "object",
-                "properties": {
-                  "ts": {
-                    "type": "string"
-                  },
-                  "evaluations": {
-                    "type": "integer"
-                  },
-                  "policy_digest": {
-                    "type": "string"
-                  },
-                  "policy_healthy": {
-                    "type": "boolean"
-                  },
-                  "audit_entries": {
-                    "type": "integer"
-                  },
-                  "audit_head_hash": {
-                    "type": "string"
-                  },
-                  "behavior_healthy": {
-                    "type": "boolean"
-                  },
-                  "behavior_anomaly_count": {
-                    "type": "integer"
-                  },
-                  "killed_count": {
-                    "type": "integer"
-                  },
-                  "seq": {
-                    "type": "integer"
-                  },
-                  "prev_hash": {
-                    "type": "string"
-                  },
-                  "hash": {
-                    "type": "string"
-                  },
-                  "signature": {
-                    "type": "string"
-                  },
-                  "signature_alg": {
-                    "type": "string"
-                  },
-                  "signer_kid": {
-                    "type": "string"
-                  },
-                  "third_party_verifiable": {
-                    "type": "boolean"
-                  }
-                },
-                "additionalProperties": true
+                "type": "null"
               },
               "chain": {
                 "type": "object",
@@ -4329,7 +4281,7 @@
                   "entries": {
                     "type": "integer"
                   },
-                  "head_hash": {
+                  "note": {
                     "type": "string"
                   }
                 },
@@ -4850,6 +4802,40 @@
       "operation_ids": [
         "deleteIdentityAgents",
         "getIdentityAgents"
+      ]
+    },
+    {
+      "path": "/api/v1/identity/backend",
+      "tag": "ecosystem",
+      "summary": "Agent 生态 API · backend",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "Agent 生态 API · backend",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "signing_backend": {
+                "type": "string"
+              },
+              "identity_ready": {
+                "type": "boolean"
+              },
+              "identity_reason": {
+                "type": "null"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "getIdentityBackend"
       ]
     },
     {
@@ -6132,7 +6118,9 @@
               "users": {
                 "type": "array",
                 "items": {
-                  "type": "string"
+                  "type": "object",
+                  "properties": {},
+                  "additionalProperties": true
                 }
               }
             },

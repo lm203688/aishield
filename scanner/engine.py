@@ -538,11 +538,11 @@ def scan(source_url, tool_type="mcp", name="", description="", enable_osv=False,
     """
     # 输入验证
     if not source_url or not isinstance(source_url, str):
-        return {"error": "source_url is required and must be a string", "overall_score": 0, "badge_level": "none", "risk_level": "critical", "findings": [], "total_findings": 0, "scanned_at": datetime.now(TZ).strftime("%Y-%m-%d %H:%M:%S"), "scanner_version": SCANNER_VERSION}
+        return {"error": "source_url is required and must be a string", "overall_score": 0, "badge_level": "none", "risk_level": "unknown", "findings": [], "total_findings": 0, "scanned_at": datetime.now(TZ).strftime("%Y-%m-%d %H:%M:%S"), "scanner_version": SCANNER_VERSION}
     
     source_url = source_url.strip()
     if len(source_url) > 500:
-        return {"error": "source_url too long (max 500 chars)", "overall_score": 0, "badge_level": "none", "risk_level": "critical", "findings": [], "total_findings": 0, "scanned_at": datetime.now(TZ).strftime("%Y-%m-%d %H:%M:%S"), "scanner_version": SCANNER_VERSION}
+        return {"error": "source_url too long (max 500 chars)", "overall_score": 0, "badge_level": "none", "risk_level": "unknown", "findings": [], "total_findings": 0, "scanned_at": datetime.now(TZ).strftime("%Y-%m-%d %H:%M:%S"), "scanner_version": SCANNER_VERSION}
     
     if tool_type not in ("mcp", "skill", "gpt", "prompt"):
         tool_type = "mcp"
@@ -550,7 +550,7 @@ def scan(source_url, tool_type="mcp", name="", description="", enable_osv=False,
     # 仅允许GitHub URL扫描（非prompt类型）
     if tool_type not in ("gpt", "prompt") and not re.match(r'^https?://github\.com/[\w.-]+/[\w.-]+', source_url):
         if not re.match(r'^https?://', source_url):
-            return {"error": "Only GitHub URLs are supported for scanning", "overall_score": 0, "badge_level": "none", "risk_level": "critical", "findings": [], "total_findings": 0, "scanned_at": datetime.now(TZ).strftime("%Y-%m-%d %H:%M:%S"), "scanner_version": SCANNER_VERSION}
+            return {"error": "Only GitHub URLs are supported for scanning", "overall_score": 0, "badge_level": "none", "risk_level": "unknown", "findings": [], "total_findings": 0, "scanned_at": datetime.now(TZ).strftime("%Y-%m-%d %H:%M:%S"), "scanner_version": SCANNER_VERSION}
     # Step 1: 获取源码
     if tool_type == "gpt":
         source_data = {"files": {}, "commit_hash": "", "gpt_url": source_url}

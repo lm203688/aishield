@@ -240,6 +240,9 @@ jobs:
       run: |
         if [ -f requirements.txt ]; then
           echo "Warning: requirements.txt detected."
+          echo "本仓刻意不建 requirements.txt：scanner/runtime 对外承诺零依赖，"
+          echo "增强依赖只在 CI 里显式装（.github/actions/prepare-tests），"
+          echo "运行时服务器依赖钉在 setup.py 的 install_requires。"
           exit 1
         fi
         if grep -rq "^import requests\|^import numpy\|^import pandas\|^import flask\|^import fastapi" --include="*.py" . 2>/dev/null; then

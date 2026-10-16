@@ -998,6 +998,49 @@ def get_openapi_spec():
                 },
             },
 
+            # ── 11. GET /api/v1/identity/backend — 身份签名后端自省 ──
+            "/api/v1/identity/backend": {
+                "get": {
+                    "operationId": "identityBackend",
+                    "tags": ["Ecosystem"],
+                    "summary": "身份/意图签名后端自省",
+                    "description": (
+                        "返回「身份与意图签名的密码学后端」事实：是否为 Ed25519 非对称、"
+                        "JWKS 是否 ready、若不 ready 的原因。用于区分「探不到后端」与"
+                        "「探到被静默降级成 hmac-sha256」—— 后者曾在 2026-10-05 导致"
+                        "生产 L1 可移植身份 / L3 意图授权签不出可被第三方验证的凭证。"
+                    ),
+                    "security": [],
+                    "responses": {
+                        "200": {
+                            "description": "后端事实",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "signing_backend": {
+                                                "type": "string",
+                                                "description": "ed25519 / hmac-sha256 / unknown",
+                                                "example": "ed25519",
+                                            },
+                                            "identity_ready": {
+                                                "type": ["boolean", "null"],
+                                                "example": True,
+                                            },
+                                            "identity_reason": {
+                                                "type": ["string", "null"],
+                                                "example": None,
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+
             # ── 8. GET /api/v1/identity/agents — Agent 列表 ──
             "/api/v1/identity/agents": {
                 "get": {

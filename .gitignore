@@ -79,18 +79,20 @@ Thumbs.db
 # =====================
 api/data/*.json
 # 身份审计事件流（append-only，含归属与注销记录，不进仓库）
-api/data/identity_events.jsonl
-# 数据飞轮核心自建库必须入库（否则每个周期扫描结果无法持久化，before 永远为 0）
-# data/batch_scans.json
+api/data/*.jsonl
+# 数据飞轮核心自建库（24.5MB 运行时产物，由工作流生成，绝不进仓库）
+data/batch_scans.json
 # guard 巡检存活信号经 Contents API 直写 main，不受 gitignore 影响；
 # 忽略它可避免被整体 add data/state/ 时与 guard 抢同一文件导致 push 冲突。
 # 注：当前各 workflow 的 `git add` 均精确指定单个文件，没有 add 整目录；
 # 下列为防御性忽略，避免未来新增 workflow 用通配一并带上。
-data/state/health.json
-# 告警台账与告警日志是运行时产物：正文虽已脱敏，仍含运维细节，不应进 public 仓库
-data/state/alerts.jsonl
-data/state/alert_cooldown.json
-data/state/undelivered_alerts.jsonl
+# ── 运行时状态：由服务/工作流生成，绝不进仓库（H1/S3 地基加固 2026-10-16）──
+# 这些文件是运行时产物，且可能被 live server 改写；进 git 既污染仓库，
+# 又可能把一份过期运行时快照当成种子下发到生产。统一忽略，由服务首次访问时自建。
+# 唯一例外：data/state/evolution_ledger.jsonl 是规则自进化账本（append-only、
+# union 合并、由 rule-promoter 工作流提交），必须留存仓库。
+data/state/**
+!data/state/evolution_ledger.jsonl
 mcp-server/dist/
 *.zip
 AIShield_完整备案包.zip

@@ -613,6 +613,10 @@ class EvidenceBundle:
         checks = {
             "run_id": self.run_id,
             "hmac": bool(self.hmac_key),
+            # 显式区分「完整性已校验」与「密码学已签名」：无密钥创建的 bundle
+            # 仍能通过 SHA-256 链校验（valid=True），但第三方无法据此采信 ——
+            # 调用方必须看 signed 字段，不能把 valid 当成「已认证」。
+            "cryptographically_signed": bool(self.hmac_key),
             "events": len(self.events),
             "proposals": len(self.proposals),
             "approvals": len(self.approvals),
@@ -698,6 +702,13 @@ def verify_bundle_payload(bundle_dict: dict, hmac_secret: str | None = None) -> 
         return {"valid": False, "reason": "not a dict"}
     if bundle_dict.get("schema") != SCHEMA_VERSION:
         return {"valid": False, "reason": f"unsupported schema: {bundle_dict.get('schema')}"}
+    # fail-closed（H4 / S5 地基加固 2026-10-16）：一个「声明用密钥签名」的包，
+    # 若验证方没给密钥，绝不能当成 valid 放行 —— 否则「忘了传密钥」会让你以为
+    # 验过签名，实则 SHA-256 裸链对任何篡改都只会暴露为 mismatch。宁可显式拒绝，
+    # 把「是否真签了名」的责任推回调用方，而不是静默降级成「看起来过了」。
+    if bundle_dict.get("hmac") is True and not hmac_secret:
+        return {"valid": False,
+                "reason": "signed bundle requires hmac_secret to verify (fail-closed)"}
     b = EvidenceBundle(run_id=bundle_dict.get("run_id"),
                        hmac_secret=hmac_secret,
                        title=bundle_dict.get("title", ""))

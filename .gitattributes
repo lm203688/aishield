@@ -1,4 +1,36 @@
-# 追加型台账：git 内置 union 合并驱动 —— 语义就是"追加型日志取并集"，
-# 比 exit 3 或取一方都正确（.github/auto-resolvable-paths.txt 的首选方案）。
-# 单写者：只有 rule-promoter workflow 的 promote/rollback 记账写它。
+# ─────────────────────────────────────────────────────────────
+# 换行符归一：所有文本按 LF 入库，Windows 检出不再引入 CRLF。
+# 这是 2026-10-16 地基加固的 P0 止血项——此前 343 个文件带 CRLF，
+# .gitattributes 形同虚设，导致 E9 门禁（脚本式禁止 CRLF）反复误报。
+# 统一 `* text=auto eol=lf` 后，未来提交一律 LF，根因消除。
+# ─────────────────────────────────────────────────────────────
+* text=auto eol=lf
+
+# 显式强制 LF（不随平台/编辑器漂移）
+*.py    text eol=lf
+*.sh    text eol=lf
+*.yml   text eol=lf
+*.yaml  text eol=lf
+*.md    text eol=lf
+*.json  text eol=lf
+*.jsonl text eol=lf
+*.toml  text eol=lf
+*.html  text eol=lf
+*.css   text eol=lf
+*.js    text eol=lf
+*.ts    text eol=lf
+*.txt   text eol=lf
+
+# 二进制：不做换行归一（避免误判为文本而损坏）
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.ico  binary
+*.pdf  binary
+*.zip  binary
+*.woff binary
+*.woff2 binary
+
+# 追加型台账：git 内置 union 合并驱动（语义就是"取并集"，比 exit 3 或取一方都正确）
 data/state/evolution_ledger.jsonl merge=union

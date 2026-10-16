@@ -1,0 +1,18 @@
+# 根 pyproject.toml —— 只承载 pytest 配置与构建后端声明。
+#
+# 刻意**不**在此声明第三方运行时依赖：
+#   - 仓库对外承诺 scanner/runtime 零依赖，ci.yml 的 dependency-check 见到
+#     requirements.txt 直接 exit 1（守这条承诺）。
+#   - 测试依赖统一由 .github/actions/prepare-tests 声明，并由
+#     scripts/validate_workflows.py 的 E12 从 import 图派生校验，避免第二处实现。
+#   - 运行时服务器（api.server）真需要的依赖钉在 setup.py 的 install_requires。
+[build-system]
+requires = ["setuptools>=68.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+# 只收集 tests/test_*.py。脚本式遗留文件 tests/e2e_test.py / tests/quick_test.py
+# 以 _test.py 结尾，被 CI 当独立脚本（python tests/quick_test.py）调用，
+# 不应被 pytest 收集——它们 import 期会启动 HTTPServer，被收集即报 error。
+# 同时避免误收集 sdk/ 等子项目里的 *_test.py。
+python_files = "test_*.py"

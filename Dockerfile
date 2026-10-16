@@ -2,7 +2,7 @@ FROM python:3.11-slim
 
 LABEL maintainer="AIShield Team"
 LABEL description="AIShield MCP/Agent Security Scan — local-first GitHub Action"
-LABEL version="4.2.2"
+LABEL version="4.11.0"
 
 WORKDIR /app
 

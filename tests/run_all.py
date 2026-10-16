@@ -292,6 +292,11 @@ def main():
         'tests.test_stale_exemptions',
         'tests.test_finding_anchor',
         'tests.test_isolation_invariants',
+        # 2026-10-16 T7 / H3 Layer 2：AST 静态隔离扫描门禁（scripts/ast_isolation_scan.py）。
+        # 从 AST 上枚举 scanner/ 全部危险执行原语调用，证「结构上不存在能把被扫数据
+        # 升级为执行原语的调用路径」，与上面 B4 经验式 + FVI 模型检查 + Hypothesis 属性
+        # 测试构成「实例 + 穷举 + 随机 + 静态」四层隔离证据。
+        'tests.test_ast_isolation_scan',
         # 2026-10-16 FVI（Program E）v0.1：隔离不变量的**有界模型检查**门禁
         # （scripts/check_isolation_invariants.py，穷举可达状态空间证 no_execute/
         # no_network/single_writer(E13) + 判别力自证）。与上面 B4 经验式（拦截 spawn）
@@ -342,6 +347,9 @@ def main():
         # 2026-09-19 在线扫描页 + 框架适配器 + SARIF 导出契约
         'tests.test_sarif_export',
         'tests.test_scan_inline_page',
+        # 2026-10-16 S4 信号纯度：输入校验失败（缺 URL / 超长 / 非 GitHub / 类型错）
+        # 的 risk_level 必须降级为 "unknown"，与真实发现档分离，避免污染下游调度。
+        'tests.test_scan_input_contract',
         # 2026-09-25 版本声明位覆盖门禁：防"门禁假绿"（api/server.py 曾 6 处 4.3.0
         # 而 mcp.json 已 4.8.3，sync_version 报"全部一致"却对那 8 处失明）
         'tests.test_version_declare',
@@ -432,6 +440,12 @@ def main():
         # server.py 的分派分支接住（曾经 intent/attestations/digest/evidence/
         # ship-gate 全是「handler 写了、入口没接」的死路由，两个门禁都绿）。
         'tests.test_server_prefix_gate',
+        # 2026-10-16 H2 脚手架：表驱动路由目录 + 路由快照测试（server.py 拆层迁移的
+        # 前置安全网）。钉死 server.py 字面路由集合，任何新增/删除/改名未同步进
+        # api/routes.py 的 DECLARED_* 即红。实际千行函数拆分延期至 P2 专项。
+        'tests.test_route_snapshot',
+        # 2026-10-16 H1/S3 状态地基：原子写 + 损坏自愈 + schema 版本校验不变量
+        'tests.test_state_store',
         # 2026-10-04 L1 可移植身份：JWKS 公钥发现 + VC 签发/验签/除销。
         # 对称密钥永不进 JWKS 是红线；除销必须实时读盘（缓存=攻击复用窗口）；
         # 第三方仅凭 JWKS 的 x 就能离线验签，这才是「别家能不能验我」。
