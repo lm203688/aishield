@@ -12,16 +12,16 @@
 | 指标 | 值 |
 |:---|:---|
 | 契约版本 | `3.0.3` |
-| 可调用操作数 | **178** |
+| 可调用操作数 | **179** |
 | 已声明请求体 | 28 |
-| **请求体未声明** | **150** |
+| **请求体未声明** | **151** |
 | 组件 schema 数 | 11 |
 
 `请求体未声明` 不是“参数无意义”，而是**契约还没把它写下来** —— 外部 agent 只能靠猜字段名。缺口是**可数的**，见文末清单；`--check` 防止它悄悄变大。
 
 ## P0 · 信任与身份（先回答“我能不能被信”）
 
-共 53 条操作。
+共 54 条操作。
 
 | 方法 | 路径 | 认证 | 实测状态 | 摘要 | 响应顶层字段 | 请求体 |
 |:---|:---|:---:|:---:|:---|:---|:---|
@@ -51,6 +51,7 @@
 | `GET` | `/api/v1/identity/agents` | 未声明 | 200 | 列出所有已注册 Agent | `success`, `total`, `agents` | 未声明 |
 | `GET` | `/api/v1/identity/agents/{did}` | 未声明 | 200 | Agent 生态 API · {did} | `success`, `error`, `did`, `error_code`, `error_id` | 未声明 |
 | `DELETE` | `/api/v1/identity/agents/{did}` | 未声明 | 200 | Agent 生态 API · {did} | `error`, `did`, `error_code`, `error_id` | 未声明 |
+| `GET` | `/api/v1/identity/backend` | 无 | 200 | 身份/意图签名后端自省 | `signing_backend`, `identity_ready`, `identity_reason` | 未声明 |
 | `POST` | `/api/v1/identity/credentials/issue` | 未声明 | 200 | Agent 生态 API · issue | `error`, `error_code`, `error_id` | `did`, `owner`, `identity_token`, `claims`, `ttl` |
 | `POST` | `/api/v1/identity/credentials/revoke` | 未声明 | 200 | Agent 生态 API · revoke | `success`, `error`, `error_code`, `error_id` | `did`, `owner`, `credential_id` |
 | `POST` | `/api/v1/identity/credentials/verify` | 未声明 | 200 | Agent 生态 API · verify | `success`, `error`, `error_code`, `error_id` | `token` |
