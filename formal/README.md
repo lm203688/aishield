@@ -26,11 +26,30 @@ node node_modules/@informalsystems/quint/dist/src/cli.js run \
 
 1. **Quint 模型**（本目录）：证明动作系统**没有**违规路径。结构性证明；
    任何人往 `step` 里加一个 spawn 动作或拆掉 fail-closed 守卫，验证立刻红。
-2. **Hypothesis 属性测试**（`tests/test_invariant_property.py`）：在**真实
+2. **Python 有界模型检查**（`scripts/check_isolation_invariants.py`，由
+   `scripts/run_fvi_gate.py` 统一驱动）：Quint 规格的**纯 Python 重述**，
+   在干净 checkout 上穷举可达状态空间。两者语义等价（见下），互相兜底——
+   Quint 因环境（Java/Apalache）跑不了时，Python 这层仍能独立证明。
+3. **Hypothesis 属性测试**（`tests/test_invariant_property.py`）：在**真实
    实现**上跑随机语料，证不变量在输入空间上成立。经验性证明；
    模型可能偏离实现，由它兜底。
-3. **固定语料回归**（`tests/test_isolation_invariants.py`）：钉具体攻击
+4. **固定语料回归**（`tests/test_isolation_invariants.py`）：钉具体攻击
    场景，防止性质测试通过而具体场景失效。
+
+## Python ↔ Quint 等价映射
+
+`scripts/check_isolation_invariants.py` 是 Quint 规格的可离线重述，一一对应：
+
+| Quint 概念            | Python 实现                                        |
+|----------------------|---------------------------------------------------|
+| `var state`          | `class State`（files / spawned / net_calls …）     |
+| `action step`        | `step_correct(s, a)`                               |
+| 注入 spawn 的缺陷动作 | `step_buggy_leak` / `step_buggy_multiwriter`       |
+| `invariant`          | `violated_invariants(s)` → `["EXEC","NET",…]`      |
+| `run` 随机/穷举轨迹  | `explore(step, bound)` 穷举可达状态                |
+
+判别力自证（防"检查器恒真=假绿"）在两层都做：正确模型零反例，**两个缺陷
+变异体必须被抓到**，否则门禁失败。CI 单一入口：`python scripts/run_fvi_gate.py`。
 
 ## 已知边界（诚实声明）
 
