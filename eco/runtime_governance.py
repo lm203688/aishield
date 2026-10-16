@@ -64,15 +64,57 @@ def _default_policy():
     }
 
 
+# 策略的合法字段名。文件里一个都不含 ⇒ 无论 JSON 是否可解析，都是垃圾策略。
+_POLICY_KNOWN_KEYS = frozenset({
+    "default_deny", "killed", "allow", "deny", "incidents",
+    "incident_threshold", "packs", "updated_at",
+})
+_POLICY_BOOL_FIELDS = ("default_deny",)
+_POLICY_DICT_FIELDS = ("killed", "allow", "deny", "incidents", "packs")
+_POLICY_INT_FIELDS = ("incident_threshold",)
+
+
+def _validate_policy_shape(data):
+    """策略结构校验。返回 (data, None) 合法 或 (None, 原因) 损坏。
+
+    三道判据：① 根必须是 object；② 至少含一个可识别字段
+    （空 dict / 全垃圾键 ⇒ 拒绝）；③ 出现了的关键字段类型必须对
+    （bool/int 要真身，注意 bool 是 int 的子类，int 字段须显式排除 bool）。
+    """
+    if not isinstance(data, dict):
+        return None, "policy root must be an object"
+    if not any(k in _POLICY_KNOWN_KEYS for k in data):
+        return None, "policy has no recognizable fields"
+    for k in _POLICY_BOOL_FIELDS:
+        if k in data and not isinstance(data[k], bool):
+            return None, "policy field %r must be a boolean" % k
+    for k in _POLICY_DICT_FIELDS:
+        if k in data and not isinstance(data[k], dict):
+            return None, "policy field %r must be an object" % k
+    for k in _POLICY_INT_FIELDS:
+        v = data.get(k)
+        if k in data and (not isinstance(v, int) or isinstance(v, bool)):
+            return None, "policy field %r must be an integer" % k
+    return data, None
+
+
 def _load_policy():
-    """读策略。文件损坏时返回 fail-closed 策略（default_deny=True），绝不放行。"""
+    """读策略。文件损坏时返回 fail-closed 策略（default_deny=True），绝不放行。
+
+    "损坏"不只是字节不可解析：合法 JSON 但语义空洞（一个可识别字段都没有、
+    或字段类型错误）同样必须 fail-closed。CI 上 Hypothesis 曾用
+    ``{"":"","":0,"":""}`` 抓到旧漏洞——它能通过 json.load 与
+    ``isinstance(dict)``，于是 default_deny 落回默认 False、整份策略
+    放行一切。结构校验（_validate_policy_shape）补上这一类输入。
+    """
     if not os.path.exists(POLICY_FILE):
         return _default_policy(), True
     try:
         with open(POLICY_FILE, "r", encoding="utf-8") as f:
             data = json.load(f)
-        if not isinstance(data, dict):
-            raise ValueError("policy root must be an object")
+        data, err = _validate_policy_shape(data)
+        if err is not None:
+            raise ValueError(err)
         base = _default_policy()
         base.update(data)
         return base, True

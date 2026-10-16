@@ -220,6 +220,47 @@ class TestFailClosedInvariant(unittest.TestCase):
                 res = rg.evaluate("allowlisted-server", "tool", log=False)
         self.assertEqual(res.get("decision"), "deny")
 
+    def _eval_with_policy(self, policy_bytes, server="allowlisted-server"):
+        with tempfile.TemporaryDirectory() as td:
+            pol = os.path.join(td, "governance.json")
+            aud = os.path.join(td, "governance_audit.jsonl")
+            with open(pol, "wb") as f:
+                f.write(policy_bytes)
+            with mock.patch.object(rg, "POLICY_FILE", pol), \
+                 mock.patch.object(rg, "AUDIT_LOG", aud):
+                return rg.evaluate(server, "tool", log=False)
+
+    def test_valid_json_but_semantically_empty_policy_denies(self):
+        """CI 事故回归（2026-10-15，Hypothesis 反例）：合法 JSON 但一个可识别
+        字段都没有 —— 旧实现能过 json.load 与 isinstance(dict)，default_deny
+        落回默认 False，fail-closed 被绕过、放行一切。结构校验必须拦下。"""
+        res = self._eval_with_policy(b'{"":"","":0,"":""}')
+        self.assertEqual(res.get("decision"), "deny")
+        self.assertTrue(res.get("policy_load_error"))
+
+    def test_empty_object_policy_denies(self):
+        """`{}` 同样一个可识别字段都没有 —— 不许因"合法 JSON"而放行。"""
+        res = self._eval_with_policy(b"{}")
+        self.assertEqual(res.get("decision"), "deny")
+        self.assertTrue(res.get("policy_load_error"))
+
+    def test_wrong_typed_fields_deny(self):
+        """字段类型错误（default_deny 是字符串 / allow 是列表）⇒ 策略损坏。"""
+        for raw in (b'{"default_deny": "yes"}',
+                    b'{"default_deny": false, "allow": []}',
+                    b'{"default_deny": false, "incident_threshold": true}'):
+            res = self._eval_with_policy(raw)
+            self.assertEqual(res.get("decision"), "deny", raw)
+            self.assertTrue(res.get("policy_load_error"), raw)
+
+    def test_valid_policy_still_allows_regression(self):
+        """修复不得误伤：结构完整的策略（含缺 packs 的存量形态）照常放行。"""
+        for raw in (b'{"default_deny": false, "allow": {"allowlisted-server": {"tools": "*"}}}',
+                    b'{"default_deny": false, "allow": {"allowlisted-server": "*"}, "killed": {}}'):
+            res = self._eval_with_policy(raw)
+            self.assertEqual(res.get("decision"), "allow", raw)
+            self.assertFalse(res.get("policy_load_error"), raw)
+
 
 class TestAuditChainIntegrity(unittest.TestCase):
     """I-4：任意事件序列 → 链完整；任一字节篡改 → 精确定位。"""

@@ -12,16 +12,16 @@
 | 指标 | 值 |
 |:---|:---|
 | 契约版本 | `3.0.3` |
-| 可调用操作数 | **148** |
+| 可调用操作数 | **178** |
 | 已声明请求体 | 28 |
-| **请求体未声明** | **120** |
+| **请求体未声明** | **150** |
 | 组件 schema 数 | 11 |
 
 `请求体未声明` 不是“参数无意义”，而是**契约还没把它写下来** —— 外部 agent 只能靠猜字段名。缺口是**可数的**，见文末清单；`--check` 防止它悄悄变大。
 
 ## P0 · 信任与身份（先回答“我能不能被信”）
 
-共 45 条操作。
+共 53 条操作。
 
 | 方法 | 路径 | 认证 | 实测状态 | 摘要 | 响应顶层字段 | 请求体 |
 |:---|:---|:---:|:---:|:---|:---|:---|
@@ -37,7 +37,7 @@
 | `POST` | `/api/v1/attestation/run-cycle` | 未声明 | 200 | POST /api/v1/attestation/run-cycle | `success`, `total`, `attested`, `skipped`, `failed`, `errors` …（共 8） | 未声明 |
 | `POST` | `/api/v1/attestation/subscribe` | 未声明 | 200 | POST /api/v1/attestation/subscribe | `success`, `error`, `error_code`, `error_id` | 未声明 |
 | `GET` | `/api/v1/attestation/trust` | 未声明 | 200 | GET /api/v1/attestation/trust | `success`, `error`, `error_code`, `error_id` | 未声明 |
-| `GET` | `/api/v1/attestations` | 未声明 | 200 | GET /api/v1/attestations | `count`, `attestations` | 未声明 |
+| `GET` | `/api/v1/attestations` | 未声明 | 200 | GET /api/v1/attestations | `object` | 未声明 |
 | `POST` | `/api/v1/attestations` | 未声明 | 200 | POST /api/v1/attestations | `error`, `error_code`, `error_id` | `subject`, `verdict`, `coverage`, `attestation`, `issuer`, `expires_at` |
 | `GET` | `/api/v1/attestations/from-scan` | 未声明 | 200 | GET /api/v1/attestations/from-scan | `error`, `error_code`, `error_id` | 未声明 |
 | `POST` | `/api/v1/attestations/from-scan` | 未声明 | 200 | POST /api/v1/attestations/from-scan | `error`, `error_code`, `error_id` | `scan_result`, `subject_url`, `subject_type` |
@@ -46,13 +46,16 @@
 | `GET` | `/api/v1/attestations/schema` | 未声明 | 200 | GET /api/v1/attestations/schema | `error`, `error_code`, `error_id` | 未声明 |
 | `GET` | `/api/v1/attestations/verify` | 未声明 | 200 | GET /api/v1/attestations/verify | `error`, `error_code`, `error_id` | 未声明 |
 | `POST` | `/api/v1/attestations/verify` | 未声明 | 200 | POST /api/v1/attestations/verify | `error`, `error_code`, `error_id` | `attestation_id`, `online_verification` |
+| `GET` | `/api/v1/attestations/{id}` | 未声明 | 200 | GET /api/v1/attestations/{id} | `error`, `error_code`, `error_id` | 未声明 |
 | `GET` | `/api/v1/digest` | 未声明 | 200 | GET /api/v1/digest | `error`, `hint`, `schema`, `error_code`, `error_id` | 未声明 |
 | `GET` | `/api/v1/identity/agents` | 未声明 | 200 | 列出所有已注册 Agent | `success`, `total`, `agents` | 未声明 |
+| `GET` | `/api/v1/identity/agents/{did}` | 未声明 | 200 | Agent 生态 API · {did} | `success`, `error`, `did`, `error_code`, `error_id` | 未声明 |
+| `DELETE` | `/api/v1/identity/agents/{did}` | 未声明 | 200 | Agent 生态 API · {did} | `error`, `did`, `error_code`, `error_id` | 未声明 |
 | `POST` | `/api/v1/identity/credentials/issue` | 未声明 | 200 | Agent 生态 API · issue | `error`, `error_code`, `error_id` | `did`, `owner`, `identity_token`, `claims`, `ttl` |
 | `POST` | `/api/v1/identity/credentials/revoke` | 未声明 | 200 | Agent 生态 API · revoke | `success`, `error`, `error_code`, `error_id` | `did`, `owner`, `credential_id` |
 | `POST` | `/api/v1/identity/credentials/verify` | 未声明 | 200 | Agent 生态 API · verify | `success`, `error`, `error_code`, `error_id` | `token` |
 | `POST` | `/api/v1/identity/erc8004/wrap` | 未声明 | 200 | Agent 生态 API · wrap | `error`, `error_code`, `error_id` | `wallet_address`, `chain_id` |
-| `GET` | `/api/v1/identity/jwks` | 未声明 | 200 | Agent 生态 API · jwks | `keys`, `ready`, `algorithm`, `reason` | 未声明 |
+| `GET` | `/api/v1/identity/jwks` | 未声明 | 200 | Agent 生态 API · jwks | `keys`, `ready` | 未声明 |
 | `POST` | `/api/v1/identity/kyad/export` | 未声明 | 200 | Agent 生态 API · export | `agent_id`, `kya`, `kya_sd_jwt_compact`, `web_bot_auth`, `erc8004` | `card`, `trust_score` |
 | `POST` | `/api/v1/identity/register` | 需要 | 200 | 注册 Agent（需注册凭据） | `success`, `did`, `name`, `reputation_score`, `status`, `registered_at` | AgentRegisterRequest |
 | `POST` | `/api/v1/identity/registration-token` | 未声明 | 200 | Agent 生态 API · registration-token | `error`, `error_code`, `error_id` | `owner`, `ttl_seconds` |
@@ -68,12 +71,17 @@
 | `GET` | `/api/v1/trust/digest` | 未声明 | 200 | Trust API 认证与信任评分 · digest | `error`, `hint`, `schema`, `error_code`, `error_id` | 未声明 |
 | `POST` | `/api/v1/trust/digest` | 未声明 | 200 | Trust API 认证与信任评分 · digest | `error`, `hint`, `schema`, `error_code`, `error_id` | 未声明 |
 | `GET` | `/api/v1/trust/score` | 未声明 | 200 | Trust API 认证与信任评分 · score | `error`, `error_code`, `error_id` | 未声明 |
+| `GET` | `/api/v1/trust/tlog/entries` | 未声明 | 200 | Trust API 认证与信任评分 · entries | `entries`, `tree_size`, `root_hash` | 未声明 |
+| `GET` | `/api/v1/trust/tlog/sth` | 未声明 | 200 | Trust API 认证与信任评分 · sth | `tree_size`, `root_hash`, `ts`, `signature`, `unsigned_reason`, `third_party_verifiable` | 未声明 |
+| `POST` | `/api/v1/trust/vc2` | 未声明 | 200 | Trust API 认证与信任评分 · vc2 | `error`, `error_code`, `error_id` | 未声明 |
+| `POST` | `/api/v1/trust/vc2/revoke` | 未声明 | 200 | Trust API 认证与信任评分 · revoke | `error`, `error_code`, `error_id` | 未声明 |
+| `POST` | `/api/v1/trust/vc2/verify` | 未声明 | 200 | Trust API 认证与信任评分 · verify | `error`, `error_code`, `error_id` | 未声明 |
 | `GET` | `/api/v1/trust/verify` | 未声明 | 200 | Trust API 认证与信任评分 · verify | `error`, `error_code`, `error_id` | 未声明 |
 | `POST` | `/api/v1/trust/verify` | 未声明 | 200 | Trust API 认证与信任评分 · verify | `error`, `error_code`, `error_id` | `src`, `type` |
 
 ## P1 · 准入与证据（这次动作合不合规）
 
-共 16 条操作。
+共 23 条操作。
 
 | 方法 | 路径 | 认证 | 实测状态 | 摘要 | 响应顶层字段 | 请求体 |
 |:---|:---|:---:|:---:|:---|:---|:---|
@@ -82,6 +90,13 @@
 | `GET` | `/api/v1/evidence/schemas` | 未声明 | 200 | GET /api/v1/evidence/schemas | `schema`, `ocsf_classes`, `stix_observable_types`, `attack_ttps`, `states`, `transitions` | 未声明 |
 | `GET` | `/api/v1/evidence/verify-payload` | 未声明 | 200 | GET /api/v1/evidence/verify-payload | `schema`, `run_id`, `title`, `description`, `created_at`, `hmac` …（共 14） | 未声明 |
 | `POST` | `/api/v1/evidence/verify-payload` | 未声明 | 200 | POST /api/v1/evidence/verify-payload | `verification` | 未声明 |
+| `GET` | `/api/v1/guard` | 未声明 | 200 | GET /api/v1/guard | `service`, `version`, `default_mode`, `endpoints` | 未声明 |
+| `GET` | `/api/v1/guard/attest` | 未声明 | 200 | GET /api/v1/guard/attest | `stream`, `latest`, `chain` | 未声明 |
+| `GET` | `/api/v1/guard/audit` | 未声明 | 200 | GET /api/v1/guard/audit | `count`, `entries` | 未声明 |
+| `GET` | `/api/v1/guard/evaluate` | 未声明 | 200 | GET /api/v1/guard/evaluate | `error`, `error_code`, `error_id` | 未声明 |
+| `GET` | `/api/v1/guard/kill-switch` | 未声明 | 200 | GET /api/v1/guard/kill-switch | `error`, `error_code`, `error_id` | 未声明 |
+| `GET` | `/api/v1/guard/policy` | 未声明 | 200 | GET /api/v1/guard/policy | `mode`, `enforced`, `default_deny`, `allow_rules`, `deny_rules`, `killed_count` …（共 8） | 未声明 |
+| `GET` | `/api/v1/guard/status` | 未声明 | 200 | GET /api/v1/guard/status | `default_deny`, `killed`, `killed_count`, `allow_rules`, `deny_rules`, `incident_threshold` …（共 10） | 未声明 |
 | `POST` | `/api/v1/intent/mandates` | 未声明 | 200 | POST /api/v1/intent/mandates | `error`, `error_code`, `error_id` | 未声明 |
 | `POST` | `/api/v1/intent/mandates/evaluate` | 未声明 | 200 | POST /api/v1/intent/mandates/evaluate | `error`, `error_code`, `error_id` | 未声明 |
 | `POST` | `/api/v1/intent/mandates/verify` | 未声明 | 200 | POST /api/v1/intent/mandates/verify | `error`, `error_code`, `error_id` | 未声明 |
@@ -96,7 +111,7 @@
 
 ## P2 · 生态位与分发（让人找得到我）
 
-共 18 条操作。
+共 26 条操作。
 
 | 方法 | 路径 | 认证 | 实测状态 | 摘要 | 响应顶层字段 | 请求体 |
 |:---|:---|:---:|:---:|:---|:---|:---|
@@ -112,8 +127,16 @@
 | `POST` | `/api/v1/contributors` | 未声明 | 200 | Agent 生态 API · contributors | `error`, `error_code`, `error_id` | 未声明 |
 | `GET` | `/api/v1/contributors/leaderboard` | 未声明 | 200 | Agent 生态 API · leaderboard | `leaderboard` | 未声明 |
 | `GET` | `/api/v1/contributors/tiers` | 未声明 | 200 | Agent 生态 API · tiers | `tiers` | 未声明 |
+| `POST` | `/api/v1/eco-support/agent-memory-scan` | 未声明 | 200 | Agent 生态支持体系：记忆扫描/策略包/红队探针/晋升/衰减 · agent-memory-scan | `error`, `error_code`, `error_id` | 未声明 |
+| `POST` | `/api/v1/eco-support/confidence-promotion` | 未声明 | 200 | Agent 生态支持体系：记忆扫描/策略包/红队探针/晋升/衰减 · confidence-promotion | `status`, `result` | 未声明 |
+| `POST` | `/api/v1/eco-support/policy-apply` | 未声明 | 200 | Agent 生态支持体系：记忆扫描/策略包/红队探针/晋升/衰减 · policy-apply | `error`, `error_code`, `error_id` | 未声明 |
+| `GET` | `/api/v1/eco-support/policy-packs` | 未声明 | 200 | Agent 生态支持体系：记忆扫描/策略包/红队探针/晋升/衰减 · policy-packs | `count`, `packs` | 未声明 |
+| `POST` | `/api/v1/eco-support/red-team-probe` | 未声明 | 200 | Agent 生态支持体系：记忆扫描/策略包/红队探针/晋升/衰减 · red-team-probe | `status`, `result` | 未声明 |
+| `GET` | `/api/v1/eco-support/red-team-probe/coverage` | 未声明 | 200 | Agent 生态支持体系：记忆扫描/策略包/红队探针/晋升/衰减 · coverage | `total`, `by_category`, `by_severity` | 未声明 |
+| `GET` | `/api/v1/eco-support/rule-decay` | 未声明 | 200 | Agent 生态支持体系：记忆扫描/策略包/红队探针/晋升/衰减 · rule-decay | `object` | 未声明 |
+| `POST` | `/api/v1/eco-support/rule-decay/retire` | 未声明 | 200 | Agent 生态支持体系：记忆扫描/策略包/红队探针/晋升/衰减 · retire | `object` | 未声明 |
 | `GET` | `/api/v1/leaderboard/providers` | 未声明 | 200 | Agent 生态 API · providers | `providers` | 未声明 |
-| `GET` | `/api/v1/leaderboard/snapshot` | 未声明 | 200 | Agent 生态 API · snapshot | `schema`, `generated_at`, `totals`, `top_by_score`, `top_by_badge`, `top_by_domain` …（共 7） | 未声明 |
+| `GET` | `/api/v1/leaderboard/snapshot` | 未声明 | 200 | Agent 生态 API · snapshot | `object` | 未声明 |
 | `GET` | `/api/v1/leaderboard/top` | 未声明 | 200 | Agent 生态 API · top | `schema`, `top` | 未声明 |
 | `GET` | `/api/v1/specialist/agents` | 未声明 | 200 | Agent 生态 API · agents | `count`, `items` | 未声明 |
 | `POST` | `/api/v1/specialist/agents` | 未声明 | 200 | Agent 生态 API · agents | `error`, `error_code`, `error_id` | 未声明 |
@@ -121,7 +144,7 @@
 
 ## P3 · 运营与自省（其余）
 
-共 69 条操作。
+共 76 条操作。
 
 | 方法 | 路径 | 认证 | 实测状态 | 摘要 | 响应顶层字段 | 请求体 |
 |:---|:---|:---:|:---:|:---|:---|:---|
@@ -132,16 +155,18 @@
 | `POST` | `/api/v1/account/register` | 未声明 | 200 | POST /api/v1/account/register | `error`, `error_code`, `error_id` | 未声明 |
 | `POST` | `/api/v1/agent/scan` | 未声明 | 200 | POST /api/v1/agent/scan | `success`, `error_code`, `error`, `error_id`, `detail` | 未声明 |
 | `POST` | `/api/v1/agent/setup` | 无 | 201 | Agent 一键入驻 | $ref AgentSetupResponse | AgentSetupRequest |
+| `GET` | `/api/v1/agent/status/{did}` | 未声明 | 200 | GET /api/v1/agent/status/{did} | `success`, `error_code`, `error`, `error_id`, `detail` | 未声明 |
 | `GET` | `/api/v1/arena/health` | 未声明 | 200 | GET /api/v1/arena/health | `ok`, `version`, `scanner_available`, `mcp_rules`, `skill_rules`, `timestamp` | 未声明 |
 | `POST` | `/api/v1/arena/scan` | 未声明 | 200 | POST /api/v1/arena/scan | `scan_id`, `timestamp`, `verdict`, `fingerprint`, `rule_counts`, `findings` …（共 8） | 未声明 |
 | `POST` | `/api/v1/audit` | 无 | 200 | 执行安全扫描 | $ref AuditResponse | AuditRequest |
 | `POST` | `/api/v1/banned-words` | 无 | 200 | 违禁词检测 | `safe`, `hits`, `total_hits` | BannedWordsRequest |
 | `POST` | `/api/v1/certify/fulfill` | 未声明 | 200 | POST /api/v1/certify/fulfill | `success`, `error`, `error_code`, `error_id` | 未声明 |
-| `GET` | `/api/v1/certify/list` | 未声明 | 200 | GET /api/v1/certify/list | `success`, `certifications` | 未声明 |
+| `GET` | `/api/v1/certify/list` | 未声明 | 200 | GET /api/v1/certify/list | `object` | 未声明 |
 | `POST` | `/api/v1/certify/request-payment` | 未声明 | 200 | POST /api/v1/certify/request-payment | `success`, `error`, `error_code`, `error_id` | 未声明 |
 | `POST` | `/api/v1/certify/request-payment-cny` | 未声明 | 200 | POST /api/v1/certify/request-payment-cny | `success`, `error`, `error_code`, `error_id` | 未声明 |
 | `POST` | `/api/v1/checkout/create` | 未声明 | 200 | POST /api/v1/checkout/create | `error`, `error_code`, `error_id` | 未声明 |
 | `POST` | `/api/v1/export` | 未声明 | 200 | POST /api/v1/export | `error`, `error_code`, `error_id` | 未声明 |
+| `POST` | `/api/v1/export/nucleus` | 未声明 | 200 | POST /api/v1/export/nucleus | `result`, `issues`, `warnings`, `payload` | 未声明 |
 | `POST` | `/api/v1/export/sarif` | 未声明 | 200 | POST /api/v1/export/sarif | `$schema`, `version`, `runs` | 未声明 |
 | `POST` | `/api/v1/export/sbom` | 未声明 | 200 | POST /api/v1/export/sbom | `bomFormat`, `specVersion`, `serialNumber`, `version`, `metadata`, `components` …（共 7） | 未声明 |
 | `GET` | `/api/v1/fleet` | 未声明 | 200 | GET /api/v1/fleet | `success`, `total`, `pass`, `fail`, `pass_rate`, `avg_score` …（共 11） | 未声明 |
@@ -183,6 +208,7 @@
 | `GET` | `/api/v1/platforms/register` | 未声明 | 200 | 个人 Agent 治理层与平台注册表 · register | `error`, `error_code`, `error_id` | 未声明 |
 | `POST` | `/api/v1/platforms/register` | 未声明 | 200 | 个人 Agent 治理层与平台注册表 · register | `error`, `error_code`, `error_id` | 未声明 |
 | `GET` | `/api/v1/platforms/stats` | 未声明 | 200 | 个人 Agent 治理层与平台注册表 · stats | `total_platforms`, `by_family`, `by_cny_accessible`, `by_access_path`, `governance_provisions_count`, `access_paths_defined` …（共 7） | 未声明 |
+| `GET` | `/api/v1/platforms/{id}` | 未声明 | 200 | 个人 Agent 治理层与平台注册表 · {id} | `error`, `error_code`, `error_id` | 未声明 |
 | `POST` | `/api/v1/policy/check` | 未声明 | 200 | POST /api/v1/policy/check | `passed`, `score`, `violations`, `policy_name` | 未声明 |
 | `POST` | `/api/v1/prompt-check` | 无 | 200 | Prompt 注入检测 | `safe`, `risk_level`, `matches` | PromptCheckRequest |
 | `POST` | `/api/v1/proxy/call` | 未声明 | 200 | POST /api/v1/proxy/call | `error`, `error_code`, `error_id` | 未声明 |
@@ -190,6 +216,10 @@
 | `GET` | `/api/v1/proxy/tools` | 未声明 | 200 | GET /api/v1/proxy/tools | `total`, `tools` | 未声明 |
 | `POST` | `/api/v1/rug-pull` | 未声明 | 200 | POST /api/v1/rug-pull | `error`, `error_code`, `error_id` | 未声明 |
 | `POST` | `/api/v1/score/audit` | 未声明 | 200 | POST /api/v1/score/audit | `error`, `error_code`, `error_id` | 未声明 |
+| `GET` | `/api/v1/semantic` | 未声明 | 200 | GET /api/v1/semantic | `service`, `version`, `discipline`, `endpoints`, `candidate_kinds` | 未声明 |
+| `POST` | `/api/v1/semantic/probe` | 未声明 | 200 | POST /api/v1/semantic/probe | `error`, `error_code`, `error_id` | 未声明 |
+| `POST` | `/api/v1/semantic/ratify` | 未声明 | 200 | POST /api/v1/semantic/ratify | `error`, `error_code`, `error_id` | 未声明 |
+| `GET` | `/api/v1/semantic/status` | 未声明 | 200 | GET /api/v1/semantic/status | `backend`, `default_offline`, `note` | 未声明 |
 | `POST` | `/api/v1/spend-cap/policy` | 未声明 | 200 | POST /api/v1/spend-cap/policy | `success`, `payer_id`, `currency`, `limits` | 未声明 |
 | `GET` | `/api/v1/spend-cap/usage` | 未声明 | 200 | GET /api/v1/spend-cap/usage | `success`, `payer_id`, `currency`, `enabled`, `limits`, `daily_spent` …（共 12） | 未声明 |
 | `GET` | `/api/v1/stats` | 未声明 | 200 | GET /api/v1/stats | `total_scans`, `total_api_calls`, `today`, `owasp_categories`, `rules_count` | 未声明 |
@@ -197,12 +227,12 @@
 
 ## 缺口清单（请求体未声明，按分组）
 
-其中 `POST` 且无请求体声明共 **56** 条 —— 这些是「agent 最难照着调」的部分，按 P0→P3 排，前 20 条是有界的下一轮增量：
+其中 `POST` 且无请求体声明共 **67** 条 —— 这些是「agent 最难照着调」的部分，按 P0→P3 排，前 20 条是有界的下一轮增量：
 
-- **P0**（7）：`/api/v1/attestation/cancel`、`/api/v1/attestation/renew`、`/api/v1/attestation/run-cycle`、`/api/v1/attestation/subscribe`、`/api/v1/registry/discover`、`/api/v1/trust`、`/api/v1/trust/digest`
+- **P0**（10）：`/api/v1/attestation/cancel`、`/api/v1/attestation/renew`、`/api/v1/attestation/run-cycle`、`/api/v1/attestation/subscribe`、`/api/v1/registry/discover`、`/api/v1/trust`、`/api/v1/trust/digest`、`/api/v1/trust/vc2`、`/api/v1/trust/vc2/revoke`、`/api/v1/trust/vc2/verify`
 - **P1**（8）：`/api/v1/evidence`、`/api/v1/evidence/verify-payload`、`/api/v1/intent/mandates`、`/api/v1/intent/mandates/evaluate`、`/api/v1/intent/mandates/verify`、`/api/v1/scan/attack-path`、`/api/v1/scan/client-config`、`/api/v1/ship-gate/run`
-- **P2**（3）：`/api/v1/connectors`、`/api/v1/contributors`、`/api/v1/specialist/agents`
-- **P3**（38）：`/api/v1/account/login`、`/api/v1/account/recharge`、`/api/v1/account/register`、`/api/v1/agent/scan`、`/api/v1/arena/scan`、`/api/v1/certify/fulfill`、`/api/v1/certify/request-payment`、`/api/v1/certify/request-payment-cny`、`/api/v1/checkout/create`、`/api/v1/export`、`/api/v1/export/sarif`、`/api/v1/export/sbom`…
+- **P2**（8）：`/api/v1/connectors`、`/api/v1/contributors`、`/api/v1/eco-support/agent-memory-scan`、`/api/v1/eco-support/confidence-promotion`、`/api/v1/eco-support/policy-apply`、`/api/v1/eco-support/red-team-probe`、`/api/v1/eco-support/rule-decay/retire`、`/api/v1/specialist/agents`
+- **P3**（41）：`/api/v1/account/login`、`/api/v1/account/recharge`、`/api/v1/account/register`、`/api/v1/agent/scan`、`/api/v1/arena/scan`、`/api/v1/certify/fulfill`、`/api/v1/certify/request-payment`、`/api/v1/certify/request-payment-cny`、`/api/v1/checkout/create`、`/api/v1/export`、`/api/v1/export/nucleus`、`/api/v1/export/sarif`…
 
 ## 复验方法（不要相信本文，相信命令）
 
