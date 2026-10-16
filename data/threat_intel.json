@@ -1,80 +1,6 @@
 {
   "intel": [
     {
-      "id": "GHSA-hqm2-cfx2-2vgh",
-      "source": "github-advisory",
-      "severity": "medium",
-      "cvss": 5.6,
-      "title": "Pipecat: Public exposure of Pipecat’s development runner can allow unauthenticated bot session creation",
-      "summary": "Pipecat’s built-in development runner exposes endpoints that create bot sessions and, for the Daily transport, paid Daily rooms. These development endpoints intentionally do not authenticate callers.\n\nThe runner binds to localhost by default and is designed exclusively for local development. It is not built or supported as a production server. Exploitation therefore requires an operator to deliberately make the development runner reachable from an untrusted network, such as by setting --host 0.0",
-      "affected": "pip:pipecat-ai",
-      "references": [
-        "https://github.com/advisories/GHSA-hqm2-cfx2-2vgh"
-      ],
-      "published": "2026-10-15T20:22:18Z",
-      "fetched": "2026-10-16T08:08:31.572635+00:00"
-    },
-    {
-      "id": "GHSA-jwrc-gm9j-263p",
-      "source": "github-advisory",
-      "severity": "medium",
-      "cvss": 4.2,
-      "title": "JupyterLab: Command link trust prompt in JupyterLab can trust a document other than the one clicked",
-      "summary": "## Description\n\nA Markdown file or a notebook output can carry a button that runs a JupyterLab command. Since 4.5.7 the first click on such a button opens a prompt naming the command, with Cancel, Run Once and Trust. Choosing Trust runs the command and marks the document trusted, so its later buttons run without a prompt.\n\nWhich document gets marked is decided when the user answers, not when they click. Both trust commands read whichever document is current at that moment: `markdownviewer:trust`",
-      "affected": "pip:jupyterlab, pip:jupyterlab, pip:notebook, pip:jupyterlite-core",
-      "references": [
-        "https://github.com/advisories/GHSA-jwrc-gm9j-263p"
-      ],
-      "published": "2026-10-15T20:22:13Z",
-      "fetched": "2026-10-16T08:08:31.572665+00:00"
-    },
-    {
-      "id": "GHSA-84m7-p3x7-pcfv",
-      "source": "osv",
-      "severity": "moderate",
-      "cvss": null,
-      "title": "MCP Python SDK: Unbounded Session Accumulation in StreamableHTTP Transport Enables Resource Exhaustion",
-      "summary": "### Summary\nIn affected versions, a Streamable HTTP server in stateful mode (the default) never reclaimed session state:\n\n- sessions did not expire;\n- a client `DELETE` ended the session but left its entry registered;\n- a session whose first request was refused stayed registered with a running task.\n\nEach session also kept its parsed `initialize` parameters, and the number of sessions was unlimited. A client that could reach the endpoint could grow server memory without bound using ordinary shor",
-      "affected": "PyPI:mcp",
-      "references": [
-        "https://github.com/modelcontextprotocol/python-sdk/security/advisories/GHSA-84m7-p3x7-pcfv",
-        "https://nvd.nist.gov/vuln/detail/CVE-2026-59951",
-        "https://github.com/modelcontextprotocol/python-sdk/pull/3395",
-        "https://github.com/modelcontextprotocol/python-sdk/pull/3426",
-        "https://github.com/modelcontextprotocol/python-sdk/commit/92120b4b0f50385af096592d7cee932fc1d994e7"
-      ],
-      "published": "2026-10-15T20:13:13Z",
-      "fetched": "2026-10-16T08:08:07.461748+00:00"
-    },
-    {
-      "id": "GHSA-84m7-p3x7-pcfv",
-      "source": "github-advisory",
-      "severity": "medium",
-      "cvss": 7.5,
-      "title": "MCP Python SDK: Unbounded Session Accumulation in StreamableHTTP Transport Enables Resource Exhaustion",
-      "summary": "### Summary\nIn affected versions, a Streamable HTTP server in stateful mode (the default) never reclaimed session state:\n\n- sessions did not expire;\n- a client `DELETE` ended the session but left its entry registered;\n- a session whose first request was refused stayed registered with a running task.\n\nEach session also kept its parsed `initialize` parameters, and the number of sessions was unlimited. A client that could reach the endpoint could grow server memory without bound using ordinary shor",
-      "affected": "pip:mcp, pip:mcp",
-      "references": [
-        "https://github.com/advisories/GHSA-84m7-p3x7-pcfv"
-      ],
-      "published": "2026-10-15T20:13:13Z",
-      "fetched": "2026-10-16T08:08:31.572729+00:00"
-    },
-    {
-      "id": "GHSA-gfp8-w835-v44j",
-      "source": "github-advisory",
-      "severity": "medium",
-      "cvss": null,
-      "title": "borg extract might modify out-of-tree files when extracting maliciously crafted archives",
-      "summary": "### Impact\n\nA maliciously crafted archive could contain a symlink (e.g. \"evil\" -> \"/etc\") followed by an item below it (\"evil/passwd\"), or an item whose path embeds \"..\" (e.g. \"a/../../etc/passwd\").\n\nWhen extracting such items, borg followed the symlink / resolved the \"..\", so it could delete or overwrite files outside the extraction directory.\n\nIn a quite similar scenario, a crafted archive could contain a slave hardlink item with the hardlink source pointing outside the extraction directory.\n\n",
-      "affected": "pip:borgbackup, pip:borgbackup",
-      "references": [
-        "https://github.com/advisories/GHSA-gfp8-w835-v44j"
-      ],
-      "published": "2026-10-15T20:09:23Z",
-      "fetched": "2026-10-16T08:08:31.572744+00:00"
-    },
-    {
       "id": "GHSA-856c-92hv-3vxx",
       "source": "github-advisory",
       "severity": "low",
@@ -87,22 +13,6 @@
       ],
       "published": "2026-10-14T18:38:05Z",
       "fetched": "2026-10-15T08:17:49.240791+00:00"
-    },
-    {
-      "id": "CVE-2026-110205",
-      "source": "nvd",
-      "severity": "high",
-      "cvss": 8.8,
-      "title": "Roo Code through 3.54.0 contains a command approval bypass vulnerability in parseCommandLine() that discards command substitutions placed next to * or ? glob characters. Attackers using indirect promp",
-      "summary": "Roo Code through 3.54.0 contains a command approval bypass vulnerability in parseCommandLine() that discards command substitutions placed next to * or ? glob characters. Attackers using indirect prompt injection can craft commands like echo *$(...) that match allowlisted prefixes, executing denied commands without user approval when auto-approval is enabled.",
-      "affected": "prompt injection",
-      "references": [
-        "https://github.com/7rah/oss-cve/blob/6adb836d24ca446fd168c3acdc4c170beb77fe0f/roocode-glob-token.md",
-        "https://github.com/RooCodeInc/Roo-Code/blob/v3.54.0/src/shared/parse-command.ts#L148-L172",
-        "https://www.vulncheck.com/advisories/roo-code-through-3.54.0-auto-approve-bypass-via-glob-token-discarding-command-substitution"
-      ],
-      "published": "2026-10-13T19:18:44.003",
-      "fetched": "2026-10-16T08:08:09.979737+00:00"
     },
     {
       "id": "CVE-2026-110204",
@@ -2938,255 +2848,6 @@
       "fetched": "2026-09-26T01:13:09.064646+00:00"
     },
     {
-      "id": "CVE-2026-77274",
-      "source": "nvd",
-      "severity": "high",
-      "cvss": 8.2,
-      "title": "MCP Atlassian is a Model Context Protocol (MCP) server for Atlassian products (Confluence and Jira). Prior to 0.22.0, validate_url_for_ssrf has a backslash authority confusion because it interprets th",
-      "summary": "MCP Atlassian is a Model Context Protocol (MCP) server for Atlassian products (Confluence and Jira). Prior to 0.22.0, validate_url_for_ssrf has a backslash authority confusion because it interprets the authority differently from the Requests connection layer in the header-based Jira and Confluence URL authentication flow. A crafted URL can validate as an external hostname while the HTTP client connects to an internal host, permitting server-side requests to protected network resources. This issu",
-      "affected": "model context protocol",
-      "references": [
-        "https://github.com/sooperset/mcp-atlassian/commit/b041733473f95119dd539542a43c280737a8e460",
-        "https://github.com/sooperset/mcp-atlassian/pull/1448",
-        "https://github.com/sooperset/mcp-atlassian/releases/tag/v0.22.0",
-        "https://github.com/sooperset/mcp-atlassian/security/advisories/GHSA-hgcf-4mq8-5266",
-        "https://github.com/sooperset/mcp-atlassian/security/advisories/GHSA-hgcf-4mq8-5266"
-      ],
-      "published": "2026-09-22T18:17:19.253",
-      "fetched": "2026-10-16T08:08:16.567973+00:00"
-    },
-    {
-      "id": "CVE-2026-77271",
-      "source": "nvd",
-      "severity": "high",
-      "cvss": 8.8,
-      "title": "MCP Atlassian is a Model Context Protocol (MCP) server for Atlassian products (Confluence and Jira). Prior to 0.22.0, validate_safe_path defaults its base directory to os.getcwd(), and affected Conflu",
-      "summary": "MCP Atlassian is a Model Context Protocol (MCP) server for Atlassian products (Confluence and Jira). Prior to 0.22.0, validate_safe_path defaults its base directory to os.getcwd(), and affected Confluence attachment call sites omit base_dir, allowing attacker-selected writes within the working directory. This Python module overwrite can provide code execution when the application later imports the modified module, bypassing the remediation tracked as CVE-2026-27825. This issue is fixed in versio",
-      "affected": "model context protocol",
-      "references": [
-        "https://github.com/sooperset/mcp-atlassian/commit/b041733473f95119dd539542a43c280737a8e460",
-        "https://github.com/sooperset/mcp-atlassian/pull/1448",
-        "https://github.com/sooperset/mcp-atlassian/releases/tag/v0.22.0",
-        "https://github.com/sooperset/mcp-atlassian/security/advisories/GHSA-6vmq-24h2-pj7j",
-        "https://github.com/sooperset/mcp-atlassian/security/advisories/GHSA-6vmq-24h2-pj7j"
-      ],
-      "published": "2026-09-22T18:17:19.107",
-      "fetched": "2026-10-16T08:08:16.567971+00:00"
-    },
-    {
-      "id": "CVE-2026-77270",
-      "source": "nvd",
-      "severity": "medium",
-      "cvss": 6.5,
-      "title": "MCP Atlassian is a Model Context Protocol (MCP) server for Atlassian products (Confluence and Jira). Prior to 0.22.0, the Jira and Confluence attachment upload tools treat caller-controlled file_path ",
-      "summary": "MCP Atlassian is a Model Context Protocol (MCP) server for Atlassian products (Confluence and Jira). Prior to 0.22.0, the Jira and Confluence attachment upload tools treat caller-controlled file_path values as trusted server-local paths. The server opens the selected file and uploads it to an Atlassian issue or page, allowing an MCP caller with upload access to disclose any file readable by the server process. The advisory traces the vulnerable input and processing flow through confluence_upload",
-      "affected": "model context protocol",
-      "references": [
-        "https://github.com/sooperset/mcp-atlassian/commit/b041733473f95119dd539542a43c280737a8e460",
-        "https://github.com/sooperset/mcp-atlassian/pull/1448",
-        "https://github.com/sooperset/mcp-atlassian/releases/tag/v0.22.0",
-        "https://github.com/sooperset/mcp-atlassian/security/advisories/GHSA-f26r-j276-ggg4",
-        "https://github.com/sooperset/mcp-atlassian/security/advisories/GHSA-f26r-j276-ggg4"
-      ],
-      "published": "2026-09-22T18:17:18.947",
-      "fetched": "2026-10-16T08:08:16.567968+00:00"
-    },
-    {
-      "id": "CVE-2026-77267",
-      "source": "nvd",
-      "severity": "medium",
-      "cvss": 6.5,
-      "title": "MCP Atlassian is a Model Context Protocol (MCP) server for Atlassian products (Confluence and Jira). Prior to 0.22.0, the X-Atlassian-Jira-Url and X-Atlassian-Confluence-Url headers are processed by _",
-      "summary": "MCP Atlassian is a Model Context Protocol (MCP) server for Atlassian products (Confluence and Jira). Prior to 0.22.0, the X-Atlassian-Jira-Url and X-Atlassian-Confluence-Url headers are processed by _process_authentication_headers and used to construct Atlassian fetchers without calling validate_url_for_ssrf. A caller who can set these headers can supply an internal or metadata-service URL and cause the server to send requests to that destination, bypassing the incomplete CVE-2026-27826 remediat",
-      "affected": "model context protocol",
-      "references": [
-        "https://github.com/sooperset/mcp-atlassian/commit/b041733473f95119dd539542a43c280737a8e460",
-        "https://github.com/sooperset/mcp-atlassian/pull/1448",
-        "https://github.com/sooperset/mcp-atlassian/releases/tag/v0.22.0",
-        "https://github.com/sooperset/mcp-atlassian/security/advisories/GHSA-5wf4-jqxh-8gm3",
-        "https://github.com/sooperset/mcp-atlassian/security/advisories/GHSA-5wf4-jqxh-8gm3"
-      ],
-      "published": "2026-09-22T18:17:18.803",
-      "fetched": "2026-10-16T08:08:16.567966+00:00"
-    },
-    {
-      "id": "CVE-2026-77265",
-      "source": "nvd",
-      "severity": "medium",
-      "cvss": 5.9,
-      "title": "MCP Atlassian is a Model Context Protocol (MCP) server for Atlassian products (Confluence and Jira). Prior to 0.22.0, header-supplied Jira or Confluence URLs are resolved and validated before the HTTP",
-      "summary": "MCP Atlassian is a Model Context Protocol (MCP) server for Atlassian products (Confluence and Jira). Prior to 0.22.0, header-supplied Jira or Confluence URLs are resolved and validated before the HTTP client resolves the hostname again for the connection. An unauthenticated caller can use a DNS-rebinding hostname that returns a public address during validation and an internal address during connection, causing requests to internal or metadata services. The advisory traces the vulnerable input an",
-      "affected": "model context protocol",
-      "references": [
-        "https://github.com/sooperset/mcp-atlassian/commit/b041733473f95119dd539542a43c280737a8e460",
-        "https://github.com/sooperset/mcp-atlassian/pull/1448",
-        "https://github.com/sooperset/mcp-atlassian/releases/tag/v0.22.0",
-        "https://github.com/sooperset/mcp-atlassian/security/advisories/GHSA-49xv-9743-pw8w",
-        "https://github.com/sooperset/mcp-atlassian/security/advisories/GHSA-49xv-9743-pw8w"
-      ],
-      "published": "2026-09-22T18:17:18.647",
-      "fetched": "2026-10-16T08:08:16.567964+00:00"
-    },
-    {
-      "id": "CVE-2026-77261",
-      "source": "nvd",
-      "severity": "high",
-      "cvss": 7.1,
-      "title": "MCP Atlassian is a Model Context Protocol (MCP) server for Atlassian products (Confluence and Jira). Prior to 0.22.0, _make_ssrf_safe_hook is omitted from JiraFetcher and ConfluenceFetcher sessions cr",
-      "summary": "MCP Atlassian is a Model Context Protocol (MCP) server for Atlassian products (Confluence and Jira). Prior to 0.22.0, _make_ssrf_safe_hook is omitted from JiraFetcher and ConfluenceFetcher sessions created through the basic-auth and oauth_pat branches. If an attacker-controlled or compromised configured Atlassian instance returns a redirect to an internal address, those sessions can follow the redirect without revalidating its destination. This issue is fixed in version 0.22.0.",
-      "affected": "model context protocol",
-      "references": [
-        "https://github.com/sooperset/mcp-atlassian/commit/b041733473f95119dd539542a43c280737a8e460",
-        "https://github.com/sooperset/mcp-atlassian/pull/1448",
-        "https://github.com/sooperset/mcp-atlassian/releases/tag/v0.22.0",
-        "https://github.com/sooperset/mcp-atlassian/security/advisories/GHSA-6529-c226-h328"
-      ],
-      "published": "2026-09-22T18:17:18.497",
-      "fetched": "2026-10-16T08:08:16.567962+00:00"
-    },
-    {
-      "id": "CVE-2026-77260",
-      "source": "nvd",
-      "severity": "high",
-      "cvss": 7.5,
-      "title": "MCP Atlassian is a Model Context Protocol (MCP) server for Atlassian products (Confluence and Jira). Prior to 0.22.0, the Confluence and Jira upload_attachment implementations accept an unconstrained ",
-      "summary": "MCP Atlassian is a Model Context Protocol (MCP) server for Atlassian products (Confluence and Jira). Prior to 0.22.0, the Confluence and Jira upload_attachment implementations accept an unconstrained file_path and open the referenced server-local file. A permitted MCP caller can upload sensitive host files to an Atlassian destination and then retrieve their contents. The advisory traces the vulnerable input and processing flow through upload_attachment, file_path, and CVE-2026-27825, which ident",
-      "affected": "model context protocol",
-      "references": [
-        "https://github.com/sooperset/mcp-atlassian/commit/b041733473f95119dd539542a43c280737a8e460",
-        "https://github.com/sooperset/mcp-atlassian/pull/1448",
-        "https://github.com/sooperset/mcp-atlassian/releases/tag/v0.22.0",
-        "https://github.com/sooperset/mcp-atlassian/security/advisories/GHSA-f4p7-qx46-wc5j",
-        "https://github.com/sooperset/mcp-atlassian/security/advisories/GHSA-f4p7-qx46-wc5j"
-      ],
-      "published": "2026-09-22T18:17:18.347",
-      "fetched": "2026-10-16T08:08:16.567959+00:00"
-    },
-    {
-      "id": "CVE-2026-77258",
-      "source": "nvd",
-      "severity": "high",
-      "cvss": 7.7,
-      "title": "MCP Atlassian is a Model Context Protocol (MCP) server for Atlassian products (Confluence and Jira). Prior to 0.22.0, upload_attachment in src/mcp_atlassian/confluence/attachments.py accepts a caller-",
-      "summary": "MCP Atlassian is a Model Context Protocol (MCP) server for Atlassian products (Confluence and Jira). Prior to 0.22.0, upload_attachment in src/mcp_atlassian/confluence/attachments.py accepts a caller-controlled file_path and opens the selected server-local file without restricting it to the workspace. A permitted Confluence MCP caller can upload the file as an attachment and disclose data readable by the server process. This issue is fixed in version 0.22.0.",
-      "affected": "model context protocol",
-      "references": [
-        "https://github.com/sooperset/mcp-atlassian/commit/b041733473f95119dd539542a43c280737a8e460",
-        "https://github.com/sooperset/mcp-atlassian/pull/1448",
-        "https://github.com/sooperset/mcp-atlassian/releases/tag/v0.22.0",
-        "https://github.com/sooperset/mcp-atlassian/security/advisories/GHSA-93xw-j965-9mx3",
-        "https://github.com/sooperset/mcp-atlassian/security/advisories/GHSA-93xw-j965-9mx3"
-      ],
-      "published": "2026-09-22T18:17:18.193",
-      "fetched": "2026-10-16T08:08:16.567956+00:00"
-    },
-    {
-      "id": "CVE-2026-77252",
-      "source": "nvd",
-      "severity": "medium",
-      "cvss": 6.5,
-      "title": "MCP Atlassian is a Model Context Protocol (MCP) server for Atlassian products (Confluence and Jira). Prior to 0.22.0, caller-supplied projects_filter and spaces_filter arguments can replace administra",
-      "summary": "MCP Atlassian is a Model Context Protocol (MCP) server for Atlassian products (Confluence and Jira). Prior to 0.22.0, caller-supplied projects_filter and spaces_filter arguments can replace administrator-configured allowlists, and caller-provided project or space clauses can suppress the configured restriction. A caller can search projects or spaces outside the intended boundary when the configured Atlassian credentials can access them. The advisory traces the vulnerable input and processing flo",
-      "affected": "model context protocol",
-      "references": [
-        "https://github.com/sooperset/mcp-atlassian/commit/b041733473f95119dd539542a43c280737a8e460",
-        "https://github.com/sooperset/mcp-atlassian/pull/1448",
-        "https://github.com/sooperset/mcp-atlassian/releases/tag/v0.22.0",
-        "https://github.com/sooperset/mcp-atlassian/security/advisories/GHSA-rqwg-9346-fjjv"
-      ],
-      "published": "2026-09-22T18:17:18.047",
-      "fetched": "2026-10-16T08:08:16.567954+00:00"
-    },
-    {
-      "id": "CVE-2026-77251",
-      "source": "nvd",
-      "severity": "medium",
-      "cvss": 6.5,
-      "title": "MCP Atlassian is a Model Context Protocol (MCP) server for Atlassian products (Confluence and Jira). Prior to 0.22.0, Jira search accepts a forbidden project clause because it checks only for the pres",
-      "summary": "MCP Atlassian is a Model Context Protocol (MCP) server for Atlassian products (Confluence and Jira). Prior to 0.22.0, Jira search accepts a forbidden project clause because it checks only for the presence of project syntax, Confluence search uses an incomplete case-sensitive space check, and Jira board APIs omit project-filter enforcement. These paths expose issues, boards, or pages outside JIRA_PROJECTS_FILTER or CONFLUENCE_SPACES_FILTER when the operator credentials have broader access. The ad",
-      "affected": "model context protocol",
-      "references": [
-        "https://github.com/sooperset/mcp-atlassian/commit/b041733473f95119dd539542a43c280737a8e460",
-        "https://github.com/sooperset/mcp-atlassian/pull/1448",
-        "https://github.com/sooperset/mcp-atlassian/releases/tag/v0.22.0",
-        "https://github.com/sooperset/mcp-atlassian/security/advisories/GHSA-w66g-j6c4-hcfc",
-        "https://github.com/sooperset/mcp-atlassian/security/advisories/GHSA-w66g-j6c4-hcfc"
-      ],
-      "published": "2026-09-22T18:17:17.883",
-      "fetched": "2026-10-16T08:08:16.567952+00:00"
-    },
-    {
-      "id": "CVE-2026-77250",
-      "source": "nvd",
-      "severity": "medium",
-      "cvss": 6.1,
-      "title": "MCP Atlassian is a Model Context Protocol (MCP) server for Atlassian products (Confluence and Jira). Prior to 0.22.0, OAuthConfig writes a plaintext fallback file containing access and refresh tokens ",
-      "summary": "MCP Atlassian is a Model Context Protocol (MCP) server for Atlassian products (Confluence and Jira). Prior to 0.22.0, OAuthConfig writes a plaintext fallback file containing access and refresh tokens under the user's .mcp-atlassian directory using process-default permissions. On systems with a permissive umask, same-group or other local users and processes can read the persisted tokens and reuse the associated Atlassian access. The advisory traces the vulnerable input and processing flow through",
-      "affected": "model context protocol",
-      "references": [
-        "https://github.com/sooperset/mcp-atlassian/commit/b041733473f95119dd539542a43c280737a8e460",
-        "https://github.com/sooperset/mcp-atlassian/pull/1448",
-        "https://github.com/sooperset/mcp-atlassian/releases/tag/v0.22.0",
-        "https://github.com/sooperset/mcp-atlassian/security/advisories/GHSA-g5xv-mhgm-v5f6",
-        "https://github.com/sooperset/mcp-atlassian/security/advisories/GHSA-g5xv-mhgm-v5f6"
-      ],
-      "published": "2026-09-22T18:17:17.720",
-      "fetched": "2026-10-16T08:08:16.567949+00:00"
-    },
-    {
-      "id": "CVE-2026-77244",
-      "source": "nvd",
-      "severity": "critical",
-      "cvss": 10.0,
-      "title": "MCP Atlassian is a Model Context Protocol (MCP) server for Atlassian products (Confluence and Jira). Prior to 0.22.0, the HTTP transport accepts requests without a verified user identity and downstrea",
-      "summary": "MCP Atlassian is a Model Context Protocol (MCP) server for Atlassian products (Confluence and Jira). Prior to 0.22.0, the HTTP transport accepts requests without a verified user identity and downstream fetcher construction falls back to the operator's globally configured Jira or Confluence credentials. A network client that can reach the MCP endpoint can invoke Atlassian tools as the operator, including read and write operations available to that account. The advisory traces the vulnerable input",
-      "affected": "model context protocol",
-      "references": [
-        "https://github.com/sooperset/mcp-atlassian/commit/b041733473f95119dd539542a43c280737a8e460",
-        "https://github.com/sooperset/mcp-atlassian/pull/1448",
-        "https://github.com/sooperset/mcp-atlassian/releases/tag/v0.22.0",
-        "https://github.com/sooperset/mcp-atlassian/security/advisories/GHSA-wrhw-j3f9-8vc6"
-      ],
-      "published": "2026-09-22T18:17:17.560",
-      "fetched": "2026-10-16T08:08:16.567947+00:00"
-    },
-    {
-      "id": "CVE-2026-77243",
-      "source": "nvd",
-      "severity": "high",
-      "cvss": 8.8,
-      "title": "MCP Atlassian is a Model Context Protocol (MCP) server for Atlassian products (Confluence and Jira). Prior to 0.22.0, ENABLED_TOOLS and TOOLSETS are applied when tools are listed but are not rechecked",
-      "summary": "MCP Atlassian is a Model Context Protocol (MCP) server for Atlassian products (Confluence and Jira). Prior to 0.22.0, ENABLED_TOOLS and TOOLSETS are applied when tools are listed but are not rechecked when a tools/call request is dispatched. A client that knows a hidden tool name can directly invoke excluded read, write, or delete tools despite the operator's configured least-privilege restrictions. The advisory traces the vulnerable input and processing flow through ENABLED_TOOLS, TOOLSETS, too",
-      "affected": "model context protocol",
-      "references": [
-        "https://github.com/sooperset/mcp-atlassian/commit/b041733473f95119dd539542a43c280737a8e460",
-        "https://github.com/sooperset/mcp-atlassian/pull/1448",
-        "https://github.com/sooperset/mcp-atlassian/releases/tag/v0.22.0",
-        "https://github.com/sooperset/mcp-atlassian/security/advisories/GHSA-3r68-hf9h-887v",
-        "https://github.com/sooperset/mcp-atlassian/security/advisories/GHSA-3r68-hf9h-887v"
-      ],
-      "published": "2026-09-22T18:17:17.410",
-      "fetched": "2026-10-16T08:08:16.567946+00:00"
-    },
-    {
-      "id": "CVE-2026-77242",
-      "source": "nvd",
-      "severity": "high",
-      "cvss": 7.5,
-      "title": "MCP Atlassian is a Model Context Protocol (MCP) server for Atlassian products (Confluence and Jira). Prior to 0.22.0, validate_url_for_ssrf checks a hostname's resolved addresses, but Requests and url",
-      "summary": "MCP Atlassian is a Model Context Protocol (MCP) server for Atlassian products (Confluence and Jira). Prior to 0.22.0, validate_url_for_ssrf checks a hostname's resolved addresses, but Requests and urllib3 resolve the hostname again when connecting. A caller can use a short-lived DNS answer that is public during validation and private during connection, preserving unauthenticated access to internal or metadata endpoints despite the earlier CVE-2026-27826 remediation. The advisory traces the vulne",
-      "affected": "model context protocol",
-      "references": [
-        "https://github.com/sooperset/mcp-atlassian/commit/b041733473f95119dd539542a43c280737a8e460",
-        "https://github.com/sooperset/mcp-atlassian/pull/1448",
-        "https://github.com/sooperset/mcp-atlassian/releases/tag/v0.22.0",
-        "https://github.com/sooperset/mcp-atlassian/security/advisories/GHSA-72fm-whvq-jghf",
-        "https://github.com/sooperset/mcp-atlassian/security/advisories/GHSA-72fm-whvq-jghf"
-      ],
-      "published": "2026-09-22T18:17:16.430",
-      "fetched": "2026-10-16T08:08:16.567943+00:00"
-    },
-    {
       "id": "GHSA-5mj8-gf6m-fhw8",
       "source": "github-advisory",
       "severity": "high",
@@ -3243,40 +2904,6 @@
       "fetched": "2026-09-26T01:13:29.223927+00:00"
     },
     {
-      "id": "CVE-2026-93982",
-      "source": "nvd",
-      "severity": "low",
-      "cvss": 3.3,
-      "title": "OpenPanel through 2.3.0 writes Model Context Protocol authentication tokens from URL query parameters to plaintext application logs without redaction. Attackers with access to application stdout or ce",
-      "summary": "OpenPanel through 2.3.0 writes Model Context Protocol authentication tokens from URL query parameters to plaintext application logs without redaction. Attackers with access to application stdout or centralized logging systems can capture base64-encoded credentials to replay MCP requests and access project analytics.",
-      "affected": "model context protocol",
-      "references": [
-        "https://github.com/Openpanel-dev/openpanel/security/advisories/GHSA-8wx6-g25r-2943",
-        "https://www.vulncheck.com/advisories/openpanel-mcp-authentication-token-in-query-parameter-logged-plaintext",
-        "https://github.com/Openpanel-dev/openpanel/security/advisories/GHSA-8wx6-g25r-2943"
-      ],
-      "published": "2026-09-19T12:16:41.310",
-      "fetched": "2026-10-16T08:08:16.567941+00:00"
-    },
-    {
-      "id": "CVE-2026-58197",
-      "source": "nvd",
-      "severity": "high",
-      "cvss": 8.8,
-      "title": "ToolHive is a utility designed to simplify the deployment and management of Model Context Protocol servers. Prior to ToolHive CLI 0.30.1 and ToolHive Studio 0.38.0, locally run MCP server containers u",
-      "summary": "ToolHive is a utility designed to simplify the deployment and management of Model Context Protocol servers. Prior to ToolHive CLI 0.30.1 and ToolHive Studio 0.38.0, locally run MCP server containers use the default network permission profile without network isolation, permitting access to host.docker.internal while ToolHive API and MCP proxy endpoints are reachable without authentication. A malicious or compromised MCP server can use the Docker gateway to contact host-local services, other ToolH",
-      "affected": "model context protocol",
-      "references": [
-        "https://github.com/stacklok/toolhive-studio/commit/968182d7f3ee1e55123369e66ad88f82128119b0",
-        "https://github.com/stacklok/toolhive-studio/pull/2469",
-        "https://github.com/stacklok/toolhive-studio/releases/tag/v0.38.0",
-        "https://github.com/stacklok/toolhive/commit/d8f40cb1599b8bf66657f2dfff15bfbfc236e712",
-        "https://github.com/stacklok/toolhive/pull/5583"
-      ],
-      "published": "2026-09-18T17:16:57.880",
-      "fetched": "2026-10-16T08:08:16.567938+00:00"
-    },
-    {
       "id": "GHSA-2vh9-42vm-xmv2",
       "source": "github-advisory",
       "severity": "critical",
@@ -3303,22 +2930,6 @@
       ],
       "published": "2026-09-17T20:32:58Z",
       "fetched": "2026-09-18T08:13:21.587215+00:00"
-    },
-    {
-      "id": "CVE-2026-50125",
-      "source": "nvd",
-      "severity": "high",
-      "cvss": 7.5,
-      "title": "MKP is a Model Context Protocol server for Kubernetes. Prior to 0.4.1, cmd/server/main.go exposes the default HTTP endpoint and pkg/mcp/server.go registers the unauthenticated get_resource tool, which",
-      "summary": "MKP is a Model Context Protocol server for Kubernetes. Prior to 0.4.1, cmd/server/main.go exposes the default HTTP endpoint and pkg/mcp/server.go registers the unauthenticated get_resource tool, which accepts attacker-controlled limitBytes and tailLines values for the pods logs subresource. buildPodLogOpts() in pkg/k8s/subresource.go parses those values as unbounded int64 parameters, and defaultGetPodLogs() copies the returned Kubernetes log stream through io.Copy into an in-memory bytes.Buffer ",
-      "affected": "model context protocol",
-      "references": [
-        "https://github.com/StacklokLabs/mkp/commit/37bf6bac862aa3b1c71b8aa1b8364eae7818962d",
-        "https://github.com/StacklokLabs/mkp/security/advisories/GHSA-qw5r-ppcg-f8rj",
-        "https://github.com/StacklokLabs/mkp/security/advisories/GHSA-qw5r-ppcg-f8rj"
-      ],
-      "published": "2026-09-17T20:16:50.127",
-      "fetched": "2026-10-16T08:08:16.567936+00:00"
     },
     {
       "id": "GHSA-8pw2-6jv3-mj5j",
@@ -9235,7 +8846,7 @@
       "fetched": "2026-08-04T06:34:53.913899+00:00"
     }
   ],
-  "updated": "2026-10-16T08:08:32.074578+00:00",
+  "updated": "2026-10-15T08:17:49.742894+00:00",
   "sources": [
     "osv",
     "nvd",
@@ -9251,43 +8862,43 @@
     "sources": {
       "osv": {
         "ok": true,
-        "items": 2,
+        "items": 1,
         "attempts": 1,
         "error": null,
-        "checked_at": "2026-10-16T08:08:09.535558+00:00",
+        "checked_at": "2026-10-15T08:17:26.386549+00:00",
         "consecutive_failures": 0,
         "degraded_since": null
       },
       "nvd": {
         "ok": true,
-        "items": 43,
+        "items": 44,
         "attempts": 1,
         "error": null,
-        "checked_at": "2026-10-16T08:08:28.828891+00:00",
+        "checked_at": "2026-10-15T08:17:46.265618+00:00",
         "consecutive_failures": 0,
         "degraded_since": null
       },
       "github-advisory": {
         "ok": true,
-        "items": 35,
+        "items": 40,
         "attempts": 1,
         "error": null,
-        "checked_at": "2026-10-16T08:08:32.074291+00:00",
+        "checked_at": "2026-10-15T08:17:49.742545+00:00",
         "consecutive_failures": 0,
         "degraded_since": null
       }
     },
     "degraded": [],
-    "last_success": "2026-10-16T08:08:32.074578+00:00",
-    "last_attempt": "2026-10-16T08:08:32.074578+00:00"
+    "last_success": "2026-10-15T08:17:49.742894+00:00",
+    "last_attempt": "2026-10-15T08:17:49.742894+00:00"
   },
   "stats": {
-    "medium": 192,
-    "moderate": 2,
-    "low": 12,
-    "high": 288,
-    "critical": 97,
-    "unknown": 36
+    "low": 11,
+    "high": 278,
+    "medium": 182,
+    "critical": 96,
+    "unknown": 36,
+    "moderate": 1
   },
-  "total": 627
+  "total": 604
 }
