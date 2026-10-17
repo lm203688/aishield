@@ -12,9 +12,9 @@
 | 指标 | 值 |
 |:---|:---|
 | 契约版本 | `3.0.3` |
-| 可调用操作数 | **179** |
+| 可调用操作数 | **180** |
 | 已声明请求体 | 28 |
-| **请求体未声明** | **151** |
+| **请求体未声明** | **152** |
 | 组件 schema 数 | 11 |
 
 `请求体未声明` 不是“参数无意义”，而是**契约还没把它写下来** —— 外部 agent 只能靠猜字段名。缺口是**可数的**，见文末清单；`--check` 防止它悄悄变大。
@@ -145,7 +145,7 @@
 
 ## P3 · 运营与自省（其余）
 
-共 76 条操作。
+共 77 条操作。
 
 | 方法 | 路径 | 认证 | 实测状态 | 摘要 | 响应顶层字段 | 请求体 |
 |:---|:---|:---:|:---:|:---|:---|:---|
@@ -187,6 +187,7 @@
 | `POST` | `/api/v1/monitor/add` | 未声明 | 200 | POST /api/v1/monitor/add | `error`, `error_code`, `error_id` | 未声明 |
 | `POST` | `/api/v1/monitor/check` | 未声明 | 200 | POST /api/v1/monitor/check | `success`, `results`, `total` | 未声明 |
 | `GET` | `/api/v1/monitor/list` | 未声明 | 200 | GET /api/v1/monitor/list | `success`, `total`, `tools` | 未声明 |
+| `POST` | `/api/v1/monitor/remove` | 未声明 | 200 | POST /api/v1/monitor/remove | `error`, `error_code`, `error_id` | 未声明 |
 | `POST` | `/api/v1/osv` | 未声明 | 200 | POST /api/v1/osv | `findings` | 未声明 |
 | `POST` | `/api/v1/pay/hupijiao/create` | 未声明 | 200 | POST /api/v1/pay/hupijiao/create | `success`, `error`, `error_code`, `error_id` | 未声明 |
 | `POST` | `/api/v1/pay/hupijiao/notify` | 未声明 | 200 | POST /api/v1/pay/hupijiao/notify | `object` | 未声明 |
@@ -228,12 +229,12 @@
 
 ## 缺口清单（请求体未声明，按分组）
 
-其中 `POST` 且无请求体声明共 **67** 条 —— 这些是「agent 最难照着调」的部分，按 P0→P3 排，前 20 条是有界的下一轮增量：
+其中 `POST` 且无请求体声明共 **68** 条 —— 这些是「agent 最难照着调」的部分，按 P0→P3 排，前 20 条是有界的下一轮增量：
 
 - **P0**（10）：`/api/v1/attestation/cancel`、`/api/v1/attestation/renew`、`/api/v1/attestation/run-cycle`、`/api/v1/attestation/subscribe`、`/api/v1/registry/discover`、`/api/v1/trust`、`/api/v1/trust/digest`、`/api/v1/trust/vc2`、`/api/v1/trust/vc2/revoke`、`/api/v1/trust/vc2/verify`
 - **P1**（8）：`/api/v1/evidence`、`/api/v1/evidence/verify-payload`、`/api/v1/intent/mandates`、`/api/v1/intent/mandates/evaluate`、`/api/v1/intent/mandates/verify`、`/api/v1/scan/attack-path`、`/api/v1/scan/client-config`、`/api/v1/ship-gate/run`
 - **P2**（8）：`/api/v1/connectors`、`/api/v1/contributors`、`/api/v1/eco-support/agent-memory-scan`、`/api/v1/eco-support/confidence-promotion`、`/api/v1/eco-support/policy-apply`、`/api/v1/eco-support/red-team-probe`、`/api/v1/eco-support/rule-decay/retire`、`/api/v1/specialist/agents`
-- **P3**（41）：`/api/v1/account/login`、`/api/v1/account/recharge`、`/api/v1/account/register`、`/api/v1/agent/scan`、`/api/v1/arena/scan`、`/api/v1/certify/fulfill`、`/api/v1/certify/request-payment`、`/api/v1/certify/request-payment-cny`、`/api/v1/checkout/create`、`/api/v1/export`、`/api/v1/export/nucleus`、`/api/v1/export/sarif`…
+- **P3**（42）：`/api/v1/account/login`、`/api/v1/account/recharge`、`/api/v1/account/register`、`/api/v1/agent/scan`、`/api/v1/arena/scan`、`/api/v1/certify/fulfill`、`/api/v1/certify/request-payment`、`/api/v1/certify/request-payment-cny`、`/api/v1/checkout/create`、`/api/v1/export`、`/api/v1/export/nucleus`、`/api/v1/export/sarif`…
 
 ## 复验方法（不要相信本文，相信命令）
 
