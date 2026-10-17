@@ -511,6 +511,42 @@ class TestPrereqCoversSuiteDeps(_NeedsYaml, unittest.TestCase):
             ["cryptography"])
         self.assertEqual(V.declared_pip_deps("# pip install nowhere"), [])
 
+    def test_pip_decl_line_wrapped_with_backslash_is_still_visible(self):
+        """依赖声明被写成 shell 续行时，门禁必须仍能看见全部包。
+
+        2026-10-16 给 prepare-tests 的 pip install 行钉死版本时，曾先写成两行
+        （用 \\ 续行），E12 解析结果立刻退化成 ['\\'] —— 等于整份声明对门禁
+        不可见，漏装将不会被发现。这类「门禁读源码文本、却没读懂源码里的续行
+        写法」的缺陷，与「门禁验证文件而不是服务出去的字节」同型，故立此回归。
+        """
+        wrapped = (
+            "run: python -m pip install --quiet \\\n"
+            "  cryptography pyyaml hypothesis"
+        )
+        self.assertEqual(
+            V.declared_pip_deps(wrapped),
+            ["cryptography", "hypothesis", "yaml"],
+        )
+
+    def test_pip_decl_line_wrapping_does_not_swallow_next_command(self):
+        """续行只能合并到**同一条命令**，不得把后续无关命令并进声明里。"""
+        body = (
+            "run: |\n"
+            "  python -m pip install --quiet cryptography \\\n"
+            "    pyyaml\n"
+            "  python -m pip install fastapi\n"
+        )
+        got = V.declared_pip_deps(body)
+        self.assertEqual(got, ["cryptography", "fastapi", "yaml"])
+
+    def test_pinned_versions_are_not_treated_as_packages(self):
+        """钉死版本后的 spec 必须剥离版本，不得把 == 后的数字当成包名。"""
+        got = V.declared_pip_deps(
+            'run: python -m pip install --disable-pip-version-check '
+            '"cryptography==50.0.1" "PyYAML==6.0.3" "hypothesis==6.168.5"'
+        )
+        self.assertEqual(got, ["cryptography", "hypothesis", "yaml"])
+
     # ── 辅助 ─────────────────────────────────────────────────────────
     def _entry(self, body: str) -> Path:
         d = tempfile.mkdtemp(prefix="aishield_e12_")

@@ -85,7 +85,27 @@ runs:
         # pip 对已满足的包会短路，不会重复下载，所以无需 `if 已装 then 跳过` 分支
         # —— 分支会让「声明」与「实际安装」两件事分叉，正是本 action 要消灭的形态。
         # 2026-10-15 FVI：test_invariant_property 引入 hypothesis（属性测试）。
-        python -m pip install --quiet --disable-pip-version-check cryptography pyyaml hypothesis
+        #
+        # 版本必须钉死（==），不给 >= 下界：
+        #   ① 本仓唯一驱动安装的清单就是这一行（requirements.txt 被 dependency-check
+        #      禁止创建，requirements-integrations.txt 只作 test_import_integrity 的
+        #      声明事实源、CI 从不引用它）。清单唯一，可复现就只能靠这一行钉死。
+        #   ② 不钉死时，某个包发新大版本破坏 API，会在**下一次** CI 跑时突然成红，
+        #      而且红的样子是产品测试失败，根因却藏在「今天装的包变了」里 ——
+        #      这正是 2026-10-05 cryptography 事故的另一种形态。
+        #   ③ 升级是显式动作：改这行 + 本地跑全量，review 时一眼能看到「谁升了依赖」，
+        #      而不是被动被上游拽红。
+        # 必须写成**单行**：scripts/validate_workflows.py 的 E12 靠正则从本行提取包名做
+        # 双向 diff，跨行续写会让声明对门禁不可见（2026-10-16 实测：写成 `\` 续行时
+        # 解析结果退化成 ['\\']，等于声明彻底失效）。解析器已加续行容错，但可读性
+        # 上仍以单行为准。
+        # 注意发行名与导入名不同：必须写 PyYAML（写 yaml 会装到 PyPI 上同名的无关包）。
+        # 去掉 --quiet 是刻意的：这条命令是整套测试的前置闸门，装失败时必须能在
+        # 日志里看清是哪一步、哪个包、什么错误 —— 静默模式会把诊断信息藏掉。
+        python -m pip install --disable-pip-version-check "cryptography==50.0.1" "PyYAML==6.0.3" "hypothesis==6.168.5"
+        # 留痕：记录本次实际生效的版本，事后判断「为什么那天突然红了」时用。
+        python -m pip freeze --disable-pip-version-check | \
+          grep -E "^(cryptography|PyYAML|hypothesis)==" || true
 
     - name: Assert prerequisites are really in effect (fail-closed)
       shell: bash

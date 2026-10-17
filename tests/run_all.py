@@ -472,6 +472,12 @@ def main():
         # 后 8 个 job 全跳过。修法不是补那 5 处，而是把前置定义一次
         # （.github/actions/prepare-tests）并由门禁强制没人能绕过。
         'tests.test_workflow_test_prereq',
+        # 2026-10-16 左移自已删除的 tests/quick_test.py（脚本式、假绿：失败只打印
+        # 不返回非零码）。monitor/* 三个端点的功能覆盖此前**只**存在于该脚本，
+        # 删它之前必须先收编，否则是真实覆盖回退。同时暴露并修掉了一个真实 bug：
+        # /api/v1/monitor/remove 从未有路由分派（remove_monitor 只被 import），
+        # 监控条目只能 add 不能删 —— 「只写不收」。
+        'tests.test_monitor_http',
         # 2026-10-05 并发 push 的「快照类」声明（E13）：同一天第三条同型事故 ——
         # spine 复验时同一生产者被并发实例化，两份快照在 data/generated_rules.json
         # 上撞 content 冲突，而判据是路径前缀代理「data/state/ 之外一律是真实逻辑」

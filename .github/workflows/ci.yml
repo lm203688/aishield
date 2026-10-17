@@ -165,10 +165,6 @@ jobs:
       run: |
         python -m py_compile api/server.py eco/*.py scanner/*.py scripts/*.py
 
-    - name: Run quick tests
-      run: |
-        python tests/quick_test.py
-
     - name: Run all tests
       shell: bash
       run: |
