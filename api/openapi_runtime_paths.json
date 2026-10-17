@@ -1,9 +1,9 @@
 {
   "note": "运行时路由清单：进程内直调 api.server.AIShieldHandler.do_GET/do_POST 探得，与 curated 规范合并后即线上 /openapi.json。",
   "source": "runtime probe (scripts/gen_openapi_spec.py)",
-  "generated_at": "2026-10-16T17:44:58",
-  "route_count": 162,
-  "operation_count": 179,
+  "generated_at": "2026-10-17T13:23:28",
+  "route_count": 163,
+  "operation_count": 180,
   "probe_errors": [],
   "state_audit": {
     "created": [],
@@ -5637,6 +5637,40 @@
       ]
     },
     {
+      "path": "/api/v1/monitor/remove",
+      "tag": "monitor",
+      "summary": "POST /api/v1/monitor/remove（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/monitor/remove（运行时探得；schema 由真实响应推导）",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "postMonitorRemove"
+      ]
+    },
+    {
       "path": "/api/v1/osv",
       "tag": "osv",
       "summary": "POST /api/v1/osv（运行时探得；schema 由真实响应推导）",
@@ -6118,9 +6152,7 @@
               "users": {
                 "type": "array",
                 "items": {
-                  "type": "object",
-                  "properties": {},
-                  "additionalProperties": true
+                  "type": "string"
                 }
               }
             },
