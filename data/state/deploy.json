@@ -1,0 +1,413 @@
+{
+  "domain": "deploy",
+  "current": {
+    "last_deploy_verify": "success",
+    "deploy_run_id": "38697603126",
+    "_source": "deploy-server",
+    "_ts": "2026-10-15T07:24:56.775058+00:00"
+  },
+  "history": [
+    {
+      "ts": "2026-09-18T08:23:26.292642+00:00",
+      "source": "deploy-server",
+      "state": {
+        "last_deploy_verify": "success",
+        "deploy_run_id": "35323168880"
+      }
+    },
+    {
+      "ts": "2026-09-19T05:34:22.519933+00:00",
+      "source": "deploy-server",
+      "state": {
+        "last_deploy_verify": "success",
+        "deploy_run_id": "35424062534"
+      }
+    },
+    {
+      "ts": "2026-09-19T07:59:28.457115+00:00",
+      "source": "deploy-server",
+      "state": {
+        "last_deploy_verify": "success",
+        "deploy_run_id": "35430571591"
+      }
+    },
+    {
+      "ts": "2026-09-19T08:08:18.373759+00:00",
+      "source": "deploy-server",
+      "state": {
+        "last_deploy_verify": "success",
+        "deploy_run_id": "35430795690"
+      }
+    },
+    {
+      "ts": "2026-09-19T13:49:22.906987+00:00",
+      "source": "deploy-server",
+      "state": {
+        "last_deploy_verify": "success",
+        "deploy_run_id": "35446583191"
+      }
+    },
+    {
+      "ts": "2026-09-19T14:04:25.419229+00:00",
+      "source": "deploy-server",
+      "state": {
+        "last_deploy_verify": "success",
+        "deploy_run_id": "35447251631"
+      }
+    },
+    {
+      "ts": "2026-09-20T01:10:07.182973+00:00",
+      "source": "deploy-server",
+      "state": {
+        "last_deploy_verify": "success",
+        "deploy_run_id": "35480572411"
+      }
+    },
+    {
+      "ts": "2026-09-20T02:53:07.576956+00:00",
+      "source": "deploy-server",
+      "state": {
+        "last_deploy_verify": "success",
+        "deploy_run_id": "35485000123"
+      }
+    },
+    {
+      "ts": "2026-09-20T08:39:24.333336+00:00",
+      "source": "deploy-server",
+      "state": {
+        "last_deploy_verify": "success",
+        "deploy_run_id": "35499810614"
+      }
+    },
+    {
+      "ts": "2026-09-21T08:59:40.060553+00:00",
+      "source": "deploy-server",
+      "state": {
+        "last_deploy_verify": "success",
+        "deploy_run_id": "35580141746"
+      }
+    },
+    {
+      "ts": "2026-09-23T01:57:34.196605+00:00",
+      "source": "deploy-server",
+      "state": {
+        "last_deploy_verify": "success",
+        "deploy_run_id": "35808270922"
+      }
+    },
+    {
+      "ts": "2026-09-26T01:10:28.636724+00:00",
+      "source": "deploy-server",
+      "state": {
+        "last_deploy_verify": "success",
+        "deploy_run_id": "36207341754"
+      }
+    },
+    {
+      "ts": "2026-09-26T01:17:31.943357+00:00",
+      "source": "deploy-server",
+      "state": {
+        "last_deploy_verify": "success",
+        "deploy_run_id": "36207626460"
+      }
+    },
+    {
+      "ts": "2026-09-26T08:42:42.077964+00:00",
+      "source": "deploy-server",
+      "state": {
+        "last_deploy_verify": "success",
+        "deploy_run_id": "36230084239"
+      }
+    },
+    {
+      "ts": "2026-09-27T09:20:57.098151+00:00",
+      "source": "deploy-server",
+      "state": {
+        "last_deploy_verify": "success",
+        "deploy_run_id": "36308596083"
+      }
+    },
+    {
+      "ts": "2026-09-28T09:48:59.375227+00:00",
+      "source": "deploy-server",
+      "state": {
+        "last_deploy_verify": "success",
+        "deploy_run_id": "36405087188"
+      }
+    },
+    {
+      "ts": "2026-09-30T02:40:30.620234+00:00",
+      "source": "deploy-server",
+      "state": {
+        "last_deploy_verify": "success",
+        "deploy_run_id": "36660663534"
+      }
+    },
+    {
+      "ts": "2026-10-02T04:13:44.709177+00:00",
+      "source": "deploy-server",
+      "state": {
+        "last_deploy_verify": "success",
+        "deploy_run_id": "36963370260"
+      }
+    },
+    {
+      "ts": "2026-10-02T04:30:15.817537+00:00",
+      "source": "deploy-server",
+      "state": {
+        "last_deploy_verify": "success",
+        "deploy_run_id": "36964452182"
+      }
+    },
+    {
+      "ts": "2026-10-02T09:50:01.236393+00:00",
+      "source": "deploy-server",
+      "state": {
+        "last_deploy_verify": "success",
+        "deploy_run_id": "36991260117"
+      }
+    },
+    {
+      "ts": "2026-10-02T15:57:24.960639+00:00",
+      "source": "deploy-server",
+      "state": {
+        "last_deploy_verify": "success",
+        "deploy_run_id": "37029669297"
+      }
+    },
+    {
+      "ts": "2026-10-03T08:11:21.967148+00:00",
+      "source": "deploy-server",
+      "state": {
+        "last_deploy_verify": "success",
+        "deploy_run_id": "37108585394"
+      }
+    },
+    {
+      "ts": "2026-10-03T08:37:19.222758+00:00",
+      "source": "deploy-server",
+      "state": {
+        "last_deploy_verify": "success",
+        "deploy_run_id": "37110007940"
+      }
+    },
+    {
+      "ts": "2026-10-03T09:17:16.889719+00:00",
+      "source": "deploy-server",
+      "state": {
+        "last_deploy_verify": "success",
+        "deploy_run_id": "37111878629"
+      }
+    },
+    {
+      "ts": "2026-10-03T15:45:09.538157+00:00",
+      "source": "deploy-server",
+      "state": {
+        "last_deploy_verify": "success",
+        "deploy_run_id": "37133763317"
+      }
+    },
+    {
+      "ts": "2026-10-03T22:58:29.543023+00:00",
+      "source": "deploy-server",
+      "state": {
+        "last_deploy_verify": "success",
+        "deploy_run_id": "37160158616"
+      }
+    },
+    {
+      "ts": "2026-10-05T02:15:36.270178+00:00",
+      "source": "deploy-server",
+      "state": {
+        "last_deploy_verify": "success",
+        "deploy_run_id": "37254487989"
+      }
+    },
+    {
+      "ts": "2026-10-05T02:56:04.859582+00:00",
+      "source": "deploy-server",
+      "state": {
+        "last_deploy_verify": "success",
+        "deploy_run_id": "37257217675"
+      }
+    },
+    {
+      "ts": "2026-10-05T03:14:15.637571+00:00",
+      "source": "deploy-server",
+      "state": {
+        "last_deploy_verify": "failure",
+        "deploy_run_id": "37258522404"
+      }
+    },
+    {
+      "ts": "2026-10-05T03:16:53.750950+00:00",
+      "source": "deploy-server",
+      "state": {
+        "last_deploy_verify": "failure",
+        "deploy_run_id": "37258726050"
+      }
+    },
+    {
+      "ts": "2026-10-05T03:23:24.957966+00:00",
+      "source": "deploy-server",
+      "state": {
+        "last_deploy_verify": "success",
+        "deploy_run_id": "37259167789"
+      }
+    },
+    {
+      "ts": "2026-10-05T14:18:06.181071+00:00",
+      "source": "deploy-server",
+      "state": {
+        "last_deploy_verify": "success",
+        "deploy_run_id": "37322422506"
+      }
+    },
+    {
+      "ts": "2026-10-05T16:24:30.551537+00:00",
+      "source": "deploy-server",
+      "state": {
+        "last_deploy_verify": "success",
+        "deploy_run_id": "37338172156"
+      }
+    },
+    {
+      "ts": "2026-10-06T10:30:04.728434+00:00",
+      "source": "deploy-server",
+      "state": {
+        "last_deploy_verify": "success",
+        "deploy_run_id": "37448252930"
+      }
+    },
+    {
+      "ts": "2026-10-06T15:32:21.329942+00:00",
+      "source": "deploy-server",
+      "state": {
+        "last_deploy_verify": "success",
+        "deploy_run_id": "37486187675"
+      }
+    },
+    {
+      "ts": "2026-10-06T15:46:48.783815+00:00",
+      "source": "deploy-server",
+      "state": {
+        "last_deploy_verify": "success",
+        "deploy_run_id": "37488987874"
+      }
+    },
+    {
+      "ts": "2026-10-07T10:28:17.955370+00:00",
+      "source": "deploy-server",
+      "state": {
+        "last_deploy_verify": "success",
+        "deploy_run_id": "37605749305"
+      }
+    },
+    {
+      "ts": "2026-10-08T10:47:14.958609+00:00",
+      "source": "deploy-server",
+      "state": {
+        "last_deploy_verify": "success",
+        "deploy_run_id": "37763875311"
+      }
+    },
+    {
+      "ts": "2026-10-09T10:40:25.181824+00:00",
+      "source": "deploy-server",
+      "state": {
+        "last_deploy_verify": "success",
+        "deploy_run_id": "37917825589"
+      }
+    },
+    {
+      "ts": "2026-10-10T09:58:07.714002+00:00",
+      "source": "deploy-server",
+      "state": {
+        "last_deploy_verify": "success",
+        "deploy_run_id": "38042545223"
+      }
+    },
+    {
+      "ts": "2026-10-11T10:06:59.155695+00:00",
+      "source": "deploy-server",
+      "state": {
+        "last_deploy_verify": "success",
+        "deploy_run_id": "38130147770"
+      }
+    },
+    {
+      "ts": "2026-10-12T10:51:46.057732+00:00",
+      "source": "deploy-server",
+      "state": {
+        "last_deploy_verify": "success",
+        "deploy_run_id": "38238015040"
+      }
+    },
+    {
+      "ts": "2026-10-13T10:40:01.409918+00:00",
+      "source": "deploy-server",
+      "state": {
+        "last_deploy_verify": "success",
+        "deploy_run_id": "38383787357"
+      }
+    },
+    {
+      "ts": "2026-10-14T08:49:30.762021+00:00",
+      "source": "deploy-server",
+      "state": {
+        "last_deploy_verify": "success",
+        "deploy_run_id": "38536550027"
+      }
+    },
+    {
+      "ts": "2026-10-15T00:20:57.885589+00:00",
+      "source": "deploy-server",
+      "state": {
+        "last_deploy_verify": "success",
+        "deploy_run_id": "38659365555"
+      }
+    },
+    {
+      "ts": "2026-10-15T00:26:06.257459+00:00",
+      "source": "deploy-server",
+      "state": {
+        "last_deploy_verify": "success",
+        "deploy_run_id": "38659881459"
+      }
+    },
+    {
+      "ts": "2026-10-15T00:34:20.401661+00:00",
+      "source": "deploy-server",
+      "state": {
+        "last_deploy_verify": "success",
+        "deploy_run_id": "38660572321"
+      }
+    },
+    {
+      "ts": "2026-10-15T01:22:26.370698+00:00",
+      "source": "deploy-server",
+      "state": {
+        "last_deploy_verify": "success",
+        "deploy_run_id": "38665058323"
+      }
+    },
+    {
+      "ts": "2026-10-15T07:07:42.512701+00:00",
+      "source": "deploy-server",
+      "state": {
+        "last_deploy_verify": "success",
+        "deploy_run_id": "38696164313"
+      }
+    },
+    {
+      "ts": "2026-10-15T07:24:56.775071+00:00",
+      "source": "deploy-server",
+      "state": {
+        "last_deploy_verify": "success",
+        "deploy_run_id": "38697603126"
+      }
+    }
+  ],
+  "updated": "2026-10-15T07:24:56.775075+00:00",
+  "desc": "部署与上线验证结果（deploy-server 独占写入）"
+}

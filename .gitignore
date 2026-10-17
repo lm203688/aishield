@@ -82,17 +82,27 @@ api/data/*.json
 api/data/*.jsonl
 # 数据飞轮核心自建库（24.5MB 运行时产物，由工作流生成，绝不进仓库）
 data/batch_scans.json
-# guard 巡检存活信号经 Contents API 直写 main，不受 gitignore 影响；
-# 忽略它可避免被整体 add data/state/ 时与 guard 抢同一文件导致 push 冲突。
-# 注：当前各 workflow 的 `git add` 均精确指定单个文件，没有 add 整目录；
-# 下列为防御性忽略，避免未来新增 workflow 用通配一并带上。
-# ── 运行时状态：由服务/工作流生成，绝不进仓库（H1/S3 地基加固 2026-10-16）──
-# 这些文件是运行时产物，且可能被 live server 改写；进 git 既污染仓库，
-# 又可能把一份过期运行时快照当成种子下发到生产。统一忽略，由服务首次访问时自建。
-# 唯一例外：data/state/evolution_ledger.jsonl 是规则自进化账本（append-only、
-# union 合并、由 rule-promoter 工作流提交），必须留存仓库。
-data/state/**
-!data/state/evolution_ledger.jsonl
+# ── 运行时状态总线：data/state/（H1/S3 地基加固 2026-10-16，2026-10-17 修正）──
+# GitHub Actions runner 是临时的，git 是跨 run 状态**唯一**的持久化介质；
+# scripts/state_bus.py 写的 <域>.json 快照是闭环之间唯一的通信介质，必须入库
+# —— 否则每个 run 都从零开始，闭环之间无法通信。
+# （2026-10-17 教训：这里曾写成 `data/state/**` 全量忽略，10 个 workflow 的
+#   `git add data/state/*.json` 全部 rc=1（git 拒绝 add 被忽略文件），状态总线
+#   静默断链，直到 validate_workflows.py 的 W7 报出「data/state/* 匹配不到任何
+#   文件」才被看见 —— 判据见 .github/auto-resolvable-paths.txt。）
+# 因此这里**反向列出**只排除真正无界增长 / 本地噪声的文件；新增的总线域文件
+# 默认入库，不会再静默失效。
+#   alerts.jsonl / undelivered_alerts.jsonl / rule_hits.jsonl —— append-only 台账
+#     （evolution_ledger.jsonl 同样 append-only，但已配 .gitattributes merge=union，入库）
+#   tech_radar.json —— seen_ids / runs 无限增长的观测历史
+#   alert_cooldown.json / health_probes.json / detail/ —— 本地噪声缓存
+data/state/alerts.jsonl
+data/state/undelivered_alerts.jsonl
+data/state/rule_hits.jsonl
+data/state/tech_radar.json
+data/state/alert_cooldown.json
+data/state/health_probes.json
+data/state/detail/
 mcp-server/dist/
 *.zip
 AIShield_完整备案包.zip

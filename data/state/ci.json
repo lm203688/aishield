@@ -1,0 +1,16 @@
+{
+  "updated": "2026-10-15T08:22:51Z",
+  "run_id": "38704185651",
+  "sha": "f4dfe9fa40ef0b5cd9c833ea5a90a0acd5557dda",
+  "overall": "failure",
+  "source": "ci.yml",
+  "jobs": {
+    "workflow-lint": "failure",
+    "distribution-gate": "success",
+    "test": "success",
+    "security-scan": "success",
+    "dependency-check": "success",
+    "performance-test": "success",
+    "docker-test": "success"
+  }
+}

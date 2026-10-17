@@ -1,0 +1,714 @@
+{
+  "domain": "distribution",
+  "current": {
+    "articles": 4,
+    "published_issues": 4,
+    "channels": [
+      "github-issue",
+      "pages",
+      "rss",
+      "readme"
+    ],
+    "last_run": "publish=success/registry=success/assert=success",
+    "_source": "channel-distribution",
+    "_ts": "2026-10-14T08:50:35.906906+00:00",
+    "published_total": 4
+  },
+  "history": [
+    {
+      "ts": "2026-08-04T09:35:05.099154+00:00",
+      "source": "publish_content",
+      "state": {
+        "articles": 4,
+        "published_issues": 0,
+        "channels": [
+          "github-issue",
+          "pages",
+          "rss",
+          "readme"
+        ],
+        "last_run": "2026-08-04T09:35:05.099077+00:00"
+      }
+    },
+    {
+      "ts": "2026-08-04T09:36:23.616730+00:00",
+      "source": "publish_content",
+      "state": {
+        "articles": 4,
+        "published_issues": 0,
+        "channels": [
+          "github-issue",
+          "pages",
+          "rss",
+          "readme"
+        ],
+        "last_run": "2026-08-04T09:36:23.610103+00:00"
+      }
+    },
+    {
+      "ts": "2026-08-04T22:32:16.541569+00:00",
+      "source": "publish_content",
+      "state": {
+        "articles": 4,
+        "published_issues": 4,
+        "channels": [
+          "github-issue",
+          "pages",
+          "rss",
+          "readme"
+        ],
+        "last_run": "2026-08-04T22:32:16.541463+00:00"
+      }
+    },
+    {
+      "ts": "2026-08-05T05:19:40.233101+00:00",
+      "source": "publish_content",
+      "state": {
+        "articles": 4,
+        "published_issues": 4,
+        "channels": [
+          "github-issue",
+          "pages",
+          "rss",
+          "readme"
+        ],
+        "last_run": "2026-08-05T05:19:40.233013+00:00"
+      }
+    },
+    {
+      "ts": "2026-08-05T08:43:22.137814+00:00",
+      "source": "publish_content",
+      "state": {
+        "articles": 4,
+        "published_issues": 4,
+        "channels": [
+          "github-issue",
+          "pages",
+          "rss",
+          "readme"
+        ],
+        "last_run": "2026-08-05T08:43:22.137703+00:00"
+      }
+    },
+    {
+      "ts": "2026-08-05T11:24:17.665537+00:00",
+      "source": "publish_content",
+      "state": {
+        "articles": 4,
+        "published_issues": 4,
+        "channels": [
+          "github-issue",
+          "pages",
+          "rss",
+          "readme"
+        ],
+        "last_run": "2026-08-05T11:24:17.665427+00:00"
+      }
+    },
+    {
+      "ts": "2026-08-05T14:20:20.286139+00:00",
+      "source": "publish_content",
+      "state": {
+        "articles": 4,
+        "published_issues": 4,
+        "channels": [
+          "github-issue",
+          "pages",
+          "rss",
+          "readme"
+        ],
+        "last_run": "2026-08-05T14:20:20.286027+00:00"
+      }
+    },
+    {
+      "ts": "2026-08-05T16:45:05.992504+00:00",
+      "source": "publish_content",
+      "state": {
+        "articles": 4,
+        "published_issues": 4,
+        "channels": [
+          "github-issue",
+          "pages",
+          "rss",
+          "readme"
+        ],
+        "last_run": "2026-08-05T16:45:05.992392+00:00"
+      }
+    },
+    {
+      "ts": "2026-08-05T18:24:55.097796+00:00",
+      "source": "publish_content",
+      "state": {
+        "articles": 4,
+        "published_issues": 4,
+        "channels": [
+          "github-issue",
+          "pages",
+          "rss",
+          "readme"
+        ],
+        "last_run": "2026-08-05T18:24:55.097629+00:00"
+      }
+    },
+    {
+      "ts": "2026-08-05T20:35:40.970659+00:00",
+      "source": "publish_content",
+      "state": {
+        "articles": 4,
+        "published_issues": 4,
+        "channels": [
+          "github-issue",
+          "pages",
+          "rss",
+          "readme"
+        ],
+        "last_run": "2026-08-05T20:35:40.970538+00:00"
+      }
+    },
+    {
+      "ts": "2026-08-05T22:15:03.069099+00:00",
+      "source": "publish_content",
+      "state": {
+        "articles": 4,
+        "published_issues": 4,
+        "channels": [
+          "github-issue",
+          "pages",
+          "rss",
+          "readme"
+        ],
+        "last_run": "2026-08-05T22:15:03.068981+00:00"
+      }
+    },
+    {
+      "ts": "2026-08-06T00:03:31.289542+00:00",
+      "source": "publish_content",
+      "state": {
+        "articles": 4,
+        "published_issues": 4,
+        "channels": [
+          "github-issue",
+          "pages",
+          "rss",
+          "readme"
+        ],
+        "last_run": "2026-08-06T00:03:31.289438+00:00"
+      }
+    },
+    {
+      "ts": "2026-08-06T04:16:38.989295+00:00",
+      "source": "publish_content",
+      "state": {
+        "articles": 4,
+        "published_issues": 4,
+        "channels": [
+          "github-issue",
+          "pages",
+          "rss",
+          "readme"
+        ],
+        "last_run": "2026-08-06T04:16:38.989171+00:00"
+      }
+    },
+    {
+      "ts": "2026-08-06T07:43:05.762370+00:00",
+      "source": "publish_content",
+      "state": {
+        "articles": 4,
+        "published_issues": 4,
+        "channels": [
+          "github-issue",
+          "pages",
+          "rss",
+          "readme"
+        ],
+        "last_run": "2026-08-06T07:43:05.762238+00:00"
+      }
+    },
+    {
+      "ts": "2026-08-06T10:43:47.645106+00:00",
+      "source": "publish_content",
+      "state": {
+        "articles": 4,
+        "published_issues": 4,
+        "channels": [
+          "github-issue",
+          "pages",
+          "rss",
+          "readme"
+        ],
+        "last_run": "2026-08-06T10:43:47.644977+00:00"
+      }
+    },
+    {
+      "ts": "2026-08-06T12:59:21.442751+00:00",
+      "source": "publish_content",
+      "state": {
+        "articles": 4,
+        "published_issues": 4,
+        "channels": [
+          "github-issue",
+          "pages",
+          "rss",
+          "readme"
+        ],
+        "last_run": "2026-08-06T12:59:21.442620+00:00"
+      }
+    },
+    {
+      "ts": "2026-08-06T15:26:22.005378+00:00",
+      "source": "publish_content",
+      "state": {
+        "articles": 4,
+        "published_issues": 4,
+        "channels": [
+          "github-issue",
+          "pages",
+          "rss",
+          "readme"
+        ],
+        "last_run": "2026-08-06T15:26:22.005248+00:00"
+      }
+    },
+    {
+      "ts": "2026-08-07T00:06:38.617164+00:00",
+      "source": "publish_content",
+      "state": {
+        "articles": 4,
+        "published_issues": 4,
+        "channels": [
+          "github-issue",
+          "pages",
+          "rss",
+          "readme"
+        ],
+        "last_run": "2026-08-07T00:06:38.617050+00:00"
+      }
+    },
+    {
+      "ts": "2026-08-07T03:52:58.784587+00:00",
+      "source": "publish_content",
+      "state": {
+        "articles": 4,
+        "published_issues": 4,
+        "channels": [
+          "github-issue",
+          "pages",
+          "rss",
+          "readme"
+        ],
+        "last_run": "2026-08-07T03:52:58.784433+00:00"
+      }
+    },
+    {
+      "ts": "2026-08-07T05:44:04.344990+00:00",
+      "source": "publish_content",
+      "state": {
+        "articles": 4,
+        "published_issues": 4,
+        "channels": [
+          "github-issue",
+          "pages",
+          "rss",
+          "readme"
+        ],
+        "last_run": "2026-08-07T05:44:04.344855+00:00"
+      }
+    },
+    {
+      "ts": "2026-08-07T07:23:14.631768+00:00",
+      "source": "publish_content",
+      "state": {
+        "articles": 4,
+        "published_issues": 4,
+        "channels": [
+          "github-issue",
+          "pages",
+          "rss",
+          "readme"
+        ],
+        "last_run": "2026-08-07T07:23:14.631631+00:00"
+      }
+    },
+    {
+      "ts": "2026-08-07T09:04:40.562305+00:00",
+      "source": "publish_content",
+      "state": {
+        "articles": 4,
+        "published_issues": 4,
+        "channels": [
+          "github-issue",
+          "pages",
+          "rss",
+          "readme"
+        ],
+        "last_run": "2026-08-07T09:04:40.562156+00:00"
+      }
+    },
+    {
+      "ts": "2026-08-07T10:57:10.607851+00:00",
+      "source": "publish_content",
+      "state": {
+        "articles": 4,
+        "published_issues": 4,
+        "channels": [
+          "github-issue",
+          "pages",
+          "rss",
+          "readme"
+        ],
+        "last_run": "2026-08-07T10:57:10.607708+00:00"
+      }
+    },
+    {
+      "ts": "2026-08-07T11:51:53.656994+00:00",
+      "source": "publish_content",
+      "state": {
+        "articles": 4,
+        "published_issues": 4,
+        "channels": [
+          "github-issue",
+          "pages",
+          "rss",
+          "readme"
+        ],
+        "last_run": "2026-08-07T11:51:53.656883+00:00"
+      }
+    },
+    {
+      "ts": "2026-08-07T13:14:06.253345+00:00",
+      "source": "publish_content",
+      "state": {
+        "articles": 4,
+        "published_issues": 4,
+        "channels": [
+          "github-issue",
+          "pages",
+          "rss",
+          "readme"
+        ],
+        "last_run": "2026-08-07T13:14:06.253169+00:00"
+      }
+    },
+    {
+      "ts": "2026-08-07T14:57:26.918086+00:00",
+      "source": "publish_content",
+      "state": {
+        "articles": 4,
+        "published_issues": 4,
+        "channels": [
+          "github-issue",
+          "pages",
+          "rss",
+          "readme"
+        ],
+        "last_run": "2026-08-07T14:57:26.917934+00:00"
+      }
+    },
+    {
+      "ts": "2026-08-07T16:02:15.313943+00:00",
+      "source": "publish_content",
+      "state": {
+        "articles": 4,
+        "published_issues": 4,
+        "channels": [
+          "github-issue",
+          "pages",
+          "rss",
+          "readme"
+        ],
+        "last_run": "2026-08-07T16:02:15.313768+00:00"
+      }
+    },
+    {
+      "ts": "2026-08-07T17:51:53.957718+00:00",
+      "source": "publish_content",
+      "state": {
+        "articles": 4,
+        "published_issues": 4,
+        "channels": [
+          "github-issue",
+          "pages",
+          "rss",
+          "readme"
+        ],
+        "last_run": "2026-08-07T17:51:53.957563+00:00"
+      }
+    },
+    {
+      "ts": "2026-08-07T19:03:35.268770+00:00",
+      "source": "publish_content",
+      "state": {
+        "articles": 4,
+        "published_issues": 4,
+        "channels": [
+          "github-issue",
+          "pages",
+          "rss",
+          "readme"
+        ],
+        "last_run": "2026-08-07T19:03:35.268620+00:00"
+      }
+    },
+    {
+      "ts": "2026-08-07T20:47:05.879587+00:00",
+      "source": "publish_content",
+      "state": {
+        "articles": 4,
+        "published_issues": 4,
+        "channels": [
+          "github-issue",
+          "pages",
+          "rss",
+          "readme"
+        ],
+        "last_run": "2026-08-07T20:47:05.879432+00:00"
+      }
+    },
+    {
+      "ts": "2026-08-07T21:43:13.929297+00:00",
+      "source": "publish_content",
+      "state": {
+        "articles": 4,
+        "published_issues": 4,
+        "channels": [
+          "github-issue",
+          "pages",
+          "rss",
+          "readme"
+        ],
+        "last_run": "2026-08-07T21:43:13.929139+00:00"
+      }
+    },
+    {
+      "ts": "2026-08-07T22:41:33.695398+00:00",
+      "source": "publish_content",
+      "state": {
+        "articles": 4,
+        "published_issues": 4,
+        "channels": [
+          "github-issue",
+          "pages",
+          "rss",
+          "readme"
+        ],
+        "last_run": "2026-08-07T22:41:33.695234+00:00"
+      }
+    },
+    {
+      "ts": "2026-08-07T23:37:47.662421+00:00",
+      "source": "publish_content",
+      "state": {
+        "articles": 4,
+        "published_issues": 4,
+        "channels": [
+          "github-issue",
+          "pages",
+          "rss",
+          "readme"
+        ],
+        "last_run": "2026-08-07T23:37:47.662263+00:00"
+      }
+    },
+    {
+      "ts": "2026-08-08T01:56:00.456028+00:00",
+      "source": "publish_content",
+      "state": {
+        "articles": 4,
+        "published_issues": 4,
+        "channels": [
+          "github-issue",
+          "pages",
+          "rss",
+          "readme"
+        ],
+        "last_run": "2026-08-08T01:56:00.455865+00:00"
+      }
+    },
+    {
+      "ts": "2026-08-08T03:38:30.221670+00:00",
+      "source": "publish_content",
+      "state": {
+        "articles": 4,
+        "published_issues": 4,
+        "channels": [
+          "github-issue",
+          "pages",
+          "rss",
+          "readme"
+        ],
+        "last_run": "2026-08-08T03:38:30.221509+00:00"
+      }
+    },
+    {
+      "ts": "2026-08-08T05:02:23.597028+00:00",
+      "source": "publish_content",
+      "state": {
+        "articles": 4,
+        "published_issues": 4,
+        "channels": [
+          "github-issue",
+          "pages",
+          "rss",
+          "readme"
+        ],
+        "last_run": "2026-08-08T05:02:23.596832+00:00"
+      }
+    },
+    {
+      "ts": "2026-08-08T07:00:46.096487+00:00",
+      "source": "publish_content",
+      "state": {
+        "articles": 4,
+        "published_issues": 4,
+        "channels": [
+          "github-issue",
+          "pages",
+          "rss",
+          "readme"
+        ],
+        "last_run": "2026-08-08T07:00:46.096324+00:00"
+      }
+    },
+    {
+      "ts": "2026-08-08T08:48:26.818897+00:00",
+      "source": "publish_content",
+      "state": {
+        "articles": 4,
+        "published_issues": 4,
+        "channels": [
+          "github-issue",
+          "pages",
+          "rss",
+          "readme"
+        ],
+        "last_run": "2026-08-08T08:48:26.818728+00:00"
+      }
+    },
+    {
+      "ts": "2026-08-08T09:42:43.279126+00:00",
+      "source": "publish_content",
+      "state": {
+        "articles": 4,
+        "published_issues": 4,
+        "channels": [
+          "github-issue",
+          "pages",
+          "rss",
+          "readme"
+        ],
+        "last_run": "2026-08-08T09:42:43.278926+00:00"
+      }
+    },
+    {
+      "ts": "2026-08-08T10:38:12.141569+00:00",
+      "source": "publish_content",
+      "state": {
+        "articles": 4,
+        "published_issues": 4,
+        "channels": [
+          "github-issue",
+          "pages",
+          "rss",
+          "readme"
+        ],
+        "last_run": "2026-08-08T10:38:12.141397+00:00"
+      }
+    },
+    {
+      "ts": "2026-08-08T11:33:10.281880+00:00",
+      "source": "publish_content",
+      "state": {
+        "articles": 4,
+        "published_issues": 4,
+        "channels": [
+          "github-issue",
+          "pages",
+          "rss",
+          "readme"
+        ],
+        "last_run": "2026-08-08T11:33:10.281703+00:00"
+      }
+    },
+    {
+      "ts": "2026-08-08T12:56:55.599256+00:00",
+      "source": "publish_content",
+      "state": {
+        "articles": 4,
+        "published_issues": 4,
+        "channels": [
+          "github-issue",
+          "pages",
+          "rss",
+          "readme"
+        ],
+        "last_run": "2026-08-08T12:56:55.599118+00:00"
+      }
+    },
+    {
+      "ts": "2026-08-08T13:51:05.010505+00:00",
+      "source": "publish_content",
+      "state": {
+        "articles": 4,
+        "published_issues": 4,
+        "channels": [
+          "github-issue",
+          "pages",
+          "rss",
+          "readme"
+        ],
+        "last_run": "2026-08-08T13:51:05.010289+00:00"
+      }
+    },
+    {
+      "ts": "2026-08-24T09:53:34.839938+00:00",
+      "source": "channel-distribution",
+      "state": {
+        "articles": 4,
+        "published_issues": 4,
+        "channels": [
+          "github-issue",
+          "pages",
+          "rss",
+          "readme"
+        ],
+        "last_run": "publish=success/registry=success/assert=success",
+        "published_total": 4
+      }
+    },
+    {
+      "ts": "2026-10-06T10:30:52.005680+00:00",
+      "source": "channel-distribution",
+      "state": {
+        "articles": 4,
+        "published_issues": 4,
+        "channels": [
+          "github-issue",
+          "pages",
+          "rss",
+          "readme"
+        ],
+        "last_run": "publish=failure/registry=skipped/assert=failure",
+        "published_total": 4
+      }
+    },
+    {
+      "ts": "2026-10-06T15:33:48.436371+00:00",
+      "source": "channel-distribution",
+      "state": {
+        "articles": 4,
+        "published_issues": 4,
+        "channels": [
+          "github-issue",
+          "pages",
+          "rss",
+          "readme"
+        ],
+        "last_run": "publish=success/registry=success/assert=success",
+        "published_total": 4
+      }
+    }
+  ],
+  "updated": "2026-10-14T08:50:35.906921+00:00",
+  "desc": "内容与生态分发执行结果"
+}
