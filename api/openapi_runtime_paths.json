@@ -1,15 +1,40 @@
 {
   "note": "运行时路由清单：进程内直调 api.server.AIShieldHandler.do_GET/do_POST 探得，与 curated 规范合并后即线上 /openapi.json。",
   "source": "runtime probe (scripts/gen_openapi_spec.py)",
-  "generated_at": "2026-10-17T13:23:28",
+  "generated_at": "2026-10-17T15:24:14",
   "route_count": 163,
   "operation_count": 180,
   "probe_errors": [],
   "state_audit": {
     "created": [],
     "restored": [
+      "C:\\Users\\xing\\Desktop\\aishield\\data\\batch_scans.json",
       "C:\\Users\\xing\\Desktop\\aishield\\data\\fleet.json",
       "C:\\Users\\xing\\Desktop\\aishield\\data\\monitored_tools.json",
+      "C:\\Users\\xing\\Desktop\\aishield\\data\\state\\alerts.jsonl",
+      "C:\\Users\\xing\\Desktop\\aishield\\data\\state\\alert_cooldown.json",
+      "C:\\Users\\xing\\Desktop\\aishield\\data\\state\\health_probes.json",
+      "C:\\Users\\xing\\Desktop\\aishield\\data\\state\\tech_radar.json",
+      "C:\\Users\\xing\\Desktop\\aishield\\data\\state\\detail\\health_probes.json",
+      "C:\\Users\\xing\\Desktop\\aishield\\api/data\\agent_registry.json",
+      "C:\\Users\\xing\\Desktop\\aishield\\api/data\\attestations.json",
+      "C:\\Users\\xing\\Desktop\\aishield\\api/data\\audits.json",
+      "C:\\Users\\xing\\Desktop\\aishield\\api/data\\auth_api_keys.json",
+      "C:\\Users\\xing\\Desktop\\aishield\\api/data\\billing.json",
+      "C:\\Users\\xing\\Desktop\\aishield\\api/data\\blackboard.json",
+      "C:\\Users\\xing\\Desktop\\aishield\\api/data\\certifications.json",
+      "C:\\Users\\xing\\Desktop\\aishield\\api/data\\collab_delegations.json",
+      "C:\\Users\\xing\\Desktop\\aishield\\api/data\\collab_messages.json",
+      "C:\\Users\\xing\\Desktop\\aishield\\api/data\\contributors.json",
+      "C:\\Users\\xing\\Desktop\\aishield\\api/data\\governance.json",
+      "C:\\Users\\xing\\Desktop\\aishield\\api/data\\identity_events.jsonl",
+      "C:\\Users\\xing\\Desktop\\aishield\\api/data\\mcp_submissions.json",
+      "C:\\Users\\xing\\Desktop\\aishield\\api/data\\payments.json",
+      "C:\\Users\\xing\\Desktop\\aishield\\api/data\\personal_agents.json",
+      "C:\\Users\\xing\\Desktop\\aishield\\api/data\\registration_tokens.json",
+      "C:\\Users\\xing\\Desktop\\aishield\\api/data\\runtime_behavior.json",
+      "C:\\Users\\xing\\Desktop\\aishield\\api/data\\sandbox_tasks.json",
+      "C:\\Users\\xing\\Desktop\\aishield\\api/data\\specialist_registry.json",
       "C:\\Users\\xing\\Desktop\\aishield\\api/data\\spend_caps.json",
       "C:\\Users\\xing\\Desktop\\aishield\\api/data\\usage.json",
       "(已删除探针新建) C:\\Users\\xing\\Desktop\\aishield\\api/data\\governance_audit.jsonl"
@@ -4681,47 +4706,7 @@
                 "type": "array",
                 "items": {
                   "type": "object",
-                  "properties": {
-                    "name": {
-                      "type": "object"
-                    },
-                    "did": {
-                      "type": "object"
-                    },
-                    "public_key": {
-                      "type": "object"
-                    },
-                    "capabilities": {
-                      "type": "object"
-                    },
-                    "owner": {
-                      "type": "object"
-                    },
-                    "reputation_score": {
-                      "type": "object"
-                    },
-                    "reputation_level": {
-                      "type": "object"
-                    },
-                    "registered_at": {
-                      "type": "object"
-                    },
-                    "updated_at": {
-                      "type": "object"
-                    },
-                    "status": {
-                      "type": "object"
-                    },
-                    "revoked_at": {
-                      "type": "object"
-                    },
-                    "identity_token_expires": {
-                      "type": "object"
-                    },
-                    "identity_token_consumed_at": {
-                      "type": "object"
-                    }
-                  },
+                  "properties": {},
                   "additionalProperties": true
                 }
               }
