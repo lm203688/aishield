@@ -567,10 +567,21 @@ def declared_pip_deps(text: str) -> List[str]:
     出现 `-r/-c` 这类参数说明有人把声明搬到了别处，那本身就该被 review 拦下。
     """
     deps: set[str] = set()
-    for line in text.splitlines():
-        s = line.strip()
+    # 先把 shell 续行（以 \ 结尾）拼成逻辑行再解析。不合并的后果是整份声明对门禁
+    # 彻底不可见：实测写成两行续行时，PIP_INSTALL_RE 只匹配到第一行截断处，
+    # 解析结果退化成 ['\\'] —— 门禁会以为「多装了一个叫反斜杠的包、漏装了全部真包」，
+    # 或者更糟地漏报漏装。这正是「门禁验证对象必须是被服务出去的字节」的同一类错误：
+    # 它读的是**源码文本**，所以源码里续行的写法必须被读懂。
+    logical: List[str] = []
+    for raw in text.splitlines():
+        s = raw.strip()
         if not s or s.startswith("#"):
             continue
+        if logical and logical[-1].endswith("\\"):
+            logical[-1] = logical[-1][:-1].rstrip() + " " + s.lstrip("\\").strip()
+            continue
+        logical.append(s)
+    for s in logical:
         m = PIP_INSTALL_RE.search(s)
         if not m:
             continue
@@ -579,7 +590,8 @@ def declared_pip_deps(text: str) -> List[str]:
         except ValueError:
             tokens = m.group(1).split()
         for tok in tokens:
-            if tok.startswith("-"):
+            # 过滤掉续行残留的反斜杠：它不是包名。
+            if tok.startswith("-") or tok == "\\":
                 continue
             name = re.split(r"[<>=!~\[;@ ]", tok, maxsplit=1)[0].strip()
             if not name:
@@ -1076,7 +1088,11 @@ def check_file(path: Path) -> Dict[str, Any]:
             run = st.get("run") or ""
             # 只认"真的在跑测试套件"的步骤。诊断/探活步骤名里也常带 test，
             # 但它们本就该 continue-on-error（属可观测性，不是门禁），不应误报。
-            TEST_CMDS = ("run_all.py", "quick_test.py", "pytest",
+            # 注意：quick_test.py / e2e_test.py 已于 2026-10-16 删除 —— 它们既不被
+            # tests/run_all.py 收录，失败时又不返回非零退出码（纯打印），在 CI 里恒绿，
+            # 属假绿测试，故连同此处的命令模式一并移除（见 tests/test_monitor_http.py
+            # 顶部注释：左移的是它们独有的 monitor 端点覆盖）。
+            TEST_CMDS = ("run_all.py", "pytest",
                          "npm test", "npm run test", "py_compile",
                          "validate_workflows.py")
             is_test = any(c in run for c in TEST_CMDS)

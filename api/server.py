@@ -1246,6 +1246,7 @@ class AIShieldHandler(BaseHTTPRequestHandler):
                     "GET  /api/v1/stats — Usage statistics",
                     "GET  /api/v1/monitor/list — List monitored tools",
                     "POST /api/v1/monitor/add — Add tool to monitor",
+                    "POST /api/v1/monitor/remove — Remove tool from monitor",
                     "POST /api/v1/monitor/check — Check for version changes",
                     "GET  /api/v1/identity/agents — List registered agents",
                     "GET  /api/v1/badge/{tool} — Security badge SVG",
@@ -2259,6 +2260,21 @@ class AIShieldHandler(BaseHTTPRequestHandler):
             result = add_tool_monitor(source_url, name)
             self._send_json(result)
             _record_usage("monitor-add", self.client_address[0])
+        elif path == "/api/v1/monitor/remove":
+            # ── 监控路由：移出监控列表 ──
+            # 2026-10-16 补上：scanner.monitor.remove_monitor 自始就被 import 进来了，
+            # 却一直没有路由分派 —— 监控条目只能 add 不能删，是典型的「只写不收」。
+            # 由 tests/test_monitor_http.py::test_remove_then_list_empty 固定住。
+            source_url = data.get("source_url", "")
+            if not source_url:
+                self._send_json({"error": "source_url is required"}, 400)
+                return
+            result = remove_monitor(source_url)
+            if not result.get("success") and result.get("error"):
+                self._send_json(result, 404)
+                return
+            self._send_json(result)
+            _record_usage("monitor-remove", self.client_address[0])
         elif path == "/api/v1/monitor/check":
             # ── 监控路由：检查版本变更 ──
             source_url = data.get("source_url", "")
