@@ -186,8 +186,22 @@ for rel in FILES:
         print(f"  delete: {rel}")
         continue
     rel = os.path.relpath(os.path.abspath(rel), ROOT).replace(os.sep, "/")
-    with open(os.path.join(ROOT, rel), "rb") as fh:
-        content = base64.b64encode(fh.read()).decode("ascii")
+    # 用 git 自己的 .gitattributes 规范化流程取 blob 内容，而不是直接读工作区
+    # 原始字节。工作区在 Windows 上常是 CRLF，而 .gitattributes 规定 eol=lf，
+    # 直接读会把 CRLF 推到 GitHub → 远端 blob 违反 eol=lf → CI（Linux）检出后
+    # 工作区仍是 CRLF，status 把工作区规范化成 LF 再跟 CRLF blob 比 → 假
+    # modified → git_push_safe.sh 的 pull --rebase 5 次全败。
+    # hash-object -w 用 rel 查 .gitattributes 规范化后写入对象库，cat-file blob
+    # 取回规范化字节；对象库多出的对象本就是 commit 应包含的，无害。
+    blob_sha = subprocess.check_output(
+        ["git", "-C", ROOT, "hash-object", "-w", rel],
+        stderr=subprocess.DEVNULL,
+    ).decode().strip()
+    raw = subprocess.check_output(
+        ["git", "-C", ROOT, "cat-file", "blob", blob_sha],
+        stderr=subprocess.DEVNULL,
+    )
+    content = base64.b64encode(raw).decode("ascii")
     s, cur = req("GET", f"https://api.github.com/repos/{REPO}/contents/{rel}?ref={BRANCH}")
     cur_b64 = cur.get("content", "").replace("\n", "") if s == 200 else None
     if cur_b64 == content:
