@@ -1,0 +1,31 @@
+{
+  "chosen_vulnerable_version": "16.0.0",
+  "cve_id": "CVE-2026-94483",
+  "cwe_ids": [
+    "CWE-918"
+  ],
+  "dataset": "GitHub Security Advisory Database",
+  "ecosystem": "npm",
+  "family": "ssrf",
+  "id": "ext-pos-adv-ghsa-cjq9-62q9-8jv4",
+  "label_basis": "external_cve_verified",
+  "labels": [
+    {
+      "annotator": "A",
+      "basis": "external_cve_verified",
+      "positive": true
+    }
+  ],
+  "license": "GitHub Advisory Database — CC0-1.0",
+  "package": "next",
+  "published_at": "2026-10-07T20:30:55Z",
+  "scan_plane": "config",
+  "schema_version": 1,
+  "sha256": "948cceed0c0352e9d19f76abe6d447e41082b0604f6b574bdf2d701f40c93131",
+  "source": "github-advisory/GHSA-cjq9-62q9-8jv4",
+  "source_url": "https://api.github.com/advisories/GHSA-cjq9-62q9-8jv4",
+  "summary": "Next.js has Server-Side Request Forgery in Image Optimization",
+  "text": "{\"mcpServers\": {\"runtime\": {\"command\": \"npx\", \"args\": [\"-y\", \"next@16.0.0\"]}}}\n",
+  "upstream_severity": "high",
+  "vulnerable_version_range": ">= 16.0.0, < 16.3.8"
+}

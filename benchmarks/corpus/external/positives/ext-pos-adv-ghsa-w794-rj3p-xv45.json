@@ -1,0 +1,31 @@
+{
+  "chosen_vulnerable_version": "1.10.2",
+  "cve_id": "CVE-2026-105697",
+  "cwe_ids": [
+    "CWE-78"
+  ],
+  "dataset": "GitHub Security Advisory Database",
+  "ecosystem": "pip",
+  "family": "command_injection",
+  "id": "ext-pos-adv-ghsa-w794-rj3p-xv45",
+  "label_basis": "external_cve_verified",
+  "labels": [
+    {
+      "annotator": "A",
+      "basis": "external_cve_verified",
+      "positive": true
+    }
+  ],
+  "license": "GitHub Advisory Database — CC0-1.0",
+  "package": "lfx",
+  "published_at": "2026-10-07T20:36:35Z",
+  "scan_plane": "instruction",
+  "schema_version": 1,
+  "sha256": "840bacc46184e53402bfd9f09179ca07d3e31e998c54d1b4d08b1770c3d44dce",
+  "source": "github-advisory/GHSA-w794-rj3p-xv45",
+  "source_url": "https://api.github.com/advisories/GHSA-w794-rj3p-xv45",
+  "summary": "Langflow: OS command injection (RCE) via arbitrary command in MCP stdio server configuration",
+  "text": "requirements: lfx==1.10.2\n",
+  "upstream_severity": "critical",
+  "vulnerable_version_range": "< 1.10.3"
+}

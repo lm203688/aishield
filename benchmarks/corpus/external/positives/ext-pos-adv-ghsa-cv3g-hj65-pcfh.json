@@ -1,0 +1,32 @@
+{
+  "chosen_vulnerable_version": "4.6.77",
+  "cve_id": "CVE-2026-61434",
+  "cwe_ids": [
+    "CWE-78",
+    "CWE-693"
+  ],
+  "dataset": "GitHub Security Advisory Database",
+  "ecosystem": "pip",
+  "family": "command_injection",
+  "id": "ext-pos-adv-ghsa-cv3g-hj65-pcfh",
+  "label_basis": "external_cve_verified",
+  "labels": [
+    {
+      "annotator": "A",
+      "basis": "external_cve_verified",
+      "positive": true
+    }
+  ],
+  "license": "GitHub Advisory Database — CC0-1.0",
+  "package": "praisonai",
+  "published_at": "2026-10-08T22:00:55Z",
+  "scan_plane": "instruction",
+  "schema_version": 1,
+  "sha256": "da2b550ed14f6f9f4b2071f16037fc4826d142c03f0fa20adb14f42e988dc68e",
+  "source": "github-advisory/GHSA-cv3g-hj65-pcfh",
+  "source_url": "https://api.github.com/advisories/GHSA-cv3g-hj65-pcfh",
+  "summary": "PraisonAI: Shell command allowlist bypass via find -exec built-in action",
+  "text": "requirements: praisonai==4.6.77\n",
+  "upstream_severity": "high",
+  "vulnerable_version_range": "<= 4.6.77"
+}

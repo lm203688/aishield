@@ -1,0 +1,31 @@
+{
+  "chosen_vulnerable_version": "6.1.0",
+  "cve_id": "CVE-2026-107302",
+  "cwe_ids": [
+    "CWE-125"
+  ],
+  "dataset": "GitHub Security Advisory Database",
+  "ecosystem": "npm",
+  "family": "memory_safety",
+  "id": "ext-pos-adv-ghsa-8f34-f56x-9xph",
+  "label_basis": "external_cve_verified",
+  "labels": [
+    {
+      "annotator": "A",
+      "basis": "external_cve_verified",
+      "positive": true
+    }
+  ],
+  "license": "GitHub Advisory Database — CC0-1.0",
+  "package": "msgpack5",
+  "published_at": "2026-10-08T17:40:10Z",
+  "scan_plane": "config",
+  "schema_version": 1,
+  "sha256": "ca356495a34bbc29ba982b7a5803e3c3dc5f8c6e977627a40c9219bc9ab42ee4",
+  "source": "github-advisory/GHSA-8f34-f56x-9xph",
+  "source_url": "https://api.github.com/advisories/GHSA-8f34-f56x-9xph",
+  "summary": "msgpack5: Truncated map32 headers throw an unexpected error",
+  "text": "{\"mcpServers\": {\"runtime\": {\"command\": \"npx\", \"args\": [\"-y\", \"msgpack5@6.1.0\"]}}}\n",
+  "upstream_severity": "high",
+  "vulnerable_version_range": "< 6.1.0"
+}

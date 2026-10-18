@@ -1,0 +1,31 @@
+{
+  "chosen_vulnerable_version": "0.26.1",
+  "cve_id": null,
+  "cwe_ids": [
+    "CWE-347"
+  ],
+  "dataset": "GitHub Security Advisory Database",
+  "ecosystem": "rust",
+  "family": "crypto_bypass",
+  "id": "ext-pos-adv-ghsa-5j98-2g5x-46v6",
+  "label_basis": "external_cve_verified",
+  "labels": [
+    {
+      "annotator": "A",
+      "basis": "external_cve_verified",
+      "positive": true
+    }
+  ],
+  "license": "GitHub Advisory Database — CC0-1.0",
+  "package": "hickory-resolver",
+  "published_at": "2026-10-05T22:54:35Z",
+  "scan_plane": "instruction",
+  "schema_version": 1,
+  "sha256": "9326cf39cab8c1abc0dc7969e07c80b1b7905d9bbb9cd2e924ddf5e4c483f8a4",
+  "source": "github-advisory/GHSA-5j98-2g5x-46v6",
+  "source_url": "https://api.github.com/advisories/GHSA-5j98-2g5x-46v6",
+  "summary": "hickory-resolver: Resolver::lookup() and Resolver::lookup_ip() APIs obscure DNSSEC validation failures",
+  "text": "hickory-resolver = \"0.26.1\"\n",
+  "upstream_severity": "high",
+  "vulnerable_version_range": "< 0.26.2"
+}

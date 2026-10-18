@@ -1,0 +1,31 @@
+{
+  "chosen_vulnerable_version": "2.13.0",
+  "cve_id": "CVE-2026-102268",
+  "cwe_ids": [
+    "CWE-347"
+  ],
+  "dataset": "GitHub Security Advisory Database",
+  "ecosystem": "pip",
+  "family": "crypto_bypass",
+  "id": "ext-pos-adv-ghsa-ffc3-869f-jxw9",
+  "label_basis": "external_cve_verified",
+  "labels": [
+    {
+      "annotator": "A",
+      "basis": "external_cve_verified",
+      "positive": true
+    }
+  ],
+  "license": "GitHub Advisory Database — CC0-1.0",
+  "package": "PyJWT",
+  "published_at": "2026-09-29T23:17:33Z",
+  "scan_plane": "instruction",
+  "schema_version": 1,
+  "sha256": "f91c2724a2cb36927d55f011468d31d42fb787e9210277cce39b8fde82d00ef3",
+  "source": "github-advisory/GHSA-ffc3-869f-jxw9",
+  "source_url": "https://api.github.com/advisories/GHSA-ffc3-869f-jxw9",
+  "summary": "PyJWT: Asymmetric-PEM detection bypass: whitespace/line-ending-mutated public keys skip the HS/asymmetric confusion guard",
+  "text": "requirements: PyJWT==2.13.0\n",
+  "upstream_severity": "critical",
+  "vulnerable_version_range": "<= 2.13.0"
+}

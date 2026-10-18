@@ -1,0 +1,32 @@
+{
+  "chosen_vulnerable_version": "6.3.0",
+  "cve_id": "CVE-2026-107720",
+  "cwe_ids": [
+    "CWE-20",
+    "CWE-347"
+  ],
+  "dataset": "GitHub Security Advisory Database",
+  "ecosystem": "npm",
+  "family": "injection_generic",
+  "id": "ext-pos-adv-ghsa-8wpc-h4q6-8fxv",
+  "label_basis": "external_cve_verified",
+  "labels": [
+    {
+      "annotator": "A",
+      "basis": "external_cve_verified",
+      "positive": true
+    }
+  ],
+  "license": "GitHub Advisory Database — CC0-1.0",
+  "package": "fast-jwt",
+  "published_at": "2026-10-08T22:02:12Z",
+  "scan_plane": "config",
+  "schema_version": 1,
+  "sha256": "23ea0b7c03dc74951b3f4f4f9e109875ba87eb148e6b6ef51204d7eecf3ffa38",
+  "source": "github-advisory/GHSA-8wpc-h4q6-8fxv",
+  "source_url": "https://api.github.com/advisories/GHSA-8wpc-h4q6-8fxv",
+  "summary": "fast-jwt: createVerifier accepts unsigned JWTs when key is '' or null and algorithms is explicitly set",
+  "text": "{\"mcpServers\": {\"runtime\": {\"command\": \"npx\", \"args\": [\"-y\", \"fast-jwt@6.3.0\"]}}}\n",
+  "upstream_severity": "high",
+  "vulnerable_version_range": "<= 6.3.0"
+}

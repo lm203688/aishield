@@ -1,0 +1,31 @@
+{
+  "chosen_vulnerable_version": "0.145.0",
+  "cve_id": "CVE-2026-100349",
+  "cwe_ids": [
+    "CWE-476"
+  ],
+  "dataset": "GitHub Security Advisory Database",
+  "ecosystem": "go",
+  "family": "memory_safety",
+  "id": "ext-pos-adv-ghsa-74vm-87hj-r66f",
+  "label_basis": "external_cve_verified",
+  "labels": [
+    {
+      "annotator": "A",
+      "basis": "external_cve_verified",
+      "positive": true
+    }
+  ],
+  "license": "GitHub Advisory Database — CC0-1.0",
+  "package": "github.com/getkin/kin-openapi",
+  "published_at": "2026-10-16T19:58:46Z",
+  "scan_plane": "instruction",
+  "schema_version": 1,
+  "sha256": "1a1a24690460212eef0796a7b8e78d892c2c3787f559e6ac3be9958e1ea2104c",
+  "source": "github-advisory/GHSA-74vm-87hj-r66f",
+  "source_url": "https://api.github.com/advisories/GHSA-74vm-87hj-r66f",
+  "summary": "kin-openapi openapi3filter: nil-pointer panic in ValidateResponse on a response header declared with content",
+  "text": "require github.com/getkin/kin-openapi v0.145.0\n",
+  "upstream_severity": "high",
+  "vulnerable_version_range": "<= 0.145.0"
+}

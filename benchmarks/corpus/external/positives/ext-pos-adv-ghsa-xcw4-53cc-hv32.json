@@ -1,0 +1,31 @@
+{
+  "chosen_vulnerable_version": "3.10.0",
+  "cve_id": "CVE-2026-59163",
+  "cwe_ids": [
+    "CWE-347"
+  ],
+  "dataset": "GitHub Security Advisory Database",
+  "ecosystem": "pip",
+  "family": "crypto_bypass",
+  "id": "ext-pos-adv-ghsa-xcw4-53cc-hv32",
+  "label_basis": "external_cve_verified",
+  "labels": [
+    {
+      "annotator": "A",
+      "basis": "external_cve_verified",
+      "positive": true
+    }
+  ],
+  "license": "GitHub Advisory Database — CC0-1.0",
+  "package": "mnemosyne-memory",
+  "published_at": "2026-09-18T17:54:26Z",
+  "scan_plane": "instruction",
+  "schema_version": 1,
+  "sha256": "36e8e9d66fb566df240bcf2191590dc012ec6b4f36b1cadcd6454e2794375e36",
+  "source": "github-advisory/GHSA-xcw4-53cc-hv32",
+  "source_url": "https://api.github.com/advisories/GHSA-xcw4-53cc-hv32",
+  "summary": "Mnemosyne has JWT signature verification bypass sync server that allows authentication bypass",
+  "text": "requirements: mnemosyne-memory==3.10.0\n",
+  "upstream_severity": "critical",
+  "vulnerable_version_range": "<= 3.10.0"
+}

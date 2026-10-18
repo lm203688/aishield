@@ -1,0 +1,31 @@
+{
+  "chosen_vulnerable_version": "1.8.4",
+  "cve_id": "CVE-2026-102422",
+  "cwe_ids": [
+    "CWE-78"
+  ],
+  "dataset": "GitHub Security Advisory Database",
+  "ecosystem": "npm",
+  "family": "command_injection",
+  "id": "ext-pos-adv-ghsa-pqg4-j6r4-53mv",
+  "label_basis": "external_cve_verified",
+  "labels": [
+    {
+      "annotator": "A",
+      "basis": "external_cve_verified",
+      "positive": true
+    }
+  ],
+  "license": "GitHub Advisory Database — CC0-1.0",
+  "package": "shell-quote",
+  "published_at": "2026-10-06T13:40:36Z",
+  "scan_plane": "config",
+  "schema_version": 1,
+  "sha256": "6a278b9b2af307a60f6934feb6df0cf82984af84f7fc54396d13605b5fd71257",
+  "source": "github-advisory/GHSA-pqg4-j6r4-53mv",
+  "source_url": "https://api.github.com/advisories/GHSA-pqg4-j6r4-53mv",
+  "summary": "shell-quote: `quote()` command injection via a line terminator in a token after a `{ comment }` token",
+  "text": "{\"mcpServers\": {\"runtime\": {\"command\": \"npx\", \"args\": [\"-y\", \"shell-quote@1.8.4\"]}}}\n",
+  "upstream_severity": "critical",
+  "vulnerable_version_range": ">= 1.8.4, < 1.11.0"
+}

@@ -1,0 +1,31 @@
+{
+  "chosen_vulnerable_version": "4.0.0",
+  "cve_id": "CVE-2026-54498",
+  "cwe_ids": [
+    "CWE-79"
+  ],
+  "dataset": "GitHub Security Advisory Database",
+  "ecosystem": "rubygems",
+  "family": "xss",
+  "id": "ext-pos-adv-ghsa-97jw-64cj-jc58",
+  "label_basis": "external_cve_verified",
+  "labels": [
+    {
+      "annotator": "A",
+      "basis": "external_cve_verified",
+      "positive": true
+    }
+  ],
+  "license": "GitHub Advisory Database — CC0-1.0",
+  "package": "view_component",
+  "published_at": "2026-07-15T22:51:04Z",
+  "scan_plane": "instruction",
+  "schema_version": 1,
+  "sha256": "99ef72bff8e243d505c6c2a1b5abbe7f070236ed5d2e1925d2b199b57eeee9a3",
+  "source": "github-advisory/GHSA-97jw-64cj-jc58",
+  "source_url": "https://api.github.com/advisories/GHSA-97jw-64cj-jc58",
+  "summary": "ViewComponent: around_render HTML-Safety Bypass",
+  "text": "gem \"view_component\", \"=4.0.0\"\n",
+  "upstream_severity": "high",
+  "vulnerable_version_range": ">= 4.0.0, < 4.12.0"
+}

@@ -1,0 +1,32 @@
+{
+  "chosen_vulnerable_version": "0.2.0",
+  "cve_id": "CVE-2026-108260",
+  "cwe_ids": [
+    "CWE-79",
+    "CWE-83"
+  ],
+  "dataset": "GitHub Security Advisory Database",
+  "ecosystem": "npm",
+  "family": "xss",
+  "id": "ext-pos-adv-ghsa-c42q-qvc3-j6vg",
+  "label_basis": "external_cve_verified",
+  "labels": [
+    {
+      "annotator": "A",
+      "basis": "external_cve_verified",
+      "positive": true
+    }
+  ],
+  "license": "GitHub Advisory Database — CC0-1.0",
+  "package": "@tinacms/web-components",
+  "published_at": "2026-10-09T20:56:45Z",
+  "scan_plane": "config",
+  "schema_version": 1,
+  "sha256": "16de15659d13d3a3a13361f32e22c4b71fd8e46318bead2616ef1b50818955b0",
+  "source": "github-advisory/GHSA-c42q-qvc3-j6vg",
+  "source_url": "https://api.github.com/advisories/GHSA-c42q-qvc3-j6vg",
+  "summary": "@tinacms/web-components: `tina-markdown` writes rich-text link URLs into `href` without scheme validation, allowing stored XSS",
+  "text": "{\"mcpServers\": {\"runtime\": {\"command\": \"npx\", \"args\": [\"-y\", \"@tinacms/web-components@0.2.0\"]}}}\n",
+  "upstream_severity": "high",
+  "vulnerable_version_range": "<= 0.2.0"
+}

@@ -1,0 +1,32 @@
+{
+  "chosen_vulnerable_version": "3.10.0",
+  "cve_id": "CVE-2026-85990",
+  "cwe_ids": [
+    "CWE-269",
+    "CWE-862"
+  ],
+  "dataset": "GitHub Security Advisory Database",
+  "ecosystem": "composer",
+  "family": "privilege_escalation",
+  "id": "ext-pos-adv-ghsa-54mm-6729-r5wp",
+  "label_basis": "external_cve_verified",
+  "labels": [
+    {
+      "annotator": "A",
+      "basis": "external_cve_verified",
+      "positive": true
+    }
+  ],
+  "license": "GitHub Advisory Database — CC0-1.0",
+  "package": "leantime/leantime",
+  "published_at": "2026-10-15T20:14:43Z",
+  "scan_plane": "instruction",
+  "schema_version": 1,
+  "sha256": "3f41e102d92fb3705af667407054a87893703065926bacf7e1a30ba37323e6f6",
+  "source": "github-advisory/GHSA-54mm-6729-r5wp",
+  "source_url": "https://api.github.com/advisories/GHSA-54mm-6729-r5wp",
+  "summary": "Leantime: Any Authenticated User Can Self-Escalate to Admin via Unauthorized JSON-RPC Methods",
+  "text": "{\"require\": {\"leantime/leantime\": \"3.10.0\"}}\n",
+  "upstream_severity": "high",
+  "vulnerable_version_range": "< 3.10.0"
+}

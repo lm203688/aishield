@@ -1,0 +1,31 @@
+{
+  "chosen_vulnerable_version": "7.3.1",
+  "cve_id": "CVE-2026-104890",
+  "cwe_ids": [
+    "CWE-434"
+  ],
+  "dataset": "GitHub Security Advisory Database",
+  "ecosystem": "composer",
+  "family": "path_traversal",
+  "id": "ext-pos-adv-ghsa-p279-5wcv-45vq",
+  "label_basis": "external_cve_verified",
+  "labels": [
+    {
+      "annotator": "A",
+      "basis": "external_cve_verified",
+      "positive": true
+    }
+  ],
+  "license": "GitHub Advisory Database — CC0-1.0",
+  "package": "kunstmaan/bundles-cms",
+  "published_at": "2026-10-07T18:05:38Z",
+  "scan_plane": "instruction",
+  "schema_version": 1,
+  "sha256": "5c98ab8039503ea90436ebdaf184fcc7ae87802e4caf3261c7645388e0923b5c",
+  "source": "github-advisory/GHSA-p279-5wcv-45vq",
+  "source_url": "https://api.github.com/advisories/GHSA-p279-5wcv-45vq",
+  "summary": "Kunstmaan CMS: MediaBundle extension blacklist bypass allows authenticated administrators to upload executable PHP files leading to remote code execution",
+  "text": "{\"require\": {\"kunstmaan/bundles-cms\": \"7.3.1\"}}\n",
+  "upstream_severity": "high",
+  "vulnerable_version_range": "< 7.3.2"
+}

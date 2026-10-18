@@ -1,0 +1,31 @@
+{
+  "chosen_vulnerable_version": "10.0.0",
+  "cve_id": "CVE-2026-70197",
+  "cwe_ids": [
+    "CWE-787"
+  ],
+  "dataset": "GitHub Security Advisory Database",
+  "ecosystem": "nuget",
+  "family": "config_weakness",
+  "id": "ext-pos-adv-ghsa-4mpw-cpwj-hxxj",
+  "label_basis": "external_cve_verified",
+  "labels": [
+    {
+      "annotator": "A",
+      "basis": "external_cve_verified",
+      "positive": true
+    }
+  ],
+  "license": "GitHub Advisory Database — CC0-1.0",
+  "package": "Microsoft.NETCore.App.Runtime.win-x86",
+  "published_at": "2026-10-13T20:34:32Z",
+  "scan_plane": "instruction",
+  "schema_version": 1,
+  "sha256": "fff2861d0f9ad978aad120849ee6350dc2ffe69721b1acc8ff18a9c649156b42",
+  "source": "github-advisory/GHSA-4mpw-cpwj-hxxj",
+  "source_url": "https://api.github.com/advisories/GHSA-4mpw-cpwj-hxxj",
+  "summary": "Microsoft Security Advisory CVE-2026-70197 - .NET and Visual Studio Remote Code Execution Vulnerability",
+  "text": "<PackageReference Include=\"Microsoft.NETCore.App.Runtime.win-x86\" Version=\"10.0.0\" />\n",
+  "upstream_severity": "high",
+  "vulnerable_version_range": ">= 10.0.0, <= 10.0.12"
+}

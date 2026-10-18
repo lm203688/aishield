@@ -1,0 +1,31 @@
+{
+  "chosen_vulnerable_version": "0.5.0b3.dev101",
+  "cve_id": null,
+  "cwe_ids": [
+    "CWE-22"
+  ],
+  "dataset": "GitHub Security Advisory Database",
+  "ecosystem": "pip",
+  "family": "path_traversal",
+  "id": "ext-pos-adv-ghsa-fr26-jjhm-638c",
+  "label_basis": "external_cve_verified",
+  "labels": [
+    {
+      "annotator": "A",
+      "basis": "external_cve_verified",
+      "positive": true
+    }
+  ],
+  "license": "GitHub Advisory Database — CC0-1.0",
+  "package": "pyload-ng",
+  "published_at": "2026-10-09T17:08:58Z",
+  "scan_plane": "instruction",
+  "schema_version": 1,
+  "sha256": "f09da340dbbd7dba57a7932f65a96c0621ebbe90570ccaecb39147d3ae7d4a4c",
+  "source": "github-advisory/GHSA-fr26-jjhm-638c",
+  "source_url": "https://api.github.com/advisories/GHSA-fr26-jjhm-638c",
+  "summary": "pyLoad: Tar extraction creates device nodes and FIFOs (member types not filtered; tarfile extractall without filter=)",
+  "text": "requirements: pyload-ng==0.5.0b3.dev101\n",
+  "upstream_severity": "high",
+  "vulnerable_version_range": "<= 0.5.0b3.dev101"
+}

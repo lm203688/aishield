@@ -1,0 +1,32 @@
+{
+  "chosen_vulnerable_version": "2026.7.13",
+  "cve_id": "CVE-2026-103929",
+  "cwe_ids": [
+    "CWE-78",
+    "CWE-284"
+  ],
+  "dataset": "GitHub Security Advisory Database",
+  "ecosystem": "rust",
+  "family": "command_injection",
+  "id": "ext-pos-adv-ghsa-g74g-rg72-j2p3",
+  "label_basis": "external_cve_verified",
+  "labels": [
+    {
+      "annotator": "A",
+      "basis": "external_cve_verified",
+      "positive": true
+    }
+  ],
+  "license": "GitHub Advisory Database — CC0-1.0",
+  "package": "mise",
+  "published_at": "2026-10-15T20:16:09Z",
+  "scan_plane": "instruction",
+  "schema_version": 1,
+  "sha256": "18efbe0567cd535ba68dc32e4e79a7ca675b4bd70ebf7246145ed194953c2dd3",
+  "source": "github-advisory/GHSA-g74g-rg72-j2p3",
+  "source_url": "https://api.github.com/advisories/GHSA-g74g-rg72-j2p3",
+  "summary": "mise permits untrusted local configuration to override default shell arguments",
+  "text": "mise = \"2026.7.13\"\n",
+  "upstream_severity": "high",
+  "vulnerable_version_range": "<= 2026.7.13"
+}

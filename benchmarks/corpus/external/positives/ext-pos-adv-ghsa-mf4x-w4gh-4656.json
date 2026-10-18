@@ -1,0 +1,31 @@
+{
+  "chosen_vulnerable_version": "10.0.0",
+  "cve_id": "CVE-2026-70186",
+  "cwe_ids": [
+    "CWE-833"
+  ],
+  "dataset": "GitHub Security Advisory Database",
+  "ecosystem": "nuget",
+  "family": "race_condition",
+  "id": "ext-pos-adv-ghsa-mf4x-w4gh-4656",
+  "label_basis": "external_cve_verified",
+  "labels": [
+    {
+      "annotator": "A",
+      "basis": "external_cve_verified",
+      "positive": true
+    }
+  ],
+  "license": "GitHub Advisory Database — CC0-1.0",
+  "package": "Microsoft.AspNetCore.App.Runtime.osx-arm64",
+  "published_at": "2026-10-13T20:53:19Z",
+  "scan_plane": "instruction",
+  "schema_version": 1,
+  "sha256": "760d7a4b68acf7b7fa5a990ded0a8dbe6173466711b5f7a444a6de2182919516",
+  "source": "github-advisory/GHSA-mf4x-w4gh-4656",
+  "source_url": "https://api.github.com/advisories/GHSA-mf4x-w4gh-4656",
+  "summary": "Microsoft Security Advisory CVE-2026-70186 - ASP.NET Core Denial of Service Vulnerability",
+  "text": "<PackageReference Include=\"Microsoft.AspNetCore.App.Runtime.osx-arm64\" Version=\"10.0.0\" />\n",
+  "upstream_severity": "high",
+  "vulnerable_version_range": ">= 10.0.0, <= 10.0.12"
+}

@@ -1,0 +1,31 @@
+{
+  "chosen_vulnerable_version": "1.0.3",
+  "cve_id": "CVE-2026-107303",
+  "cwe_ids": [
+    "CWE-79"
+  ],
+  "dataset": "GitHub Security Advisory Database",
+  "ecosystem": "npm",
+  "family": "xss",
+  "id": "ext-pos-adv-ghsa-9ffp-22j7-56r2",
+  "label_basis": "external_cve_verified",
+  "labels": [
+    {
+      "annotator": "A",
+      "basis": "external_cve_verified",
+      "positive": true
+    }
+  ],
+  "license": "GitHub Advisory Database — CC0-1.0",
+  "package": "react-jhipster",
+  "published_at": "2026-10-08T17:40:29Z",
+  "scan_plane": "config",
+  "schema_version": 1,
+  "sha256": "f645a0b04e5b984fe66dbd4a244a8c0dbcbd372239b8124185b81c1386290bab",
+  "source": "github-advisory/GHSA-9ffp-22j7-56r2",
+  "source_url": "https://api.github.com/advisories/GHSA-9ffp-22j7-56r2",
+  "summary": "JHipster: Generated Applications Allow Stored XSS via Unrestricted Blob ContentType Opened as Same-Origin Blob",
+  "text": "{\"mcpServers\": {\"runtime\": {\"command\": \"npx\", \"args\": [\"-y\", \"react-jhipster@1.0.3\"]}}}\n",
+  "upstream_severity": "high",
+  "vulnerable_version_range": "<= 1.0.3"
+}

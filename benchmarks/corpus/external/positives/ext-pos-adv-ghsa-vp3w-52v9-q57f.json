@@ -1,0 +1,31 @@
+{
+  "chosen_vulnerable_version": "5.12.0",
+  "cve_id": "CVE-2026-77601",
+  "cwe_ids": [
+    "CWE-78"
+  ],
+  "dataset": "GitHub Security Advisory Database",
+  "ecosystem": "rubygems",
+  "family": "command_injection",
+  "id": "ext-pos-adv-ghsa-vp3w-52v9-q57f",
+  "label_basis": "external_cve_verified",
+  "labels": [
+    {
+      "annotator": "A",
+      "basis": "external_cve_verified",
+      "positive": true
+    }
+  ],
+  "license": "GitHub Advisory Database — CC0-1.0",
+  "package": "openc3",
+  "published_at": "2026-09-23T18:51:01Z",
+  "scan_plane": "instruction",
+  "schema_version": 1,
+  "sha256": "a6e12fdcb7d429f443105a0a86440e05bbed31509fd844f2cdb9746d63782cdf",
+  "source": "github-advisory/GHSA-vp3w-52v9-q57f",
+  "source_url": "https://api.github.com/advisories/GHSA-vp3w-52v9-q57f",
+  "summary": "OpenC3 COSMOS: Authenticated OS command injection via the `pypi_url` setting",
+  "text": "gem \"openc3\", \"=5.12.0\"\n",
+  "upstream_severity": "high",
+  "vulnerable_version_range": ">= 5.12.0, <= 7.2.1"
+}

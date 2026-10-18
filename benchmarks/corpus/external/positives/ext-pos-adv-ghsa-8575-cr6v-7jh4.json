@@ -1,0 +1,32 @@
+{
+  "chosen_vulnerable_version": "4.22.0",
+  "cve_id": "CVE-2026-105649",
+  "cwe_ids": [
+    "CWE-79",
+    "CWE-434"
+  ],
+  "dataset": "GitHub Security Advisory Database",
+  "ecosystem": "npm",
+  "family": "xss",
+  "id": "ext-pos-adv-ghsa-8575-cr6v-7jh4",
+  "label_basis": "external_cve_verified",
+  "labels": [
+    {
+      "annotator": "A",
+      "basis": "external_cve_verified",
+      "positive": true
+    }
+  ],
+  "license": "GitHub Advisory Database — CC0-1.0",
+  "package": "ghost",
+  "published_at": "2026-10-07T20:35:22Z",
+  "scan_plane": "config",
+  "schema_version": 1,
+  "sha256": "42fdb23232d1ffc5fb7835a77270c907bf696233148f41b4d85401130ba921f4",
+  "source": "github-advisory/GHSA-8575-cr6v-7jh4",
+  "source_url": "https://api.github.com/advisories/GHSA-8575-cr6v-7jh4",
+  "summary": "Ghost: Stored XSS via SVG Uploads Bypassing Sanitization",
+  "text": "{\"mcpServers\": {\"runtime\": {\"command\": \"npx\", \"args\": [\"-y\", \"ghost@4.22.0\"]}}}\n",
+  "upstream_severity": "high",
+  "vulnerable_version_range": ">= 4.22.0, < 6.65.0"
+}

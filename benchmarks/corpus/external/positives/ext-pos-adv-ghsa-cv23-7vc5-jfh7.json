@@ -1,0 +1,31 @@
+{
+  "chosen_vulnerable_version": "0.0.0-20260724235538-61af6e1e6970",
+  "cve_id": "CVE-2026-102941",
+  "cwe_ids": [
+    "CWE-125"
+  ],
+  "dataset": "GitHub Security Advisory Database",
+  "ecosystem": "go",
+  "family": "memory_safety",
+  "id": "ext-pos-adv-ghsa-cv23-7vc5-jfh7",
+  "label_basis": "external_cve_verified",
+  "labels": [
+    {
+      "annotator": "A",
+      "basis": "external_cve_verified",
+      "positive": true
+    }
+  ],
+  "license": "GitHub Advisory Database — CC0-1.0",
+  "package": "github.com/gomarkdown/markdown",
+  "published_at": "2026-10-16T15:41:39Z",
+  "scan_plane": "instruction",
+  "schema_version": 1,
+  "sha256": "267140605babbf66937b66d837ca54e4c075f513ee3e7c7045470f4f336c2cd5",
+  "source": "github-advisory/GHSA-cv23-7vc5-jfh7",
+  "source_url": "https://api.github.com/advisories/GHSA-cv23-7vc5-jfh7",
+  "summary": "gomarkdown/markdown IsSafeURL panics on short URLs",
+  "text": "require github.com/gomarkdown/markdown v0.0.0-20260724235538-61af6e1e6970\n",
+  "upstream_severity": "high",
+  "vulnerable_version_range": "< 0.0.0-20260724235538-61af6e1e6971"
+}

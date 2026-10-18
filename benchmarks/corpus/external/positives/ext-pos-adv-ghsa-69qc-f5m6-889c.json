@@ -1,0 +1,32 @@
+{
+  "chosen_vulnerable_version": "6.34.0",
+  "cve_id": "CVE-2026-105643",
+  "cwe_ids": [
+    "CWE-79",
+    "CWE-653"
+  ],
+  "dataset": "GitHub Security Advisory Database",
+  "ecosystem": "npm",
+  "family": "xss",
+  "id": "ext-pos-adv-ghsa-69qc-f5m6-889c",
+  "label_basis": "external_cve_verified",
+  "labels": [
+    {
+      "annotator": "A",
+      "basis": "external_cve_verified",
+      "positive": true
+    }
+  ],
+  "license": "GitHub Advisory Database — CC0-1.0",
+  "package": "ghost",
+  "published_at": "2026-10-07T20:43:05Z",
+  "scan_plane": "config",
+  "schema_version": 1,
+  "sha256": "6f04adec319ac14d55aab14798934d32ae216efb776beb2a03fb63a81eff8549",
+  "source": "github-advisory/GHSA-69qc-f5m6-889c",
+  "source_url": "https://api.github.com/advisories/GHSA-69qc-f5m6-889c",
+  "summary": "Ghost: Stored XSS via Embed Card Previews",
+  "text": "{\"mcpServers\": {\"runtime\": {\"command\": \"npx\", \"args\": [\"-y\", \"ghost@6.34.0\"]}}}\n",
+  "upstream_severity": "high",
+  "vulnerable_version_range": ">= 6.34.0, < 6.67.0"
+}

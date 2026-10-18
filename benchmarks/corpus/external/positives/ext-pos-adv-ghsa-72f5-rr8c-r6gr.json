@@ -1,0 +1,31 @@
+{
+  "chosen_vulnerable_version": "1.19.2",
+  "cve_id": "CVE-2026-44161",
+  "cwe_ids": [
+    "CWE-918"
+  ],
+  "dataset": "GitHub Security Advisory Database",
+  "ecosystem": "rubygems",
+  "family": "ssrf",
+  "id": "ext-pos-adv-ghsa-72f5-rr8c-r6gr",
+  "label_basis": "external_cve_verified",
+  "labels": [
+    {
+      "annotator": "A",
+      "basis": "external_cve_verified",
+      "positive": true
+    }
+  ],
+  "license": "GitHub Advisory Database — CC0-1.0",
+  "package": "fluentd",
+  "published_at": "2026-06-26T16:36:11Z",
+  "scan_plane": "instruction",
+  "schema_version": 1,
+  "sha256": "b04aaa8447e2905b056e92dff5754ab514e0b3ccdf16abf2fea3c8988b6a5102",
+  "source": "github-advisory/GHSA-72f5-rr8c-r6gr",
+  "source_url": "https://api.github.com/advisories/GHSA-72f5-rr8c-r6gr",
+  "summary": "Fluentd is Vulnerable to Server-Side Request Forgery (SSRF) via Placeholder Expansion in `out_http`",
+  "text": "gem \"fluentd\", \"=1.19.2\"\n",
+  "upstream_severity": "high",
+  "vulnerable_version_range": "<= 1.19.2"
+}

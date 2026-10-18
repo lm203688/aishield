@@ -1,0 +1,31 @@
+{
+  "chosen_vulnerable_version": "6.2.0",
+  "cve_id": "CVE-2026-107722",
+  "cwe_ids": [
+    "CWE-347"
+  ],
+  "dataset": "GitHub Security Advisory Database",
+  "ecosystem": "npm",
+  "family": "crypto_bypass",
+  "id": "ext-pos-adv-ghsa-ww5h-9m49-7xx4",
+  "label_basis": "external_cve_verified",
+  "labels": [
+    {
+      "annotator": "A",
+      "basis": "external_cve_verified",
+      "positive": true
+    }
+  ],
+  "license": "GitHub Advisory Database — CC0-1.0",
+  "package": "fast-jwt",
+  "published_at": "2026-10-08T22:02:07Z",
+  "scan_plane": "config",
+  "schema_version": 1,
+  "sha256": "4cd6b5e46e5a2fa172d29bab80898bb7e8dc74847607d663a920572185adea3b",
+  "source": "github-advisory/GHSA-ww5h-9m49-7xx4",
+  "source_url": "https://api.github.com/advisories/GHSA-ww5h-9m49-7xx4",
+  "summary": "fast-jwt: Incomplete patch of CVE-2026-34950: Non-whitespace key-prefix re-enables RSA→HS256 algorithm confusion",
+  "text": "{\"mcpServers\": {\"runtime\": {\"command\": \"npx\", \"args\": [\"-y\", \"fast-jwt@6.2.0\"]}}}\n",
+  "upstream_severity": "critical",
+  "vulnerable_version_range": ">= 6.2.0, <= 6.2.4"
+}

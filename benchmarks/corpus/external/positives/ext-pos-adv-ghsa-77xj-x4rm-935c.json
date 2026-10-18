@@ -1,0 +1,32 @@
+{
+  "chosen_vulnerable_version": "0.59.0",
+  "cve_id": "CVE-2026-107377",
+  "cwe_ids": [
+    "CWE-22",
+    "CWE-73"
+  ],
+  "dataset": "GitHub Security Advisory Database",
+  "ecosystem": "pip",
+  "family": "path_traversal",
+  "id": "ext-pos-adv-ghsa-77xj-x4rm-935c",
+  "label_basis": "external_cve_verified",
+  "labels": [
+    {
+      "annotator": "A",
+      "basis": "external_cve_verified",
+      "positive": true
+    }
+  ],
+  "license": "GitHub Advisory Database — CC0-1.0",
+  "package": "datamodel-code-generator",
+  "published_at": "2026-10-08T17:58:01Z",
+  "scan_plane": "instruction",
+  "schema_version": 1,
+  "sha256": "7e6151c2add941ea2ef98ccab7fe7eb641f5ebd5daf5599c6d054a30be25e3a1",
+  "source": "github-advisory/GHSA-77xj-x4rm-935c",
+  "source_url": "https://api.github.com/advisories/GHSA-77xj-x4rm-935c",
+  "summary": "datamodel-code-generator: Protobuf weak-import path traversal allows files to be written outside the temporary directory",
+  "text": "requirements: datamodel-code-generator==0.59.0\n",
+  "upstream_severity": "high",
+  "vulnerable_version_range": ">= 0.59.0, <= 0.80.0"
+}

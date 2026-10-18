@@ -1,0 +1,32 @@
+{
+  "chosen_vulnerable_version": "2.21.0",
+  "cve_id": "CVE-2026-77524",
+  "cwe_ids": [
+    "CWE-269",
+    "CWE-918"
+  ],
+  "dataset": "GitHub Security Advisory Database",
+  "ecosystem": "go",
+  "family": "privilege_escalation",
+  "id": "ext-pos-adv-ghsa-637c-6jxx-4rwm",
+  "label_basis": "external_cve_verified",
+  "labels": [
+    {
+      "annotator": "A",
+      "basis": "external_cve_verified",
+      "positive": true
+    }
+  ],
+  "license": "GitHub Advisory Database — CC0-1.0",
+  "package": "github.com/kedacore/keda/v2",
+  "published_at": "2026-10-15T20:19:42Z",
+  "scan_plane": "instruction",
+  "schema_version": 1,
+  "sha256": "1a2d0ad359da17f9c1edc0967c01d19200a7ab2284426619064b5ca2dba3ccc0",
+  "source": "github-advisory/GHSA-637c-6jxx-4rwm",
+  "source_url": "https://api.github.com/advisories/GHSA-637c-6jxx-4rwm",
+  "summary": "KEDA: Privilege escalation from namespace admin to cluster admin via KEDA TriggerAuthentication",
+  "text": "require github.com/kedacore/keda/v2 v2.21.0\n",
+  "upstream_severity": "critical",
+  "vulnerable_version_range": "< 2.21.0"
+}

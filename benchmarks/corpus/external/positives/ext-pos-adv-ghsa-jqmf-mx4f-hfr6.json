@@ -1,0 +1,35 @@
+{
+  "chosen_vulnerable_version": "0.1.0",
+  "cve_id": null,
+  "cwe_ids": [
+    "CWE-77",
+    "CWE-78",
+    "CWE-94",
+    "CWE-116",
+    "CWE-918"
+  ],
+  "dataset": "GitHub Security Advisory Database",
+  "ecosystem": "pip",
+  "family": "command_injection",
+  "id": "ext-pos-adv-ghsa-jqmf-mx4f-hfr6",
+  "label_basis": "external_cve_verified",
+  "labels": [
+    {
+      "annotator": "A",
+      "basis": "external_cve_verified",
+      "positive": true
+    }
+  ],
+  "license": "GitHub Advisory Database — CC0-1.0",
+  "package": "vibe-trading-ai",
+  "published_at": "2026-10-02T22:44:03Z",
+  "scan_plane": "instruction",
+  "schema_version": 1,
+  "sha256": "f15d1c11dea473c083f1aa4438281053bea02b829794ac9aee7cb0a8dbdf115a",
+  "source": "github-advisory/GHSA-jqmf-mx4f-hfr6",
+  "source_url": "https://api.github.com/advisories/GHSA-jqmf-mx4f-hfr6",
+  "summary": "Vibe-Trading LLM-callable tools permit command execution, code injection, and SSRF",
+  "text": "requirements: vibe-trading-ai==0.1.0\n",
+  "upstream_severity": "critical",
+  "vulnerable_version_range": ">= 0.1.0, < 0.1.7"
+}

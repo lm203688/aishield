@@ -1,0 +1,32 @@
+{
+  "chosen_vulnerable_version": "1.7.0",
+  "cve_id": "CVE-2026-106451",
+  "cwe_ids": [
+    "CWE-367",
+    "CWE-377"
+  ],
+  "dataset": "GitHub Security Advisory Database",
+  "ecosystem": "maven",
+  "family": "race_condition",
+  "id": "ext-pos-adv-ghsa-mcr4-qmvw-px4g",
+  "label_basis": "external_cve_verified",
+  "labels": [
+    {
+      "annotator": "A",
+      "basis": "external_cve_verified",
+      "positive": true
+    }
+  ],
+  "license": "GitHub Advisory Database — CC0-1.0",
+  "package": "org.lz4:lz4-java",
+  "published_at": "2026-10-07T20:35:51Z",
+  "scan_plane": "instruction",
+  "schema_version": 1,
+  "sha256": "fdeebcb4bdf27afac3ba18fc1b0e36db2c221f49ef8030db20bfe087a790ed00",
+  "source": "github-advisory/GHSA-mcr4-qmvw-px4g",
+  "source_url": "https://api.github.com/advisories/GHSA-mcr4-qmvw-px4g",
+  "summary": "yawkat LZ4 Java: Native library extraction to a shared temporary directory is vulnerable to file replacement by another local user",
+  "text": "<dependency>\n  <groupId>org.lz4:lz4-java</groupId>\n  <version>1.7.0</version>\n</dependency>\n",
+  "upstream_severity": "high",
+  "vulnerable_version_range": ">= 1.7.0, <= 1.8.1"
+}

@@ -1,0 +1,32 @@
+{
+  "chosen_vulnerable_version": "1.6.77",
+  "cve_id": "CVE-2026-61437",
+  "cwe_ids": [
+    "CWE-693",
+    "CWE-829"
+  ],
+  "dataset": "GitHub Security Advisory Database",
+  "ecosystem": "pip",
+  "family": "privilege_escalation",
+  "id": "ext-pos-adv-ghsa-4gfv-wg42-7jw5",
+  "label_basis": "external_cve_verified",
+  "labels": [
+    {
+      "annotator": "A",
+      "basis": "external_cve_verified",
+      "positive": true
+    }
+  ],
+  "license": "GitHub Advisory Database — CC0-1.0",
+  "package": "praisonaiagents",
+  "published_at": "2026-10-08T16:48:57Z",
+  "scan_plane": "instruction",
+  "schema_version": 1,
+  "sha256": "26983835d81ad42b0136421f6faf1efc585aa26ec65df84c1ccfe2071dee34fb",
+  "source": "github-advisory/GHSA-4gfv-wg42-7jw5",
+  "source_url": "https://api.github.com/advisories/GHSA-4gfv-wg42-7jw5",
+  "summary": "PraisonAI: Unsafe Dynamic Module Loading Leads to Arbitrary Code Execution via tools.py in AgentFlow",
+  "text": "requirements: praisonaiagents==1.6.77\n",
+  "upstream_severity": "high",
+  "vulnerable_version_range": "<= 1.6.77"
+}

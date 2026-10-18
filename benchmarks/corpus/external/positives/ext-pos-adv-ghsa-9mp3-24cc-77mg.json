@@ -1,0 +1,32 @@
+{
+  "chosen_vulnerable_version": "4.6.77",
+  "cve_id": "CVE-2026-61445",
+  "cwe_ids": [
+    "CWE-22",
+    "CWE-78"
+  ],
+  "dataset": "GitHub Security Advisory Database",
+  "ecosystem": "pip",
+  "family": "path_traversal",
+  "id": "ext-pos-adv-ghsa-9mp3-24cc-77mg",
+  "label_basis": "external_cve_verified",
+  "labels": [
+    {
+      "annotator": "A",
+      "basis": "external_cve_verified",
+      "positive": true
+    }
+  ],
+  "license": "GitHub Advisory Database — CC0-1.0",
+  "package": "praisonai",
+  "published_at": "2026-10-08T22:00:40Z",
+  "scan_plane": "instruction",
+  "schema_version": 1,
+  "sha256": "da2b550ed14f6f9f4b2071f16037fc4826d142c03f0fa20adb14f42e988dc68e",
+  "source": "github-advisory/GHSA-9mp3-24cc-77mg",
+  "source_url": "https://api.github.com/advisories/GHSA-9mp3-24cc-77mg",
+  "summary": "PraisonAI: AICoder Arbitrary File Write and Command Execution via LLM Tool Calls",
+  "text": "requirements: praisonai==4.6.77\n",
+  "upstream_severity": "critical",
+  "vulnerable_version_range": "<= 4.6.77"
+}

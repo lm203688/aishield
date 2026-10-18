@@ -1,0 +1,31 @@
+{
+  "chosen_vulnerable_version": "5.4.4",
+  "cve_id": "CVE-2026-107726",
+  "cwe_ids": [
+    "CWE-20"
+  ],
+  "dataset": "GitHub Security Advisory Database",
+  "ecosystem": "maven",
+  "family": "injection_generic",
+  "id": "ext-pos-adv-ghsa-6v25-8wq6-xq4j",
+  "label_basis": "external_cve_verified",
+  "labels": [
+    {
+      "annotator": "A",
+      "basis": "external_cve_verified",
+      "positive": true
+    }
+  ],
+  "license": "GitHub Advisory Database — CC0-1.0",
+  "package": "com.hazelcast:hazelcast",
+  "published_at": "2026-10-08T22:10:29Z",
+  "scan_plane": "instruction",
+  "schema_version": 1,
+  "sha256": "7ab8ab69bae9db52435432ab4a1a6894b841e7eb533718ddd39c99cbb1cfa0d3",
+  "source": "github-advisory/GHSA-6v25-8wq6-xq4j",
+  "source_url": "https://api.github.com/advisories/GHSA-6v25-8wq6-xq4j",
+  "summary": "Hazelcast allows arbitrary member memory access by low-privileged client",
+  "text": "<dependency>\n  <groupId>com.hazelcast:hazelcast</groupId>\n  <version>5.4.4</version>\n</dependency>\n",
+  "upstream_severity": "critical",
+  "vulnerable_version_range": "< 5.4.5"
+}

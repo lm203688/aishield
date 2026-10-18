@@ -1,0 +1,32 @@
+{
+  "chosen_vulnerable_version": "1.9.10-0.20260703131214-23d1934099b0",
+  "cve_id": "CVE-2026-84317",
+  "cwe_ids": [
+    "CWE-20",
+    "CWE-693"
+  ],
+  "dataset": "GitHub Security Advisory Database",
+  "ecosystem": "go",
+  "family": "injection_generic",
+  "id": "ext-pos-adv-ghsa-76pm-mq2q-9gcr",
+  "label_basis": "external_cve_verified",
+  "labels": [
+    {
+      "annotator": "A",
+      "basis": "external_cve_verified",
+      "positive": true
+    }
+  ],
+  "license": "GitHub Advisory Database — CC0-1.0",
+  "package": "github.com/0xJacky/Nginx-UI",
+  "published_at": "2026-10-15T20:11:07Z",
+  "scan_plane": "instruction",
+  "schema_version": 1,
+  "sha256": "2e167212ee66126a6af0390033ec8d2f7b60d9bcc82f11cc2a3e9be8d6d18e94",
+  "source": "github-advisory/GHSA-76pm-mq2q-9gcr",
+  "source_url": "https://api.github.com/advisories/GHSA-76pm-mq2q-9gcr",
+  "summary": "Nginx UI: MCP nginx_config_add skips config directive validation → authenticated nginx directive injection (RCE on the official image)",
+  "text": "require github.com/0xJacky/Nginx-UI v1.9.10-0.20260703131214-23d1934099b0\n",
+  "upstream_severity": "high",
+  "vulnerable_version_range": "< 1.9.10-0.20260703131214-23d1934099b0"
+}

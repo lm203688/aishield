@@ -1,0 +1,31 @@
+{
+  "chosen_vulnerable_version": "6.2.4",
+  "cve_id": "CVE-2026-107724",
+  "cwe_ids": [
+    "CWE-347"
+  ],
+  "dataset": "GitHub Security Advisory Database",
+  "ecosystem": "npm",
+  "family": "crypto_bypass",
+  "id": "ext-pos-adv-ghsa-g3jj-5cmm-3hxx",
+  "label_basis": "external_cve_verified",
+  "labels": [
+    {
+      "annotator": "A",
+      "basis": "external_cve_verified",
+      "positive": true
+    }
+  ],
+  "license": "GitHub Advisory Database — CC0-1.0",
+  "package": "fast-jwt",
+  "published_at": "2026-10-08T22:01:53Z",
+  "scan_plane": "config",
+  "schema_version": 1,
+  "sha256": "eae8a0514ceb0a73b1a1cab6084719007873ef8593307a65e5f7bd252af30280",
+  "source": "github-advisory/GHSA-g3jj-5cmm-3hxx",
+  "source_url": "https://api.github.com/advisories/GHSA-g3jj-5cmm-3hxx",
+  "summary": "fast-jwt treats raw public JWK JSON as an HMAC secret, enabling HS256 token forgery",
+  "text": "{\"mcpServers\": {\"runtime\": {\"command\": \"npx\", \"args\": [\"-y\", \"fast-jwt@6.2.4\"]}}}\n",
+  "upstream_severity": "high",
+  "vulnerable_version_range": "= 6.2.4"
+}

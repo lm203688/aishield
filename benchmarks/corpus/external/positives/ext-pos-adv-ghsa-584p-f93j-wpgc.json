@@ -1,0 +1,32 @@
+{
+  "chosen_vulnerable_version": "2.2.22",
+  "cve_id": "CVE-2026-76087",
+  "cwe_ids": [
+    "CWE-639",
+    "CWE-862"
+  ],
+  "dataset": "GitHub Security Advisory Database",
+  "ecosystem": "composer",
+  "family": "auth_bypass",
+  "id": "ext-pos-adv-ghsa-584p-f93j-wpgc",
+  "label_basis": "external_cve_verified",
+  "labels": [
+    {
+      "annotator": "A",
+      "basis": "external_cve_verified",
+      "positive": true
+    }
+  ],
+  "license": "GitHub Advisory Database — CC0-1.0",
+  "package": "verbb/formie",
+  "published_at": "2026-09-23T18:36:44Z",
+  "scan_plane": "instruction",
+  "schema_version": 1,
+  "sha256": "1108137ece83b84cc91dba61b141e7cca4a538b80b2a9034ce7c19a08e0af884",
+  "source": "github-advisory/GHSA-584p-f93j-wpgc",
+  "source_url": "https://api.github.com/advisories/GHSA-584p-f93j-wpgc",
+  "summary": "Formie: Unauthenticated users can overwrite incomplete submissions via submit action",
+  "text": "{\"require\": {\"verbb/formie\": \"2.2.22\"}}\n",
+  "upstream_severity": "high",
+  "vulnerable_version_range": "< 2.2.23"
+}

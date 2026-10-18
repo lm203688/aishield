@@ -1,0 +1,31 @@
+{
+  "chosen_vulnerable_version": "11.0.0-preview.1",
+  "cve_id": "CVE-2026-85363",
+  "cwe_ids": [
+    "CWE-190"
+  ],
+  "dataset": "GitHub Security Advisory Database",
+  "ecosystem": "nuget",
+  "family": "memory_safety",
+  "id": "ext-pos-adv-ghsa-f63g-mx39-3r38",
+  "label_basis": "external_cve_verified",
+  "labels": [
+    {
+      "annotator": "A",
+      "basis": "external_cve_verified",
+      "positive": true
+    }
+  ],
+  "license": "GitHub Advisory Database — CC0-1.0",
+  "package": "Microsoft.WindowsDesktop.App.Runtime.win-x86",
+  "published_at": "2026-10-13T20:49:39Z",
+  "scan_plane": "instruction",
+  "schema_version": 1,
+  "sha256": "43777bad7c3f4355dfb1fc733bbc740f34cf5760160bef98a856637585e99e82",
+  "source": "github-advisory/GHSA-f63g-mx39-3r38",
+  "source_url": "https://api.github.com/advisories/GHSA-f63g-mx39-3r38",
+  "summary": "Microsoft Security Advisory CVE-2026-85363 - .NET and Visual Studio Remote Code Execution Vulnerability",
+  "text": "<PackageReference Include=\"Microsoft.WindowsDesktop.App.Runtime.win-x86\" Version=\"11.0.0-preview.1\" />\n",
+  "upstream_severity": "high",
+  "vulnerable_version_range": ">= 11.0.0-preview.1, <= 11.0.0-rc.1"
+}

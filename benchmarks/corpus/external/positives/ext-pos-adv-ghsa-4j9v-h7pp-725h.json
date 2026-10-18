@@ -1,0 +1,31 @@
+{
+  "chosen_vulnerable_version": "11.0.0-preview.1",
+  "cve_id": "CVE-2026-70035",
+  "cwe_ids": [
+    "CWE-502"
+  ],
+  "dataset": "GitHub Security Advisory Database",
+  "ecosystem": "nuget",
+  "family": "supply_chain_exec",
+  "id": "ext-pos-adv-ghsa-4j9v-h7pp-725h",
+  "label_basis": "external_cve_verified",
+  "labels": [
+    {
+      "annotator": "A",
+      "basis": "external_cve_verified",
+      "positive": true
+    }
+  ],
+  "license": "GitHub Advisory Database — CC0-1.0",
+  "package": "Microsoft.WindowsDesktop.App.Runtime.win-arm64",
+  "published_at": "2026-10-13T20:53:46Z",
+  "scan_plane": "instruction",
+  "schema_version": 1,
+  "sha256": "1a6736356a5b9030b3921737e2273403e6a48536f8c0f3e2c13e0db19831ff38",
+  "source": "github-advisory/GHSA-4j9v-h7pp-725h",
+  "source_url": "https://api.github.com/advisories/GHSA-4j9v-h7pp-725h",
+  "summary": "Microsoft Security Advisory CVE-2026-70035 - .NET and Visual Studio Remote Code Execution Vulnerability",
+  "text": "<PackageReference Include=\"Microsoft.WindowsDesktop.App.Runtime.win-arm64\" Version=\"11.0.0-preview.1\" />\n",
+  "upstream_severity": "high",
+  "vulnerable_version_range": ">= 11.0.0-preview.1, <= 11.0.0-rc.1"
+}
