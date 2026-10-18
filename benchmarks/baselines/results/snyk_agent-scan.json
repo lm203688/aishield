@@ -1,0 +1,16 @@
+{
+  "baseline": {
+    "command": "snyk agent-scan --json <sample>",
+    "name": "Snyk agent-scan",
+    "offline": false,
+    "rule_count": null,
+    "source": "https://docs.snyk.io/agent-scan",
+    "version": "v1.x"
+  },
+  "corpus": "benchmarks/corpus/external/",
+  "reason": "snyk CLI 未安装",
+  "results": {},
+  "run_at": "2026-10-18T09:22:43Z",
+  "schema_version": 1,
+  "status": "not_run"
+}

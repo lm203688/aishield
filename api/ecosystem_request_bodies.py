@@ -114,6 +114,8 @@ ECO_REQUEST_BODIES: dict[tuple[str, str], dict] = {
         "example": {
             "subject": {"type": "tool", "url": "https://github.com/example/tool"},
             "verdict": "pass",
+            # 示例值：真值随规则集变化。门禁不覆盖本文件（.py 声明表），
+            # 此处仅作 payload 形态说明；规则数真值以 /api/v1/health.rules_count 为准。
             "coverage": {"rules": 264},
             "attestation": {"score": 92},
         },

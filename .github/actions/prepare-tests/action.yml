@@ -69,6 +69,17 @@ inputs:
     required: false
     default: 'true'
 
+  install-package:
+    description: >-
+      是否把本仓自身装成可编辑包。用于需要 import 本仓而非只是跑脚本的调用方
+      （unified-security-scan 的 external-scan job）。本入参存在的意义是把
+      「装本仓」这一步也纳入统一前置，避免 workflow 里各自做可编辑安装
+      （E11b 已禁止）——依赖清单唯一，升级才不被漏掉。
+      注意：E12 靠正则从本 action 的文本里提取依赖声明，所以描述文字里不要出现
+      形如 `pip` 后跟 `install` 的字面量，否则会被当成包名误报成 W6。
+    required: false
+    default: 'false'
+
 runs:
   using: composite
   steps:
@@ -127,6 +138,16 @@ runs:
             print("::error::签名后端仍为 %s —— 测试将在错误前提下运行" % backend)
             sys.exit(1)
         PY
+
+    - name: Install AIShield as editable package
+      if: inputs.install-package == 'true'
+      shell: bash
+      run: |
+        # 供需要「import 本仓而非跑脚本」的调用方使用（unified-security-scan 的
+        # external-scan job）。原先它在自己 job 里自行安装本仓，而 setup.py
+        # 已钉死 cryptography/PyYAML —— 把「装本仓」收敛到本 action 后，依赖升级
+        # 只改一处，也不会让 E11b（禁止 workflow 内散落依赖安装）失效。
+        python -m pip install --disable-pip-version-check -e .
 
     - name: Install mcp-server deps
       if: inputs.install-node-deps == 'true'

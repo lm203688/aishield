@@ -1,0 +1,113 @@
+name: AIShield Eval Gate
+
+# 检测能力与形式化不变量的**唯一**回归门禁：数字退化即红。
+#
+# 缘由（2026-10-18 SCI 执行方案 P0.3）：此前检测能力没有任何 CI 层面的防回归
+# 保护 —— 57 条恶意语料的召回、45 条良性语料的零误报、以及"扫描绝不执行被扫
+# 配置"这条项目级不变量，全部只在**本地手动**跑过。后果是双向的：
+#
+#   ① 静默退化 —— 某次重构把一条规则的 pattern 写错，召回从 100% 掉到 96%，
+#      CI 全绿（测试套件断言的是"函数能跑"，不是"还能检出该检出的东西"），
+#      直到有人重新手动跑 benchmark 才被发现。
+#   ② 假绿修复 —— benchmarks/run_bench.py 第 82–88 行曾是一段**空操作断言**
+#      （if 分支末尾只有 pass，无论漏检与否都不置 ok=False），使 malicious 样本
+#      的 expect_typosquat=true 在 lodahs 完全漏检的情况下仍报 PASS。它躲了
+#      很久，因为没有门禁会去校验"断言本身是否真的在断言"。
+#
+# 所以本 workflow 的存在意义是：把这三条数字钉在 CI 上，任何 PR 只要让它们
+# 退化就红，而不需要人记得去跑。
+#
+# ── 为什么只有这三个检查 ────────────────────────────────────────────
+# 报告要求"单一入口"。这里的"单一"是指**检测能力的所有回归信号收敛到这一处**，
+# 而不是限制只能有两个步骤。benchmarks/run_bench.py 被列为第三个是刻意的：
+# 它是检测端到端行为的断言层（含上述 typosquat 断言），属于同一类"数字退化即
+# 红"的门禁。若把它留在 workflow 之外，等于给刚修好的空操作断言留一个退化口。
+#
+# ── 为什么仍引用 prepare-tests（E11 语境）──────────────────────────
+# scripts/benchmark.py 与 scripts/run_fvi_gate.py 的第三方依赖闭包都是**空**
+# （已用 validate_workflows.third_party_imports 实测），所以 E11 并不强制本
+# job 引用统一前置。仍然引用是刻意的：
+#   · FVI 链路经由 scripts/prove_isolation.py 触碰 eco/crypto_sign.py，其签名
+#     后端在 import 时按 cryptography 可用性决定。干净 runner 上若未装，后端
+#     静默降级为 hmac-sha256，而 prove_isolation 的断言不检查后端身份 —— 它
+#     会在错误的密码学前提下"通过"，正是本仓要消灭的那种假绿。
+#   · Python 版本统一钉在 3.13，与 ci.yml 测试 job 一致。
+# install-node-deps: false —— 纯 Python 门禁，不需要 mcp-server 的 npm 依赖。
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+    # 本门禁关心的是"检测引擎与形式化资产变了没有"，其余路径的改动不会让它
+    # 产生新信号，触发只是白烧配额（ci.yml 用同样的手法阻断状态回写自激）。
+    paths:
+      - 'scanner/**'
+      - 'scripts/benchmark.py'
+      - 'scripts/run_fvi_gate.py'
+      - 'scripts/prove_isolation.py'
+      - 'scripts/rule_corpus.py'
+      - 'scripts/check_isolation_invariants.py'
+      - 'formal/**'
+      - 'benchmarks/**'
+      - 'data/**'
+      - 'tests/**'
+      - 'scripts/rule_count_gate.py'
+      - '.github/actions/prepare-tests/**'
+      - '.github/workflows/eval-gate.yml'
+  workflow_call:          # 供 closed-loop-spine 串行调用
+  workflow_dispatch:     # 故障时手动补跑，无需等下一个 push
+
+permissions:
+  contents: read         # 只读门禁：绝不需要写仓库的权限
+
+concurrency:
+  group: eval-gate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  eval-gate:
+    name: Eval Gate (detection + formal invariants)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prepare gate environment
+        uses: ./.github/actions/prepare-tests
+        with:
+          install-node-deps: 'false'
+
+      - name: Detection benchmark — recall / false-positive gate
+        shell: bash
+        run: |
+          # pipefail 必需：一旦未来有人在本行后加管道（如 | tail），bash 默认
+          # 取最后一个命令的退出码，会把 benchmark 的 fail-closed 信号吞掉，
+          # 于是"召回掉了 CI 依然绿"—— 这正是本 workflow 要堵的假绿形状。
+          set -o pipefail
+          # 阈值取自 SCI 执行方案 P0.3：召回 ≥0.9 是投稿的最低科学门槛，
+          # FP 上限钉在 0 —— 本仓的核心承诺就是"零误报纪律"，任何误报都是
+          # 对卖点的直接违背，不能留容差。
+          # 不设 --json：CI 日志里要看到的是可读的诊断，JSON 只在 --out 写
+          # artifact 时用，而 artifact 不是本门禁的产物（本门禁只负责红/绿）。
+          python scripts/benchmark.py --fail-under-recall 0.9 --fail-over-fp 0
+
+      - name: End-to-end benchmark assertions (run_bench)
+        shell: bash
+        run: |
+          # 断言层：expected.json 里每个样本的 expect_types_present /
+          # forbid_types / expect_typosquat。它是"引擎行为对不对"的端到端
+          # 断言，与上面 benchmark.py 的"聚合数字够不够"互补 —— 后者会在
+          # "漏了一个但另一个补上了"时依然报 100%，前者能抓到那个漏掉的。
+          set -o pipefail
+          python benchmarks/run_bench.py
+
+      - name: FVI — isolation invariants gate
+        shell: bash
+        run: |
+          # 形式化门禁：有界模型检查 + 判别力验证（step_buggy_leak /
+          # step_buggy_multiwriter 必须被抓到）。这一步守住的是"扫描过程绝不
+          # 执行被扫配置"这条项目级不变量 —— 它是 AIShield 区别于同类工具的
+          # 根本前提，退化就等于产品失去存在理由，所以必须和检测数字同等级
+          # 地进 CI。
+          set -o pipefail
+          python scripts/run_fvi_gate.py

@@ -27,7 +27,7 @@ import os
 import threading
 import time
 
-# 按目录分发的写锁：同一目录的写串行，不同目录可并行。
+# 进程内锁：按目录分发的写锁，同目录写串行、不同目录并行。
 _dir_locks: dict[str, threading.Lock] = {}
 _global_lock = threading.Lock()
 
@@ -41,21 +41,140 @@ def _lock_for(directory: str) -> threading.Lock:
         return lock
 
 
-def save_json(path: str, data, *, fsync: bool = True, tmp_suffix: str = ".tmp") -> None:
+# 跨进程锁：threading.Lock 只在单进程内有效。Railway / Render 常见多 worker
+# 部署，两个进程同时写同一个 JSON 时，后写的 os.replace 会静默覆盖先写的
+# —— 丢更新，且不报任何错。用一个旁路 .lock 文件承载 advisory 锁
+# （POSIX fcntl / Windows msvcrt），跨进程互斥；崩溃进程持锁会自动由内核释放，
+# 不会留死锁。文件锁是「软互斥」：只有本模块的写者遵守它，故它是对原子写
+# 的补强而非替代，两把锁都要留。
+class _FileLock:
+    """跨进程 advisory 互斥锁（标准库实现，零第三方依赖）。
+
+    用法：`with file_lock(dir) as fh: ...`。POSIX 下用 fcntl.flock 独占阻塞锁；
+    Windows 下用 msvcrt.locking 锁 1 字节（必须持 open 句柄，故锁句柄由调用方
+    在 with 块内自行管理，本类只负责加/解锁与超时退避）。
+    """
+
+    def __init__(self, directory: str, *, timeout: float = 30.0, poll: float = 0.05):
+        self.path = os.path.join(directory, ".state_write.lock")
+        self.timeout = timeout
+        self.poll = poll
+        self._fh = None
+
+    def acquire(self) -> bool:
+        deadline = time.monotonic() + self.timeout
+        while True:
+            fh = open(self.path, "a+b")
+            try:
+                fh.seek(0)
+                fh.write(b"\0")
+            except OSError:
+                fh.close()
+                fh = None
+            if fh is not None and _try_lock(fh):
+                # 锁已持有：句柄必须保持打开直到 release()（flock 绑在
+                # open file description 上，提前 close 等于提前解锁）。
+                self._fh = fh
+                return True
+            if fh is not None:
+                try:
+                    fh.close()
+                except OSError:
+                    pass
+            if time.monotonic() >= deadline:
+                return False
+            time.sleep(self.poll)
+
+    def release(self) -> None:
+        fh = self._fh
+        self._fh = None
+        if fh is None:
+            return
+        try:
+            _unlock(fh)
+        except OSError:
+            pass
+        try:
+            fh.close()
+        except OSError:
+            pass
+
+    def __enter__(self):
+        if not self.acquire():
+            raise TimeoutError(
+                f"state write lock timed out after {self.timeout}s: {self.path}")
+        return self
+
+    def __exit__(self, exc_type, exc, tb):
+        self.release()
+        return False
+
+
+def _try_lock(fh) -> bool:
+    """尽力加锁；不支持平台返回 True（退化为仅进程内互斥）。"""
+    try:
+        import fcntl  # POSIX
+    except ImportError:
+        try:
+            import msvcrt  # Windows
+            fh.seek(0)
+            msvcrt.locking(fh.fileno(), msvcrt.LK_NBLCK, 1)
+            return True
+        except (ImportError, OSError):
+            return True
+    try:
+        fcntl.flock(fh.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        return True
+    except OSError:
+        return False
+
+
+def _unlock(fh) -> None:
+    try:
+        import fcntl
+        fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+        return
+    except ImportError:
+        pass
+    try:
+        import msvcrt
+        fh.seek(0)
+        msvcrt.locking(fh.fileno(), msvcrt.LK_UNLCK, 1)
+    except (ImportError, OSError):
+        pass
+
+
+def file_lock(directory: str) -> _FileLock:
+    """取得跨进程写锁（同一目录下所有 state 文件共用一把）。"""
+    return _FileLock(directory)
+
+
+def save_json(path: str, data, *, fsync: bool = True, tmp_suffix: str = ".tmp",
+              cross_process: bool = True) -> None:
     """原子写 JSON：临时文件 → fsync → os.replace。
 
     中途崩溃最多留下一个 .tmp 文件，活文件始终完整。
+    cross_process=True 时在进程内锁之外再加一把跨进程文件锁，覆盖多 worker
+    部署（见模块内 `_FileLock` 的说明）。
     """
     directory = os.path.dirname(os.path.abspath(path)) or "."
     os.makedirs(directory, exist_ok=True)
     tmp = f"{path}{tmp_suffix}"
     with _lock_for(directory):
-        with open(tmp, "w", encoding="utf-8") as fh:
-            json.dump(data, fh, ensure_ascii=False, indent=2)
-            if fsync:
-                fh.flush()
-                os.fsync(fh.fileno())
-        os.replace(tmp, path)
+        if cross_process:
+            with file_lock(directory):
+                _write_atomic(path, tmp, data, fsync)
+        else:
+            _write_atomic(path, tmp, data, fsync)
+
+
+def _write_atomic(path: str, tmp: str, data, fsync: bool) -> None:
+    with open(tmp, "w", encoding="utf-8") as fh:
+        json.dump(data, fh, ensure_ascii=False, indent=2)
+        if fsync:
+            fh.flush()
+            os.fsync(fh.fileno())
+    os.replace(tmp, path)
 
 
 def load_json(path: str, default=None, *, schema_version=None,

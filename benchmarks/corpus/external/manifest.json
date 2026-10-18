@@ -1,0 +1,155 @@
+{
+  "annotation_status": "not_human_annotated",
+  "benchmark": "aishield-external-corpus/v1",
+  "cohen_kappa": null,
+  "cohen_kappa_detail": {
+    "n_a": 1110,
+    "n_b": 0,
+    "reason": "仅 1 个标注来源（A = 外部真值：CVE 记录或数据集作者标注）。Cohen's κ 需 ≥2 名独立人类标注者；用脚本自算 κ 等于作弊，因此留空而非编造。补 B 标注后重跑本脚本即可自动出 κ。"
+  },
+  "collected_at": "2026-10-18",
+  "datasets": [
+    "GitHub Security Advisory Database",
+    "InjecAgent (Zhang et al., NAACL 2024)"
+  ],
+  "families_negative": {
+    "benign_user_task": 17,
+    "indirect_prompt_injection": 500
+  },
+  "families_positive": {
+    "advisory_native": 2,
+    "auth_bypass": 5,
+    "command_injection": 7,
+    "config_weakness": 1,
+    "credential_exposure": 3,
+    "crypto_bypass": 7,
+    "data_exfiltration": 176,
+    "indirect_prompt_injection": 176,
+    "injection_generic": 5,
+    "jailbreak_family": 175,
+    "memory_safety": 4,
+    "path_traversal": 7,
+    "privilege_escalation": 6,
+    "race_condition": 2,
+    "resource_exhaustion": 3,
+    "ssrf": 4,
+    "supply_chain_exec": 4,
+    "xss": 6
+  },
+  "family_count": 18,
+  "label_basis": {
+    "controlled_negative_matched": "控制变量负样本：同工件同格式，注入被移除；标签由构造客观决定",
+    "external_cve_verified": "标签锚定第三方（NVD/GitHub/发行方）已发布 CVE，非主观判断",
+    "external_dataset_clean_sample": "数据集中本身不含注入的干净样本",
+    "external_dataset_ground_truth": "标签为公开数据集作者标注的攻击类型真值"
+  },
+  "provenance_honesty": "CVE 样本的 text 由 advisory 的生态+包+版本区间派生为原生依赖声明，非 advisory 原文；InjecAgent 样本的 text 为该数据集的 Tool Response 字段原值。provenance 与标签均为外部，派生过程记录在 label_basis。",
+  "r1_status": {
+    "checks": {
+      "families_ge_15": {
+        "actual": 18,
+        "met": true,
+        "target": 15
+      },
+      "kappa_ge_0.8": {
+        "actual": null,
+        "met": false,
+        "target": 0.8
+      },
+      "negatives_ge_400": {
+        "actual": 517,
+        "met": true,
+        "target": 400
+      },
+      "positives_ge_400": {
+        "actual": 593,
+        "met": true,
+        "target": 400
+      }
+    },
+    "met": false,
+    "note": "κ 项无法由自动化补齐 —— 需 ≥2 名独立人类标注者。这是 R1 的真实阻塞项，不伪造。",
+    "unmet": [
+      "kappa_ge_0.8"
+    ]
+  },
+  "schema_version": 1,
+  "shortfall": {
+    "families": 0,
+    "negatives": 0,
+    "positives": 0
+  },
+  "sources": [
+    {
+      "count": 66,
+      "dataset": "GitHub Security Advisory Database",
+      "distinct_sources": 66,
+      "label_basis": "external_cve_verified",
+      "scan_planes": {
+        "config": 12,
+        "instruction": 54
+      },
+      "side": "positives",
+      "source_examples": [
+        "github-advisory/GHSA-23vg-4cjm-66q5",
+        "github-advisory/GHSA-26vp-8gxg-v4pg",
+        "github-advisory/GHSA-27j2-h3m2-8237",
+        "github-advisory/GHSA-2cvf-wqm6-wr9g",
+        "github-advisory/GHSA-2gc7-j998-5xx6"
+      ]
+    },
+    {
+      "count": 527,
+      "dataset": "InjecAgent (Zhang et al., NAACL 2024)",
+      "distinct_sources": 3,
+      "label_basis": "external_dataset_ground_truth",
+      "scan_planes": {
+        "instruction": 527
+      },
+      "side": "positives",
+      "source_examples": [
+        "injecagent/test_cases_dh_base.json",
+        "injecagent/test_cases_dh_enhanced.json",
+        "injecagent/test_cases_ds_base.json"
+      ]
+    },
+    {
+      "count": 17,
+      "dataset": "InjecAgent (Zhang et al., NAACL 2024)",
+      "distinct_sources": 1,
+      "label_basis": "external_dataset_clean_sample",
+      "scan_planes": {
+        "instruction": 17
+      },
+      "side": "negatives",
+      "source_examples": [
+        "injecagent/data/user_cases.jsonl"
+      ]
+    },
+    {
+      "count": 500,
+      "dataset": "InjecAgent (Zhang et al., NAACL 2024)",
+      "distinct_sources": 1,
+      "label_basis": "controlled_negative_matched",
+      "scan_planes": {
+        "instruction": 500
+      },
+      "side": "negatives",
+      "source_examples": [
+        "injecagent/test_cases_dh_base.json"
+      ]
+    }
+  ],
+  "target": {
+    "families": 15,
+    "min_annotators": 2,
+    "min_kappa": 0.8,
+    "negatives": 400,
+    "positives": 400
+  },
+  "totals": {
+    "negatives": 517,
+    "positives": 593,
+    "total": 1110
+  }
+}

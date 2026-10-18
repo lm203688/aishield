@@ -22,9 +22,11 @@ prompt，对齐 **OWASP MCP Top 10 (2025)** 与 **OWASP Agentic AI Top 10 (ASI01
    匹配，绝不 `exec` / `os.system` / `subprocess` 被扫配置中的任何指令。
    自证：`python scripts/prove_isolation.py`（拦截 subprocess/os.system，断言 0 次 spawn）。
 2. **代码与配置绝不上传云端。** 本地优先、零依赖、可离线。
-3. **绝不引用过期规则计数。** 真值以 `/api/v1/health` 的 `rules_breakdown` 为准；
-   改规则数必须同步 `mcp-server/README.md` 逐类表 + 跑 `scripts/sync_readme_counts()`。
-   勿引用 227/215/133/228 等历史数字。
+3. **绝不引用过期规则计数。** 真值以 `/api/v1/health` 的 `rules_breakdown` 为准，
+   单一出口是 `scripts/rule_count_gate.py --json`（返回 `authority.mcp/skill/static/
+   generated/radar`）与 `/api/v1/health` 的运行时值。改规则数必须同步
+   `mcp-server/README.md` 逐类表 + 跑 `scripts/rule_count_gate.py --check`（不一致即红）。
+   勿引用 227/215/133/228/201/235 等历史数字。
 4. **本地测试绿 ≠ CI 绿。** 推送走 `scripts/_push_batch.py`（Contents API，单提交），
    推完必须 API 复验。
    **统一 push 入口的退出码必须被尊重**：`bash scripts/git_push_safe.sh` 的失败
@@ -118,7 +120,7 @@ prompt，对齐 **OWASP MCP Top 10 (2025)** 与 **OWASP Agentic AI Top 10 (ASI01
 # 1. 克隆并准备
 git clone https://github.com/lm203688/aishield.git && cd aishield
 python -m venv .venv && source .venv/bin/activate
-pip install pytest cryptography pyyaml   # cryptography / pyyaml 都是**必需**的，不是可选增强
+pip install pytest cryptography pyyaml hypothesis   # 四个都是**必需**的，不是可选增强
 
 # 2. 跑全量测试
 python tests/run_all.py
@@ -130,6 +132,11 @@ python scripts/prove_isolation.py
 > `cryptography` 为什么必需：L1 可移植身份（JWKS 只发非对称公钥、第三方凭公钥离线验签）
 > 与 L3 意图授权（AP2 Intent Mandate）建立在 Ed25519 上。缺它时 `eco/crypto_sign.py`
 > 会静默降级成 hmac-sha256，那两组用例 fail-closed 成片报红，**看起来像产品回归**。
+>
+> `hypothesis` 为什么必需：`tests/test_invariant_property.py` 是属性测试（FVI 引入），
+> 它 import hypothesis。此前该依赖只写在 `.github/actions/prepare-tests` 里、本地无人声明，
+> 新环境按本 quickstart 装完 pytest 会在 **collection 阶段**直接崩——这是 2026-10-17 查缺
+> 报告定性的「任何人 clone 跑测试」承诺硬违约。等价的一条命令：`pip install ".[test]"`。
 > `tests/run_all.py` 会在开跑前预检并中止（退出码 2），让你不必对着一屏误导性红找根因。
 > `pyyaml` 为什么必需：`scripts/validate_workflows.py` 与 `scripts/meta_monitor.py`
 > 靠它解析 workflow / 体检配置；缺它时校验器会报 `E1 PyYAML 未安装`，而依赖 YAML 的

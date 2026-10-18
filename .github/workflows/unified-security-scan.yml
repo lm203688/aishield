@@ -220,13 +220,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      # 前置统一走 prepare-tests（E11/E11b）：Python 版本保留 3.10 做兼容性覆盖
+      # （刻意不为它单独定版本），本仓自身以可编辑包形式安装，不再在 job 里散落
+      # `pip install -e .` 字面量。node 依赖此 job 用不到，关掉省一次安装。
+      - uses: ./.github/actions/prepare-tests
         with:
           python-version: '3.10'
-
-      - name: Install AIShield
-        run: pip install -e .
+          install-node-deps: 'false'
+          install-package: 'true'
 
       - name: Run Security Scan
         env:

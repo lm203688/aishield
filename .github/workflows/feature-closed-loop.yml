@@ -121,7 +121,7 @@ jobs:
       - name: Validate workflow syntax
         if: steps.ci-check.outputs.skip_tests != 'true'
         run: |
-          pip install pyyaml
+          # PyYAML 由本 job 的 prepare-tests 统一安装（E11/E12）；此处不再各自 pip install。
           python scripts/validate_workflows.py
 
       - name: Write CI status for downstream consumers
