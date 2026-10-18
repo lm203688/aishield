@@ -228,9 +228,14 @@ def _reg_snyk_agent_scan() -> Baseline:
 
 
 def registry() -> List[Baseline]:
-    """全部已登记基线。顺序稳定，保证对比表行序可复现。"""
+    """全部已登记基线。顺序稳定，保证对比表行序可复现。
+
+    前 4 个为外部商业基线（本环境无法运行 -> not_run，条件不对等，不伪造）；
+    后 2 个为项目自带、离线可跑的朴素基线，提供 R2 所需的真实数字下界。
+    """
+    from naive_baselines import naive_baselines
     return [_reg_invariant(), _reg_agent_security_scanner(),
-            _reg_mcp_audit(), _reg_snyk_agent_scan()]
+            _reg_mcp_audit(), _reg_snyk_agent_scan()] + naive_baselines()
 
 
 SELF = Baseline(

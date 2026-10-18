@@ -10,7 +10,7 @@
   "corpus": "benchmarks/corpus/external/",
   "reason": "模块未安装：pip install agent-security-scanner-mcp",
   "results": {},
-  "run_at": "2026-10-18T09:22:43Z",
+  "run_at": "2026-10-18T21:58:23Z",
   "schema_version": 1,
   "status": "not_run"
 }

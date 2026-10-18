@@ -58,22 +58,30 @@ python scripts/validate_workflows.py               # Workflow 语法门禁
 | external corpus 家族数 | 18 | `jq .family_count benchmarks/corpus/external/manifest.json` |
 | external corpus 样本数 | 1110（1 条 manifest 元数据不计入） | 同上 |
 
-**阈值判据**（R1 外部验证门槛，来自 `benchmarks/corpus/external/manifest.json:r1_status`）：
-- `families_ge_15`：18 ≥ 15 ✓
-- `positives_ge_100`：760 ≥ 100 ✓
-- `negatives_ge_50`：500 ≥ 50 ✓
-- `provenance_honesty`：CVE + 公开数据集，非自造 ✓
-- `cohen_kappa`：N/A（仅 1 标注源，诚实留空，禁止脚本自算 κ 凑数）
+**阈值判据**（R1 外部验证门槛，来自 `benchmarks/corpus/external/manifest.json:r1_status`，
+以下为 `r1_status.checks` 的逐字段镜像，禁止手写副本）：
+
+| R1 检查项 | 实际 | 目标 | 达标 |
+|---|---|---|---|
+| `families_ge_15` | 18 | ≥ 15 | ✓ |
+| `positives_ge_400` | 593 | ≥ 400 | ✓ |
+| `negatives_ge_400` | 517 | ≥ 400 | ✓ |
+| `kappa_ge_0.8` | null（仅 1 标注源） | ≥ 0.8 | ✗（诚实阻塞） |
+| **`r1_status.met`** | — | — | **false**（仅 κ 项未达标） |
+
+> 诚实声明：`r1_status.met=false` 不是脚本缺陷，而是 **Cohen's κ 需要 ≥2 名独立人类
+> 标注者**，自动化无法补齐。这是 R1 的真实阻塞项，论文局限性章节（R7）必须直接引用。
+> `provenance_honesty`：CVE（GitHub Advisory）+ 公开数据集（InjecAgent 等），非自造 ✓。
 
 ---
 
 ## 3. 语料（Corpus）复现
 
-外部语料 `benchmarks/corpus/external/`（约 5.0 MB，1110 条正/负样本，18 家族）：
+外部语料 `benchmarks/corpus/external/`（约 5.0 MB，1110 条样本 = 593 正 / 517 负，18 家族）：
 
-- 正样本（positives）：760 条，来源 GitHub Security Advisory Database + InjecAgent
-- 负样本（negatives）：500 条，其中 500 条为间接提示注入控制样本，17 条为良性用户任务
-- 家族分布：见 `manifest.json:families_positive` / `families_negative`
+- 正样本（positives）：593 条，来源 GitHub Security Advisory Database + InjecAgent 等公开数据集
+- 负样本（negatives）：517 条，其中 500 条为间接提示注入控制样本（controlled_matched，与正样本同表面文本但无恶意指令嵌入），17 条为良性用户任务（benign_user_task）
+- 家族分布：见 `manifest.json:families_positive` / `families_negative`（18 个正样本家族）
 
 **重新收集**（需外网，非默认路径）：
 

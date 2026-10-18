@@ -10,7 +10,7 @@
   "corpus": "benchmarks/corpus/external/",
   "reason": "镜像探测失败：FileNotFoundError",
   "results": {},
-  "run_at": "2026-10-18T09:22:43Z",
+  "run_at": "2026-10-18T21:58:23Z",
   "schema_version": 1,
   "status": "not_run"
 }
