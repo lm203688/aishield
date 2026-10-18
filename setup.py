@@ -26,6 +26,14 @@ setup(
         "PyYAML>=6.0",
     ],
     extras_require={
+        # 测试依赖显式声明（10-17 查缺报告 §3.2）：tests/test_invariant_property.py
+        # import hypothesis，此前只写进 .github/actions/prepare-tests 一个地方，
+        # 导致「按 README 一条命令装完就 pytest」在 collection 阶段直接崩。
+        # 声明口径与 prepare-tests 的 pins 保持同源，改 pins 时两边同步。
+        "test": [
+            "pytest>=8.0",
+            "hypothesis>=6.168.5",
+        ],
         "browser-use": ["browser-use>=0.2.0"],
         "graph-db": ["neo4j>=5.0.0"],
         "kafka": ["kafka-python>=2.0.0"],

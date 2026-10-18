@@ -45,15 +45,41 @@ class TestIsolationInvariantsFormal(unittest.TestCase):
                         "变异体 step_buggy_multiwriter 未被抓到 → 检查器恒真（假绿）")
         self.assertTrue(any("SINGLE_WRITER" in v for v in violations))
 
+    def test_checker_catches_readonly_mutant(self):
+        """判别力：INV-4 read_only_input 违背必须被抓到（M3）。"""
+        _, _, violations = fvi.explore(fvi.step_buggy_writes_scanned)
+        self.assertTrue(violations, "M3 未被抓到 → 检查器恒真")
+        self.assertTrue(any("READ_ONLY" in v for v in violations))
+
+    def test_checker_catches_completeness_mutant(self):
+        """判别力：INV-5 完备性违背必须被抓到（M4）。"""
+        corpus_names = frozenset(a.name for a in fvi.HOSTILE_CORPUS)
+        tc = lambda ts: fvi.completeness_check(ts, corpus_names)
+        _, _, violations = fvi.explore_with_report(
+            fvi.step_buggy_skip, terminal_check=tc)
+        self.assertTrue(violations, "M4 未被抓到 → 检查器恒真")
+        self.assertTrue(any("COMPLETENESS" in v for v in violations))
+
+    def test_completeness_argument_matches_actual(self):
+        """完备性论证的结论必须与实测穷举结果一致。"""
+        arg = fvi.completeness_argument()
+        report, _, _ = fvi.explore_with_report(fvi.step_correct)
+        self.assertEqual(report["termination"], "exhausted")
+        self.assertEqual(report["explored"], arg["upper_bound"])
+        self.assertEqual(report["explored"], 2 ** len(fvi.HOSTILE_CORPUS))
+
     def test_script_exit_code_zero(self):
-        """端到端：脚本整体退出码 0（正确模型通过 + 两变异体均被抓）。"""
+        """端到端：脚本整体退出码 0（正确模型通过 + 4 变异体均被抓）。"""
         r = subprocess.run(
             [sys.executable, os.path.join(ROOT, "scripts", "check_isolation_invariants.py")],
             capture_output=True, text=True, timeout=120,
         )
         self.assertEqual(r.returncode, 0, f"stdout:\n{r.stdout}\nstderr:\n{r.stderr}")
-        self.assertIn("no_execute / no_network / single_writer 全部成立", r.stdout)
-        self.assertIn("被抓住", r.stdout)
+        self.assertIn("INV-1/2/3/4 全部成立", r.stdout)
+        self.assertIn("INV-5 完备性", r.stdout)
+        self.assertIn("termination=exhausted", r.stdout)
+        for mid in ("M1", "M2", "M3", "M4"):
+            self.assertIn(mid, r.stdout, f"{mid} 未在输出中")
 
 
 if __name__ == "__main__":

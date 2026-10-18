@@ -31,7 +31,15 @@ Semantics:
 """
 from __future__ import annotations
 
-from typing import Dict, List, Tuple
+import os
+from typing import Any, Dict, List, Optional, Sequence, Tuple
+
+# 仓库根 = 本文件所在 scripts/ 的上一级。
+# 外部语料路径必须从根派生而不是用相对 cwd：本模块被 CI、单测、命令行三处
+# 以不同 cwd 导入（tests 从仓库根跑、agent_infra 从 connectors/ 跑），
+# 用 cwd 相对路径会间歇性读到空目录 —— 那正是「模块级单例 import 时固化路径」
+# 这一类老坑，见 .workbuddy/memory/ 里 2026-10-15 的 `AttestationStream` 事故。
+_REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # ---------------------------------------------------------------------------
 # Negative control
@@ -355,6 +363,214 @@ def all_family_names() -> Tuple[str, ...]:
     return tuple(ATTACK_FAMILIES)
 
 
+# ---------------------------------------------------------------------------
+# Cohen's kappa —— 零依赖实现
+# ---------------------------------------------------------------------------
+# 为什么自己实现而不是依赖 sklearn：本仓库的全部基准脚本刻意保持零第三方依赖
+# （`tests/test_benchmark.py` 断言不 import 任何第三方库），κ 是一个四行公式，
+# 引入 numpy 只为算它不值。手写还能让 `manifest.json` 里的 κ 可被任何人逐格
+# 复核 —— κ 是外部语料一致性验收（R1）里审稿人第一个会去验的数字，给一个
+# 无法核对的裸数等于把这条验收项交给运气。
+#
+# 口径纪律：κ 度量的是「两个标注者在不看对方标签时的一致程度」。它**不能**
+# 由同一个人对自己的标注算出来，也不能由模型对模型算出来 —— 那些测的不是
+# 一致性而是恒等。所以 κ 只在拿到 ≥2 名独立标注者的标签时才计算；数据不足
+# 时返回 None 而不是 0.0/1.0（编一个数字比留空更糟）。
+def cohen_kappa(labels_a: Sequence[Any], labels_b: Sequence[Any]) -> Tuple[Optional[float], Dict[str, Any]]:
+    """二分类标注一致性 κ，返回 ``(kappa, detail)``。
+
+    ``detail`` 含四格表、观测一致率与期望一致率，供 manifest 留痕。
+
+    a = 两人都判正 / b = 两人都判负 / c = 仅 A 判正 / d = 仅 B 判正
+
+      κ = (po - pe) / (1 - pe)
+      po = (a + b) / n
+      pe = [(a + c)(a + b) + (b + d)(c + d)] / n²
+    """
+    if len(labels_a) != len(labels_b):
+        raise ValueError("两组标签长度不一致：A=%d B=%d" % (len(labels_a), len(labels_b)))
+    n = len(labels_a)
+    if n == 0:
+        return None, {"n": 0, "reason": "无样本，κ 无定义"}
+    a = b = c = d = 0
+    for x, y in zip(labels_a, labels_b):
+        px, py = bool(x), bool(y)
+        if px and py:
+            a += 1
+        elif not px and not py:
+            b += 1
+        elif px:
+            c += 1
+        else:
+            d += 1
+    po = (a + b) / n
+    # 期望一致率 = 各自边际概率乘积之和
+    pe = ((a + c) * (a + b) + (b + d) * (c + d)) / (n * n)
+    detail = {
+        "n": n,
+        "table": {"both_positive": a, "both_negative": b,
+                  "only_a_positive": c, "only_b_positive": d},
+        "observed_agreement": round(po, 6),
+        "expected_agreement": round(pe, 6),
+        "a_positive_rate": round((a + c) / n, 6),
+        "b_positive_rate": round((a + b) / n, 6),
+    }
+    if 1.0 - pe <= 0.0:
+        # 全体标签恒定（没有任何反例），期望一致率 = 1，分母为 0。
+        # 这不是「完美一致」，是「没有可判断的方差」—— 返回 None 并说明。
+        return None, dict(detail, reason="标签无变异，κ 无定义")
+    return round((po - pe) / (1.0 - pe), 6), detail
+
+
+# ---------------------------------------------------------------------------
+# 外部独立语料加载器（2026-10-18，SCI 路线 P1）
+# ---------------------------------------------------------------------------
+#
+# 为什么外部语料必须走文件而不是像 ATTACK_SAMPLES 那样内联：
+#
+#   1. 可审计性。外部样本每条都要带 provenance（CVE/GHSA id、来源 URL、
+#      license、sha256 指纹）。把这些塞进 Python 字面量，指纹校验就只能靠
+#      注释，而注释是可以骗人的 —— `run_bench.py` 的死分支就是前车之鉴。
+#   2. 增量采集。语料要长到 ≥400/≥400，不可能一次提交写完。落盘 + 按 id
+#      分文件，`scripts/corpus_collect.py` 才能增量补采而不与人工标注打架。
+#   3. 标注留痕。labels 字段里要记两名标注者的原始判定（可能不一致），
+#      不一致的样本要在 manifest 里记账 —— 这是 Python 常量表达不了的结构。
+#
+# 关键纪律：加载器**只读已落盘且校验通过**的样本。指纹不符或缺字段的样本
+# 被显式跳过并计数报告，绝不静默吞掉 —— 一份「看起来有 400 条、实际有 30 条
+# 损坏」的语料，是比空语料更糟的假绿。
+_EXTERNAL_SCHEMA_VERSION = 1
+
+_EXTERNAL_REQUIRED_FIELDS = ("id", "family", "source", "license", "text", "labels")
+
+
+def _validate_external_sample(path: str, rec: Dict[str, Any]) -> Tuple[Optional[str], Optional[str]]:
+    """校验单个外部样本，返回 ``(canonical_sha256, error)``。"""
+    import hashlib
+    import json
+
+    for f in _EXTERNAL_REQUIRED_FIELDS:
+        if f not in rec:
+            return None, "%s: 缺字段 %r" % (path, f)
+    text = rec.get("text")
+    if not isinstance(text, str) or not text.strip():
+        return None, "%s: text 为空或非字符串" % path
+    labels = rec.get("labels")
+    if not isinstance(labels, list) or len(labels) < 1:
+        return None, "%s: labels 必须是至少一个标注者的列表" % path
+    for lab in labels:
+        if not isinstance(lab, dict) or "annotator" not in lab or "positive" not in lab:
+            return None, "%s: labels 条目缺 annotator/positive" % path
+    # 内容指纹：对 text 的规范化 UTF-8 字节取 sha256。
+    # 这是样本唯一性的锚，也是 manifest 里「样本没被悄悄改过」的证据。
+    digest = hashlib.sha256(text.encode("utf-8")).hexdigest()
+    if rec.get("sha256") and rec["sha256"] != digest:
+        return None, "%s: sha256 不匹配（记录 %s / 实际 %s）—— 样本被改过" % (
+            path, str(rec.get("sha256"))[:12], digest[:12])
+    return digest, None
+
+
+def _external_root() -> str:
+    return os.path.join(_REPO_ROOT, "benchmarks", "corpus", "external")
+
+
+def _load_external_dir(kind: str) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
+    """加载 positives/ 或 negatives/ 目录，返回 ``(samples, stats)``。
+
+    ``stats`` 记账：总数、校验通过数、校验失败清单。失败不清零 —— 语料层
+    的假绿历来是靠「静默跳过」完成的，这里刻意让坏样本可见。
+    """
+    import json
+
+    root = _external_root()
+    directory = os.path.join(root, kind)
+    stats = {"kind": kind, "directory": directory, "files": 0, "ok": 0, "errors": []}
+    out: List[Dict[str, Any]] = []
+    if not os.path.isdir(directory):
+        stats["errors"].append("目录不存在：%s" % directory)
+        return out, stats
+    for name in sorted(os.listdir(directory)):
+        if not name.endswith(".json"):
+            continue
+        stats["files"] += 1
+        full = os.path.join(directory, name)
+        try:
+            with open(full, encoding="utf-8") as fh:
+                rec = json.load(fh)
+        except (ValueError, OSError) as exc:
+            stats["errors"].append("%s: 无法解析 JSON（%s）" % (name, exc))
+            continue
+        if rec.get("schema_version") != _EXTERNAL_SCHEMA_VERSION:
+            stats["errors"].append("%s: schema_version 不匹配" % name)
+            continue
+        digest, err = _validate_external_sample(name, rec)
+        if err:
+            stats["errors"].append(err)
+            continue
+        out.append(rec)
+        stats["ok"] += 1
+    return out, stats
+
+
+def load_external_corpus() -> Dict[str, Any]:
+    """加载外部独立语料，返回可直接被 benchmark 消费的字典。
+
+    返回结构::
+
+        {
+          "positives": [sample, ...],   # 已校验
+          "negatives": [sample, ...],
+          "manifest": {...} | None,     # manifest.json（可能不存在）
+          "stats": {"positives": {...}, "negatives": {...}},
+        }
+
+    语料不存在或为空时返回空列表 + 明确 stats，**不抛异常**：基准要能在
+    「外部语料尚未采集」的状态下照常跑内部语料，缺数据是事实而不是崩溃。
+    """
+    pos, pos_stats = _load_external_dir("positives")
+    neg, neg_stats = _load_external_dir("negatives")
+    manifest = None
+    mp = os.path.join(_external_root(), "manifest.json")
+    if os.path.isfile(mp):
+        import json
+        with open(mp, encoding="utf-8") as fh:
+            manifest = json.load(fh)
+    return {
+        "positives": pos,
+        "negatives": neg,
+        "manifest": manifest,
+        "stats": {"positives": pos_stats, "negatives": neg_stats},
+    }
+
+
+# 模块级导出：调用方可直接 import。惰性计算（不 import 即不读盘），
+# 与 BENIGN_CORPUS / ATTACK_SAMPLES 的纯字面量语义一致。
+def _cached_external():
+    global EXTERNAL_POSITIVES, EXTERNAL_NEGATIVES
+    corpus = load_external_corpus()
+    EXTERNAL_POSITIVES = tuple(corpus["positives"])
+    EXTERNAL_NEGATIVES = tuple(corpus["negatives"])
+    return corpus
+
+
+EXTERNAL_POSITIVES: Tuple[Dict[str, Any], ...] = ()
+EXTERNAL_NEGATIVES: Tuple[Dict[str, Any], ...] = ()
+
+# 标记加载状态，避免模块导入时就读盘（保持 rule_corpus 导入零 IO）。
+# tests 与 benchmark 需要显式调用 `refresh_external_corpus()`。
+EXTERNAL_CORPUS_LOADED = False
+
+
+def refresh_external_corpus() -> Dict[str, Any]:
+    """重新从磁盘加载外部语料（采集/标注变更后调用）。"""
+    global EXTERNAL_CORPUS_LOADED
+    corpus = _cached_external()
+    EXTERNAL_CORPUS_LOADED = True
+    return corpus
+
+
 __all__ = ["BENIGN_CORPUS", "ATTACK_SAMPLES", "DESCRIPTION_SAMPLES",
            "IMPERATIVE_BENIGN_SAMPLES", "ATTACK_FAMILIES", "SAMPLE_FAMILY",
-           "KNOWN_GAP_SAMPLES", "family_coverage", "all_family_names"]
+           "KNOWN_GAP_SAMPLES", "family_coverage", "all_family_names",
+           "cohen_kappa", "load_external_corpus", "refresh_external_corpus",
+           "EXTERNAL_POSITIVES", "EXTERNAL_NEGATIVES"]

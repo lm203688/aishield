@@ -20,6 +20,7 @@ step id 而非 job id，GitHub Actions 解析期直接报错，整个 workflow 4
       `|| echo`/`|| true` 吞）/ `git add data/state/` 整目录提交；刻意降级须写
       `allow-push-degrade: <理由>`
   E11 有第三方依赖的本仓入口却没引用统一前置 prepare-tests（派生判据，不写死名单）
+  E11b workflow 的 run 块里散落 pip install（第二处依赖定义，升级必漏一处）
   E12 统一前置没装齐测试套件**真正**依赖的第三方包（从 import 图推导，不用人工清单）
   E13 声明为"并发冲突可自动解决"的数据文件不是单一生产者（快照语义前提不成立）
   E14 用带 CI-skip（`[skip ci]`）的提交改写了对外声明面，却既没走统一推送入口
@@ -555,6 +556,23 @@ def _check_local_refs(text: str, res: Dict[str, Any]) -> None:
             res["errors"].append(f"E4 引用了不存在的本地 action: {rel}")
 
 
+def local_action_refs(text: str) -> List[str]:
+    """取出本文件里所有指向仓库内 action 的 `uses:` 引用（相对路径，POSIX 分隔）。
+
+    与 `_check_local_refs` 的区别：后者只关心「引用是否真实存在」（E4），本函数
+    关心「引用集合本身」，供 W8 孤儿 action 检测做引用闭包。两处各自独立解析
+    `uses:` 迟早会漂移，故抽成函数，E4 的遍历也可以复用同一份正则。
+    """
+    out: List[str] = []
+    for m in re.finditer(r"uses:\s*(.+)", text):
+        val = m.group(1).strip().split("#", 1)[0].strip()
+        if not val.startswith(("./", ".github/")):
+            continue
+        rel = val[2:] if val.startswith("./") else val
+        out.append(rel)
+    return out
+
+
 def import_name_to_dist(name: str) -> str:
     """导入名 → pip 用的发行名（yaml→PyYAML、PIL→pillow…）。"""
     return IMPORT_TO_DIST.get(name, name)
@@ -591,7 +609,7 @@ def declared_pip_deps(text: str) -> List[str]:
             tokens = m.group(1).split()
         for tok in tokens:
             # 过滤掉续行残留的反斜杠：它不是包名。
-            if tok.startswith("-") or tok == "\\":
+            if tok.startswith("-") or tok in ("\\", ".", "."):
                 continue
             name = re.split(r"[<>=!~\[;@ ]", tok, maxsplit=1)[0].strip()
             if not name:
@@ -989,6 +1007,7 @@ def check_file(path: Path) -> Dict[str, Any]:
         # 就是「本仓声称跑测试要装什么」的唯一事实源。
         res["path"] = _rel(path)
         res["pip_deps"] = declared_pip_deps(text)
+        res["local_action_refs"] = local_action_refs(text)
         _check_local_refs(text, res)
         return res
 
@@ -1000,6 +1019,7 @@ def check_file(path: Path) -> Dict[str, Any]:
     # 记录本文件的 workflow 名与 workflow_run 引用，供跨文件检查（E7）使用
     res["name"] = data.get("name")
     res["workflow_run_refs"] = []
+    res["local_action_refs"] = local_action_refs(text)
     if isinstance(on, dict):
         wr = on.get("workflow_run") or {}
         refs = wr.get("workflows") if isinstance(wr, dict) else None
@@ -1102,6 +1122,9 @@ def check_file(path: Path) -> Dict[str, Any]:
                     f"跑了测试却设 continue-on-error，测试无法阻断发布"
                 )
 
+    # ── E11b 禁止 workflow 内散落 pip install（第二处依赖定义）─────────
+    _check_inline_pip_install(res, data)
+
     # ── E11 有第三方依赖的入口必须引用统一前置（派生判据）────────────────
     # 判据：job 内出现真正的命令行（注释不算）——
     #   · 跑全量套件（python tests/run_all.py）→ 入口 = 整套 tests/*.py；
@@ -1138,6 +1161,48 @@ def check_file(path: Path) -> Dict[str, Any]:
     return res
 
 
+# E11b：真正的安装命令（行首，允许 python -m 前缀）。刻意不匹配任意位置的
+# `pip install` 文本 —— 它常出现在报错提示串里（如 deploy-server.yml 的失败
+# 诊断消息），那不是安装动作，误报会让门禁失去可信度。
+_PIP_INSTALL_CMD_RE = re.compile(r"^\s*(?:python3?\s+-m\s+)?pip\s+install\b")
+
+
+def _check_inline_pip_install(res: Dict[str, Any], data: Dict[str, Any]) -> None:
+    """E11b：workflow 的 run 块里不得各自 pip install。
+
+    为什么单独一条而不是并入 E11：E11 只拦「跑了本仓入口却没走统一前置」，
+    拦不住「顺手装了个包」。AGENTS.md:48 自己承认的「另外 3 个 job 属于同一类」
+    正是这一种——它不算漏装（装的东西是对的），而是**第二处依赖定义**，
+    依赖升级时必然有一处被漏掉。收敛的前提是不存在第二处。
+
+    范围：只查 workflow，不查 composite action —— action 内部的 pip install
+    才是唯一被允许的依赖声明处（E12 读取的就是它）。
+    """
+    jobs = data.get("jobs") or {}
+    if not isinstance(jobs, dict):
+        return
+    for jname, jbody in jobs.items():
+        if not isinstance(jbody, dict):
+            continue
+        for st in (jbody.get("steps") or []):
+            if not isinstance(st, dict):
+                continue
+            run = st.get("run")
+            if not isinstance(run, str):
+                continue
+            for line in run.splitlines():
+                if _PIP_INSTALL_CMD_RE.search(line):
+                    label = st.get("name") or run.strip().splitlines()[0][:30]
+                    res["errors"].append(
+                        f"E11b job '{jname}' 步骤 '{label}' 在 workflow 里直接 "
+                        f"`pip install`（{line.strip()[:60]}）—— 这是第二处依赖定义，"
+                        f"升级时必然漏掉一处。请改用 {PREP_ACTION} 统一安装"
+                        f"（测试依赖补进该 action 的 install 行，本仓自身用 "
+                        f"install-package: 'true'）"
+                    )
+                    break
+
+
 def _check_prereq_covers_suite_deps(results: List[Dict[str, Any]]) -> None:
     """E12 / W6：统一前置声明的依赖必须与测试套件的真实依赖一致（双向 diff）。
 
@@ -1171,6 +1236,51 @@ def _check_prereq_covers_suite_deps(results: List[Dict[str, Any]]) -> None:
         )
 
 
+def _check_orphan_actions(results: List[Dict[str, Any]]) -> None:
+    """W8：定义在 .github/actions/ 下却没有任何 workflow 引用的孤儿 action。
+
+    为什么单独立一条：孤儿 action 是一份「看起来在工作、实际从未生效」的 CI 代码。
+    它会腐烂——依赖版本过时、heredoc 写法带病、门禁规则改了它没跟着改——而腐烂
+    全程没有任何信号，因为它从未被调用过。本仓 2026-10-17 的教训是另一个方向
+    （E9 漏扫 .github/actions/**，导致命脉 action 自己带着 CRLF），这条补的是
+    镜像方向：定义存在 ≠ 有人真的在用。
+
+    判据是**引用闭包**而非文件存在：一个 workflow 的 `uses:` 指向它才算被引用；
+    action 内部 `uses:` 另指向一个 action 也算（composite action 可嵌套调用）。
+    warning 级别不阻断：有些 action 是留给本地手动跑 / 未来 workflow 用的脚手架，
+    硬阻断会让「先写 action 再接 workflow」这种正常施工顺序直接红。
+    """
+    if not ACTION_DIR.exists():
+        return
+    defined = set()
+    for f in sorted(ACTION_DIR.rglob("action.yml")):
+        rel = f.relative_to(REPO_ROOT).as_posix()
+        if "/.github/actions/" not in rel:
+            continue
+        defined.add(rel.split("/.github/actions/", 1)[1])
+
+    referenced = set()
+    for r in results:
+        for ref in r.get("local_action_refs", []):
+            if "/.github/actions/" in ref:
+                referenced.add(ref.split("/.github/actions/", 1)[1])
+
+    for rel in sorted(defined):
+        if rel not in referenced:
+            for r in results:
+                if r.get("kind") == "action" and r.get("path") == rel:
+                    r["warnings"].append(
+                        "W8 定义了 composite action 但没有任何 workflow 引用它 "
+                        "（孤儿 action：从未生效、会静默腐烂）。要么在 workflow 里 "
+                        "`uses: ./.github/actions/" + rel.rstrip('/action.yml') + "`，"
+                        "要么删除它。"
+                    )
+                    break
+            else:
+                if defined and not defined - referenced:
+                    break
+
+
 def cross_check(results: List[Dict[str, Any]]) -> None:
     """跨文件检查 E7：workflow_run 引用了不存在的 workflow 名。
 
@@ -1181,6 +1291,7 @@ def cross_check(results: List[Dict[str, Any]]) -> None:
     _check_prereq_covers_suite_deps(results)
     _check_auto_resolvable_paths(results)
     _check_skip_ci_declared_surface(results)
+    _check_orphan_actions(results)
 
     known = {r["name"] for r in results if r.get("name")}
     for r in results:

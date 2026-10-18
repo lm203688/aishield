@@ -157,6 +157,14 @@ def _patterns() -> List[Tuple[re.Pattern, str]]:
         (re.compile(r"(?<!\d)(\d+)-rule\s+base", re.I), "mcp"),
         # 捕获组在末尾，前面已锚定 `[:=]\s*`，不可能落在数字上，无需后顾。
         (re.compile(r"rules?_count\s*[:=]\s*(\d+)"), "mcp"),
+        # SKILL.md frontmatter 的 `metadata: rules_mcp: 264 / rules_skill: 291`。
+        # 这是待上架 agent 平台的**机器读契约字段**（Claude/ClawHub 直接解析
+        # frontmatter 对外呈现规则数），不是散文声明。此前只有 `rules?_count`
+        # 这一种键名被覆盖，`rules_mcp`/`rules_skill` 落在此外，导致
+        # distribution/aishield-plugins 的 SKILL.md 停在 235/262 而自身
+        # version 已升到 4.11.0 —— 同一份文件自相矛盾，门禁一路绿灯。
+        (re.compile(r"rules?_mcp\s*[:=]\s*(\d+)"), "mcp"),
+        (re.compile(r"rules?_skill\s*[:=]\s*(\d+)"), "skill"),
     ]
     return p
 
@@ -367,6 +375,18 @@ def _is_declared_surface(rel: str) -> bool:
         return True
     if rel.startswith("docs/benchmark/"):
         return True
+    # distribution/ 下的 SKILL.md 是待上架 agent 平台的 skill 定义文件，
+    # 其 frontmatter 的 rules_mcp/rules_skill 是**机器读的契约字段**，
+    # 会被 Claude/ClawHub 等平台直接解析并对外呈现。它们与 api/static 同样
+    # 对外，却因不在声明面而漂了整整两代规则数（2026-10-18 实测：
+    # aishield-plugins 的 SKILL.md 停在 235/262 而自身 version 已是 4.11.0，
+    # claude-skill 更停在 214/220 —— 同一目录内三个数字互不相认）。
+    # 只覆盖 SKILL.md、不覆盖 distribution/ 其余文件：后者的 SUBMIT.md 等
+    # 含带日期的实测拓扑快照（如 "2026-09-26 实测 …4.8.3 / 235 rules"），
+    # 那些数字是"当时测到的值"，同步等于篡改史实。SKILL.md 是结构化契约、
+    # 无历史段落，可以安全校验。
+    if rel.startswith("distribution/") and os.path.basename(rel) == "SKILL.md":
+        return True
     if rel.startswith("docs/"):
         # docs/ 根级文档是带日期的历史分析快照（标题或正文标注了测量日期），
         # 其中的数字是"当时测到的值"。同步成当前数字等于把它改写成伪造历史，
@@ -409,9 +429,15 @@ def collect_files() -> List[str]:
     """列出所有受门禁约束的声明位文件。"""
     out: List[str] = []
     for dirpath, dirnames, filenames in os.walk(REPO):
+        # 精确分量匹配，不是 substring。历史实现用 `bad in d`，于是
+        # "dist" in "distribution" 为真，整个 distribution/ 被静默剪掉 ——
+        # 那份 40 文件的对外上架材料（含 SKILL.md 的机器读 rules_mcp 契约
+        # 字段）从此全在门禁之外，而门禁报"全部一致"。同理 "tests" 误伤
+        # ".github/actions/prepare-tests"、".git" 误伤 ".github"。
+        # EXCLUDE_DIR_PARTS 的每个元素都是完整目录名，应当做集合成员判定。
         dirnames[:] = [
             d for d in dirnames
-            if not any(bad in d for bad in EXCLUDE_DIR_PARTS)
+            if d not in EXCLUDE_DIR_PARTS
         ]
         rel_dir = os.path.relpath(dirpath, REPO).replace(os.sep, "/")
         if any(rel_dir.startswith(bad) for bad in EXCLUDE_PATH_PARTS):

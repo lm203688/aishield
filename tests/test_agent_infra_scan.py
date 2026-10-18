@@ -91,7 +91,10 @@ class TestMcpAdapterSkeleton(unittest.TestCase):
         res = sp.scan_target({"name": "risky", "files": RISKY_FILES})
         skel = sp.build_mcp_adapter_skeleton(res)
         self.assertIn("def handle(", skel)
-        self.assertIn("TODO(二次研发)", skel)
+        # 2026-10-17：占位符改为「Step N + owner」形式（见 scan_pipeline.py 模板说明段），
+        # 不再用 TODO(二次研发) 裸标签——owner 可追溯比 TODO 可搜索更重要。
+        self.assertIn("owner:", skel)
+        self.assertIn("Step 1: 治理 preflight", skel)
         self.assertIn("risky", skel)
         # 代码花括号未被 .format 误伤
         self.assertIn("raise NotImplementedError", skel)

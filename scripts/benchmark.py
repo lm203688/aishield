@@ -39,8 +39,10 @@
 from __future__ import annotations
 
 import argparse
+import collections
 import json
 import os
+import random
 import sys
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
@@ -50,6 +52,11 @@ for _p in (_ROOT, _HERE):
         sys.path.insert(0, _p)
 
 BENCHMARK_ID = "aishield-security-benchmark/v1"
+
+# Bootstrap 固定种子。基准的 invariants.deterministic=True 被测试钉住：
+# 同一段代码跑两次必须得到同一个 CI，否则审稿人重跑拿不到同一个数。
+# 种子作为公开常量写在这里，任何人可以改它重跑敏感性分析，但默认不随机。
+BOOTSTRAP_SEED = 20261018
 
 
 # ══════════════════════════════════════════════════════════════
@@ -710,23 +717,235 @@ def _plane_d():
     }
 
 
-def run():
-    """跑完整基准，返回确定性结果字典。"""
+# ══════════════════════════════════════════════════════════════
+#  Bootstrap 置信区间
+# ══════════════════════════════════════════════════════════════
+#
+# 为什么必须做 bootstrap，而不是只报点估计：recall=1.00 在 57 条语料上，
+# 换 1 条样本就变成 0.98。审稿人看到的是一个数，但那个数的**不确定度**
+# 才是决定它能不能进论文的关键。没有 CI 的基准数字，和没有误差棒的
+# 实验图是同一类问题。
+#
+# 用百分位法（percentile method）：简单、无分布假设、对本仓库的零依赖
+# 约束友好（不需要 numpy/scipy）。1000 次重采样在 1200 条样本上实测约
+# 0.3 秒，CI 里跑得起。
+#
+# 种子写死在 BOOTSTRAP_SEED：基准的确定性不变量被测试钉住，同一段代码
+# 跑两次必须得到同一个 CI。否则"重跑复现"会变成"重跑得到一个新的 CI"，
+# 那比不报 CI 更糟。
+def _bootstrap_ci(outcomes, resamples=1000, seed=BOOTSTRAP_SEED, alpha=0.05):
+    """对 0/1 结果序列做 bootstrap 百分位法 CI。
+
+    ``outcomes``：正样本上 1=检出，负样本上 1=误报。
+    返回 dict，含 point / low / high / n / resamples。
+    """
+    n = len(outcomes)
+    if n == 0:
+        return {"point": None, "low": None, "high": None, "n": 0,
+                "resamples": resamples, "reason": "无样本，CI 无定义"}
+    point = sum(outcomes) / n
+    if n < 2:
+        # 重采样退化：n=1 时每次抽到的都是同一个值，CI 退化成 [p, p]，
+        # 那是自欺欺数，不如明确标出来。
+        return {"point": round(point, 6), "low": None, "high": None, "n": n,
+                "resamples": resamples,
+                "reason": "n<2，重采样退化，CI 无定义"}
+    rng = random.Random(seed)
+    rates = []
+    for _ in range(resamples):
+        s = 0
+        for i in range(n):
+            s += outcomes[rng.randrange(n)]
+        rates.append(s / n)
+    rates.sort()
+    low = rates[int(resamples * alpha / 2)]
+    high = rates[int(resamples * (1 - alpha / 2))]
+    return {
+        "point": round(point, 4),
+        "low": round(low, 4),
+        "high": round(high, 4),
+        "n": n,
+        "resamples": resamples,
+        "alpha": alpha,
+        "seed": seed,
+        "method": "percentile",
+    }
+
+
+def _with_ci(plane, bootstrap, seed=BOOTSTRAP_SEED):
+    """给一个平面补 recall / fp 的 bootstrap CI。bootstrap<=0 时原样返回。"""
+    if not bootstrap:
+        return plane
+    plane["recall_ci"] = _bootstrap_ci(
+        [1] * plane.get("detected", 0) + [0] *
+        max(0, plane.get("positives", 0) - plane.get("detected", 0)),
+        resamples=bootstrap, seed=seed)
+    plane["false_positive_rate_ci"] = _bootstrap_ci(
+        [1] * plane.get("false_positives", 0) + [0] *
+        max(0, plane.get("negatives", 0) - plane.get("false_positives", 0)),
+        resamples=bootstrap, seed=seed)
+    return plane
+
+
+def _plane_e(corpus):
+    """外部独立语料面（2026-10-18，SCI 路线 P1）。
+
+    为什么单独一个平面，而不是把外部样本塞进 Plane A/B：
+
+      1. **来源不同就不能混算**。Plane A/B 的样本是仓库内联的最小化复现；
+         Plane E 来自第三方（GitHub Advisory、InjecAgent），分布、措辞、
+         攻击面都不同。混进同一个 recall 数字，等于把"在自家语料上的
+         成绩"和"在外部语料上的成绩"合成一个数 —— 那个数既不能证明规则
+         变强了，也不能证明外部语料更难，是两种分布的不可解释叠加。
+      2. **量级不同**。内部 57+45 条，外部 700+500 条。混算会让外部样本
+         主导总分，把一个真实的外部检出率塌方淹没在"总体还行"里。
+      3. **口径必须一致才能横向比**。Plane E 用与 Plane A/B **完全相同**的
+         serious_only / any_finding 双口径，只是分母、来源、族标签各自
+         独立记账。改口径会让 E 与 A/B 不可比。
+
+    扫描路由由样本的 ``scan_plane`` 字段决定，不由 benchmark 猜：
+      config      → scan_client_configs（MCP JSON 配置）
+      instruction → analyze（agent 指令 / 工具响应文本）
+    """
+    from scanner.rules import analyze
+    from scanner.client_discovery import scan_client_configs
+
+    corpus = corpus or {}
+    positives = list(corpus.get("positives", ()))
+    negatives = list(corpus.get("negatives", ()))
+
+    def _scan(s, idx):
+        plane = s.get("scan_plane", "instruction")
+        if plane == "config":
+            return scan_client_configs({"/bench/external_%04d.json" % idx:
+                                        s.get("text", "")}).get("findings", [])
+        # skills/ 路径：InjecAgent 的 Tool Response 是 agent 实际会收到的
+        # 工具内容，不是人类文档，不能走文档降级（与 _plane_a 同一理由）。
+        return analyze({"skills/external_%04d.md" % idx: s.get("text", "")},
+                       "mcp").get("findings", [])
+
+    detected = 0
+    detected_any = 0
+    missed = []
+    below_threshold = []
+    by_family = {}
+    for i, s in enumerate(positives):
+        fam = s.get("family", "unlabeled")
+        bk = by_family.setdefault(fam, {"total": 0, "detected": 0})
+        bk["total"] += 1
+        findings = _scan(s, i)
+        serious = [f for f in findings if f.get("severity") in ("critical", "high")]
+        ok = bool(serious)
+        detected += 1 if ok else 0
+        detected_any += 1 if findings else 0
+        if not ok:
+            missed.append(s.get("id"))
+            if findings:
+                below_threshold.append({"id": s.get("id"),
+                                        "max_severity": _max_severity(findings)})
+        else:
+            bk["detected"] += 1
+
+    false_positives = []
+    fp_by_type = collections.Counter()
+    for i, s in enumerate(negatives):
+        findings = _scan(s, i)
+        if [f for f in findings if f.get("severity") in ("critical", "high")]:
+            false_positives.append(s.get("id"))
+            fp_by_type[s.get("negative_type", "unknown")] += 1
+
+    n_pos, n_neg = len(positives), len(negatives)
+    manifest = corpus.get("manifest") or {}
+    # 负样本按类型分桶：controlled_matched（同工件去注入）与 clean_source
+    # （数据集原生干净）是两种不同性质的负样本，合在一起算 fp 会掩盖
+    # "到底是不是控制变量设计的问题"。
+    neg_by_type = collections.Counter(
+        s.get("negative_type", "unknown") for s in negatives)
+    pos_by_dataset = collections.Counter(
+        (s.get("dataset") or "?")[:28] for s in positives)
+    pos_by_family_src = {k: by_family[k] for k in sorted(by_family)}
+
+    return {
+        "name": "external_plane",
+        "description": ("外部独立语料面：GitHub Security Advisory（真实 CVE）"
+                        "+ InjecAgent（真实间接提示注入）"),
+        "corpus_available": bool(n_pos or n_neg),
+        "engine": "scanner.rules.analyze / scanner.client_discovery.scan_client_configs",
+        "positives": n_pos,
+        "detected": detected,
+        "recall": round(detected / n_pos, 4) if n_pos else None,
+        "detection_bar": "serious_only",
+        "detected_any": detected_any,
+        "recall_any": round(detected_any / n_pos, 4) if n_pos else None,
+        "coverage_bar": "any_finding",
+        "missed": missed,
+        "detected_below_threshold": below_threshold,
+        "negatives": n_neg,
+        "false_positives": len(false_positives),
+        "false_positive_rate": round(len(false_positives) / n_neg, 4) if n_neg else None,
+        "false_positive_ids": false_positives,
+        "false_positives_by_negative_type": dict(sorted(fp_by_type.items())),
+        "negatives_by_type": dict(sorted(neg_by_type.items())),
+        "by_family": pos_by_family_src,
+        "family_count": len(by_family),
+        "families_zero_detected": sorted(
+            k for k, v in by_family.items() if v["detected"] == 0),
+        "positives_by_dataset": dict(sorted(pos_by_dataset.items())),
+        # 来源与标签诚实性 —— 这是外部语料能不能进论文的关键留痕
+        "manifest": {
+            "benchmark": manifest.get("benchmark"),
+            "collected_at": manifest.get("collected_at"),
+            "cohen_kappa": manifest.get("cohen_kappa"),
+            "annotation_status": manifest.get("annotation_status"),
+            "annotation_reason": (manifest.get("cohen_kappa_detail") or {}).get("reason"),
+            "family_count": manifest.get("family_count"),
+            "r1_status": manifest.get("r1_status"),
+            "provenance_honesty": manifest.get("provenance_honesty"),
+            "label_basis": manifest.get("label_basis"),
+            "datasets": manifest.get("datasets"),
+            "totals": manifest.get("totals"),
+        },
+    }
+
+
+def run(corpus="internal", bootstrap=0, bootstrap_seed=BOOTSTRAP_SEED):
+    """跑完整基准，返回确定性结果字典。
+
+    ``corpus``：internal（默认，与历史行为完全一致）/ external（只跑外部平面）
+    / all（两者都跑，独立统计不相加）。
+    ``bootstrap``：>0 时对 recall 与 fp 率做 bootstrap 95% CI（重采样次数）。
+    """
     from scanner.rules import get_rule_count
 
-    plane_a = _plane_a()
-    plane_b = _plane_b()
-    plane_c = _plane_c()
-    plane_d = _plane_d()
-    return {
+    want_internal = corpus in ("internal", "all")
+    want_external = corpus in ("external", "all")
+
+    plane_a = _plane_a() if want_internal else None
+    plane_b = _plane_b() if want_internal else None
+    plane_c = _plane_c() if want_internal else None
+    plane_d = _plane_d() if want_internal else None
+
+    plane_e = None
+    if want_external:
+        import rule_corpus
+        corpus_obj = rule_corpus.load_external_corpus()
+        plane_e = _plane_e(corpus_obj)
+
+    planes = [p for p in (plane_a, plane_b, plane_c, plane_d, plane_e) if p]
+    result = {
         "benchmark": BENCHMARK_ID,
         "rules": {"mcp": get_rule_count("mcp"), "skill": get_rule_count("skill")},
-        "planes": [plane_a, plane_b, plane_c, plane_d],
-        "summary": {
+        "corpus": corpus,
+        "planes": planes,
+    }
+
+    if want_internal:
+        result["summary"] = {
             "positives": plane_a["positives"] + plane_b["positives"],
             "detected": plane_a["detected"] + plane_b["detected"],
             "negatives": plane_a["negatives"] + plane_b["negatives"],
-            "false_positives": plane_a["false_positives"] + plane_b["false_positives"],
+            "false_positives": plane_a["false_positives"]
+                              + plane_b["false_positives"],
             "recall": round(
                 (plane_a["detected"] + plane_b["detected"])
                 / max(1, plane_a["positives"] + plane_b["positives"]), 4),
@@ -750,13 +969,67 @@ def run():
             "memory_detected": plane_d["detected"],
             "memory_recall": plane_d["recall"],
             "memory_false_positives": plane_d["false_positives"],
-        },
-        "invariants": {
-            "network_calls": False,
-            "executes_scanned_configs": False,
-            "deterministic": True,
-        },
+        }
+    else:
+        # external-only 模式：summary 来自外部平面，键名与内部一致以便
+        # --fail-under-recall / --fail-over-fp 门禁无差别工作。
+        result["summary"] = {
+            "positives": plane_e["positives"],
+            "detected": plane_e["detected"],
+            "recall": plane_e["recall"],
+            "negatives": plane_e["negatives"],
+            "false_positives": plane_e["false_positives"],
+            "false_positive_rate": plane_e["false_positive_rate"],
+            "detected_any": plane_e["detected_any"],
+            "recall_any": plane_e["recall_any"],
+            "detection_bar": plane_e["detection_bar"],
+            "coverage_bar": plane_e["coverage_bar"],
+        }
+
+    if want_external:
+        # 外部平面**独立**记账，不并入 summary：内部与外部是两种分布，
+        # 相加得到的数字不可解释（见 _plane_e docstring）。
+        result["external_summary"] = {
+            "positives": plane_e["positives"],
+            "detected": plane_e["detected"],
+            "recall": plane_e["recall"],
+            "negatives": plane_e["negatives"],
+            "false_positives": plane_e["false_positives"],
+            "false_positive_rate": plane_e["false_positive_rate"],
+            "family_count": plane_e["family_count"],
+            "families_zero_detected": plane_e["families_zero_detected"],
+            "corpus_available": plane_e["corpus_available"],
+            "r1_status": (plane_e.get("manifest") or {}).get("r1_status"),
+        }
+
+    result["invariants"] = {
+        "network_calls": False,
+        "executes_scanned_configs": False,
+        "deterministic": True,
     }
+
+    if bootstrap:
+        # CI 覆盖 summary（两平面合计口径），便于 CI 门禁与论文直接引用。
+        s = result["summary"]
+        result["bootstrap"] = {
+            "resamples": bootstrap,
+            "alpha": 0.05,
+            "seed": bootstrap_seed,
+            "method": "percentile",
+            "recall_ci": _bootstrap_ci(
+                [1] * s.get("detected", 0) + [0] *
+                max(0, s.get("positives", 0) - s.get("detected", 0)),
+                resamples=bootstrap, seed=bootstrap_seed),
+            "false_positive_rate_ci": _bootstrap_ci(
+                [1] * s.get("false_positives", 0) + [0] *
+                max(0, s.get("negatives", 0) - s.get("false_positives", 0)),
+                resamples=bootstrap, seed=bootstrap_seed),
+        }
+        for p in result["planes"]:
+            if p.get("detection_bar") == "serious_only" and "positives" in p:
+                _with_ci(p, bootstrap, bootstrap_seed)
+
+    return result
 
 
 def render_markdown(result):
@@ -896,6 +1169,17 @@ def render_markdown(result):
     return "\n".join(lines)
 
 
+def _fmt_ci(point, ci):
+    """把点估计 + bootstrap CI 渲染成一行可比对的文本。
+
+    论文表里必须有区间；只报点估计的基准数字不可复现比较。
+    """
+    if not ci:
+        return "%.1f%%" % (point * 100)
+    return "%.1f%% [%.1f%%, %.1f%%]" % (
+        point * 100, ci.get("low", 0) * 100, ci.get("high", 0) * 100)
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(prog="benchmark", description=__doc__.split("\n")[0])
     ap.add_argument("--json", action="store_true", help="输出确定性 JSON")
@@ -905,9 +1189,25 @@ def main(argv=None):
                     help="召回低于此值则退出码 1（CI 门禁）")
     ap.add_argument("--fail-over-fp", type=float, default=None,
                     help="误报率高于此值则退出码 1（CI 门禁）")
+    # --corpus：内部（仓库内联语料，默认）/ 外部（benchmarks/corpus/external/）
+    # / all。SCI 方案任务 1.4 的验收命令就是 `benchmark.py --corpus external`，
+    # 但此前 main() 从未把它暴露给 CLI，run() 里已实现的 _plane_e 因此不可达
+    # （2026-10-18 实测：`--corpus internal` 直接 argparse 报错）。
+    ap.add_argument("--corpus", choices=("internal", "external", "all"),
+                    default="internal",
+                    help="语料面：internal（默认，与历史行为一致）/ external / all")
+    # --bootstrap：>0 时对 recall 与 fp 率做 bootstrap 95% CI（SCI 门槛 R3）。
+    # 种子固定为 BOOTSTRAP_SEED，保证同一次采样的 CI 可复现。
+    ap.add_argument("--bootstrap", type=int, default=0,
+                    help="bootstrap 重采样次数（>0 时输出 recall/fp 的 95%% CI）")
+    ap.add_argument("--bootstrap-seed", type=int, default=BOOTSTRAP_SEED,
+                    help="bootstrap 随机种子（默认 %d）" % BOOTSTRAP_SEED)
     args = ap.parse_args(argv)
 
-    result = run()
+    result = run(corpus=args.corpus, bootstrap=args.bootstrap,
+                 bootstrap_seed=args.bootstrap_seed)
+
+    ci = result.get("bootstrap") or {}
 
     if args.markdown:
         text = render_markdown(result)
@@ -915,14 +1215,31 @@ def main(argv=None):
         text = json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True)
     else:
         s = result["summary"]
-        text = "\n".join([
-            "%s" % BENCHMARK_ID,
-            "-" * 52,
-            "positives  : %d   detected: %d   recall: %.1f%%"
-            % (s["positives"], s["detected"], s["recall"] * 100),
-            "negatives  : %d   false pos: %d   fp rate: %.1f%%"
-            % (s["negatives"], s["false_positives"], s["false_positive_rate"] * 100),
-        ])
+        rec_ci = ci.get("recall_ci")
+        fp_ci = ci.get("false_positive_rate_ci")
+        lines = [
+            "%s  (corpus=%s)" % (BENCHMARK_ID, result.get("corpus", "internal")),
+            "-" * 64,
+            "positives  : %d   detected: %d   recall: %s"
+            % (s["positives"], s["detected"], _fmt_ci(s["recall"], rec_ci)),
+            "negatives  : %d   false pos: %d   fp rate: %s"
+            % (s["negatives"], s["false_positives"], _fmt_ci(
+                s["false_positive_rate"], fp_ci)),
+        ]
+        # 外部平面的族覆盖是 R1 的可测证据，文本模式也要可见。
+        es = result.get("external_summary")
+        if es:
+            lines += [
+                "",
+                "external: families=%d  零检出族=%s"
+                % (es.get("family_count", 0),
+                   es.get("families_zero_detected") or "无"),
+            ]
+            if es.get("r1_status"):
+                st = es["r1_status"]
+                lines.append("R1 status: met=%s  unmet=%s"
+                             % (st.get("met"), st.get("unmet") or "无"))
+        text = "\n".join(lines)
 
     if args.out:
         parent = os.path.dirname(os.path.abspath(args.out))
