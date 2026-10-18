@@ -1,0 +1,32 @@
+{
+  "chosen_vulnerable_version": "1.6.77",
+  "cve_id": "CVE-2026-61447",
+  "cwe_ids": [
+    "CWE-94",
+    "CWE-200"
+  ],
+  "dataset": "GitHub Security Advisory Database",
+  "ecosystem": "pip",
+  "family": "supply_chain_exec",
+  "id": "ext-pos-adv-ghsa-2xv2-w8cq-5gxw",
+  "label_basis": "external_cve_verified",
+  "labels": [
+    {
+      "annotator": "A",
+      "basis": "external_cve_verified",
+      "positive": true
+    }
+  ],
+  "license": "GitHub Advisory Database — CC0-1.0",
+  "package": "praisonaiagents",
+  "published_at": "2026-10-08T16:44:01Z",
+  "scan_plane": "instruction",
+  "schema_version": 1,
+  "sha256": "26983835d81ad42b0136421f6faf1efc585aa26ec65df84c1ccfe2071dee34fb",
+  "source": "github-advisory/GHSA-2xv2-w8cq-5gxw",
+  "source_url": "https://api.github.com/advisories/GHSA-2xv2-w8cq-5gxw",
+  "summary": "PraisonAI: CodeAgent Executes LLM-Generated Code Without Sandboxing and Leaks All Environment Secrets",
+  "text": "requirements: praisonaiagents==1.6.77\n",
+  "upstream_severity": "critical",
+  "vulnerable_version_range": "<= 1.6.77"
+}

@@ -1,0 +1,32 @@
+{
+  "chosen_vulnerable_version": "2.0.0",
+  "cve_id": null,
+  "cwe_ids": [
+    "CWE-400",
+    "CWE-407"
+  ],
+  "dataset": "GitHub Security Advisory Database",
+  "ecosystem": "composer",
+  "family": "resource_exhaustion",
+  "id": "ext-pos-adv-ghsa-3q6v-r5mr-hxv8",
+  "label_basis": "external_cve_verified",
+  "labels": [
+    {
+      "annotator": "A",
+      "basis": "external_cve_verified",
+      "positive": true
+    }
+  ],
+  "license": "GitHub Advisory Database — CC0-1.0",
+  "package": "league/commonmark",
+  "published_at": "2026-09-30T15:36:13Z",
+  "scan_plane": "instruction",
+  "schema_version": 1,
+  "sha256": "71bc8f27650ec05984632b4674cddaf093f3bf547b8d626e9689ec78fd7c2573",
+  "source": "github-advisory/GHSA-3q6v-r5mr-hxv8",
+  "source_url": "https://api.github.com/advisories/GHSA-3q6v-r5mr-hxv8",
+  "summary": "league/commonmark: Quadratic-time denial of service in the GitHub Flavored Markdown Table extension block-start scan",
+  "text": "{\"require\": {\"league/commonmark\": \"2.0.0\"}}\n",
+  "upstream_severity": "high",
+  "vulnerable_version_range": ">= 2.0.0, <= 2.10.1"
+}

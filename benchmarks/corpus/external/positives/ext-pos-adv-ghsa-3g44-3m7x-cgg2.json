@@ -1,0 +1,31 @@
+{
+  "chosen_vulnerable_version": "5.12.7",
+  "cve_id": "CVE-2026-55511",
+  "cwe_ids": [
+    "CWE-94"
+  ],
+  "dataset": "GitHub Security Advisory Database",
+  "ecosystem": "maven",
+  "family": "supply_chain_exec",
+  "id": "ext-pos-adv-ghsa-3g44-3m7x-cgg2",
+  "label_basis": "external_cve_verified",
+  "labels": [
+    {
+      "annotator": "A",
+      "basis": "external_cve_verified",
+      "positive": true
+    }
+  ],
+  "license": "GitHub Advisory Database — CC0-1.0",
+  "package": "org.yamcs:yamcs-core",
+  "published_at": "2026-08-28T17:06:56Z",
+  "scan_plane": "instruction",
+  "schema_version": 1,
+  "sha256": "736b611998ffb775a300eca86db65941eba770b5c866aba698e2b7ccf1c7d970",
+  "source": "github-advisory/GHSA-3g44-3m7x-cgg2",
+  "source_url": "https://api.github.com/advisories/GHSA-3g44-3m7x-cgg2",
+  "summary": "Yamcs vulnerable to authenticated RCE via StreamSQL aggregate-compiler column-name injection in Yamcs `executeSql`",
+  "text": "<dependency>\n  <groupId>org.yamcs:yamcs-core</groupId>\n  <version>5.12.7</version>\n</dependency>\n",
+  "upstream_severity": "critical",
+  "vulnerable_version_range": "<= 5.12.7"
+}

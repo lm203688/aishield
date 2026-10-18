@@ -1,0 +1,31 @@
+{
+  "chosen_vulnerable_version": "0.32.0.rc1",
+  "cve_id": "CVE-2026-45378",
+  "cwe_ids": [
+    "CWE-200"
+  ],
+  "dataset": "GitHub Security Advisory Database",
+  "ecosystem": "rubygems",
+  "family": "credential_exposure",
+  "id": "ext-pos-adv-ghsa-3mvf-82qp-8qh5",
+  "label_basis": "external_cve_verified",
+  "labels": [
+    {
+      "annotator": "A",
+      "basis": "external_cve_verified",
+      "positive": true
+    }
+  ],
+  "license": "GitHub Advisory Database — CC0-1.0",
+  "package": "decidim-verifications",
+  "published_at": "2026-07-13T17:10:12Z",
+  "scan_plane": "instruction",
+  "schema_version": 1,
+  "sha256": "08159cb89261566a1cce87fd5aba1550f223b9a301a7c59ab1889f2f9f0f88e8",
+  "source": "github-advisory/GHSA-3mvf-82qp-8qh5",
+  "source_url": "https://api.github.com/advisories/GHSA-3mvf-82qp-8qh5",
+  "summary": "Decidim: Verification documents can be downloaded through reusable links",
+  "text": "gem \"decidim-verifications\", \"=0.32.0.rc1\"\n",
+  "upstream_severity": "high",
+  "vulnerable_version_range": ">= 0.32.0.rc1, < 0.32.0"
+}

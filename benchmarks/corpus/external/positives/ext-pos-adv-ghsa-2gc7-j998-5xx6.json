@@ -1,0 +1,31 @@
+{
+  "chosen_vulnerable_version": "1.9.10-0.20260703131214-23d1934099b0",
+  "cve_id": "CVE-2026-84314",
+  "cwe_ids": [
+    "CWE-285"
+  ],
+  "dataset": "GitHub Security Advisory Database",
+  "ecosystem": "go",
+  "family": "privilege_escalation",
+  "id": "ext-pos-adv-ghsa-2gc7-j998-5xx6",
+  "label_basis": "external_cve_verified",
+  "labels": [
+    {
+      "annotator": "A",
+      "basis": "external_cve_verified",
+      "positive": true
+    }
+  ],
+  "license": "GitHub Advisory Database — CC0-1.0",
+  "package": "github.com/0xJacky/Nginx-UI",
+  "published_at": "2026-10-15T20:11:45Z",
+  "scan_plane": "instruction",
+  "schema_version": 1,
+  "sha256": "2e167212ee66126a6af0390033ec8d2f7b60d9bcc82f11cc2a3e9be8d6d18e94",
+  "source": "github-advisory/GHSA-2gc7-j998-5xx6",
+  "source_url": "https://api.github.com/advisories/GHSA-2gc7-j998-5xx6",
+  "summary": "Nginx UI: Account Takeover via Missing `RequireSecureSession` on User Management Endpoint",
+  "text": "require github.com/0xJacky/Nginx-UI v1.9.10-0.20260703131214-23d1934099b0\n",
+  "upstream_severity": "high",
+  "vulnerable_version_range": "< 1.9.10-0.20260703131214-23d1934099b0"
+}

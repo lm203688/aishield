@@ -1,0 +1,31 @@
+{
+  "chosen_vulnerable_version": "6.0.0",
+  "cve_id": "CVE-2026-94603",
+  "cwe_ids": [
+    "CWE-693"
+  ],
+  "dataset": "GitHub Security Advisory Database",
+  "ecosystem": "go",
+  "family": "privilege_escalation",
+  "id": "ext-pos-adv-ghsa-2cvf-wqm6-wr9g",
+  "label_basis": "external_cve_verified",
+  "labels": [
+    {
+      "annotator": "A",
+      "basis": "external_cve_verified",
+      "positive": true
+    }
+  ],
+  "license": "GitHub Advisory Database — CC0-1.0",
+  "package": "go.podman.io/podman/v6",
+  "published_at": "2026-10-15T20:22:16Z",
+  "scan_plane": "instruction",
+  "schema_version": 1,
+  "sha256": "7901d260cfba1aa2b80f883fff304d66896dc897d66b3ac3efa7d458361fdd0e",
+  "source": "github-advisory/GHSA-2cvf-wqm6-wr9g",
+  "source_url": "https://api.github.com/advisories/GHSA-2cvf-wqm6-wr9g",
+  "summary": "Podman: The `podman run` command can be instructed to disable almost all sandboxing by image annotation",
+  "text": "require go.podman.io/podman/v6 v6.0.0\n",
+  "upstream_severity": "critical",
+  "vulnerable_version_range": ">= 6.0.0, < 6.1.3"
+}

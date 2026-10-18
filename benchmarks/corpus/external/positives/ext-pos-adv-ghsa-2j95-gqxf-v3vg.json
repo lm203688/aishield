@@ -1,0 +1,31 @@
+{
+  "chosen_vulnerable_version": "0.84.0",
+  "cve_id": "CVE-2026-11746",
+  "cwe_ids": [
+    "CWE-798"
+  ],
+  "dataset": "GitHub Security Advisory Database",
+  "ecosystem": "maven",
+  "family": "credential_exposure",
+  "id": "ext-pos-adv-ghsa-2j95-gqxf-v3vg",
+  "label_basis": "external_cve_verified",
+  "labels": [
+    {
+      "annotator": "A",
+      "basis": "external_cve_verified",
+      "positive": true
+    }
+  ],
+  "license": "GitHub Advisory Database — CC0-1.0",
+  "package": "com.linecorp.centraldogma:centraldogma-server",
+  "published_at": "2026-09-11T20:44:23Z",
+  "scan_plane": "instruction",
+  "schema_version": 1,
+  "sha256": "9d13ca9f67a7976d564dc83b9ece36a3e2aa7dddcc5e8f0c69ec9e726f1d842e",
+  "source": "github-advisory/GHSA-2j95-gqxf-v3vg",
+  "source_url": "https://api.github.com/advisories/GHSA-2j95-gqxf-v3vg",
+  "summary": "Central Dogma: Hard-coded ZooKeeper replication secret 'ch4n63m3' with silent fallback enables cluster takeover",
+  "text": "<dependency>\n  <groupId>com.linecorp.centraldogma:centraldogma-server</groupId>\n  <version>0.84.0</version>\n</dependency>\n",
+  "upstream_severity": "critical",
+  "vulnerable_version_range": "< 0.84.0"
+}

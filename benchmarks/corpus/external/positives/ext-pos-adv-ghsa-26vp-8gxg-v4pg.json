@@ -1,0 +1,31 @@
+{
+  "chosen_vulnerable_version": "14.10.1",
+  "cve_id": "CVE-2025-53837",
+  "cwe_ids": [
+    "CWE-95"
+  ],
+  "dataset": "GitHub Security Advisory Database",
+  "ecosystem": "maven",
+  "family": "supply_chain_exec",
+  "id": "ext-pos-adv-ghsa-26vp-8gxg-v4pg",
+  "label_basis": "external_cve_verified",
+  "labels": [
+    {
+      "annotator": "A",
+      "basis": "external_cve_verified",
+      "positive": true
+    }
+  ],
+  "license": "GitHub Advisory Database — CC0-1.0",
+  "package": "org.xwiki.rendering:xwiki-rendering-xml",
+  "published_at": "2026-09-18T15:05:13Z",
+  "scan_plane": "instruction",
+  "schema_version": 1,
+  "sha256": "581811bd0865e1a129b2bbab331b9eafacd1d6d05c8231f37a6e5196f8c54dd9",
+  "source": "github-advisory/GHSA-26vp-8gxg-v4pg",
+  "source_url": "https://api.github.com/advisories/GHSA-26vp-8gxg-v4pg",
+  "summary": "org.xwiki.rendering:xwiki-rendering-xml has an Eval Injection issue",
+  "text": "<dependency>\n  <groupId>org.xwiki.rendering:xwiki-rendering-xml</groupId>\n  <version>14.10.1</version>\n</dependency>\n",
+  "upstream_severity": "critical",
+  "vulnerable_version_range": "< 14.10.2"
+}

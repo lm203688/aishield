@@ -1,0 +1,31 @@
+{
+  "chosen_vulnerable_version": "9.0.0",
+  "cve_id": "CVE-2026-96231",
+  "cwe_ids": [
+    "CWE-59"
+  ],
+  "dataset": "GitHub Security Advisory Database",
+  "ecosystem": "nuget",
+  "family": "advisory_native",
+  "id": "ext-pos-adv-ghsa-2j93-m82w-73j2",
+  "label_basis": "external_cve_verified",
+  "labels": [
+    {
+      "annotator": "A",
+      "basis": "external_cve_verified",
+      "positive": true
+    }
+  ],
+  "license": "GitHub Advisory Database — CC0-1.0",
+  "package": "Microsoft.NETCore.App.Runtime.osx-arm64",
+  "published_at": "2026-10-13T20:44:11Z",
+  "scan_plane": "instruction",
+  "schema_version": 1,
+  "sha256": "62f030826644d78e93cbee00f58e07193022c27f492593e6505abb9e6ac2c04e",
+  "source": "github-advisory/GHSA-2j93-m82w-73j2",
+  "source_url": "https://api.github.com/advisories/GHSA-2j93-m82w-73j2",
+  "summary": "Microsoft Security Advisory CVE-2026-96231 - .NET and Visual Studio Elevation of Privilege Vulnerability",
+  "text": "<PackageReference Include=\"Microsoft.NETCore.App.Runtime.osx-arm64\" Version=\"9.0.0\" />\n",
+  "upstream_severity": "high",
+  "vulnerable_version_range": ">= 9.0.0, <= 9.0.20"
+}

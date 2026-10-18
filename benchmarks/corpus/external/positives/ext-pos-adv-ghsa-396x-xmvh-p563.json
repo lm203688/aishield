@@ -1,0 +1,31 @@
+{
+  "chosen_vulnerable_version": "8.7.0",
+  "cve_id": "CVE-2026-63498",
+  "cwe_ids": [
+    "CWE-79"
+  ],
+  "dataset": "GitHub Security Advisory Database",
+  "ecosystem": "composer",
+  "family": "xss",
+  "id": "ext-pos-adv-ghsa-396x-xmvh-p563",
+  "label_basis": "external_cve_verified",
+  "labels": [
+    {
+      "annotator": "A",
+      "basis": "external_cve_verified",
+      "positive": true
+    }
+  ],
+  "license": "GitHub Advisory Database — CC0-1.0",
+  "package": "snipe/snipe-it",
+  "published_at": "2026-09-24T18:19:38Z",
+  "scan_plane": "instruction",
+  "schema_version": 1,
+  "sha256": "4ce3e6052c7ced839ffccef4140b044bbed9663b3bb109a756bb14fafdb3149c",
+  "source": "github-advisory/GHSA-396x-xmvh-p563",
+  "source_url": "https://api.github.com/advisories/GHSA-396x-xmvh-p563",
+  "summary": "Snipe-IT: Stored XSS via Inline XML Rendering in the Uploaded Files API",
+  "text": "{\"require\": {\"snipe/snipe-it\": \"8.7.0\"}}\n",
+  "upstream_severity": "high",
+  "vulnerable_version_range": "< 8.7.0"
+}

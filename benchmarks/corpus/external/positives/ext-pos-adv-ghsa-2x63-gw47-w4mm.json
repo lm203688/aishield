@@ -1,0 +1,31 @@
+{
+  "chosen_vulnerable_version": "0.8.1",
+  "cve_id": "CVE-2026-61666",
+  "cwe_ids": [
+    "CWE-248"
+  ],
+  "dataset": "GitHub Security Advisory Database",
+  "ecosystem": "rubygems",
+  "family": "resource_exhaustion",
+  "id": "ext-pos-adv-ghsa-2x63-gw47-w4mm",
+  "label_basis": "external_cve_verified",
+  "labels": [
+    {
+      "annotator": "A",
+      "basis": "external_cve_verified",
+      "positive": true
+    }
+  ],
+  "license": "GitHub Advisory Database — CC0-1.0",
+  "package": "websocket-driver",
+  "published_at": "2026-07-21T18:34:42Z",
+  "scan_plane": "instruction",
+  "schema_version": 1,
+  "sha256": "7503b0113792c43ef9d85f03cc42a426c74f9480a9df49ae33811bb7cb775bf8",
+  "source": "github-advisory/GHSA-2x63-gw47-w4mm",
+  "source_url": "https://api.github.com/advisories/GHSA-2x63-gw47-w4mm",
+  "summary": "websocket-driver-ruby: Denial of service via malformed Host header",
+  "text": "gem \"websocket-driver\", \"=0.8.1\"\n",
+  "upstream_severity": "high",
+  "vulnerable_version_range": "< 0.8.2"
+}

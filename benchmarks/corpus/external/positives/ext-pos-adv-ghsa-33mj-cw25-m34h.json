@@ -1,0 +1,32 @@
+{
+  "chosen_vulnerable_version": "1.13.0",
+  "cve_id": "CVE-2026-77405",
+  "cwe_ids": [
+    "CWE-316",
+    "CWE-326"
+  ],
+  "dataset": "GitHub Security Advisory Database",
+  "ecosystem": "go",
+  "family": "crypto_bypass",
+  "id": "ext-pos-adv-ghsa-33mj-cw25-m34h",
+  "label_basis": "external_cve_verified",
+  "labels": [
+    {
+      "annotator": "A",
+      "basis": "external_cve_verified",
+      "positive": true
+    }
+  ],
+  "license": "GitHub Advisory Database — CC0-1.0",
+  "package": "github.com/rabbitmq/amqp091-go",
+  "published_at": "2026-09-17T17:04:01Z",
+  "scan_plane": "instruction",
+  "schema_version": 1,
+  "sha256": "bd331d778e43c83bf214b19a6e88d0e515af2cafbe979d1818391d9738a56945",
+  "source": "github-advisory/GHSA-33mj-cw25-m34h",
+  "source_url": "https://api.github.com/advisories/GHSA-33mj-cw25-m34h",
+  "summary": "RabbitMQ amqp091-go: Missing Explicit TLS Minimum Version Configuration In URI Parser",
+  "text": "require github.com/rabbitmq/amqp091-go v1.13.0\n",
+  "upstream_severity": "critical",
+  "vulnerable_version_range": "< 1.13.0"
+}

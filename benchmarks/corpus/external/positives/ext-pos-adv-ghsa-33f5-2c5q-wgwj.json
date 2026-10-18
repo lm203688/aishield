@@ -1,0 +1,31 @@
+{
+  "chosen_vulnerable_version": "2.0.0",
+  "cve_id": "CVE-2026-63127",
+  "cwe_ids": [
+    "CWE-345"
+  ],
+  "dataset": "GitHub Security Advisory Database",
+  "ecosystem": "rust",
+  "family": "crypto_bypass",
+  "id": "ext-pos-adv-ghsa-33f5-2c5q-wgwj",
+  "label_basis": "external_cve_verified",
+  "labels": [
+    {
+      "annotator": "A",
+      "basis": "external_cve_verified",
+      "positive": true
+    }
+  ],
+  "license": "GitHub Advisory Database — CC0-1.0",
+  "package": "rmcp",
+  "published_at": "2026-09-16T22:13:26Z",
+  "scan_plane": "instruction",
+  "schema_version": 1,
+  "sha256": "f29b3167061cbde6fc1c70bd9176b1ded350986098a327b0b8e094dc4781d72c",
+  "source": "github-advisory/GHSA-33f5-2c5q-wgwj",
+  "source_url": "https://api.github.com/advisories/GHSA-33f5-2c5q-wgwj",
+  "summary": "RMCP: Missing Resource Field Validation in OAuth Protected Resource Metadata Discovery",
+  "text": "rmcp = \"2.0.0\"\n",
+  "upstream_severity": "high",
+  "vulnerable_version_range": "< 2.0.0"
+}

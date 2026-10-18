@@ -1,0 +1,31 @@
+{
+  "chosen_vulnerable_version": "2.2.0",
+  "cve_id": "CVE-2026-84939",
+  "cwe_ids": [
+    "CWE-23"
+  ],
+  "dataset": "GitHub Security Advisory Database",
+  "ecosystem": "maven",
+  "family": "path_traversal",
+  "id": "ext-pos-adv-ghsa-27j2-h3m2-8237",
+  "label_basis": "external_cve_verified",
+  "labels": [
+    {
+      "annotator": "A",
+      "basis": "external_cve_verified",
+      "positive": true
+    }
+  ],
+  "license": "GitHub Advisory Database — CC0-1.0",
+  "package": "org.freemarker:freemarker",
+  "published_at": "2026-09-10T06:31:45Z",
+  "scan_plane": "instruction",
+  "schema_version": 1,
+  "sha256": "fd71c63d8889029d3240d74b817ebe7464be6782daf65d8cc410d0037487152e",
+  "source": "github-advisory/GHSA-27j2-h3m2-8237",
+  "source_url": "https://api.github.com/advisories/GHSA-27j2-h3m2-8237",
+  "summary": "Apache FreeMarker template loading mechanism vulnerable to path traversal",
+  "text": "<dependency>\n  <groupId>org.freemarker:freemarker</groupId>\n  <version>2.2.0</version>\n</dependency>\n",
+  "upstream_severity": "critical",
+  "vulnerable_version_range": ">= 2.2.0, <= 2.3.34"
+}

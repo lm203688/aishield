@@ -1,0 +1,32 @@
+{
+  "chosen_vulnerable_version": "0.144.0",
+  "cve_id": "CVE-2026-100351",
+  "cwe_ids": [
+    "CWE-289",
+    "CWE-436"
+  ],
+  "dataset": "GitHub Security Advisory Database",
+  "ecosystem": "go",
+  "family": "advisory_native",
+  "id": "ext-pos-adv-ghsa-23vg-4cjm-66q5",
+  "label_basis": "external_cve_verified",
+  "labels": [
+    {
+      "annotator": "A",
+      "basis": "external_cve_verified",
+      "positive": true
+    }
+  ],
+  "license": "GitHub Advisory Database — CC0-1.0",
+  "package": "github.com/getkin/kin-openapi",
+  "published_at": "2026-10-15T20:19:20Z",
+  "scan_plane": "instruction",
+  "schema_version": 1,
+  "sha256": "7f52996240cfd97c11f07b05e59f67d9ea00a518e26c18a1ac1a98629b33c03e",
+  "source": "github-advisory/GHSA-23vg-4cjm-66q5",
+  "source_url": "https://api.github.com/advisories/GHSA-23vg-4cjm-66q5",
+  "summary": "kin-openapi: ValidationHandler security-requirement bypass via encoded-path operation confusion",
+  "text": "require github.com/getkin/kin-openapi v0.144.0\n",
+  "upstream_severity": "high",
+  "vulnerable_version_range": ">= 0.144.0, < 0.147.0"
+}

@@ -1,0 +1,31 @@
+{
+  "chosen_vulnerable_version": "0.0.0-20260721043339-eef10568384e",
+  "cve_id": "CVE-2026-69085",
+  "cwe_ids": [
+    "CWE-89"
+  ],
+  "dataset": "GitHub Security Advisory Database",
+  "ecosystem": "go",
+  "family": "injection_generic",
+  "id": "ext-pos-adv-ghsa-33jq-p8c2-q3q4",
+  "label_basis": "external_cve_verified",
+  "labels": [
+    {
+      "annotator": "A",
+      "basis": "external_cve_verified",
+      "positive": true
+    }
+  ],
+  "license": "GitHub Advisory Database — CC0-1.0",
+  "package": "github.com/siyuan-note/siyuan/kernel",
+  "published_at": "2026-10-01T14:38:48Z",
+  "scan_plane": "instruction",
+  "schema_version": 1,
+  "sha256": "e09feaf565ca2c4db884e865a8aac71d8ec2c8d5aff451483a33c5c66f0aa7a6",
+  "source": "github-advisory/GHSA-33jq-p8c2-q3q4",
+  "source_url": "https://api.github.com/advisories/GHSA-33jq-p8c2-q3q4",
+  "summary": "SiYuan: Unauthenticated SQL injection in searchDocs via unescaped keyword (publish mode): cross-notebook read/write with statement stacking",
+  "text": "require github.com/siyuan-note/siyuan/kernel v0.0.0-20260721043339-eef10568384e\n",
+  "upstream_severity": "critical",
+  "vulnerable_version_range": "< 0.0.0-20260721043339-eef10568384e"
+}
