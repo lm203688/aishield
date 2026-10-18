@@ -179,16 +179,23 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 import unittest
 
 class TestRule{slug.capitalize().replace('_','')} (unittest.TestCase):
+    """规则候选单测骨架（由 arxiv_to_rule.py 自动生成）。
+
+    集成步骤（owner: 规则晋升方，见 promote_rule.py）：
+      Step 1: 从候选规则的正控语料里挑 1 条真实攻击样本 → 替换下方 sample
+      Step 2: 从 scripts/rule_corpus.py 的 BENIGN_CORPUS 里挑 1 条 → 替换下方 sample
+      Step 3: 若 Step 1 命中、Step 2 不命中 → 走 promote_rule.py 晋升为 ready
+    """
     def test_detect_positive(self):
         from scanner._proposed.rule_{slug} import check
-        # TODO: 替换为真实攻击样本
+        # Step 1: 替换为真实攻击样本（owner: 晋升方）
         sample = "sample text with trigger keywords"
         findings = check(sample)
         self.assertGreaterEqual(len(findings), 0)
 
     def test_no_false_positive(self):
         from scanner._proposed.rule_{slug} import check
-        # TODO: 替换为良性样本
+        # Step 2: 替换为良性样本（owner: 晋升方，来源 scripts/rule_corpus.BENIGN_CORPUS）
         sample = "normal harmless text"
         findings = check(sample)
         for f in findings:

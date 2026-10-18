@@ -7,7 +7,8 @@ eco/payment.py — 支付网关 + 计费系统
   - CreemGateway:        国际支付（已有集成）
   - BillingService:      计费服务
       免费层: 50次/天
-      Pro: ¥19/月 1000次/天
+      Pro: ¥39/月 1000次/天
+      终身版: ¥199 一次性
       Enterprise: 定制
   - 数据持久化: data/billing.json
 
@@ -79,7 +80,7 @@ PLANS = {
     },
     "pro": {
         "name": "Pro",
-        "price": 19,
+        "price": 39,
         "currency": "CNY",
         "billing_cycle": "monthly",
         "daily_limit": 1000,
@@ -975,7 +976,7 @@ if __name__ == "__main__":
 
     print("\n=== 支付宝网关测试 ===")
     alipay = AlipayGateway()
-    result = alipay.create_payment(19, "CNY", "test_order_001", "Pro套餐")
+    result = alipay.create_payment(39, "CNY", "test_order_001", "Pro套餐")
     print(f"  创建支付: {result.get('payment_id')}")
 
     print("\n=== 计费服务测试 ===")

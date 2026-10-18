@@ -1203,7 +1203,21 @@ LEGIT_PACKAGE_CATALOG = NPM_PACKAGE_CATALOG | PYPI_PACKAGE_CATALOG
 
 
 def _levenshtein(a, b):
-    """标准编辑距离（本地、零依赖）。"""
+    """Damerau-Levenshtein 编辑距离（本地、零依赖）。
+
+    相对标准 Levenshtein 增加「相邻字符转位」作为 1 步编辑。这决定 typosquat
+    检测能否命中**转位型**幻觉包——`lodahs`→`lodash` 是 `sh`↔`hs` 的相邻转位：
+      - Levenshtein 距离 = 2（须删+插或 2 次替换）
+      - Damerau-Levenshtein 距离 = 1（一次转位）
+
+    转位是人工误击与刻意仿冒的第一大类手法，学术界与工业界（Wikipedia、
+    Postmates、Google 拼写建议）均以 Damerau-Levenshtein 为基准度量。本仓库
+    的 typosquat 阈值原先要求 best_d==2 且 len>=8，使得 len=6 的 `lodahs`
+    永远漏检——2026-10-18 实测 `benchmarks/servers/malicious` 因此 PASS 于
+    一个空操作断言下（见 benchmarks/run_bench.py 任务 P0.1）。
+
+    复杂度仍是 O(len(a)*len(b))，仅多引用 i-2/j-2 单元格。
+    """
     if a == b:
         return 0
     la, lb = len(a), len(b)
@@ -1211,14 +1225,23 @@ def _levenshtein(a, b):
         return lb
     if lb == 0:
         return la
-    prev = list(range(lb + 1))
-    for i, ca in enumerate(a, 1):
-        cur = [i]
-        for j, cb in enumerate(b, 1):
-            cost = 0 if ca == cb else 1
-            cur.append(min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + cost))
-        prev = cur
-    return prev[lb]
+    # 三缓冲矩阵：prev2=row[i-2], prev1=row[i-1], cur=row[i]
+    # 第 0 行 = [0,1,2,...,lb]；prev2 初值为占位行（i==1 时转位分支不启用，不会被读到）
+    prev2 = [0] * (lb + 1)
+    prev1 = list(range(lb + 1))
+    for i in range(1, la + 1):
+        cur = [i] + [0] * lb
+        for j in range(1, lb + 1):
+            cost = 0 if a[i - 1] == b[j - 1] else 1
+            cur[j] = min(prev1[j] + 1,          # 删除
+                         cur[j - 1] + 1,         # 插入
+                         prev1[j - 1] + cost)    # 替换
+            # 相邻转位：a[i-1]==b[j-2] 且 a[i-2]==b[j-1]
+            if (i > 1 and j > 1 and a[i - 1] == b[j - 2]
+                    and a[i - 2] == b[j - 1]):
+                cur[j] = min(cur[j], prev2[j - 2] + 1)
+        prev2, prev1 = prev1, cur
+    return prev1[lb]
 
 
 # 形近字符归一化（防 homoglyph 投毒：0/o 1/l 3/e 5/s @/a）

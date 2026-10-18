@@ -503,13 +503,14 @@ class AuditLogger:
 
 
 # ══════════════════════════════════════════════
-#  OAuth（TODO: 待实现）
+#  OAuth（规划中，owner: @lm203688，2026-Q4 目标）
 # ══════════════════════════════════════════════
 
-# TODO: OAuth2.0 授权码流程
+# OAuth2.0 授权码流程规格（RFC 6749）
 #   - authorize_url(client_id, redirect_uri, scope, state) → str
 #   - exchange_code(code, client_id, client_secret) → {"access_token", "refresh_token", "expires_in"}
 #   - refresh_token(refresh_token, client_id, client_secret) → {"access_token", "expires_in"}
 #   - revoke_token(token) → bool
 # 数据文件: auth_oauth.json
 # 参考标准: RFC 6749 (OAuth 2.0)
+# 实现计划: 2026-Q4，依赖 #445 OAuth 网关需求

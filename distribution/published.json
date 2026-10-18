@@ -1,7 +1,7 @@
 {
-  "_comment": "对外发布台账。任何投放到外部渠道的产物都必须在此登记，且 source_dir 内必须留底源文件。由 scripts/verify_distribution.py 门禁校验。",
+  "_comment": "对外发布台账。任何投放到外部渠道的产物都必须在此登记，且 source_dir 内必须留底源文件。由 scripts/verify_distribution.py 门禁校验。updated 每次改动同步；published_version/published_at 从渠道侧实测回填，未知一律 null（不猜、不编）。",
   "schema_version": 1,
-  "updated": "2026-08-10",
+  "updated": "2026-10-17",
   "policy": {
     "min_overall_score": 80,
     "block_severities": ["critical", "high"],
@@ -17,7 +17,8 @@
       "published_at": "2026-08-10",
       "source_dir": "distribution/agensi/chinese-seo-compliance",
       "source_status": "rebuilt",
-      "notes": "v1.0 首发时源未入库（发布留底流程缺失）。1.1.0 为按 AIShield 规范重建并通过自检的版本，下次更新以此覆盖发布，届时 published_version 同步为 1.1.0。",
+      "status": "stale",
+      "notes": "v1.0 首发时源未入库（发布留底流程缺失）。1.1.0 为按 AIShield 规范重建并通过自检的版本，渠道侧仍显示 1.0.0，需重发覆盖。owner: @lm203688。",
       "signals": {
         "downloads": 1,
         "first_download_at": "2026-08-10T12:01:00+08:00",
@@ -25,51 +26,113 @@
       }
     },
     {
+      "channel": "npm",
+      "name": "aishield-mcp-server",
+      "kind": "npm-package",
+      "version": "4.11.0",
+      "published_version": "4.11.0",
+      "published_at": "2026-10-16",
+      "source_dir": "mcp-server",
+      "source_status": "in_repo",
+      "status": "live",
+      "notes": "npm registry 实测 4.11.0（`npm view aishield-mcp-server version`）。provenance 由 .github/workflows/publish-npm.yml 用 id-token: write + npm publish --provenance 签。",
+      "signals": {
+        "url": "https://www.npmjs.com/package/aishield-mcp-server"
+      }
+    },
+    {
+      "channel": "github",
+      "name": "lm203688/aishield",
+      "kind": "repo",
+      "version": "4.11.0",
+      "published_version": "4.11.0",
+      "published_at": "2026-10-16",
+      "source_dir": ".",
+      "source_status": "in_repo",
+      "status": "live",
+      "notes": "MIT 公开仓库。v4.11.0 Release 已发。",
+      "signals": {
+        "url": "https://github.com/lm203688/aishield"
+      }
+    },
+    {
+      "channel": "smithery",
+      "name": "aishield",
+      "kind": "mcp-server",
+      "version": "4.11.0",
+      "published_version": null,
+      "published_at": null,
+      "source_dir": ".",
+      "source_status": "in_repo",
+      "status": "listed-version-unknown",
+      "notes": "smithery.ai/server/aishield 200（listing 存在），但页面未标版本号；渠道侧版本回填需人工核验。manifest 源：`smithery.yaml`（sync_version 门禁覆盖）。",
+      "signals": {
+        "url": "https://smithery.ai/server/aishield"
+      }
+    },
+    {
+      "channel": "glama",
+      "name": "lm203688-aishield",
+      "kind": "mcp-server",
+      "version": "4.11.0",
+      "published_version": null,
+      "published_at": null,
+      "source_dir": ".",
+      "source_status": "in_repo",
+      "status": "unlisted",
+      "notes": "2026-10-17 实测 https://glama.ai/api/v1/servers/lm203688-aishield → 404，Glama 上未注册。需人工提交；渠道 API 未公开自助接口，走 glama.ai 页面提审。owner: @lm203688。",
+      "signals": {}
+    },
+    {
       "channel": "claude-skills",
       "name": "aishield-security-scan",
       "kind": "skill",
-      "version": "4.3.0",
+      "version": "4.11.0",
       "published_version": null,
       "published_at": null,
       "source_dir": "distribution/claude-skill",
       "source_status": "in_repo",
-      "notes": "源已就绪，待提交 Claude 技能市场。",
+      "status": "not-submitted",
+      "notes": "源已就绪，待提交 Claude 技能市场（需账号登录 + 平台审核）。owner: @lm203688。",
       "signals": {}
     },
     {
       "channel": "gpt-store",
       "name": "aishield-gpt",
       "kind": "gpt",
-      "version": "4.3.0",
+      "version": "4.11.0",
       "published_version": null,
       "published_at": null,
       "source_dir": "distribution/gpt-store",
       "source_status": "in_repo",
-      "notes": "Actions 接 AIShield Trust API。",
+      "status": "not-submitted",
+      "notes": "Actions 接 AIShield Trust API。提交需 ChatGPT Business / Team 账号。owner: @lm203688。",
       "signals": {}
     },
     {
       "channel": "huggingface",
       "name": "aishield-agent-security-benchmark",
       "kind": "dataset-card",
-      "version": "4.3.0",
+      "version": "4.11.0",
       "published_version": null,
       "published_at": null,
       "source_dir": "distribution/huggingface",
       "source_status": "in_repo",
-      "notes": "安全基准 + 复现卡。",
+      "status": "not-submitted",
+      "notes": "安全基准 + 复现卡。首次提交需 huggingface.co 账号。owner: @lm203688。",
       "signals": {}
     },
     {
       "channel": "clawhub",
       "name": "aishield",
       "kind": "skill",
-      "version": "4.3.0",
+      "version": "4.11.0",
       "published_version": null,
       "published_at": null,
       "source_dir": "distribution/clawhub",
       "source_status": "in_repo",
-      "notes": "认领 ClawHub 命名空间，反制第三方 clawhub/ai-shield-audit (laurentaia) 混淆名占用。需 clawhub login（够老 GitHub 账号）后 publish。",
+      "status": "namespace-claimed",
+      "notes": "认领 ClawHub 命名空间，反制第三方 clawhub/ai-shield-audit (laurentaia) 混淆名占用。需 clawhub login（够老 GitHub 账号）后 publish。owner: @lm203688。",
       "signals": {}
     }
   ]

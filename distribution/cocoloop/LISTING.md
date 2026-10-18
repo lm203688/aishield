@@ -32,7 +32,7 @@
 - **定位互补**：CocoLoop 的 CLS 认证是「上架门槛」，AIShield 是开发者**自己**给技能/插件做「**安装前**安全门禁」的工具 —— 一个在云端审、一个在本机审。
 - **纯静态推断**：绝不执行被扫配置里的任何命令（read-only），避免「为看工具列表先把恶意配置跑一遍」的陷阱；可用 `scripts/prove_isolation.py` 自证 spawn 0 子进程。
 - **5 维评分**（安全 / 权限 / 数据处理 / 供应链 / 可靠性）+ 0–100 总分与 `safe/medium/high/critical` 风险级；输出 **SARIF**（进 GitHub Security tab）与 CycloneDX SBOM，可直接当 CI 门禁。
-- **235 条规则**，对齐 OWASP MCP Top 10 与 OWASP Agentic AI Top 10（ASI01–ASI10）；含 19 条 Tech-Radar 自动晋升的雷达规则。
+- **264 条规则**，对齐 OWASP MCP Top 10 与 OWASP Agentic AI Top 10（ASI01–ASI10）；含 19 条 Tech-Radar 自动晋升的雷达规则。
 - **与 CLS 互补而非替代**：CLS 偏大模型深度检测（依赖外部 API、较慢），AIShield 本地零依赖、可离线、秒级 —— 两者叠加使用。
 
 **Risk-review note**（坦诚声明保证边界）:

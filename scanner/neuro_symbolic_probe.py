@@ -101,12 +101,23 @@ class DeterministicHeuristicBackend(SemanticBackend):
 
 
 class GGUFBackend(SemanticBackend):
-    """可插拔 llama.cpp GGUF 后端（蓝图 30 天 PoC 真接入点）。
+    """可插拔 llama.cpp GGUF 后端（蓝图 Program A · 60/90 天阶段接入点）。
 
-    仅当提供模型文件且本机有 llama.cpp 库时才可用；否则清晰报错，不假装能跑。
-    接口与 DeterministicHeuristicBackend 完全一致，下游 ratify 逻辑无需改动。
+    模板说明：本类是 SemanticBackend 的**可选实装**，不是必需路径。
+      * v0.1 已落地：**DeterministicHeuristicBackend**（零依赖，作为神经层最小实现）。
+      * 本类保留可插拔接口，等本地已有 GGUF 模型 + llama.cpp 库时直接替换即可，
+        下游 ratify/scan/eval_corpus 无需任何改动。
+    接口契约（对齐 DeterministicHeuristicBackend.candidates 的输出结构）：
+        返回 List[Dict]，每个 Dict 至少含 span / start / end / category / confidence。
+    实施计划（owner: @lm203688）：
+      Step 1: 选定 3B–7B GGUF 模型（owner: 需评估本地内存，见 archive/local-models-infra.md）
+      Step 2: 通过 llama.cpp Python 绑定加载并注入 tokenizer+kv-cache
+      Step 3: candidates() 走 logprobs 阈值切片，返回 span+confidence
+    当前状态：占位。不注入即诚实报 NotImplementedError，不假装能跑（trust fail-loud）。
     """
     name = "gguf"
+    owner = "@lm203688"
+    target = "Program A 60/90d"
 
     def __init__(self, model_path: Optional[str] = None, lib_path: Optional[str] = None):
         self.model_path = model_path
@@ -115,8 +126,9 @@ class GGUFBackend(SemanticBackend):
     def candidates(self, text: str) -> List[Dict[str, Any]]:
         raise NotImplementedError(
             "GGUFBackend 需要本地 GGUF 模型 + llama.cpp 库；"
-            "当前为 30 天 PoC 占位。请在脚本中注入已加载的 llama.cpp 实例，"
-            "或见蓝图 Program A 的 30 天 PoC 计划。")
+            "当前为 60/90 天阶段占位（owner: @lm203688）。"
+            "零依赖默认路径见 DeterministicHeuristicBackend；"
+            "接入步骤见本类 docstring。")
 
 
 # ───────────────────────────────────────────────────────────────────────────

@@ -26,13 +26,13 @@
 **标题/Name**：`AIShield (local, open-source)`
 
 **一句话描述（Short）**：
-> Local-first, open-source AI-tool security scanner for MCP servers, AI skills, GPTs and prompts. OWASP MCP Top 10 + Agentic ASI01–10. 235 MCP / 241 skill rules. Runs fully offline — your code never leaves your machine.
+> Local-first, open-source AI-tool security scanner for MCP servers, AI skills, GPTs and prompts. OWASP MCP Top 10 + Agentic ASI01–10. 264 MCP / 291 skill rules. Runs fully offline — your code never leaves your machine.
 
-> ⚠️ **规则数基线（2026-09-15 起）**：**235 MCP / 241 Skill**（静态 208 + 情报 8 + 雷达 19）。
+> ⚠️ **规则数基线（2026-10-03 起）**：**264 MCP / 291 Skill**（静态 237 + 情报 8 + 雷达 19）。
 > 本文件已同步；仓库内其余营销/品牌文档仍写着历史值 **227/233**，属已知 drift，待统一 sweep。
 
 **长描述（Long）**：
-> AIShield is a **local-first, open-source** security scanner for the agent ecosystem. It scans MCP servers, AI skills, GPTs and prompts for tool poisoning, prompt injection and supply-chain risks, aligned to OWASP MCP Top 10 + Agentic AI Top 10 (ASI01–ASI10). The rule base covers 235 MCP + 241 skill rules, with zero third-party runtime dependencies (urllib only) and an optional remote LLM semantic backend.
+> AIShield is a **local-first, open-source** security scanner for the agent ecosystem. It scans MCP servers, AI skills, GPTs and prompts for tool poisoning, prompt injection and supply-chain risks, aligned to OWASP MCP Top 10 + Agentic AI Top 10 (ASI01–ASI10). The rule base covers 264 MCP + 291 skill rules, with zero third-party runtime dependencies (urllib only) and an optional remote LLM semantic backend.
 >
 > **Why local-first matters:** AIShield runs entirely on your machine. It never uploads your code or config, never spawns commands found inside the artifact being scanned, and can run 100% offline. This is the open-source edition — distinct from the cloud SaaS `aishield.ai`.
 
