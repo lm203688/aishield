@@ -1,0 +1,32 @@
+{
+  "chosen_vulnerable_version": "1.9.10-0.20260703131214-23d1934099b0",
+  "cve_id": "CVE-2026-84312",
+  "cwe_ids": [
+    "CWE-287",
+    "CWE-352"
+  ],
+  "dataset": "GitHub Security Advisory Database",
+  "ecosystem": "go",
+  "family": "auth_bypass",
+  "id": "ext-pos-adv-ghsa-44xr-mrhh-qm78",
+  "label_basis": "external_cve_verified",
+  "labels": [
+    {
+      "annotator": "A",
+      "basis": "external_cve_verified",
+      "positive": true
+    }
+  ],
+  "license": "GitHub Advisory Database — CC0-1.0",
+  "package": "Nginx-UI",
+  "published_at": "2026-10-15T20:12:52Z",
+  "scan_plane": "instruction",
+  "schema_version": 1,
+  "sha256": "253d15f6da8a48fedc7429a657daecaed48ae701567c09a627a3ee5ab1d8e6dc",
+  "source": "github-advisory/GHSA-44xr-mrhh-qm78",
+  "source_url": "https://api.github.com/advisories/GHSA-44xr-mrhh-qm78",
+  "summary": "Nginx UI: Casdoor SSO callback uses a constant `state` parameter (login CSRF)",
+  "text": "require Nginx-UI v1.9.10-0.20260703131214-23d1934099b0\n",
+  "upstream_severity": "high",
+  "vulnerable_version_range": "< 1.9.10-0.20260703131214-23d1934099b0"
+}

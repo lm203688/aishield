@@ -1,0 +1,31 @@
+{
+  "chosen_vulnerable_version": "5.5.0",
+  "cve_id": "CVE-2026-94462",
+  "cwe_ids": [
+    "CWE-639"
+  ],
+  "dataset": "GitHub Security Advisory Database",
+  "ecosystem": "rubygems",
+  "family": "auth_bypass",
+  "id": "ext-pos-adv-ghsa-4825-p4xm-pcf2",
+  "label_basis": "external_cve_verified",
+  "labels": [
+    {
+      "annotator": "A",
+      "basis": "external_cve_verified",
+      "positive": true
+    }
+  ],
+  "license": "GitHub Advisory Database — CC0-1.0",
+  "package": "spree_api",
+  "published_at": "2026-09-22T20:40:30Z",
+  "scan_plane": "instruction",
+  "schema_version": 1,
+  "sha256": "6573d18521571061ecffee4c24189eff5c58d988872c7e581816cab98f8c56e6",
+  "source": "github-advisory/GHSA-4825-p4xm-pcf2",
+  "source_url": "https://api.github.com/advisories/GHSA-4825-p4xm-pcf2",
+  "summary": "Spree: Broken Access Control in `PATCH /api/v3/store/carts/:id/associate` (IDOR)",
+  "text": "gem \"spree_api\", \"=5.5.0\"\n",
+  "upstream_severity": "high",
+  "vulnerable_version_range": ">= 5.5.0, < 5.5.4"
+}

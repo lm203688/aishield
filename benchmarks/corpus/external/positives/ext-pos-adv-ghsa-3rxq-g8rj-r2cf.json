@@ -1,0 +1,31 @@
+{
+  "chosen_vulnerable_version": "11.0.0-preview.1",
+  "cve_id": "CVE-2026-69651",
+  "cwe_ids": [
+    "CWE-407"
+  ],
+  "dataset": "GitHub Security Advisory Database",
+  "ecosystem": "nuget",
+  "family": "resource_exhaustion",
+  "id": "ext-pos-adv-ghsa-3rxq-g8rj-r2cf",
+  "label_basis": "external_cve_verified",
+  "labels": [
+    {
+      "annotator": "A",
+      "basis": "external_cve_verified",
+      "positive": true
+    }
+  ],
+  "license": "GitHub Advisory Database — CC0-1.0",
+  "package": "Microsoft.NETCore.App.Runtime.osx-arm64",
+  "published_at": "2026-10-13T20:32:47Z",
+  "scan_plane": "instruction",
+  "schema_version": 1,
+  "sha256": "504587f76106194496cfb372e6839cb3fc128092b2e551ca3e7038fc7b3dfc8c",
+  "source": "github-advisory/GHSA-3rxq-g8rj-r2cf",
+  "source_url": "https://api.github.com/advisories/GHSA-3rxq-g8rj-r2cf",
+  "summary": "Microsoft Security Advisory CVE-2026-69651 - .NET and Visual Studio Denial of Service Vulnerability",
+  "text": "<PackageReference Include=\"Microsoft.NETCore.App.Runtime.osx-arm64\" Version=\"11.0.0-preview.1\" />\n",
+  "upstream_severity": "high",
+  "vulnerable_version_range": ">= 11.0.0-preview.1, <= 11.0.0-rc.1"
+}

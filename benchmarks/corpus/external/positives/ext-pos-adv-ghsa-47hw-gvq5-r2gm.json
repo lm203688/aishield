@@ -1,0 +1,31 @@
+{
+  "chosen_vulnerable_version": "0.63.0",
+  "cve_id": "CVE-2026-102823",
+  "cwe_ids": [
+    "CWE-20"
+  ],
+  "dataset": "GitHub Security Advisory Database",
+  "ecosystem": "rust",
+  "family": "injection_generic",
+  "id": "ext-pos-adv-ghsa-47hw-gvq5-r2gm",
+  "label_basis": "external_cve_verified",
+  "labels": [
+    {
+      "annotator": "A",
+      "basis": "external_cve_verified",
+      "positive": true
+    }
+  ],
+  "license": "GitHub Advisory Database — CC0-1.0",
+  "package": "russh",
+  "published_at": "2026-09-30T23:27:17Z",
+  "scan_plane": "instruction",
+  "schema_version": 1,
+  "sha256": "90063c91842b62d185c8d80f4d93d5f3aa11e5f49d00231f85e50b722ba9a945",
+  "source": "github-advisory/GHSA-47hw-gvq5-r2gm",
+  "source_url": "https://api.github.com/advisories/GHSA-47hw-gvq5-r2gm",
+  "summary": "russh: Client-side channel-scoped Handler callbacks fire for channel IDs the client never opened",
+  "text": "russh = \"0.63.0\"\n",
+  "upstream_severity": "high",
+  "vulnerable_version_range": "<= 0.63.0"
+}

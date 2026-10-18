@@ -1,0 +1,31 @@
+{
+  "chosen_vulnerable_version": "3.4.0",
+  "cve_id": "CVE-2026-85396",
+  "cwe_ids": [
+    "CWE-22"
+  ],
+  "dataset": "GitHub Security Advisory Database",
+  "ecosystem": "rubygems",
+  "family": "path_traversal",
+  "id": "ext-pos-adv-ghsa-47m2-wp7j-p9vc",
+  "label_basis": "external_cve_verified",
+  "labels": [
+    {
+      "annotator": "A",
+      "basis": "external_cve_verified",
+      "positive": true
+    }
+  ],
+  "license": "GitHub Advisory Database — CC0-1.0",
+  "package": "rubyzip",
+  "published_at": "2026-09-03T21:31:16Z",
+  "scan_plane": "instruction",
+  "schema_version": 1,
+  "sha256": "d09e33a416dfd717a5630ec047ad7bc2eebe67cba9bb24bf4b4df2848ececc70",
+  "source": "github-advisory/GHSA-47m2-wp7j-p9vc",
+  "source_url": "https://api.github.com/advisories/GHSA-47m2-wp7j-p9vc",
+  "summary": "rubyzip path traversal vulnerability",
+  "text": "gem \"rubyzip\", \"=3.4.0\"\n",
+  "upstream_severity": "high",
+  "vulnerable_version_range": "< 3.4.0"
+}
