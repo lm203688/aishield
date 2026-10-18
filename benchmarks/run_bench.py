@@ -80,12 +80,16 @@ def main():
                 ok = False
                 reasons.append(f"漏报期望类型 {ft}")
         if cfg.get("expect_typosquat"):
-            typ = any("typosquat" in t or "hallucinated" in t or "package_name" in t for t in types)
-            # 通过依赖名检查（check_package_name 产出类型可能不同）
-            dep_names = " ".join(d.get("type", "") for d in dep.get("findings", []))
-            if not (typ or "lodahs" in str(dep.get("dependencies", [])) and "hallucinated" in dep_names):
-                # 只要检测到了 lodahs 的异常即可
-                pass
+            # P0.1 修复：此分支曾是空操作（末尾 `pass`，无论真假都不置 ok=False），
+            # 导致 malicious.expect_typosquat=true 在漏检时仍 PASS。
+            # 现在落为真实断言：必须在 findings 类型里看到 typosquat/hallucinated
+            # 信号，否则记为漏报并 FAIL。
+            typ = any("typosquat" in t or "hallucinated" in t or "package_name" in t
+                      for t in types)
+            dep_types = " ".join(d.get("type", "") for d in dep.get("findings", []))
+            if not (typ or "hallucinated" in dep_types):
+                ok = False
+                reasons.append("未检出预期 typosquat/hallucinated（依赖名仿冒漏检）")
         status = "PASS" if ok else "FAIL"
         print(f"[{status}] {case}: score={scores['overall_score']} types={sorted(types)}")
         for r in reasons:

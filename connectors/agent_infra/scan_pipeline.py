@@ -248,12 +248,30 @@ SERVER_NAME = "<<SAFE_NAME>>"
 
 
 def handle(tool_name, arguments, *, user_id, agent_instance_id):
-    """统一入口：先治理 preflight，再转发到 <<NAME>> 原生能力。"""
-    # TODO(二次研发): 调用 AIShield 治理层
-    #   pf = pa.check_budget_and_risk(user_id=user_id, action="mcp.%s" % tool_name, ...)
-    #   if pf.get("verdict") == "block": return {"ok": False, "blocked": True}
-    # TODO(二次研发): 在此调用 <<NAME>> 原生 API / SDK
-    raise NotImplementedError("implement forwarding to %s" % SERVER_NAME)
+    """统一入口：先治理 preflight，再转发到 <<NAME>> 原生能力。
+
+    模板说明：本函数是 MCP 适配器骨架的占位实现，
+    由 build_mcp_adapter_skeleton() 生成时替换 SERVER_NAME 和工具清单。
+    实际集成时需：
+      1. 调用 AIShield 治理层 preflight（见 eco/personal_agent.py）
+      2. 调用目标 MCP server 的原生 API / SDK
+    参考实现：connectors/agent_infra/personal_agent.py
+    """
+    # Step 1: 治理 preflight（owner: @lm203688）
+    #   from eco import personal_agent as pa
+    #   pf = pa.check_budget_and_risk(
+    #       user_id=user_id,
+    #       action="mcp.%s" % tool_name,
+    #       agent_instance_id=agent_instance_id,
+    #   )
+    #   if pf.get("verdict") == "block":
+    #       return {"ok": False, "blocked": True, "reason": pf.get("reason")}
+    #
+    # Step 2: 转发到目标 MCP server（owner: 集成方）
+    #   在此调用 <<NAME>> 原生 API / SDK，传入 tool_name 和 arguments
+    raise NotImplementedError(
+        "Implement forwarding to %s. "
+        "See docstring for integration steps." % SERVER_NAME)
 
 
 # 暴露给 AIShield 64-tool MCP server 的工具清单（示例）

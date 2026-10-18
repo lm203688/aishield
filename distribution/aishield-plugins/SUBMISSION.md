@@ -85,13 +85,13 @@ Anthropic 目前**不区分**个人 / 团队作者，官方市场 (`claude-plugi
 短描述（≈ 300 字符，用于列表页）：
 
 ```
-AIShield 是本地、开源、零成本的 AI 工具安全扫描器，覆盖 OWASP MCP Top 10 + OWASP Agentic AI Top 10 + 沙箱硬化，235 条 MCP 规则 / 262 条 Skill 规则。核心不变量：扫描过程绝不执行被扫配置里的任何命令。
+AIShield 是本地、开源、零成本的 AI 工具安全扫描器，覆盖 OWASP MCP Top 10 + OWASP Agentic AI Top 10 + 沙箱硬化，264 条 MCP 规则 / 291 条 Skill 规则。核心不变量：扫描过程绝不执行被扫配置里的任何命令。
 ```
 
 长描述（复制到 README 字段）：
 
 ```markdown
-AIShield 是本地、开源、零成本的 AI 工具安全扫描器，覆盖 OWASP MCP Top 10 + OWASP Agentic AI Top 10 + 沙箱硬化，共 235 条 MCP 规则 / 262 条 Skill 规则（含 27 条 SKILL_EXTRA：供应链 / 上下文劫持 / Harness 元能力 / 记忆篡改 / 中文变体 / benchmark 声称 / 桌面驱动 / Agent 支付与预算攻击面）。
+AIShield 是本地、开源、零成本的 AI 工具安全扫描器，覆盖 OWASP MCP Top 10 + OWASP Agentic AI Top 10 + 沙箱硬化，共 264 条 MCP 规则 / 291 条 Skill 规则（含 27 条 SKILL_EXTRA：供应链 / 上下文劫持 / Harness 元能力 / 记忆篡改 / 中文变体 / benchmark 声称 / 桌面驱动 / Agent 支付与预算攻击面）。
 
 核心不变量：扫描过程绝不执行被扫配置里的任何命令。很多同类工具为了读取 tools/list 会真实启动被扫服务——那等于先中招再体检。AIShield 只读文件 + 只发 HTTP 审计请求，零 subprocess、零被扫代码执行面。
 
@@ -198,7 +198,7 @@ print('plugin.json OK; live API OK')
 "
 ```
 
-`rules_breakdown.total` 应与 plugin.json / README / SKILL.md 里的 MCP 数字一致（当前 `235`）。
+`rules_breakdown.total` 应与 plugin.json / README / SKILL.md 里的 MCP 数字一致（当前 `264`）。
 
 ## 联系
 

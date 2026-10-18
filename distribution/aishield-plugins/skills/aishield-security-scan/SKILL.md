@@ -8,15 +8,15 @@ metadata:
   version: "4.11.0"
   skill-author: lm203688
   category: quality-security
-  rules_mcp: 235
-  rules_skill: 262
+  rules_mcp: 264
+  rules_skill: 291
   skill_extra: 27
   invariant: "never executes any command found in a scanned config"
 ---
 
 # AIShield Security Scan
 
-你帮助用户评估 MCP 服务器、AI Skill 与 Agent 工作区的安全性。AIShield 是本地、开源、零成本的扫描器，覆盖 **OWASP MCP Top 10 + OWASP Agentic AI Top 10 + 沙箱硬化**，共 **235 条 MCP 规则 / 262 条 Skill 规则**（其中 27 条 SKILL_EXTRA 覆盖供应链 / 上下文劫持 / Harness 元能力 / 记忆篡改 / 中文变体 / benchmark 声称 / 桌面驱动 / Agent 支付与预算攻击面），输出 CycloneDX SBOM 与 SARIF。
+你帮助用户评估 MCP 服务器、AI Skill 与 Agent 工作区的安全性。AIShield 是本地、开源、零成本的扫描器，覆盖 **OWASP MCP Top 10 + OWASP Agentic AI Top 10 + 沙箱硬化**，共 **264 条 MCP 规则 / 291 条 Skill 规则**（其中 27 条 SKILL_EXTRA 覆盖供应链 / 上下文劫持 / Harness 元能力 / 记忆篡改 / 中文变体 / benchmark 声称 / 桌面驱动 / Agent 支付与预算攻击面），输出 CycloneDX SBOM 与 SARIF。
 
 **核心不变量：扫描过程绝不执行被扫配置里的任何命令。** 很多同类工具为了读取 `tools/list` 会真实启动被扫服务——那等于先中招再体检。
 

@@ -1,6 +1,6 @@
 # AIShield Security Scan — Anthropic Plugin
 
-AIShield 是本地、开源、零成本的 AI 工具安全扫描器，覆盖 **OWASP MCP Top 10 + OWASP Agentic AI Top 10 + 沙箱硬化**，共 **235 条 MCP 规则 / 262 条 Skill 规则**（含 27 条 SKILL_EXTRA 覆盖供应链 / 上下文劫持 / Harness 元能力 / 记忆篡改 / 中文变体 / benchmark 声称 / 桌面驱动 / Agent 支付与预算攻击面）。
+AIShield 是本地、开源、零成本的 AI 工具安全扫描器，覆盖 **OWASP MCP Top 10 + OWASP Agentic AI Top 10 + 沙箱硬化**，共 **264 条 MCP 规则 / 291 条 Skill 规则**（含 27 条 SKILL_EXTRA 覆盖供应链 / 上下文劫持 / Harness 元能力 / 记忆篡改 / 中文变体 / benchmark 声称 / 桌面驱动 / Agent 支付与预算攻击面）。
 
 **核心不变量：扫描过程绝不执行被扫配置里的任何命令。**
 
