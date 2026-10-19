@@ -1,0 +1,19 @@
+# AIShield artifact-reproduction image (NOT the production GitHub Action image).
+# Built for artifact evaluation: runs the offline evaluation battery and exits 0.
+# Reproduces every number in the paper / ARTIFACT.md from pinned inputs.
+FROM python:3.13-slim
+
+LABEL maintainer="AIShield Team"
+LABEL description="AIShield artifact reproduction: offline benchmark + FVI gate"
+LABEL version="4.11.0"
+
+WORKDIR /app
+COPY . .
+
+# Install runtime + test dependencies (offline-capable, no network at eval time).
+RUN python -m pip install --no-cache-dir -e .[test]
+
+# Artifact entrypoint: run the core reproducible evaluation and report.
+# (The full gate battery including environment-gated CI self-scan lives in
+#  scripts/run_all.py; this image pins the paper's evaluation numbers.)
+ENTRYPOINT ["python", "scripts/artifact_eval.py"]
