@@ -16,6 +16,7 @@ from ipaddress import ip_address
 
 from .rules import (
     OWASP_MCP_TOP10, DANGEROUS_NPM_PACKAGES, DANGEROUS_PYPI_PACKAGES,
+    GENERATED_PACKAGE_BLACKLIST,
     SKIP_EXTENSIONS, SKIP_NAMES, analyze as rules_analyze,
     check_package_name,
     check_dependency_hygiene,
@@ -167,7 +168,14 @@ def dependency_analysis(files):
                     for name, ver in pkg.get(dep_type, {}).items():
                         dependencies.append({"name": name, "version": ver, "source": "npm"})
                         if name in DANGEROUS_NPM_PACKAGES:
-                            findings.append({"type": "dangerous_dependency", "package": name, "severity": "critical", "description": f"已知恶意npm包: {name}", "owasp_category": "MCP04"})
+                            gen = GENERATED_PACKAGE_BLACKLIST.get(f"npm:{name}")
+                            if gen:
+                                cves = ", ".join(gen.get("advisories", [])[:3]) or "未知CVE"
+                                desc = (f"依赖含已知漏洞（{cves}）: {name}"
+                                        f"（情报公告，建议升级至修复版本）")
+                            else:
+                                desc = f"已知恶意npm包: {name}"
+                            findings.append({"type": "dangerous_dependency", "package": name, "severity": "critical", "description": desc, "owasp_category": "MCP04"})
                         for _f in check_package_name(name, "npm"):
                             _f["file"] = fname
                             findings.append(_f)
@@ -182,7 +190,14 @@ def dependency_analysis(files):
                     ver = parts[1].strip() if len(parts) > 1 else "latest"
                     dependencies.append({"name": name, "version": ver, "source": "pypi"})
                     if name in DANGEROUS_PYPI_PACKAGES:
-                        findings.append({"type": "dangerous_dependency", "package": name, "severity": "critical", "description": f"已知恶意PyPI包: {name}", "owasp_category": "MCP04"})
+                        gen = GENERATED_PACKAGE_BLACKLIST.get(f"pypi:{name}")
+                        if gen:
+                            cves = ", ".join(gen.get("advisories", [])[:3]) or "未知CVE"
+                            desc = (f"依赖含已知漏洞（{cves}）: {name}"
+                                    f"（情报公告，建议升级至修复版本）")
+                        else:
+                            desc = f"已知恶意PyPI包: {name}"
+                        findings.append({"type": "dangerous_dependency", "package": name, "severity": "critical", "description": desc, "owasp_category": "MCP04"})
                     for _f in check_package_name(name, "pypi"):
                         _f["file"] = fname
                         findings.append(_f)

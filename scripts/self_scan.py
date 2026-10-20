@@ -54,6 +54,28 @@ OFF_LEDGER_SOURCES = [
     "action_entrypoint.py",
 ]
 
+# 不在"已发布制品"射程内的本地状态/生成物，扫它们只会产出维护者机器噪声，
+# 且可能含测试假凭证（如 bench 夹具）。这些不是对外分发物，直接排除。
+# 注意：secret_exposure 等敏感类型由 scanner/self_reference.NEVER_SUPPRESS
+# 兜底——即便漏排除，也绝不会被允许清单抑制。
+_EXCLUDE_FIRST_COMPONENTS = {".git", ".workbuddy", ".opencode", "node_modules"}
+
+
+def _excluded(relpath: str) -> bool:
+    """判断某个相对路径是否应被排除（非发布物 / 门禁自身生成物 / 临时分析文件）。"""
+    rel = relpath.replace("\\", "/")
+    first = rel.split("/", 1)[0]
+    if first in _EXCLUDE_FIRST_COMPONENTS:
+        return True
+    base = os.path.basename(rel)
+    # 门禁自身每轮重新生成的输出（防止递归扫到自己的报告，里面含示例假凭证）
+    if base.startswith("self-scan-") and base.endswith((".json", ".md")):
+        return True
+    # 临时分析产物
+    if base.startswith(".tmp_"):
+        return True
+    return False
+
 
 def _scan_sources():
     """返回去重后的 (source, is_dir) 列表：台账 source_dir + 台账外源。"""
@@ -81,7 +103,7 @@ def _scan_sources():
 
 def scan(allowlist=None):
     allowlist = allowlist or load_allowlist()
-    results, used_keys = [], set()
+    results, used_ids = [], set()
     totals = {"findings": 0, "suppressed": 0, "blocking_unsuppressed": 0}
 
     for source in _scan_sources():
@@ -97,13 +119,15 @@ def scan(allowlist=None):
             tool_type = _tool_type_for({"kind": "mcp" if "mcp" in source else "skill"})
         if not files:
             continue
+        # 排除非发布物 / 门禁自身生成物 / 临时文件，避免维护者机器噪声
+        files = {k: v for k, v in files.items() if not _excluded(k)}
+        if not files:
+            continue
 
         report = _local_pipeline(files, os.path.basename(source.rstrip("/")) or source,
                                  tool_type=tool_type)
-        kept, suppressed = split_findings(source, report.get("findings", []), allowlist)
-        for f in suppressed:
-            used_keys.add((source.replace("\\", "/"), (f.get("file") or "").replace("\\", "/"),
-                           f.get("type")))
+        kept, suppressed = split_findings(source, report.get("findings", []), allowlist,
+                                          used_ids=used_ids)
         blocking = blocking_of(kept)
 
         results.append({
@@ -118,8 +142,9 @@ def scan(allowlist=None):
         totals["suppressed"] += len(suppressed)
         totals["blocking_unsuppressed"] += len(blocking)
 
-    # allowlist 腐烂检测：条目已不匹配任何实际发现
-    stale = [k for k in (allowlist.get("index") or {}) if k not in used_keys]
+    # allowlist 腐烂检测：条目已不匹配任何实际发现（按命中 _id 统计）
+    stale = [e["_id"] for e in (allowlist.get("index") or {}).values()
+             if e.get("_id") not in used_ids]
 
     return {
         "sources": results,

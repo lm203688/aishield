@@ -33,7 +33,7 @@ python scripts/openapi_contract.py                 # OpenAPI 契约门禁
 python scripts/validate_workflows.py               # Workflow 语法门禁
 ```
 
-预期退出码：全部为 0。任一非 0 即视为不可复现，见 §5 故障定位。
+预期退出码：全部为 0，**除 `ci_self_scan_gate.py` 外**。CI 自扫门禁是**故意 fail-closed**：若仓库存在真实、未被 allowlist 抑制的漏洞（如依赖 CVE），它会**正确地**非 0 退出。这属于安全预期，并非复现失败；只有"自指噪声导致失败"才是需修复的复现缺陷——该噪声已于 2026-10-21 由 `distribution/self_reference_allowlist.json` v2 + `NEVER_SUPPRESS` 安全底线清零，当前唯一阻断为 `@modelcontextprotocol/sdk` 真实 critical CVE（GHSA-6qxp-vccf-f47h），推荐升级 SDK 至 `^2.2.0` 修复（独立工程任务，不影响 R1–R7）。
 
 ---
 
@@ -120,7 +120,7 @@ SCI 复现的核心保证来自六道独立门禁，任一门禁失败即拒绝�
 | 3 | 声明面运行时 | `scripts/declaration_surface_gate.py` | 8 检查：AST 分派唯一性 / 运行时规则数 / 版本 / 可达 |
 | 4 | OpenAPI 契约 | `scripts/openapi_contract.py` | 运行时路由 ↔ openapi.json 双向 diff |
 | 5 | Workflow 语法 | `scripts/validate_workflows.py` | E9 单源 / E11 prepare-tests / E12 import 图派生 / E13-W7 写入者唯一 / E14 skip-ci 统一入口 |
-| 6 | CI 自扫 | `scripts/ci_self_scan_gate.py` | 扫描器自指误报 allowlist 消噪 |
+| 6 | CI 自扫 | `scripts/ci_self_scan_gate.py` | 扫描器自指误报 allowlist 消噪（v2：目录通配 + `_id` 腐烂检测）；**fail-closed**：真实漏洞（如依赖 CVE）不抑制，故可能非 0 退出——正确安全行为 |
 
 **全量回归**：`python scripts/run_all.py` 依次跑完上述门禁 + 单元测试 + FVI。
 
@@ -137,6 +137,7 @@ SCI 复现的核心保证来自六道独立门禁，任一门禁失败即拒绝�
 | `rule_count_gate` 报 53 声明位不一致 | 本地脏改动或未同步 | `git checkout .` 后重跑 |
 | Windows 上测试 SIGTERM | 沙箱安全删除守卫误触发 | 用 `env -u CODEBUDDY_SAFE_DELETE_BULK_STATE_DIR -u CODEBUDDY_TOOL_CALL_ID python -m unittest ...` |
 | Docker 构建失败 | 系统未装 Docker 或网络受限 | 改用 venv 路径，Docker 非必需 |
+| `ci_self_scan_gate.py` 非 0 退出 | 真实漏洞被正确 fail-closed（如 `@modelcontextprotocol/sdk` CVE GHSA-6qxp-vccf-f47h） | 属安全预期；升级 SDK 至 `^2.2.0` 修复。若失败来自自指噪声（allowlist 未覆盖），更新 `distribution/self_reference_allowlist.json`（v2 已清零 197 条噪声，`stale` 须为 `[]`） |
 
 ---
 
@@ -151,6 +152,7 @@ SCI 复现的核心保证来自六道独立门禁，任一门禁失败即拒绝�
   复现镜像（entrypoint 跑 `scripts/artifact_eval.py`，离线跑 benchmark + FVI + 基线对比并断言关键不变量）。
   本地开发用 venv 等价，`docker build -f Dockerfile.artifact -t aishield-artifact . && docker run aishield-artifact` 即跑通复现包。
 - **Windows 路径**：项目支持 Linux/macOS/Windows，但部分 bash 脚本（`deploy-*.sh`、`git_push_safe.sh`）需 Git Bash 或 WSL。
+- **CI 自扫门禁 fail-closed（2026-10-21）**：自指噪声 197 条已由 `distribution/self_reference_allowlist.json` v2 + `scanner/self_reference.py`（`NEVER_SUPPRESS` 安全底线 + 目录通配 + `_id` 腐烂检测）+ `scripts/self_scan.py`（`_excluded` 排除门禁自身生成物 `self-scan-*`/`.tmp_*`）+ `scanner/engine.py`（CVE 正确标注为"已知漏洞"而非"恶意包"）清零。当前唯一阻断为 `@modelcontextprotocol/sdk` 真实 critical CVE **GHSA-6qxp-vccf-f47h**（OAuth 凭证泄露，fixed in v2.2.0，本仓 pin `^1.12.1` 全 1.x 受影响），按 fail-closed 故意保留；推荐升级 SDK 至 `^2.2.0` 作独立工程任务，不影响 R1–R7 研究贡献判定。
 
 ---
 
@@ -162,4 +164,4 @@ SCI 复现的核心保证来自六道独立门禁，任一门禁失败即拒绝�
 - 基准预期值：`benchmarks/expected.json`
 - 线上复验：`curl -sS https://aishield.tools/api/v1/health`
 
-**变更历史**：本文件随每次发布同步更新。P5 首次入库为 2026-10-18。
+**变更历史**：本文件随每次发布同步更新。P5 首次入库为 2026-10-18；2026-10-21 补记 CI 自扫门禁自指噪声闭环（allowlist v2 + NEVER_SUPPRESS 安全底线，唯一阻断为真实 SDK CVE，诚实 fail-closed）。
