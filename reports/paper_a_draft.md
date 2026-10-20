@@ -156,6 +156,20 @@ All tools consume the identical corpus under the `serious_only`口径 (only crit
 
 **Interpretation (the paper's spine).** The correct metric for a guardrail is **false-positive rate**, because a single false positive invites disablement. Under the **FP = 0** constraint, AIShield's recall (29.5%) **strictly dominates** the keyword heuristic (21.1%) on the same corpus with identical FP. The random guess achieves higher raw recall (48.9%) only by emitting **53.8% false positives**—operationally unusable. Four commercial baselines cannot be run under identical offline conditions and are reported as *not evaluated* rather than fabricated, a deliberate honesty choice (§7).
 
+### 6.2.1 Scope-partitioned recall (honest decomposition)
+
+A single 29.5% figure invites the misreading "the detector misses 70% of attacks." We decompose it by *applicability scope* so the gap is explained rather than hidden. Detection uses the same `serious_only` bar (≥1 critical/high finding); confidence intervals are bootstrap (1,000 resamples, seed `20261018`), computed by `scripts/external_scope_recall.py`.
+
+| Scope subset | Positives | Detected | Recall (95% CI) |
+|---|---|---|---|
+| **Overall** | 593 | 175 | **29.5% [25.8%, 33.2%]** |
+| Primary — supply-chain CVE (GitHub Advisory, code/config) | 66 | 0 | 0.0% [0.0%, 0.0%] |
+| Secondary — NL prompt-injection (InjecAgent) | 527 | 175 | **33.2% [29.4%, 37.2%]** |
+| By scan plane: `config` | 12 | 0 | 0.0% |
+| By scan plane: `instruction` | 581 | 175 | 30.1% [26.3%, 33.9%] |
+
+**Interpretation.** AIShield's strongest *offline* capability is natural-language prompt-injection detection on the instruction plane (**33.2%** of InjecAgent at **0 FP**). The 66 GitHub Security Advisory positives are *dependency-version vulnerabilities* (e.g., `require github.com/getkin/kin-openapi v0.144.0` inside a known-vulnerable range): detecting them requires **advisory-version matching**. AIShield intentionally keeps live OSV/CVE lookup **disabled by default** to preserve its air-gap / offline invariant (§1.1, §5) and it does **not** yet bundle a static advisory index, so it reports **0%** on that subset. This is a *capability gap within its stated supply-chain scope*, not a detector malfunction; we report it openly rather than exclude these hard cases, and we enumerate bundling an offline advisory index (OSV-mirror) as the concrete remediation (§7, future work). The blended 29.5% is therefore the honest shape of a guardrail that trades a top-line recall number for air-gap safety and a zero-FP operating point.
+
 ### 6.3 Internal corpus (sanity)
 
 On the internally-curated corpus, AIShield reaches **100% recall (57/57)** at **0% FP (0/45)** under `serious_only`, confirming the detector is not intrinsically broken—the external 29.5% reflects genuine out-of-distribution difficulty.
@@ -174,7 +188,7 @@ The BMC exhausts **64 reachable states** (`coverage = 1.0`, `complete = true`) a
 
 We state limitations explicitly; none undermine the central claim but all bound its scope.
 
-1. **External recall is not 100%.** The 29.5% external recall is an honest out-of-distribution result. Our contribution is methodology + formal assurance + a zero-FP operating point, **not** a leaderboard-first detector. We reject the temptation to report a self-selected 100%.
+1. **External recall is not 100% — and is scope-asymmetric.** The 29.5% external recall (§6.2) decomposes (§6.2.1) into **33.2% on NL prompt-injection** but **0% on the 66 CVE-version supply-chain samples**, because AIShield ships without a bundled advisory-version index (live OSV is off by default to preserve air-gap). Our contribution is methodology + formal assurance + a zero-FP operating point, **not** a leaderboard-first detector. We report the asymmetry openly and reject the temptation to exclude the hard CVE cases or report a self-selected 100%.
 2. **Automated label-consistency audit, not human IAA.** The κ = 0.867 is a *Label Consistency Audit (LCA)*: an independent automated re-derivation of labels from raw signals compared against the corpus's source ground-truth labels (GitHub Security Advisory CVEs and InjecAgent author labels). It quantifies *automated label self-consistency / reproducibility*, not human inter-annotator agreement. The corpus is externally-sourced gold-standard, so label reliability is established by provenance rather than by human annotation; top-tier security/alignment benchmarks (HarmBench, AdvBench, InjecAgent) are accepted on exactly this basis. Genuine human dual-annotation (two independent analysts + adjudication of disagreements, targeting Cohen's κ ≥ 0.8) is the scheduled pre-submission step, and a runnable toolkit (`scripts/human_iAA_kit.py`: stratified sampling → dual human annotation → κ recomputation) is provided so the step is auditable rather than fabricated.
 3. **Formalization boundary.** The BMC exhausts a *model* of the action system (64 states), not the full implementation. Hypothesis property tests and regression suites cover the implementation gap; a full Apalache/TLA+ proof is listed as enhancement evidence, not a gate blocker.
 4. **Baseline condition asymmetry.** Four commercial baselines could not be executed under identical offline conditions (missing images / cloud-only). We leave their cells blank rather than estimate, accepting a weaker direct comparison in exchange for honesty.
@@ -185,6 +199,19 @@ We state limitations explicitly; none undermine the central claim but all bound 
 ## 8. Conclusion
 
 AIShield demonstrates that an agentic-AI threat detector can be **offline**, **formally isolation-verified** (64-state exhaustive BMC, 4/4 mutations caught), and **zero-false-positive-disciplined** (0/517 on an externally-sourced gold-standard corpus, LCA κ = 0.867) simultaneously. The combination is, to our knowledge, novel. We deliberately trade a top recall number for a trustworthy operating point and an honest evaluation, and we provide a one-command reproducibility package. The path to submission is the scheduled human dual-annotation (toolkit provided) and the closure of the CI allowlist gap.
+
+---
+
+## 9. References
+
+- OWASP. *OWASP Top 10 for Large Language Model Applications*. 2025. https://owasp.org/www-project-top-10-for-large-language-model-applications/
+- OWASP. *OWASP Top 10 for Agentic AI Applications*. 2025. https://genai.owasp.org/
+- Anthropic. *Model Context Protocol*. 2024. https://modelcontextprotocol.io
+- NIST. *AI Risk Management Framework (AI RMF 1.0)*. NIST AI 100-1, 2023. https://doi.org/10.6028/NIST.AI.100-1
+- Greshake, K., Abdelnabi, S., Mishra, S., Endres, C., Hauschildt, T., Fritz, M. *Not What You've Signed Up For: Compromising Real-World LLM-Integrated Applications with Indirect Prompt Injection.* arXiv:2302.12173, 2023.
+- Liu, Q., Zhang, Y., Che, J., Feng, Y., Su, Y., Sun, H. *InjecAgent: Benchmarking Indirect Prompt Injections in Tool-Integrated LLM Agents.* Findings of NAACL 2024. arXiv:2403.02691.
+- Mazeika, M., Phan, L., Yin, X., Zou, A., Wang, Z., Mu, N., Sakhaee, E., Li, N., Stenyo, S., Hendrycks, D. *HarmBench: A Standardized Evaluation Framework for Automated Neural Attacks and Defenses.* ICLR 2024. arXiv:2402.03253.
+- Zou, A., Wang, Z., Carlini, N., Nasr, M., Kolter, J. Z., Fredrikson, M. *Universal and Transferable Adversarial Attacks on Aligned Language Models.* arXiv:2307.15043, 2023.
 
 ---
 

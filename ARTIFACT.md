@@ -60,6 +60,9 @@ python scripts/validate_workflows.py               # Workflow 语法门禁
 | external corpus LCA (Cohen's κ) | **0.867 [0.809, 0.926]** | `python scripts/compute_lca.py --no-write` |
 | external corpus 标签来源 | A = 来源真值（GHSA CVE / InjecAgent 作者标注）；**gold-standard 外部真值，非人工双标** | `scripts/label_consistency_audit.py` |
 | external corpus 人类双标 (IAA) | **pending**（投前步骤；工具包已备） | `scripts/human_iAA_kit.py` |
+| **external 召回·按适用范围分解** | 主范围（GHSA 供应链 CVE 66）：**0.0%**；次范围（InjecAgent NL 注入 527）：**33.2% [29.4%, 37.2%]** | `python scripts/external_scope_recall.py` |
+| external 召回·按 scan_plane | config 12：**0.0%**；instruction 581：**30.1% [26.3%, 33.9%]** | 同上 |
+| GHSA 0% 根因 | AIShield 默认关闭联网 OSV/CVE 查询以保离线/气隙不变性，且无本地内置公告索引 → 依赖版本型 CVE **能力缺口**（非检测器失灵） | `scanner/osv.py`（`enable_osv=False` 默认）；论文 §6.2.1 / §7 |
 
 **阈值判据**（R1 外部验证门槛，来自 `benchmarks/corpus/external/manifest.json:r1_status`，
 以下为 `r1_status.checks` 的逐字段镜像，禁止手写副本）：

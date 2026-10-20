@@ -1,0 +1,90 @@
+{
+  "generated_by": "scripts/external_scope_recall.py",
+  "bootstrap_seed": 20261018,
+  "bootstrap_n": 1000,
+  "detection_bar": "serious_only (>=1 critical/high finding)",
+  "overall": {
+    "label": "overall",
+    "positives": 593,
+    "detected": 175,
+    "recall": 0.2951,
+    "recall_ci95": [
+      0.258,
+      0.3322
+    ]
+  },
+  "by_scope": [
+    {
+      "label": "primary",
+      "positives": 66,
+      "detected": 0,
+      "recall": 0.0,
+      "recall_ci95": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "label": "secondary",
+      "positives": 527,
+      "detected": 175,
+      "recall": 0.3321,
+      "recall_ci95": [
+        0.2941,
+        0.3719
+      ]
+    }
+  ],
+  "by_dataset": [
+    {
+      "label": "ghsa",
+      "positives": 66,
+      "detected": 0,
+      "recall": 0.0,
+      "recall_ci95": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "label": "injecagent",
+      "positives": 527,
+      "detected": 175,
+      "recall": 0.3321,
+      "recall_ci95": [
+        0.2941,
+        0.3719
+      ]
+    }
+  ],
+  "by_scan_plane": [
+    {
+      "label": "config",
+      "positives": 12,
+      "detected": 0,
+      "recall": 0.0,
+      "recall_ci95": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "label": "instruction",
+      "positives": 581,
+      "detected": 175,
+      "recall": 0.3012,
+      "recall_ci95": [
+        0.2633,
+        0.3391
+      ]
+    }
+  ],
+  "negatives_total": 517,
+  "false_positives": 0,
+  "false_positive_rate": 0.0,
+  "false_positives_by_type": {},
+  "negatives_by_type": {
+    "clean_source": 17,
+    "controlled_matched": 500
+  }
+}
