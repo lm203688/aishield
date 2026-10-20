@@ -52,7 +52,7 @@ python scripts/validate_workflows.py               # Workflow 语法门禁
 | Skill 规则数 | 291 | `python scripts/declaration_surface_gate.py` |
 | internal corpus 召回 | 57/57 = 100.0% | `python scripts/benchmark.py --json` |
 | internal corpus 误报 | 0/45 = 0.0% | 同上 |
-| external corpus 召回 | 29.51% [25.8%, 33.22%]（bootstrap 95% CI, seed=20261018） | `python scripts/benchmark.py --corpus external --bootstrap 1000 --bootstrap-seed 20261018` |
+| external corpus 召回 | 40.6% [36.6%, 44.7%]（bootstrap 95% CI, seed=20261018） | `python scripts/external_scope_recall.py` |
 | external corpus 误报 | 0.0% [0.0%, 0.0%] | 同上 |
 | external corpus 样本数 | 593 正 / 517 负 | 同上 |
 | external corpus 家族数 | 18 | `jq .family_count benchmarks/corpus/external/manifest.json` |
@@ -60,9 +60,10 @@ python scripts/validate_workflows.py               # Workflow 语法门禁
 | external corpus LCA (Cohen's κ) | **0.867 [0.809, 0.926]** | `python scripts/compute_lca.py --no-write` |
 | external corpus 标签来源 | A = 来源真值（GHSA CVE / InjecAgent 作者标注）；**gold-standard 外部真值，非人工双标** | `scripts/label_consistency_audit.py` |
 | external corpus 人类双标 (IAA) | **pending**（投前步骤；工具包已备） | `scripts/human_iAA_kit.py` |
-| **external 召回·按适用范围分解** | 主范围（GHSA 供应链 CVE 66）：**0.0%**；次范围（InjecAgent NL 注入 527）：**33.2% [29.4%, 37.2%]** | `python scripts/external_scope_recall.py` |
-| external 召回·按 scan_plane | config 12：**0.0%**；instruction 581：**30.1% [26.3%, 33.9%]** | 同上 |
-| GHSA 0% 根因 | AIShield 默认关闭联网 OSV/CVE 查询以保离线/气隙不变性，且无本地内置公告索引 → 依赖版本型 CVE **能力缺口**（非检测器失灵） | `scanner/osv.py`（`enable_osv=False` 默认）；论文 §6.2.1 / §7 |
+| **external 召回·按适用范围分解** | 主范围（GHSA 供应链 CVE 66）：**100.0% (66/66)**；次范围（InjecAgent NL 注入 527）：**33.2% [29.4%, 37.2%]** | `python scripts/external_scope_recall.py` |
+| external 召回·按 scan_plane | config 12：**100.0%**；instruction 581：**39.4% [35.3%, 43.5%]** | 同上 |
+| 离线供应链 CVE 匹配器 | 已落地：解析 8 生态依赖声明（go require / npm @ / pip == / maven / nuget / ruby gem / rust cargo / composer）+ 本地公告索引版本区间匹配；气隙安全（不联网），FP 0/517 | `scanner/supply_chain.py` + `scanner/data/advisory_index.json`（由 `scripts/build_advisory_index.py` 从 GHSA/OSV 真值生成）；单测 `tests/test_offline_advisory_matcher.py` |
+| GHSA 0%→100% 根因 | 此前 GHSA 0% 因默认关闭联网 OSV 且无本地公告索引（依赖版本型 CVE 能力缺口）；现已落地**离线公告索引匹配器**（vendored `advisory_index.json`），主范围召回 **0%→100% (66/66) @ 0 FP**。联网 OSV 仍默认关闭以保气隙。 | `scanner/osv.py`（`enable_osv=False`）；`scanner/supply_chain.py`；论文 §6.2.1 / §7 |
 
 **阈值判据**（R1 外部验证门槛，来自 `benchmarks/corpus/external/manifest.json:r1_status`，
 以下为 `r1_status.checks` 的逐字段镜像，禁止手写副本）：

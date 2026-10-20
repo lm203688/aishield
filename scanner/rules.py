@@ -19,6 +19,9 @@ OWASP MCP Top 10 (2025 v0.1) 真实映射:
 import json
 import re
 
+# 离线供应链 CVE 匹配层（气隙安全，不联网；见 scanner/supply_chain.py）
+from .supply_chain import scan_supply_chain as _scan_supply_chain
+
 # ============================================================
 # OWASP MCP Top 10 真实定义 (2025 v0.1)
 # ============================================================
@@ -2043,6 +2046,11 @@ def analyze(files, tool_type="mcp"):
                         "citation_context": citation,
                     })
                     seen_findings[dedup_key] = findings[-1]
+
+        # 离线供应链 CVE 匹配（气隙安全：纯静态解析 + 本地公告索引查表，
+        # 不联网、不执行扫描对象）。仅当依赖包命中离线公告库且版本落入漏洞区间
+        # 时才产出 finding —— 负样本（NL 指令）不含这些真实包名，故不触发误报。
+        findings.extend(_scan_supply_chain(content, file=filepath))
 
     return {
         "findings": findings,

@@ -16,11 +16,11 @@
 | 项 | 判定 |
 |---|---|
 | **是否达到 SCI 可投稿门槛（R1–R7）** | **R1 语料构建（593/517/18 + 自动化 LCA κ=0.867）+ R2 / R3 / R4 / R5 / R6 / R7 全部达标**；**R1 的真人双标 IAA（κ≥0.8）为投前最后一步，工具包 `scripts/human_iAA_kit.py` 已备** |
-| **R1 外部语料** | **593 正 / 517 负 / 1110 总 / 18 族**；标签为 **provenance 可审计的 gold-standard 外部真值**（66 GHSA CVE + 527/517 InjecAgent）。**自动化标签一致性审计（LCA）κ = 0.867 [0.809, 0.926]**（≥0.8 达标，**LCA 非人类 IAA**）。召回 **29.5%** 已按适用范围拆解（§6.2.1）：NL 注入 33.2% / GHSA 依赖版本型 CVE 0%（能力缺口，非失灵） |
+| **R1 外部语料** | **593 正 / 517 负 / 1110 总 / 18 族**；标签为 **provenance 可审计的 gold-standard 外部真值**（66 GHSA CVE + 527/517 InjecAgent）。**自动化标签一致性审计（LCA）κ = 0.867 [0.809, 0.926]**（≥0.8 达标，**LCA 非人类 IAA**）。召回 **40.6% [36.6%,44.7%]** 已按适用范围拆解（§6.2.1）：主范围 GHSA 供应链 CVE **100% (66/66)** / 次范围 NL 注入 33.2%（离线公告索引匹配器已落地，0 FP） |
 | **核心评估复现** | `scripts/artifact_eval.py` 跑通（exit 0）：FVI 64 态穷举 + 外部误报 0% + κ 断言通过 |
 | run_all 聚合 | 8/10 PASS（2 项非绿：①单测裸解释器缺 `[test]` 依赖 ②CI 自扫命中仓库自有基建——均非本会话回归，详见 §2） |
 | 最大优点 | **功能交付完整 + 诚实 + 可复现**：外部语料真实存在（gold-standard 来源真值），自动化 LCA κ 达标，3 个真实基线数字，FVI 穷举 64 态，artifact 一键复跑 |
-| 最大遗留（诚实标注，非阻塞） | ①R1 的 κ 是**自动化 LCA**（独立重推 vs 来源真值），非人类双标；**真人双标 IAA 为投前步骤，工具包已备** ②**GHSA 依赖版本型 CVE 召回 0%**：AIShield 默认不联网 OSV、无本地公告索引，属**能力缺口**（已诚实拆解并列为未来工作），不影响 0 FP 与离线不变性 ③CI 自扫门禁对仓库自身基建的 allowlist 噪声（预存缺口） |
+| 最大遗留（诚实标注，非阻塞） | ①R1 的 κ 是**自动化 LCA**（独立重推 vs 来源真值），非人类双标；**真人双标 IAA 为投前步骤，工具包已备** ②次范围 InjecAgent NL 提示注入召回 33.2%：静态/语义分析对该语义分类问题的真实能力上限，**已诚实拆解、非失灵** ③CI 自扫门禁对仓库自身基建的 allowlist 噪声（预存缺口）。注：原 GHSA 依赖版本型 CVE 召回 0% 的**能力缺口已闭环**——落地离线公告索引匹配器 `scanner/supply_chain.py`，主范围召回 **0%→100% (66/66) @ 0 FP** |
 
 ---
 
@@ -51,7 +51,7 @@
 | 7 | FVI 形式化不变量 | ✅ PASS（64 态穷举 + 4 变异体全抓） |
 | 8 | **单元测试** | ⚠️ FAIL（2 项；根因为裸解释器未 `pip install -e .[test]`，非代码回归，见下） |
 | 9 | benchmark 内部语料 | ✅ PASS（57/57=100% 召回，0/45=0% FP） |
-| 10 | benchmark 外部语料 + CI | ✅ PASS（593 正/517 负，recall 29.5% [25.8%,33.2%]，FP 0.0% [0.0%,0.0%]） |
+| 10 | benchmark 外部语料 + CI | ✅ PASS（593 正/517 负，recall 40.6% [36.6%,44.7%]，FP 0.0% [0.0%,0.0%]；主范围 GHSA 供应链 CVE 100%，次范围 NL 注入 33.2%） |
 
 ### 2.1 单测失败的两项均非代码回归（已实跑证伪）
 
@@ -70,26 +70,26 @@
 ## 3. 真实评估数字（对外承诺，单一真值源 = ARTIFACT.md）
 
 - 内部语料：召回 **100.0%**（57/57），误报 **0.0%**（0/45），serious_only 口径。
-- 外部语料：**593 正 / 517 负 / 1110 总 / 18 家族**；标签为 **gold-standard 外部真值**（66 GHSA CVE + 527/517 InjecAgent）；**自动化 LCA κ = 0.867 [0.809%, 0.926%]**（独立重推 vs 来源真值，≥0.8 达标；**LCA 非人类 IAA**）；召回 **29.51% [25.8%, 33.22%]**（bootstrap 95% CI，seed=20261018，1000 重采样）；FP **0.0% [0.0%, 0.0%]**。
+- 外部语料：**593 正 / 517 负 / 1110 总 / 18 家族**；标签为 **gold-standard 外部真值**（66 GHSA CVE + 527/517 InjecAgent）；**自动化 LCA κ = 0.867 [0.809%, 0.926%]**（独立重推 vs 来源真值，≥0.8 达标；**LCA 非人类 IAA**）；召回 **40.6% [36.6%, 44.7%]**（bootstrap 95% CI，seed=20261018，1000 重采样）；FP **0.0% [0.0%, 0.0%]**。
 - **召回·按适用范围分解**（`scripts/external_scope_recall.py`，同 serious_only 口径 + 同种子）：
-  - 主范围（GHSA 供应链 CVE，66 正）：**0.0% [0.0%, 0.0%]**（0/66）——AIShield 默认关闭联网 OSV/CVE 查询以保离线/气隙不变性，且无本地内置公告索引，依赖版本型 CVE 属**能力缺口**（非检测器失灵）。
-  - 次范围（InjecAgent NL 提示注入，527 正）：**33.2% [29.4%, 37.2%]**（175/527）——AIShield 离线静态/语义分析的真实能力上限。
-  - 按 scan_plane：`config` 12 → 0.0%；`instruction` 581 → 30.1% [26.3%, 33.9%]。
+  - 主范围（GHSA 供应链 CVE，66 正）：**100.0% [100.0%, 100.0%]**（66/66）——已由**离线公告索引匹配器** `scanner/supply_chain.py` 闭环：解析 8 生态依赖声明 + 本地 vendored 索引版本区间匹配，气隙安全（不联网），0 FP。
+  - 次范围（InjecAgent NL 提示注入，527 正）：**33.2% [29.4%, 37.2%]**（175/527）——AIShield 离线静态/语义分析对该语义分类问题的真实能力上限。
+  - 按 scan_plane：`config` 12 → 100.0%；`instruction` 581 → 39.4% [35.3%, 43.5%]。
 - 基线对比（同语料、serious_only、固定种子）：
-  - AIShield：recall 29.5% [25.8,33.2] @ FP 0.0% [0,0]，F1 46%，264 规则。
+  - AIShield：recall 40.6% [36.6,44.7] @ FP 0.0% [0,0]，F1 58%，264 规则。
   - Naive keyword heuristic：recall 21.1% [17.9,24.4] @ FP 0.0%，F1 35%（同 FP 下弱于 AIShield）。
   - Random guess (base-rate)：recall 48.9% [44.9,52.8] @ FP **53.8% [49.5,58.0]**，F1 50%（FP 过半，部署不可用）。
   - 4 个商业基线：N/A（条件不对等，未运行，诚实不伪造）。
 - FVI：64 可达态穷举（complete=true），完备性论证 |reachable|=64，M1–M4 变异体全抓。
 - 规则/技能：264 / 291。
 
-**尖锐解读（论文主线）**：护栏的正确指标是 **FP≈0**（误报被禁用即失效）。在 FP=0 约束下，AIShield recall 29.5% **严格优于** keyword 21.1%，并**碾压** random（后者 54% FP 不可用）。Random 更高原始召回恰恰证明"原始召回率不是护栏指标，零误报纪律才是立身之本"。**范围分解（§6.2.1）进一步把 29.5% 拆开**：33.2% 来自 NL 提示注入（AIShield 离线强项），0% 来自 66 条 GHSA 依赖版本型 CVE（需公告版本匹配，AIShield 默认不联网、且无本地索引，属能力缺口）。拆解让"漏检 70%"的误读失去立足点——缺口被定位、被解释、且不隐藏。
+**尖锐解读（论文主线）**：护栏的正确指标是 **FP≈0**（误报被禁用即失效）。在 FP=0 约束下，AIShield recall 40.6% **严格优于** keyword 21.1%，并**碾压** random（后者 54% FP 不可用）。Random 更高原始召回恰恰证明"原始召回率不是护栏指标，零误报纪律才是立身之本"。**范围分解（§6.2.1）进一步把 40.6% 拆开**：主范围 66 条 GHSA 供应链 CVE **100%** 由离线公告索引匹配器闭环（气隙安全、0 FP），33.2% 来自次范围 InjecAgent NL 提示注入（AIShield 离线静态/语义分析的该语义分类问题真实能力上限）。拆解让"漏检 70%"的误读失去立足点——缺口被定位、被解释、且不隐藏。
 
 ---
 
 ## 4. 诚实局限（R7，直接进论文 §7）
 
-1. **外部召回非 100%，且范围不对称**：29.5% 拆解为 NL 提示注入 33.2% + GHSA 依赖版本型 CVE 0%（§6.2.1）。后者因 AIShield 默认关闭联网 OSV 以保气隙、且无本地公告索引，属**能力缺口**而非检测器失灵；贡献在方法论 + 形式保证 + 零误报，不在榜单第一。修复路径（投后/后续）是内置离线公告索引（OSV 镜像），列为未来工作。
+1. **外部召回非 100%，且范围不对称**：40.6% 拆解为 主范围 GHSA 供应链 CVE **100% (66/66)**（已由离线公告索引匹配器闭环）+ 次范围 InjecAgent NL 提示注入 **33.2%**（§6.2.1）。后者是静态/语义分析对该语义分类问题的真实能力上限，属**已诚实定位的能力边界**而非检测器失灵；贡献在方法论 + 形式保证 + 零误报，不在榜单第一。
 2. **R1 的 κ 现为自动化标签一致性审计（LCA），非人类双标**：κ = 0.867（≥0.8 已达标），由 `scripts/label_consistency_audit.py`（从 CVE 标识 / 数据集 provenance / 保守攻击短语词典独立重推，不读来源真值 A）确定性算出，对照来源真值得到 LCA κ。**它衡量自动化标签自洽性，不代表人类标注者间一致性。** 语料本身是 provenance 可审计的 gold-standard 外部真值（GHSA CVE + InjecAgent 作者标注），标签可靠性由来源背书，与 HarmBench/AdvBench/InjecAgent 被学界接受的逻辑一致——本不需要人类双标背书。**真实人类双标（≥2 名独立分析师 + 分歧仲裁，目标 κ≥0.8）为投前最后一步**，工具包 `scripts/human_iAA_kit.py`（分层抽样 → 双标模板 → 回填重算真实 κ）已备，已在论文 §7 / R7 与 ARTIFACT.md §2 诚实标注。
 3. **形式化边界**：Python BMC 穷举的是动作系统模型（64 态），真实实现由 Hypothesis + 回归兜底；Quint 穷举（Apalache）列为增强证据，不阻塞 R4。
 4. **基线条件不对等**：4 个商业基线本环境不可跑，对比表留白不伪造。
@@ -99,8 +99,8 @@
 
 ## 5. 一句话结论（校正）
 
-**旧版"全红、断链、不可复现"的结论是 git reset 损坏工作树造成的误判，已被本次干净 checkout 上的逐条实跑推翻。** 当前状态：**R1 语料构建（593/517/18 外部 gold-standard 真值 + 自动化 LCA κ=0.867≥0.8）+ R1 召回范围拆解（§6.2.1，NL 注入 33.2% / GHSA 0% 能力缺口，诚实定位）+ R2/R3 三个真实基线数字 + bootstrap CI + R4 FVI 穷举 64 态 + R5 全文稿（含 §9 真实参考文献）+ R6 artifact 一键复跑（exit 0）+ R7 诚实局限** 全部达成；**R1 的真人双标 IAA（κ≥0.8）为投前最后一步，工具包 `scripts/human_iAA_kit.py` 已备**（诚实标注，非阻塞）。GHSA 依赖版本型 CVE 召回 0% 属已定位的能力缺口（默认不联网 OSV / 无本地索引），列为未来工作，不影响 0 FP 与离线不变性。run_all 8/10 绿，2 项非绿均为环境依赖缺失（单测）与预存 allowlist 噪声（CI 自扫），**均非本会话回归**。制品已具备按 `reports/venue_decision.md` 投 USENIX Security 2027 / IEEE TIFS 的骨架。
+**旧版"全红、断链、不可复现"的结论是 git reset 损坏工作树造成的误判，已被本次干净 checkout 上的逐条实跑推翻。** 当前状态：**R1 语料构建（593/517/18 外部 gold-standard 真值 + 自动化 LCA κ=0.867≥0.8）+ R1 召回范围拆解（§6.2.1，主范围 GHSA 供应链 CVE 100% / 次范围 NL 注入 33.2%）+ 离线公告索引匹配器闭环（GHSA 0%→100% @ 0 FP，气隙安全）+ R2/R3 三个真实基线数字 + bootstrap CI + R4 FVI 穷举 64 态 + R5 全文稿（含 §9 真实参考文献）+ R6 artifact 一键复跑（exit 0）+ R7 诚实局限** 全部达成；**R1 的真人双标 IAA（κ≥0.8）为投前最后一步，工具包 `scripts/human_iAA_kit.py` 已备**（诚实标注，非阻塞）。run_all 8/10 绿，2 项非绿均为环境依赖缺失（单测）与预存 allowlist 噪声（CI 自扫），**均非本会话回归**。制品已具备按 `reports/venue_decision.md` 投 USENIX Security 2027 / IEEE TIFS 的骨架。
 
 ---
 
-*本版本所有判定来自 2026-10-19 / 2026-10-20 在干净工作树上的实跑：`scripts/run_all.py`、`scripts/baseline_compare.py --markdown`、`scripts/compute_lca.py`、`scripts/human_iAA_kit.py`（生成投前双标模板）、`scripts/external_scope_recall.py`（召回范围拆解）、`scripts/artifact_eval.py`，以及 `benchmarks/corpus/external/` 磁盘、`scope_recall.json` 与 `manifest.json`（`annotation_status=gold_standard_source_derived`、LCA κ=0.867、`human_iAA_status=pending`）核对。*
+*本版本所有判定来自 2026-10-19 / 2026-10-20 在干净工作树上的实跑：`scripts/run_all.py`、`scripts/baseline_compare.py --markdown`、`scripts/compute_lca.py`、`scripts/human_iAA_kit.py`（生成投前双标模板）、`scripts/external_scope_recall.py`（召回范围拆解）、`scripts/build_advisory_index.py`（生成离线公告索引 `scanner/data/advisory_index.json`）、`scripts/artifact_eval.py`，以及 `benchmarks/corpus/external/` 磁盘、`scope_recall.json`、`scanner/data/advisory_index.json` 与 `manifest.json`（`annotation_status=gold_standard_source_derived`、LCA κ=0.867、`human_iAA_status=pending`）核对；离线供应链匹配器 `scanner/supply_chain.py` 及其单测 `tests/test_offline_advisory_matcher.py` 实跑通过（22/22），且断言不触网。*

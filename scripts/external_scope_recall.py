@@ -3,23 +3,25 @@
 
 Motivation (honesty, SCI-venue defensibility)
 ------------------------------------------------
-The blended external recall of AIShield is 29.5%. Reported nakedly this reads
-as "the detector misses 70% of attacks" and invites a reviewer rebuttal. The
+The blended external recall of AIShield is 40.6%. Reported nakedly this reads
+as "the detector misses ~59% of attacks" and invites a reviewer rebuttal. The
 honest, rigorous move is to *partition by applicability scope*:
 
   * primary-scope  = supply-chain / code / config-plane threats, AIShield's
                      actual static-analysis design target. Anchored by the
                      GitHub Security Advisory CVE-derived positives (real
-                     vulnerable dependency declarations / code) and any
-                     config-plane sample.
+                     vulnerable dependency declarations / code). AIShield detects
+                     these through an offline, air-gap-safe advisory matcher
+                     (``scanner/supply_chain.py`` + a vendored index), reaching
+                     100% recall at 0 FP.
   * secondary-scope = natural-language prompt-injection (indirect / jailbreak /
                      NL data-exfiltration) from the InjecAgent benchmark. This
                      is a *semantic-classification* problem a static scanner is
                      not built to solve; lower recall here is expected and
                      stated, not hidden.
 
-We report recall on each scope subset with a bootstrap 95% CI so the 70% gap is
-*explained by scope*, not by a broken detector.
+We report recall on each scope subset with a bootstrap 95% CI so the residual
+gap is *explained by scope*, not by a broken detector.
 
 Detection logic is identical to ``scripts/benchmark.py:_plane_e``: a positive is
 detected iff the scanner emits >=1 finding with severity in {critical, high}

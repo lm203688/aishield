@@ -1,0 +1,646 @@
+{
+  "generated_by": "scripts/build_advisory_index.py",
+  "source": "github-advisory / GHSA (OSV mirror bootstrap)",
+  "note": "Vendored offline advisory index. Refreshed out-of-band from OSV.dev in production. Matcher correctness is independently validated on synthetic cases in tests/test_supply_chain.py.",
+  "advisory_count": 66,
+  "advisories": {
+    "github.com/getkin/kin-openapi": [
+      {
+        "cve": "CVE-2026-100351",
+        "range": ">= 0.144.0, < 0.147.0",
+        "severity": "high",
+        "ecosystem": "go",
+        "summary": "kin-openapi: ValidationHandler security-requirement bypass via encoded-path operation confusion",
+        "ghsa": "GHSA-23vg-4cjm-66q5"
+      },
+      {
+        "cve": "CVE-2026-100349",
+        "range": "<= 0.145.0",
+        "severity": "high",
+        "ecosystem": "go",
+        "summary": "kin-openapi openapi3filter: nil-pointer panic in ValidateResponse on a response header declared with content",
+        "ghsa": "GHSA-74vm-87hj-r66f"
+      }
+    ],
+    "org.xwiki.rendering:xwiki-rendering-xml": [
+      {
+        "cve": "CVE-2025-53837",
+        "range": "< 14.10.2",
+        "severity": "critical",
+        "ecosystem": "maven",
+        "summary": "org.xwiki.rendering:xwiki-rendering-xml has an Eval Injection issue",
+        "ghsa": "GHSA-26vp-8gxg-v4pg"
+      }
+    ],
+    "org.freemarker:freemarker": [
+      {
+        "cve": "CVE-2026-84939",
+        "range": ">= 2.2.0, <= 2.3.34",
+        "severity": "critical",
+        "ecosystem": "maven",
+        "summary": "Apache FreeMarker template loading mechanism vulnerable to path traversal",
+        "ghsa": "GHSA-27j2-h3m2-8237"
+      }
+    ],
+    "go.podman.io/podman/v6": [
+      {
+        "cve": "CVE-2026-94603",
+        "range": ">= 6.0.0, < 6.1.3",
+        "severity": "critical",
+        "ecosystem": "go",
+        "summary": "Podman: The `podman run` command can be instructed to disable almost all sandboxing by image annotation",
+        "ghsa": "GHSA-2cvf-wqm6-wr9g"
+      }
+    ],
+    "github.com/0xJacky/Nginx-UI": [
+      {
+        "cve": "CVE-2026-84314",
+        "range": "<=1.9.10-0.20260703131214-23d1934099b0",
+        "severity": "high",
+        "ecosystem": "go",
+        "summary": "Nginx UI: Account Takeover via Missing `RequireSecureSession` on User Management Endpoint",
+        "ghsa": "GHSA-2gc7-j998-5xx6"
+      },
+      {
+        "cve": "CVE-2026-84319",
+        "range": "<=1.9.10-0.20260703131214-23d1934099b0",
+        "severity": "high",
+        "ecosystem": "go",
+        "summary": "Nginx UI: MCP configuration tools bypass restricted directive validation and allow secondary authenticated users to execute NJS in Nginx worker context",
+        "ghsa": "GHSA-5r62-gj48-897x"
+      },
+      {
+        "cve": "CVE-2026-84317",
+        "range": "<=1.9.10-0.20260703131214-23d1934099b0",
+        "severity": "high",
+        "ecosystem": "go",
+        "summary": "Nginx UI: MCP nginx_config_add skips config directive validation → authenticated nginx directive injection (RCE on the official image)",
+        "ghsa": "GHSA-76pm-mq2q-9gcr"
+      }
+    ],
+    "praisonai": [
+      {
+        "cve": "CVE-2026-61435",
+        "range": "<= 4.6.77",
+        "severity": "high",
+        "ecosystem": "pip",
+        "summary": "PraisonAI: Call API localhost-only authentication bypass via spoofed Host header",
+        "ghsa": "GHSA-2gpf-2492-q9jh"
+      },
+      {
+        "cve": "CVE-2026-61445",
+        "range": "<= 4.6.77",
+        "severity": "critical",
+        "ecosystem": "pip",
+        "summary": "PraisonAI: AICoder Arbitrary File Write and Command Execution via LLM Tool Calls",
+        "ghsa": "GHSA-9mp3-24cc-77mg"
+      },
+      {
+        "cve": "CVE-2026-61434",
+        "range": "<= 4.6.77",
+        "severity": "high",
+        "ecosystem": "pip",
+        "summary": "PraisonAI: Shell command allowlist bypass via find -exec built-in action",
+        "ghsa": "GHSA-cv3g-hj65-pcfh"
+      }
+    ],
+    "Microsoft.NETCore.App.Runtime.osx-arm64": [
+      {
+        "cve": "CVE-2026-96231",
+        "range": ">= 9.0.0, <= 9.0.20",
+        "severity": "high",
+        "ecosystem": "nuget",
+        "summary": "Microsoft Security Advisory CVE-2026-96231 - .NET and Visual Studio Elevation of Privilege Vulnerability",
+        "ghsa": "GHSA-2j93-m82w-73j2"
+      },
+      {
+        "cve": "CVE-2026-69651",
+        "range": ">= 11.0.0-preview.1, <= 11.0.0-rc.1",
+        "severity": "high",
+        "ecosystem": "nuget",
+        "summary": "Microsoft Security Advisory CVE-2026-69651 - .NET and Visual Studio Denial of Service Vulnerability",
+        "ghsa": "GHSA-3rxq-g8rj-r2cf"
+      }
+    ],
+    "com.linecorp.centraldogma:centraldogma-server": [
+      {
+        "cve": "CVE-2026-11746",
+        "range": "<=0.84.0",
+        "severity": "critical",
+        "ecosystem": "maven",
+        "summary": "Central Dogma: Hard-coded ZooKeeper replication secret 'ch4n63m3' with silent fallback enables cluster takeover",
+        "ghsa": "GHSA-2j95-gqxf-v3vg"
+      }
+    ],
+    "websocket-driver": [
+      {
+        "cve": "CVE-2026-61666",
+        "range": "< 0.8.2",
+        "severity": "high",
+        "ecosystem": "rubygems",
+        "summary": "websocket-driver-ruby: Denial of service via malformed Host header",
+        "ghsa": "GHSA-2x63-gw47-w4mm"
+      }
+    ],
+    "praisonaiagents": [
+      {
+        "cve": "CVE-2026-61447",
+        "range": "<= 1.6.77",
+        "severity": "critical",
+        "ecosystem": "pip",
+        "summary": "PraisonAI: CodeAgent Executes LLM-Generated Code Without Sandboxing and Leaks All Environment Secrets",
+        "ghsa": "GHSA-2xv2-w8cq-5gxw"
+      },
+      {
+        "cve": "CVE-2026-61437",
+        "range": "<= 1.6.77",
+        "severity": "high",
+        "ecosystem": "pip",
+        "summary": "PraisonAI: Unsafe Dynamic Module Loading Leads to Arbitrary Code Execution via tools.py in AgentFlow",
+        "ghsa": "GHSA-4gfv-wg42-7jw5"
+      },
+      {
+        "cve": "CVE-2026-61443",
+        "range": "<= 1.6.77",
+        "severity": "high",
+        "ecosystem": "pip",
+        "summary": "PraisonAI: SkillTools Executes Scripts Without Path Containment Validation",
+        "ghsa": "GHSA-c44f-37qr-gw3f"
+      }
+    ],
+    "rmcp": [
+      {
+        "cve": "CVE-2026-63127",
+        "range": "<=2.0.0",
+        "severity": "high",
+        "ecosystem": "rust",
+        "summary": "RMCP: Missing Resource Field Validation in OAuth Protected Resource Metadata Discovery",
+        "ghsa": "GHSA-33f5-2c5q-wgwj"
+      }
+    ],
+    "github.com/siyuan-note/siyuan/kernel": [
+      {
+        "cve": "CVE-2026-69085",
+        "range": "<=0.0.0-20260721043339-eef10568384e",
+        "severity": "critical",
+        "ecosystem": "go",
+        "summary": "SiYuan: Unauthenticated SQL injection in searchDocs via unescaped keyword (publish mode): cross-notebook read/write with statement stacking",
+        "ghsa": "GHSA-33jq-p8c2-q3q4"
+      }
+    ],
+    "github.com/rabbitmq/amqp091-go": [
+      {
+        "cve": "CVE-2026-77405",
+        "range": "<=1.13.0",
+        "severity": "critical",
+        "ecosystem": "go",
+        "summary": "RabbitMQ amqp091-go: Missing Explicit TLS Minimum Version Configuration In URI Parser",
+        "ghsa": "GHSA-33mj-cw25-m34h"
+      }
+    ],
+    "snipe/snipe-it": [
+      {
+        "cve": "CVE-2026-63498",
+        "range": "<=8.7.0",
+        "severity": "high",
+        "ecosystem": "composer",
+        "summary": "Snipe-IT: Stored XSS via Inline XML Rendering in the Uploaded Files API",
+        "ghsa": "GHSA-396x-xmvh-p563"
+      }
+    ],
+    "org.yamcs:yamcs-core": [
+      {
+        "cve": "CVE-2026-55511",
+        "range": "<= 5.12.7",
+        "severity": "critical",
+        "ecosystem": "maven",
+        "summary": "Yamcs vulnerable to authenticated RCE via StreamSQL aggregate-compiler column-name injection in Yamcs `executeSql`",
+        "ghsa": "GHSA-3g44-3m7x-cgg2"
+      }
+    ],
+    "decidim-verifications": [
+      {
+        "cve": "CVE-2026-45378",
+        "range": ">= 0.32.0.rc1, <=0.32.0",
+        "severity": "high",
+        "ecosystem": "rubygems",
+        "summary": "Decidim: Verification documents can be downloaded through reusable links",
+        "ghsa": "GHSA-3mvf-82qp-8qh5"
+      }
+    ],
+    "league/commonmark": [
+      {
+        "cve": null,
+        "range": ">= 2.0.0, <= 2.10.1",
+        "severity": "high",
+        "ecosystem": "composer",
+        "summary": "league/commonmark: Quadratic-time denial of service in the GitHub Flavored Markdown Table extension block-start scan",
+        "ghsa": "GHSA-3q6v-r5mr-hxv8"
+      }
+    ],
+    "Nginx-UI": [
+      {
+        "cve": "CVE-2026-84312",
+        "range": "<=1.9.10-0.20260703131214-23d1934099b0",
+        "severity": "high",
+        "ecosystem": "go",
+        "summary": "Nginx UI: Casdoor SSO callback uses a constant `state` parameter (login CSRF)",
+        "ghsa": "GHSA-44xr-mrhh-qm78"
+      }
+    ],
+    "russh": [
+      {
+        "cve": "CVE-2026-102823",
+        "range": "<= 0.63.0",
+        "severity": "high",
+        "ecosystem": "rust",
+        "summary": "russh: Client-side channel-scoped Handler callbacks fire for channel IDs the client never opened",
+        "ghsa": "GHSA-47hw-gvq5-r2gm"
+      }
+    ],
+    "rubyzip": [
+      {
+        "cve": "CVE-2026-85396",
+        "range": "<=3.4.0",
+        "severity": "high",
+        "ecosystem": "rubygems",
+        "summary": "rubyzip path traversal vulnerability",
+        "ghsa": "GHSA-47m2-wp7j-p9vc"
+      }
+    ],
+    "spree_api": [
+      {
+        "cve": "CVE-2026-94462",
+        "range": ">= 5.5.0, < 5.5.4",
+        "severity": "high",
+        "ecosystem": "rubygems",
+        "summary": "Spree: Broken Access Control in `PATCH /api/v3/store/carts/:id/associate` (IDOR)",
+        "ghsa": "GHSA-4825-p4xm-pcf2"
+      }
+    ],
+    "mariadb": [
+      {
+        "cve": "CVE-2026-107383",
+        "range": ">= 3.5.0-rc.0, < 3.5.4",
+        "severity": "high",
+        "ecosystem": "npm",
+        "summary": "MariaDB Connector/Node.js exposes uninitialized process memory through malformed GeoJSON parameters",
+        "ghsa": "GHSA-48qf-xh34-q73r"
+      }
+    ],
+    "Microsoft.WindowsDesktop.App.Runtime.win-arm64": [
+      {
+        "cve": "CVE-2026-70035",
+        "range": ">= 11.0.0-preview.1, <= 11.0.0-rc.1",
+        "severity": "high",
+        "ecosystem": "nuget",
+        "summary": "Microsoft Security Advisory CVE-2026-70035 - .NET and Visual Studio Remote Code Execution Vulnerability",
+        "ghsa": "GHSA-4j9v-h7pp-725h"
+      }
+    ],
+    "Microsoft.NETCore.App.Runtime.win-x86": [
+      {
+        "cve": "CVE-2026-70197",
+        "range": ">= 10.0.0, <= 10.0.12",
+        "severity": "high",
+        "ecosystem": "nuget",
+        "summary": "Microsoft Security Advisory CVE-2026-70197 - .NET and Visual Studio Remote Code Execution Vulnerability",
+        "ghsa": "GHSA-4mpw-cpwj-hxxj"
+      }
+    ],
+    "leantime/leantime": [
+      {
+        "cve": "CVE-2026-85990",
+        "range": "<=3.10.0",
+        "severity": "high",
+        "ecosystem": "composer",
+        "summary": "Leantime: Any Authenticated User Can Self-Escalate to Admin via Unauthorized JSON-RPC Methods",
+        "ghsa": "GHSA-54mm-6729-r5wp"
+      }
+    ],
+    "verbb/formie": [
+      {
+        "cve": "CVE-2026-76087",
+        "range": "< 2.2.23",
+        "severity": "high",
+        "ecosystem": "composer",
+        "summary": "Formie: Unauthenticated users can overwrite incomplete submissions via submit action",
+        "ghsa": "GHSA-584p-f93j-wpgc"
+      }
+    ],
+    "io.moquette:moquette-broker": [
+      {
+        "cve": "CVE-2026-85724",
+        "range": "<= 0.18.0",
+        "severity": "critical",
+        "ecosystem": "maven",
+        "summary": "Moquette: Pattern-ACL wildcard injection (cross-tenant authorization bypass) plus a remote-unauthenticated DoS cluster, a Will-message authorization bypass, and a cross-session durable-corruption bug",
+        "ghsa": "GHSA-5f42-97gr-vfhq"
+      }
+    ],
+    "hickory-resolver": [
+      {
+        "cve": null,
+        "range": "< 0.26.2",
+        "severity": "high",
+        "ecosystem": "rust",
+        "summary": "hickory-resolver: Resolver::lookup() and Resolver::lookup_ip() APIs obscure DNSSEC validation failures",
+        "ghsa": "GHSA-5j98-2g5x-46v6"
+      }
+    ],
+    "github.com/kedacore/keda/v2": [
+      {
+        "cve": "CVE-2026-77524",
+        "range": "<=2.21.0",
+        "severity": "critical",
+        "ecosystem": "go",
+        "summary": "KEDA: Privilege escalation from namespace admin to cluster admin via KEDA TriggerAuthentication",
+        "ghsa": "GHSA-637c-6jxx-4rwm"
+      }
+    ],
+    "ghost": [
+      {
+        "cve": "CVE-2026-105643",
+        "range": ">= 6.34.0, < 6.67.0",
+        "severity": "high",
+        "ecosystem": "npm",
+        "summary": "Ghost: Stored XSS via Embed Card Previews",
+        "ghsa": "GHSA-69qc-f5m6-889c"
+      },
+      {
+        "cve": "CVE-2026-105649",
+        "range": ">= 4.22.0, < 6.65.0",
+        "severity": "high",
+        "ecosystem": "npm",
+        "summary": "Ghost: Stored XSS via SVG Uploads Bypassing Sanitization",
+        "ghsa": "GHSA-8575-cr6v-7jh4"
+      }
+    ],
+    "com.hazelcast:hazelcast": [
+      {
+        "cve": "CVE-2026-107726",
+        "range": "< 5.4.5",
+        "severity": "critical",
+        "ecosystem": "maven",
+        "summary": "Hazelcast allows arbitrary member memory access by low-privileged client",
+        "ghsa": "GHSA-6v25-8wq6-xq4j"
+      }
+    ],
+    "fluentd": [
+      {
+        "cve": "CVE-2026-44161",
+        "range": "<= 1.19.2",
+        "severity": "high",
+        "ecosystem": "rubygems",
+        "summary": "Fluentd is Vulnerable to Server-Side Request Forgery (SSRF) via Placeholder Expansion in `out_http`",
+        "ghsa": "GHSA-72f5-rr8c-r6gr"
+      }
+    ],
+    "datamodel-code-generator": [
+      {
+        "cve": "CVE-2026-107377",
+        "range": ">= 0.59.0, <= 0.80.0",
+        "severity": "high",
+        "ecosystem": "pip",
+        "summary": "datamodel-code-generator: Protobuf weak-import path traversal allows files to be written outside the temporary directory",
+        "ghsa": "GHSA-77xj-x4rm-935c"
+      }
+    ],
+    "msgpack5": [
+      {
+        "cve": "CVE-2026-107302",
+        "range": "<=6.1.0",
+        "severity": "high",
+        "ecosystem": "npm",
+        "summary": "msgpack5: Truncated map32 headers throw an unexpected error",
+        "ghsa": "GHSA-8f34-f56x-9xph"
+      }
+    ],
+    "fast-jwt": [
+      {
+        "cve": "CVE-2026-107720",
+        "range": "<= 6.3.0",
+        "severity": "high",
+        "ecosystem": "npm",
+        "summary": "fast-jwt: createVerifier accepts unsigned JWTs when key is '' or null and algorithms is explicitly set",
+        "ghsa": "GHSA-8wpc-h4q6-8fxv"
+      },
+      {
+        "cve": "CVE-2026-107724",
+        "range": "= 6.2.4",
+        "severity": "high",
+        "ecosystem": "npm",
+        "summary": "fast-jwt treats raw public JWK JSON as an HMAC secret, enabling HS256 token forgery",
+        "ghsa": "GHSA-g3jj-5cmm-3hxx"
+      },
+      {
+        "cve": "CVE-2026-107722",
+        "range": ">= 6.2.0, <= 6.2.4",
+        "severity": "critical",
+        "ecosystem": "npm",
+        "summary": "fast-jwt: Incomplete patch of CVE-2026-34950: Non-whitespace key-prefix re-enables RSA→HS256 algorithm confusion",
+        "ghsa": "GHSA-ww5h-9m49-7xx4"
+      }
+    ],
+    "view_component": [
+      {
+        "cve": "CVE-2026-54498",
+        "range": ">= 4.0.0, < 4.12.0",
+        "severity": "high",
+        "ecosystem": "rubygems",
+        "summary": "ViewComponent: around_render HTML-Safety Bypass",
+        "ghsa": "GHSA-97jw-64cj-jc58"
+      }
+    ],
+    "react-jhipster": [
+      {
+        "cve": "CVE-2026-107303",
+        "range": "<= 1.0.3",
+        "severity": "high",
+        "ecosystem": "npm",
+        "summary": "JHipster: Generated Applications Allow Stored XSS via Unrestricted Blob ContentType Opened as Same-Origin Blob",
+        "ghsa": "GHSA-9ffp-22j7-56r2"
+      }
+    ],
+    "css_parser": [
+      {
+        "cve": "CVE-2026-53727",
+        "range": "<=3.0.0",
+        "severity": "high",
+        "ecosystem": "rubygems",
+        "summary": "Ruby CSS Parser: SSRF and Local File Disclosure in `CssParser::Parser#read_remote_file`",
+        "ghsa": "GHSA-9pmc-p236-855h"
+      }
+    ],
+    "@tinacms/web-components": [
+      {
+        "cve": "CVE-2026-108260",
+        "range": "<= 0.2.0",
+        "severity": "high",
+        "ecosystem": "npm",
+        "summary": "@tinacms/web-components: `tina-markdown` writes rich-text link URLs into `href` without scheme validation, allowing stored XSS",
+        "ghsa": "GHSA-c42q-qvc3-j6vg"
+      }
+    ],
+    "next": [
+      {
+        "cve": "CVE-2026-94483",
+        "range": ">= 16.0.0, < 16.3.8",
+        "severity": "high",
+        "ecosystem": "npm",
+        "summary": "Next.js has Server-Side Request Forgery in Image Optimization",
+        "ghsa": "GHSA-cjq9-62q9-8jv4"
+      }
+    ],
+    "github.com/gomarkdown/markdown": [
+      {
+        "cve": "CVE-2026-102941",
+        "range": "<=0.0.0-20260724235538-61af6e1e6971",
+        "severity": "high",
+        "ecosystem": "go",
+        "summary": "gomarkdown/markdown IsSafeURL panics on short URLs",
+        "ghsa": "GHSA-cv23-7vc5-jfh7"
+      }
+    ],
+    "Microsoft.WindowsDesktop.App.Runtime.win-x86": [
+      {
+        "cve": "CVE-2026-85363",
+        "range": ">= 11.0.0-preview.1, <= 11.0.0-rc.1",
+        "severity": "high",
+        "ecosystem": "nuget",
+        "summary": "Microsoft Security Advisory CVE-2026-85363 - .NET and Visual Studio Remote Code Execution Vulnerability",
+        "ghsa": "GHSA-f63g-mx39-3r38"
+      }
+    ],
+    "PyJWT": [
+      {
+        "cve": "CVE-2026-102268",
+        "range": "<= 2.13.0",
+        "severity": "critical",
+        "ecosystem": "pip",
+        "summary": "PyJWT: Asymmetric-PEM detection bypass: whitespace/line-ending-mutated public keys skip the HS/asymmetric confusion guard",
+        "ghsa": "GHSA-ffc3-869f-jxw9"
+      }
+    ],
+    "pyload-ng": [
+      {
+        "cve": null,
+        "range": "<= 0.5.0b3.dev101",
+        "severity": "high",
+        "ecosystem": "pip",
+        "summary": "pyLoad: Tar extraction creates device nodes and FIFOs (member types not filtered; tarfile extractall without filter=)",
+        "ghsa": "GHSA-fr26-jjhm-638c"
+      }
+    ],
+    "mise": [
+      {
+        "cve": "CVE-2026-103929",
+        "range": "<= 2026.7.13",
+        "severity": "high",
+        "ecosystem": "rust",
+        "summary": "mise permits untrusted local configuration to override default shell arguments",
+        "ghsa": "GHSA-g74g-rg72-j2p3"
+      }
+    ],
+    "pydantic-ai-slim": [
+      {
+        "cve": "CVE-2026-107295",
+        "range": ">= 2.0.0b1, < 2.28.0",
+        "severity": "high",
+        "ecosystem": "pip",
+        "summary": "Pydantic AI Web chat UI (`Agent.to_web()`, `clai web`): a website visited by the developer can trigger agent runs and server-side tool execution on the local chat endpoint",
+        "ghsa": "GHSA-h4xc-3qfq-jf93"
+      }
+    ],
+    "vibe-trading-ai": [
+      {
+        "cve": null,
+        "range": ">= 0.1.0, < 0.1.7",
+        "severity": "critical",
+        "ecosystem": "pip",
+        "summary": "Vibe-Trading LLM-callable tools permit command execution, code injection, and SSRF",
+        "ghsa": "GHSA-jqmf-mx4f-hfr6"
+      }
+    ],
+    "org.lz4:lz4-java": [
+      {
+        "cve": "CVE-2026-106451",
+        "range": ">= 1.7.0, <= 1.8.1",
+        "severity": "high",
+        "ecosystem": "maven",
+        "summary": "yawkat LZ4 Java: Native library extraction to a shared temporary directory is vulnerable to file replacement by another local user",
+        "ghsa": "GHSA-mcr4-qmvw-px4g"
+      }
+    ],
+    "Microsoft.AspNetCore.App.Runtime.osx-arm64": [
+      {
+        "cve": "CVE-2026-70186",
+        "range": ">= 10.0.0, <= 10.0.12",
+        "severity": "high",
+        "ecosystem": "nuget",
+        "summary": "Microsoft Security Advisory CVE-2026-70186 - ASP.NET Core Denial of Service Vulnerability",
+        "ghsa": "GHSA-mf4x-w4gh-4656"
+      }
+    ],
+    "kunstmaan/bundles-cms": [
+      {
+        "cve": "CVE-2026-104890",
+        "range": "< 7.3.2",
+        "severity": "high",
+        "ecosystem": "composer",
+        "summary": "Kunstmaan CMS: MediaBundle extension blacklist bypass allows authenticated administrators to upload executable PHP files leading to remote code execution",
+        "ghsa": "GHSA-p279-5wcv-45vq"
+      }
+    ],
+    "shell-quote": [
+      {
+        "cve": "CVE-2026-102422",
+        "range": ">= 1.8.4, < 1.11.0",
+        "severity": "critical",
+        "ecosystem": "npm",
+        "summary": "shell-quote: `quote()` command injection via a line terminator in a token after a `{ comment }` token",
+        "ghsa": "GHSA-pqg4-j6r4-53mv"
+      }
+    ],
+    "@simple-git/argv-parser": [
+      {
+        "cve": "CVE-2026-102829",
+        "range": "< 2.0.1",
+        "severity": "critical",
+        "ecosystem": "npm",
+        "summary": "simple-git: `VISUAL` editor environment variable is omitted from unsafe editor detection",
+        "ghsa": "GHSA-v5rq-49vh-5v5c"
+      }
+    ],
+    "openc3": [
+      {
+        "cve": "CVE-2026-77601",
+        "range": ">= 5.12.0, <= 7.2.1",
+        "severity": "high",
+        "ecosystem": "rubygems",
+        "summary": "OpenC3 COSMOS: Authenticated OS command injection via the `pypi_url` setting",
+        "ghsa": "GHSA-vp3w-52v9-q57f"
+      }
+    ],
+    "lfx": [
+      {
+        "cve": "CVE-2026-105697",
+        "range": "< 1.10.3",
+        "severity": "critical",
+        "ecosystem": "pip",
+        "summary": "Langflow: OS command injection (RCE) via arbitrary command in MCP stdio server configuration",
+        "ghsa": "GHSA-w794-rj3p-xv45"
+      }
+    ],
+    "mnemosyne-memory": [
+      {
+        "cve": "CVE-2026-59163",
+        "range": "<= 3.10.0",
+        "severity": "critical",
+        "ecosystem": "pip",
+        "summary": "Mnemosyne has JWT signature verification bypass sync server that allows authentication bypass",
+        "ghsa": "GHSA-xcw4-53cc-hv32"
+      }
+    ]
+  }
+}

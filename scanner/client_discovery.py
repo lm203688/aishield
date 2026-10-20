@@ -28,6 +28,9 @@ import json
 import os
 import re
 
+# 离线供应链 CVE 匹配层（气隙安全，不联网；见 scanner/supply_chain.py）
+from .supply_chain import scan_supply_chain as _scan_supply_chain
+
 __all__ = [
     "CLIENT_PROFILES",
     "get_client_profiles",
@@ -705,6 +708,10 @@ def scan_client_configs(configs):
             })
 
     findings.extend(analyze_cross_server(inventory))
+
+    # 离线供应链 CVE 匹配（气隙安全：纯静态解析 + 本地公告索引查表）
+    for item in normalized:
+        findings.extend(_scan_supply_chain(item["content"], file=item["path"]))
 
     score, counts = compute_config_score(findings)
 
