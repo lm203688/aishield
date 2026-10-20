@@ -1,6 +1,6 @@
 {
-  "annotator": "B",
-  "basis": "protocol_independent",
+  "audit": "label_consistency_audit",
+  "basis": "independent_re-derivation_vs_source_truth",
   "labels": {
     "ext-pos-adv-ghsa-23vg-4cjm-66q5": true,
     "ext-pos-adv-ghsa-26vp-8gxg-v4pg": true,

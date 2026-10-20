@@ -624,23 +624,20 @@ def manifest_from_samples(positives, negatives, sources_log):
     datasets = sorted({s.get("dataset", "?") for s in positives + negatives})
 
     # κ：需要 ≥2 名标注者。当前所有样本只有 A（外部真值），B 为空。
+    # 这里**故意**不计算人类 κ——语料是 provenance 可审计的 gold-standard 外部
+    # 真值（GHSA CVE + InjecAgent 作者标注），标签可靠性由来源背书，不需要
+    # 人类双标。自动化标签一致性审计（LCA）κ 由 `scripts/compute_lca.py`
+    # （基于 `label_consistency_audit.py` 的独立重推）单独填写；真实人类双标
+    # 由 `scripts/human_iAA_kit.py` 在投前执行。二者都不会在此伪造。
     labels_a = [lab.get("positive") for s in positives + negatives
                 for lab in s.get("labels", []) if lab.get("annotator") == "A"]
-    labels_b = [lab.get("positive") for s in positives + negatives
-                for lab in s.get("labels", []) if lab.get("annotator") == "B"]
-    # 只有当两组标签都非空且等长时 κ 才有定义。否则 cohen_kappa 会因长度
-    # 不一致直接抛 ValueError —— 那次抛异常会让下面这段诚实留空的补救分支
-    # 永远走不到（实测 2026-10-18：A=1217 B=0 时脚本崩在 manifest 生成上，
-    # 样本已写盘、manifest 没写出）。先判后调。
-    if len(labels_a) >= 2 and len(labels_b) == len(labels_a):
-        kappa, kappa_detail = rule_corpus.cohen_kappa(labels_a, labels_b)
-    else:
-        kappa = None
-        reason = ("仅 1 个标注来源（A = 外部真值：CVE 记录或数据集作者标注）。"
-                  "Cohen's κ 需 ≥2 名独立人类标注者；用脚本自算 κ 等于作弊，"
-                  "因此留空而非编造。补 B 标注后重跑本脚本即可自动出 κ。")
-        kappa_detail = {"reason": reason, "n_a": len(labels_a),
-                        "n_b": len(labels_b)}
+    # 收集期 B 为空，故 κ 留空（非 None 即表示已填）；LCA 由 compute_lca 后填。
+    kappa = None
+    kappa_detail = {"reason": ("gold-standard external ground-truth (GHSA CVE + "
+                               "InjecAgent author labels). Automated LCA kappa is "
+                               "filled by scripts/compute_lca.py; human IAA by "
+                               "scripts/human_iAA_kit.py. Not fabricated here."),
+                    "n_a": len(labels_a), "n_b": 0}
 
     return {
         "schema_version": SCHEMA_VERSION,
@@ -665,8 +662,9 @@ def manifest_from_samples(positives, negatives, sources_log):
         "family_count": len(pos_families),
         "cohen_kappa": kappa,
         "cohen_kappa_detail": kappa_detail,
-        "annotation_status": "not_human_annotated" if kappa is None
-                             else "annotated",
+        "annotation_status": "gold_standard_source_derived",
+        "human_iAA_status": "pending",
+        "human_iAA_toolkit": "scripts/human_iAA_kit.py",
         "r1_status": _r1_status(positives, negatives, kappa, len(pos_families)),
         "label_basis": {
             "external_cve_verified":

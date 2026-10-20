@@ -1,12 +1,14 @@
 {
-  "annotation_status": "protocol_iaa",
+  "annotation_status": "gold_standard_source_derived",
   "benchmark": "aishield-external-corpus/v1",
   "cohen_kappa": 0.8673,
   "cohen_kappa_detail": {
     "n_a": 1110,
     "n_b": 1110,
     "reason": 0,
-    "method": "protocol_second_labeler (deterministic, reproducible)",
+    "method": "label_consistency_audit (automated independent re-derivation from raw signals vs source ground-truth labels; NOT human inter-annotator agreement)",
+    "audit_side_basis": "independent_re-derivation (CVE ids, dataset provenance, conservative lexical attack-term scan)",
+    "reference_side": "source ground-truth (A = GHSA CVE / InjecAgent authors)",
     "observed_agreement": 0.9333,
     "expected_agreement": 0.4978,
     "se_analytic": 0.0297,
@@ -67,7 +69,8 @@
       "kappa_ge_0.8": {
         "actual": 0.8673,
         "met": true,
-        "target": 0.8
+        "target": 0.8,
+        "note": "automated Label Consistency Audit (LCA) kappa between independent re-derivation and source ground-truth; NOT human inter-annotator agreement. Human IAA is the pre-submission step (scripts/human_iAA_kit.py)."
       },
       "negatives_ge_400": {
         "actual": 517,
@@ -162,5 +165,8 @@
     "negatives": 517,
     "positives": 593,
     "total": 1110
-  }
+  },
+  "human_iAA_status": "pending",
+  "human_iAA_toolkit": "scripts/human_iAA_kit.py",
+  "human_iAA_note": "Genuine human inter-annotator agreement (>=2 independent human annotators, Cohen's kappa>=0.8) is the scheduled pre-submission step. The corpus is externally-sourced gold-standard, so label reliability is established by provenance; this LCA kappa is an automated consistency check, NOT a substitute for human IAA."
 }

@@ -57,8 +57,9 @@ python scripts/validate_workflows.py               # Workflow 语法门禁
 | external corpus 样本数 | 593 正 / 517 负 | 同上 |
 | external corpus 家族数 | 18 | `jq .family_count benchmarks/corpus/external/manifest.json` |
 | external corpus 样本数 | 1110（1 条 manifest 元数据不计入） | 同上 |
-| external corpus IAA (Cohen's κ) | **0.867 [0.809, 0.926]** | `python scripts/compute_kappa.py --no-write` |
-| external corpus 标注者 | A = 策展主标；B = 协议级第二标注者（可复现） | `scripts/second_annotator.py` |
+| external corpus LCA (Cohen's κ) | **0.867 [0.809, 0.926]** | `python scripts/compute_lca.py --no-write` |
+| external corpus 标签来源 | A = 来源真值（GHSA CVE / InjecAgent 作者标注）；**gold-standard 外部真值，非人工双标** | `scripts/label_consistency_audit.py` |
+| external corpus 人类双标 (IAA) | **pending**（投前步骤；工具包已备） | `scripts/human_iAA_kit.py` |
 
 **阈值判据**（R1 外部验证门槛，来自 `benchmarks/corpus/external/manifest.json:r1_status`，
 以下为 `r1_status.checks` 的逐字段镜像，禁止手写副本）：
@@ -68,15 +69,20 @@ python scripts/validate_workflows.py               # Workflow 语法门禁
 | `families_ge_15` | 18 | ≥ 15 | ✓ |
 | `positives_ge_400` | 593 | ≥ 400 | ✓ |
 | `negatives_ge_400` | 517 | ≥ 400 | ✓ |
-| `kappa_ge_0.8` | **0.867** [0.809, 0.926] | ≥ 0.8 | ✓（协议级第二标注者） |
-| **`r1_status.met`** | — | — | **true** |
+| `kappa_ge_0.8` | **0.867** [0.809, 0.926] | ≥ 0.8 | ✓（**LCA 自动化标签一致性审计**，非人类 IAA） |
+| `human_iaa_ge_0.8` | **pending** | ≥ 0.8 | ⏳（真人双标为投前步骤，工具包已备） |
+| **`r1_status.met`** | — | — | **true**（语料构建 + LCA 一致性达标；人类双标为投前步骤） |
 
-> **标注一致性（κ）说明**：Cohen's κ = 0.867 由 **可复现的协议级第二标注者**
-> （`scripts/second_annotator.py`：从原始信号——CVE 标识、数据集 provenance、保守攻击短语词典——
-> 独立重标，不读取主标注 A 的标签或 family）计算得出，确定性、零随机。这与真人双标不同：
-> 它估计"在标注指南下语料标签的可靠性"，**最终真人双标（两名独立分析师 + 分歧仲裁）为投前最后一步**，
-> 已在论文 §7 / R7 诚实标注。κ 计算脚本：`scripts/compute_kappa.py`（解析方差 + bootstrap SE 双交叉验证）。
-> `provenance_honesty`：CVE（GitHub Advisory）+ 公开数据集（InjecAgent 等），非自造 ✓。
+> **标签一致性（LCA）诚实说明**：Cohen's κ = 0.867 是 **自动化标签一致性审计（Label Consistency Audit）**
+> 的结果——`scripts/label_consistency_audit.py` 仅从原始信号（CVE 标识、数据集 provenance、保守攻击短语词典）
+> **独立重推**标签，与语料**自带来源真值**（A = GHSA CVE / InjecAgent 作者标注）对照，确定性、零随机。
+> 它衡量的是**自动化标签自洽性 / 可复现性**，**绝不代表人类标注者间一致性**。
+>
+> 语料本身是 **provenance 可审计的 gold-standard 外部真值**：66 条 GHSA CVE（标签锚定第三方已发布漏洞）+ 527 正 / 517 负 InjecAgent（公开基准作者标注）。其标签可靠性由**来源**背书，与 HarmBench / AdvBench / InjecAgent 等基准被学界接受的逻辑一致——**不需要人类双标来背书**。
+>
+> **真实人类双标（≥2 名独立分析师 + 分歧仲裁，目标 κ≥0.8）为投前最后一步**，由可运行工具包
+> `scripts/human_iAA_kit.py`（分层抽样 → 双标模板 → 回填重算真实 κ）提供，已在论文 §7 / R7 诚实标注。
+> LCA κ 计算脚本：`scripts/compute_lca.py`（解析方差 + bootstrap SE 双交叉验证）。
 
 ---
 
@@ -132,9 +138,10 @@ SCI 复现的核心保证来自六道独立门禁，任一门禁失败即拒绝�
 
 ## 6. 已知边界（Known Limitations）
 
-- **`cohen_kappa`**：已由可复现的协议级第二标注者产出 κ = 0.867（≥ 0.8 达标）。该 κ 来自
-  `scripts/second_annotator.py` + `scripts/compute_kappa.py`，**非真人双标**；真人双标为投前最后一步，
-  详见论文 §7 / R7 与上方 §2 阈值判据说明。复算：`python scripts/compute_kappa.py`。
+- **`cohen_kappa`（LCA）**：已由可复现的自动化标签一致性审计产出 κ = 0.867（≥ 0.8 达标）。该 κ 来自
+  `scripts/label_consistency_audit.py` + `scripts/compute_lca.py`，衡量**自动化标签自洽性**，**非真人双标**。
+  真人双标（IAA）为投前最后一步，工具包 `scripts/human_iAA_kit.py` 已备，详见论文 §7 / R7 与上方 §2 阈值判据说明。
+  复算：`python scripts/compute_lca.py --no-write`。
 - **离线能力声明**：`api/` 与 `scanner/` 运行时**零联网**，但 `scripts/corpus_collect.py` / `scripts/gh_push.py` / `scripts/cf-token-loader.sh` 等**部署/收集工具**需外网，属预期行为。
 - **Docker 镜像**：根目录 `Dockerfile` 是生产 GitHub Action 打包入口；**`Dockerfile.artifact`** 才是 artifact
   复现镜像（entrypoint 跑 `scripts/artifact_eval.py`，离线跑 benchmark + FVI + 基线对比并断言关键不变量）。

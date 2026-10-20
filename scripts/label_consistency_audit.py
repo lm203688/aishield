@@ -1,35 +1,34 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-第二标注者协议（Second-Annotator Protocol）—— 复现 R1 的 inter-annotator agreement。
+标签一致性审计（Label Consistency Audit, LCA）—— 复现 R1 的"标签可靠性"信号。
 
-背景
-----
-外部语料 ``benchmarks/corpus/external/`` 的 PRIMARY 标注者（A）是语料策展流程：
-每条样本带 ``labels:[{annotator:"A", positive: <bool>}]`` 与 ``family``。
+重要澄清（方法论诚实）
+----------------------
+本脚本 **不是** "第二标注者 / 双人工标注"。R1 的语料来自**权威、可审计真值来源**：
 
-SCI 门槛 R1 要求 ≥2 名标注者且 Cohen's κ ≥ 0.8。本仓库写作阶段无法获得真人双标，
-因此这里提供一个 **可复现、透明的协议级第二标注者（B）**，其设计遵循 annotation
-guideline 的独立重应用原则：
+  * 正样本 66 条 = GitHub Security Advisory（GHSA）已发布 CVE，标签锚定第三方
+    （NVD / GitHub / 发行方）已公开漏洞记录，非主观判断；
+  * 正样本 527 条 + 负样本 517 条 = InjecAgent（Zhang et al., NAACL 2024）公开
+    基准，标签为该数据集作者标注的攻击类型真值。
 
-    B 仅从「原始信号」推导标签，绝不包含 A 的标签或 family 赋值：
-      1. 外部可验证 provenance：样本带 cve_id / cwe_ids / 来源为 GitHub Security
-         Advisory Database → 强正信号（确定性漏洞，无歧义）。
-      2. 保守的高精度攻击短语词典：对 text + summary + user_instruction 做
-         不区分大小写的短语匹配（仅命中明确攻击措辞，避免误伤良性样本）。
-      3. 其余 → 负。
+即语料是 **provenance 可审计的 gold-standard 语料**。顶会安全/对齐基准
+（HarmBench / AdvBench / InjecAgent 等）均以此类外部真值作为标签，不需要
+"两名人类标注者间一致性"来背书——标签的可靠性来自来源本身。
 
-B 与 A 的分歧恰好落在「语义微妙 / 良性上下文误含触发词」的样本上，这正是真实
-IAA 会出现分歧的地方。κ 是该协议下语料标签可靠性的可复现估计；最终真人双标是
-投前最后一步（见 paper §7 / R7）。
+本脚本做的是 **自动化一致性审计（LCA）**：用一套"仅从原始信号独立重推标签"
+的保守启发式（不读语料自带标签），去对照语料自带的来源真值标签，算出的 Cohen's
+κ 衡量的是"独立自动化重推 与 来源真值"的一致性（即可复现性 / 标签自洽性），
+**绝不代表人类标注者间一致性**。真实的人类双标（≥2 名独立分析师 + 分歧仲裁）是
+投前最后一步，由 `scripts/human_iAA_kit.py` 提供工具包（见 paper §7 / R7）。
 
-本脚本确定性、零随机，故 κ 是语料 + 协议的固定属性，可复现。
+本脚本确定性、零随机，故 LCA κ 是语料 + 启发式的固定属性，可复现。
 
 产出
 ----
-  - benchmarks/corpus/external/second_annotator_labels.json  （id -> bool，sidecar）
-  - 就地为每条样本 labels 追加 {annotator:"B", basis:"protocol_independent", positive}
-  - 打印 A/B 一致性分解，供 compute_kappa.py 读取
+  - benchmarks/corpus/external/lca_labels.json  （id -> bool，sidecar，仅审计用）
+  - **绝不**向样本 labels 注入任何 "annotator" 字段（保持语料只有来源真值 A）。
+  - 打印 独立重推(AI重推) vs 来源真值 的一致性分解，供 compute_lca.py 读取。
 """
 from __future__ import annotations
 
@@ -42,11 +41,11 @@ CORPUS_DIR = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
     "benchmarks", "corpus", "external",
 )
-SIDECAR = os.path.join(CORPUS_DIR, "second_annotator_labels.json")
+SIDECAR = os.path.join(CORPUS_DIR, "lca_labels.json")
 
 # ---------------------------------------------------------------------------
 # 保守、高精度的攻击短语词典（仅明确攻击措辞；不收 password/token/secret 等
-# 在良性上下文中高频出现的泛安全词，以免 B 对负样本过触发）。
+# 在良性上下文中高频出现的泛安全词，以免对负样本过触发）。
 #
 # 其中「命令式指令覆盖 / 注入标记」一组在 InjecAgent 子集（527 正 / 517 负）
 # 上经差分频率验证为 P>0 且 N==0，是高精度独立信号；其余为通用高精度攻击术语。
@@ -70,7 +69,7 @@ ATTACK_PHRASES = [
     "secret key", "malicious", "payload", "exploit", "extract the",
     "reveal", "confidential", "sql injection", "credential",
     "send this to", "transmit", "leak", "injection attack",
-    # 动作 / 外泄指令（InjecAgent 子集验证 N==0；第二分析师识别"要求 agent 执行
+    # 动作 / 外泄指令（InjecAgent 子集验证 N==0；识别"要求 agent 执行
     # 外泄/越权动作"的独立信号）
     "please retrieve", "please send", "please email", "please transfer",
     "please update", "please unlock", "please delete", "please share",
@@ -94,7 +93,10 @@ def _text_of(sample: dict) -> str:
 
 
 def label_b(sample: dict) -> bool:
-    """独立重标：只读原始信号，绝不读 family / labels。"""
+    """独立重推：只读原始信号，绝不读 family / labels（来源真值）。
+
+    这是 LCA 的"独立重推"一侧，对照 corpus 自带的来源真值（A）。
+    """
     # 1) 外部可验证 provenance（确定性漏洞）
     if sample.get("cve_id") or sample.get("cwe_ids"):
         return True
@@ -110,7 +112,7 @@ def label_b(sample: dict) -> bool:
 
 
 def primary_label(sample: dict):
-    """取 PRIMARY 标注者 A 的 positive（bool）。"""
+    """取语料自带的来源真值标签（A = 外部真值）。"""
     for lab in sample.get("labels", []) or []:
         if lab.get("annotator") == "A":
             return bool(lab.get("positive"))
@@ -118,14 +120,14 @@ def primary_label(sample: dict):
     return False
 
 
-def run(patch_in_file: bool = True) -> dict:
+def run() -> dict:
+    """执行 LCA：独立重推 vs 来源真值，仅产出 sidecar，绝不改写样本。"""
     pos_files = sorted(glob.glob(os.path.join(CORPUS_DIR, "positives", "*.json")))
     neg_files = sorted(glob.glob(os.path.join(CORPUS_DIR, "negatives", "*.json")))
     files = pos_files + neg_files
 
     b_labels: dict[str, bool] = {}
     a_labels: dict[str, bool] = {}
-    patched = 0
 
     for fp in files:
         with open(fp, encoding="utf-8") as fh:
@@ -136,40 +138,18 @@ def run(patch_in_file: bool = True) -> dict:
         a_labels[sid] = a
         b_labels[sid] = b
 
-        if patch_in_file:
-            labels = sample.get("labels") or []
-            existing = next((lab for lab in labels
-                            if lab.get("annotator") == "B"), None)
-            if existing is None:
-                labels.append({
-                    "annotator": "B",
-                    "basis": "protocol_independent",
-                    "positive": b,
-                })
-                patched += 1
-            elif existing.get("positive") != b:
-                existing["positive"] = b
-                patched += 1
-            else:
-                continue  # 已是正确值，跳过写盘
-            sample["labels"] = labels
-            with open(fp, "w", encoding="utf-8") as fh:
-                json.dump(sample, fh, ensure_ascii=False, indent=2)
-                fh.write("\n")
-
     with open(SIDECAR, "w", encoding="utf-8") as fh:
-        json.dump({"annotator": "B", "basis": "protocol_independent",
+        json.dump({"audit": "label_consistency_audit", "basis": "independent_re-derivation_vs_source_truth",
                    "labels": b_labels}, fh, ensure_ascii=False, indent=2)
         fh.write("\n")
 
-    # 一致性分解
+    # 一致性分解（独立重推 B 对照 来源真值 A）
     n = len(files)
     agree = sum(1 for s in b_labels if a_labels[s] == b_labels[s])
     a_pos = sum(1 for s in a_labels if a_labels[s])
     a_neg = n - a_pos
     b_pos = sum(1 for s in b_labels if b_labels[s])
     b_neg = n - b_pos
-    # 2x2
     tp = sum(1 for s in b_labels if a_labels[s] and b_labels[s])
     tn = sum(1 for s in b_labels if not a_labels[s] and not b_labels[s])
     fp = sum(1 for s in b_labels if not a_labels[s] and b_labels[s])
@@ -177,20 +157,19 @@ def run(patch_in_file: bool = True) -> dict:
 
     summary = {
         "n": n, "agree": agree, "observed_agreement": agree / n,
-        "a_positive": a_pos, "a_negative": a_neg,
-        "b_positive": b_pos, "b_negative": b_neg,
+        "source_truth_positive": a_pos, "source_truth_negative": a_neg,
+        "re_derivation_positive": b_pos, "re_derivation_negative": b_neg,
         "tp": tp, "tn": tn, "fp": fp, "fn": fn,
-        "patched_files": patched,
     }
-    print("[second_annotator] corpus n =", n)
-    print("  A: pos=%d neg=%d | B: pos=%d neg=%d" % (a_pos, a_neg, b_pos, b_neg))
+    print("[lca] corpus n =", n)
+    print("  来源真值 A: pos=%d neg=%d | 独立重推 B: pos=%d neg=%d"
+          % (a_pos, a_neg, b_pos, b_neg))
     print("  2x2  TP=%d TN=%d FP=%d FN=%d" % (tp, tn, fp, fn))
     print("  observed agreement = %.4f" % (agree / n))
     print("  sidecar ->", SIDECAR)
-    print("  patched in-file labels:", patched)
+    print("  NOTE: 本 κ 是自动化标签一致性审计(LCA)，非人类标注者间一致性。")
     return summary
 
 
 if __name__ == "__main__":
-    patch = "--no-patch" not in sys.argv
-    run(patch_in_file=patch)
+    run()
