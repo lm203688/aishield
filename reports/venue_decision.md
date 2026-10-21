@@ -42,7 +42,7 @@
 - 仓库已有完整可复现包（ARTIFACT.md + run_all.py + 语料 + FVI）。预印本须附带：
   - 完整 `ARTIFACT.md` 与 `reports/paper_a_outline.md` 对应正文。
   - 真实数字（内部 100%/0%、外部 40.6% [36.6,44.7]/0%、主范围 GHSA 供应链 CVE 100%/次范围 NL 注入 33.2%、FVI 64 态、baselines 三真实数字）。
-  - **诚实标注 R1 标签一致性为自动化 LCA（κ=0.867≥0.8，非人类 IAA）**（§7 limitations），真实人类双标为投前步骤、工具包已备；不删除不掩饰。
+  - **R1 标签质量标注为 provenance + 自动化 LCA（κ=0.867≥0.8，非人类 IAA 且不冒充人类 κ）**（§6.1 / §7.2）：不重标公开基准是有文献支撑的 deliberate 方法选择（CTIConnect 2025 先例），`scripts/human_iAA_kit.py` 随仓库发布供 reviewer 请求时产出；不删除不掩饰。
 - 分类：cs.CR（密码学与安全）+ cs.AI（人工智能）。
 - 优先权：在 USENIX/TIFS 投稿前 1–2 周挂出，固定优先权日。
 

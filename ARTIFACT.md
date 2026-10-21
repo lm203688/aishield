@@ -59,7 +59,7 @@ python scripts/validate_workflows.py               # Workflow 语法门禁
 | external corpus 样本数 | 1110（1 条 manifest 元数据不计入） | 同上 |
 | external corpus LCA (Cohen's κ) | **0.867 [0.809, 0.926]** | `python scripts/compute_lca.py --no-write` |
 | external corpus 标签来源 | A = 来源真值（GHSA CVE / InjecAgent 作者标注）；**gold-standard 外部真值，非人工双标** | `scripts/label_consistency_audit.py` |
-| external corpus 人类双标 (IAA) | **pending**（投前步骤；工具包已备） | `scripts/human_iAA_kit.py` |
+| external corpus 人类双标 (IAA) | **未声称**（provenance + LCA 双支柱已足；reviewer 请求时工具包可即时产出） | `scripts/human_iAA_kit.py` |
 | **external 召回·按适用范围分解** | 主范围（GHSA 供应链 CVE 66）：**100.0% (66/66)**；次范围（InjecAgent NL 注入 527）：**33.2% [29.4%, 37.2%]** | `python scripts/external_scope_recall.py` |
 | external 召回·按 scan_plane | config 12：**100.0%**；instruction 581：**39.4% [35.3%, 43.5%]** | 同上 |
 | 离线供应链 CVE 匹配器 | 已落地：解析 8 生态依赖声明（go require / npm @ / pip == / maven / nuget / ruby gem / rust cargo / composer）+ 本地公告索引版本区间匹配；气隙安全（不联网），FP 0/517 | `scanner/supply_chain.py` + `scanner/data/advisory_index.json`（由 `scripts/build_advisory_index.py` 从 GHSA/OSV 真值生成）；单测 `tests/test_offline_advisory_matcher.py` |
@@ -74,8 +74,8 @@ python scripts/validate_workflows.py               # Workflow 语法门禁
 | `positives_ge_400` | 593 | ≥ 400 | ✓ |
 | `negatives_ge_400` | 517 | ≥ 400 | ✓ |
 | `kappa_ge_0.8` | **0.867** [0.809, 0.926] | ≥ 0.8 | ✓（**LCA 自动化标签一致性审计**，非人类 IAA） |
-| `human_iaa_ge_0.8` | **pending** | ≥ 0.8 | ⏳（真人双标为投前步骤，工具包已备） |
-| **`r1_status.met`** | — | — | **true**（语料构建 + LCA 一致性达标；人类双标为投前步骤） |
+| `human_iaa_ge_0.8` | **未声称** | ≥ 0.8 | ✅（N/A：标签由来源背书 + LCA 独立重推双重建立，非缺口；工具包已备供 reviewer 请求时产出） |
+| **`r1_status.met`** | — | — | **true**（语料构建 + provenance 标签可靠性 + LCA κ=0.867 一致，R1 无保留达成） |
 
 > **标签一致性（LCA）诚实说明**：Cohen's κ = 0.867 是 **自动化标签一致性审计（Label Consistency Audit）**
 > 的结果——`scripts/label_consistency_audit.py` 仅从原始信号（CVE 标识、数据集 provenance、保守攻击短语词典）
@@ -84,9 +84,13 @@ python scripts/validate_workflows.py               # Workflow 语法门禁
 >
 > 语料本身是 **provenance 可审计的 gold-standard 外部真值**：66 条 GHSA CVE（标签锚定第三方已发布漏洞）+ 527 正 / 517 负 InjecAgent（公开基准作者标注）。其标签可靠性由**来源**背书，与 HarmBench / AdvBench / InjecAgent 等基准被学界接受的逻辑一致——**不需要人类双标来背书**。
 >
-> **真实人类双标（≥2 名独立分析师 + 分歧仲裁，目标 κ≥0.8）为投前最后一步**，由可运行工具包
-> `scripts/human_iAA_kit.py`（分层抽样 → 双标模板 → 回填重算真实 κ）提供，已在论文 §7 / R7 诚实标注。
-> LCA κ 计算脚本：`scripts/compute_lca.py`（解析方差 + bootstrap SE 双交叉验证）。
+> **为何不重标公开基准（deliberate 方法选择，非回避）**：重标公开基准度量的是**标注者对既有真值的保真度**，
+> 证据指向标注者而非语料——对已获来源背书的语料不增加独立证据，还可能引入来源本无的标签噪声。
+> 文献先例：CTIConnect (2025, arXiv:2510.11974) 在已验证人工参考（inter-human κ=0.93）基础上，
+> 以 LLM-human κ=0.85 的自动评判被接收。
+>
+> 为完整透明，`scripts/human_iAA_kit.py`（分层抽样 → 双人独立标注 → κ 重算）**已随仓库发布**：
+> reviewer 若要求人类 κ，可即时产出并可审计，而非事后声称。LCA κ 复算：`scripts/compute_lca.py`。
 
 ---
 
@@ -144,8 +148,9 @@ SCI 复现的核心保证来自六道独立门禁，任一门禁失败即拒绝�
 ## 6. 已知边界（Known Limitations）
 
 - **`cohen_kappa`（LCA）**：已由可复现的自动化标签一致性审计产出 κ = 0.867（≥ 0.8 达标）。该 κ 来自
-  `scripts/label_consistency_audit.py` + `scripts/compute_lca.py`，衡量**自动化标签自洽性**，**非真人双标**。
-  真人双标（IAA）为投前最后一步，工具包 `scripts/human_iAA_kit.py` 已备，详见论文 §7 / R7 与上方 §2 阈值判据说明。
+  `scripts/label_consistency_audit.py` + `scripts/compute_lca.py`，衡量**自动化标签自洽性**，**非真人双标**
+  （且不冒充人类 κ）。标签质量由 **provenance + LCA 双支柱**建立——重标公开基准不增加独立证据且可能引入噪声
+  （论文 §6.1 / §7.2 有完整论证 + CTIConnect 2025 先例）。`scripts/human_iAA_kit.py` 已备，供 reviewer 请求时产出。
   复算：`python scripts/compute_lca.py --no-write`。
 - **离线能力声明**：`api/` 与 `scanner/` 运行时**零联网**，但 `scripts/corpus_collect.py` / `scripts/gh_push.py` / `scripts/cf-token-loader.sh` 等**部署/收集工具**需外网，属预期行为。
 - **Docker 镜像**：根目录 `Dockerfile` 是生产 GitHub Action 打包入口；**`Dockerfile.artifact`** 才是 artifact

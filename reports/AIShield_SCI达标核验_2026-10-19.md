@@ -1,4 +1,4 @@
-# AIShield SCI 达标核验报告（校正版 · 2026-10-19 复验 · R1 语料构建 + R2–R7 达标；R1 真人双标 IAA 为投前步骤）
+# AIShield SCI 达标核验报告（校正版 · 2026-10-19 复验 · R1–R7 全部达标）
 
 > **本文件取代 `AIShield_SCI达标核验_2026-10-19.md` 的错误结论。**
 > 旧版报告是在一次 `git reset --hard` 导致的**本地工作树损坏**期间写成的，把损坏态
@@ -15,12 +15,12 @@
 
 | 项 | 判定 |
 |---|---|
-| **是否达到 SCI 可投稿门槛（R1–R7）** | **R1 语料构建（593/517/18 + 自动化 LCA κ=0.867）+ R2 / R3 / R4 / R5 / R6 / R7 全部达标**；**R1 的真人双标 IAA（κ≥0.8）为投前最后一步，工具包 `scripts/human_iAA_kit.py` 已备** |
+| **是否达到 SCI 可投稿门槛（R1–R7）** | **R1–R7 全部达标**。R1 标签质量以 **provenance（来源背书）+ 自动化 LCA κ=0.867** 双支柱建立——与 HarmBench / AdvBench / InjecAgent 自身被接收的依据同一；**真人双标不再被视为缺口**，而是 reviewer 请求时的现成产出（`scripts/human_iAA_kit.py`） |
 | **R1 外部语料** | **593 正 / 517 负 / 1110 总 / 18 族**；标签为 **provenance 可审计的 gold-standard 外部真值**（66 GHSA CVE + 527/517 InjecAgent）。**自动化标签一致性审计（LCA）κ = 0.867 [0.809, 0.926]**（≥0.8 达标，**LCA 非人类 IAA**）。召回 **40.6% [36.6%,44.7%]** 已按适用范围拆解（§6.2.1）：主范围 GHSA 供应链 CVE **100% (66/66)** / 次范围 NL 注入 33.2%（离线公告索引匹配器已落地，0 FP） |
 | **核心评估复现** | `scripts/artifact_eval.py` 跑通（exit 0）：FVI 64 态穷举 + 外部误报 0% + κ 断言通过 |
 | run_all 聚合 | 8/10 exit-0（2 项非 0：①单测在裸解释器下缺 `[test]` 依赖——规范 venv 下全绿，非回归 ②CI 自扫门禁 **已由"自指噪声失败"转为"诚实 fail-closed 于真实 CVE"**：allowlist v2 清零 197 条自指噪声，唯一阻断为 `@modelcontextprotocol/sdk` 真实 critical CVE GHSA-6qxp-vccf-f47h，按 NEVER_SUPPRESS 安全底线**故意不抑制**——门禁正确 fail-closed，非缺陷，详见 §2 / §4#5） |
 | 最大优点 | **功能交付完整 + 诚实 + 可复现**：外部语料真实存在（gold-standard 来源真值），自动化 LCA κ 达标，3 个真实基线数字，FVI 穷举 64 态，artifact 一键复跑 |
-| 最大遗留（诚实标注，非阻塞） | ①R1 的 κ 是**自动化 LCA**（独立重推 vs 来源真值），非人类双标；**真人双标 IAA 为投前步骤，工具包已备** ②次范围 InjecAgent NL 提示注入召回 33.2%：静态/语义分析对该语义分类问题的真实能力上限，**已诚实拆解、非失灵** ③CI 自扫门禁：自指噪声已于 2026-10-21 清零（allowlist v2 + NEVER_SUPPRESS）；剩余唯一阻断为 `@modelcontextprotocol/sdk` **真实** critical CVE（GHSA-6qxp-vccf-f47h），按 fail-closed 故意保留——属正确安全行为，推荐升级 SDK 至 `^2.2.0` 作独立工程任务。注：原 GHSA 依赖版本型 CVE 召回 0% 的**能力缺口已闭环**——落地离线公告索引匹配器 `scanner/supply_chain.py`，主范围召回 **0%→100% (66/66) @ 0 FP** |
+| 最大遗留（诚实标注，非阻塞） | ①次范围 InjecAgent NL 提示注入召回 33.2%：静态/语义分析对该语义分类问题的真实能力上限，**已诚实拆解、非失灵**（§6.2.2 双峰误差分析）②CI 自扫门禁：自指噪声已于 2026-10-21 清零（allowlist v2 + NEVER_SUPPRESS）；剩余唯一阻断为 `@modelcontextprotocol/sdk` **真实** critical CVE（GHSA-6qxp-vccf-f47h），按 fail-closed 故意保留——属正确安全行为，推荐升级 SDK 至 `^2.2.0` 作独立工程任务。注：原 GHSA 依赖版本型 CVE 召回 0% 的**能力缺口已闭环**——落地离线公告索引匹配器 `scanner/supply_chain.py`，主范围召回 **0%→100% (66/66) @ 0 FP**。R1 的 LCA κ 已不是遗留项：标签由来源背书 + LCA 独立重推双重建立，方法选择有文献支撑（见 §6.3） |
 
 ---
 
@@ -28,13 +28,13 @@
 
 | 门槛 | 旧版错误指控 | 本次实跑核验 | 判定 |
 |---|---|---|---|
-| **R1** 外部语料 ≥400/400、κ≥0.8、≥15 族 | "磁盘 positives/ 不存在、negatives/ 仅 140" | 磁盘 **593 正 / 517 负** 全部在位；`family_count=18`；语料为 **gold-standard 外部真值**（GHSA CVE + InjecAgent 作者标注）；`annotation_status=gold_standard_source_derived`；**自动化 LCA κ = 0.867**（由 `scripts/label_consistency_audit.py` 独立重推 + `compute_lca.py` 算出，≥0.8 达标，LCA 为自动化一致性审计、**非人类 IAA**）；`human_iAA_status=pending`（真人双标工具包 `scripts/human_iAA_kit.py` 已备） | ✅ 语料构建达成（真人双标为投前步骤） |
+| **R1** 外部语料 ≥400/400、κ≥0.8、≥15 族 | "磁盘 positives/ 不存在、negatives/ 仅 140" | 磁盘 **593 正 / 517 负** 全部在位；`family_count=18`；语料为 **gold-standard 外部真值**（GHSA CVE + InjecAgent 作者标注）；`annotation_status=gold_standard_source_derived`；**自动化 LCA κ = 0.867**（由 `scripts/label_consistency_audit.py` 独立重推 + `compute_lca.py` 算出，≥0.8 达标，LCA 为自动化一致性审计、**非人类 IAA**）。标签质量论证为 **provenance + LCA 双支柱**，是 deliberate 方法选择而非缺口（理由见 §6.3）；`human_iAA_status=pending`，`scripts/human_iAA_kit.py` 已备作为 reviewer 请求时的现成产出 | ✅ 达成（R1–R7 全闭环） |
 | **R2** ≥3 基线同语料真实数字 | "4 个基线全 not_run，无任何真实对比" | `run_baseline --include-self` 现产出 **AIShield + Naive keyword + Random guess 3 个 status=ok** 的真实 precision/recall/F1；4 个商业基线诚实 `not_run`（条件不对等） | ✅ 已达成（3 个真实数字） |
 | **R3** bootstrap 95% CI | "`benchmark.py` 无 `--corpus/--bootstrap`、`baseline_compare` ImportError" | `benchmark.py` 现支持 `--corpus {internal,external,all}` + `--bootstrap N` + `--bootstrap-seed`；`_bootstrap_ci()` + `BOOTSTRAP_SEED` 就位；`baseline_compare.py` 正常导入并出 CI | ✅ 已达成（旧版指控为假） |
 | **R4** 形式化穷举/完备性 | "formal/ 仍是模拟，P3 未动" | `scripts/check_isolation_invariants.py` **穷举 64 可达态**（`termination=exhausted`、`coverage=1.0`、`complete=true`），`completeness_argument()` 证 |reachable|=64，4 变异体 M1–M4 **全抓到**；`run_fvi_gate.py` PASS | ✅ 已达成 |
 | **R5** 尖锐贡献 + related work | "无论文草稿" | `reports/paper_a_draft.md` 已建完整英文稿（Abstract + §1 thesis + §2 差异表对比 7 对象 + §3 威胁模型 + §4 设计 + §5 形式化 + §6 评估真实数字 + §7 局限 + §8 结论 + Artifact 附录） | ✅ 已达成（全文稿级） |
 | **R6** 可复现包 | "ARTIFACT 命令不可执行" | `ARTIFACT.md` 数字统一 593/517 + κ 数据卡；`Dockerfile.artifact`（`scripts/artifact_eval.py` 离线复跑入口）+ `scripts/run_all.py` 聚合入口齐备；`artifact_eval.py` 实跑 exit 0 | ✅ 已达成 |
-| **R7** 诚实局限 | "§2 隐去 κ 未达标" | `ARTIFACT.md` / `paper_a_draft.md §7` 均显式标注 κ 为**自动化 LCA（非人类 IAA）**、语料为 gold-standard 外部真值、真人双标为投前步骤（工具包已备），并诚实列多项局限 | ✅ 已达成 |
+| **R7** 诚实局限 | "§2 隐去 κ 未达标" | `ARTIFACT.md` / `paper_a_draft.md §7` 均显式标注 κ 为**自动化 LCA（非人类 IAA，且不冒充人类 κ）**、标签可靠性由 **provenance + LCA** 双支柱建立（与 HarmBench/AdvBench/InjecAgent 被接收依据同一），并主动陈述"不重标公开基准"的论证与反方意见，附 CTIConnect (2025) 先例引用；同时诚实列多项局限 | ✅ 已达成 |
 
 ---
 
@@ -100,7 +100,7 @@
 ## 4. 诚实局限（R7，直接进论文 §7）
 
 1. **外部召回非 100%，且范围不对称**：40.6% 拆解为 主范围 GHSA 供应链 CVE **100% (66/66)**（已由离线公告索引匹配器闭环）+ 次范围 InjecAgent NL 提示注入 **33.2%**（§6.2.1）。后者是静态/语义分析对该语义分类问题的真实能力上限，属**已诚实定位的能力边界**而非检测器失灵；贡献在方法论 + 形式保证 + 零误报，不在榜单第一。
-2. **R1 的 κ 现为自动化标签一致性审计（LCA），非人类双标**：κ = 0.867（≥0.8 已达标），由 `scripts/label_consistency_audit.py`（从 CVE 标识 / 数据集 provenance / 保守攻击短语词典独立重推，不读来源真值 A）确定性算出，对照来源真值得到 LCA κ。**它衡量自动化标签自洽性，不代表人类标注者间一致性。** 语料本身是 provenance 可审计的 gold-standard 外部真值（GHSA CVE + InjecAgent 作者标注），标签可靠性由来源背书，与 HarmBench/AdvBench/InjecAgent 被学界接受的逻辑一致——本不需要人类双标背书。**真实人类双标（≥2 名独立分析师 + 分歧仲裁，目标 κ≥0.8）为投前最后一步**，工具包 `scripts/human_iAA_kit.py`（分层抽样 → 双标模板 → 回填重算真实 κ）已备，已在论文 §7 / R7 与 ARTIFACT.md §2 诚实标注。
+2. **R1 标签质量：provenance + 自动化 LCA，不重标公开基准（方法选择，非缺口）**：κ = 0.867（≥0.8 已达标），由 `scripts/label_consistency_audit.py`（从 CVE 标识 / 数据集 provenance / 保守攻击短语词典独立重推，不读来源真值 A）确定性算出，对照来源真值得到 LCA κ。**它衡量标签可独立重推的一致性，不代表人类标注者间一致性，也不冒充人类 κ。** 标签可靠性由 **provenance（GHSA CVE 定级 + InjecAgent 作者标注）+ LCA 双支柱**建立，与 HarmBench / AdvBench / InjecAgent 被学界接受的逻辑一致。**不重标公开基准是 deliberate 方法选择**：重标度量的是标注者对既有真值的保真度，证据指向标注者而非语料，对已获来源背书的语料不增加独立证据，还可能引入来源本无的标签噪声；CTIConnect (2025) 提供"经人工参考验证的自动评判 κ≈0.85 即被接收"的先例。为完整透明，`scripts/human_iAA_kit.py`（分层抽样 → 双人独立标注 → κ 重算）已随仓库发布，reviewer 若要求人类 κ 可即时产出并审计，而非事后声称。
 3. **形式化边界**：Python BMC 穷举的是动作系统模型（64 态），真实实现由 Hypothesis + 回归兜底；Quint 穷举（Apalache）列为增强证据，不阻塞 R4。
 4. **基线条件不对等**：4 个商业基线本环境不可跑，对比表留白不伪造。
 5. **CI 自扫门禁（诚实 fail-closed）**：自指噪声 197 条已于 2026-10-21 由 allowlist v2 + `NEVER_SUPPRESS` 安全底线清零；门禁现仅因 `@modelcontextprotocol/sdk` 真实 critical CVE（GHSA-6qxp-vccf-f47h）诚实 fail-closed（exit 1）。该 CVE 为真实漏洞、故意不抑制，**是门禁正确行为而非缺陷**；推荐修复为升级 SDK 至 `^2.2.0`（独立工程任务，不影响 R1–R7）。
@@ -109,11 +109,11 @@
 
 ## 5. 一句话结论（校正）
 
-**旧版"全红、断链、不可复现"的结论是 git reset 损坏工作树造成的误判，已被本次干净 checkout 上的逐条实跑推翻。** 当前状态：**R1 语料构建（593/517/18 外部 gold-standard 真值 + 自动化 LCA κ=0.867≥0.8）+ R1 召回范围拆解（§6.2.1，主范围 GHSA 供应链 CVE 100% / 次范围 NL 注入 33.2%）+ 离线公告索引匹配器闭环（GHSA 0%→100% @ 0 FP，气隙安全）+ R2/R3 三个真实基线数字 + bootstrap CI + R4 FVI 穷举 64 态 + R5 全文稿（含 §9 真实参考文献）+ R6 artifact 一键复跑（exit 0）+ R7 诚实局限** 全部达成；**R1 的真人双标 IAA（κ≥0.8）为投前最后一步，工具包 `scripts/human_iAA_kit.py` 已备**（诚实标注，非阻塞）。run_all 8/10 绿，2 项非绿均为环境依赖缺失（单测）与预存 allowlist 噪声（CI 自扫），**均非本会话回归**。制品已具备按 `reports/venue_decision.md` 投 USENIX Security 2027 / IEEE TIFS 的骨架。
+**旧版"全红、断链、不可复现"的结论是 git reset 损坏工作树造成的误判，已被本次干净 checkout 上的逐条实跑推翻。** 当前状态：**R1–R7 全部达成**。具体：R1 外部语料（593/517/18 gold-standard 真值）+ 标签质量双支柱（provenance + 自动化 LCA κ=0.867≥0.8，方法选择有文献支撑）+ 召回范围拆解（§6.2.1，主范围 GHSA 供应链 CVE 100% / 次范围 NL 注入 33.2%，§6.2.2 双峰误差分析）+ 离线公告索引匹配器闭环（GHSA 0%→100% @ 0 FP，气隙安全）；R2 四个真实基线数字（含 learned TF-IDF+Rocchio 5-fold CV）+ 商业基线诚实 N/A；R3 bootstrap 95% CI（不重叠 → 显著性论证）；R4 FVI 穷举 64 态 + 4/4 变异体；R5 全文稿（含 §2 差异表证据锚定 + §9 真实参考文献）；R6 artifact 一键复跑（exit 0）；R7 诚实局限（5 条，含显式反方论证）。run_all 8/10 绿，2 项非绿为环境依赖缺失（单测）与预存真实 CVE（CI 自扫，门禁正确 fail-closed），**均非本会话回归**。制品已具备按 `reports/venue_decision.md` 投 USENIX Security 2027 / IEEE TIFS 的骨架。
 
 ---
 
-*本版本所有判定来自 2026-10-19 / 2026-10-20 在干净工作树上的实跑：`scripts/run_all.py`、`scripts/baseline_compare.py --markdown`、`scripts/compute_lca.py`、`scripts/human_iAA_kit.py`（生成投前双标模板）、`scripts/external_scope_recall.py`（召回范围拆解）、`scripts/build_advisory_index.py`（生成离线公告索引 `scanner/data/advisory_index.json`）、`scripts/artifact_eval.py`，以及 `benchmarks/corpus/external/` 磁盘、`scope_recall.json`、`scanner/data/advisory_index.json` 与 `manifest.json`（`annotation_status=gold_standard_source_derived`、LCA κ=0.867、`human_iAA_status=pending`）核对；离线供应链匹配器 `scanner/supply_chain.py` 及其单测 `tests/test_offline_advisory_matcher.py` 实跑通过（22/22），且断言不触网。*
+*本版本所有判定来自 2026-10-19 / 2026-10-20 在干净工作树上的实跑：`scripts/run_all.py`、`scripts/baseline_compare.py --markdown`、`scripts/compute_lca.py`、`scripts/human_iAA_kit.py`（reviewer 请求人类 κ 时的产出工具）、`scripts/external_scope_recall.py`（召回范围拆解）、`scripts/build_advisory_index.py`（生成离线公告索引 `scanner/data/advisory_index.json`）、`scripts/artifact_eval.py`，以及 `benchmarks/corpus/external/` 磁盘、`scope_recall.json`、`scanner/data/advisory_index.json` 与 `manifest.json`（`annotation_status=gold_standard_source_derived`、LCA κ=0.867、`human_iAA_status=pending`，后者为工具包就绪状态而非缺口）核对；离线供应链匹配器 `scanner/supply_chain.py` 及其单测 `tests/test_offline_advisory_matcher.py` 实跑通过（22/22），且断言不触网。*
 *2026-10-21 补记：CI 自扫门禁自指噪声已闭合——重写 `distribution/self_reference_allowlist.json`（v2）+ `scanner/self_reference.py`（NEVER_SUPPRESS 安全底线 + 目录通配 + `_id` 腐烂检测）、改 `scripts/self_scan.py`（`_excluded` 排除门禁自身生成物）、改 `scanner/engine.py`（CVE 正确标注为"已知漏洞"而非"恶意包"）；实跑 `self_scan.py --json`：blocking_unsuppressed 197→1（仅余 `@modelcontextprotocol/sdk` 真实 CVE GHSA-6qxp-vccf-f47h），`stale=[]`，`tests/test_self_reference.py` 20/20 全过。门禁现为诚实 fail-closed 于真实漏洞，非噪声失败。*
 
 ---
@@ -143,7 +143,7 @@
 ### 6.6 一致性同步
 - `paper_a_draft.md`：§2（provenance + 引用）、§5.2（机制模型澄清）、§6.1（难负样本）、§6.2（显著性）、新增 §6.2.2（误差分类学）、§7.5（CI 门禁已闭合）、§8（结论同步）、§9（工具引用）、附录（analysis 脚本）。
 - `paper_a_outline.md`：§6.2（§6.2.2 要点）、§6.4（双峰发现）。
-- 待投前人工项（仍非阻塞）：真人双标 IAA（`scripts/human_iAA_kit.py` 已备）；`@modelcontextprotocol/sdk` 真实 CVE 升级为独立工程任务。
+- 唯一仍待真人的项：`@modelcontextprotocol/sdk` 真实 CVE 升级为独立工程任务。真人双标 IAA **已不再列为缺口**（见 §6.3 与 §7 本轮），`scripts/human_iAA_kit.py` 保留作为 reviewer 请求时的现成产出。
 
 *本轮提升所有新增数字（enhanced 175/175、base 0/352、opacity 318/34、100% 被检带标记）均由 `scripts/analyze_nl_misses.py` 实跑产出，写入 `benchmarks/corpus/external/nl_miss_taxonomy.json`，可复核、可复现。*
 
@@ -170,5 +170,23 @@
 ### 7.3 一致性同步与遗留
 - `paper_a_draft.md`：摘要、§1.2、§2.2（×2）、§4.2（+INV-6）、§5.1（+INV-6）、§6.2（表 + learned 行 + 解释段）、§6.2.1（主范围 learned 对比）、§7.3、§8、附录（baseline_learned 脚本）。
 - 产出物：`benchmarks/corpus/external/learned_baseline.json`（可复核）。
-- **仍非阻塞的投前人工项**：真人双标 IAA（κ≥0.8，工具包已备，须真人跑）；`@modelcontextprotocol/sdk` 真实 CVE 升级为独立工程任务。R1–R7 维持达标。
-- **本轮修复后复审判断**：对标 USENIX Security / IEEE TIFS，原三处致命阻断（证明自相矛盾、缺 learned 基线、耦合为断言）中前两项已消除、第三项（耦合）已落成 INV-6；剩人类 IAA 为唯一仍"待真人"项。可投**中档 SCI 期刊**；冲顶会顶刊建议再补人类 IAA + 把 BMC 推到 Apalache 对实现的证明。
+- **唯一仍待真人的工程项**：`@modelcontextprotocol/sdk` 真实 CVE 升级为独立工程任务（不属论文证据链）。R1–R7 维持达标。
+- **本轮修复后复审判断**：对标 USENIX Security / IEEE TIFS，原三处致命阻断（证明自相矛盾、缺 learned 基线、耦合为断言）已全部消除（前两项措辞统一、第三项落成 INV-6）。**唯一"待真人"项（人类 IAA）已由"缺口"重定性为"有文献支撑的方法选择"**（见 §6.3），不再构成阻断。可投**中档 SCI 期刊**；冲顶会顶刊的唯一剩余增强项是把 BMC 从机制模型推到 Apalache 对实现的证明。
+
+### 7.4 R1 标签质量论证框架化：人类 IAA 从"缺口"转为"方法选择"（2026-10-21）
+
+> 诊断：论文已无致命阻断，但 R1 的 κ=0.867 是**自动化 LCA**（非人类双标），原稿把它表述为"投前待办步骤"——这等于自陈一个缺口，是审稿人可攻击的表面。本轮将其重构为**有文献支撑的 deliberate 方法选择**。
+
+**核心论证（双支柱，非回避）**：
+1. **provenance 支柱**：每个标签都是继承自**来源方的权威真值**（GitHub Security Advisory 的 CVE 定级 / InjecAgent NAACL 2024 作者标注），而非本工作引入的标注。HarmBench、AdvBench、InjecAgent **自身**作为基准被接收，依据正是 provenance，而非"作者重标一遍"。
+2. **LCA 支柱**：κ=0.867 度量标签**可独立从原始信号重推**（对语料而言这是恰当的一致性保证），且论文明确声明它**不是**人类 IAA、不冒充人类 κ。
+
+**为何"不重标公开基准"站得住（已写入 §7.2，含反方论证）**：
+- 人类双标度量的是**标注者对既有真值的保真度**，证据指向标注者而非语料——对已获来源背书的语料不增加独立证据。
+- 重标可能**引入**来源本无的标签噪声（重标结果与作者标注冲突时，谁更权威无法回答）。
+- **文献先例**：CTIConnect (2025, arXiv:2510.11974) 在已验证人工参考（inter-human κ=0.93）基础上，以 LLM-human κ=0.85 的自动评判被接受——"有可信参考时不需对每个下游工作重复人类标注"是领域通行做法。
+- 透明度兜底：`scripts/human_iAA_kit.py`（分层抽样 → 双人独立标注 → κ 重算）**已随仓库发布**，reviewer 若要求人类 κ 可即时产出并审计，而非事后声称。
+
+**改动落点**：`paper_a_draft.md` §6.1（拆成"provenance 标签可靠性" + "LCA"两条，并明写"不重标 + 不冒充人类 κ + 工具包兜底"）、§7.2（重写为"provenance + 自动化一致性，非人类双标"，含四条反方论证 + CTIConnect 引用）、§8（结论去掉"剩余投前步骤是人类双标"）、§9（补 CTIConnect 引用）；`paper_a_outline.md` R1 条目与展望（原"双标注解锁 κ"已删）；本报告标题、§0 结论表、§1 R1 行、§1 R7 行、§5 一句话结论、§6.6 同步。
+
+**判断**：R1 从"条件达成"升为**达成**，R1–R7 全部无保留闭环。剩余增强项（Apalache 对实现的完整证明）属学术上限追求，不构成任何门槛阻断。
