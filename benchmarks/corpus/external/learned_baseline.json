@@ -1,0 +1,47 @@
+{
+  "generated_by": "scripts/baseline_learned.py",
+  "method": "TF-IDF + nearest-class-centroid (Rocchio), stratified 5-fold CV",
+  "offline": true,
+  "dependencies": "stdlib-only",
+  "detection_bar": "binary malicious/injection decision (detected == predicts positive)",
+  "bootstrap_seed": 20261018,
+  "bootstrap_n": 1000,
+  "n_positives": 593,
+  "n_negatives": 517,
+  "tp": 492,
+  "fn": 101,
+  "fp": 253,
+  "tn": 264,
+  "recall": 0.8297,
+  "recall_ci95": [
+    0.7993,
+    0.86
+  ],
+  "fp_rate": 0.4894,
+  "fp_ci95": [
+    0.4449,
+    0.5319
+  ],
+  "precision": 0.6604,
+  "f1": 0.7354,
+  "scope_recall": {
+    "secondary": {
+      "recall": 0.8558,
+      "detected": 451,
+      "positives": 527
+    },
+    "primary": {
+      "recall": 0.6212,
+      "detected": 41,
+      "positives": 66
+    }
+  },
+  "false_positives_by_type": {
+    "controlled_matched": 249,
+    "clean_source": 4
+  },
+  "negatives_by_type": {
+    "controlled_matched": 500,
+    "clean_source": 17
+  }
+}

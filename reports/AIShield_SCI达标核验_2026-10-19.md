@@ -146,3 +146,29 @@
 - 待投前人工项（仍非阻塞）：真人双标 IAA（`scripts/human_iAA_kit.py` 已备）；`@modelcontextprotocol/sdk` 真实 CVE 升级为独立工程任务。
 
 *本轮提升所有新增数字（enhanced 175/175、base 0/352、opacity 318/34、100% 被检带标记）均由 `scripts/analyze_nl_misses.py` 实跑产出，写入 `benchmarks/corpus/external/nl_miss_taxonomy.json`，可复核、可复现。*
+
+## 7. 复审后矛盾消除 + learned 基线补齐 R2（2026-10-21 · 针对"未达 SCI"诊断的修复）
+
+> 复审结论：摘要/§5 的"proven by exhaustive BMC"与 §7.3"模型非实现"自相矛盾；R2 仅 keyword+random 两个离线基线、缺 learned 对手。本轮两处均修。
+
+### 7.1 消除"证明"自相矛盾（最高杠杆、零风险）
+全文统一口径为**"机制模型级验证"**，不再用"proven"误导：
+- 摘要：proven → "*verified over a faithful mechanism model* ... 实现对实现由 runtime self-proof + property tests 覆盖，完整 TLA+/Apalache 证明列为 enhance 证据"。
+- §1.2 thesis、§2.2 差异表（BMC 列改为"model-level BMC"）、§2.2 provenance 段（"machine-checkable isolation proof"→"verification (model-level BMC)"）、§8 结论同步。
+- §7.3 改写为"**Formalization boundary (model-level, not implementation-level)**"，并显式标注"与摘要/§1.2 同口径"——把潜在 reviewer 把柄变成自我一致的声明。
+- §4.2 新增 INV-6 `grounded_promotion`，把"检测器-证明耦合"落成形式不变量（INV-3 + INV-6），堵住"两件独立物"质疑（原弱点 C）。
+
+### 7.2 补齐 learned 基线（R2 缺口 → 现 ≥3 真实数字基线）
+新增 `scripts/baseline_learned.py`（纯 stdlib、离线、零依赖、stratified 5-fold CV，TF-IDF + nearest-centroid/Rocchio），在同一外部语料、同 detection bar 下跑出真实数字：
+- **recall 83.0% [79.9%, 86.0%]（492/593）**，**FP 48.9% [44.5%, 53.2%]（253/517）**，precision 66.0%、F1 73.5%。
+- 主范围（供应链 CVE）**62.1% vs AIShield 100%**；次范围（NL 注入）85.6%。
+- FP 分布：controlled_matched 难负样本 **249/500**，clean_source 4/17。
+- 所有 bootstrap 95% CI **互不重叠**（learned recall 显著高于 random 与 AIShield；learned FP 显著高于 AIShield 的 0%）。
+
+**学术含义（已写入 §6.2 解释段 + 摘要）**：learned 基线用召回换来了**不可用的工作点**（近半负样本误报，其中 249/500 是难负样本），且在 AIShield 的**设计目标范围（主范围）被反超（62% vs 100%）**——证明这是离线公告版本匹配的*结构性*优势。论文 thesis（"拿召回换可信工作点 + 在设计目标范围碾压"）现由**真实 learned 对手**坐实，R2 从"2 个 naive 基线"升为"keyword + random + learned + 4 个诚实 N/A 商业工具"。
+
+### 7.3 一致性同步与遗留
+- `paper_a_draft.md`：摘要、§1.2、§2.2（×2）、§4.2（+INV-6）、§5.1（+INV-6）、§6.2（表 + learned 行 + 解释段）、§6.2.1（主范围 learned 对比）、§7.3、§8、附录（baseline_learned 脚本）。
+- 产出物：`benchmarks/corpus/external/learned_baseline.json`（可复核）。
+- **仍非阻塞的投前人工项**：真人双标 IAA（κ≥0.8，工具包已备，须真人跑）；`@modelcontextprotocol/sdk` 真实 CVE 升级为独立工程任务。R1–R7 维持达标。
+- **本轮修复后复审判断**：对标 USENIX Security / IEEE TIFS，原三处致命阻断（证明自相矛盾、缺 learned 基线、耦合为断言）中前两项已消除、第三项（耦合）已落成 INV-6；剩人类 IAA 为唯一仍"待真人"项。可投**中档 SCI 期刊**；冲顶会顶刊建议再补人类 IAA + 把 BMC 推到 Apalache 对实现的证明。
