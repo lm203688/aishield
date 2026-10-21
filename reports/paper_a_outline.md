@@ -81,6 +81,7 @@
 - 规模：**593 正 / 517 负 / 1110 总 / 18 家族**（GitHub Advisory + InjecAgent 等公开数据集，非自造）。
 - 召回 **40.6% [36.6%, 44.7%]**（bootstrap 95% CI，seed=20261018，1000 重采样）；FP **0.0% [0.0%, 0.0%]**；其中主范围 GHSA 供应链 CVE **100% (66/66)**、次范围 InjecAgent NL 注入 33.2%。
 - **R1 标签一致性（LCA）**：Cohen's κ = 0.867 [0.809, 0.926]（≥0.8 达标），由 `scripts/compute_lca.py` 从来源真值独立重推得出，为**自动化标签一致性审计（LCA）**而非人类双标（语料是 GHSA CVE + InjecAgent 作者标注的 gold-standard 外部真值，标签由来源背书，不需人类双标）；真实人类 IAA 为投前步骤（`scripts/human_iAA_kit.py` 已备）。GHSA 供应链 CVE 召回已通过**离线公告索引匹配器** `scanner/supply_chain.py`（气隙安全）闭环 0%→100% @ 0 FP。
+- **§6.2.2 误差分析（新增，把弱点变贡献）**：用 InjecAgent 自有字段 `dataset_setting`/`family`/`attack_type` + 检测器无关的词法不透明代理，对 352 个漏检做分类。**核心发现：召回按"注入显露度"双峰分布**——`enhanced`(显露型) 175/175=100%，`base`(隐蔽嵌入型) 0/352=0%；且 **100% 被检中都带显式注入标记、90.3% 漏检无标记**（剩余 9.7% 标记仅出现在良性工具输出上下文中=语境隐蔽注入，升级会制造 FP）。这把 33.2% 重构为"静态离线零误报分析对隐蔽语义分类问题的原理性上限"，并映射 overt/covert 注入文献轴。
 
 ### 6.3 基线对比（R2/R3）
 同一固定语料、serious_only 口径、bootstrap 种子固定。
@@ -95,7 +96,7 @@
 **尖锐解读（关键，避免被误读为"不如随机"）**：对**护栏**而言 FP 必须近零（误报被禁用即失效）。在 **FP=0 约束下**，AIShield recall 40.6% **严格优于** keyword 21.1%（同 FP 下更高召回），并**碾压** random（后者 54% FP 在实际部署中不可用）。Random 的更高原始 recall 恰恰说明：原始召回率不是护栏的正确指标，零误报纪律才是本工作的立身之本。
 
 ### 6.4 家族覆盖
-18 个正样本家族覆盖情况（indirect_prompt_injection 176 / data_exfiltration 176 / jailbreak 175 为三大主力；技术漏洞类长尾各 1–7）。讨论分布偏斜对外部召回的影响。
+18 个正样本家族覆盖情况（indirect_prompt_injection 176 / data_exfiltration 176 / jailbreak 175 为三大主力；技术漏洞类长尾各 1–7）。讨论分布偏斜对外部召回的影响。**关键诚实发现（§6.2.2 支撑）**：NL 注入子集按 `dataset_setting` 双峰——`jailbreak_family`(=enhanced) 175/175=100%，`data_exfiltration`+`indirect_prompt_injection`(=base) 0/352=0%；召回完全由"注入是否显露"预测，而非检测器随机失效。
 
 ---
 

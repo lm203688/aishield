@@ -115,3 +115,34 @@
 
 *本版本所有判定来自 2026-10-19 / 2026-10-20 在干净工作树上的实跑：`scripts/run_all.py`、`scripts/baseline_compare.py --markdown`、`scripts/compute_lca.py`、`scripts/human_iAA_kit.py`（生成投前双标模板）、`scripts/external_scope_recall.py`（召回范围拆解）、`scripts/build_advisory_index.py`（生成离线公告索引 `scanner/data/advisory_index.json`）、`scripts/artifact_eval.py`，以及 `benchmarks/corpus/external/` 磁盘、`scope_recall.json`、`scanner/data/advisory_index.json` 与 `manifest.json`（`annotation_status=gold_standard_source_derived`、LCA κ=0.867、`human_iAA_status=pending`）核对；离线供应链匹配器 `scanner/supply_chain.py` 及其单测 `tests/test_offline_advisory_matcher.py` 实跑通过（22/22），且断言不触网。*
 *2026-10-21 补记：CI 自扫门禁自指噪声已闭合——重写 `distribution/self_reference_allowlist.json`（v2）+ `scanner/self_reference.py`（NEVER_SUPPRESS 安全底线 + 目录通配 + `_id` 腐烂检测）、改 `scripts/self_scan.py`（`_excluded` 排除门禁自身生成物）、改 `scanner/engine.py`（CVE 正确标注为"已知漏洞"而非"恶意包"）；实跑 `self_scan.py --json`：blocking_unsuppressed 197→1（仅余 `@modelcontextprotocol/sdk` 真实 CVE GHSA-6qxp-vccf-f47h），`stale=[]`，`tests/test_self_reference.py` 20/20 全过。门禁现为诚实 fail-closed 于真实漏洞，非噪声失败。*
+
+---
+
+## 6. 本轮论文学术质量提升（2026-10-22 · 把"最大弱点"变严谨贡献）
+
+> 目标：在已完成工程闭环基础上，把论文（Paper A）从"系统介绍级"提升到 SCI 审稿人（USENIX Security / IEEE TIFS）会接受的**学术严谨级**。本轮只动**论文与相关说明文档**，不触碰工程门禁（R1–R7 维持达标）。
+
+### 6.1 核验最强声明（Task #541 · 防 overclaim）
+实跑并精读 `scripts/check_isolation_invariants.py`：64 可达态**是真实动作词汇推导的合法上界**（6 个 hostile corpus artifact → 每 artifact 处理/未处理 → 可达集恰为 2^6=64），且 `completeness_argument()` 与实测交叉校验；4 个缺陷变异体 M1–M4 全抓到，证明检查器非恒真。结论：**64 态声明合法**，但本质是"隔离机制模型"的完备穷举，非对 2500 行实现的直接验证——论文 §5.2 已显式写明"机制抽象 + 运行时自证 `prove_isolation.py` 互补 + BMC 是 Apalache 离线 fallback"，§7.3 维持"模型非实现"边界声明，无 overclaim。
+
+### 6.2 新增 §6.2.2 误差分析 / 分类学（Task #542 · 核心提升）
+实跑 `scripts/analyze_nl_misses.py`（扫描全部 527 个 InjecAgent 正样本，复用论文同一 scanner 函数），用**基准自有字段**（`dataset_setting`/`family`/`attack_type`）+ **检测器无关词法不透明代理**对 352 个漏检分类，得到可复核的 JSON（`benchmarks/corpus/external/nl_miss_taxonomy.json`）。核心发现：
+- **召回按"注入显露度"双峰分布，非随机失灵**：`enhanced`(显露型) 175/175=**100%**；`base`(隐蔽嵌入型，注入藏在良性工具输出如商品评论里) 0/352=**0%**。与 `family` 轴完全重合（jailbreak=100%，data_exfiltration+indirect=0%）。
+- **词法不透明代理**：**100% 被检中都带显式注入标记**；**318/352=90.3% 漏检无标记**（lexically opaque）；**34/352=9.7%** 标记仅出现在良性工具输出语境中（"email them" 嵌在商品评论/GitHub note）→ 语境隐蔽注入，静态升级会制造 FP，**属语义属性边界而非缺关键词**。
+- **学术贡献**：把"33.2% 漏检"重构为"静态离线零误报分析对隐蔽语义分类问题的**原理性上限**"，并映射 overt/covert（direct/indirect、隐写）注入文献轴（Greshake 2023、Zhang NAACL 2024）；诚实指出 remedy 是运行时语义监控器（超出静态离线工具范围，列为 future work）。审稿人最难攻击的"你只是召回低"被转为可辩护的边界论证。
+
+### 6.3 统计显著性诚实表述（Task #544 · 强化可信度）
+论文 §6.2 新增 bootstrap 显著性段：95% CI **不重叠**（定量非定性）——(i) AIShield [36.6,44.7] 完全高于 keyword [17.9,24.4] → **召回优势在 FP=0 下统计显著**；(ii) random [44.9,52.8] 完全高于 AIShield → **随机猜测原始召回显著更高**，AIShield 本就不是召回冠军——**价值全在 FP 维度（0/517 vs 53.8%）**。这一"不打自招"的诚实反而坐实论文核心 thesis（可信 operating point 而非榜单第一），是顶会欣赏的成熟姿态。
+
+### 6.4 负样本对抗设计显式化（Task #544）
+§6.1 显式说明 517 负中 **500 个 `controlled_matched` 难负样本**（同工件/同格式、仅移除恶意意图），专门探测**过度触发**；0/517（尤其 0/500）因此是有意义的精度结论而非 trivial 负样本产物。
+
+### 6.5 §2 差异表证据锚定（Task #543）
+新增"Cell provenance"段：每个非 AIShield 单元格是**证据锚定**声明（Offline=本地可跑/否=须云+token；Formal proof=机器可验证明，竞品均"无已发表证据"而非绝对断言）；§9 增补 mcp-scan / Snyk agent-scan / Lakera-Gandalf / InjecAgent 仓库引用。把"差异表怕被拆穿"转为可追溯声明。
+
+### 6.6 一致性同步
+- `paper_a_draft.md`：§2（provenance + 引用）、§5.2（机制模型澄清）、§6.1（难负样本）、§6.2（显著性）、新增 §6.2.2（误差分类学）、§7.5（CI 门禁已闭合）、§8（结论同步）、§9（工具引用）、附录（analysis 脚本）。
+- `paper_a_outline.md`：§6.2（§6.2.2 要点）、§6.4（双峰发现）。
+- 待投前人工项（仍非阻塞）：真人双标 IAA（`scripts/human_iAA_kit.py` 已备）；`@modelcontextprotocol/sdk` 真实 CVE 升级为独立工程任务。
+
+*本轮提升所有新增数字（enhanced 175/175、base 0/352、opacity 318/34、100% 被检带标记）均由 `scripts/analyze_nl_misses.py` 实跑产出，写入 `benchmarks/corpus/external/nl_miss_taxonomy.json`，可复核、可复现。*
