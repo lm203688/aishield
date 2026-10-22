@@ -7,26 +7,14 @@
     "problems": [
       "M2 运行活性: 0 个任务超期未执行，2 个最近运行失败（ci.yml、closed-loop-spine.yml） —— 这是静默失效的典型信号",
       "M3 状态新鲜度: 状态域 ['intel', 'rules', 'flywheel', 'feature', 'ci'] 的归属 workflow 超过阈值未成功运行 —— 对应环节可能已停摆；且状态文件自身超期未刷新：intel(7d)、rules(7d)、flywheel(7d) —— 链路在跑但状态没落地（artifact 路径/git add 名单是首要嫌疑）；共同根因：closed-loop-spine.yml 最近一次运行失败，4 个域共用该归属（intel、rules、flywheel、feature）—— 先修这一处，不必逐个排查各子系统",
-      "M7 上游情报源: 上游情报源异常：情报库已 173h 未成功更新"
+      "M7 上游情报源: 上游情报源异常：情报库已 180h 未成功更新"
     ],
-    "checked_at": "2026-10-22T13:45:11.302015+00:00",
+    "checked_at": "2026-10-22T20:05:16.095776+00:00",
     "_source": "meta_monitor",
-    "_ts": "2026-10-22T13:45:11.302345+00:00",
+    "_ts": "2026-10-22T20:05:16.096122+00:00",
     "level": "degraded"
   },
   "history": [
-    {
-      "ts": "2026-10-09T20:52:11.526722+00:00",
-      "source": "meta_monitor",
-      "state": {
-        "score": 100,
-        "passed": 10,
-        "total": 10,
-        "problems": [],
-        "checked_at": "2026-10-09T20:52:11.526482+00:00",
-        "level": "healthy"
-      }
-    },
     {
       "ts": "2026-10-10T05:47:51.366427+00:00",
       "source": "meta_monitor",
@@ -775,8 +763,24 @@
         "checked_at": "2026-10-22T13:45:11.302015+00:00",
         "level": "degraded"
       }
+    },
+    {
+      "ts": "2026-10-22T20:05:16.096135+00:00",
+      "source": "meta_monitor",
+      "state": {
+        "score": 67,
+        "passed": 6,
+        "total": 9,
+        "problems": [
+          "M2 运行活性: 0 个任务超期未执行，2 个最近运行失败（ci.yml、closed-loop-spine.yml） —— 这是静默失效的典型信号",
+          "M3 状态新鲜度: 状态域 ['intel', 'rules', 'flywheel', 'feature', 'ci'] 的归属 workflow 超过阈值未成功运行 —— 对应环节可能已停摆；且状态文件自身超期未刷新：intel(7d)、rules(7d)、flywheel(7d) —— 链路在跑但状态没落地（artifact 路径/git add 名单是首要嫌疑）；共同根因：closed-loop-spine.yml 最近一次运行失败，4 个域共用该归属（intel、rules、flywheel、feature）—— 先修这一处，不必逐个排查各子系统",
+          "M7 上游情报源: 上游情报源异常：情报库已 180h 未成功更新"
+        ],
+        "checked_at": "2026-10-22T20:05:16.095776+00:00",
+        "level": "degraded"
+      }
     }
   ],
-  "updated": "2026-10-22T13:45:11.302360+00:00",
+  "updated": "2026-10-22T20:05:16.096139+00:00",
   "desc": "元监控：自动化体系自身的健康度"
 }
