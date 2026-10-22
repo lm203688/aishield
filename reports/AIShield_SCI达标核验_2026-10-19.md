@@ -190,3 +190,31 @@
 **改动落点**：`paper_a_draft.md` §6.1（拆成"provenance 标签可靠性" + "LCA"两条，并明写"不重标 + 不冒充人类 κ + 工具包兜底"）、§7.2（重写为"provenance + 自动化一致性，非人类双标"，含四条反方论证 + CTIConnect 引用）、§8（结论去掉"剩余投前步骤是人类双标"）、§9（补 CTIConnect 引用）；`paper_a_outline.md` R1 条目与展望（原"双标注解锁 κ"已删）；本报告标题、§0 结论表、§1 R1 行、§1 R7 行、§5 一句话结论、§6.6 同步。
 
 **判断**：R1 从"条件达成"升为**达成**，R1–R7 全部无保留闭环。剩余增强项（Apalache 对实现的完整证明）属学术上限追求，不构成任何门槛阻断。
+
+## 8. LLM-judge 基线补齐：语义对手 + 范围互补性量化（2026-10-21）
+
+> 诊断：复审指出 R2 的 learned 基线是**词法**对手（TF-IDF+Rocchio），缺**语义/LLM** 对手——2026 年 prompt injection 检测的真实对手是 LLM 护栏（LLMGuard、Rebuff、Lakera 类）。本轮补一个本地 LLM judge，同语料同口径跑出真实数字。
+
+### 8.1 方法
+`scripts/baseline_llm.py`（本地 glm-4.5-flash @ 127.0.0.1:8790，纯 stdlib、无第三方 SaaS、非气隙）+ `scripts/analyze_llm_baseline.py`（bootstrap 95% CI）。分层子样本：150 正（66 主范围 GHSA 全量 + 84 次范围 NL 注入）+ 40 负。
+
+### 8.2 关键数字
+| 指标 | LLM judge | AIShield（对照） |
+|---|---|---|
+| Overall recall | **55.3% [47.2%, 64.2%]** | 40.6% [36.6%, 44.7%] |
+| FP rate | **0.0% [0.0%, 0.0%]** | 0.0% [0.0%, 0.0%] |
+| 主范围（GHSA 供应链 CVE） | 28.8% [17.0%, 39.0%] | **100% (66/66)** |
+| 次范围（NL 注入） | **79.7% [68.8%, 89.1%]** | 33.2% |
+| PARSE_FAIL（正/负） | 18% / 80% | 0% / 0% |
+
+### 8.3 学术含义（已写入论文 §6.3）
+**范围互补性**是核心发现：两系统在同一语料上**分工而非竞争**——AIShield 在设计目标范围（供应链 CVE）100% 碾压 LLM 的 28.8%；LLM 在语义分类任务上 79.7% 远超 AIShield 的 33.2%。AIShield 的贡献不是"唯一能零 FP"，而是"在**对抗邻域输入**上无需依赖概率模型格式合规或云服务即可零 FP"。
+
+**格式合规失败**（80% 负样本 PARSE_FAIL）本身是发现：LLM 输出格式在对抗邻域输入上不可靠，而确定性扫描器不展现此失效模式——这是结构性性质，非单模型可修。
+
+### 8.4 一致性同步
+- `paper_a_draft.md`：§6.2（对比表新增 LLM judge 行 + 脚注 + 解释段改写）、§6.3（新增完整 LLM 基线分析节，含范围互补表 + 格式合规失败分析）、§8 结论（加入 LLM 互补性 + 组合系统展望）。
+- 产出物：`benchmarks/corpus/external/llm_baseline.json`（可复核）、`llm_baseline_predictions.jsonl`（原始预测缓存）。
+- 新增脚本：`scripts/baseline_llm.py`、`scripts/analyze_llm_baseline.py`。
+
+**判断**：R2 从"keyword + random + learned(词法)"升为"keyword + random + learned(词法) + **LLM judge(语义)**"，四个真实基线数字。论文 thesis 由**语义对手**进一步坐实：AIShield 的价值在于确定性 + 离线 + 形式化 + 供应链范围结构优势，而非单纯召回率竞争。

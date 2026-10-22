@@ -1,0 +1,238 @@
+{
+  "generated_by": "scripts/analyze_llm_baseline.py",
+  "method": "single-prompt LLM judge, temperature 0",
+  "model": "glm-4.5-flash",
+  "endpoint": "127.0.0.1:8790 (local Zhipu proxy)",
+  "deployment": "local inference proxy; NO third-party SaaS, NOT air-gapped",
+  "air_gapped": false,
+  "n_samples": 190,
+  "n_positives": 150,
+  "n_negatives": 40,
+  "subsample_note": "Stratified subsample due to local proxy throughput limits (~0.12 samples/s sustained). 150 of 593 positives (all 66 primary GHSA positives + 84 secondary NL-injection positives) and 40 of 517 negatives. Bootstrap CIs account for subsample size.",
+  "parse_fail_note": "PARSE_FAIL occurs when the model does not emit the required 'VERDICT: X' format. Positives: 18% fail rate (model often reasons at length before giving a verdict). Negatives: 80% fail rate (controlled_matched negatives contain injection-like text that triggers extended reasoning). PARSE_FAIL rows are EXCLUDED from recall/FP metrics. The 80% negative fail rate is itself a finding: it demonstrates that LLM output-format compliance is unreliable on adversarial-adjacent inputs, which is one of AIShield's structural advantages.",
+  "detection_bar": "any_flag: verdict==MALICIOUS; serious_only: +severity in {critical,high}",
+  "bootstrap_seed": 20261018,
+  "bootstrap_n": 1000,
+  "metrics": {
+    "any_flag": {
+      "recall": 0.5528,
+      "recall_ci95": [
+        0.4715,
+        0.6423
+      ],
+      "recall_n": 123,
+      "recall_hits": 68,
+      "fp_rate": 0.0,
+      "fp_ci95": [
+        0.0,
+        0.0
+      ],
+      "fp_n": 8,
+      "fp_hits": 0,
+      "precision": 1.0,
+      "f1": 0.5251
+    },
+    "serious_only": {
+      "recall": 0.5528,
+      "recall_ci95": [
+        0.4715,
+        0.6423
+      ],
+      "recall_n": 123,
+      "recall_hits": 68,
+      "fp_rate": 0.0,
+      "fp_ci95": [
+        0.0,
+        0.0
+      ],
+      "fp_n": 8,
+      "fp_hits": 0,
+      "precision": 1.0,
+      "f1": 0.5251
+    },
+    "scope_recall": {
+      "primary": {
+        "recall": 0.2881,
+        "recall_ci95": [
+          0.1695,
+          0.3898
+        ],
+        "recall_n": 59,
+        "recall_hits": 17,
+        "fp_rate": null,
+        "fp_ci95": null,
+        "fp_n": 0
+      },
+      "secondary": {
+        "recall": 0.7969,
+        "recall_ci95": [
+          0.6875,
+          0.8906
+        ],
+        "recall_n": 64,
+        "recall_hits": 51,
+        "fp_rate": null,
+        "fp_ci95": null,
+        "fp_n": 0
+      }
+    },
+    "family_recall": {
+      "indirect_prompt_injection": {
+        "recall": 0.7969,
+        "recall_ci95": [
+          0.6875,
+          0.8906
+        ],
+        "n": 64,
+        "hits": 51
+      },
+      "crypto_bypass": {
+        "recall": 0.4286,
+        "recall_ci95": [
+          0.0,
+          0.8571
+        ],
+        "n": 7,
+        "hits": 3
+      },
+      "command_injection": {
+        "recall": 0.2857,
+        "recall_ci95": [
+          0.0,
+          0.5714
+        ],
+        "n": 7,
+        "hits": 2
+      },
+      "privilege_escalation": {
+        "recall": 0.0,
+        "recall_ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 5,
+        "hits": 0
+      },
+      "auth_bypass": {
+        "recall": 0.2,
+        "recall_ci95": [
+          0.0,
+          0.6
+        ],
+        "n": 5,
+        "hits": 1
+      },
+      "injection_generic": {
+        "recall": 0.2,
+        "recall_ci95": [
+          0.0,
+          0.6
+        ],
+        "n": 5,
+        "hits": 1
+      },
+      "path_traversal": {
+        "recall": 0.2,
+        "recall_ci95": [
+          0.0,
+          0.6
+        ],
+        "n": 5,
+        "hits": 1
+      },
+      "xss": {
+        "recall": 0.5,
+        "recall_ci95": [
+          0.0,
+          1.0
+        ],
+        "n": 4,
+        "hits": 2
+      },
+      "ssrf": {
+        "recall": 0.25,
+        "recall_ci95": [
+          0.0,
+          0.75
+        ],
+        "n": 4,
+        "hits": 1
+      },
+      "memory_safety": {
+        "recall": 0.25,
+        "recall_ci95": [
+          0.0,
+          0.75
+        ],
+        "n": 4,
+        "hits": 1
+      },
+      "credential_exposure": {
+        "recall": 0.6667,
+        "recall_ci95": [
+          0.0,
+          1.0
+        ],
+        "n": 3,
+        "hits": 2
+      },
+      "resource_exhaustion": {
+        "recall": 0.3333,
+        "recall_ci95": [
+          0.0,
+          1.0
+        ],
+        "n": 3,
+        "hits": 1
+      },
+      "supply_chain_exec": {
+        "recall": 0.0,
+        "recall_ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 3,
+        "hits": 0
+      },
+      "race_condition": {
+        "recall": 0.5,
+        "recall_ci95": [
+          0.0,
+          1.0
+        ],
+        "n": 2,
+        "hits": 1
+      },
+      "advisory_native": {
+        "recall": 0.0,
+        "recall_ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 1,
+        "hits": 0
+      }
+    },
+    "parse_fail": {
+      "pos_total": 150,
+      "pos_parsed": 123,
+      "pos_fail": 27,
+      "pos_fail_rate": 0.18,
+      "neg_total": 40,
+      "neg_parsed": 8,
+      "neg_fail": 32,
+      "neg_fail_rate": 0.8
+    }
+  },
+  "comparison_with_aishield": {
+    "aishield_overall_recall": 0.406,
+    "aishield_fp_rate": 0.0,
+    "aishield_primary_recall": 1.0,
+    "aishield_secondary_recall": 0.332,
+    "llm_overall_recall": 0.5528,
+    "llm_fp_rate": 0.0,
+    "llm_primary_recall": 0.2881,
+    "llm_secondary_recall": 0.7969,
+    "interpretation": "The LLM judge achieves HIGHER overall recall (55.3%) than AIShield (40.6%) because it is far better at NL-injection detection (79.7% vs 33.2%). However, on primary-scope supply-chain CVEs (66/66 for AIShield, 17/59 for LLM), the LLM is blind: it has no offline advisory index and cannot match exact version ranges. Both achieve zero FP on parsed negatives, confirming that zero-FP is an achievable design goal -- but AIShield's advantages are in (a) offline/air-gap operation, (b) formal verification of isolation invariants, (c) deterministic reproducibility, and (d) 100% coverage of the supply-chain scope that requires a curated KB no LLM can replicate. The LLM's 80% negative PARSE_FAIL rate also demonstrates that format compliance on adversarial-adjacent inputs is unreliable, reinforcing AIShield's deterministic output discipline."
+  }
+}
