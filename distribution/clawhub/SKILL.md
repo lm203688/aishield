@@ -39,7 +39,7 @@ AIShield against it **before** execution and block or warn based on the score.
    `SKILL.md` / `tool` definitions statically. Do NOT run `npx`, `pip`, shell
    scripts, or install-time hook scripts pulled from the target. The scan stays
    read-only inference.
-2. **Code never leaves the machine.** All 264 MCP / 291 Skill rules run locally
+2. **Code never leaves the machine.** All 313 MCP / 340 Skill rules run locally
    with zero third-party dependencies. The scanned artifact is never sent to any
    remote service.
 3. If the target cannot be scanned statically (requires auth / live endpoint),
