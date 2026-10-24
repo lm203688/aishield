@@ -60,6 +60,14 @@ after_head=""
 if [ -n "${DEPLOY_SHA:-}" ]; then
     after_head="$DEPLOY_SHA"
     log "代码由 runner tarball 投递，权威 sha=${after_head:0:8}"
+    # 【2026-10-24 修复】tarball 投递后磁盘必是最新代码，进程必是旧代码。
+    # 旧实现不在此处设 NEED_RESTART=1，依赖第 137 行「live_commit != disk_commit」
+    # 判断——但 live_commit 来自 health endpoint（读 .deploy_meta.json），
+    # disk_commit 也读 .deploy_meta.json，两者恒等，永不触发重启。
+    # 结果：代码上传到磁盘、.deploy_meta.json 更新、health 报新 commit，
+    # 但进程一直跑旧代码，所有新端点返回 404 或旧行为。
+    # 现改为：DEPLOY_SHA 注入即强制重启（tarball 已覆盖磁盘，重启无副作用）。
+    NEED_RESTART=1
 else
     fetch_ok=0
     if git fetch --all 2>/tmp/aishield-fetch.log; then
