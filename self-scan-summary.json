@@ -5,8 +5,8 @@
   "badge_level": "F",
   "report": {
     "totals": {
-      "findings": 286,
-      "suppressed": 159,
+      "findings": 289,
+      "suppressed": 161,
       "blocking_unsuppressed": 1
     },
     "sources": [
@@ -38,8 +38,8 @@
         "source": ".",
         "files": 59,
         "overall_score": 15,
-        "findings": 186,
-        "suppressed": 115,
+        "findings": 189,
+        "suppressed": 117,
         "blocking_unsuppressed": []
       },
       {
