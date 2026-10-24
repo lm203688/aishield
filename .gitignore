@@ -164,3 +164,4 @@ scripts/_rollback_crons.py
 # 导致 `git add -A` 整批失败。忽略之，不删除（可逆）。
 nul
 NUL
+outputs/
