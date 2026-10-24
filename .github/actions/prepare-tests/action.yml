@@ -113,7 +113,7 @@ runs:
         # 注意发行名与导入名不同：必须写 PyYAML（写 yaml 会装到 PyPI 上同名的无关包）。
         # 去掉 --quiet 是刻意的：这条命令是整套测试的前置闸门，装失败时必须能在
         # 日志里看清是哪一步、哪个包、什么错误 —— 静默模式会把诊断信息藏掉。
-        python -m pip install --disable-pip-version-check "cryptography==50.0.1" "PyYAML==6.0.3" "hypothesis==6.168.5"
+        python -m pip install --disable-pip-version-check "cryptography==50.0.1" "PyYAML==6.0.3" "hypothesis==6.168.5" "pytest==9.1.1"
         # 留痕：记录本次实际生效的版本，事后判断「为什么那天突然红了」时用。
         python -m pip freeze --disable-pip-version-check | \
           grep -E "^(cryptography|PyYAML|hypothesis)==" || true
