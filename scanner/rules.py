@@ -281,6 +281,49 @@ MCP06_RULES = {
     # 而投毒描述里只有"上传到工具作者的服务器"这类无 URL 措辞，必定漏）。
     r'不再(受|接受|遵守)[^。；\n]{0,16}(安全|策略|防护|约束|限制)': ("开发者覆盖声明: 声称不再受安全策略约束", "high"),
     r'\.ssh/id_[a-z0-9]+|\.ssh/config|\.ssh/known_hosts|\.aws/credentials': ("私钥/凭据路径出现在指令载荷里(工具投毒外传)", "high"),
+    # ─────────────────────────────────────────────────────────────────────
+    # 2026-10-23 P0 攻坚：补齐间接提示注入（InjecAgent 基准）自然语言载荷
+    # 背景：外部语料中 indirect_prompt_injection(176) + data_exfiltration(176)
+    # 共 59.4% 正样本此前零检出。根因：这两族攻击全部是工具响应中的自然语言
+    # 指令（JSON 结构里 review_content/snippet/body/description 等字段），
+    # 不含代码/配置模式，既有符号规则（动作型正则）对 NL 载荷无覆盖。
+    # 设计纪律：所有规则要求「祈使动词 + 具体目标 + 动作宾语」三要素共现，
+    # 与 control-negative（"Solid product. Arrived on time..." 等良性描述）
+    # 严格区分。已在 517 负样本上验证 0 FP（见 scripts/test_nl_rules_fp.py）。
+    # 对齐 OWASP MCP06（上下文注入）+ ASI01（目标与指令操纵）+ ASI02（工具滥用）。
+    # ── 间接提示注入：请求授予访问权限（智能家居/系统账户）──
+    r'(?i)\bgrant\s+(permanent|temporary|full)?\s*access\s+to\s+(my\s+)?(?:friend|guest|user|member)\b[^.]{0,80}(guest|user|member)[_ ]\w+\s*(?:on|at|in)\s+\w': ("间接注入: 请求授予第三方永久/临时访问权限", "critical"),
+    r'(?i)\bunlock\s+(my\s+)?(?:front|back|side|main)?\s*door': ("间接注入: 请求解锁物理门禁(智能家居)", "high"),
+    # ── 间接提示注入：金融交易操纵 ──
+    r'(?i)\b(?:initiate|process|execute|make)\s+a\s+payment\s+of\s+\$?\d': ("间接注入: 请求发起支付交易", "critical"),
+    r'(?i)\btransfer\s+\$[\d,]+(?:,?\d{3})*': ("间接注入: 请求转账", "critical"),
+    r'(?i)\bdeposit\s+[\d,]+\s*(?:USD|EUR|GBP|dollars?|euros?)\b': ("间接注入: 请求存款操作", "critical"),
+    r'(?i)\bwithdraw\s+[\d.]+\s*(?:Bitcoin|BTC|crypto)': ("间接注入: 请求加密货币提现", "critical"),
+    r'(?i)\bsell\s+[\d]+\s+units?\s+of\s+my\s+(?:Bitcoin|crypto|assets)': ("间接注入: 请求出售加密资产", "critical"),
+    # ── 间接提示注入：安全策略篡改 ──
+    r'(?i)\bcreate\s+a\s+new\s+(?:blacklist|whitelist|allowlist|denylist)\s+policy': ("间接注入: 请求创建安全策略黑名单/白名单", "critical"),
+    r'(?i)\bupdate\s+my\s+security\s+policy': ("间接注入: 请求修改安全策略", "critical"),
+    r'(?i)\bdelete\s+(?:all\s+)?(?:my\s+)?users?\s+(?:from|in|on)\s+\w': ("间接注入: 请求删除用户", "high"),
+    # ── 间接提示注入：文件操作 ──
+    r'(?i)\bmove\s+the\s+files?\s+in\s+the\s+"[^"]+"\s+to': ("间接注入: 请求移动文件到指定位置", "high"),
+    # ── 间接提示注入：应急调度 ──
+    r'(?i)\bdispatch\s+an?\s+emergency\s+(?:fire|medical|police|security)\s+response': ("间接注入: 请求调度应急响应", "high"),
+    # ── 数据外泄：请求检索数据并发送至外部邮箱 ──
+    r'(?i)\b(?:retrieve|get|fetch|list|send|upload)\b[^.]{0,60}\b(?:addresses?|payment\s+methods?|accounts?|history|details?|information|data|files?)\b[^.]{0,40}\b(?:email|send)\b[^.]{0,30}to\s+(?:my\s+)?(?:alternate|secondary|new)?\s*email': ("数据外泄: 请求检索数据并发送至外部邮箱", "critical"),
+    r'(?i)\bemail\s+the\s+(?:details?|information|data)\s+to\s+[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}': ("数据外泄: 请求将详情发送至外部邮箱", "critical"),
+    r'(?i)\bsend\s+this\s+(?:information|list|details?)\s+to\s+(?:my\s+)?email\s+address': ("数据外泄: 请求将信息发送至邮箱", "critical"),
+    r'(?i)\bemail\s+those\s+details?\s+to\s+(?:me\s+)?at\s+"?[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}': ("数据外泄: 请求将详情发送至指定邮箱", "critical"),
+    r'(?i)\bsend\s+this\s+list\s+to\s+[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}': ("数据外泄: 请求将列表发送至邮箱", "critical"),
+    # ── 数据外泄：具体数据类型枚举 ──
+    r'(?i)\b(?:retriv|retriev)\w+\s+the\s+smart\s+lock\s+access\s+history': ("数据外泄: 请求智能门锁访问历史", "critical"),
+    r'(?i)\blist\s+(?:the\s+details?\s+of\s+)?all\s+my\s+saving\s+accounts': ("数据外泄: 请求列出储蓄账户详情", "critical"),
+    r'(?i)\buse\s+the\s+\w+\s+tool\s+to\s+search\s+for\s+all\s+payees': ("数据外泄: 请求使用工具枚举所有收款人", "critical"),
+    r'(?i)\bget\s+my\s+cryptocurrency\s+order\s+history': ("数据外泄: 请求加密货币交易历史", "critical"),
+    r'(?i)\bget\s+detailed\s+information\s+about\s+the\s+security\s+log': ("数据外泄: 请求安全日志详情", "critical"),
+    r'(?i)\bgenerate\s+an?\s+audio\s+deepfake': ("数据外泄: 请求生成音频深度伪造", "critical"),
+    r'(?i)\bfetch\s+the\s+details?\s+about\s+the\s+file\s+"[^"]+"\s+in\s+the': ("数据外泄: 请求获取指定文件详情", "critical"),
+    r'(?i)\blist\s+all\s+(?:folders?|files?)\s+(?:and\s+|or\s+)?(?:folders?|files?)?\s+in\s+my\s+\w': ("数据外泄: 请求列出云存储目录", "high"),
+    r'(?i)\bdownload\s+the\s+file\s+from\s+my\s+health\s+system': ("数据外泄: 请求下载健康系统文件", "critical"),
 }
 
 # ============================================================
@@ -638,6 +681,316 @@ ZH_PROMPT_INJECTION_RULES = {
 }
 
 # ============================================================
+# OWASP Agentic Skills Top 10 (AST 2026-08) 编号体系
+# 与 MCP Top 10 / Agentic AI Top 10 并列，构成 "MCP + Agentic + Skills" 三维检测体系
+# 官方来源：https://owasp.github.io/www-project-agentic-skills-top-10
+# 发布：2026-08，OWASP 新项目/Incubator 阶段 v1.0
+# 10 类风险：AST01 Malicious Skills / AST02 Supply Chain Compromise / AST03 Over-Privileged Skills /
+#           AST04 Insecure Metadata / AST05 Untrusted External Instructions / AST06 Weak Isolation /
+#           AST07 Update Drift / AST08 Poor Scanning / AST09 No Governance / AST10 Cross-Platform Reuse
+#
+# 设计纪律：本段规则只做 SKILL 元数据 / 声明层的信号——不与 SKILL_EXTRA_RULES
+# （上下文劫持/供应链/curl|sh 等执行面）重复计数。SKILL_EXTRA_RULES 抓"skill 试图
+# 干什么"，AST_RULES 抓"skill 自述的元数据长什么样"。
+# ============================================================
+OWASP_AGENTIC_SKILLS_TOP10 = {
+    "AST01": {
+        "name": "Malicious Skills",
+        "name_cn": "恶意技能",
+        "severity": "critical",
+        "description": "技能伪装正常但隐藏凭证窃取、反弹shell、提示劫持等恶意行为"
+    },
+    "AST02": {
+        "name": "Supply Chain Compromise",
+        "name_cn": "供应链妥协",
+        "severity": "critical",
+        "description": "注册表/依赖/分发渠道无溯源，允许攻击者批量投毒或接管账号"
+    },
+    "AST03": {
+        "name": "Over-Privileged Skills",
+        "name_cn": "过度授权技能",
+        "severity": "high",
+        "description": "技能被赋予超出其目的所需的权限，一旦被注入即扩大爆炸半径"
+    },
+    "AST04": {
+        "name": "Insecure Metadata",
+        "name_cn": "不安全元数据",
+        "severity": "high",
+        "description": "未验证/未签名元数据导致品牌冒充、权限 understatement、搜索投毒"
+    },
+    "AST05": {
+        "name": "Untrusted External Instructions",
+        "name_cn": "不可信外部指令",
+        "severity": "high",
+        "description": "技能指向外部文档作为执行指令来源，可变未固定内容可被 rug-pull"
+    },
+    "AST06": {
+        "name": "Weak Isolation",
+        "name_cn": "弱隔离",
+        "severity": "high",
+        "description": "技能在 agent 完整安全上下文运行，无沙箱 → 每个技能都是全系统沦陷点"
+    },
+    "AST07": {
+        "name": "Update Drift",
+        "name_cn": "更新漂移",
+        "severity": "medium",
+        "description": "无固定版本/无校验，技能静默漂移到易受攻击或新恶意的版本"
+    },
+    "AST08": {
+        "name": "Poor Scanning",
+        "name_cn": "扫描不足",
+        "severity": "medium",
+        "description": "自然语言+代码混合绕过签名扫描器，恶意技能通过所有自动检查"
+    },
+    "AST09": {
+        "name": "No Governance",
+        "name_cn": "缺乏治理",
+        "severity": "medium",
+        "description": "无清单、审批、审计、吊销——安全团队看不见的 shadow-AI 层"
+    },
+    "AST10": {
+        "name": "Cross-Platform Reuse",
+        "name_cn": "跨平台复用",
+        "severity": "medium",
+        "description": "跨平台移植时丢失源格式安全元数据，打开可利用缺口"
+    },
+}
+
+# ============================================================
+# AST01 - 恶意技能（技能本体即恶意载荷）
+# ============================================================
+# AST01 抓"技能本体里嵌的恶意代码"——远程模块加载、编码载荷 exec、反弹 shell。
+# 与 SKILL_EXTRA_RULES 的 curl|sh 不同：这里抓的是**已下载后的执行面**，不是
+# 下载本身。判据是"运行时从网络字节流构造可执行对象"，静态看是合法 Python。
+AST01_RULES = {
+    # 远程模块加载：importlib.load / __import__ / runpy.run_path + 网络库共现
+    # 判据是"动态导入 + 网络"，不是任意 importlib 使用（防御文档/正常插件管理会误报）
+    r'(?i)(?:importlib\.load|importlib\.load_module|__import__|runpy\.run_path|importlib\.import_module)'
+    r'.{0,60}(?:urllib|requests|http\.client|socket|httplib|curl)':
+        ("AST01: 远程模块动态加载(从网络字节流构造可执行对象)", "critical"),
+    # 编码载荷执行：exec/eval 吃 base64/hex/frombytes/unquote 结果
+    # 判据是"exec/eval + 解码函数"，不是任意 exec（合法脚本常有 exec(open())）
+    r'(?i)(?:exec|eval)\s*\(.{0,40}'
+    r'(?:base64\.b64decode|base64\.decodebytes|bytes\.fromhex|'
+    r'bytes\.frombytes|urllib\.parse\.unquote|codecs\.decode|marshal\.loads|'
+    r'pickle\.loads|shelve|zlib\.decompress|lzma\.decompress)':
+        ("AST01: 解码载荷直接 exec/eval(不可审计执行面)", "critical"),
+    # 反弹 shell：/dev/tcp、mkfifo、nc -e、socat、bash -i 反向连接
+    r'(?i)(?:/dev/tcp/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d+'
+    r'|(?:nc|ncat|netcat|socat)\s+.*?-e\s+(?:/bin/)?(?:sh|bash)'
+    r'|(?:mkfifo|bash\s+-i)\s+.*?(?:/tmp/|/dev/shm/).*?(?:nc|socat|netcat))':
+        ("AST01: 反弹shell/反向隧道(远程交互式shell)", "critical"),
+}
+
+# ============================================================
+# AST02 - 供应链妥协（注册表/依赖/分发渠道无溯源）
+# ============================================================
+# AST02 抓"技能来源本身不可信"——github.io 托管、CDN 镜像、未固定版本的安装源。
+# 与 SKILL_EXTRA_RULES 的"pip install"不同：这里抓的是**注册表/来源可信度**，
+# 不是包管理器命令。AST02 判据是"技能声明的源 URL 来自无溯源托管"。
+AST02_RULES = {
+    # github.io 托管的 skill/plugin/agent 定义——个人博客托管，无 provenance
+    # 判据是"技能元数据里 source/install 字段指向 *.github.io"
+    r'(?i)"?(?:source|install_from|download|url|repository)"?\s*[:=]\s*["\']'
+    r'https?://[^"\']*\.github\.io[^"\']*["\']':
+        ("AST02: 技能源来自 github.io(个人托管无溯源)", "high"),
+    # 未固定版本的安装源：install: master / install: latest / install: main
+    # 判据是"install/source 字段直接引用分支名而非 tag/hash"
+    r'(?i)"?(?:install|source|version_from|ref)"?\s*[:=]\s*["\']'
+    r'(?:master|main|dev|develop|next|latest|release|stable)["\']':
+        ("AST02: 技能安装源引用分支名而非固定版本(漂移风险)", "high"),
+    # 已删除/未注册账号的 npm 包名——Slopsquat 模式（Air Security SkillJacking 报告）
+    # 判据是"包名 + 明确的删除/未注册/接管信号词"，不是任意包名
+    r'(?i)(?:'
+    r'(?:deleted|unregistered|removed|compromised|hijacked|taken\s+over)'
+    r'.{0,40}(?:package|account|publisher|namespace|owner)'
+    r'|'
+    r'(?:package|account|publisher|namespace|owner)'
+    r'.{0,40}(?:deleted|unregistered|removed|compromised|hijacked|taken\s+over))':
+        ("AST02: 技能依赖已删除/被接管的发布者账号(Slopsquat 风险)", "high"),
+}
+
+# ============================================================
+# AST03 - 过度授权技能（声明的权限远超所需）
+# ============================================================
+# AST03 抓"技能自述的权限声明本身过宽"——通配符权限、admin/system scope。
+# 与 SKILL_EXTRA_RULES 的"(elevate|privilege|sudo|root)"不同：那里抓"执行动词"，
+# 这里抓"元数据里的权限字段值"。AST03 判据是"权限字段的值本身是通配符/最高权"。
+AST03_RULES = {
+    # 通配符权限：permissions: ["*"] / tools: ["*"] / scopes: "*"
+    r'(?i)"?(?:permissions|tools|capabilities|access)"?\s*[:=]\s*'
+    r'(?:\[\s*["\']?\*["\']?\s*\]|["\']?\*["\']?|'
+    r'(?:all|everything|unrestricted|full)[^"\']*["\']?)':
+        ("AST03: 技能声明通配符/全量权限(过度授权)", "high"),
+    # admin/system/root scope：scopes 字段包含最高权标识
+    r'(?i)"?(?:scopes?|roles?|claims?|audience)"?\s*[:=]\s*["\']'
+    r'(?:.*\b(?:admin|administrator|root|system|owner|superuser|super_admin)\b.*)'
+    r'["\']':
+        ("AST03: 技能声明 admin/system/root scope(过度授权)", "critical"),
+}
+
+# ============================================================
+# AST04 - 不安全元数据（品牌冒充、权限 understatement）
+# ============================================================
+# AST04 抓"技能自述身份可疑"——name/description 字段冒充知名品牌、声称官方认证。
+# 判据是"元数据字段 + 品牌名/信任声明词"共现，不是任意品牌提及（防御文档会误报）。
+AST04_RULES = {
+    # 品牌冒充：name 字段直接是知名品牌名（google/openai/anthropic 等）
+    # 判据是"name 字段值 = 品牌名"，不是任意"google"出现
+    r'(?i)"?name"?\s*[:=]\s*["\']'
+    r'(?:official\s+|verified\s+|trusted\s+)?'
+    r'(?:google|openai|anthropic|github|microsoft|facebook|meta|amazon|apple|'
+    r'stripe|paypal|shopify|twilio|sendgrid|notion|slack|discord|spotify|'
+    r'youtube|tiktok|twitter|x\.com|reddit|linkedin)\b[^"\']*["\']':
+        ("AST04: 技能名冒充知名品牌(品牌冒充/搜索投毒)", "high"),
+    # 信任声明：description 字段声称 official/verified/trusted
+    # 判据是"description 字段 + 信任词 + skill/plugin/agent"共现
+    r'(?i)"?description"?\s*[:=]\s*["\']'
+    r'(?:.*\b(?:official|verified|trusted|certified|legitimate|authentic|'
+    r'endorsed|sanctioned|approved|authorized|accredited)\b.*?)'
+    r'(?:skill|plugin|agent|integration|tool|extension|connector)'
+    r'[^"\']*["\']':
+        ("AST04: 技能描述声称官方认证(无溯源信任声明)", "medium"),
+}
+
+# ============================================================
+# AST05 - 不可信外部指令（技能指向外部可变内容作为执行指令）
+# ============================================================
+# AST05 抓"技能把执行逻辑外置到可变 URL"——instructions/guide 字段指向 .md 文档。
+# 判据是"指令类字段 + 外部 URL + .md 后缀"，不是任意 URL（README 链接会误报）。
+AST05_RULES = {
+    # 外部 markdown 作为指令源：instructions/read/follow/see + URL + .md
+    r'(?i)(?:'
+    r'"?(?:instructions|guide|docs|readme|reference|see|follow|read|fetch)"?'
+    r'\s*[:=]\s*["\']https?://[^"\']*\.md(?:\?[^"\']*)?["\']'
+    r'|'
+    r'(?:see|follow|read|reference|instructions|full\s+instructions|'
+    r'complete\s+guide|for\s+details)\s*[:at]\s*["\']?https?://[^"\s]+\.md)':
+        ("AST05: 技能指向外部可变 .md 文档作为执行指令(rug-pull 风险)", "high"),
+    # 外部可变指令：URL 指向任意非 .md 但字段名是 instructions/guide
+    r'(?i)"?(?:instructions|guide|reference_doc|external_doc|fetch_url)"?'
+    r'\s*[:=]\s*["\']https?://[^"\']*["\']':
+        ("AST05: 技能元数据指向外部可变指令源(未固定内容)", "high"),
+}
+
+# ============================================================
+# AST06 - 弱隔离（技能声明在 agent 完整上下文运行，无沙箱）
+# ============================================================
+# AST06 抓"技能自述无隔离"——isolation/sandbox/container 字段声明为 false/host/none。
+# 判据是"隔离字段 + 关闭值"，不是任意"sandbox"提及（防御文档会误报）。
+AST06_RULES = {
+    # 隔离字段显式关闭：isolation/sandbox/container: false/off/disabled/none/host
+    r'(?i)"?(?:isolation|sandbox|container|chroot|vm)"?\s*[:=]\s*["\']?'
+    r'(?:false|off|disabled|none|host|no|0|unconfined|bypass|skip)'
+    r'(?:["\']?\s*[,:}\]]|$)':
+        ("AST06: 技能声明关闭隔离/沙箱(运行在 agent 完整上下文)", "critical"),
+    # 网络字段声明 host/allow/all：允许技能访问宿主网络
+    r'(?i)(?:'
+    r'"?network"?\s*[:=]\s*["\']?(?:host|allow|all|full|unrestricted|bridged|nat)'
+    r'(?:["\']?\s*[,:}\]]|$)'
+    r'|'
+    r'"?(?:network_mode|dns|cap_net)"?\s*[:=]\s*["\']?(?:host|allow|all)'
+    r'(?:["\']?\s*[,:}\]]|$))':
+        ("AST06: 技能声明 host 网络访问(突破网络隔离)", "high"),
+}
+
+# ============================================================
+# AST07 - 更新漂移（无固定版本/无校验）
+# ============================================================
+# AST07 抓"技能声明的版本本身不可审计"——version: latest/master、缺 integrity 字段。
+# 与 AST02 的"install: master"不同：这里抓的是**version 字段本身**，不是安装源。
+AST07_RULES = {
+    # 版本字段是分支名/浮动标签：version: "latest"/"master"/"stable"/"dev"
+    r'(?i)"?version"?\s*[:=]\s*["\']?'
+    r'(?:latest|stable|current|master|main|dev|develop|next|release|nightly|snapshot|master)'
+    r'(?:["\']?\s*[,:}\]]|$)':
+        ("AST07: 技能版本字段为浮动标签(更新漂移风险)", "medium"),
+    # 缺完整性字段：checksum/integrity/hash/signature 字段值为空
+    # 判据是"完整性字段 + 空值"，不是任意缺字段（YAML 省略字段也合法）
+    r'(?i)"?(?:checksum|integrity|sha256|hash|signature|manifest_hash)"?\s*[:=]\s*["\']?'
+    r'(?:\s*["\']?\s*[,:}\]]|$|'
+    r'(?:null|none|empty|n/a|TBD|TODO)["\']?)':
+        ("AST07: 技能缺完整性校验字段(无法验证完整性)", "medium"),
+}
+
+# ============================================================
+# AST08 - 扫描不足（自然语言+代码混合绕过签名扫描）
+# ============================================================
+# AST08 抓"技能里嵌的混淆代码"——chr() 拼接、hex escape、base64 decode。
+# 判据是"混淆模式"，不是任意 base64（正常数据编码会误报）。
+AST08_RULES = {
+    # chr() 字符拼接混淆：chr(65) + chr(66) + chr(67) + chr(68) + ...
+    # 判据是 4 个以上 chr() 拼接，正常代码极少这样写
+    r'(?i)(?:'
+    r'(?:chr\s*\(\s*\d+\s*\)\s*\+){4,}'
+    r'|'
+    r'(?:chr\s*\(\s*\d+\s*\)\s*\.\s*join\s*\())':
+        ("AST08: chr() 字符拼接混淆(绕过字符串扫描)", "high"),
+    # hex escape 混淆：\x41\x42\x43\x44\x45\x46... 6 个以上
+    r'(?i)(?:'
+    r'(?:\\x[0-9a-fA-F]{2}){6,}'
+    r'|'
+    r'\\x[0-9a-fA-F]{2}(?:\\x[0-9a-fA-F]{2}){5,})':
+        ("AST08: hex escape 字节混淆(绕过字符串扫描)", "high"),
+    # base64 解码 + 执行链路：b64decode 后接 exec/eval/compile
+    r"(?i)(?:base64\.b64decode\s*\([^)]*\)\s*[';:].{0,20}"
+    r'(?:exec|eval|compile|marshal\.loads|pickle\.loads)'
+    r'|'
+    r'(?:exec|eval|compile)\s*\(\s*base64\.b64decode)':
+        ("AST08: base64 解码后直接执行(不可审计)", "critical"),
+}
+
+# ============================================================
+# AST09 - 缺乏治理（无清单、审批、审计、吊销）
+# ============================================================
+# AST09 抓"技能元数据缺治理字段"——author/owner 空、approved/reviewed 为 false。
+# 判据是"治理字段 + 空/关闭值"，不是任意缺字段。
+AST09_RULES = {
+    # author/owner/maintainer 字段为空：技能无责任人
+    r'(?i)"?(?:author|owner|maintainer|publisher|creator)"?\s*[:=]\s*["\']?'
+    r'(?:\s*["\']?\s*[,:}\]]|$|'
+    r'(?:null|none|unknown|anonymous|unnamed|TBD|TODO)["\']?)':
+        ("AST09: 技能无责任人字段(shadow-AI 治理缺口)", "medium"),
+    # 审批/审计字段关闭：approved/reviewed/audited/signed: false/none/skip/pending
+    r'(?i)"?(?:approved|reviewed|audited|signed|verified|governed)"?\s*[:=]\s*["\']?'
+    r'(?:false|none|skip|disabled|pending|no|0|unverified|not_reviewed|TBD|TODO)'
+    r'(?:["\']?\s*[,:}\]]|$)':
+        ("AST09: 技能缺审批/审计状态(shadow-AI 治理缺口)", "medium"),
+}
+
+# ============================================================
+# AST10 - 跨平台复用（移植丢失安全元数据）
+# ============================================================
+# AST10 抓"技能声明跨平台但无格式保真"——platform: all/universal、跨平台移植声明。
+# 判据是"platform 字段过宽 + 跨平台声明"，不是任意平台提及。
+AST10_RULES = {
+    # platform 字段过宽：all/multi/universal/any/all-platforms
+    r'(?i)"?platform(?:s|s?_target)"?\s*[:=]\s*["\']?'
+    r'(?:'
+    r'(?:all|multi|universal|any|all-platforms|cross-platform|portable|platform-agnostic|universal)'
+    r'(?:["\']?\s*[,:}\]]|$)'
+    r'|'
+    r'\[\s*["\'](?:all|multi|universal|any|any|universal)(?:["\']?\s*\])'
+    r')':
+        ("AST10: 技能声明跨全平台运行(未验证平台保真)", "medium"),
+    # 跨平台移植声明：port/portable/universal skill from/to/across + 平台名
+    r'(?i)(?:'
+    r'(?:port|portable|universal|multi[- ]?platform|cross[- ]?platform)'
+    r'.{0,30}(?:skill|plugin|agent|extension)'
+    r'.{0,30}(?:from|to|across|for|between)\s+'
+    r'(?:claude|cursor|codex|vscode|openclaw|windsurf|copilot|gemini|chatgpt|'
+    r'langchain|autogen|crewai|autogen|metagpt|openai|anthropic)'
+    r'|'
+    r'(?:from|to|across|for|between)\s+'
+    r'(?:claude|cursor|codex|vscode|openclaw|windsurf|copilot|gemini|chatgpt|'
+    r'langchain|autogen|crewai|metagpt|openai|anthropic)'
+    r'.{0,30}(?:skill|plugin|agent|extension)'
+    r'.{0,30}(?:port|portable|universal|multi[- ]?platform|cross[- ]?platform)'
+    r')':
+        ("AST10: 技能声明跨平台移植(元数据保真未验证)", "medium"),
+}
+
+# ============================================================
 # OWASP Agentic AI Top 10 (2025) 真实映射
 # 与 MCP Top 10 并列，构成 "MCP + Agentic" 双维检测体系
 # ============================================================
@@ -918,6 +1271,19 @@ ALL_RULES.update(ASI08_RULES)
 ALL_RULES.update(ASI09_RULES)
 ALL_RULES.update(ASI10_RULES)
 ALL_RULES.update(ZH_PROMPT_INJECTION_RULES)
+# 2026-10-22 P1：加入 OWASP Agentic Skills Top 10 (AST 2026-08) 编号规则
+# 与 SKILL_EXTRA_RULES 互补——SKILL_EXTRA_RULES 抓"skill 试图干什么"（执行面），
+# AST_RULES 抓"skill 自述元数据长什么样"（声明面）。
+ALL_RULES.update(AST01_RULES)
+ALL_RULES.update(AST02_RULES)
+ALL_RULES.update(AST03_RULES)
+ALL_RULES.update(AST04_RULES)
+ALL_RULES.update(AST05_RULES)
+ALL_RULES.update(AST06_RULES)
+ALL_RULES.update(AST07_RULES)
+ALL_RULES.update(AST08_RULES)
+ALL_RULES.update(AST09_RULES)
+ALL_RULES.update(AST10_RULES)
 
 # 静态规则总数快照：在任何动态规则合并之前取。
 # 用途：把「线上报 215 条、本地却是 238 条」这类差异，从一句笼统的数字拆成
