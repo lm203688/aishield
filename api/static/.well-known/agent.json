@@ -2,7 +2,7 @@
   "$schema": "https://agents.well-known.dev/v1",
   "name": "AIShield",
   "service_version": "4.11.0",
-  "description": "Open-source, local-first AI Agent security scanner and trust authority for the MCP / Agentic AI economy. OWASP MCP Top 10 + OWASP Agentic AI Top 10 (ASI01-ASI10) aligned, 264 MCP rule categories / 291 skill rule categories. Static analysis only - it never spawns or executes the configuration it scans.",
+  "description": "Open-source, local-first AI Agent security scanner and trust authority for the MCP / Agentic AI economy. OWASP MCP Top 10 + OWASP Agentic AI Top 10 (ASI01-ASI10) aligned, 313 MCP rule categories / 340 skill rule categories. Static analysis only - it never spawns or executes the configuration it scans.",
   "url": "https://aishield.tools",
   "category": "Agent 安全 / MCP Security",
   "language": "en",
@@ -136,11 +136,11 @@
     "OWASP Agentic AI Top 10 (ASI01-ASI10)"
   ],
   "rules": {
-    "total": 264,
-    "static": 237,
+    "total": 313,
+    "static": 286,
     "generated": 8,
     "radar": 19,
-    "skill_categories": 291
+    "skill_categories": 340
   },
   "contact": "61960005@qq.com",
   "links": [
