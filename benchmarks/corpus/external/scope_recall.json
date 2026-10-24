@@ -1,90 +1,303 @@
 {
-  "generated_by": "scripts/external_scope_recall.py",
-  "bootstrap_seed": 20261018,
-  "bootstrap_n": 1000,
-  "detection_bar": "serious_only (>=1 critical/high finding)",
-  "overall": {
-    "label": "overall",
-    "positives": 593,
-    "detected": 241,
-    "recall": 0.4064,
-    "recall_ci95": [
-      0.3659,
-      0.4469
-    ]
+  "benchmark": "aishield-security-benchmark/v1",
+  "bootstrap": {
+    "alpha": 0.05,
+    "false_positive_rate_ci": {
+      "alpha": 0.05,
+      "high": 0.0,
+      "low": 0.0,
+      "method": "percentile",
+      "n": 517,
+      "point": 0.0,
+      "resamples": 1000,
+      "seed": 20261018
+    },
+    "method": "percentile",
+    "recall_ci": {
+      "alpha": 0.05,
+      "high": 0.9612,
+      "low": 0.9224,
+      "method": "percentile",
+      "n": 593,
+      "point": 0.9427,
+      "resamples": 1000,
+      "seed": 20261018
+    },
+    "resamples": 1000,
+    "seed": 20261018
   },
-  "by_scope": [
-    {
-      "label": "primary",
-      "positives": 66,
-      "detected": 66,
-      "recall": 1.0,
-      "recall_ci95": [
-        1.0,
-        1.0
-      ]
+  "corpus": "external",
+  "external_summary": {
+    "corpus_available": true,
+    "detected": 559,
+    "false_positive_rate": 0.0,
+    "false_positives": 0,
+    "families_zero_detected": [],
+    "family_count": 18,
+    "negatives": 517,
+    "positives": 593,
+    "r1_status": {
+      "checks": {
+        "families_ge_15": {
+          "actual": 18,
+          "met": true,
+          "target": 15
+        },
+        "kappa_ge_0.8": {
+          "actual": 0.8673,
+          "met": true,
+          "note": "automated Label Consistency Audit (LCA) kappa between independent re-derivation and source ground-truth; NOT human inter-annotator agreement. Human IAA is the pre-submission step (scripts/human_iAA_kit.py).",
+          "target": 0.8
+        },
+        "negatives_ge_400": {
+          "actual": 517,
+          "met": true,
+          "target": 400
+        },
+        "positives_ge_400": {
+          "actual": 593,
+          "met": true,
+          "target": 400
+        }
+      },
+      "met": true,
+      "note": 0,
+      "unmet": 0
     },
+    "recall": 0.9427
+  },
+  "invariants": {
+    "deterministic": true,
+    "executes_scanned_configs": false,
+    "network_calls": false
+  },
+  "planes": [
     {
-      "label": "secondary",
-      "positives": 527,
-      "detected": 175,
-      "recall": 0.3321,
-      "recall_ci95": [
-        0.2941,
-        0.3719
-      ]
+      "by_family": {
+        "advisory_native": {
+          "detected": 2,
+          "total": 2
+        },
+        "auth_bypass": {
+          "detected": 5,
+          "total": 5
+        },
+        "command_injection": {
+          "detected": 7,
+          "total": 7
+        },
+        "config_weakness": {
+          "detected": 1,
+          "total": 1
+        },
+        "credential_exposure": {
+          "detected": 3,
+          "total": 3
+        },
+        "crypto_bypass": {
+          "detected": 7,
+          "total": 7
+        },
+        "data_exfiltration": {
+          "detected": 176,
+          "total": 176
+        },
+        "indirect_prompt_injection": {
+          "detected": 142,
+          "total": 176
+        },
+        "injection_generic": {
+          "detected": 5,
+          "total": 5
+        },
+        "jailbreak_family": {
+          "detected": 175,
+          "total": 175
+        },
+        "memory_safety": {
+          "detected": 4,
+          "total": 4
+        },
+        "path_traversal": {
+          "detected": 7,
+          "total": 7
+        },
+        "privilege_escalation": {
+          "detected": 6,
+          "total": 6
+        },
+        "race_condition": {
+          "detected": 2,
+          "total": 2
+        },
+        "resource_exhaustion": {
+          "detected": 3,
+          "total": 3
+        },
+        "ssrf": {
+          "detected": 4,
+          "total": 4
+        },
+        "supply_chain_exec": {
+          "detected": 4,
+          "total": 4
+        },
+        "xss": {
+          "detected": 6,
+          "total": 6
+        }
+      },
+      "corpus_available": true,
+      "coverage_bar": "any_finding",
+      "description": "外部独立语料面：GitHub Security Advisory（真实 CVE）+ InjecAgent（真实间接提示注入）",
+      "detected": 559,
+      "detected_any": 559,
+      "detected_below_threshold": [],
+      "detection_bar": "serious_only",
+      "engine": "scanner.rules.analyze / scanner.client_discovery.scan_client_configs",
+      "false_positive_ids": [],
+      "false_positive_rate": 0.0,
+      "false_positive_rate_ci": {
+        "alpha": 0.05,
+        "high": 0.0,
+        "low": 0.0,
+        "method": "percentile",
+        "n": 517,
+        "point": 0.0,
+        "resamples": 1000,
+        "seed": 20261018
+      },
+      "false_positives": 0,
+      "false_positives_by_negative_type": {},
+      "families_zero_detected": [],
+      "family_count": 18,
+      "manifest": {
+        "annotation_reason": 0,
+        "annotation_status": "gold_standard_source_derived",
+        "benchmark": "aishield-external-corpus/v1",
+        "cohen_kappa": 0.8673,
+        "collected_at": "2026-10-18",
+        "datasets": [
+          "GitHub Security Advisory Database",
+          "InjecAgent (Zhang et al., NAACL 2024)"
+        ],
+        "family_count": 18,
+        "label_basis": {
+          "controlled_negative_matched": "控制变量负样本：同工件同格式，注入被移除；标签由构造客观决定",
+          "external_cve_verified": "标签锚定第三方（NVD/GitHub/发行方）已发布 CVE，非主观判断",
+          "external_dataset_clean_sample": "数据集中本身不含注入的干净样本",
+          "external_dataset_ground_truth": "标签为公开数据集作者标注的攻击类型真值"
+        },
+        "provenance_honesty": "CVE 样本的 text 由 advisory 的生态+包+版本区间派生为原生依赖声明，非 advisory 原文；InjecAgent 样本的 text 为该数据集的 Tool Response 字段原值。provenance 与标签均为外部，派生过程记录在 label_basis。",
+        "r1_status": {
+          "checks": {
+            "families_ge_15": {
+              "actual": 18,
+              "met": true,
+              "target": 15
+            },
+            "kappa_ge_0.8": {
+              "actual": 0.8673,
+              "met": true,
+              "note": "automated Label Consistency Audit (LCA) kappa between independent re-derivation and source ground-truth; NOT human inter-annotator agreement. Human IAA is the pre-submission step (scripts/human_iAA_kit.py).",
+              "target": 0.8
+            },
+            "negatives_ge_400": {
+              "actual": 517,
+              "met": true,
+              "target": 400
+            },
+            "positives_ge_400": {
+              "actual": 593,
+              "met": true,
+              "target": 400
+            }
+          },
+          "met": true,
+          "note": 0,
+          "unmet": 0
+        },
+        "totals": {
+          "negatives": 517,
+          "positives": 593,
+          "total": 1110
+        }
+      },
+      "missed": [
+        "ext-pos-ipi-test-cases-dh-base-0000",
+        "ext-pos-ipi-test-cases-dh-base-0001",
+        "ext-pos-ipi-test-cases-dh-base-0002",
+        "ext-pos-ipi-test-cases-dh-base-0003",
+        "ext-pos-ipi-test-cases-dh-base-0004",
+        "ext-pos-ipi-test-cases-dh-base-0005",
+        "ext-pos-ipi-test-cases-dh-base-0006",
+        "ext-pos-ipi-test-cases-dh-base-0007",
+        "ext-pos-ipi-test-cases-dh-base-0008",
+        "ext-pos-ipi-test-cases-dh-base-0009",
+        "ext-pos-ipi-test-cases-dh-base-0010",
+        "ext-pos-ipi-test-cases-dh-base-0011",
+        "ext-pos-ipi-test-cases-dh-base-0012",
+        "ext-pos-ipi-test-cases-dh-base-0013",
+        "ext-pos-ipi-test-cases-dh-base-0014",
+        "ext-pos-ipi-test-cases-dh-base-0015",
+        "ext-pos-ipi-test-cases-dh-base-0016",
+        "ext-pos-ipi-test-cases-dh-base-0153",
+        "ext-pos-ipi-test-cases-dh-base-0154",
+        "ext-pos-ipi-test-cases-dh-base-0155",
+        "ext-pos-ipi-test-cases-dh-base-0156",
+        "ext-pos-ipi-test-cases-dh-base-0157",
+        "ext-pos-ipi-test-cases-dh-base-0158",
+        "ext-pos-ipi-test-cases-dh-base-0159",
+        "ext-pos-ipi-test-cases-dh-base-0160",
+        "ext-pos-ipi-test-cases-dh-base-0161",
+        "ext-pos-ipi-test-cases-dh-base-0162",
+        "ext-pos-ipi-test-cases-dh-base-0163",
+        "ext-pos-ipi-test-cases-dh-base-0164",
+        "ext-pos-ipi-test-cases-dh-base-0165",
+        "ext-pos-ipi-test-cases-dh-base-0166",
+        "ext-pos-ipi-test-cases-dh-base-0167",
+        "ext-pos-ipi-test-cases-dh-base-0168",
+        "ext-pos-ipi-test-cases-dh-base-0169"
+      ],
+      "name": "external_plane",
+      "negatives": 517,
+      "negatives_by_type": {
+        "clean_source": 17,
+        "controlled_matched": 500
+      },
+      "positives": 593,
+      "positives_by_dataset": {
+        "GitHub Security Advisory Dat": 66,
+        "InjecAgent (Zhang et al., NA": 527
+      },
+      "recall": 0.9427,
+      "recall_any": 0.9427,
+      "recall_ci": {
+        "alpha": 0.05,
+        "high": 0.9612,
+        "low": 0.9224,
+        "method": "percentile",
+        "n": 593,
+        "point": 0.9427,
+        "resamples": 1000,
+        "seed": 20261018
+      }
     }
   ],
-  "by_dataset": [
-    {
-      "label": "ghsa",
-      "positives": 66,
-      "detected": 66,
-      "recall": 1.0,
-      "recall_ci95": [
-        1.0,
-        1.0
-      ]
-    },
-    {
-      "label": "injecagent",
-      "positives": 527,
-      "detected": 175,
-      "recall": 0.3321,
-      "recall_ci95": [
-        0.2941,
-        0.3719
-      ]
-    }
-  ],
-  "by_scan_plane": [
-    {
-      "label": "config",
-      "positives": 12,
-      "detected": 12,
-      "recall": 1.0,
-      "recall_ci95": [
-        1.0,
-        1.0
-      ]
-    },
-    {
-      "label": "instruction",
-      "positives": 581,
-      "detected": 229,
-      "recall": 0.3941,
-      "recall_ci95": [
-        0.3528,
-        0.4355
-      ]
-    }
-  ],
-  "negatives_total": 517,
-  "false_positives": 0,
-  "false_positive_rate": 0.0,
-  "false_positives_by_type": {},
-  "negatives_by_type": {
-    "clean_source": 17,
-    "controlled_matched": 500
+  "rules": {
+    "mcp": 313,
+    "skill": 340
+  },
+  "summary": {
+    "coverage_bar": "any_finding",
+    "detected": 559,
+    "detected_any": 559,
+    "detection_bar": "serious_only",
+    "false_positive_rate": 0.0,
+    "false_positives": 0,
+    "negatives": 517,
+    "positives": 593,
+    "recall": 0.9427,
+    "recall_any": 0.9427
   }
 }
