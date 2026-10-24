@@ -48,6 +48,36 @@ def _sha256(text):
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
+def _build_memory_threats():
+    """从 FVI HOSTILE_CORPUS 派生 6 类 threat model 的 canonical 判表。
+
+    单一事实源是 scripts/check_isolation_invariants.py::HOSTILE_CORPUS
+    （本仓库威胁面的枚举定义）。此函数是 FVI ↔ 治理层的桥接点：
+    治理层的 memory_threats 与 FVI 的 HOSTILE_CORPUS 6:6 同步，任何工件
+    在 FVI 侧新增 / 删除都会自动反映到这里，无需手工维护两份清单。
+
+    字段：
+      adversary_ops : FVI 抽象出来的攻击者意图 op 集合（exec / net）
+      has_adversary_requests : 是否为恶意工件（True = L5，False = L1 良性对照）
+      rsi           : RSI 分级（L5 严重 / L1 良性对照）
+      verdict       : 治理层对该工件的默认决策（deny / observe）
+    """
+    from scripts.check_isolation_invariants import HOSTILE_CORPUS
+    out = {}
+    for a in HOSTILE_CORPUS:
+        has_reqs = bool(a.adversary_requests)
+        out[a.name] = {
+            "adversary_ops": sorted(a.adversary_requests),
+            "has_adversary_requests": has_reqs,
+            "rsi": "L5" if has_reqs else "L1",
+            "verdict": "deny" if has_reqs else "observe",
+        }
+    return out
+
+
+MEMORY_THREATS = _build_memory_threats()  # 模块级派生；治理层 memory_threats 的单一事实源
+
+
 def _default_policy():
     return {
         # default_deny=True → 未在 allowlist 中的实体一律拒绝（fail-closed 的核心开关）
@@ -60,6 +90,9 @@ def _default_policy():
         # L2 策略贯通：server -> {"source_pack", "runtime", "bound_at", "strict_runtime"}
         # 由 eco/policy_bridge.py 编译写入；扫描期 pack 的 excluded_categories 在此生效。
         "packs": {},         # server -> 绑定的 policy pack 及其运行时投影
+        # FVI ↔ 治理层贯通：artifact_name -> {adversary_ops, rsi, verdict, ...}
+        # 6 类 threat model 由 FVI HOSTILE_CORPUS 派生（单一事实源）
+        "memory_threats": _build_memory_threats(),
         "updated_at": _now_iso(),
     }
 
@@ -67,10 +100,10 @@ def _default_policy():
 # 策略的合法字段名。文件里一个都不含 ⇒ 无论 JSON 是否可解析，都是垃圾策略。
 _POLICY_KNOWN_KEYS = frozenset({
     "default_deny", "killed", "allow", "deny", "incidents",
-    "incident_threshold", "packs", "updated_at",
+    "incident_threshold", "packs", "memory_threats", "updated_at",
 })
 _POLICY_BOOL_FIELDS = ("default_deny",)
-_POLICY_DICT_FIELDS = ("killed", "allow", "deny", "incidents", "packs")
+_POLICY_DICT_FIELDS = ("killed", "allow", "deny", "incidents", "packs", "memory_threats")
 _POLICY_INT_FIELDS = ("incident_threshold",)
 
 
@@ -1061,6 +1094,86 @@ def deny_tool(server, tools="*"):
 
 def set_default_deny(enabled):
     return _default.set_default_deny(enabled)
+
+
+# ══════════════════════════════════════════
+#  FVI ↔ 治理层贯通：memory_threats 判表
+# ══════════════════════════════════════════
+# 6 类 threat model 由 scripts/check_isolation_invariants.HOSTILE_CORPUS
+# 派生（单一事实源）。这里提供三个辅助：
+#   memory_threats()         → 返回当前策略里的 memory_threats 判表
+#   set_memory_verdict(...)  → 为单个工件覆写治理层决策（deny / allow / observe）
+#   verify_fvi_integration() → 双向对账：FVI HOSTILE_CORPUS 工件名 == 策略里的键
+
+_MEMORY_VERDICTS = frozenset({"deny", "allow", "observe"})
+
+
+def memory_threats():
+    """返回当前策略里的 memory_threats 判表（FVI 派生的 6 类 threat model）。"""
+    policy, _ = _load_policy()
+    return policy.get("memory_threats") or {}
+
+
+def set_memory_verdict(artifact_name, verdict):
+    """为某个工件覆写治理层决策。verdict ∈ {deny, allow, observe}。
+
+    策略损坏（加载失败）时抛 RuntimeError —— 与 bind_pack 同口径：
+    fail-closed 下拒绝写入，不能静默把威胁工件的决策降级。
+    未知工件（不在 FVI HOSTILE_CORPUS 里）返回 404 语义，不写入。
+    """
+    from scripts.check_isolation_invariants import HOSTILE_CORPUS
+    verdict = str(verdict or "").strip().lower()
+    if verdict not in _MEMORY_VERDICTS:
+        return {"success": False,
+                "error": "verdict 必须是 %s" % "/".join(sorted(_MEMORY_VERDICTS))}
+    known = frozenset(a.name for a in HOSTILE_CORPUS)
+    if artifact_name not in known:
+        return {"success": False,
+                "error": f"unknown threat artifact: {artifact_name}",
+                "known": sorted(known)}
+
+    policy, ok = _load_policy()
+    if not ok:
+        raise RuntimeError("策略文件损坏且已按 fail-closed 收紧；请先修复策略再更新 memory_threats")
+    threats = policy.setdefault("memory_threats", {})
+    if artifact_name not in threats:
+        threats[artifact_name] = {}
+    threats[artifact_name]["verdict"] = verdict
+    threats[artifact_name]["verdict_overridden_at"] = _now_iso()
+    _save_policy(policy)
+    audit("memory_threat_verdict", {
+        "artifact": artifact_name, "verdict": verdict,
+    })
+    return {"success": True, "artifact": artifact_name, "verdict": verdict}
+
+
+def verify_fvi_integration():
+    """双向对账 FVI HOSTILE_CORPUS 与策略里的 memory_threats 键集合。
+
+    返回：
+      {
+        "ok": bool,
+        "fvi_artifacts":  [...]       # FVI 侧工件名列表
+        "policy_artifacts": [...]     # 治理层策略侧键名列表
+        "missing_in_policy": [...]    # FVI 有但治理层无
+        "extra_in_policy":  [...]     # 治理层有但 FVI 无
+      }
+
+    ok=True 表示两侧完全同步——这是"FVI 与治理层真贯通"的机器可检验证据。
+    任何单边新增（例如 FVI 加了新工件但治理层没跟上，或反之）都会被抓出。
+    """
+    from scripts.check_isolation_invariants import HOSTILE_CORPUS
+    fvi_names = {a.name for a in HOSTILE_CORPUS}
+    policy, _ = _load_policy()
+    policy_names = set((policy.get("memory_threats") or {}).keys())
+    return {
+        "ok": fvi_names == policy_names,
+        "fvi_artifacts": sorted(fvi_names),
+        "policy_artifacts": sorted(policy_names),
+        "missing_in_policy": sorted(fvi_names - policy_names),
+        "extra_in_policy": sorted(policy_names - fvi_names),
+        "canonical": MEMORY_THREATS,  # 单一事实源（模块加载时派生）
+    }
 
 
 def status():

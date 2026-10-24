@@ -443,6 +443,15 @@ class AIShieldHandler(BaseHTTPRequestHandler):
             except (ValueError, UnicodeDecodeError):
                 data = {}
         query = parse_qs(parsed.query)
+        # ── 交互反馈闭环（P3-4）：删除抑制规则 ──
+        if path.startswith("/api/v1/feedback"):
+            try:
+                import feedback_api
+                payload, status = feedback_api.handle_delete(path)
+                self._send_json(payload, status)
+            except Exception as e:  # noqa: BLE001
+                self._send_json({"error": str(e)}, 500)
+            return
         try:
             from api import ecosystem_api
             payload, status = ecosystem_api.handle_delete(path, query)
@@ -578,6 +587,17 @@ class AIShieldHandler(BaseHTTPRequestHandler):
             try:
                 import semantic_probe_api
                 payload, status = semantic_probe_api.handle_get(path, parsed.query)
+                self._send_json(payload, status)
+            except Exception as e:  # noqa: BLE001
+                self._send_json({"error": str(e)}, 500)
+            return
+
+        # ── 交互反馈闭环（P3-4）：误报反馈→抑制→修复建议→复扫 ──
+        #    内存存储，不持久化；每次服务重启重置。适合 CI 短生命周期场景。
+        if path.startswith("/api/v1/feedback"):
+            try:
+                import feedback_api
+                payload, status = feedback_api.handle_get(path, parsed.query)
                 self._send_json(payload, status)
             except Exception as e:  # noqa: BLE001
                 self._send_json({"error": str(e)}, 500)
@@ -1373,20 +1393,35 @@ class AIShieldHandler(BaseHTTPRequestHandler):
                 self._send_json({"error": str(e)}, 500)
             return
 
-        # ── L2 策略贯通：查看某 server 绑定的 policy pack 及其运行时投影 ──
+        # ── L2 策略贯通 + FVI 6 类 threat model 贯通：/api/v1/governance/policy ──
+        # 三种模式：
+        #   无 ?server=  → 全局视图（含 memory_threats 判表 + fvi_integrated 对账）
+        #   ?server=X    → 该 server 的 bound pack（既有行为，向后兼容）
+        # 每次响应都带 memory_threats + fvi_integrated 两段，让调用方一眼看到
+        # 治理层与 FVI HOSTILE_CORPUS 的 6:6 同步状态——这是 #443 治理通电的
+        # FVI↔治理层贯通验证点。
         if path == "/api/v1/governance/policy":
             try:
                 from eco import runtime_governance as rg
                 server = (parse_qs(parsed.query).get("server") or [""])[0].strip()
+                threats = rg.memory_threats()
+                fvi_integration = rg.verify_fvi_integration()
+                base = {
+                    "success": True,
+                    "memory_threats": threats,
+                    "memory_threat_count": len(threats),
+                    "fvi_integrated": fvi_integration["ok"],
+                    "fvi_integration": fvi_integration,
+                }
                 if not server:
-                    self._send_json({"success": False, "error": "server is required"}, 400)
+                    self._send_json(base, 200)
                     return
                 ent = rg.bound_pack(server)
                 if ent is None:
-                    self._send_json({"success": True, "server": server,
+                    self._send_json({**base, "server": server,
                                      "bound": False, "pack": None}, 200)
                 else:
-                    self._send_json({"success": True, "server": server, "bound": True, **ent}, 200)
+                    self._send_json({**base, "server": server, "bound": True, **ent}, 200)
             except Exception as e:
                 self._send_json({"error": str(e)}, 500)
             return
@@ -1522,6 +1557,26 @@ class AIShieldHandler(BaseHTTPRequestHandler):
             except Exception as e:  # noqa: BLE001
                 self._send_json({"error": str(e)}, 500)
             _record_usage("semantic-probe", self.client_address[0])
+            return
+
+        # ── 交互反馈闭环（P3-4）：误报反馈→抑制→修复建议→复扫 ──
+        #    内存存储，不持久化；每次服务重启重置。适合 CI 短生命周期场景。
+        if path.startswith("/api/v1/feedback"):
+            try:
+                body = self._read_body()
+                if body is None:
+                    return
+                data = json.loads(body) if body else {}
+            except json.JSONDecodeError:
+                self._send_json({"error": "Invalid JSON"}, 400)
+                return
+            try:
+                import feedback_api
+                payload, status = feedback_api.handle_post(path, data)
+                self._send_json(payload, status)
+            except Exception as e:  # noqa: BLE001
+                self._send_json({"error": str(e)}, 500)
+            _record_usage("feedback-api", self.client_address[0])
             return
 
         # ── Ecosystem API (P1): Agent 生态 5 支柱 ──
@@ -1989,6 +2044,8 @@ class AIShieldHandler(BaseHTTPRequestHandler):
         #   action=unbind        → 解绑，回到纯默认运行时行为
         #   action=allow / deny  → 工具级放行/拒绝（需 server，可选 tools）
         #   action=default_deny  → 全局默认拒绝开关（需 enabled）
+        #   action=memory_verdict → 为某个 FVI threat artifact 覆写治理决策
+        #                          （需 artifact + verdict ∈ {deny,allow,observe}）
         if path == "/api/v1/governance/policy":
             try:
                 from eco import runtime_governance as rg
@@ -2009,12 +2066,24 @@ class AIShieldHandler(BaseHTTPRequestHandler):
                     res = rg.set_default_deny(bool(data.get("enabled", True)))
                     self._send_json(res, 200 if res.get("success") else 400)
                     return
+                if action == "memory_verdict":
+                    artifact = str(data.get("artifact") or "").strip()
+                    verdict = str(data.get("verdict") or "").strip().lower()
+                    if not artifact or not verdict:
+                        self._send_json({
+                            "success": False,
+                            "error": "artifact 和 verdict 都是必填",
+                        }, 400)
+                        return
+                    res = rg.set_memory_verdict(artifact, verdict)
+                    self._send_json(res, 200 if res.get("success") else 400)
+                    return
                 if action not in ("bind", "unbind"):
                     # 明确回绝未知 action，而不是悄悄按 bind 处理 ——
                     # 静默降级正是让上面那个死分支存活至今的原因。
                     self._send_json({
                         "success": False,
-                        "error": "action 必须是 bind / unbind / allow / deny / default_deny",
+                        "error": "action 必须是 bind / unbind / allow / deny / default_deny / memory_verdict",
                     }, 400)
                     return
 
