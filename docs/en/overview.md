@@ -16,14 +16,15 @@ AIShield ships with rule sets for both standards in parallel:
 |---|---|---|
 | **OWASP MCP Top 10 (2025 v0.1)** | MCP01–MCP10 | 128 |
 | **OWASP Agentic AI Top 10 (ASI01–ASI10, AIShield internal)** | ASI01–ASI10 | 75 |
+| **OWASP Agentic Skills Top 10 (AST01–AST10, 2026-08)** | AST01–AST10 | 23 |
 | Sandbox / host-escape heuristics | — | 12 |
 | Chinese-language prompt injection | — | 22 |
-| **Static subtotal** | | **237** |
+| Skill execution-plane extras | — | 26 |
+| **Static subtotal** | | **286** |
 | Threat-intel generated (daily radar) | — | 8 |
 | Radar-promoted (weekly) | — | 19 |
-| **MCP-type total** | | **264** |
-| Skill-specific extra | — | +27 |
-| **Skill-type total** | | **291** |
+| **MCP-type total** | | **313** |
+| **Skill-type total** | | **340** |
 
 The authoritative number is always what `GET /api/v1/health` reports as `rules_breakdown`. Every other number in the repo is derived from that.
 
@@ -31,7 +32,7 @@ The authoritative number is always what `GET /api/v1/health` reports as `rules_b
 
 ## Architecture in one paragraph
 
-`scanner/engine.py` is the entry point. It loads `scanner/rules.py` (237 static + dynamic rule sets from `data/`), runs the neuro-symbolic probe (`scanner/neuro_symbolic_probe.py` — symbolic layer as constitution, semantic layer as recall enhancer only, never self-escalates), and produces a scored report. `api/server.py` wraps this as an HTTP service; `mcp-server/src/index.ts` wraps it as an MCP server; both call the same engine. There is no duplicate logic.
+`scanner/engine.py` is the entry point. It loads `scanner/rules.py` (286 static + dynamic rule sets from `data/`), runs the neuro-symbolic probe (`scanner/neuro_symbolic_probe.py` — symbolic layer as constitution, semantic layer as recall enhancer only, never self-escalates), and produces a scored report. `api/server.py` wraps this as an HTTP service; `mcp-server/src/index.ts` wraps it as an MCP server; both call the same engine. There is no duplicate logic.
 
 ## Zero-cost, offline-first
 
@@ -56,6 +57,10 @@ The scanner also verifies itself: `distribution/published.json` is a public ledg
 ## Related documents
 
 - [Quick Start](./quickstart.md)
+- [Architecture](./architecture.md)
+- [Benchmark results](./benchmark.md)
+- [API reference](./api-reference.md)
+- [FAQ](./faq.md)
 - [Deployment](./deployment.md)
 - [Trust attestation quickstart](../trust-attestation-quickstart.md)
 - [Agent ecosystem landscape](../agent-ecosystem-2026-landscape.md)
