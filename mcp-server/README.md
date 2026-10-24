@@ -1,7 +1,7 @@
 # AIShield MCP Server
 
 Security scanner for AI Agent tools, aligned with **OWASP MCP Top 10** and
-**OWASP Agentic AI Top 10 (ASI)**. 264 local rules (MCP type) / 264 rules
+**OWASP Agentic AI Top 10 (ASI)**. 264 local rules (MCP type) / 313 rules
 (Skill type), 5-dimension scoring.
 
 > `owasp_category` values `ASI01`–`ASI10` are AIShield's **internal** category IDs, not the
@@ -49,7 +49,7 @@ npx aishield-mcp-server
 
 | Tool | Description |
 |------|-------------|
-| `aishield_scan` | Full security scan — OWASP MCP Top 10 + Agentic AI Top 10, 264 rules, 5-dimension scoring |
+| `aishield_scan` | Full security scan — OWASP MCP Top 10 + Agentic AI Top 10, 313 rules, 5-dimension scoring |
 | `aishield_guardrail` | Pre-install safety check — pass/block verdict with score |
 | `aishield_prompt_check` | Prompt injection detection — Chinese + English |
 | `aishield_banned_words` | Chinese content compliance — 6 platform rules |
@@ -240,7 +240,8 @@ Policy Pack / Red-team probe / confidence 晋升 / rule decay。全部走
  Tool Poisoning |
 | MCP04 | 13 | Supply Chain Attack & Dependency Tampering |
 | MCP05 | 27 | Command Injection & Execution |
-| MCP06 | 15 | Intent Flow Subversion / Prompt Injection |
+| MCP06 | 41 | Intent Flow Subversion / Prompt Injection |
+ Intent Flow Subversion / Prompt Injection |
  Intent Flow Subversion / Prompt Injection |
 | MCP07 | 10 | Insufficient Authentication & Authorization |
 | MCP08 | 6 | Lack of Audit & Observability |
@@ -279,7 +280,7 @@ Subtotal: **75 ASI rules**
 
 Static baseline: **237 rules** (128 MCP + 75 ASI + 12 sandbox + 22 Chinese)
 
-**Total: 264 rules** (MCP type) / **291 rules** (Skill type)
+**Total: 313 rules** (MCP type) / **340 rules** (Skill type)
 
 The Skill total adds 27 skill-specific rules on top of the MCP set.
 
