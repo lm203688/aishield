@@ -187,8 +187,8 @@ def _rescan_content(content: str, file_path: str = "",
                     original_findings: list = None) -> dict:
     """复扫内容，返回新 findings 和对比结果。"""
     # 加载扫描引擎
-    from scanner.engine import scan_content
-    new_findings = scan_content(content, file_path=file_path or "inline")
+    from scanner.engine import scan
+    new_findings = scan(content, tool_type="inline", name=file_path or "inline")
 
     result = {
         "file_path": file_path or "inline",
