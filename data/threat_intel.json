@@ -1092,20 +1092,6 @@
       "fetched": "2026-10-07T10:16:14.582626+00:00"
     },
     {
-      "id": "GHSA-6qxp-vccf-f47h",
-      "source": "github-advisory",
-      "severity": "high",
-      "cvss": 7.5,
-      "title": "MCP TypeScript SDK: OAuth client could send credentials to an authorization server chosen by the MCP server",
-      "summary": "### Summary\nIn affected versions, the SDK's OAuth client let the MCP server decide which authorization server received the client's OAuth credentials. Credentials were not tied to the authorization server they belong to.\n\nA malicious or compromised MCP server could name its own authorization server. With no user interaction, the client would send it:\n\n- the `refresh_token` and `client_secret` stored from an earlier sign-in\n- the `client_secret` or signed assertion configured on a bundled provide",
-      "affected": "npm:@modelcontextprotocol/sdk, npm:@modelcontextprotocol/client",
-      "references": [
-        "https://github.com/advisories/GHSA-6qxp-vccf-f47h"
-      ],
-      "published": "2026-10-06T15:35:44Z",
-      "fetched": "2026-10-07T10:16:38.690662+00:00"
-    },
-    {
       "id": "GHSA-8qpj-27x8-pwpq",
       "source": "github-advisory",
       "severity": "critical",
@@ -3463,24 +3449,6 @@
       "fetched": "2026-09-16T08:33:00.704131+00:00"
     },
     {
-      "id": "CVE-2026-53957",
-      "source": "nvd",
-      "severity": "high",
-      "cvss": 7.7,
-      "title": "Contentful MCP Server is a Model Context Protocol server for the Contentful Management API. Prior to @contentful/mcp-server 1.7.19 and @contentful/mcp-tools 0.4.5, export_space and import_space in pac",
-      "summary": "Contentful MCP Server is a Model Context Protocol server for the Contentful Management API. Prior to @contentful/mcp-server 1.7.19 and @contentful/mcp-tools 0.4.5, export_space and import_space in packages/mcp-tools/src/tools/jobs/space-to-space-migration/exportSpace.ts and packages/mcp-tools/src/tools/jobs/space-to-space-migration/importSpace.ts expose host, proxy, rawProxy, and insecure network options to LLM-controlled tool arguments and combine those options with the server's CONTENTFUL_MANA",
-      "affected": "model context protocol",
-      "references": [
-        "https://github.com/contentful/contentful-mcp-server/commit/fa7477ee48515f4248bc91a025eab0ca83423fe0",
-        "https://github.com/contentful/contentful-mcp-server/pull/376",
-        "https://github.com/contentful/contentful-mcp-server/releases/tag/mcp-server@1.7.19",
-        "https://github.com/contentful/contentful-mcp-server/releases/tag/mcp-tools@0.4.5",
-        "https://github.com/contentful/contentful-mcp-server/security/advisories/GHSA-2xhg-73j7-rrgx"
-      ],
-      "published": "2026-09-15T15:17:17.367",
-      "fetched": "2026-09-16T08:33:06.847591+00:00"
-    },
-    {
       "id": "CVE-2026-73497",
       "source": "nvd",
       "severity": "medium",
@@ -4947,21 +4915,6 @@
       "fetched": "2026-08-28T01:21:46.749251+00:00"
     },
     {
-      "id": "CVE-2026-37003",
-      "source": "nvd",
-      "severity": "unknown",
-      "cvss": null,
-      "title": "Agno up to and including 2.5.8 is vulnerable to Remote Code Execution (RCE) via prompt injection. The PythonTools and ShellTools components pass unsanitized, LLM-generated arguments directly to execut",
-      "summary": "Agno up to and including 2.5.8 is vulnerable to Remote Code Execution (RCE) via prompt injection. The PythonTools and ShellTools components pass unsanitized, LLM-generated arguments directly to execution sinks including exec(), runpy.run_path(), and subprocess.run(). An unauthenticated attacker can exploit this by embedding malicious instructions in content processed by the agent (such as web pages or documents), allowing for arbitrary code and OS command execution on the host server.",
-      "affected": "llm agent",
-      "references": [
-        "http://agno.com",
-        "https://yerangamage.com/cves/detail/?slug=agno-rce-tools"
-      ],
-      "published": "2026-08-27T20:17:41.107",
-      "fetched": "2026-08-28T01:21:59.142350+00:00"
-    },
-    {
       "id": "CVE-2026-18885",
       "source": "nvd",
       "severity": "unknown",
@@ -5004,22 +4957,6 @@
       ],
       "published": "2026-08-26T15:16:55.853",
       "fetched": "2026-08-26T16:20:40.105317+00:00"
-    },
-    {
-      "id": "CVE-2026-75062",
-      "source": "nvd",
-      "severity": "unknown",
-      "cvss": null,
-      "title": "Improper Neutralization of Directives in Dynamically Evaluated Code ('Eval Injection') in the default lf.query Python protocol in Google langfun versions prior to 0.1.2 allows remote unauthenticated a",
-      "summary": "Improper Neutralization of Directives in Dynamically Evaluated Code ('Eval Injection') in the default lf.query Python protocol in Google langfun versions prior to 0.1.2 allows remote unauthenticated attackers to execute arbitrary Python code in the context of the host application via crafted prompt inputs that cause the model to generate executable Python expressions evaluated without a sandbox.",
-      "affected": "model context protocol",
-      "references": [
-        "https://github.com/google/langfun",
-        "https://github.com/google/langfun/issues/725",
-        "https://github.com/google/langfun/issues/725"
-      ],
-      "published": "2026-08-26T15:16:55.853",
-      "fetched": "2026-08-26T16:20:46.191260+00:00"
     },
     {
       "id": "GHSA-93qj-5q5v-3c2h",
@@ -6076,20 +6013,6 @@
       "fetched": "2026-08-18T18:42:30.477972+00:00"
     },
     {
-      "id": "GHSA-p23g-mvhj-jh3j",
-      "source": "github-advisory",
-      "severity": "high",
-      "cvss": 7.5,
-      "title": "GeoLens: Cross-dataset authorization bypass discloses private dataset metadata, schema, sample values, table rows, and raster/vector tile data",
-      "summary": "### Summary\n\nMultiple GeoLens read/link endpoints authorized only the resource named in the\nrequest URL (a map, a VRT, a source dataset, an AI request) and failed to\nre-authorize a **second, caller-influenced dataset** that the request reached\nthrough a relationship, layer reference, mosaic source, or request body. This\n\"authorize the URL resource, read a *different* dataset un-re-authorized\"\npattern let callers read data from datasets they have no access to.\n\nThe most severe instances require *",
-      "affected": "pip:@geolens/sdk, pip:geolens-cli, pip:geolens",
-      "references": [
-        "https://github.com/advisories/GHSA-p23g-mvhj-jh3j"
-      ],
-      "published": "2026-08-18T18:00:07Z",
-      "fetched": "2026-08-18T18:42:31.963185+00:00"
-    },
-    {
       "id": "CVE-2026-75913",
       "source": "nvd",
       "severity": "critical",
@@ -6771,21 +6694,6 @@
       "fetched": "2026-08-06T04:15:37.206735+00:00"
     },
     {
-      "id": "CVE-2026-67531",
-      "source": "nvd",
-      "severity": "unknown",
-      "cvss": null,
-      "title": "FrontMCP is a TypeScript-first framework for the Model Context Protocol (MCP). Prior to 1.5.7, the sandboxed codecall:execute tool exposes live host Zod schema instances to the script via getTool(), a",
-      "summary": "FrontMCP is a TypeScript-first framework for the Model Context Protocol (MCP). Prior to 1.5.7, the sandboxed codecall:execute tool exposes live host Zod schema instances to the script via getTool(), and because Zod v4 defines _zod as a non-configurable, non-writable own property, the ECMAScript Proxy invariants force the security membrane to hand back the raw host object, letting a script reach _zod.constr.constructor (the host Function constructor) and execute arbitrary code in the server proce",
-      "affected": "model context protocol",
-      "references": [
-        "https://github.com/agentfront/frontmcp/commit/209cddd19a8d4db0777f725b527818da7df6f67f",
-        "https://github.com/agentfront/frontmcp/security/advisories/GHSA-mp29-fxh8-92px"
-      ],
-      "published": "2026-08-06T00:16:53.733",
-      "fetched": "2026-08-06T04:15:43.400405+00:00"
-    },
-    {
       "id": "GHSA-279x-mwfv-vcqv",
       "source": "github-advisory",
       "severity": "critical",
@@ -6969,23 +6877,6 @@
       ],
       "published": "2026-08-04T20:16:54.473",
       "fetched": "2026-08-04T22:31:51.615800+00:00"
-    },
-    {
-      "id": "CVE-2026-70477",
-      "source": "nvd",
-      "severity": "unknown",
-      "cvss": null,
-      "title": "Flowise is a drag & drop user interface to build a customized large language model flow. Prior to 3.1.3, a prompt injection sent to a chatflow using a CSV Agent node can cause the LLM to respond with ",
-      "summary": "Flowise is a drag & drop user interface to build a customized large language model flow. Prior to 3.1.3, a prompt injection sent to a chatflow using a CSV Agent node can cause the LLM to respond with a malicious Python script that bypasses the blocklist validator and executes in an unsandboxed Pyodide environment. The specific flaw exists within the run method of the CSV_Agents class, where untrusted data is used to construct an LLM prompt and the resulting pythonCode is validated by validatePyt",
-      "affected": "llm agent",
-      "references": [
-        "https://github.com/FlowiseAI/Flowise/commit/f4e2794f6a576b94578f2fdafbf49c2fb304626c",
-        "https://github.com/FlowiseAI/Flowise/pull/6499",
-        "https://github.com/FlowiseAI/Flowise/releases/tag/flowise@3.1.3",
-        "https://github.com/FlowiseAI/Flowise/security/advisories/GHSA-5xvg-pmgg-3mxr"
-      ],
-      "published": "2026-08-04T20:16:54.473",
-      "fetched": "2026-08-04T22:32:04.400278+00:00"
     },
     {
       "id": "GHSA-3xpf-xq7r-v8c5",
@@ -8290,22 +8181,6 @@
       "fetched": "2026-08-04T06:34:46.965312+00:00"
     },
     {
-      "id": "CVE-2026-55615",
-      "source": "nvd",
-      "severity": "unknown",
-      "cvss": null,
-      "title": "Langroid is a framework for building large-language-model-powered applications. Prior to version 0.65.5, Neo4jChatAgent passes LLM-generated Cypher queries straight to the Neo4j driver with no validat",
-      "summary": "Langroid is a framework for building large-language-model-powered applications. Prior to version 0.65.5, Neo4jChatAgent passes LLM-generated Cypher queries straight to the Neo4j driver with no validation, no statement-type allowlist, and no opt-out gate. The query text is influenceable by prompt injection (direct user input or indirect content the agent reads back via RAG), so an attacker who can influence the prompt can read or destroy all graph data and, when APOC or dbms.security procedures a",
-      "affected": "llm agent",
-      "references": [
-        "https://github.com/langroid/langroid/commit/5a3097d9dd6378b08ced5480b0caf76cc58d00fa",
-        "https://github.com/langroid/langroid/security/advisories/GHSA-2pq5-3q89-j7cc",
-        "https://github.com/langroid/langroid/security/advisories/GHSA-2pq5-3q89-j7cc"
-      ],
-      "published": "2026-07-10T00:16:33.867",
-      "fetched": "2026-08-04T06:35:01.639531+00:00"
-    },
-    {
       "id": "CVE-2026-54769",
       "source": "nvd",
       "severity": "critical",
@@ -8480,20 +8355,6 @@
       ],
       "published": "2026-07-03T11:16:27.720",
       "fetched": "2026-08-04T06:34:46.965302+00:00"
-    },
-    {
-      "id": "CVE-2026-13341",
-      "source": "nvd",
-      "severity": "high",
-      "cvss": 7.4,
-      "title": "A vulnerability exists in the Kong Konnect Model Context Protocol (MCP) server prior to version 1.0.0, which could allow a remote attacker to perform an indirect prompt injection attack and execute un",
-      "summary": "A vulnerability exists in the Kong Konnect Model Context Protocol (MCP) server prior to version 1.0.0, which could allow a remote attacker to perform an indirect prompt injection attack and execute unintended API requests.",
-      "affected": "model context protocol",
-      "references": [
-        "https://github.com/Kong/mcp-konnect/security/advisories/GHSA-7767-3m3w-2p44"
-      ],
-      "published": "2026-07-03T11:16:27.720",
-      "fetched": "2026-08-04T06:34:53.913927+00:00"
     },
     {
       "id": "CVE-2026-10564",
@@ -8751,22 +8612,6 @@
       "fetched": "2026-08-04T06:34:46.965277+00:00"
     },
     {
-      "id": "CVE-2026-55743",
-      "source": "nvd",
-      "severity": "critical",
-      "cvss": 9.6,
-      "title": "The shell tool command allowlist in the SecurityPolicy of OpenHuman desktop agent through 0.54.0 (default Supervised security policy) can be bypassed to execute arbitrary OS commands with the privileg",
-      "summary": "The shell tool command allowlist in the SecurityPolicy of OpenHuman desktop agent through 0.54.0 (default Supervised security policy) can be bypassed to execute arbitrary OS commands with the privileges of the desktop user. Two flaws in src/openhuman/security/policy.rs combine: (1) is_args_safe() blocks the find flags -exec and -ok but not the functionally identical -execdir and -okdir, which also execute an arbitrary command for each matched file; and (2) skip_env_assignments() strips leading i",
-      "affected": "llm agent",
-      "references": [
-        "https://github.com/tinyhumansai/openhuman",
-        "https://github.com/tinyhumansai/openhuman/blob/v0.53.49-staging/src/openhuman/security/policy.rs",
-        "https://github.com/tinyhumansai/openhuman/commit/60050aa09a870f53ed7e4cd40ed41fd2860329e7"
-      ],
-      "published": "2026-06-17T15:17:02.337",
-      "fetched": "2026-08-04T06:35:01.639475+00:00"
-    },
-    {
       "id": "GHSA-gr75-jv2w-4656",
       "source": "osv",
       "severity": "moderate",
@@ -8900,5 +8745,5 @@
     "unknown": 36,
     "moderate": 1
   },
-  "total": 604
+  "total": 594
 }
