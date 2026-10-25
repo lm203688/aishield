@@ -1,7 +1,7 @@
 # AIShield 自动化台账
 
 > **本文件由 `scripts/gen_task_registry.py` 自动生成，请勿手工编辑。**
-> 生成时间：2026-10-16 22:28 UTC
+> 生成时间：2026-10-25 14:28 UTC
 
 历史教训：本台账曾手工声称「二十八项定时任务在跑」，而仓库实际只有十四个 workflow，其中 self-heal 因 YAML 语法错静默失效 48 天。台账一旦脱离现实，就会把「看起来很自动化」的幻觉喂给每一次决策。现改为从 workflow 真实内容派生。
 
@@ -9,9 +9,9 @@
 
 | 指标 | 数值 |
 |------|------|
-| 本仓库 workflow 总数 | 21 个任务 |
+| 本仓库 workflow 总数 | 22 个任务 |
 | 其中定时驱动 | 7 个 |
-| 其中事件驱动 | 14 个 |
+| 其中事件驱动 | 15 个 |
 | 存在断链/语法问题 | 0 个 |
 
 ## 定时任务
@@ -34,6 +34,7 @@
 | `ci.yml` | AIShield CI/CD | workflow_call / push(main,dev) / PR / 手动 | 10 |
 | `data-scan-flywheel.yml` | AIShield Data Flywheel (Batch Scan to Self-Built Database) | workflow_call / 手动 | 2 |
 | `deploy-server.yml` | Deploy to Production Server | workflow_call / 手动 | 2 |
+| `eval-gate.yml` | AIShield Eval Gate | PR / push(main) / workflow_call / 手动 | 1 |
 | `feature-closed-loop.yml` | AIShield Intelligence-to-Feature Closed-Loop | workflow_call / Issue 事件 / 手动 | 5 |
 | `install-cf-token.yml` | install CF token to VPS | 手动 | 1 |
 | `issue-labeler.yml` | Auto Label Issues | Issue 事件 / 手动 | 1 |
@@ -52,16 +53,16 @@
 | 状态域 | 最近更新 |
 |--------|----------|
 | data | 2026-09-04 07:56:50 |
-| deploy | 2026-10-15 07:24:56 |
+| deploy | 2026-10-24 12:13:11 |
 | distribution | 2026-10-14 08:50:35 |
 | feature | 2026-10-14 08:49:43 |
 | flywheel | 2026-10-15 08:16:52 |
-| health | 2026-10-15 17:11:28 |
+| health | 2026-10-24 11:18:18 |
 | intel | 2026-10-15 08:19:32 |
-| meta | 2026-10-15 13:23:27 |
+| meta | 2026-10-24 14:22:32 |
 | registry | 2026-10-14 08:50:23 |
 | rules | 2026-10-15 08:18:05 |
-| selfheal | 2026-10-15 17:11:41 |
+| selfheal | 2026-10-24 11:18:32 |
 
 ## 健康问题
 
