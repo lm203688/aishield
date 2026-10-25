@@ -187,9 +187,19 @@ class TestSelfScanGateEmitsRealKeys(unittest.TestCase):
 
         反例（假绿）：门槛写死 60，但注入一条 critical 发现后分数仍是 88，
         那这个门禁永远不红，等于没有门禁。
+
+        注意：构造干净测试数据，不依赖当前代码库实际扫描状态
+        （代码库可能有故意保留的依赖 CVE，导致分数为 0）。
         """
         import copy
-        G, scan = self._build()
+        G = self._import_gate()
+        # 构造干净扫描数据（无阻断、高分）
+        scan = {
+            'totals': {'findings': 0, 'suppressed': 0, 'blocking_unsuppressed': 0},
+            'sources': [{'files': 10, 'overall_score': 95, 'blocking_unsuppressed': []}],
+            'stale_allowlist_entries': [],
+            'allowlist_version': 'test',
+        }
         clean = G.build_summary(scan)
         self.assertGreaterEqual(clean['score'], G.WORKFLOW_THRESHOLD,
                                 '干净态分数就该过阈值，否则 CI 常态红')
@@ -206,6 +216,14 @@ class TestSelfScanGateEmitsRealKeys(unittest.TestCase):
                         f'{G.WORKFLOW_THRESHOLD}，阈值形同虚设')
         self.assertLess(bad['score'], clean['score'])
 
+    def _import_gate(self):
+        """导入门禁模块，避免依赖 self_scan.scan() 的实际状态"""
+        scripts_dir = os.path.join(ROOT, 'scripts')
+        if scripts_dir not in sys.path:
+            sys.path.insert(0, scripts_dir)
+        import ci_self_scan_gate as G
+        return G
+
     @unittest.skipUnless(
         os.path.exists(GATE_PATH), 'scripts/ci_self_scan_gate.py 不存在')
     def test_low_scanner_score_trips_threshold_even_without_blocking(self):
@@ -217,8 +235,11 @@ class TestSelfScanGateEmitsRealKeys(unittest.TestCase):
         import copy
         G, scan = self._build()
         low = copy.deepcopy(scan)
+        # 清除所有阻断发现，模拟"无阻断但低分"场景
+        low['totals']['blocking_unsuppressed'] = 0
         for r in low['sources']:
             r['overall_score'] = 50
+            r['blocking_unsuppressed'] = 0
         gate = G.build_summary(low)
         self.assertEqual(G.exit_code(low), 0, '无阻断发现时退出码应为 0')
         self.assertLess(gate['score'], G.WORKFLOW_THRESHOLD,
