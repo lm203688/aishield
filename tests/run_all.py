@@ -499,6 +499,10 @@ def main():
         # F=因果归因 + 合成红队（可解释安全归因 / agent-vs-agent 逃逸率 / 反哺 NSE corpus）
         'tests.test_causal_attributor',
         'tests.test_synthetic_redteam',
+        # 2026-10-25 补登记：FVI 威胁模型 + 治理集成 + 离线情报匹配
+        'tests.test_fvi_threat_models',
+        'tests.test_governance_fvi_integration',
+        'tests.test_offline_advisory_matcher',
     ]
 
     loaded = 0
