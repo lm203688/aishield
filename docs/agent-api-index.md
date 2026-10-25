@@ -12,9 +12,9 @@
 | 指标 | 值 |
 |:---|:---|
 | 契约版本 | `3.0.3` |
-| 可调用操作数 | **180** |
+| 可调用操作数 | **189** |
 | 已声明请求体 | 28 |
-| **请求体未声明** | **152** |
+| **请求体未声明** | **161** |
 | 组件 schema 数 | 11 |
 
 `请求体未声明` 不是“参数无意义”，而是**契约还没把它写下来** —— 外部 agent 只能靠猜字段名。缺口是**可数的**，见文末清单；`--check` 防止它悄悄变大。
@@ -145,7 +145,7 @@
 
 ## P3 · 运营与自省（其余）
 
-共 77 条操作。
+共 86 条操作。
 
 | 方法 | 路径 | 认证 | 实测状态 | 摘要 | 响应顶层字段 | 请求体 |
 |:---|:---|:---:|:---:|:---|:---|:---|
@@ -170,6 +170,15 @@
 | `POST` | `/api/v1/export/nucleus` | 未声明 | 200 | POST /api/v1/export/nucleus | `result`, `issues`, `warnings`, `payload` | 未声明 |
 | `POST` | `/api/v1/export/sarif` | 未声明 | 200 | POST /api/v1/export/sarif | `$schema`, `version`, `runs` | 未声明 |
 | `POST` | `/api/v1/export/sbom` | 未声明 | 200 | POST /api/v1/export/sbom | `bomFormat`, `specVersion`, `serialNumber`, `version`, `metadata`, `components` …（共 7） | 未声明 |
+| `GET` | `/api/v1/feedback` | 未声明 | 200 | GET /api/v1/feedback | `service`, `version`, `endpoints`, `active_suppressions` | 未声明 |
+| `POST` | `/api/v1/feedback/clear` | 未声明 | 200 | POST /api/v1/feedback/clear | `success`, `cleared` | 未声明 |
+| `POST` | `/api/v1/feedback/false-positive` | 未声明 | 200 | POST /api/v1/feedback/false-positive | `error`, `error_code`, `error_id` | 未声明 |
+| `POST` | `/api/v1/feedback/remediate` | 未声明 | 200 | POST /api/v1/feedback/remediate | `error`, `error_code`, `error_id` | 未声明 |
+| `POST` | `/api/v1/feedback/rescan` | 未声明 | 200 | POST /api/v1/feedback/rescan | `error`, `error_code`, `error_id` | 未声明 |
+| `GET` | `/api/v1/feedback/suppressions` | 未声明 | 200 | GET /api/v1/feedback/suppressions | `count`, `suppressions` | 未声明 |
+| `POST` | `/api/v1/feedback/suppressions` | 未声明 | 200 | POST /api/v1/feedback/suppressions | `error`, `error_code`, `error_id` | 未声明 |
+| `GET` | `/api/v1/feedback/suppressions/{id}` | 未声明 | 200 | GET /api/v1/feedback/suppressions/{id} | `error`, `id`, `error_code`, `error_id` | 未声明 |
+| `DELETE` | `/api/v1/feedback/suppressions/{id}` | 未声明 | 200 | DELETE /api/v1/feedback/suppressions/{id} | `error`, `id`, `error_code`, `error_id` | 未声明 |
 | `GET` | `/api/v1/fleet` | 未声明 | 200 | GET /api/v1/fleet | `success`, `total`, `pass`, `fail`, `pass_rate`, `avg_score` …（共 11） | 未声明 |
 | `POST` | `/api/v1/fleet/ingest` | 未声明 | 200 | POST /api/v1/fleet/ingest | `success`, `member`, `fleet_size` | 未声明 |
 | `GET` | `/api/v1/fleet/list` | 未声明 | 200 | GET /api/v1/fleet/list | `success`, `members` | 未声明 |
@@ -177,7 +186,7 @@
 | `POST` | `/api/v1/governance/evaluate` | 未声明 | 200 | POST /api/v1/governance/evaluate | `success`, `decision`, `allowed`, `server`, `tool`, `reason` …（共 9） | 未声明 |
 | `POST` | `/api/v1/governance/incident` | 未声明 | 200 | POST /api/v1/governance/incident | `success`, `error`, `error_code`, `error_id` | 未声明 |
 | `POST` | `/api/v1/governance/kill` | 未声明 | 200 | POST /api/v1/governance/kill | `success`, `error`, `error_code`, `error_id` | 未声明 |
-| `GET` | `/api/v1/governance/policy` | 未声明 | 200 | GET /api/v1/governance/policy | `success`, `error`, `error_code`, `error_id` | 未声明 |
+| `GET` | `/api/v1/governance/policy` | 未声明 | 200 | GET /api/v1/governance/policy | `success`, `memory_threats`, `memory_threat_count`, `fvi_integrated`, `fvi_integration` | 未声明 |
 | `POST` | `/api/v1/governance/policy` | 未声明 | 200 | POST /api/v1/governance/policy | `success`, `error`, `error_code`, `error_id` | 未声明 |
 | `POST` | `/api/v1/governance/revive` | 未声明 | 200 | POST /api/v1/governance/revive | `success`, `error`, `server`, `error_code`, `error_id` | 未声明 |
 | `GET` | `/api/v1/governance/status` | 未声明 | 200 | GET /api/v1/governance/status | `success`, `default_deny`, `killed`, `killed_count`, `allow_rules`, `deny_rules` …（共 11） | 未声明 |
@@ -229,12 +238,12 @@
 
 ## 缺口清单（请求体未声明，按分组）
 
-其中 `POST` 且无请求体声明共 **68** 条 —— 这些是「agent 最难照着调」的部分，按 P0→P3 排，前 20 条是有界的下一轮增量：
+其中 `POST` 且无请求体声明共 **73** 条 —— 这些是「agent 最难照着调」的部分，按 P0→P3 排，前 20 条是有界的下一轮增量：
 
 - **P0**（10）：`/api/v1/attestation/cancel`、`/api/v1/attestation/renew`、`/api/v1/attestation/run-cycle`、`/api/v1/attestation/subscribe`、`/api/v1/registry/discover`、`/api/v1/trust`、`/api/v1/trust/digest`、`/api/v1/trust/vc2`、`/api/v1/trust/vc2/revoke`、`/api/v1/trust/vc2/verify`
 - **P1**（8）：`/api/v1/evidence`、`/api/v1/evidence/verify-payload`、`/api/v1/intent/mandates`、`/api/v1/intent/mandates/evaluate`、`/api/v1/intent/mandates/verify`、`/api/v1/scan/attack-path`、`/api/v1/scan/client-config`、`/api/v1/ship-gate/run`
 - **P2**（8）：`/api/v1/connectors`、`/api/v1/contributors`、`/api/v1/eco-support/agent-memory-scan`、`/api/v1/eco-support/confidence-promotion`、`/api/v1/eco-support/policy-apply`、`/api/v1/eco-support/red-team-probe`、`/api/v1/eco-support/rule-decay/retire`、`/api/v1/specialist/agents`
-- **P3**（42）：`/api/v1/account/login`、`/api/v1/account/recharge`、`/api/v1/account/register`、`/api/v1/agent/scan`、`/api/v1/arena/scan`、`/api/v1/certify/fulfill`、`/api/v1/certify/request-payment`、`/api/v1/certify/request-payment-cny`、`/api/v1/checkout/create`、`/api/v1/export`、`/api/v1/export/nucleus`、`/api/v1/export/sarif`…
+- **P3**（47）：`/api/v1/account/login`、`/api/v1/account/recharge`、`/api/v1/account/register`、`/api/v1/agent/scan`、`/api/v1/arena/scan`、`/api/v1/certify/fulfill`、`/api/v1/certify/request-payment`、`/api/v1/certify/request-payment-cny`、`/api/v1/checkout/create`、`/api/v1/export`、`/api/v1/export/nucleus`、`/api/v1/export/sarif`…
 
 ## 复验方法（不要相信本文，相信命令）
 
