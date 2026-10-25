@@ -1,43 +1,19 @@
 {
   "note": "运行时路由清单：进程内直调 api.server.AIShieldHandler.do_GET/do_POST 探得，与 curated 规范合并后即线上 /openapi.json。",
   "source": "runtime probe (scripts/gen_openapi_spec.py)",
-  "generated_at": "2026-10-17T15:24:14",
-  "route_count": 163,
-  "operation_count": 180,
+  "generated_at": "2026-10-25T22:07:45",
+  "route_count": 170,
+  "operation_count": 189,
   "probe_errors": [],
   "state_audit": {
     "created": [],
     "restored": [
-      "C:\\Users\\xing\\Desktop\\aishield\\data\\batch_scans.json",
       "C:\\Users\\xing\\Desktop\\aishield\\data\\fleet.json",
       "C:\\Users\\xing\\Desktop\\aishield\\data\\monitored_tools.json",
-      "C:\\Users\\xing\\Desktop\\aishield\\data\\state\\alerts.jsonl",
-      "C:\\Users\\xing\\Desktop\\aishield\\data\\state\\alert_cooldown.json",
-      "C:\\Users\\xing\\Desktop\\aishield\\data\\state\\health_probes.json",
-      "C:\\Users\\xing\\Desktop\\aishield\\data\\state\\tech_radar.json",
-      "C:\\Users\\xing\\Desktop\\aishield\\data\\state\\detail\\health_probes.json",
-      "C:\\Users\\xing\\Desktop\\aishield\\api/data\\agent_registry.json",
-      "C:\\Users\\xing\\Desktop\\aishield\\api/data\\attestations.json",
-      "C:\\Users\\xing\\Desktop\\aishield\\api/data\\audits.json",
-      "C:\\Users\\xing\\Desktop\\aishield\\api/data\\auth_api_keys.json",
-      "C:\\Users\\xing\\Desktop\\aishield\\api/data\\billing.json",
-      "C:\\Users\\xing\\Desktop\\aishield\\api/data\\blackboard.json",
-      "C:\\Users\\xing\\Desktop\\aishield\\api/data\\certifications.json",
-      "C:\\Users\\xing\\Desktop\\aishield\\api/data\\collab_delegations.json",
-      "C:\\Users\\xing\\Desktop\\aishield\\api/data\\collab_messages.json",
-      "C:\\Users\\xing\\Desktop\\aishield\\api/data\\contributors.json",
-      "C:\\Users\\xing\\Desktop\\aishield\\api/data\\governance.json",
-      "C:\\Users\\xing\\Desktop\\aishield\\api/data\\identity_events.jsonl",
-      "C:\\Users\\xing\\Desktop\\aishield\\api/data\\mcp_submissions.json",
-      "C:\\Users\\xing\\Desktop\\aishield\\api/data\\payments.json",
-      "C:\\Users\\xing\\Desktop\\aishield\\api/data\\personal_agents.json",
-      "C:\\Users\\xing\\Desktop\\aishield\\api/data\\registration_tokens.json",
-      "C:\\Users\\xing\\Desktop\\aishield\\api/data\\runtime_behavior.json",
-      "C:\\Users\\xing\\Desktop\\aishield\\api/data\\sandbox_tasks.json",
-      "C:\\Users\\xing\\Desktop\\aishield\\api/data\\specialist_registry.json",
+      "C:\\Users\\xing\\Desktop\\aishield\\api/data\\.state_write.lock",
+      "C:\\Users\\xing\\Desktop\\aishield\\api/data\\governance_audit.jsonl",
       "C:\\Users\\xing\\Desktop\\aishield\\api/data\\spend_caps.json",
-      "C:\\Users\\xing\\Desktop\\aishield\\api/data\\usage.json",
-      "(已删除探针新建) C:\\Users\\xing\\Desktop\\aishield\\api/data\\governance_audit.jsonl"
+      "C:\\Users\\xing\\Desktop\\aishield\\api/data\\usage.json"
     ],
     "failed": []
   },
@@ -3539,6 +3515,326 @@
       ]
     },
     {
+      "path": "/api/v1/feedback",
+      "tag": "feedback",
+      "summary": "GET /api/v1/feedback（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "GET /api/v1/feedback（运行时探得；schema 由真实响应推导）",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "service": {
+                "type": "string"
+              },
+              "version": {
+                "type": "string"
+              },
+              "endpoints": {
+                "type": "object",
+                "properties": {
+                  "GET  /api/v1/feedback/suppressions": {
+                    "type": "string"
+                  },
+                  "POST /api/v1/feedback/false-positive": {
+                    "type": "string"
+                  },
+                  "POST /api/v1/feedback/suppressions": {
+                    "type": "string"
+                  },
+                  "DELETE /api/v1/feedback/suppressions/{id}": {
+                    "type": "string"
+                  },
+                  "POST /api/v1/feedback/remediate": {
+                    "type": "string"
+                  },
+                  "POST /api/v1/feedback/rescan": {
+                    "type": "string"
+                  },
+                  "POST /api/v1/feedback/clear": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": true
+              },
+              "active_suppressions": {
+                "type": "integer"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "getFeedback"
+      ]
+    },
+    {
+      "path": "/api/v1/feedback/clear",
+      "tag": "feedback",
+      "summary": "POST /api/v1/feedback/clear（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/feedback/clear（运行时探得；schema 由真实响应推导）",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "success": {
+                "type": "boolean"
+              },
+              "cleared": {
+                "type": "integer"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        }
+      ],
+      "operation_ids": [
+        "postFeedbackClear"
+      ]
+    },
+    {
+      "path": "/api/v1/feedback/false-positive",
+      "tag": "feedback",
+      "summary": "POST /api/v1/feedback/false-positive（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/feedback/false-positive（运行时探得；schema 由真实响应推导）",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "postFeedbackFalsePositive"
+      ]
+    },
+    {
+      "path": "/api/v1/feedback/remediate",
+      "tag": "feedback",
+      "summary": "POST /api/v1/feedback/remediate（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/feedback/remediate（运行时探得；schema 由真实响应推导）",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "postFeedbackRemediate"
+      ]
+    },
+    {
+      "path": "/api/v1/feedback/rescan",
+      "tag": "feedback",
+      "summary": "POST /api/v1/feedback/rescan（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/feedback/rescan（运行时探得；schema 由真实响应推导）",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "postFeedbackRescan"
+      ]
+    },
+    {
+      "path": "/api/v1/feedback/suppressions",
+      "tag": "feedback",
+      "summary": "GET /api/v1/feedback/suppressions（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "get",
+          "summary": "GET /api/v1/feedback/suppressions（运行时探得；schema 由真实响应推导）",
+          "status": 200,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "count": {
+                "type": "integer"
+              },
+              "suppressions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {},
+                  "additionalProperties": true
+                }
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 200
+        },
+        {
+          "verb": "post",
+          "summary": "POST /api/v1/feedback/suppressions（运行时探得；schema 由真实响应推导）",
+          "status": 400,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 400
+        }
+      ],
+      "operation_ids": [
+        "getFeedbackSuppressions",
+        "postFeedbackSuppressions"
+      ]
+    },
+    {
+      "path": "/api/v1/feedback/suppressions/{id}",
+      "tag": "feedback",
+      "summary": "GET /api/v1/feedback/suppressions/{id}（运行时探得；schema 由真实响应推导）",
+      "operations": [
+        {
+          "verb": "delete",
+          "summary": "DELETE /api/v1/feedback/suppressions/{id}（运行时探得；schema 由真实响应推导）",
+          "status": 404,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "id": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 404
+        },
+        {
+          "verb": "get",
+          "summary": "GET /api/v1/feedback/suppressions/{id}（运行时探得；schema 由真实响应推导）",
+          "status": 404,
+          "sample_present": true,
+          "sample_truncated": false,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              },
+              "id": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "error_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "x-aishield-generated": true,
+          "x-aishield-probe-status": 404
+        }
+      ],
+      "operation_ids": [
+        "deleteFeedbackSuppressions",
+        "getFeedbackSuppressions"
+      ]
+    },
+    {
       "path": "/api/v1/fleet",
       "tag": "fleet",
       "summary": "GET /api/v1/fleet（运行时探得；schema 由真实响应推导）",
@@ -3857,7 +4153,7 @@
                   "entries": {
                     "type": "integer"
                   },
-                  "note": {
+                  "head_hash": {
                     "type": "string"
                   }
                 },
@@ -3867,7 +4163,26 @@
                 "type": "array",
                 "items": {
                   "type": "object",
-                  "properties": {},
+                  "properties": {
+                    "seq": {
+                      "type": "object"
+                    },
+                    "ts": {
+                      "type": "object"
+                    },
+                    "event": {
+                      "type": "object"
+                    },
+                    "detail": {
+                      "type": "object"
+                    },
+                    "prev_hash": {
+                      "type": "object"
+                    },
+                    "hash": {
+                      "type": "object"
+                    }
+                  },
                   "additionalProperties": true
                 }
               }
@@ -4018,7 +4333,7 @@
         {
           "verb": "get",
           "summary": "GET /api/v1/governance/policy（运行时探得；schema 由真实响应推导）",
-          "status": 400,
+          "status": 200,
           "sample_present": true,
           "sample_truncated": false,
           "schema": {
@@ -4027,20 +4342,188 @@
               "success": {
                 "type": "boolean"
               },
-              "error": {
-                "type": "string"
+              "memory_threats": {
+                "type": "object",
+                "properties": {
+                  "package.json#postinstall": {
+                    "type": "object",
+                    "properties": {
+                      "adversary_ops": {
+                        "type": "object"
+                      },
+                      "has_adversary_requests": {
+                        "type": "object"
+                      },
+                      "rsi": {
+                        "type": "object"
+                      },
+                      "verdict": {
+                        "type": "object"
+                      }
+                    },
+                    "additionalProperties": true
+                  },
+                  "tool.py#os.system": {
+                    "type": "object",
+                    "properties": {
+                      "adversary_ops": {
+                        "type": "object"
+                      },
+                      "has_adversary_requests": {
+                        "type": "object"
+                      },
+                      "rsi": {
+                        "type": "object"
+                      },
+                      "verdict": {
+                        "type": "object"
+                      }
+                    },
+                    "additionalProperties": true
+                  },
+                  "tool.py#subprocess.call": {
+                    "type": "object",
+                    "properties": {
+                      "adversary_ops": {
+                        "type": "object"
+                      },
+                      "has_adversary_requests": {
+                        "type": "object"
+                      },
+                      "rsi": {
+                        "type": "object"
+                      },
+                      "verdict": {
+                        "type": "object"
+                      }
+                    },
+                    "additionalProperties": true
+                  },
+                  "skill.md#os.system": {
+                    "type": "object",
+                    "properties": {
+                      "adversary_ops": {
+                        "type": "object"
+                      },
+                      "has_adversary_requests": {
+                        "type": "object"
+                      },
+                      "rsi": {
+                        "type": "object"
+                      },
+                      "verdict": {
+                        "type": "object"
+                      }
+                    },
+                    "additionalProperties": true
+                  },
+                  "mcp_config.json#bash -c": {
+                    "type": "object",
+                    "properties": {
+                      "adversary_ops": {
+                        "type": "object"
+                      },
+                      "has_adversary_requests": {
+                        "type": "object"
+                      },
+                      "rsi": {
+                        "type": "object"
+                      },
+                      "verdict": {
+                        "type": "object"
+                      }
+                    },
+                    "additionalProperties": true
+                  },
+                  "benign_readme.md": {
+                    "type": "object",
+                    "properties": {
+                      "adversary_ops": {
+                        "type": "object"
+                      },
+                      "has_adversary_requests": {
+                        "type": "object"
+                      },
+                      "rsi": {
+                        "type": "object"
+                      },
+                      "verdict": {
+                        "type": "object"
+                      }
+                    },
+                    "additionalProperties": true
+                  }
+                },
+                "additionalProperties": true
               },
-              "error_code": {
-                "type": "string"
+              "memory_threat_count": {
+                "type": "integer"
               },
-              "error_id": {
-                "type": "string"
+              "fvi_integrated": {
+                "type": "boolean"
+              },
+              "fvi_integration": {
+                "type": "object",
+                "properties": {
+                  "ok": {
+                    "type": "boolean"
+                  },
+                  "fvi_artifacts": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "policy_artifacts": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "missing_in_policy": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "extra_in_policy": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "canonical": {
+                    "type": "object",
+                    "properties": {
+                      "package.json#postinstall": {
+                        "type": "object"
+                      },
+                      "tool.py#os.system": {
+                        "type": "object"
+                      },
+                      "tool.py#subprocess.call": {
+                        "type": "object"
+                      },
+                      "skill.md#os.system": {
+                        "type": "object"
+                      },
+                      "mcp_config.json#bash -c": {
+                        "type": "object"
+                      },
+                      "benign_readme.md": {
+                        "type": "object"
+                      }
+                    },
+                    "additionalProperties": true
+                  }
+                },
+                "additionalProperties": true
               }
             },
             "additionalProperties": true
           },
           "x-aishield-generated": true,
-          "x-aishield-probe-status": 400
+          "x-aishield-probe-status": 200
         },
         {
           "verb": "post",
@@ -4706,7 +5189,47 @@
                 "type": "array",
                 "items": {
                   "type": "object",
-                  "properties": {},
+                  "properties": {
+                    "name": {
+                      "type": "object"
+                    },
+                    "did": {
+                      "type": "object"
+                    },
+                    "public_key": {
+                      "type": "object"
+                    },
+                    "capabilities": {
+                      "type": "object"
+                    },
+                    "owner": {
+                      "type": "object"
+                    },
+                    "reputation_score": {
+                      "type": "object"
+                    },
+                    "reputation_level": {
+                      "type": "object"
+                    },
+                    "registered_at": {
+                      "type": "object"
+                    },
+                    "updated_at": {
+                      "type": "object"
+                    },
+                    "status": {
+                      "type": "object"
+                    },
+                    "revoked_at": {
+                      "type": "object"
+                    },
+                    "identity_token_expires": {
+                      "type": "object"
+                    },
+                    "identity_token_consumed_at": {
+                      "type": "object"
+                    }
+                  },
                   "additionalProperties": true
                 }
               }
@@ -6137,7 +6660,9 @@
               "users": {
                 "type": "array",
                 "items": {
-                  "type": "string"
+                  "type": "object",
+                  "properties": {},
+                  "additionalProperties": true
                 }
               }
             },
