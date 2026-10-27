@@ -97,8 +97,13 @@ jobs:
         run: |
           git config user.name "github-actions[full]"
           git config user.email "github-actions[full]@users.noreply.github.com"
-          git add data/batch_scans.json data/monitored_tools.json data/security_report.md 2>/dev/null
-          git add data/batch_scans.json data/monitored_tools.json data/security_report.md data/state/flywheel.json  2>/dev/null
+          # 2026-10-27 修复（spine 部署链停摆 6 天根因）：data/batch_scans.json 已被
+          # .gitignore 忽略（H2 状态退出 git），git add 对它返回非零且整条命令原子失败；
+          # 在 shell 为 bash -e 的步骤里，第一条 git add 就中断步骤 -> radar job 失败 ->
+          # spine 的 deploy 及其后全部 skipped。移除该路径，只 add 被跟踪的数据文件
+          #（monitored_tools.json / security_report.md 在 git 树中，checkout 后必存在）。
+          git add data/monitored_tools.json data/security_report.md 2>/dev/null
+          git add data/monitored_tools.json data/security_report.md data/state/flywheel.json  2>/dev/null
           if ! git diff --cached --quiet; then
             git commit -m "auto: 批量扫描入库 [skip ci]"
             bash scripts/git_push_safe.sh
