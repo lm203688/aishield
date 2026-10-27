@@ -241,6 +241,12 @@ TARGETS: List[Tuple[str, str, str]] = [
     ("smithery.yaml",
      r'(\nversion:\s*")([^"]+)(")',
      r"\g<1>{v}\g<3>"),
+    # 用户查 API 文档直接读到的响应示例里自报的产品版本（/health 的 version 字段）。
+    # 此前不在门禁内 → 文档停在旧版而 /health 已升版，用户按文档对不上线上值。
+    # 只锚定 JSON 键 `"version"`，不会误伤行 9 的散文 "Service status, version, ..."。
+    ("docs/en/api-reference.md",
+     r'("version"\s*:\s*")([^"]+)(")',
+     r"\g<1>{v}\g<3>"),
 ]
 
 SEMVER = re.compile(r"^(\d+)\.(\d+)\.(\d+)")

@@ -199,9 +199,12 @@ class TestProbeHermetic(unittest.TestCase):
         # 支付上限是生态端点探针跑过去的副产物。它们**写脏了又被还原** ——
         # state_restored 非空恰恰是"探针没污染仓库"的凭据，不是污染本身。
         # 白名单漏一个就会出现"明明还原成功却红"的假故障，所以这里只准增、不准漏。
+        # .state_write.lock：api/state_store.py 的跨进程 advisory 锁文件。探针命中
+        # 写端点时 save_json → file_lock 会创建/改写它（锁文件不随 release 删除），
+        # 属瞬态运行时工件而非污染，与上面 5 个状态文件同类，故一并白名单。
         _known = {
             "fleet.json", "monitored_tools.json", "governance_audit.jsonl",
-            "usage.json", "spend_caps.json",
+            "usage.json", "spend_caps.json", ".state_write.lock",
         }
         touched = {os.path.basename(p) for p in d["state_restored"]}
         self.assertTrue(touched <= _known, f"意外触碰：{touched}")
