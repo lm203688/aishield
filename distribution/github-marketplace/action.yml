@@ -25,6 +25,14 @@ inputs:
     description: "Fail CI at this risk level: safe / medium / high / critical"
     required: false
     default: "high"
+  output_format:
+    description: "Output format: json / sarif / text"
+    required: false
+    default: "sarif"
+  include_trust_attestation:
+    description: "Generate integrity-anchored scan adjudication (neutral trust credential)"
+    required: false
+    default: "false"
 outputs:
   score:
     description: "Overall security score (0-100)"
@@ -34,6 +42,8 @@ outputs:
     description: "Path to JSON scan report"
   sarif:
     description: "Path to SARIF file (uploadable to GitHub Security tab)"
+  trust_attestation:
+    description: "Path to integrity-anchored scan adjudication JSON"
 runs:
   using: "docker"
   image: "Dockerfile"
@@ -43,3 +53,5 @@ runs:
     INPUT_NAME: ${{ inputs.name }}
     INPUT_ENABLE_OSV: ${{ inputs.enable_osv }}
     INPUT_FAIL_ON: ${{ inputs.fail_on }}
+    INPUT_OUTPUT_FORMAT: ${{ inputs.output_format }}
+    INPUT_INCLUDE_TRUST_ATTESTATION: ${{ inputs.include_trust_attestation }}

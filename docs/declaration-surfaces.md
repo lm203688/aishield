@@ -1,5 +1,11 @@
 # 公开声明面：为什么"文件是对的"不等于"服务是对的"
 
+> [!NOTE]
+> **历史快照（2026-10-05）**：本文数值为当时实测，**不是当前复现承诺**。
+> 当前权威数字（规则数/版本/协议/依赖边界）一律见
+> [`release-facts.json`](../release-facts.json)（由 `scripts/generate_release_facts.py` 派生）。
+> 归档副本：`archive/legacy-reports/declaration-surfaces.md`。
+
 > 2026-10-05 实测触发。本文记录一类缺陷的形状与它的机械拦截，供后续改动参考。
 
 ## 一、现象

@@ -1,0 +1,45 @@
+{
+  "message": "404 Not Found - POST https://registry.npmmirror.com/-/npm/v1/security/advisories/bulk - [NOT_IMPLEMENTED] /-/npm/v1/security/* not implemented yet",
+  "method": "POST",
+  "uri": "https://registry.npmmirror.com/-/npm/v1/security/advisories/bulk",
+  "headers": {
+    "server": [
+      "Tengine"
+    ],
+    "date": [
+      "Tue, 27 Oct 2026 04:17:51 GMT"
+    ],
+    "content-type": [
+      "application/json"
+    ],
+    "transfer-encoding": [
+      "chunked"
+    ],
+    "connection": [
+      "keep-alive"
+    ],
+    "strict-transport-security": [
+      "max-age=5184000"
+    ],
+    "via": [
+      "kunlun1.cn3189[,404666]"
+    ],
+    "timing-allow-origin": [
+      "*"
+    ],
+    "eagleid": [
+      "1b98b91517930746715961910e"
+    ],
+    "x-fetch-attempts": [
+      "1"
+    ]
+  },
+  "statusCode": 404,
+  "body": {
+    "error": "[NOT_IMPLEMENTED] /-/npm/v1/security/* not implemented yet"
+  },
+  "error": {
+    "summary": "",
+    "detail": ""
+  }
+}

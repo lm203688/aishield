@@ -45,14 +45,14 @@ python scripts/validate_workflows.py               # Workflow 语法门禁
 | 指标 | 值 | 权威命令 |
 |---|---|---|
 | API 版本 | `4.11.0` | `python -c "import api.server; print(api.server.API_VERSION)"` |
-| 静态规则数 | 237 | `python scripts/rule_count_gate.py` |
+| 静态规则数 | 286 | `python scripts/rule_count_gate.py` |
 | 生成规则数 | 8 | 同上（gate 汇总） |
 | 雷达规则数 | 19 | 同上 |
-| 规则总数 | 264 | `curl -s https://aishield.tools/api/v1/health | jq .rules_count` |
-| Skill 规则数 | 291 | `python scripts/declaration_surface_gate.py` |
+| 规则总数 | 313 | `curl -s https://aishield.tools/api/v1/health | jq .rules_count` |
+| Skill 规则数 | 340 | `python scripts/declaration_surface_gate.py` |
 | internal corpus 召回 | 57/57 = 100.0% | `python scripts/benchmark.py --json` |
 | internal corpus 误报 | 0/45 = 0.0% | 同上 |
-| external corpus 召回 | 40.6% [36.6%, 44.7%]（bootstrap 95% CI, seed=20261018） | `python scripts/external_scope_recall.py` |
+| external corpus 召回 | 94.3% [92.2%, 96.1%]（bootstrap 95% CI, seed=20261018） | `python scripts/external_scope_recall.py` |
 | external corpus 误报 | 0.0% [0.0%, 0.0%] | 同上 |
 | external corpus 样本数 | 593 正 / 517 负 | 同上 |
 | external corpus 家族数 | 18 | `jq .family_count benchmarks/corpus/external/manifest.json` |
@@ -60,8 +60,8 @@ python scripts/validate_workflows.py               # Workflow 语法门禁
 | external corpus LCA (Cohen's κ) | **0.867 [0.809, 0.926]** | `python scripts/compute_lca.py --no-write` |
 | external corpus 标签来源 | A = 来源真值（GHSA CVE / InjecAgent 作者标注）；**gold-standard 外部真值，非人工双标** | `scripts/label_consistency_audit.py` |
 | external corpus 人类双标 (IAA) | **未声称**（provenance + LCA 双支柱已足；reviewer 请求时工具包可即时产出） | `scripts/human_iAA_kit.py` |
-| **external 召回·按适用范围分解** | 主范围（GHSA 供应链 CVE 66）：**100.0% (66/66)**；次范围（InjecAgent NL 注入 527）：**33.2% [29.4%, 37.2%]** | `python scripts/external_scope_recall.py` |
-| external 召回·按 scan_plane | config 12：**100.0%**；instruction 581：**39.4% [35.3%, 43.5%]** | 同上 |
+| **external 召回·按适用范围分解** | 主范围（GHSA 供应链 CVE 66）：**100.0% (66/66)**；次范围（InjecAgent NL 注入 527）：**93.6% (493/527)** | `python scripts/external_scope_recall.py` |
+| external 召回·按 scan_plane | config 12：**100.0%**；instruction 581：**94.0% [91.9%, 96.0%]**（34 漏检全在 instruction） | 同上 |
 | 离线供应链 CVE 匹配器 | 已落地：解析 8 生态依赖声明（go require / npm @ / pip == / maven / nuget / ruby gem / rust cargo / composer）+ 本地公告索引版本区间匹配；气隙安全（不联网），FP 0/517 | `scanner/supply_chain.py` + `scanner/data/advisory_index.json`（由 `scripts/build_advisory_index.py` 从 GHSA/OSV 真值生成）；单测 `tests/test_offline_advisory_matcher.py` |
 | GHSA 0%→100% 根因 | 此前 GHSA 0% 因默认关闭联网 OSV 且无本地公告索引（依赖版本型 CVE 能力缺口）；现已落地**离线公告索引匹配器**（vendored `advisory_index.json`），主范围召回 **0%→100% (66/66) @ 0 FP**。联网 OSV 仍默认关闭以保气隙。 | `scanner/osv.py`（`enable_osv=False`）；`scanner/supply_chain.py`；论文 §6.2.1 / §7 |
 
@@ -164,7 +164,7 @@ SCI 复现的核心保证来自六道独立门禁，任一门禁失败即拒绝�
 ## 7. 变更追溯（Provenance）
 
 - 版本号单一真值源：`api/server.py:API_VERSION`
-- 规则数单一真值源：`/api/v1/health.rules_breakdown`（静态 237 + 生成 8 + 雷达 19 = 264）
+- 规则数单一真值源：`/api/v1/health.rules_breakdown`（静态 286 + 生成 8 + 雷达 19 = 313）
 - 语料 manifest：`benchmarks/corpus/external/manifest.json`（含 `collected_at`、`provenance_honesty`、`r1_status`）
 - 基准预期值：`benchmarks/expected.json`
 - 线上复验：`curl -sS https://aishield.tools/api/v1/health`

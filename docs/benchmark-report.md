@@ -1,5 +1,11 @@
 # AIShield 公开基准测评报告
 
+> [!NOTE]
+> **历史快照（2026-08-27）**：本文数值为当时一次性实测结果，且正文已自证"不可复现"，
+> **不是当前复现承诺**。当前权威数字（规则数/召回/CI/协议/依赖边界）一律见
+> [`release-facts.json`](../release-facts.json)（由 `scripts/generate_release_facts.py` 派生）。
+> 归档副本：`archive/legacy-reports/benchmark-report.md`。
+
 > 版本: v4.3.0 | 测试时间: 2026-08-27 | 零第三方依赖 | 本地优先
 
 ---

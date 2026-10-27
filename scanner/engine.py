@@ -35,6 +35,77 @@ TZ = timezone(timedelta(hours=8))
 SCANNER_VERSION = "4.11.0"
 USER_AGENT = "AIShield/4.0"
 
+# 关键分析器：它们失败 = 「没能分析」而不是「没有发现风险」。
+# 安全工具的失败语义必须区分二者：前者绝不能显示成 safe/0 findings。
+# 审计 P0-3：把 except Exception → [] 的静默失败改为显式 failed 状态。
+_CRITICAL_ANALYZERS = frozenset({
+    "toxic_flow",
+    "cross_channel",
+    "capability",
+    "baseline_drift",
+})
+
+# 统一退出码（审计 §10）：0=完成且未达阈值 / 1=完成且达阻断阈值 /
+# 2=输入或配置错误 / 3=扫描不完整或关键分析器失败 / 4=证据或签名验证失败。
+EXIT_OK = 0
+EXIT_THRESHOLD = 1
+EXIT_CONFIG = 2
+EXIT_INCOMPLETE = 3
+EXIT_EVIDENCE = 4
+
+
+def _new_analyzer_state():
+    """返回分析器状态容器。每个分析器记录 status/error/duration_ms。"""
+    return {}
+
+
+def _record_analyzer(state, name, status, error=None, duration_ms=None, findings_count=0):
+    """记录单个分析器的运行状态。
+
+    status: complete / partial / failed / not_applicable / skipped
+    - complete: 正常跑完
+    - partial: 部分输入无法分析（如个别文件解析失败），但主体完成
+    - failed:  分析器整体失败（异常），结果不可信
+    - not_applicable: 该分析器在本场景下无输入（如无 baseline 传入）
+    - skipped: 可选分析器未启用（如 LLM 不可用）
+    """
+    state[name] = {
+        "status": status,
+        "error": error,
+        "duration_ms": duration_ms,
+        "findings_count": findings_count,
+    }
+    return state[name]
+
+
+def analyzer_failures(state):
+    """返回关键分析器中 status == failed 的名字列表（非关键失败不视为不完整）。"""
+    if not state:
+        return []
+    return sorted(
+        name for name, info in state.items()
+        if name in _CRITICAL_ANALYZERS and info.get("status") == "failed"
+    )
+
+
+def scan_exit_code(report, fail_on="high"):
+    """统一退出码决策：0/1/2/3/4。
+
+    优先级（审计 §10 口径）：配置错误 > 关键分析器失败 > 达阈值 > 完成。
+    关键分析器失败返回 3，即使分数显示 safe —— 这是 fail-closed 的核心：
+    「没能分析」绝不能伪装成「没有发现风险」。
+    """
+    state = report.get("analyzer_status") or {}
+    fails = analyzer_failures(state)
+    if fails:
+        return EXIT_INCOMPLETE
+    # 达阻断阈值（复用 action_entrypoint 的风险档排序语义）
+    rank = {"": 0, "info": 1, "safe": 1, "low": 1, "medium": 2, "high": 3, "critical": 4}
+    risk = (report.get("risk_level") or "safe").lower()
+    if rank.get(risk, 0) >= rank.get(str(fail_on).lower(), 2):
+        return EXIT_THRESHOLD
+    return EXIT_OK
+
 
 def _is_safe_url(url):
     """防止SSRF: 拒绝内网地址和私有IP"""
@@ -577,68 +648,170 @@ def scan(source_url, tool_type="mcp", name="", description="", enable_osv=False,
     files = source_data.get("files", {})
     total_files = len(files)
 
+    # 分析器状态账本：审计 P0-3，except→[] 的静默失败必须显式化。
+    # 关键分析器（toxic_flow / cross_channel / capability / baseline_drift）
+    # 失败时 scan_exit_code() 返回 3，绝不显示成 safe/0 findings。
+    analyzer_state = _new_analyzer_state()
+
     # Step 2: 静态分析（对齐OWASP MCP Top 10）
-    static_results = rules_analyze(files, tool_type)
+    _t0 = time.time()
+    try:
+        static_results = rules_analyze(files, tool_type)
+        _record_analyzer(analyzer_state, "static", "complete",
+                         duration_ms=int((time.time() - _t0) * 1000),
+                         findings_count=len(static_results.get("findings", [])))
+    except Exception as e:  # noqa: BLE001
+        static_results = {"findings": [], "owasp_coverage": {}, "agentic_coverage": {}}
+        _record_analyzer(analyzer_state, "static", "failed", error=repr(e),
+                         duration_ms=int((time.time() - _t0) * 1000))
 
     # Step 3: 依赖分析
-    dependency_results = dependency_analysis(files)
+    _t0 = time.time()
+    try:
+        dependency_results = dependency_analysis(files)
+        _record_analyzer(analyzer_state, "dependency", "complete",
+                         duration_ms=int((time.time() - _t0) * 1000),
+                         findings_count=len(dependency_results.get("findings", [])))
+    except Exception as e:  # noqa: BLE001
+        dependency_results = {"findings": [], "dependencies": [], "total_dependencies": 0}
+        _record_analyzer(analyzer_state, "dependency", "failed", error=repr(e),
+                         duration_ms=int((time.time() - _t0) * 1000))
 
     # Step 3b: OSV.dev 实时 CVE（D1，默认关闭）
     osv_findings = []
     if enable_osv:
+        _t0 = time.time()
         try:
             from .osv import check_osv
             osv_findings = check_osv(dependency_results.get("dependencies", []), use_network=True)
             for _f in osv_findings:
                 _f["file"] = "dependencies"
-        except Exception:
+            _record_analyzer(analyzer_state, "osv", "complete",
+                             duration_ms=int((time.time() - _t0) * 1000),
+                             findings_count=len(osv_findings))
+        except Exception as e:  # noqa: BLE001
             osv_findings = []
+            _record_analyzer(analyzer_state, "osv", "failed", error=repr(e),
+                             duration_ms=int((time.time() - _t0) * 1000))
+    else:
+        _record_analyzer(analyzer_state, "osv", "skipped",
+                         error="enable_osv=false（默认离线优先）")
 
     # Step 4: 密钥检测
-    secrets_results = secrets_detection(files)
+    _t0 = time.time()
+    try:
+        secrets_results = secrets_detection(files)
+        _record_analyzer(analyzer_state, "secrets", "complete",
+                         duration_ms=int((time.time() - _t0) * 1000),
+                         findings_count=len(secrets_results.get("findings", [])))
+    except Exception as e:  # noqa: BLE001
+        secrets_results = {"findings": []}
+        _record_analyzer(analyzer_state, "secrets", "failed", error=repr(e),
+                         duration_ms=int((time.time() - _t0) * 1000))
 
     # Step 5: Tool Poisoning语义检测（正则）
-    poisoning_results = tool_poisoning_detection(files)
+    _t0 = time.time()
+    try:
+        poisoning_results = tool_poisoning_detection(files)
+        _record_analyzer(analyzer_state, "poisoning", "complete",
+                         duration_ms=int((time.time() - _t0) * 1000),
+                         findings_count=len(poisoning_results))
+    except Exception as e:  # noqa: BLE001
+        poisoning_results = []
+        _record_analyzer(analyzer_state, "poisoning", "failed", error=repr(e),
+                         duration_ms=int((time.time() - _t0) * 1000))
 
     # Step 5b: LLM语义分析（如果可用）
     llm_results = {"findings": [], "analyzed": False}
     llm_sc_results = {"findings": [], "analyzed": False}
     if LLM_AVAILABLE:
-        llm_results = llm_poisoning(files, name)
-        llm_sc_results = llm_supply_chain(dependency_results)
+        _t0 = time.time()
+        try:
+            llm_results = llm_poisoning(files, name)
+            llm_sc_results = llm_supply_chain(dependency_results)
+            _record_analyzer(analyzer_state, "llm", "complete",
+                             duration_ms=int((time.time() - _t0) * 1000),
+                             findings_count=len(llm_results.get("findings", [])) + len(llm_sc_results.get("findings", [])))
+        except Exception as e:  # noqa: BLE001
+            llm_results = {"findings": [], "analyzed": False}
+            llm_sc_results = {"findings": [], "analyzed": False}
+            _record_analyzer(analyzer_state, "llm", "failed", error=repr(e),
+                             duration_ms=int((time.time() - _t0) * 1000))
+    else:
+        _record_analyzer(analyzer_state, "llm", "skipped",
+                         error="LLM analyzer not available")
 
     # Step 6: 污点分析
-    taint_results = taint_analysis(files)
+    _t0 = time.time()
+    try:
+        taint_results = taint_analysis(files)
+        _record_analyzer(analyzer_state, "taint", "complete",
+                         duration_ms=int((time.time() - _t0) * 1000),
+                         findings_count=len(taint_results))
+    except Exception as e:  # noqa: BLE001
+        taint_results = []
+        _record_analyzer(analyzer_state, "taint", "failed", error=repr(e),
+                         duration_ms=int((time.time() - _t0) * 1000))
 
     # Step 6b: Toxic Flow 致命三要素（借鉴 Snyk agent-scan / mcp-security-scan）
+    # 关键分析器：失败 ≠ 没有发现风险，必须记录 failed（审计 P0-3 fail-closed）。
+    _t0 = time.time()
     try:
         from .baseline_scan import detect_toxic_flows, check_drift
         toxic_results = detect_toxic_flows(files).get("findings", [])
-    except Exception:
+        _record_analyzer(analyzer_state, "toxic_flow", "complete",
+                         duration_ms=int((time.time() - _t0) * 1000),
+                         findings_count=len(toxic_results))
+    except Exception as e:  # noqa: BLE001
         toxic_results = []
+        _record_analyzer(analyzer_state, "toxic_flow", "failed", error=repr(e),
+                         duration_ms=int((time.time() - _t0) * 1000))
 
     # Step 6c: 基线漂移比对（可选，传入 baseline 时启用 —— 定义级 rug-pull 钉扎）
+    # 关键分析器：有 baseline 时失败必须记录，不能把「无法比对」当「无漂移」。
     drift_findings = []
     if baseline is not None:
+        _t0 = time.time()
         try:
             from .baseline_scan import check_drift as _check_drift
             drift_findings = _check_drift(files, baseline).get("findings", [])
-        except Exception:
+            _record_analyzer(analyzer_state, "baseline_drift", "complete",
+                             duration_ms=int((time.time() - _t0) * 1000),
+                             findings_count=len(drift_findings))
+        except Exception as e:  # noqa: BLE001
             drift_findings = []
+            _record_analyzer(analyzer_state, "baseline_drift", "failed", error=repr(e),
+                             duration_ms=int((time.time() - _t0) * 1000))
+    else:
+        _record_analyzer(analyzer_state, "baseline_drift", "not_applicable")
 
     # Step 6d: 跨通道污点（分片重组 / 编码规避 / 跨引用逃逸 —— 单一通道扫描看不到完整恶意载荷）
+    # 关键分析器：失败必须记录，不能静默当无跨通道风险。
+    _t0 = time.time()
     try:
         from .cross_channel_taint import scan_cross_channel
         cross_channel_results = scan_cross_channel(files)
-    except Exception:
+        _record_analyzer(analyzer_state, "cross_channel", "complete",
+                         duration_ms=int((time.time() - _t0) * 1000),
+                         findings_count=len(cross_channel_results))
+    except Exception as e:  # noqa: BLE001
         cross_channel_results = []
+        _record_analyzer(analyzer_state, "cross_channel", "failed", error=repr(e),
+                         duration_ms=int((time.time() - _t0) * 1000))
 
     # Step 6e: 能力契约 diff（实现能力集 vs 声明 surface，超权即报）
+    # 关键分析器：失败必须记录，不能静默当无超权。
+    _t0 = time.time()
     try:
         from .capability_contract import scan_capability_contract
         capability_results = scan_capability_contract(files)
-    except Exception:
+        _record_analyzer(analyzer_state, "capability", "complete",
+                         duration_ms=int((time.time() - _t0) * 1000),
+                         findings_count=len(capability_results))
+    except Exception as e:  # noqa: BLE001
         capability_results = []
+        _record_analyzer(analyzer_state, "capability", "failed", error=repr(e),
+                         duration_ms=int((time.time() - _t0) * 1000))
 
     # Step 7: 评分（含 LLM 语义 findings 归因）
     scores = calculate_scores(
@@ -676,22 +849,32 @@ def scan(source_url, tool_type="mcp", name="", description="", enable_osv=False,
 
     # Step 8: 合规映射（借鉴 Latteflo/mcp-scanner ——纯报告层，
     # findings 按 OWASP 类别聚合到 NIST CSF / ISO 27001 / PCI DSS 控制项）
+    _t0 = time.time()
     try:
         from .compliance import compliance_summary as _compliance
         compliance_results = _compliance(unique_findings)
-    except Exception:
+        _record_analyzer(analyzer_state, "compliance", "complete",
+                         duration_ms=int((time.time() - _t0) * 1000))
+    except Exception as e:  # noqa: BLE001
         compliance_results = {}
+        _record_analyzer(analyzer_state, "compliance", "failed", error=repr(e),
+                         duration_ms=int((time.time() - _t0) * 1000))
 
     # Step 8b: CoSAI MCP Security v2.0 采购证据包（2026-08-12 发布）。
     # 与 Step 8 的区别：CoSAI 回答的是"这套方案整体处于哪个安全保证级、
     # 八维度覆盖如何"—— 企业采购评审现场真正被问的问题。本仓内部 ASI
     # 编号与官方非同一套，故必须由这一层把证据对齐到采购方的语言。
     # 保证级不由扫描结果自动授予：未提供部署态证据时最高只主张 L1。
+    _t0 = time.time()
     try:
         from .cosai_evidence import cosai_evidence_map as _cosai
         cosai_results = _cosai(unique_findings)
-    except Exception:
+        _record_analyzer(analyzer_state, "cosai", "complete",
+                         duration_ms=int((time.time() - _t0) * 1000))
+    except Exception as e:  # noqa: BLE001
         cosai_results = {}
+        _record_analyzer(analyzer_state, "cosai", "failed", error=repr(e),
+                         duration_ms=int((time.time() - _t0) * 1000))
 
     return {
         **scores,
@@ -710,6 +893,11 @@ def scan(source_url, tool_type="mcp", name="", description="", enable_osv=False,
         "compliance": compliance_results,
         "cosai": cosai_results,
         "osv_cve": osv_findings,
+        # 审计 P0-3：分析器状态账本。每个分析器 status/error/duration_ms，
+        # 关键分析器 failed → scan_exit_code() 返回 3（不完整），不得显示成 safe。
+        "analyzer_status": analyzer_state,
+        "analyzer_complete": sum(1 for i in analyzer_state.values() if i.get("status") == "complete"),
+        "analyzer_failed": sum(1 for i in analyzer_state.values() if i.get("status") == "failed"),
         "commit_hash": source_data.get("commit_hash", ""),
         "recommendations": recommendations,
         "scanned_at": datetime.now(TZ).strftime("%Y-%m-%d %H:%M:%S"),

@@ -9,7 +9,7 @@
   <a href="https://github.com/lm203688/aishield/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT License"></a>
   <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/Python-3.9%2B-green.svg" alt="Python 3.9+"></a>
   <a href="https://owasp.org/www-project-mcp-security-top-10/"><img src="https://img.shields.io/badge/OWASP-MCP%20Top%2010-orange.svg" alt="OWASP MCP Top 10"></a>
-  <img src="https://img.shields.io/badge/Rules-264-blue.svg" alt="313 Rules (static 286 + intel 8 + radar 19)">
+  <img src="https://img.shields.io/badge/Rules-313-blue.svg" alt="313 Rules (static 286 + intel 8 + radar 19)">
   <img src="https://img.shields.io/badge/Dependencies-0-9cf.svg" alt="Zero Dependencies">
   <img src="https://img.shields.io/badge/Version-v4.11.0-brightgreen.svg" alt="v4.11.0">
 </p>

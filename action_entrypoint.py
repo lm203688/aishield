@@ -132,26 +132,79 @@ def build_sarif(report, tool_version):
     return sarif
 
 
+def _write_trust_attestation(report, score, risk):
+    """生成带完整性锚点的扫描裁决（不是可独立验签的凭证）。
+
+    审计 P0-6 明确：哈希链能证明「记录后来没被悄悄改」，但不能单独证明
+    「扫描结论真实」或「第三方能验证签发者」。故对外只能称「带完整性锚点的
+    扫描裁决」，直到实现独立验签/密钥轮换/撤销/时间语义后才改称「可验证凭证」。
+    本函数用扫描报告自身的规范化摘要作为锚点，不声称任何签名。
+    """
+    import hashlib
+
+    s = report.get("summary", {}) or {}
+    payload = {
+        "schema": "https://aishield.tools/schemas/scan-adjudication-v1.json",
+        "kind": "scan-adjudication",
+        "score": score,
+        "risk_level": risk,
+        "assessment": s.get("overall_assessment", "n/a"),
+        "items_total": s.get("items_total", 0),
+        "items_high_risk": s.get("items_high_risk", 0),
+        "items_medium_risk": s.get("items_medium_risk", 0),
+        "scanner_version": report.get("scanner_version"),
+        "scanned_at": report.get("scanned_at"),
+        "findings_digest": hashlib.sha256(
+            json.dumps(report.get("aggregate_findings") or [], ensure_ascii=False, sort_keys=True).encode("utf-8")
+        ).hexdigest()[:32],
+    }
+    payload["integrity_anchor"] = hashlib.sha256(
+        json.dumps(payload, ensure_ascii=False, sort_keys=True).encode("utf-8")
+    ).hexdigest()
+    path = "aishield-trust-attestation.json"
+    with open(path, "w", encoding="utf-8") as fh:
+        json.dump(payload, fh, ensure_ascii=False, indent=2)
+    return path
+
+
 def main():
     target, src_desc = resolve_target()
     tool_type = (os.environ.get("INPUT_TOOL_TYPE") or "mcp").strip() or "mcp"
     name = (os.environ.get("INPUT_NAME") or "").strip()
     fail_on = (os.environ.get("INPUT_FAIL_ON") or "high").strip().lower() or "high"
     enable_osv = str(os.environ.get("INPUT_ENABLE_OSV", "false")).strip().lower() == "true"
+    output_format = (os.environ.get("INPUT_OUTPUT_FORMAT") or "sarif").strip().lower() or "sarif"
+    include_attest = str(os.environ.get("INPUT_INCLUDE_TRUST_ATTESTATION", "false")).strip().lower() == "true"
 
-    # fail_on 拼错时旧代码静默按 high 处理 —— 用户以为在收紧门禁，实际没生效。
+    # 坏配置必须产生明确错误（退出码 2），不能静默按默认值处理 ——
+    # 否则用户以为在收紧门禁（fail_on: critical），实际拿到的仍是 high。
+    # 审计 P0「坏配置产生明确错误」判据。
+    valid_risk = sorted(set(RISK_ORDER) - {"safe"})
     if fail_on not in RISK_ORDER:
-        sys.stderr.write(f"[warn] fail_on='{fail_on}' 不是合法风险档"
-                         f"（{sorted(set(RISK_ORDER) - {'safe'})}），按 high 处理\n")
-        fail_on = "high"
+        sys.stderr.write(f"[error] fail_on='{fail_on}' 不是合法风险档（{valid_risk}）\n")
+        return 2
+    if output_format not in ("json", "sarif", "text"):
+        sys.stderr.write(f"[error] output_format='{output_format}' 不是合法输出格式（json/sarif/text）\n")
+        return 2
 
-    sys.stdout.write(f"[aishield] scanning {src_desc} (tool_type={tool_type}, fail_on={fail_on}, osv={enable_osv})\n")
+    sys.stdout.write(f"[aishield] scanning {src_desc} (tool_type={tool_type}, fail_on={fail_on}, "
+                     f"osv={enable_osv}, format={output_format})\n")
     sys.stdout.flush()
 
-    report = preflight(target)
+    try:
+        report = preflight(target)
+    except Exception as e:  # noqa: BLE001
+        # 审计 P0-3 fail-closed：preflight 抛异常 = 扫描不完整（exit 3），
+        # 绝不写成 0 findings / safe。
+        sys.stderr.write(f"[error] preflight 失败：{e}\n")
+        with open("aishield-report.json", "w", encoding="utf-8") as fh:
+            json.dump({"error": f"preflight failed: {e}", "risk_level": "unknown",
+                       "overall_score": 0, "total_findings": 0,
+                       "scanner_version": SCANNER_VERSION}, fh, ensure_ascii=False, indent=2)
+        return 3
     score, risk = verdict_from(report)
 
-    # 写 JSON 报告
+    # 写 JSON 报告（sarif/text 也写 JSON，JSON 是事实源；text 只省 SARIF）
     with open("aishield-report.json", "w", encoding="utf-8") as fh:
         json.dump(report, fh, ensure_ascii=False, indent=2)
 
@@ -163,6 +216,14 @@ def main():
     with open("aishield.sarif", "w", encoding="utf-8") as fh:
         json.dump(sarif, fh, ensure_ascii=False, indent=2)
 
+    # 带完整性锚点的扫描裁决（用户显式开启才生成；未生成时不写 GITHUB_OUTPUT 键）
+    trust_path = ""
+    if include_attest:
+        try:
+            trust_path = _write_trust_attestation(report, score, risk)
+        except Exception as e:  # noqa: BLE001
+            sys.stderr.write(f"[warn] trust attestation 生成失败（{e}），继续发布扫描结果\n")
+
     # GitHub Actions 输出
     out_path = os.environ.get("GITHUB_OUTPUT")
     if out_path:
@@ -170,7 +231,10 @@ def main():
             fh.write(f"score={score}\n")
             fh.write(f"risk_level={risk}\n")
             fh.write(f"report={os.path.abspath('aishield-report.json')}\n")
-            fh.write(f"sarif={os.path.abspath('aishield.sarif')}\n")
+            if output_format in ("sarif", "json"):
+                fh.write(f"sarif={os.path.abspath('aishield.sarif')}\n")
+            if trust_path:
+                fh.write(f"trust_attestation={os.path.abspath(trust_path)}\n")
 
     # Step Summary
     summ = os.environ.get("GITHUB_STEP_SUMMARY")
@@ -186,6 +250,20 @@ def main():
 
     sys.stdout.write(f"[aishield] score={score} risk={risk}\n")
     sys.stdout.flush()
+
+    # 审计 P0-3 统一退出码：关键分析器失败（analyzer_status 含 failed）→ 3（不完整），
+    # 即使分数显示 safe 也不能把「没能分析」伪装成「没有发现风险」。
+    # preflight 报告通常走 workspace_scan 流水线，不一定带 analyzer_status；
+    # 若带且有关键失败，按 exit 3 处理。
+    try:
+        from scanner.engine import analyzer_failures
+        ast = report.get("analyzer_status") or {}
+        if analyzer_failures(ast):
+            sys.stdout.write(f"[aishield] INCOMPLETE: 关键分析器失败 {analyzer_failures(ast)}\n")
+            sys.stdout.flush()
+            return 3
+    except Exception:  # noqa: BLE001  # 兼容：无 analyzer_status 时走阈值
+        pass
 
     if RISK_ORDER.get(risk, 0) >= RISK_ORDER.get(fail_on, 2):
         sys.stdout.write(f"[aishield] FAIL: risk '{risk}' >= fail_on '{fail_on}'\n")

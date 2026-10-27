@@ -1,5 +1,11 @@
 # AIShield Agent 安全基准报告 2026
 
+> [!NOTE]
+> **历史快照（2026-08-04）**：本文数值为当时实测，**不是当前复现承诺**。
+> 当前权威数字（规则数/召回/CI/协议/依赖边界）一律见
+> [`release-facts.json`](../release-facts.json)（由 `scripts/generate_release_facts.py` 派生）。
+> 归档副本：`archive/legacy-reports/agent-security-benchmark-2026.md`。
+
 > 版本: v4.2 · 发布: 2026-08-04 · 标准: OWASP MCP Top 10 (2025) + OWASP Agentic AI Top 10 (2025)
 > 域名: https://aishield.tools · 授权: 开源 / 本地 / 零成本 / Agent 原生
 

@@ -15,6 +15,10 @@ Core invariant (same as the scanner):
 Self-contained: when run from the standalone `aishield-action` repo (where the
 `scanner/` package is absent), it lazily clones the AIShield source repo
 (OUR repo, not the scanned target) to import the engine.
+
+⚠️ 同步纪律：本文件是主仓 `action_entrypoint.py` 的「独立 marketplace 发布副本」，
+主逻辑必须与根版本一致（坏配置 exit 2 / 最高档 risk / output_format /
+trust_attestation）。仅懒克隆加载逻辑是独立仓库专属，允许不同。
 """
 import json
 import os
@@ -39,7 +43,9 @@ except Exception:  # noqa: BLE001
         sys.path.insert(0, _src)
     from scanner.workspace_scan import preflight
 
-RISK_ORDER = {"safe": 0, "low": 0, "medium": 1, "high": 2, "critical": 3}
+# 风险档权重（与根版本一致：info/safe=1，low=1，medium=2，high=3，critical=4）
+RISK_ORDER = {"info": 1, "safe": 1, "low": 1, "medium": 2, "high": 3, "critical": 4}
+ASSESSMENT_FALLBACK = {"danger": "high", "review": "medium"}
 SARIF_LEVEL = {"critical": "error", "high": "error", "medium": "warning", "low": "note", "info": "none"}
 
 
@@ -65,15 +71,27 @@ def resolve_target():
     return ".", "workspace: ."
 
 
+def _max_risk(*candidates):
+    """取候选风险档中的最高档；空串/未知值按最低档处理。"""
+    rank = {"": 0, "info": 1, "safe": 1, "low": 1, "medium": 2, "high": 3, "critical": 4}
+    best, best_r = "safe", 1
+    for c in candidates:
+        c = (c or "").strip().lower()
+        if rank.get(c, 0) > best_r:
+            best, best_r = c, rank[c]
+    return best
+
+
 def verdict_from(report):
     s = report.get("summary", {})
-    assess = s.get("overall_assessment", "safe")
-    if assess == "danger":
-        risk = "high"
-    elif assess == "review":
-        risk = "medium"
-    else:
-        risk = "safe"
+    assess = (s.get("overall_assessment") or "safe").lower()
+    # 风险档 = 引擎整体档 ∪ 逐条 finding 最高档 ∪ assessment 兜底，取最高者。
+    # 旧实现只从三档 assessment 反推，risk 永远到不了 critical（fail_on: critical 永不触发）。
+    risk = _max_risk(
+        s.get("risk_level"),
+        *((f.get("severity") or "") for f in (report.get("aggregate_findings") or [])),
+        ASSESSMENT_FALLBACK.get(assess, "safe"),
+    )
     score = s.get("overall_score")
     if score is None:
         score = 100 if assess in ("safe", "empty") else 0
@@ -123,14 +141,58 @@ def build_sarif(report, tool_version):
     }
 
 
+def _write_trust_attestation(report, score, risk):
+    """生成带完整性锚点的扫描裁决（不是可独立验签的凭证）。
+
+    审计 P0-6：哈希链能证明「记录后来没被悄悄改」，但不能单独证明「扫描结论
+    真实」或「第三方能验证签发者」。故对外只称「带完整性锚点的扫描裁决」。
+    """
+    import hashlib
+    s = report.get("summary", {}) or {}
+    payload = {
+        "schema": "https://aishield.tools/schemas/scan-adjudication-v1.json",
+        "kind": "scan-adjudication",
+        "score": score,
+        "risk_level": risk,
+        "assessment": s.get("overall_assessment", "n/a"),
+        "items_total": s.get("items_total", 0),
+        "items_high_risk": s.get("items_high_risk", 0),
+        "items_medium_risk": s.get("items_medium_risk", 0),
+        "scanner_version": report.get("scanner_version"),
+        "scanned_at": report.get("scanned_at"),
+        "findings_digest": hashlib.sha256(
+            json.dumps(report.get("aggregate_findings") or [], ensure_ascii=False, sort_keys=True).encode("utf-8")
+        ).hexdigest()[:32],
+    }
+    payload["integrity_anchor"] = hashlib.sha256(
+        json.dumps(payload, ensure_ascii=False, sort_keys=True).encode("utf-8")
+    ).hexdigest()
+    path = "aishield-trust-attestation.json"
+    with open(path, "w", encoding="utf-8") as fh:
+        json.dump(payload, fh, ensure_ascii=False, indent=2)
+    return path
+
+
 def main():
     target, src_desc = resolve_target()
     tool_type = (os.environ.get("INPUT_TOOL_TYPE") or "mcp").strip() or "mcp"
     name = (os.environ.get("INPUT_NAME") or "").strip()
     fail_on = (os.environ.get("INPUT_FAIL_ON") or "high").strip().lower() or "high"
     enable_osv = str(os.environ.get("INPUT_ENABLE_OSV", "false")).strip().lower() == "true"
+    output_format = (os.environ.get("INPUT_OUTPUT_FORMAT") or "sarif").strip().lower() or "sarif"
+    include_attest = str(os.environ.get("INPUT_INCLUDE_TRUST_ATTESTATION", "false")).strip().lower() == "true"
 
-    sys.stdout.write(f"[aishield] scanning {src_desc} (tool_type={tool_type}, fail_on={fail_on}, osv={enable_osv})\n")
+    # 坏配置必须产生明确错误（exit 2），不能静默按默认值处理（审计 P0-2 判据）。
+    valid_risk = sorted(set(RISK_ORDER) - {"safe"})
+    if fail_on not in RISK_ORDER:
+        sys.stderr.write(f"[error] fail_on='{fail_on}' 不是合法风险档（{valid_risk}）\n")
+        return 2
+    if output_format not in ("json", "sarif", "text"):
+        sys.stderr.write(f"[error] output_format='{output_format}' 不是合法输出格式（json/sarif/text）\n")
+        return 2
+
+    sys.stdout.write(f"[aishield] scanning {src_desc} (tool_type={tool_type}, fail_on={fail_on}, "
+                     f"osv={enable_osv}, format={output_format})\n")
     sys.stdout.flush()
 
     report = preflight(target)
@@ -139,9 +201,16 @@ def main():
     with open("aishield-report.json", "w", encoding="utf-8") as fh:
         json.dump(report, fh, ensure_ascii=False, indent=2)
 
-    sarif = build_sarif(report, report.get("scanner_version", "4.2.2"))
+    sarif = build_sarif(report, report.get("scanner_version", "4.11.0"))
     with open("aishield.sarif", "w", encoding="utf-8") as fh:
         json.dump(sarif, fh, ensure_ascii=False, indent=2)
+
+    trust_path = ""
+    if include_attest:
+        try:
+            trust_path = _write_trust_attestation(report, score, risk)
+        except Exception as e:  # noqa: BLE001
+            sys.stderr.write(f"[warn] trust attestation 生成失败（{e}），继续发布扫描结果\n")
 
     out_path = os.environ.get("GITHUB_OUTPUT")
     if out_path:
@@ -149,7 +218,10 @@ def main():
             fh.write(f"score={score}\n")
             fh.write(f"risk_level={risk}\n")
             fh.write(f"report={os.path.abspath('aishield-report.json')}\n")
-            fh.write(f"sarif={os.path.abspath('aishield.sarif')}\n")
+            if output_format in ("sarif", "json"):
+                fh.write(f"sarif={os.path.abspath('aishield.sarif')}\n")
+            if trust_path:
+                fh.write(f"trust_attestation={os.path.abspath(trust_path)}\n")
 
     summ = os.environ.get("GITHUB_STEP_SUMMARY")
     s = report.get("summary", {})

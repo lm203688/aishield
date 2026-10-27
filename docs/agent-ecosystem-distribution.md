@@ -1,5 +1,11 @@
 # AIShield Agent 生态位分发版图（2026-08-15 实测）
 
+> [!NOTE]
+> **历史快照（2026-08-15）**：本文线上状态为当时实测，**不是当前复现承诺**。
+> 当前权威数字（规则数/版本/协议/依赖边界）一律见
+> [`release-facts.json`](../release-facts.json)（由 `scripts/generate_release_facts.py` 派生）。
+> 归档副本：`archive/legacy-reports/agent-ecosystem-distribution.md`。
+
 > 本文件是「扫描所有开源平台 + 补齐 agent 生态位空白」的执行交付。所有「线上状态」均经 curl/WebFetch 实测，不靠推理。
 > 维护：`aishield-ops` skill。配套台账：`api/data/mcp_submissions.json`、`distribution/published.json`。
 

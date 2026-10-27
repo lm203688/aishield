@@ -1,0 +1,584 @@
+test_auth_exempt_health_endpoint_still_accessible (tests.test_linkages.TestAuthMiddleware.test_auth_exempt_health_endpoint_still_accessible)
+验证健康检查端点不需要认证即可访问 ... skipped '服务器未启动'
+test_auth_exempt_paths_do_not_require_token (tests.test_linkages.TestAuthMiddleware.test_auth_exempt_paths_do_not_require_token)
+验证健康检查和 key 生成端点豁免认证 ... ok
+test_auth_flow_generate_verify_revoke (tests.test_linkages.TestAuthMiddleware.test_auth_flow_generate_verify_revoke)
+验证 API Key 完整生命周期: 生成 -> 验证 -> 撤销 -> 验证失败 ... skipped '服务器未启动'
+test_auth_key_manager_has_verify_and_revoke (tests.test_linkages.TestAuthMiddleware.test_auth_key_manager_has_verify_and_revoke)
+验证 APIKeyManager 具备 verify_key 和 revoke_key 方法 ... ok
+test_auth_module_has_require_auth_function (tests.test_linkages.TestAuthMiddleware.test_auth_module_has_require_auth_function)
+验证 dispatcher 模块导出了 _require_auth 函数 ... ok
+test_auth_rejects_request_without_bearer_token (tests.test_linkages.TestAuthMiddleware.test_auth_rejects_request_without_bearer_token)
+验证未携带 Bearer token 的 POST 请求被拒绝 (401) ... skipped '服务器未启动'
+test_certification_service_exists (tests.test_linkages.TestBadgeScanLinkage.test_certification_service_exists)
+验证 CertificationService 类可导入 ... ok
+test_certification_service_has_certify_method (tests.test_linkages.TestBadgeScanLinkage.test_certification_service_has_certify_method)
+验证 certify_tool 方法接受 source_url 和 scan_report 参数 ... ok
+test_certify_tool_with_mock_data (tests.test_linkages.TestBadgeScanLinkage.test_certify_tool_with_mock_data)
+使用模拟数据调用 certify_tool，验证不崩溃并返回结构化结果 ... ok
+test_a2a_discover_returns_agents_list (tests.test_linkages.TestCollabA2ALinkage.test_a2a_discover_returns_agents_list)
+A2A 网关: discover 方法返回 agent 列表 ... ok
+test_collab_delegation_lifecycle (tests.test_linkages.TestCollabA2ALinkage.test_collab_delegation_lifecycle)
+完整委托生命周期: 创建 -> 接受 -> 提交结果 ... ok
+test_message_bus_can_publish_and_consume (tests.test_linkages.TestCollabA2ALinkage.test_message_bus_can_publish_and_consume)
+消息总线: 发布消息后可被消费 ... ok
+test_auth_revoke_key_uses_agent_id (tests.test_linkages.TestDispatcherParams.test_auth_revoke_key_uses_agent_id)
+验证 dispatcher 调用 revoke_key() 时使用 agent_id 参数 ... ok
+test_collab_consume_uses_subscriber_agent_id (tests.test_linkages.TestDispatcherParams.test_collab_consume_uses_subscriber_agent_id)
+验证 dispatcher 调用 consume() 时使用 subscriber_agent_id 参数 ... ok
+test_dispatcher_init_accepts_modules_dict (tests.test_linkages.TestDispatcherParams.test_dispatcher_init_accepts_modules_dict)
+验证 dispatcher.init() 接受模块字典参数 ... ok
+test_billing_service_has_record_usage (tests.test_linkages.TestPaymentDelegationLinkage.test_billing_service_has_record_usage)
+验证 BillingService.record_usage 方法存在 ... ok
+test_billing_service_record_usage_runs (tests.test_linkages.TestPaymentDelegationLinkage.test_billing_service_record_usage_runs)
+验证 record_usage 可以正常执行不崩溃 ... ok
+test_delegation_submit_result_triggers_billing (tests.test_linkages.TestPaymentDelegationLinkage.test_delegation_submit_result_triggers_billing)
+验证 TaskDelegation.submit_result 内部调用 payment.record_usage ... ok
+test_sandbox_pre_check_catches_eval_exec (tests.test_linkages.TestSandboxSkillLinkage.test_sandbox_pre_check_catches_eval_exec)
+沙箱预检查应捕获 eval 和 exec 模式 ... ok
+test_sandbox_task_rejects_dangerous_code (tests.test_linkages.TestSandboxSkillLinkage.test_sandbox_task_rejects_dangerous_code)
+提交危险代码到沙箱，状态应为 rejected ... ok
+test_sandbox_task_submit_safe_code (tests.test_linkages.TestSandboxSkillLinkage.test_sandbox_task_submit_safe_code)
+提交安全代码到沙箱，状态应为 queued ... ok
+test_skill_invoke_nonexistent_skill_returns_error (tests.test_linkages.TestSkillInvoke.test_skill_invoke_nonexistent_skill_returns_error)
+调用不存在的技能应返回错误而非崩溃 ... ok
+test_skill_invoker_class_exists (tests.test_linkages.TestSkillInvoke.test_skill_invoker_class_exists)
+验证 SkillInvoker 类可导入 ... ok
+test_skill_invoker_has_invoke_method_with_correct_params (tests.test_linkages.TestSkillInvoke.test_skill_invoker_has_invoke_method_with_correct_params)
+验证 invoke 方法接受正确参数: skill_id, caller_agent_id, input_data ... ok
+test_agent_card_has_endpoints (tests.test_geo.TestAgentCardJson.test_agent_card_has_endpoints)
+Agent Card 包含 API 端点列表 ... ok
+test_agent_card_has_required_fields (tests.test_geo.TestAgentCardJson.test_agent_card_has_required_fields)
+Agent Card 包含必须字段: name, version, skills, trust_score ... ok
+test_agent_card_is_valid_json (tests.test_geo.TestAgentCardJson.test_agent_card_is_valid_json)
+Agent Card 是有效的 JSON 对象 ... ok
+test_agent_card_name_is_aishield (tests.test_geo.TestAgentCardJson.test_agent_card_name_is_aishield)
+Agent Card name 字段为 AIShield ... ok
+test_agent_card_skills_have_input_output_schema (tests.test_geo.TestAgentCardJson.test_agent_card_skills_have_input_output_schema)
+每个 skill 包含 input_schema ... ok
+test_agent_card_trust_score_has_overall (tests.test_geo.TestAgentCardJson.test_agent_card_trust_score_has_overall)
+trust_score 包含 overall 总分 ... ok
+test_all_endpoints_are_first_party_urls (tests.test_geo.TestAgentDiscoveryJson.test_all_endpoints_are_first_party_urls)
+发现资产只能指向自家域名，避免把 Agent 引到第三方。 ... ok
+test_domain_is_aishield_tools (tests.test_geo.TestAgentDiscoveryJson.test_domain_is_aishield_tools) ... ok
+test_has_required_discovery_fields (tests.test_geo.TestAgentDiscoveryJson.test_has_required_discovery_fields) ... ok
+test_is_valid_json_object (tests.test_geo.TestAgentDiscoveryJson.test_is_valid_json_object) ... ok
+test_local_install_contract (tests.test_geo.TestAgentDiscoveryJson.test_local_install_contract)
+本地安装契约：离线可用、不执行被扫配置。 ... ok
+test_rules_match_health_contract (tests.test_geo.TestAgentDiscoveryJson.test_rules_match_health_contract)
+规则数必须与 /api/v1/health 的 rules_breakdown 一致。 ... ok
+test_agent_html_contains_json_ld (tests.test_geo.TestAgentHtml.test_agent_html_contains_json_ld)
+agent.html 包含 JSON-LD 结构化数据 ... ok
+test_agent_html_has_meta_description (tests.test_geo.TestAgentHtml.test_agent_html_has_meta_description)
+agent.html 包含 meta description 标签 ... ok
+test_agent_html_has_og_tags (tests.test_geo.TestAgentHtml.test_agent_html_has_og_tags)
+agent.html 包含 Open Graph 标签 ... ok
+test_agent_html_json_ld_is_parseable (tests.test_geo.TestAgentHtml.test_agent_html_json_ld_is_parseable)
+JSON-LD 内容可被正确解析 ... ok
+test_capabilities_are_non_empty (tests.test_geo.TestAgentJson.test_capabilities_are_non_empty) ... ok
+test_discovery_assets_all_resolve_to_aishield (tests.test_geo.TestAgentJson.test_discovery_assets_all_resolve_to_aishield) ... ok
+test_has_required_agent_fields (tests.test_geo.TestAgentJson.test_has_required_agent_fields) ... ok
+test_is_valid_json_object (tests.test_geo.TestAgentJson.test_is_valid_json_object) ... ok
+test_links_have_rel_and_href (tests.test_geo.TestAgentJson.test_links_have_rel_and_href) ... ok
+test_safety_contract (tests.test_geo.TestAgentJson.test_safety_contract)
+AIShield 的核心不变量：静态分析、不出机、不执行被扫配置。 ... ok
+test_api_endpoints_are_first_party (tests.test_geo.TestAiPluginJson.test_api_endpoints_are_first_party) ... ok
+test_api_points_at_live_openapi (tests.test_geo.TestAiPluginJson.test_api_points_at_live_openapi) ... ok
+test_auth_is_none (tests.test_geo.TestAiPluginJson.test_auth_is_none)
+基础端点无需鉴权 —— 这决定了 Agent 能否零门槛试用。 ... ok
+test_has_required_openai_fields (tests.test_geo.TestAiPluginJson.test_has_required_openai_fields) ... ok
+test_is_valid_json_object (tests.test_geo.TestAiPluginJson.test_is_valid_json_object) ... ok
+test_name_for_model_is_lowercase_identifier (tests.test_geo.TestAiPluginJson.test_name_for_model_is_lowercase_identifier)
+模型侧标识必须是纯小写 ASCII，方便 Agent 当工具名引用。 ... ok
+test_no_invented_legal_pages (tests.test_geo.TestAiPluginJson.test_no_invented_legal_pages)
+legal/ToS 只能指向真实存在的 LICENSE，不虚构法务页面。 ... ok
+test_schema_version_is_v1 (tests.test_geo.TestAiPluginJson.test_schema_version_is_v1) ... ok
+test_banned_words_page_has_canonical (tests.test_geo.TestBannedWordsPage.test_banned_words_page_has_canonical)
+违禁词页面包含 canonical URL ... ok
+test_banned_words_page_has_meta_description (tests.test_geo.TestBannedWordsPage.test_banned_words_page_has_meta_description)
+违禁词页面包含 meta description ... ok
+test_banned_words_page_has_og_tags (tests.test_geo.TestBannedWordsPage.test_banned_words_page_has_og_tags)
+违禁词页面包含 Open Graph 标签 ... ok
+test_banned_words_page_has_title (tests.test_geo.TestBannedWordsPage.test_banned_words_page_has_title)
+违禁词页面包含正确的标题 ... ok
+test_no_secrets_in_any_geo_asset (tests.test_geo.TestGeoAssetNoSecrets.test_no_secrets_in_any_geo_asset) ... ok
+test_docs_llms_source_is_not_a_dead_copy (tests.test_geo.TestGeoAssetRoutesWired.test_docs_llms_source_is_not_a_dead_copy)
+docs/llms.txt 与 api/static/llms.txt 都必须在 TARGETS 之外但内容同步。 ... ok
+test_route_serves_with_cache_control (tests.test_geo.TestGeoAssetRoutesWired.test_route_serves_with_cache_control)
+发现资产应带 Cache-Control，Agent 侧才有稳定的缓存语义。 ... ok
+test_route_table_declares_all_five_assets (tests.test_geo.TestGeoAssetRoutesWired.test_route_table_declares_all_five_assets) ... ok
+test_route_table_maps_to_the_right_files (tests.test_geo.TestGeoAssetRoutesWired.test_route_table_maps_to_the_right_files)
+路由表里每个条目都必须指向真实存在的静态文件名。 ... ok
+test_geo_assets_have_cache_control (tests.test_geo.TestGeoServerEndpoints.test_geo_assets_have_cache_control)
+发现资产响应必须带 Cache-Control 与 CORS 头 ... skipped '服务器未启动'
+test_get_agent_card_returns_200 (tests.test_geo.TestGeoServerEndpoints.test_get_agent_card_returns_200)
+GET /.well-known/agent-card.json 返回 200 和 JSON ... skipped '服务器未启动'
+test_get_agent_discovery_returns_200 (tests.test_geo.TestGeoServerEndpoints.test_get_agent_discovery_returns_200)
+GET /agent-discovery.json 返回 200 和 JSON ... skipped '服务器未启动'
+test_get_agent_html_returns_200 (tests.test_geo.TestGeoServerEndpoints.test_get_agent_html_returns_200)
+GET /agent.html 返回 200 和 HTML ... skipped '服务器未启动'
+test_get_agent_json_returns_200 (tests.test_geo.TestGeoServerEndpoints.test_get_agent_json_returns_200)
+GET /.well-known/agent.json 返回 200 和 JSON ... skipped '服务器未启动'
+test_get_ai_plugin_returns_200 (tests.test_geo.TestGeoServerEndpoints.test_get_ai_plugin_returns_200)
+GET /.well-known/ai-plugin.json 返回 200 和 JSON ... skipped '服务器未启动'
+test_get_and_options_unaffected (tests.test_geo.TestGeoServerEndpoints.test_get_and_options_unaffected)
+加了 do_HEAD 之后 GET 和 OPTIONS 不能受影响（回归护栏）。 ... skipped '服务器未启动'
+test_get_banned_words_returns_html (tests.test_geo.TestGeoServerEndpoints.test_get_banned_words_returns_html)
+GET /banned-words 返回 200 和 HTML ... skipped '服务器未启动'
+test_get_index_returns_html_with_json_ld (tests.test_geo.TestGeoServerEndpoints.test_get_index_returns_html_with_json_ld)
+GET / 首页返回包含 JSON-LD 的 HTML ... skipped '服务器未启动'
+test_get_llms_full_txt_returns_200 (tests.test_geo.TestGeoServerEndpoints.test_get_llms_full_txt_returns_200)
+GET /llms-full.txt 返回 200 和 text/plain ... skipped '服务器未启动'
+test_get_llms_txt_returns_200 (tests.test_geo.TestGeoServerEndpoints.test_get_llms_txt_returns_200)
+GET /llms.txt 返回 200 和 text/plain ... skipped '服务器未启动'
+test_get_robots_txt_returns_200 (tests.test_geo.TestGeoServerEndpoints.test_get_robots_txt_returns_200)
+GET /robots.txt 返回 200 和 text/plain ... skipped '服务器未启动'
+test_get_sitemap_xml_returns_200 (tests.test_geo.TestGeoServerEndpoints.test_get_sitemap_xml_returns_200)
+GET /sitemap.xml 返回 200 和 application/xml ... skipped '服务器未启动'
+test_head_404_not_501 (tests.test_geo.TestGeoServerEndpoints.test_head_404_not_501)
+HEAD 一个不存在的 URL 应返回 404，不能是 501。 ... skipped '服务器未启动'
+test_head_body_is_empty (tests.test_geo.TestGeoServerEndpoints.test_head_body_is_empty)
+HEAD 绝不能带响应体（RFC 9112 §2.1.1）。 ... skipped '服务器未启动'
+test_head_dynamic_endpoints_status_and_type (tests.test_geo.TestGeoServerEndpoints.test_head_dynamic_endpoints_status_and_type)
+动态端点（响应体按请求重新生成）只断言状态码与 Content-Type。 ... skipped '服务器未启动'
+test_head_not_501 (tests.test_geo.TestGeoServerEndpoints.test_head_not_501)
+HEAD 必须返回 200，不能是 501 Not Implemented。 ... skipped '服务器未启动'
+test_head_status_matches_get (tests.test_geo.TestGeoServerEndpoints.test_head_status_matches_get)
+HEAD 与 GET 的状态码、Content-Type、Content-Length 必须一致。 ... skipped '服务器未启动'
+test_all_wfile_writes_follow_end_headers (tests.test_geo.TestHeadMethodSupported.test_all_wfile_writes_follow_end_headers)
+do_HEAD 的正确性依赖一个不变量：所有 body 写入都紧跟 end_headers()。 ... ok
+test_do_head_delegates_to_get (tests.test_geo.TestHeadMethodSupported.test_do_head_delegates_to_get)
+HEAD 必须复用 do_GET 的路由逻辑，而不是另写一份（否则必然漂移）。 ... ok
+test_do_head_is_defined (tests.test_geo.TestHeadMethodSupported.test_do_head_is_defined) ... ok
+test_do_head_suppresses_body_only (tests.test_geo.TestHeadMethodSupported.test_do_head_suppresses_body_only)
+必须只丢弃响应体，响应头（含 Content-Length）必须保留。 ... ok
+test_index_contains_json_ld (tests.test_geo.TestIndexPage.test_index_contains_json_ld)
+首页包含 JSON-LD 结构化数据 ... ok
+test_index_has_canonical_url (tests.test_geo.TestIndexPage.test_index_has_canonical_url)
+首页包含 canonical URL ... ok
+test_index_has_seo_meta_tags (tests.test_geo.TestIndexPage.test_index_has_seo_meta_tags)
+首页包含 SEO meta 标签 ... ok
+test_index_json_ld_has_organization_type (tests.test_geo.TestIndexPage.test_index_json_ld_has_organization_type)
+首页 JSON-LD 包含 Organization 类型 ... ok
+test_llms_full_exists_and_non_empty (tests.test_geo.TestLlmsTxt.test_llms_full_exists_and_non_empty) ... ok
+test_llms_txt_exists_and_non_empty (tests.test_geo.TestLlmsTxt.test_llms_txt_exists_and_non_empty) ... ok
+test_llms_txt_has_scenario_triggers (tests.test_geo.TestLlmsTxt.test_llms_txt_has_scenario_triggers)
+llms.txt 必须有 "When to Recommend" 场景触发段，且 >= 10 个场景。 ... ok
+test_llms_txt_lists_every_agent_discovery_asset (tests.test_geo.TestLlmsTxt.test_llms_txt_lists_every_agent_discovery_asset)
+llms.txt 必须自报每一个机器可读发现资产，否则 Agent 找不到它们。 ... ok
+test_scenario_triggers_state_recommendation_and_price (tests.test_geo.TestLlmsTxt.test_scenario_triggers_state_recommendation_and_price)
+每个场景触发必须同时给出「推荐什么」与「价格」。 ... ok
+test_served_llms_txt_matches_docs_source (tests.test_geo.TestLlmsTxt.test_served_llms_txt_matches_docs_source)
+api/static 与 docs 两份 llms.txt 必须逐字节一致，防止漂移。 ... ok
+test_guard_defined (tests.test_geo.TestNotRootGuard.test_guard_defined) ... ok
+test_main_calls_guard (tests.test_geo.TestNotRootGuard.test_main_calls_guard) ... ok
+test_override_allows_root (tests.test_geo.TestNotRootGuard.test_override_allows_root)
+AISHIELD_ALLOW_ROOT=1 是显式、可记录的绕过，容器场景需要。 ... ok
+test_override_escape_hatch_present (tests.test_geo.TestNotRootGuard.test_override_escape_hatch_present)
+容器场景需要 root 时必须有显式绕过，且默认关闭。 ... ok
+test_root_detection_present (tests.test_geo.TestNotRootGuard.test_root_detection_present) ... ok
+test_root_refused (tests.test_geo.TestNotRootGuard.test_root_refused)
+模拟 geteuid()==0：必须 sys.exit(2)，不得静默放行。 ... AIShield refuses to run as root.
+This is a local scanner that reads config/secret/SSH paths with your user permissions; as root those reads span the whole machine.
+Run as a normal user, or set AISHIELD_ALLOW_ROOT=1 inside a container.
+ok
+test_robots_txt_allows_root (tests.test_geo.TestRobotsTxt.test_robots_txt_allows_root)
+robots.txt 允许抓取根路径 ... ok
+test_robots_txt_contains_sitemap_location (tests.test_geo.TestRobotsTxt.test_robots_txt_contains_sitemap_location)
+robots.txt 包含 Sitemap 声明 ... ok
+test_robots_txt_disallows_sensitive_paths (tests.test_geo.TestRobotsTxt.test_robots_txt_disallows_sensitive_paths)
+robots.txt 禁止抓取敏感数据目录 ... ok
+test_robots_txt_exists (tests.test_geo.TestRobotsTxt.test_robots_txt_exists)
+robots.txt 文件存在且非空 ... ok
+test_robots_txt_has_ai_crawler_rules (tests.test_geo.TestRobotsTxt.test_robots_txt_has_ai_crawler_rules)
+robots.txt 包含 AI 搜索引擎专属规则 ... ok
+test_robots_allows_all_geo_assets (tests.test_geo.TestSitemapAndRobotsCoverage.test_robots_allows_all_geo_assets) ... ok
+test_sitemap_contains_all_geo_assets (tests.test_geo.TestSitemapAndRobotsCoverage.test_sitemap_contains_all_geo_assets) ... ok
+test_sitemap_still_valid_xml (tests.test_geo.TestSitemapAndRobotsCoverage.test_sitemap_still_valid_xml) ... ok
+test_sitemap_contains_major_pages (tests.test_geo.TestSitemapXml.test_sitemap_contains_major_pages)
+sitemap 包含所有主要页面 ... ok
+test_sitemap_homepage_has_highest_priority (tests.test_geo.TestSitemapXml.test_sitemap_homepage_has_highest_priority)
+首页优先级最高 (1.0) ... ok
+test_sitemap_is_valid_xml (tests.test_geo.TestSitemapXml.test_sitemap_is_valid_xml)
+sitemap.xml 是有效的 XML 文件 ... ok
+test_sitemap_urls_have_loc_elements (tests.test_geo.TestSitemapXml.test_sitemap_urls_have_loc_elements)
+每个 URL 条目包含 loc 元素 ... ok
+test_agent_discovery_version_gated (tests.test_geo.TestVersionDeclarationsGated.test_agent_discovery_version_gated) ... ok
+test_agent_json_version_gated (tests.test_geo.TestVersionDeclarationsGated.test_agent_json_version_gated) ... ok
+test_ai_plugin_version_gated (tests.test_geo.TestVersionDeclarationsGated.test_ai_plugin_version_gated) ... ok
+test_targets_files_all_exist (tests.test_geo.TestVersionDeclarationsGated.test_targets_files_all_exist) ... ok
+test_generate_key_returns_structured_result (tests.test_security.TestAPIKeyLifecycle.test_generate_key_returns_structured_result)
+生成 API Key 返回结构化结果 ... ok
+test_revoke_key_then_verify_fails (tests.test_security.TestAPIKeyLifecycle.test_revoke_key_then_verify_fails)
+撤销 key 后验证应失败 ... ok
+test_revoke_key_wrong_agent_fails (tests.test_security.TestAPIKeyLifecycle.test_revoke_key_wrong_agent_fails)
+非所属 agent 撤销 key 应失败 ... ok
+test_scope_wildcard_access (tests.test_security.TestAPIKeyLifecycle.test_scope_wildcard_access)
+验证通配符作用域匹配 ... ok
+test_scopes_validation (tests.test_security.TestAPIKeyLifecycle.test_scopes_validation)
+验证作用域验证功能 ... ok
+test_verify_invalid_key_returns_none (tests.test_security.TestAPIKeyLifecycle.test_verify_invalid_key_returns_none)
+验证无效 key 返回 None ... ok
+test_verify_key_returns_agent_info (tests.test_security.TestAPIKeyLifecycle.test_verify_key_returns_agent_info)
+验证 API Key 返回 agent 信息 ... ok
+test_banned_words_result_structure (tests.test_security.TestBannedWordsDetection.test_banned_words_result_structure)
+违禁词检测结果包含正确的结构 ... ok
+test_clean_text_passes (tests.test_security.TestBannedWordsDetection.test_clean_text_passes)
+干净文本应通过检测 ... ok
+test_detect_base_banned_word (tests.test_security.TestBannedWordsDetection.test_detect_base_banned_word)
+检测基础违禁词: 赌博 ... ok
+test_detect_multiple_banned_words (tests.test_security.TestBannedWordsDetection.test_detect_multiple_banned_words)
+检测多个违禁词 ... ok
+test_platform_specific_filter (tests.test_security.TestBannedWordsDetection.test_platform_specific_filter)
+平台过滤: douyin 特有违禁词 ... ok
+test_all_10_categories_have_rules (tests.test_security.TestOWASPCoverage.test_all_10_categories_have_rules)
+每个 OWASP MCP Top 10 类别都有对应的规则 ... ok
+test_dangerous_npm_packages_defined (tests.test_security.TestOWASPCoverage.test_dangerous_npm_packages_defined)
+已知恶意 npm 包列表已定义 ... ok
+test_dangerous_pypi_packages_defined (tests.test_security.TestOWASPCoverage.test_dangerous_pypi_packages_defined)
+已知恶意 PyPI 包列表已定义 ... ok
+test_detect_bypass_security (tests.test_security.TestPromptInjectionDetection.test_detect_bypass_security)
+检测绕过安全指令：high finding 绝不能被分数洗白成 safe ... ok
+test_detect_dan_jailbreak (tests.test_security.TestPromptInjectionDetection.test_detect_dan_jailbreak)
+检测 DAN 越狱关键词 ... ok
+test_detect_ignore_previous_instructions (tests.test_security.TestPromptInjectionDetection.test_detect_ignore_previous_instructions)
+检测英文注入: 'ignore previous instructions' ... ok
+test_detect_zh_forget_instructions (tests.test_security.TestPromptInjectionDetection.test_detect_zh_forget_instructions)
+检测中文注入: '忘记所有指令' ... ok
+test_detect_zh_injection_ignore (tests.test_security.TestPromptInjectionDetection.test_detect_zh_injection_ignore)
+检测中文注入: '忽略以上指令' ... ok
+test_prompt_too_short_returns_error (tests.test_security.TestPromptInjectionDetection.test_prompt_too_short_returns_error)
+过短的 prompt 应返回结果（纯函数不做最小长度校验） ... ok
+test_safe_prompt_passes_check (tests.test_security.TestPromptInjectionDetection.test_safe_prompt_passes_check)
+安全的 prompt 应通过检测 ... ok
+test_mcp_rules_count_at_least_100 (tests.test_security.TestRuleCount.test_mcp_rules_count_at_least_100)
+MCP 类型规则数量 >= 100 ... ok
+test_owasp_top10_categories_defined (tests.test_security.TestRuleCount.test_owasp_top10_categories_defined)
+OWASP MCP Top 10 所有 10 个类别都已定义 ... ok
+test_skill_rules_count_greater_than_mcp (tests.test_security.TestRuleCount.test_skill_rules_count_greater_than_mcp)
+Skill 类型规则数量应多于 MCP（包含额外 SKILL_EXTRA_RULES） ... ok
+test_zh_prompt_injection_rules_exist (tests.test_security.TestRuleCount.test_zh_prompt_injection_rules_exist)
+中文 Prompt 注入检测规则存在 ... ok
+test_allow_safe_code (tests.test_security.TestSandboxPreCheck.test_allow_safe_code)
+干净代码应通过预检查 ... ok
+test_block_chmod_777 (tests.test_security.TestSandboxPreCheck.test_block_chmod_777)
+拦截 shell 中的 chmod 777 ... ok
+test_block_eval (tests.test_security.TestSandboxPreCheck.test_block_eval)
+拦截 eval() 调用 ... ok
+test_block_exec (tests.test_security.TestSandboxPreCheck.test_block_exec)
+拦截 exec() 调用 ... ok
+test_block_javascript_child_process (tests.test_security.TestSandboxPreCheck.test_block_javascript_child_process)
+拦截 JavaScript 中的 child_process ... ok
+test_block_javascript_eval (tests.test_security.TestSandboxPreCheck.test_block_javascript_eval)
+拦截 JavaScript 中的 eval ... ok
+test_block_os_system (tests.test_security.TestSandboxPreCheck.test_block_os_system)
+拦截 os.system 调用 ... ok
+test_block_shell_rm_rf (tests.test_security.TestSandboxPreCheck.test_block_shell_rm_rf)
+拦截 shell 中的 rm -rf ... ok
+test_block_subprocess (tests.test_security.TestSandboxPreCheck.test_block_subprocess)
+拦截 subprocess 调用 ... ok
+test_scan_clean_prompt_gets_high_score (tests.test_security.TestScanEngine.test_scan_clean_prompt_gets_high_score)
+干净的 prompt 应获得高分 (>= 80) ... ok
+test_scan_dangerous_prompt_gets_low_score (tests.test_security.TestScanEngine.test_scan_dangerous_prompt_gets_low_score)
+包含已知漏洞描述的 prompt 会触发 findings（但 prompt 类型会被降级处理） ... ok
+test_scan_empty_source_url_returns_error (tests.test_security.TestScanEngine.test_scan_empty_source_url_returns_error)
+空 source_url 应返回错误结果 ... ok
+test_scan_none_source_url_returns_error (tests.test_security.TestScanEngine.test_scan_none_source_url_returns_error)
+None source_url 应返回错误结果 ... ok
+test_scan_prompt_type_returns_result (tests.test_security.TestScanEngine.test_scan_prompt_type_returns_result)
+扫描 prompt 类型的工具应返回有效的评分结果 ... ok
+test_scan_result_contains_findings (tests.test_security.TestScanEngine.test_scan_result_contains_findings)
+扫描结果应包含 findings 列表 ... ok
+test_scan_result_contains_owasp_categories (tests.test_security.TestScanEngine.test_scan_result_contains_owasp_categories)
+扫描结果应包含 owasp_categories 相关信息 ... ok
+test_clean_manifest_no_findings (tests.test_supply_chain.TestDependencyHygiene.test_clean_manifest_no_findings)
+干净 manifest 不应误报 ... ok
+test_install_script_poisoning (tests.test_supply_chain.TestDependencyHygiene.test_install_script_poisoning)
+postinstall 中的 curl|bash 应判为 critical ... ok
+test_lockfile_present_no_warning (tests.test_supply_chain.TestDependencyHygiene.test_lockfile_present_no_warning)
+存在 lockfile 时不应提示缺失 ... ok
+test_malformed_json_is_safe (tests.test_supply_chain.TestDependencyHygiene.test_malformed_json_is_safe)
+损坏的 package.json 不应抛异常 ... ok
+test_missing_lockfile (tests.test_supply_chain.TestDependencyHygiene.test_missing_lockfile)
+有依赖但无 lockfile 应有 low 级提示 ... ok
+test_non_dict_input_is_safe (tests.test_supply_chain.TestDependencyHygiene.test_non_dict_input_is_safe) ... ok
+test_requirements_extra_index_url (tests.test_supply_chain.TestDependencyHygiene.test_requirements_extra_index_url)
+--extra-index-url 应判为依赖混淆风险 ... ok
+test_requirements_untrusted_source (tests.test_supply_chain.TestDependencyHygiene.test_requirements_untrusted_source)
+requirements.txt 的 git+/http 来源应判为 high ... ok
+test_unpinned_version (tests.test_supply_chain.TestDependencyHygiene.test_unpinned_version)
+* / latest 应判为未锁定 ... ok
+test_untrusted_source_git_spec (tests.test_supply_chain.TestDependencyHygiene.test_untrusted_source_git_spec)
+git+ / http:// 直装应判为 high ... ok
+test_advisory_does_not_deduct_score (tests.test_supply_chain.TestEngineIntegration.test_advisory_does_not_deduct_score)
+info 级 advisory 在 calculate_scores 中扣 0 分 ... ok
+test_advisory_findings_are_capped (tests.test_supply_chain.TestEngineIntegration.test_advisory_findings_are_capped)
+幻觉包 advisory 最多 5 条，避免刷屏 ... ok
+test_hygiene_wired_into_dependency_analysis (tests.test_supply_chain.TestEngineIntegration.test_hygiene_wired_into_dependency_analysis) ... ok
+test_requirements_pipeline (tests.test_supply_chain.TestEngineIntegration.test_requirements_pipeline) ... ok
+test_brand_impersonation (tests.test_supply_chain.TestPackageNameHeuristics.test_brand_impersonation)
+借用厂商品牌 + 社工词应判为品牌仿冒 ... ok
+test_catalog_union_backward_compatible (tests.test_supply_chain.TestPackageNameHeuristics.test_catalog_union_backward_compatible)
+LEGIT_PACKAGE_CATALOG 仍为两生态并集（向后兼容） ... ok
+test_cross_registry_confusion_npm_name_in_pypi (tests.test_supply_chain.TestPackageNameHeuristics.test_cross_registry_confusion_npm_name_in_pypi)
+npm 生态名出现在 Python 依赖中（研究: 8.7% 交叉命中） ... ok
+test_cross_registry_confusion_pypi_name_in_npm (tests.test_supply_chain.TestPackageNameHeuristics.test_cross_registry_confusion_pypi_name_in_npm)
+PyPI 生态名出现在 npm 依赖中 ... ok
+test_dependency_confusion_internal_namespace (tests.test_supply_chain.TestPackageNameHeuristics.test_dependency_confusion_internal_namespace)
+内部命名空间词出现在公共 manifest 应告警 ... ok
+test_homoglyph_normalization (tests.test_supply_chain.TestPackageNameHeuristics.test_homoglyph_normalization)
+形近字符投毒（0->o）应被归一化识别 ... ok
+test_invalid_input_is_safe (tests.test_supply_chain.TestPackageNameHeuristics.test_invalid_input_is_safe)
+非法输入不应抛异常 ... ok
+test_legit_package_no_finding (tests.test_supply_chain.TestPackageNameHeuristics.test_legit_package_no_finding)
+可信名录内的包不应告警 ... ok
+test_scoped_package_name_handling (tests.test_supply_chain.TestPackageNameHeuristics.test_scoped_package_name_handling)
+npm scope 前缀应被正确剥离 ... ok
+test_single_token_unknown_not_flagged_as_hallucination (tests.test_supply_chain.TestPackageNameHeuristics.test_single_token_unknown_not_flagged_as_hallucination)
+单段无锚点的陌生包名不进幻觉通道（避免全量误报） ... ok
+test_slopsquat_more_examples (tests.test_supply_chain.TestPackageNameHeuristics.test_slopsquat_more_examples)
+其它复合式幻觉命名同样应被 advisory 捕获 ... ok
+test_slopsquat_no_false_positive_on_common_composites (tests.test_supply_chain.TestPackageNameHeuristics.test_slopsquat_no_false_positive_on_common_composites)
+常见合法复合包不应产生幻觉 advisory（误报控制） ... ok
+test_slopsquat_non_similar_hallucination (tests.test_supply_chain.TestPackageNameHeuristics.test_slopsquat_non_similar_hallucination)
+核心新增能力：与真实包**不形近**的复合式幻觉包。 ... ok
+test_typosquat_edit_distance (tests.test_supply_chain.TestPackageNameHeuristics.test_typosquat_edit_distance)
+编辑距离 1 的仿冒名应判为 typosquatting ... ok
+test_env_reference_does_not_imply_secrets (tests.test_client_discovery.TestCapabilities.test_env_reference_does_not_imply_secrets)
+仅凭键名判定会让毒性流对几乎所有合法配置恒亮 —— 必须按值判定。 ... ok
+test_infers_filesystem_and_network (tests.test_client_discovery.TestCapabilities.test_infers_filesystem_and_network) ... ok
+test_inline_plaintext_credential_implies_secrets (tests.test_client_discovery.TestCapabilities.test_inline_plaintext_credential_implies_secrets) ... ok
+test_plain_server_has_no_capabilities (tests.test_client_discovery.TestCapabilities.test_plain_server_has_no_capabilities) ... ok
+test_remote_server_implies_network (tests.test_client_discovery.TestCapabilities.test_remote_server_implies_network) ... ok
+test_secret_store_server_implies_secrets (tests.test_client_discovery.TestCapabilities.test_secret_store_server_implies_secrets) ... ok
+test_detects_secrets_plus_network_toxic_flow (tests.test_client_discovery.TestCrossServer.test_detects_secrets_plus_network_toxic_flow) ... ok
+test_detects_server_name_collision (tests.test_client_discovery.TestCrossServer.test_detects_server_name_collision) ... ok
+test_empty_inventory_is_safe (tests.test_client_discovery.TestCrossServer.test_empty_inventory_is_safe) ... ok
+test_no_toxic_flow_when_capability_missing (tests.test_client_discovery.TestCrossServer.test_no_toxic_flow_when_capability_missing) ... ok
+test_unique_names_do_not_collide (tests.test_client_discovery.TestCrossServer.test_unique_names_do_not_collide) ... ok
+test_exists_flag_is_reported (tests.test_client_discovery.TestDiscovery.test_exists_flag_is_reported) ... ok
+test_macos_paths_use_application_support (tests.test_client_discovery.TestDiscovery.test_macos_paths_use_application_support) ... ok
+test_no_duplicate_paths_per_client (tests.test_client_discovery.TestDiscovery.test_no_duplicate_paths_per_client) ... ok
+test_project_scope_only_when_project_root_given (tests.test_client_discovery.TestDiscovery.test_project_scope_only_when_project_root_given) ... ok
+test_supports_at_least_eight_clients (tests.test_client_discovery.TestDiscovery.test_supports_at_least_eight_clients) ... ok
+test_windows_paths_include_appdata_clients (tests.test_client_discovery.TestDiscovery.test_windows_paths_include_appdata_clients) ... ok
+test_benign_configs_produce_no_high_or_critical (tests.test_client_discovery.TestFalsePositiveControl.test_benign_configs_produce_no_high_or_critical) ... ok
+test_malformed_json_is_failsafe (tests.test_client_discovery.TestParsing.test_malformed_json_is_failsafe) ... ok
+test_non_dict_entries_are_skipped (tests.test_client_discovery.TestParsing.test_non_dict_entries_are_skipped) ... ok
+test_parses_mcpservers_schema (tests.test_client_discovery.TestParsing.test_parses_mcpservers_schema) ... ok
+test_parses_vscode_servers_schema (tests.test_client_discovery.TestParsing.test_parses_vscode_servers_schema) ... ok
+test_parses_zed_context_servers_and_nested_mcp (tests.test_client_discovery.TestParsing.test_parses_zed_context_servers_and_nested_mcp) ... ok
+test_config_score_drops_with_critical_findings (tests.test_client_discovery.TestScanIntegration.test_config_score_drops_with_critical_findings) ... ok
+test_discover_and_scan_never_executes_commands (tests.test_client_discovery.TestScanIntegration.test_discover_and_scan_never_executes_commands)
+核心不变量：发现+扫描全程不得 spawn 任何子进程。 ... ok
+test_discover_and_scan_reports_supported_clients (tests.test_client_discovery.TestScanIntegration.test_discover_and_scan_reports_supported_clients) ... ok
+test_empty_input_is_safe (tests.test_client_discovery.TestScanIntegration.test_empty_input_is_safe) ... ok
+test_scan_result_is_json_serializable (tests.test_client_discovery.TestScanIntegration.test_scan_result_is_json_serializable) ... ok
+test_scan_returns_inventory_findings_summary (tests.test_client_discovery.TestScanIntegration.test_scan_returns_inventory_findings_summary) ... ok
+test_score_is_bounded (tests.test_client_discovery.TestScanIntegration.test_score_is_bounded) ... ok
+test_unreadable_file_is_skipped_not_fatal (tests.test_client_discovery.TestScanIntegration.test_unreadable_file_is_skipped_not_fatal) ... ok
+test_benign_and_malicious_scores_are_separated (tests.test_client_discovery.TestScoringDiscrimination.test_benign_and_malicious_scores_are_separated) ... ok
+test_clean_config_scores_high (tests.test_client_discovery.TestScoringDiscrimination.test_clean_config_scores_high) ... ok
+test_criticals_drive_score_down_fast (tests.test_client_discovery.TestScoringDiscrimination.test_criticals_drive_score_down_fast) ... ok
+test_info_findings_cost_nothing (tests.test_client_discovery.TestScoringDiscrimination.test_info_findings_cost_nothing) ... ok
+test_medium_penalty_is_capped_by_fleet_size (tests.test_client_discovery.TestScoringDiscrimination.test_medium_penalty_is_capped_by_fleet_size)
+20 台机器各 1 条 medium 不应把分数打到 0。 ... ok
+test_stdio_exposure_is_info_not_noise (tests.test_client_discovery.TestScoringDiscrimination.test_stdio_exposure_is_info_not_noise) ... ok
+test_toxic_flow_is_advisory_and_capped_at_medium (tests.test_client_discovery.TestScoringDiscrimination.test_toxic_flow_is_advisory_and_capped_at_medium) ... ok
+test_wildcard_bind_is_high (tests.test_client_discovery.TestScoringDiscrimination.test_wildcard_bind_is_high) ... ok
+test_detects_db_connection_string_with_password (tests.test_client_discovery.TestServerEntryRisks.test_detects_db_connection_string_with_password) ... ok
+test_detects_elevated_privilege_launch (tests.test_client_discovery.TestServerEntryRisks.test_detects_elevated_privilege_launch) ... ok
+test_detects_insecure_http_transport (tests.test_client_discovery.TestServerEntryRisks.test_detects_insecure_http_transport) ... ok
+test_detects_plaintext_credentials (tests.test_client_discovery.TestServerEntryRisks.test_detects_plaintext_credentials) ... ok
+test_detects_remote_server_without_auth (tests.test_client_discovery.TestServerEntryRisks.test_detects_remote_server_without_auth) ... ok
+test_detects_shell_interpreter_launch (tests.test_client_discovery.TestServerEntryRisks.test_detects_shell_interpreter_launch) ... ok
+test_detects_stdio_command_exposure (tests.test_client_discovery.TestServerEntryRisks.test_detects_stdio_command_exposure) ... ok
+test_detects_unpinned_runtime_package_fetch (tests.test_client_discovery.TestServerEntryRisks.test_detects_unpinned_runtime_package_fetch) ... ok
+test_detects_untrusted_launch_source (tests.test_client_discovery.TestServerEntryRisks.test_detects_untrusted_launch_source) ... ok
+test_findings_carry_owasp_and_remediation (tests.test_client_discovery.TestServerEntryRisks.test_findings_carry_owasp_and_remediation) ... ok
+test_latest_tag_is_flagged_even_without_auto_yes (tests.test_client_discovery.TestServerEntryRisks.test_latest_tag_is_flagged_even_without_auto_yes) ... ok
+test_localhost_http_is_not_insecure_transport (tests.test_client_discovery.TestServerEntryRisks.test_localhost_http_is_not_insecure_transport) ... ok
+test_pinned_version_does_not_flag_runtime_fetch (tests.test_client_discovery.TestServerEntryRisks.test_pinned_version_does_not_flag_runtime_fetch) ... ok
+test_placeholder_env_values_are_not_flagged (tests.test_client_discovery.TestServerEntryRisks.test_placeholder_env_values_are_not_flagged) ... ok
+test_private_host_without_auth_is_only_medium (tests.test_client_discovery.TestServerEntryRisks.test_private_host_without_auth_is_only_medium) ... ok
+test_project_scope_raises_trust_risk (tests.test_client_discovery.TestServerEntryRisks.test_project_scope_raises_trust_risk) ... ok
+test_remote_server_has_no_stdio_exposure_finding (tests.test_client_discovery.TestServerEntryRisks.test_remote_server_has_no_stdio_exposure_finding) ... ok
+test_remote_with_auth_header_is_not_flagged (tests.test_client_discovery.TestServerEntryRisks.test_remote_with_auth_header_is_not_flagged) ... ok
+test_clean_scan_stays_safe (tests.test_ci_contract.TestActionEntrypointSeverityGate.test_clean_scan_stays_safe)
+干净扫描不得被误升档 ... ok
+test_critical_finding_reaches_critical_risk (tests.test_ci_contract.TestActionEntrypointSeverityGate.test_critical_finding_reaches_critical_risk)
+critical 级 finding 必须把整体风险档顶到 critical ... ok
+test_danger_assessment_still_maps_to_high (tests.test_ci_contract.TestActionEntrypointSeverityGate.test_danger_assessment_still_maps_to_high)
+向后兼容：无 finding 明细时仍按 assessment 兜底到 high ... ok
+test_fail_on_critical_is_reachable (tests.test_ci_contract.TestActionEntrypointSeverityGate.test_fail_on_critical_is_reachable)
+旧实现下此断言必然失败 —— risk 到不了 critical ... ok
+test_fail_on_typo_is_loud (tests.test_ci_contract.TestActionEntrypointSeverityGate.test_fail_on_typo_is_loud)
+fail_on 拼错必须显式告警，不得静默按 high 处理 ... ok
+test_legacy_thresholds_unchanged (tests.test_ci_contract.TestActionEntrypointSeverityGate.test_legacy_thresholds_unchanged)
+既有 fail_on=high 语义不得改变（防回归） ... ok
+test_sarif_version_not_hardcoded_stale (tests.test_ci_contract.TestActionEntrypointSeverityGate.test_sarif_version_not_hardcoded_stale)
+SARIF 版本的兜底值不得是写死的字面量 —— 会盖上一个不存在的版本号 ... ok
+test_verdict_only_escalates (tests.test_ci_contract.TestActionEntrypointSeverityGate.test_verdict_only_escalates)
+多来源取最高档，单调只升不降 —— finding 明细不得把高档降下来 ... ok
+test_audit_response_exposes_top_level_score (tests.test_ci_contract.TestAuditResponseContract.test_audit_response_exposes_top_level_score)
+顶层 score 字段存在且取自 overall_score —— CI 门禁的直接依赖 ... ok
+test_audit_response_keeps_nested_report (tests.test_ci_contract.TestAuditResponseContract.test_audit_response_keeps_nested_report)
+report 嵌套结构不得被移除（既有消费方依赖） ... ok
+test_top_level_convenience_fields_present (tests.test_ci_contract.TestAuditResponseContract.test_top_level_convenience_fields_present)
+badge_level / risk_level 同步提升到顶层，便于 Agent 直读 ... ok
+test_gitignore_documents_the_secret_exclusions (tests.test_ci_contract.TestMemoryBoundary.test_gitignore_documents_the_secret_exclusions)
+排除规则必须是显式的 —— 隐式排除等于没有排除 ... ok
+test_memory_directory_has_no_credentials (tests.test_ci_contract.TestMemoryBoundary.test_memory_directory_has_no_credentials)
+记忆目录必须零凭证 —— 记忆会被直接喂进模型，泄露即越权 ... ok
+test_memory_policy_document_exists (tests.test_ci_contract.TestMemoryBoundary.test_memory_policy_document_exists)
+记忆边界原则必须成文，否则"只记事实不记指令"靠不住 ... ok
+test_every_test_file_is_registered_in_runner (tests.test_ci_contract.TestRunnerCoverage.test_every_test_file_is_registered_in_runner) ... ok
+test_runner_has_no_dangling_entries (tests.test_ci_contract.TestRunnerCoverage.test_runner_has_no_dangling_entries)
+清单里不得登记不存在的文件（会被静默跳过，掩盖配置错误） ... ok
+test_runner_has_no_duplicate_entries (tests.test_ci_contract.TestRunnerCoverage.test_runner_has_no_duplicate_entries)
+清单不得重复登记同一模块。 ... ok
+test_every_key_the_gate_reads_is_served_by_api (tests.test_ci_contract.TestSecurityGateReadsRealKeys.test_every_key_the_gate_reads_is_served_by_api)
+门禁读的键不能是 API 里不存在的幻觉字段（历史事故根因） ... ok
+test_gate_reads_at_least_one_score_key (tests.test_ci_contract.TestSecurityGateReadsRealKeys.test_gate_reads_at_least_one_score_key)
+门禁必须真的读分数，而不是空跑 ... ok
+test_gate_threshold_is_explicit (tests.test_ci_contract.TestSecurityGateReadsRealKeys.test_gate_threshold_is_explicit)
+阈值必须写死在门禁里，便于审计 ... ok
+test_emitted_keys_are_all_served (tests.test_ci_contract.TestSelfScanGateEmitsRealKeys.test_emitted_keys_are_all_served)
+门禁脚本产出的顶层键，必须都是白名单里真实存在的键 ... ok
+test_low_scanner_score_trips_threshold_even_without_blocking (tests.test_ci_contract.TestSelfScanGateEmitsRealKeys.test_low_scanner_score_trips_threshold_even_without_blocking)
+扫描器自己给低分（没有阻断发现）也必须触发阈值 ... ok
+test_score_key_is_present_and_in_range (tests.test_ci_contract.TestSelfScanGateEmitsRealKeys.test_score_key_is_present_and_in_range)
+score 键必须真实存在且落在 0-100 ... ok
+test_threshold_is_not_vacuous (tests.test_ci_contract.TestSelfScanGateEmitsRealKeys.test_threshold_is_not_vacuous)
+注入一条阻断级发现，分数必须跌破阈值 —— 阈值不是空转 ... ok
+test_to_attack_graph_shape (tests.test_commercialization.TestAttackGraphData.test_to_attack_graph_shape) ... ok
+test_dedup_by_identity (tests.test_commercialization.TestFleet.test_dedup_by_identity) ... ok
+test_ingest_and_summary (tests.test_commercialization.TestFleet.test_ingest_and_summary) ... ok
+test_list_members (tests.test_commercialization.TestFleet.test_list_members) ... ok
+test_worst_offenders_sorted (tests.test_commercialization.TestFleet.test_worst_offenders_sorted) ... ok
+test_fulfill_rejects_invalid_header (tests.test_commercialization.TestMonetization.test_fulfill_rejects_invalid_header) ... ok
+test_fulfill_unknown_order (tests.test_commercialization.TestMonetization.test_fulfill_unknown_order) ... ok
+test_fulfill_with_valid_header (tests.test_commercialization.TestMonetization.test_fulfill_with_valid_header) ... ok
+test_reject_none_level (tests.test_commercialization.TestMonetization.test_reject_none_level) ... ok
+test_request_payment_gold (tests.test_commercialization.TestMonetization.test_request_payment_gold) ... ok
+test_cny_price_tiers_present_and_ordered (tests.test_hupijiao.TestCnyPricing.test_cny_price_tiers_present_and_ordered) ... ok
+test_low_score_cannot_buy_certification (tests.test_hupijiao.TestCnyPricing.test_low_score_cannot_buy_certification)
+付费不能绕过评分门槛——否则认证就成了卖徽章。 ... ok
+test_query_requires_an_identifier (tests.test_hupijiao.TestCreatePaymentValidation.test_query_requires_an_identifier) ... ok
+test_rejects_bad_amounts (tests.test_hupijiao.TestCreatePaymentValidation.test_rejects_bad_amounts) ... ok
+test_rejects_non_cny (tests.test_hupijiao.TestCreatePaymentValidation.test_rejects_non_cny) ... ok
+test_rejects_unknown_payment_method (tests.test_hupijiao.TestCreatePaymentValidation.test_rejects_unknown_payment_method) ... ok
+test_unconfigured_degrades_gracefully (tests.test_hupijiao.TestCreatePaymentValidation.test_unconfigured_degrades_gracefully) ... ok
+test_describe_never_returns_plaintext (tests.test_hupijiao.TestCredentials.test_describe_never_returns_plaintext) ... ok
+test_env_takes_precedence (tests.test_hupijiao.TestCredentials.test_env_takes_precedence) ... ok
+test_fingerprint_is_stable_and_short (tests.test_hupijiao.TestCredentials.test_fingerprint_is_stable_and_short) ... ok
+test_mask_hides_middle (tests.test_hupijiao.TestCredentials.test_mask_hides_middle) ... ok
+test_missing_returns_default (tests.test_hupijiao.TestCredentials.test_missing_returns_default) ... ok
+test_amounts_equal_tolerance (tests.test_hupijiao.TestHelpers.test_amounts_equal_tolerance) ... ok
+test_extract_open_order_id (tests.test_hupijiao.TestHelpers.test_extract_open_order_id) ... ok
+test_status_never_leaks_plaintext_secret (tests.test_hupijiao.TestHelpers.test_status_never_leaks_plaintext_secret) ... ok
+test_handle_notify_is_idempotent (tests.test_hupijiao.TestNotifySecurity.test_handle_notify_is_idempotent) ... ok
+test_notify_secret_is_never_echoed (tests.test_hupijiao.TestNotifySecurity.test_notify_secret_is_never_echoed) ... ok
+test_parse_notify_handles_form_body (tests.test_hupijiao.TestNotifySecurity.test_parse_notify_handles_form_body) ... ok
+test_rejects_amount_tampering (tests.test_hupijiao.TestNotifySecurity.test_rejects_amount_tampering)
+签名合法但金额与本地下单不符（如 0.01 买 19 元认证）——必须拒。 ... ok
+test_rejects_bad_signature (tests.test_hupijiao.TestNotifySecurity.test_rejects_bad_signature) ... ok
+test_rejects_empty_payload (tests.test_hupijiao.TestNotifySecurity.test_rejects_empty_payload) ... ok
+test_rejects_foreign_appid (tests.test_hupijiao.TestNotifySecurity.test_rejects_foreign_appid)
+他人用自己的商户号伪造回调 —— 必须被 appid 归属检查拦下。 ... ok
+test_rejects_replay_after_settlement (tests.test_hupijiao.TestNotifySecurity.test_rejects_replay_after_settlement) ... ok
+test_rejects_unpaid_status (tests.test_hupijiao.TestNotifySecurity.test_rejects_unpaid_status) ... ok
+test_rejects_when_gateway_unconfigured (tests.test_hupijiao.TestNotifySecurity.test_rejects_when_gateway_unconfigured) ... ok
+test_valid_notify_passes (tests.test_hupijiao.TestNotifySecurity.test_valid_notify_passes) ... ok
+test_foreign_hosts_blocked (tests.test_hupijiao.TestSSRFGuard.test_foreign_hosts_blocked) ... ok
+test_official_hosts_allowed (tests.test_hupijiao.TestSSRFGuard.test_official_hosts_allowed) ... ok
+test_post_refuses_disallowed_host (tests.test_hupijiao.TestSSRFGuard.test_post_refuses_disallowed_host) ... ok
+test_empty_values_and_hash_key_excluded (tests.test_hupijiao.TestSignature.test_empty_values_and_hash_key_excluded) ... ok
+test_hash_independent_of_insertion_order (tests.test_hupijiao.TestSignature.test_hash_independent_of_insertion_order) ... ok
+test_hash_is_deterministic (tests.test_hupijiao.TestSignature.test_hash_is_deterministic) ... ok
+test_secret_actually_affects_hash (tests.test_hupijiao.TestSignature.test_secret_actually_affects_hash) ... ok
+test_verify_hash_rejects_tampered_and_missing (tests.test_hupijiao.TestSignature.test_verify_hash_rejects_tampered_and_missing) ... ok
+test_verify_hash_roundtrip (tests.test_hupijiao.TestSignature.test_verify_hash_roundtrip) ... ok
+test_cancel_is_idempotent (tests.test_governance.TestAttestation.test_cancel_is_idempotent) ... ok
+test_cancel_then_no_attestation (tests.test_governance.TestAttestation.test_cancel_then_no_attestation) ... ok
+test_downgrade_detected (tests.test_governance.TestAttestation.test_downgrade_detected) ... ok
+test_duplicate_subscription_blocked (tests.test_governance.TestAttestation.test_duplicate_subscription_blocked) ... ok
+test_evidence_chain_detects_tampering (tests.test_governance.TestAttestation.test_evidence_chain_detects_tampering) ... ok
+test_evidence_chain_valid (tests.test_governance.TestAttestation.test_evidence_chain_valid) ... ok
+test_get_expiring_lists_soon_to_expire (tests.test_governance.TestAttestation.test_get_expiring_lists_soon_to_expire) ... ok
+test_grace_period_still_attests (tests.test_governance.TestAttestation.test_grace_period_still_attests) ... ok
+test_lapsed_subscription_stops_attesting (tests.test_governance.TestAttestation.test_lapsed_subscription_stops_attesting) ... ok
+test_list_filters_by_payer (tests.test_governance.TestAttestation.test_list_filters_by_payer) ... ok
+test_pass_renews_certification (tests.test_governance.TestAttestation.test_pass_renews_certification) ... ok
+test_plans_exposed (tests.test_governance.TestAttestation.test_plans_exposed) ... ok
+test_renew_cancelled_rejected (tests.test_governance.TestAttestation.test_renew_cancelled_rejected) ... ok
+test_renew_extends_from_current_expiry (tests.test_governance.TestAttestation.test_renew_extends_from_current_expiry) ... ok
+test_renew_rejects_bad_periods (tests.test_governance.TestAttestation.test_renew_rejects_bad_periods) ... ok
+test_run_cycle_counts_failures (tests.test_governance.TestAttestation.test_run_cycle_counts_failures) ... ok
+test_run_cycle_processes_due_subscriptions (tests.test_governance.TestAttestation.test_run_cycle_processes_due_subscriptions) ... ok
+test_scan_failure_recorded_not_fatal (tests.test_governance.TestAttestation.test_scan_failure_recorded_not_fatal) ... ok
+test_score_drop_revokes_certification (tests.test_governance.TestAttestation.test_score_drop_revokes_certification)
+rug-pull 兜底：拿到徽章后改坏代码，复扫必须立刻吊销。 ... ok
+test_subscribe_creates_active (tests.test_governance.TestAttestation.test_subscribe_creates_active) ... ok
+test_subscribe_rejects_unknown_plan (tests.test_governance.TestAttestation.test_subscribe_rejects_unknown_plan) ... ok
+test_subscribe_requires_source_url (tests.test_governance.TestAttestation.test_subscribe_requires_source_url) ... ok
+test_throttled_until_due (tests.test_governance.TestAttestation.test_throttled_until_due) ... ok
+test_trust_status_not_verified_after_failure (tests.test_governance.TestAttestation.test_trust_status_not_verified_after_failure) ... ok
+test_trust_status_unsubscribed (tests.test_governance.TestAttestation.test_trust_status_unsubscribed) ... ok
+test_trust_status_verified_after_pass (tests.test_governance.TestAttestation.test_trust_status_verified_after_pass) ... ok
+test_allowlist_is_tool_scoped (tests.test_governance.TestRuntimeGovernance.test_allowlist_is_tool_scoped) ... ok
+test_audit_chain_detects_deletion (tests.test_governance.TestRuntimeGovernance.test_audit_chain_detects_deletion) ... ok
+test_audit_chain_detects_tampering (tests.test_governance.TestRuntimeGovernance.test_audit_chain_detects_tampering)
+把审计里的"拒绝"改写成"放行"，必须能被检出。 ... ok
+test_audit_chain_valid_after_writes (tests.test_governance.TestRuntimeGovernance.test_audit_chain_valid_after_writes) ... ok
+test_corrupt_policy_fails_closed (tests.test_governance.TestRuntimeGovernance.test_corrupt_policy_fails_closed)
+策略文件坏了必须收紧到默认拒绝，而不是敞开。 ... ok
+test_default_allow_when_not_fail_closed (tests.test_governance.TestRuntimeGovernance.test_default_allow_when_not_fail_closed) ... ok
+test_deny_overrides_allow (tests.test_governance.TestRuntimeGovernance.test_deny_overrides_allow) ... ok
+test_empty_server_denied (tests.test_governance.TestRuntimeGovernance.test_empty_server_denied) ... ok
+test_fail_closed_denies_unknown (tests.test_governance.TestRuntimeGovernance.test_fail_closed_denies_unknown) ... ok
+test_incidents_trigger_auto_kill (tests.test_governance.TestRuntimeGovernance.test_incidents_trigger_auto_kill) ... ok
+test_kill_is_audited (tests.test_governance.TestRuntimeGovernance.test_kill_is_audited) ... ok
+test_kill_requires_server (tests.test_governance.TestRuntimeGovernance.test_kill_requires_server) ... ok
+test_kill_switch_beats_everything (tests.test_governance.TestRuntimeGovernance.test_kill_switch_beats_everything) ... ok
+test_low_severity_does_not_trip_breaker (tests.test_governance.TestRuntimeGovernance.test_low_severity_does_not_trip_breaker) ... ok
+test_revive_resets_incident_count (tests.test_governance.TestRuntimeGovernance.test_revive_resets_incident_count) ... ok
+test_revive_restores_access (tests.test_governance.TestRuntimeGovernance.test_revive_restores_access) ... ok
+test_revive_unknown_server_fails (tests.test_governance.TestRuntimeGovernance.test_revive_unknown_server_fails) ... ok
+test_status_reports_chain_health (tests.test_governance.TestRuntimeGovernance.test_status_reports_chain_health) ... ok
+test_wildcard_allow (tests.test_governance.TestRuntimeGovernance.test_wildcard_allow) ... ok
+test_allows_within_limit (tests.test_governance.TestSpendCap.test_allows_within_limit) ... ok
+test_anonymous_payer_normalized (tests.test_governance.TestSpendCap.test_anonymous_payer_normalized) ... ok
+test_commit_is_idempotent (tests.test_governance.TestSpendCap.test_commit_is_idempotent) ... ok
+test_commit_without_reservation_or_params_fails (tests.test_governance.TestSpendCap.test_commit_without_reservation_or_params_fails) ... ok
+test_corrupt_ledger_does_not_crash (tests.test_governance.TestSpendCap.test_corrupt_ledger_does_not_crash) ... ok
+test_daily_cap_accumulates (tests.test_governance.TestSpendCap.test_daily_cap_accumulates) ... ok
+test_default_policy_present (tests.test_governance.TestSpendCap.test_default_policy_present) ... ok
+test_disabled_switch_skips_enforcement (tests.test_governance.TestSpendCap.test_disabled_switch_skips_enforcement) ... ok
+test_expired_reservation_is_pruned (tests.test_governance.TestSpendCap.test_expired_reservation_is_pruned) ... ok
+test_late_commit_does_not_lose_the_charge (tests.test_governance.TestSpendCap.test_late_commit_does_not_lose_the_charge)
+预留过期后结算仍必须入账，否则限额可被"拖时间"绕过。 ... ok
+test_monthly_cap_enforced (tests.test_governance.TestSpendCap.test_monthly_cap_enforced) ... ok
+test_payers_are_isolated (tests.test_governance.TestSpendCap.test_payers_are_isolated) ... ok
+test_rejects_non_numeric_amount (tests.test_governance.TestSpendCap.test_rejects_non_numeric_amount) ... ok
+test_rejects_over_per_tx (tests.test_governance.TestSpendCap.test_rejects_over_per_tx) ... ok
+test_rejects_zero_and_negative (tests.test_governance.TestSpendCap.test_rejects_zero_and_negative) ... ok
+test_release_returns_quota (tests.test_governance.TestSpendCap.test_release_returns_quota) ... ok
+test_reservation_blocks_double_spend (tests.test_governance.TestSpendCap.test_reservation_blocks_double_spend)
+未确认的预留也要占额度，否则并发下单可以透支。 ... ok
+test_reserve_is_idempotent_per_order (tests.test_governance.TestSpendCap.test_reserve_is_idempotent_per_order) ... ok
+test_set_policy_rejects_negative (tests.test_governance.TestSpendCap.test_set_policy_rejects_negative) ... ok
+test_set_policy_rejects_unknown_currency (tests.test_governance.TestSpendCap.test_set_policy_rejects_unknown_currency) ... ok
+test_unknown_currency_fails_closed (tests.test_governance.TestSpendCap.test_unknown_currency_fails_closed)
+未定义额度的币种必须拒绝——绝不能因为没配规则就放行。 ... ok
+test_usdc_maps_to_usd_bucket (tests.test_governance.TestSpendCap.test_usdc_maps_to_usd_bucket) ... ok
+test_api_provides_every_field_mcp_reads (tests.test_mcp_contract.TestAuditShapeContract.test_api_provides_every_field_mcp_reads)
+跨文件一致性：MCP server 从顶层读的便捷字段，API 必须真实提供。 ... ok
+test_guardrail_uses_unwrapped_score (tests.test_mcp_contract.TestAuditShapeContract.test_guardrail_uses_unwrapped_score)
+guardrail 的判定分数必须来自解包结果，否则会对一切工具判 BLOCK ... ok
+test_no_top_level_overall_score_read (tests.test_mcp_contract.TestAuditShapeContract.test_no_top_level_overall_score_read)
+禁止再从顶层直接读 overall_score —— 这正是造成恒 0 分的写法。 ... ok
+test_unwrap_helper_exists (tests.test_mcp_contract.TestAuditShapeContract.test_unwrap_helper_exists)
+必须有显式的解包函数，而不是各处零散地猜结构 ... ok
+test_unwrap_reads_nested_report (tests.test_mcp_contract.TestAuditShapeContract.test_unwrap_reads_nested_report)
+解包函数必须认得 report 嵌套层 ... ok

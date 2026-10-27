@@ -1,0 +1,90 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-10-27T08:25:44Z",
+  "git": {
+    "commit": "fe9a3cb30608f76119bddc583b3f44252a85bcbd"
+  },
+  "version": "4.11.0",
+  "rules": {
+    "mcp": 313,
+    "skill": 340,
+    "static": 286,
+    "generated": 8,
+    "radar": 19,
+    "breakdown_sums": true
+  },
+  "benchmark": {
+    "corpus": "aishield-external-corpus/v1",
+    "collected_at": "2026-10-18",
+    "family_count": 18,
+    "positives": 593,
+    "negatives": 517,
+    "detected": 559,
+    "recall": 0.9427,
+    "recall_ci": {
+      "low": 0.9224,
+      "high": 0.9612,
+      "method": "percentile",
+      "seed": 20261018,
+      "resamples": 1000
+    },
+    "false_positives": 0,
+    "false_positive_rate": 0.0,
+    "fpr_ci": {
+      "low": 0.0,
+      "high": 0.0
+    },
+    "families_zero_detected": [],
+    "cohen_kappa": 0.8673,
+    "r1_status": {
+      "met": true
+    }
+  },
+  "protocol": {
+    "mcp_latest": "2026-07-28",
+    "guardrail_protocol": "2025-06-18",
+    "a2a_protocol": "a2a-2025-06",
+    "mcp_sdk_declared": "^1.12.1",
+    "mcp_sdk_locked": "1.30.0"
+  },
+  "dependencies": {
+    "python": {
+      "install_requires": [
+        "cryptography>=42.0.0",
+        "PyYAML>=6.0"
+      ],
+      "extras_require": {
+        "test": [
+          "pytest>=8.0",
+          "hypothesis>=6.168.5"
+        ],
+        "browser-use": [
+          "browser-use>=0.2.0"
+        ],
+        "graph-db": [
+          "neo4j>=5.0.0"
+        ],
+        "kafka": [
+          "kafka-python>=2.0.0"
+        ],
+        "all": [
+          "browser-use>=0.2.0",
+          "neo4j>=5.0.0",
+          "kafka-python>=2.0.0"
+        ]
+      }
+    },
+    "node": {
+      "dependencies": {
+        "@modelcontextprotocol/sdk": "^1.12.1",
+        "zod": "^3.24.0"
+      }
+    }
+  },
+  "tests": {
+    "status": "incomplete",
+    "note": "全量 Python 测试在 300 秒审计时限内未结束，无最终汇总；已执行部分未见失败，但不能据此声称全量通过。",
+    "last_test_seen": "test_unwrap_reads_nested_report",
+    "log": "reports/audit-2026-10-27-tests.log"
+  }
+}

@@ -1,0 +1,23 @@
+# External corpus — scope-partitioned recall
+
+- detection bar: `serious_only (>=1 critical/high finding)`
+- bootstrap: n=1000, seed=20261018
+
+## Overall
+- recall **94.3%** CI[92.2%, 96.1%] (559/593), FP=0/517
+
+## By applicability scope
+- **primary**: recall **100.0%** CI[100.0%, 100.0%] (66/66)
+- **secondary**: recall **93.5%** CI[91.5%, 95.6%] (493/527)
+
+## By dataset source
+- **ghsa**: recall **100.0%** CI[100.0%, 100.0%] (66/66)
+- **injecagent**: recall **93.5%** CI[91.5%, 95.6%] (493/527)
+
+## By scan_plane
+- **config**: recall **100.0%** CI[100.0%, 100.0%] (12/12)
+- **instruction**: recall **94.2%** CI[92.2%, 96.0%] (547/581)
+
+FP by type: {} (total 0/517)
+
+wrote C:\Users\xing\Desktop\aishield\scripts\..\benchmarks\corpus\external\scope_recall.json
